@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Admin Dashboard | Complete Oversight</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0,206,209,0.3), transparent 70%); top:-40%; left:-20%; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124,252,0,0.2), transparent 70%); top:-30%; left:-10%; animation-delay:8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,59,59,0.15), transparent 70%); top:-20%; left:0%; animation-delay:16s; }
+    @keyframes waveBgDrift { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(40px,-30px) scale(1.05);} 100%{transform:translate(-30px,20px) scale(1);} }
+    
+    /* ===== 3D LOGO - TRADEAUX ===== */
+    .gem-logo-corner {
+      display: inline-block;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.65);
+      transform-origin: left center;
+      vertical-align: middle;
+    }
+    
+    .gem-text {
+      font-size: 80px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+    
+    /* Letter T - Blue */
+    .gem-letter:nth-child(1)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter R - Green */
+    .gem-letter:nth-child(2)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter A - Red */
+    .gem-letter:nth-child(3)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter D - Blue */
+    .gem-letter:nth-child(4)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter E - Green */
+    .gem-letter:nth-child(5)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter A - Red */
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter U - Blue */
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter X - Green */
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    .gem-letter .edge-top {
+      position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-right {
+      position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+      background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-bottom {
+      position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-left {
+      position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+      background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+    
+    .light-source {
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite;
+      pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+    }
+    
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+    
+    .sparkle {
+      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+    }
+    
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+    
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    
+    .depth-shadow {
+      position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+      background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+      filter: blur(20px); z-index: -1;
+    }
+    
+    .container { max-width: 1800px; margin: 0 auto; padding: 20px 24px 40px; position: relative; z-index: 2; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+    
+    .logo-area { display: inline-flex; align-items: center; position: relative; }
+    
+    .admin-badge { 
+      font-family: 'Orbitron', sans-serif; 
+      font-size: 14px; 
+      font-weight: 500; 
+      background: rgba(0,206,209,0.2); 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      margin-left: 15px;
+      letter-spacing: 1px;
+      border: 1px solid rgba(0,206,209,0.5);
+    }
+    
+    .nav { display: flex; gap: 12px; align-items: center; }
+    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; }
+    .nav a:hover { border-color: #00ced1; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: linear-gradient(145deg,rgba(15,32,64,0.85),rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
+    .stat-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .stat-icon { font-size: 32px; margin-bottom: 12px; }
+    .stat-value { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 800; color: #00ced1; }
+    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-change { font-size: 11px; margin-top: 8px; }
+    .stat-change.up { color: #7CFC00; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; margin-bottom: 30px; }
+    .dashboard-card { background: linear-gradient(145deg,rgba(15,32,64,0.8),rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; }
+    .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; }
+    .clickable-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+    .clickable-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
+    .item-title { font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .item-details { font-size: 11px; color: #9ca3af; }
+    .alphabet-list { max-height: 400px; overflow-y: auto; }
+    .alphabet-letter { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: #FFD966; margin: 12px 0 8px; border-bottom: 1px solid rgba(255,217,102,0.2); padding-bottom: 4px; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-content { background: linear-gradient(145deg,#0a1228,#020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 650px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; }
+    .modal-close:hover { color: #00ced1; }
+    .bot-detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .btn { padding: 8px 16px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg,#00ced1,#00ff7f); color: #000; }
+    .btn-danger { background: linear-gradient(135deg,#ff3b3b,#ff6b6b); color: #fff; }
+    .btn-sm { padding: 4px 12px; font-size: 11px; }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #0f1a2e; border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; transition: 0.3s; opacity: 0; z-index: 2000; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .leaderboard-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .leaderboard-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
+    .badge { background: rgba(0,206,209,0.2); padding: 2px 8px; border-radius: 20px; font-size: 10px; }
+  </style>
+</head>
+<body>
+<div class="bg-waves"><div class="wave-bg wave-1"></div><div class="wave-bg wave-2"></div><div class="wave-bg wave-3"></div></div>
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div>
+        <div class="sparkle sparkle-2"></div>
+        <div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div>
+        <div class="sparkle sparkle-5"></div>
+        <div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div>
+        <div class="sparkle sparkle-8"></div>
+        <div class="sparkle sparkle-9"></div>
+        <div class="sparkle sparkle-10"></div>
+        <div class="depth-shadow"></div>
+      </div>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="nav"><a href="#">Dashboard</a><a href="#">Clients</a><a href="#">Transport</a><a href="#" id="logoutBtn">Sign Out</a></nav>
+  </header>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalUsers">247</div><div class="stat-label">Total Users</div><div class="stat-change up">▲ +12 today</div></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value" id="totalFees">$1,250</div><div class="stat-label">Fees Collected (Today)</div><div class="stat-change up">▲ +$450 vs yesterday</div></div>
+    <div class="stat-card"><div class="stat-icon">🟢</div><div class="stat-value" id="activeAuctions">15</div><div class="stat-label">Active Auctions</div><div class="stat-change">8 commodities · 5 transport · 2 briefs</div></div>
+    <div class="stat-card"><div class="stat-icon">🤖</div><div class="stat-value" id="activeBots">12</div><div class="stat-label">Active Bots</div><div class="stat-change up">▲ +2 this week</div></div>
+  </div>
+  <div class="dashboard-grid">
+    <div class="dashboard-card"><div class="card-header">🏆 TOP 10 BUYERS TODAY</div><div id="topBuyersList"></div></div>
+    <div class="dashboard-card"><div class="card-header">🏆 TOP 10 SELLERS TODAY</div><div id="topSellersList"></div></div>
+  </div>
+  <div class="dashboard-card" style="margin-bottom:30px;"><div class="card-header">🚢 TRANSPORT AUCTIONS</div><div id="transportAuctionsList"></div></div>
+  <div class="dashboard-card"><div class="card-header">📋 CLIENTS (A-Z)</div><div id="alphabeticalClientList" class="alphabet-list"></div></div>
+  <footer class="footer" style="margin-top:30px;"><p>TRADEAUX ADMIN © 2026</p></footer>
+</div>
+<div id="detailModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeDetailModal">&times;</span><div id="detailModalContent"></div><div class="modal-actions" style="margin-top:20px;"><button class="btn" id="closeDetailBtn">Close</button></div></div></div>
+<div class="toast" id="toast">Action completed</div>
+<script>
+const buyers = [
+  { id:1, name:'Coconut Imports Ltd', spent:12500, country:'Singapore', email:'contact@coconutimports.sg', phone:'+65 9123 4567', type:'Buyer', trades:47, winRate:72, joined:'2026-01-15', recentActivity:['Won 50 MT Coconuts @ $0.42','Booked transport to Rotterdam'] },
+  { id:2, name:'Pacific Foods', spent:8750, country:'USA', email:'procurement@pacificfoods.com', phone:'+1 (213) 555-0123', type:'Buyer', trades:32, winRate:68, joined:'2026-02-10', recentActivity:['Won 100 MT Peanuts @ $1.18','Shipment delayed'] },
+  { id:3, name:'Global Commodities Ltd', spent:6200, country:'UK', email:'trading@globalcommodities.co.uk', phone:'+44 20 7946 0123', type:'Buyer', trades:23, winRate:65, joined:'2026-01-20', recentActivity:['Bid on 200 MT Wheat'] },
+  { id:4, name:'Asia Pacific Trading', spent:5400, country:'Hong Kong', email:'orders@aptrading.hk', phone:'+852 9123 4567', type:'Buyer', trades:18, winRate:70, joined:'2026-03-01', recentActivity:['Won 80 MT Avocados'] },
+  { id:5, name:'Organic Harvest Co', spent:4800, country:'Germany', email:'buy@organicharvest.de', phone:'+49 30 1234 5678', type:'Buyer', trades:29, winRate:75, joined:'2026-02-20', recentActivity:['Looking for organic coconuts'] },
+  { id:6, name:'Coconut King Ltd', spent:3500, country:'Thailand', email:'sales@coconutking.co.th', phone:'+66 2 123 4567', type:'Buyer', trades:15, winRate:60, joined:'2026-03-15', recentActivity:[] },
+  { id:7, name:'Tropical Exports', spent:2900, country:'Brazil', email:'export@tropicalex.com.br', phone:'+55 11 91234 5678', type:'Buyer', trades:12, winRate:58, joined:'2026-04-01', recentActivity:[] },
+  { id:8, name:'Sunrise Trading', spent:2100, country:'Vietnam', email:'trade@sunrise.vn', phone:'+84 28 1234 5678', type:'Buyer', trades:9, winRate:55, joined:'2026-04-10', recentActivity:[] },
+  { id:9, name:'Blue Ocean Foods', spent:1800, country:'India', email:'procurement@blueocean.in', phone:'+91 22 1234 5678', type:'Buyer', trades:7, winRate:50, joined:'2026-04-15', recentActivity:[] },
+  { id:10, name:'Equator Trading', spent:1200, country:'Kenya', email:'trade@equator.ke', phone:'+254 20 123 4567', type:'Buyer', trades:5, winRate:45, joined:'2026-04-20', recentActivity:[] }
+];
+const sellers = [
+  { id:101, name:'Matale Coconut Co-op', revenue:24500, country:'Sri Lanka', email:'sales@matale-coconut.lk', phone:'+94 77 123 4567', type:'Seller', trades:247, rating:4.9, joined:'2025-10-01', recentActivity:['Sold 200 MT Coconuts','Listed 500 MT'] },
+  { id:102, name:'Georgia Nut Growers', revenue:18200, country:'USA', email:'sales@ga-peanuts.com', phone:'+1 (404) 555-2101', type:'Seller', trades:189, rating:4.8, joined:'2025-11-15', recentActivity:['Sold 300 MT Peanuts'] },
+  { id:103, name:'Kerala Spice Growers', revenue:12800, country:'India', email:'spice@keralacoop.in', phone:'+91 471 231 0987', type:'Seller', trades:156, rating:4.7, joined:'2025-12-01', recentActivity:['Sold 50 MT Turmeric'] },
+  { id:104, name:'Davao Coconut Producers', revenue:9800, country:'Philippines', email:'oil@phorganic.ph', phone:'+63 2 8532 1122', type:'Seller', trades:134, rating:4.6, joined:'2026-01-10', recentActivity:[] },
+  { id:105, name:'California Crown', revenue:7500, country:'USA', email:'hello@cal-almonds.coop', phone:'+1 (916) 555-6723', type:'Seller', trades:98, rating:4.9, joined:'2026-02-01', recentActivity:[] },
+  { id:106, name:'Viet Delta', revenue:6200, country:'Vietnam', email:'cashew@vietdelta.vn', phone:'+84 28 3920 1188', type:'Seller', trades:87, rating:4.5, joined:'2026-02-15', recentActivity:[] },
+  { id:107, name:'Ivory Harvest', revenue:5400, country:'Ivory Coast', email:'contact@ivoirecacao.ci', phone:'+225 27 2245 9912', type:'Seller', trades:76, rating:4.4, joined:'2026-03-01', recentActivity:[] },
+  { id:108, name:'PeruBio', revenue:4300, country:'Peru', email:'mango@perubio.pe', phone:'+51 1 654 9988', type:'Seller', trades:65, rating:4.6, joined:'2026-03-15', recentActivity:[] },
+  { id:109, name:'Queensland Nut', revenue:3200, country:'Australia', email:'info@macadamia.au', phone:'+61 7 4123 4567', type:'Seller', trades:54, rating:4.8, joined:'2026-04-01', recentActivity:[] },
+  { id:110, name:'Southern Nut', revenue:2100, country:'Chile', email:'ventas@nueces.cl', phone:'+56 2 2789 1122', type:'Seller', trades:43, rating:4.5, joined:'2026-04-10', recentActivity:[] }
+];
+const transportAuctions = [
+  { id:1, route:'Colombo → Rotterdam', mode:'Ocean + Rail', cargo:'Coconuts', quantity:500, bids:8, lowestBid:2850, winner:'Maersk', status:'active', timeLeft:'2:34', carrierBids:[{name:'Maersk',price:2850,eta:'28 days'},{name:'MSC',price:2920,eta:'26 days'},{name:'CMA CGM',price:3050,eta:'27 days'}] },
+  { id:2, route:'Wareham, MA → Kenosha, WI', mode:'Truck', cargo:'Cranberries', quantity:40, bids:5, lowestBid:1250, winner:'J.B. Hunt', status:'active', timeLeft:'1:45', carrierBids:[{name:'J.B. Hunt',price:1250,eta:'2 days'},{name:'Schneider',price:1280,eta:'2 days'}] },
+  { id:3, route:'Colombo → Budapest', mode:'Intermodal', cargo:'Almonds', quantity:100, bids:12, lowestBid:3420, winner:'Hapag-Lloyd', status:'closed', timeLeft:'0:00', carrierBids:[{name:'Hapag-Lloyd',price:3420,eta:'25 days'},{name:'Maersk',price:3550,eta:'26 days'}] },
+  { id:4, route:'Colombo → Manila', mode:'Ship', cargo:'Potatoes', quantity:500, bids:6, lowestBid:4100, winner:'MSC', status:'active', timeLeft:'3:22', carrierBids:[{name:'MSC',price:4100,eta:'21 days'},{name:'COSCO',price:4250,eta:'22 days'}] },
+  { id:5, route:'Colombo → Luxembourg', mode:'Air', cargo:'Coffee', quantity:15, bids:4, lowestBid:12500, winner:'Cargolux', status:'active', timeLeft:'4:10', carrierBids:[{name:'Cargolux',price:12500,eta:'3 days'},{name:'FedEx',price:13200,eta:'4 days'}] }
+];
+const allClients = [...buyers.map(b=>({...b,role:'Buyer'})), ...sellers.map(s=>({...s,role:'Seller'}))].sort((a,b)=>a.name.localeCompare(b.name));
+function updateStats(){ document.getElementById('totalUsers').textContent = allClients.length; document.getElementById('totalFees').textContent = `$${(buyers.reduce((s,b)=>s+b.spent,0)*0.02).toFixed(0)}`; document.getElementById('activeAuctions').textContent = transportAuctions.filter(a=>a.status==='active').length + 8; document.getElementById('activeBots').textContent = '12'; }
+function renderTopBuyers(){ document.getElementById('topBuyersList').innerHTML = buyers.sort((a,b)=>b.spent-a.spent).slice(0,10).map(b=>`<div class="clickable-item" data-user-id="${b.id}" data-user-type="buyer"><div class="item-title"><span>${b.name}</span><span class="badge">$${b.spent.toLocaleString()}</span></div><div class="item-details">📍 ${b.country} · ${b.trades} trades · Win Rate ${b.winRate}%</div></div>`).join(''); attachUserClicks(); }
+function renderTopSellers(){ document.getElementById('topSellersList').innerHTML = sellers.sort((a,b)=>b.revenue-a.revenue).slice(0,10).map(s=>`<div class="clickable-item" data-user-id="${s.id}" data-user-type="seller"><div class="item-title"><span>${s.name}</span><span class="badge">$${s.revenue.toLocaleString()}</span></div><div class="item-details">📍 ${s.country} · ⭐ ${s.rating} ★ · ${s.trades} trades</div></div>`).join(''); attachUserClicks(); }
+function renderTransportAuctions(){ document.getElementById('transportAuctionsList').innerHTML = transportAuctions.map(a=>`<div class="clickable-item" data-transport-id="${a.id}"><div class="item-title"><span>🚢 ${a.route}</span><span>${a.status === 'active' ? '🟢 LIVE' : '🔒 CLOSED'}</span></div><div class="item-details">📦 ${a.cargo} · ${a.quantity} MT · ${a.mode} · ${a.bids} bids · Lowest: $${a.lowestBid.toLocaleString()}</div></div>`).join(''); attachTransportClicks(); }
+function renderAlphabeticalClients(){ const letters={}; allClients.forEach(c=>{ const letter=c.name.charAt(0).toUpperCase(); if(!letters[letter]) letters[letter]=[]; letters[letter].push(c); }); let html=''; Object.keys(letters).sort().forEach(letter=>{ html+=`<div class="alphabet-letter">${letter}</div>`; letters[letter].forEach(client=>{ html+=`<div class="clickable-item" data-user-id="${client.id}" data-user-type="${client.type.toLowerCase()}"><div class="item-title"><span>${client.name}</span><span class="badge">${client.role}</span></div><div class="item-details">📍 ${client.country || 'N/A'} · ${client.email}</div></div>`; }); }); document.getElementById('alphabeticalClientList').innerHTML = html; attachUserClicks(); }
+function attachUserClicks(){ document.querySelectorAll('[data-user-id][data-user-type]').forEach(el=>{ el.addEventListener('click',()=>{ const id=parseInt(el.dataset.userId); const type=el.dataset.userType; const user = type==='buyer' ? buyers.find(b=>b.id===id) : sellers.find(s=>s.id===id); if(user) showUserDetails(user,type); }); }); }
+function attachTransportClicks(){ document.querySelectorAll('[data-transport-id]').forEach(el=>{ el.addEventListener('click',()=>{ const id=parseInt(el.dataset.transportId); const auction=transportAuctions.find(a=>a.id===id); if(auction) showTransportDetails(auction); }); }); }
+function showUserDetails(user,role){ const activityHtml = user.recentActivity?.length ? user.recentActivity.map(a=>`<div class="bot-detail-row"><span>📌 ${a}</span></div>`).join('') : '<div class="bot-detail-row"><span>No recent activity</span></div>'; document.getElementById('detailModalContent').innerHTML = `<div><h2>${user.name}</h2></div><div class="bot-detail-row"><span>Role:</span><span>${role === 'buyer' ? 'Buyer' : 'Seller'}</span></div><div class="bot-detail-row"><span>Country:</span><span>${user.country}</span></div><div class="bot-detail-row"><span>Email:</span><span>${user.email}</span></div><div class="bot-detail-row"><span>Phone:</span><span>${user.phone}</span></div><div class="bot-detail-row"><span>Member Since:</span><span>${user.joined}</span></div><div class="bot-detail-row"><span>Total Trades:</span><span>${user.trades}</span></div>${role === 'buyer' ? `<div class="bot-detail-row"><span>Total Spent:</span><span style="color:#7CFC00;">$${user.spent.toLocaleString()}</span></div><div class="bot-detail-row"><span>Win Rate:</span><span>${user.winRate}%</span></div>` : `<div class="bot-detail-row"><span>Total Revenue:</span><span style="color:#FFD966;">$${user.revenue.toLocaleString()}</span></div><div class="bot-detail-row"><span>Rating:</span><span>⭐ ${user.rating} ★</span></div>`}<div class="bot-detail-row"><span>Recent Activity:</span></div>${activityHtml}`; document.getElementById('detailModal').style.display = 'flex'; }
+function showTransportDetails(auction){ const carrierHtml = auction.carrierBids.map(b=>`<div class="bot-detail-row"><span>${b.name}</span><span>$${b.price.toLocaleString()} · ${b.eta}</span></div>`).join(''); document.getElementById('detailModalContent').innerHTML = `<div><h2>🚢 Transport: ${auction.route}</h2></div><div class="bot-detail-row"><span>Mode:</span><span>${auction.mode}</span></div><div class="bot-detail-row"><span>Cargo:</span><span>${auction.cargo} · ${auction.quantity} MT</span></div><div class="bot-detail-row"><span>Status:</span><span>${auction.status === 'active' ? '🟢 Active' : '🔒 Closed'}</span></div><div class="bot-detail-row"><span>Time Left:</span><span>${auction.timeLeft}</span></div><div class="bot-detail-row"><span>Total Bids:</span><span>${auction.bids} carriers</span></div><div class="bot-detail-row"><span>Lowest Bid:</span><span style="color:#7CFC00;">$${auction.lowestBid.toLocaleString()}</span></div><div class="bot-detail-row"><span>Winner:</span><span>${auction.winner || 'Pending'}</span></div><div class="bot-detail-row"><span>Carrier Bids:</span></div>${carrierHtml}`; document.getElementById('detailModal').style.display = 'flex'; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'),3000); }
+document.getElementById('closeDetailModal').onclick = ()=>document.getElementById('detailModal').style.display='none';
+document.getElementById('closeDetailBtn').onclick = ()=>document.getElementById('detailModal').style.display='none';
+document.getElementById('logoutBtn').onclick = ()=>{ showToast('Logged out (demo)'); setTimeout(()=>window.location.href='/',1000); };
+updateStats(); renderTopBuyers(); renderTopSellers(); renderTransportAuctions(); renderAlphabeticalClients();
+</script>
+</body>
+</html>

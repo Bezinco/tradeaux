@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Seller Auction | Highest Bid Wins</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --neon-green: #7CFC00;
+      --gold: #FFD966;
+      --silver: #C0C7D9;
+      --bronze: #CD7F32;
+      --card-bg: linear-gradient(145deg, #0B1122, #030712);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #F0F3FA;
+      background: radial-gradient(ellipse at 20% 30%, rgba(124,252,0,0.08), transparent 55%),
+                  radial-gradient(ellipse at 85% 70%, rgba(255,217,102,0.08), transparent 60%),
+                  linear-gradient(125deg, #03050C 0%, #0A111F 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: radial-gradient(circle at 30% 20%, rgba(124,252,0,0.04) 0%, transparent 45%),
+                  radial-gradient(circle at 80% 70%, rgba(255,217,102,0.04) 0%, transparent 50%);
+      animation: slowDrift 24s infinite alternate ease-in-out;
+      z-index: 0;
+    }
+
+    @keyframes slowDrift {
+      0% { transform: translate(0%, 0%) scale(1); opacity: 0.5; }
+      100% { transform: translate(1.5%, 1%) scale(1.03); opacity: 1; }
+    }
+
+    .dynamic-bg-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image: radial-gradient(#7CFC00 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.04;
+      animation: floatParticles 32s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes floatParticles {
+      0% { background-position: 0 0; }
+      100% { background-position: 120px 120px; }
+    }
+
+    .glass-header {
+      backdrop-filter: blur(14px);
+      background: rgba(3, 5, 12, 0.7);
+      border-bottom: 1px solid rgba(124,252,0,0.35);
+      padding: 12px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 12;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, #7CFC00, #00D4FF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #BFC9E0;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      border: 1px solid rgba(124,252,0,0.3);
+      transition: 0.2s;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .nav-links a:hover {
+      border-color: var(--neon-green);
+      color: var(--neon-green);
+      box-shadow: 0 0 12px rgba(124,252,0,0.3);
+    }
+
+    .seller-info-bar {
+      max-width: 1100px;
+      margin: 20px auto 10px;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      border-radius: 60px;
+      border: 1px solid rgba(255,217,102,0.4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .seller-avatar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .avatar-placeholder {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #1a2a3a, #0a1222);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(124,252,0,0.3);
+    }
+    .crop-image-placeholder {
+      font-size: 32px;
+    }
+    .image-label {
+      font-size: 8px;
+      color: #9ca6bb;
+      margin-top: 4px;
+    }
+    .seller-name h3 { font-size: 1.2rem; letter-spacing: 1px; }
+    .seller-name p { font-size: 0.7rem; color: #9ca6bb; margin: 2px 0; }
+    .fob-line { font-size: 0.7rem; color: #7CFC00; margin-top: 4px; font-weight: 500; }
+
+    .inventory-stats {
+      text-align: right;
+    }
+    .remaining-qty { font-size: 1.8rem; font-weight: 800; color: var(--neon-green); }
+    .total-qty { font-size: 0.7rem; color: #9ca6bb; }
+
+    .auction-cockpit {
+      max-width: 1100px;
+      margin: 16px auto 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .timer-panel {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 8px 28px;
+      text-align: center;
+      border: 1px solid rgba(124,252,0,0.5);
+    }
+
+    .timer-digits {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--neon-green);
+      text-shadow: 0 0 8px rgba(124,252,0,0.5);
+    }
+
+    .timer-digits.warning {
+      color: #FF4D4D;
+      animation: pulseRed 0.7s infinite;
+    }
+
+    @keyframes pulseRed {
+      0% { opacity: 1; text-shadow: 0 0 0px red; }
+      100% { opacity: 0.9; text-shadow: 0 0 8px #ff4d4d; }
+    }
+
+    .stats-group {
+      display: flex;
+      gap: 28px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 28px;
+      border-radius: 60px;
+      backdrop-filter: blur(6px);
+    }
+
+    .stat { text-align: center; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94A3B8; }
+    .stat-value { font-weight: 800; font-size: 1.3rem; color: var(--neon-green); }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin: 16px 24px 24px;
+      justify-content: center;
+      z-index: 10;
+      position: relative;
+    }
+
+    .btn {
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 10px 32px;
+      border-radius: 48px;
+      cursor: pointer;
+      transition: 0.2s;
+      background: rgba(20, 30, 50, 0.9);
+      color: white;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      color: #010101;
+      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,252,0,0.4); }
+    .btn-reset { background: linear-gradient(105deg, #9b2c2c, #e54848); }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 175px));
+      gap: 22px;
+      justify-content: center;
+      max-width: 980px;
+      margin: 28px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 8;
+    }
+
+    @media (max-width: 920px) { .cards-grid { grid-template-columns: repeat(4, minmax(0, 175px)); max-width: 740px; } }
+    @media (max-width: 720px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 190px)); gap: 20px; } }
+    @media (max-width: 460px) { .cards-grid { grid-template-columns: repeat(1, 200px); } }
+
+    .market-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      border: 1px solid rgba(124,252,0,0.35);
+      padding: 14px 10px 14px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      position: relative;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 12px 20px -12px black;
+    }
+
+    .market-card:hover {
+      border-color: var(--neon-green);
+      transform: translateY(-5px);
+      box-shadow: 0 25px 30px -14px rgba(124,252,0,0.25);
+    }
+
+    .market-card.accepted {
+      opacity: 0.4;
+      filter: grayscale(0.3);
+      pointer-events: none;
+    }
+
+    .rank-flag {
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 40px;
+      z-index: 3;
+      backdrop-filter: blur(4px);
+    }
+    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; box-shadow: 0 0 8px gold; }
+    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+
+    .verified-badge {
+      position: absolute;
+      top: -6px;
+      right: 10px;
+      background: rgba(0,0,0,0.85);
+      border-radius: 30px;
+      padding: 3px 10px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--neon-green);
+      border: 1px solid #7CFC00;
+      backdrop-filter: blur(4px);
+      z-index: 3;
+    }
+
+    .product-visual { text-align: center; margin-bottom: 10px; background: rgba(0, 0, 0, 0.25); border-radius: 40px; padding: 8px 6px; }
+    .product-emoji { font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+    .card-title { font-weight: 800; font-size: 0.9rem; text-align: center; }
+    .contact-name {
+      font-size: 0.6rem;
+      text-align: center;
+      color: #7CFC00;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .price-row { display: flex; justify-content: center; gap: 8px; align-items: baseline; margin: 6px 0 5px; }
+    .current-price { font-weight: 800; font-size: 1.2rem; color: #FFE484; }
+    .change-badge { font-size: 0.65rem; font-weight: 600; }
+    .up { color: #7CFC00; }
+    .down { color: #FF5E5E; }
+    .bid-quantity { font-size: 0.65rem; color: #a0aec0; text-align: center; margin-top: 4px; }
+    .heat-bar-container { margin: 8px 0 6px; background: #1e293b; border-radius: 12px; height: 4px; overflow: hidden; }
+    .heat-fill { height: 100%; background: linear-gradient(90deg, #7CFC00, #FFD966); border-radius: 12px; }
+    .card-meta { display: flex; justify-content: space-between; font-size: 0.6rem; margin-top: 8px; color: #a0aec0; }
+
+    .accept-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 6px;
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      border: none;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #010101;
+    }
+    .accept-btn:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(124,252,0,0.5); }
+    .accept-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-card {
+      background: #0B1122;
+      max-width: 500px;
+      width: 92%;
+      border-radius: 40px;
+      border: 1px solid #7CFC00;
+      padding: 28px 24px;
+      position: relative;
+      box-shadow: 0 40px 70px black;
+    }
+    .modal-close {
+      position: absolute;
+      right: 22px;
+      top: 18px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .modal-header { text-align: center; margin-bottom: 20px; }
+    .modal-emoji { font-size: 56px; margin-bottom: 4px; }
+    .modal-title-xl { font-size: 26px; font-weight: 800; }
+    .contact-block { background: #03050C; border-radius: 24px; padding: 14px 18px; margin: 16px 0; font-size: 0.8rem; }
+    .contact-row { display: flex; gap: 10px; margin: 8px 0; align-items: center; flex-wrap: wrap; }
+    .accept-modal-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      border: none;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 16px;
+      color: #010101;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(70px);
+      background: #0a1424cc;
+      backdrop-filter: blur(12px);
+      padding: 10px 24px;
+      border-radius: 60px;
+      font-size: 0.8rem;
+      border-left: 4px solid #7CFC00;
+      transition: 0.2s;
+      opacity: 0;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+    footer { text-align: center; padding: 20px; font-size: 10px; color: #5c6b8a; border-top: 1px solid rgba(124,252,0,0.15); margin-top: 20px; position: relative; z-index: 5; }
+  </style>
+</head>
+<body>
+<div class="dynamic-bg-overlay"></div>
+
+<div class="glass-header">
+  <div class="logo">⚡ TRADEAUX • SELLER AUCTION</div>
+  <div class="nav-links"><a href="#">LIVE</a><a href="#">CO-OPS</a><a href="#">LEADERBOARD</a></div>
+</div>
+
+<div class="seller-info-bar">
+  <div class="seller-avatar">
+    <div class="avatar-placeholder">
+      <div class="crop-image-placeholder">🥥</div>
+      <div class="image-label">Product Image</div>
+    </div>
+    <div class="seller-name">
+      <h3>MATALE COCONUT CO-OP</h3>
+      <p>⭐ 4.9 ★ (247 sales) • Member since 2022</p>
+      <p class="fob-line">📍 FOB: COLOMBO, SRI LANKA</p>
+    </div>
+  </div>
+  <div class="inventory-stats">
+    <div class="remaining-qty" id="remainingQuantity">500</div>
+    <div class="total-qty">MT remaining of 500 MT total</div>
+  </div>
+</div>
+
+<div class="auction-cockpit">
+  <div class="timer-panel"><div class="timer-digits" id="timerMain">03:00</div></div>
+  <div class="stats-group"><div class="stat"><div class="stat-label">ACTIVE BIDS</div><div class="stat-value" id="statActive">0</div></div><div class="stat"><div class="stat-label">HIGHEST BID</div><div class="stat-value" id="statHighest">$0.00</div></div><div class="stat"><div class="stat-label">💰 FEES COLLECTED</div><div class="stat-value" id="statFees">$0</div></div></div>
+</div>
+<div class="controls"><button class="btn btn-primary" id="startBtn">▶ START AUCTION</button><button class="btn btn-reset" id="resetBtn">⟳ RESET</button></div>
+<div class="cards-grid" id="cardsGrid"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card"><button class="modal-close" id="closeModalBtn">✕</button>
+    <div class="modal-header"><div class="modal-emoji" id="modalEmoji">🏢</div><div class="modal-title-xl" id="modalName">Buyer Company</div></div>
+    <div style="text-align:center; margin-bottom:12px;"><span style="font-size:2rem; font-weight:800; color:#FFD966;" id="modalPrice">$0.00</span><span style="font-size:0.8rem;" id="modalQty">0 MT</span></div>
+    <div class="contact-block">
+      <div class="contact-row">👤 <strong>Contact:</strong> <span id="modalContact"></span></div>
+      <div class="contact-row">📧 <span id="modalEmail">buyer@example.com</span></div>
+      <div class="contact-row">📱 <span id="modalPhone">+1 (555) 123-4567</span></div>
+      <div class="contact-row">💬 WhatsApp: <span id="modalWhatsapp">+1 (555) 123-4567</span></div>
+    </div>
+    <button class="accept-modal-btn" id="acceptFromModalBtn">✓ ACCEPT THIS OFFER</button>
+  </div>
+</div>
+
+<div class="toast-msg" id="toastMsg"></div>
+<footer>⚡ Highest bid wins • Click any card for buyer contact • Accept offer captures $25 fee</footer>
+
+<script>
+  let activeCards = [];
+  let auctionActive = false;
+  let timerSeconds = 180;
+  let timerInterval = null;
+  let priceInterval = null;
+  let feesCollected = 0;
+  let remainingQty = 500;
+  const totalQty = 500;
+
+  const generateMockBids = () => {
+    const buyers = [
+      { name: "Coconut Imports Ltd", location: "Singapore", contact: "James Wong", email: "contact@coconutimports.sg", phone: "+65 9123 4567", whatsapp: "+65 9123 4567" },
+      { name: "Pacific Foods", location: "USA", contact: "Sarah Johnson", email: "procurement@pacificfoods.com", phone: "+1 (213) 555-0123", whatsapp: "+1 (213) 555-0123" },
+      { name: "Global Commodities Ltd", location: "United Kingdom", contact: "Robert Chen", email: "trading@globalcommodities.co.uk", phone: "+44 20 7946 0123", whatsapp: "+44 20 7946 0123" },
+      { name: "Asia Pacific Trading", location: "Hong Kong", contact: "Michelle Lau", email: "orders@aptrading.hk", phone: "+852 9123 4567", whatsapp: "+852 9123 4567" },
+      { name: "Organic Harvest Co", location: "Germany", contact: "Klaus Weber", email: "buy@organicharvest.de", phone: "+49 30 1234 5678", whatsapp: "+49 30 1234 5678" },
+      { name: "Coconut King Ltd", location: "Thailand", contact: "Somchai Rakdee", email: "sales@coconutking.co.th", phone: "+66 2 123 4567", whatsapp: "+66 81 234 5678" },
+      { name: "Tropical Exports", location: "Brazil", contact: "Carlos Mendez", email: "export@tropicalex.com.br", phone: "+55 11 91234 5678", whatsapp: "+55 11 91234 5678" },
+      { name: "Sunrise Trading", location: "Vietnam", contact: "Nguyen Van Thanh", email: "trade@sunrise.vn", phone: "+84 28 1234 5678", whatsapp: "+84 90 123 4567" },
+      { name: "Pacific Rim Exports", location: "Indonesia", contact: "Ayu Widyastuti", email: "export@pacificrim.id", phone: "+62 21 1234 5678", whatsapp: "+62 812 3456 7890" },
+      { name: "Golden Harvest", location: "Philippines", contact: "Maria Santos", email: "buy@goldenharvest.ph", phone: "+63 2 8532 1122", whatsapp: "+63 917 123 4567" },
+      { name: "Blue Ocean Foods", location: "India", contact: "Raj Patel", email: "procurement@blueocean.in", phone: "+91 22 1234 5678", whatsapp: "+91 98765 43210" },
+      { name: "Equator Trading", location: "Kenya", contact: "James Omondi", email: "trade@equator.ke", phone: "+254 20 123 4567", whatsapp: "+254 712 345 678" }
+    ];
+
+    let bids = [];
+    for (let i = 0; i < 20; i++) {
+      const buyer = buyers[i % buyers.length];
+      const basePrice = 0.32 + (Math.random() * 0.20);
+      const quantity = [20, 30, 40, 50, 60, 70, 80, 100][Math.floor(Math.random() * 8)];
+      bids.push({
+        id: i + 1,
+        buyerName: buyer.name,
+        location: buyer.location,
+        contactPerson: buyer.contact,
+        email: buyer.email,
+        phone: buyer.phone,
+        whatsapp: buyer.whatsapp,
+        price: parseFloat(basePrice.toFixed(2)),
+        quantity: quantity,
+        totalValue: parseFloat((basePrice * quantity).toFixed(2)),
+        accepted: false,
+        change: (Math.random() - 0.5) * 5,
+        heat: 40 + Math.random() * 50
+      });
+    }
+    return bids.sort((a, b) => b.price - a.price);
+  };
+
+  function sortByHighestPrice() {
+    activeCards.sort((a, b) => b.price - a.price);
+  }
+
+  function renderCardsWithJostle() {
+    const container = document.getElementById('cardsGrid');
+    const oldChildren = Array.from(container.children);
+    const posMap = new Map();
+    oldChildren.forEach(el => { let id = el.getAttribute('data-id'); if(id) { let rect = el.getBoundingClientRect(); posMap.set(id, { left: rect.left, top: rect.top }); } });
+    container.innerHTML = '';
+    activeCards.forEach((card, idx) => {
+      const div = document.createElement('div');
+      div.className = `market-card ${card.accepted ? 'accepted' : ''}`;
+      div.setAttribute('data-id', card.id);
+      const rankVal = idx + 1;
+      const rankHtml = rankVal <= 3 ? `<div class="rank-flag ${rankVal===1?'rank-1':rankVal===2?'rank-2':'rank-3'}">#${rankVal}</div>` : `<div class="rank-flag" style="background:#1e293b;">#${rankVal}</div>`;
+      const changePct = card.change || 0;
+      const changeClass = changePct >= 0 ? 'up' : 'down';
+      const heatPercent = Math.min(100, Math.max(8, card.heat));
+      div.innerHTML = `
+        ${rankHtml}
+        <div class="verified-badge">✓ Buyer Verified</div>
+        <div class="product-visual"><div class="product-emoji">🏢</div></div>
+        <div class="card-title">${card.buyerName}</div>
+        <div class="contact-name">📞 ${card.contactPerson}</div>
+        <div class="price-row"><span class="current-price">$${card.price.toFixed(2)}</span><span class="change-badge ${changeClass}">${changePct>=0?'+':''}${changePct.toFixed(1)}%</span></div>
+        <div class="bid-quantity">📦 ${card.quantity} MT · Total: $${card.totalValue.toLocaleString()}</div>
+        <div class="heat-bar-container"><div class="heat-fill" style="width: ${heatPercent}%;"></div></div>
+        <div class="card-meta"><span>⭐ ${(4 + Math.random()).toFixed(1)} ★</span><span>🔥 ${Math.round(card.heat)}°</span></div>
+        ${!card.accepted ? `<button class="accept-btn" onclick="event.stopPropagation(); acceptOffer(${card.id})">✓ ACCEPT OFFER</button>` : '<button class="accept-btn" disabled style="opacity:0.5;">✓ ACCEPTED</button>'}
+      `;
+      div.onclick = (e) => { if(!e.target.classList.contains('accept-btn')) openModal(card, idx+1); };
+      container.appendChild(div);
+    });
+    requestAnimationFrame(() => {
+      const newCards = Array.from(container.children);
+      newCards.forEach(el => { let id = el.getAttribute('data-id'); let old = posMap.get(id); if(old && !el.classList.contains('accepted')) { let rect = el.getBoundingClientRect(); let dx = old.left - rect.left, dy = old.top - rect.top; if(Math.abs(dx)>2||Math.abs(dy)>2) { el.style.transform = `translate(${dx}px, ${dy}px)`; el.style.transition = 'none'; el.offsetHeight; el.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1)'; el.style.transform = ''; } } });
+    });
+    updateStats();
+  }
+
+  function updateStats() {
+    const activeCount = activeCards.filter(c => !c.accepted).length;
+    const highestBid = activeCards.filter(c => !c.accepted).sort((a,b) => b.price - a.price)[0]?.price || 0;
+    document.getElementById('statActive').innerText = activeCount;
+    document.getElementById('statHighest').innerText = `$${highestBid.toFixed(2)}`;
+    document.getElementById('statFees').innerText = `$${feesCollected}`;
+    document.getElementById('remainingQuantity').innerText = remainingQty;
+  }
+
+  function updateMarketPrices() {
+    if (!auctionActive) return;
+    for(let card of activeCards) {
+      if(card.accepted) continue;
+      let volatility = (Math.random() - 0.5) * 3.5;
+      let newPrice = card.price * (1 + volatility/100);
+      newPrice = Math.max(0.25, Math.min(0.65, newPrice));
+      let old = card.price;
+      card.price = parseFloat(newPrice.toFixed(2));
+      card.totalValue = parseFloat((card.price * card.quantity).toFixed(2));
+      card.change = ((card.price - old)/old)*100;
+      if(Math.abs(card.change) > 2) card.heat = Math.min(96, card.heat + 2);
+      else card.heat = Math.min(95, Math.max(20, card.heat + (Math.random()-0.5)*4));
+    }
+    sortByHighestPrice();
+    renderCardsWithJostle();
+  }
+
+  function acceptOffer(bidId) {
+    const bid = activeCards.find(c => c.id === bidId);
+    if(!bid || bid.accepted) return;
+    if(bid.quantity > remainingQty) {
+      showToast(`Cannot accept ${bid.quantity} MT — only ${remainingQty} MT remaining`, true);
+      return;
+    }
+    bid.accepted = true;
+    remainingQty -= bid.quantity;
+    feesCollected += 25;
+    showToast(`✓ Accepted ${bid.buyerName}: ${bid.quantity} MT @ $${bid.price}/MT — $25 fee captured`);
+    
+    console.log(`📧 EMAIL TO SELLER & BUYER:
+      To: seller@tradeaux.com, ${bid.email}
+      Subject: Offer Accepted - TradeAux Auction
+      Body: Your offer for ${bid.quantity} MT at $${bid.price}/MT has been accepted.
+      Contact seller: MATALE COCONUT CO-OP, sales@matale-coconut.lk, +94 77 123 4567
+      Contact buyer: ${bid.buyerName}, ${bid.contactPerson}, ${bid.email}, ${bid.phone}
+      TradeAux fee: $25 processed.`);
+    
+    sortByHighestPrice();
+    renderCardsWithJostle();
+    
+    if(remainingQty <= 0) {
+      showToast("🎉 INVENTORY SOLD OUT! Auction complete.");
+      auctionActive = false;
+      if(timerInterval) clearInterval(timerInterval);
+      if(priceInterval) clearInterval(priceInterval);
+    }
+  }
+
+  function openModal(card, rank) {
+    document.getElementById('modalEmoji').innerHTML = "🏢";
+    document.getElementById('modalName').innerHTML = card.buyerName;
+    document.getElementById('modalPrice').innerHTML = `$${card.price.toFixed(2)}`;
+    document.getElementById('modalQty').innerHTML = `${card.quantity} MT · Total: $${card.totalValue.toLocaleString()}`;
+    document.getElementById('modalContact').innerHTML = card.contactPerson;
+    document.getElementById('modalEmail').innerHTML = card.email;
+    document.getElementById('modalPhone').innerHTML = card.phone;
+    document.getElementById('modalWhatsapp').innerHTML = card.whatsapp;
+    const modal = document.getElementById('modalOverlay');
+    modal.classList.add('active');
+    window.currentModalBid = card;
+  }
+
+  function acceptFromModal() {
+    if(window.currentModalBid) acceptOffer(window.currentModalBid.id);
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+
+  function closeModalFn() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+  function startTimerLoop() {
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if(!auctionActive) return;
+      if(timerSeconds <= 1) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        if(priceInterval) clearInterval(priceInterval);
+        auctionActive = false;
+        showToast("⏰ TIME'S UP! Auction ended. Highest bids win.");
+      } else {
+        timerSeconds--;
+        let mins=Math.floor(timerSeconds/60), secs=timerSeconds%60;
+        let el=document.getElementById('timerMain');
+        el.innerText=`${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        if(timerSeconds<=10) el.classList.add('warning');
+        else el.classList.remove('warning');
+      }
+    }, 1000);
+  }
+
+  function startAuction() {
+    if(auctionActive) { showToast("Auction already running!"); return; }
+    auctionActive = true;
+    timerSeconds = 180;
+    document.getElementById('timerMain').innerText = "03:00";
+    startTimerLoop();
+    if(priceInterval) clearInterval(priceInterval);
+    priceInterval = setInterval(() => updateMarketPrices(), 3000);
+    showToast("🎬 Seller auction STARTED — highest bid wins!");
+  }
+
+  function resetAuction() {
+    if(timerInterval) clearInterval(timerInterval);
+    if(priceInterval) clearInterval(priceInterval);
+    auctionActive = false;
+    timerSeconds = 180;
+    feesCollected = 0;
+    remainingQty = totalQty;
+    document.getElementById('timerMain').innerText = "03:00";
+    activeCards = generateMockBids();
+    sortByHighestPrice();
+    renderCardsWithJostle();
+    showToast("🔄 Auction reset. 20 buyer bids ready.");
+  }
+
+  function showToast(msg, isError=false) {
+    let t=document.getElementById('toastMsg');
+    t.innerText=msg;
+    t.style.borderLeftColor = isError ? '#FF5E5E' : '#7CFC00';
+    t.classList.add('visible');
+    setTimeout(()=>t.classList.remove('visible'),3000);
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startAuction);
+  document.getElementById('resetBtn').addEventListener('click', resetAuction);
+  document.getElementById('closeModalBtn').addEventListener('click', closeModalFn);
+  document.getElementById('acceptFromModalBtn').addEventListener('click', acceptFromModal);
+  document.getElementById('modalOverlay').addEventListener('click', (e) => { if(e.target===document.getElementById('modalOverlay')) closeModalFn(); });
+
+  activeCards = generateMockBids();
+  sortByHighestPrice();
+  renderCardsWithJostle();
+</script>
+</body>
+</html>
