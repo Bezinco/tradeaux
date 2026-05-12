@@ -284,6 +284,9 @@
     .leaderboard-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
     .badge { background: rgba(0,206,209,0.2); padding: 2px 8px; border-radius: 20px; font-size: 10px; }
   </style>
+<base target="_blank">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<base target="_blank">
 </head>
 <body>
 <div class="bg-waves"><div class="wave-bg wave-1"></div><div class="wave-bg wave-2"></div><div class="wave-bg wave-3"></div></div>
@@ -316,7 +319,7 @@
       </div>
       <span class="admin-badge">ADMIN</span>
     </div>
-    <nav class="nav"><a href="#">Dashboard</a><a href="#">Clients</a><a href="#">Transport</a><a href="#" id="logoutBtn">Sign Out</a></nav>
+    <nav class="nav"><a href="#">Dashboard</a><a href="#">Clients</a><a href="#">Transport</a><button id="refreshBtn" class="btn btn-sm btn-primary" style="margin-left:8px;">🔄 Refresh</button><a href="#" id="logoutBtn">Sign Out</a></nav>
   </header>
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalUsers">247</div><div class="stat-label">Total Users</div><div class="stat-change up">▲ +12 today</div></div>
@@ -324,63 +327,344 @@
     <div class="stat-card"><div class="stat-icon">🟢</div><div class="stat-value" id="activeAuctions">15</div><div class="stat-label">Active Auctions</div><div class="stat-change">8 commodities · 5 transport · 2 briefs</div></div>
     <div class="stat-card"><div class="stat-icon">🤖</div><div class="stat-value" id="activeBots">12</div><div class="stat-label">Active Bots</div><div class="stat-change up">▲ +2 this week</div></div>
   </div>
+  <div class="dashboard-card" style="margin-bottom:30px;"><div class="card-header">💰 WALLET ALERTS</div><div id="walletAlertsList"><div style="color:#9ca3af; text-align:center; padding:20px;">Loading wallet data...</div></div></div>
   <div class="dashboard-grid">
     <div class="dashboard-card"><div class="card-header">🏆 TOP 10 BUYERS TODAY</div><div id="topBuyersList"></div></div>
     <div class="dashboard-card"><div class="card-header">🏆 TOP 10 SELLERS TODAY</div><div id="topSellersList"></div></div>
   </div>
   <div class="dashboard-card" style="margin-bottom:30px;"><div class="card-header">🚢 TRANSPORT AUCTIONS</div><div id="transportAuctionsList"></div></div>
+  <div class="dashboard-card" style="margin-bottom:30px;"><div class="card-header">🤖 BOT MONITORING</div><div id="botMonitoringList"><div style="color:#9ca3af; text-align:center; padding:20px;">Loading bot data...</div></div></div>
   <div class="dashboard-card"><div class="card-header">📋 CLIENTS (A-Z)</div><div id="alphabeticalClientList" class="alphabet-list"></div></div>
   <footer class="footer" style="margin-top:30px;"><p>TRADEAUX ADMIN © 2026</p></footer>
 </div>
 <div id="detailModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeDetailModal">&times;</span><div id="detailModalContent"></div><div class="modal-actions" style="margin-top:20px;"><button class="btn" id="closeDetailBtn">Close</button></div></div></div>
 <div class="toast" id="toast">Action completed</div>
 <script>
-const buyers = [
-  { id:1, name:'Coconut Imports Ltd', spent:12500, country:'Singapore', email:'contact@coconutimports.sg', phone:'+65 9123 4567', type:'Buyer', trades:47, winRate:72, joined:'2026-01-15', recentActivity:['Won 50 MT Coconuts @ $0.42','Booked transport to Rotterdam'] },
-  { id:2, name:'Pacific Foods', spent:8750, country:'USA', email:'procurement@pacificfoods.com', phone:'+1 (213) 555-0123', type:'Buyer', trades:32, winRate:68, joined:'2026-02-10', recentActivity:['Won 100 MT Peanuts @ $1.18','Shipment delayed'] },
-  { id:3, name:'Global Commodities Ltd', spent:6200, country:'UK', email:'trading@globalcommodities.co.uk', phone:'+44 20 7946 0123', type:'Buyer', trades:23, winRate:65, joined:'2026-01-20', recentActivity:['Bid on 200 MT Wheat'] },
-  { id:4, name:'Asia Pacific Trading', spent:5400, country:'Hong Kong', email:'orders@aptrading.hk', phone:'+852 9123 4567', type:'Buyer', trades:18, winRate:70, joined:'2026-03-01', recentActivity:['Won 80 MT Avocados'] },
-  { id:5, name:'Organic Harvest Co', spent:4800, country:'Germany', email:'buy@organicharvest.de', phone:'+49 30 1234 5678', type:'Buyer', trades:29, winRate:75, joined:'2026-02-20', recentActivity:['Looking for organic coconuts'] },
-  { id:6, name:'Coconut King Ltd', spent:3500, country:'Thailand', email:'sales@coconutking.co.th', phone:'+66 2 123 4567', type:'Buyer', trades:15, winRate:60, joined:'2026-03-15', recentActivity:[] },
-  { id:7, name:'Tropical Exports', spent:2900, country:'Brazil', email:'export@tropicalex.com.br', phone:'+55 11 91234 5678', type:'Buyer', trades:12, winRate:58, joined:'2026-04-01', recentActivity:[] },
-  { id:8, name:'Sunrise Trading', spent:2100, country:'Vietnam', email:'trade@sunrise.vn', phone:'+84 28 1234 5678', type:'Buyer', trades:9, winRate:55, joined:'2026-04-10', recentActivity:[] },
-  { id:9, name:'Blue Ocean Foods', spent:1800, country:'India', email:'procurement@blueocean.in', phone:'+91 22 1234 5678', type:'Buyer', trades:7, winRate:50, joined:'2026-04-15', recentActivity:[] },
-  { id:10, name:'Equator Trading', spent:1200, country:'Kenya', email:'trade@equator.ke', phone:'+254 20 123 4567', type:'Buyer', trades:5, winRate:45, joined:'2026-04-20', recentActivity:[] }
-];
-const sellers = [
-  { id:101, name:'Matale Coconut Co-op', revenue:24500, country:'Sri Lanka', email:'sales@matale-coconut.lk', phone:'+94 77 123 4567', type:'Seller', trades:247, rating:4.9, joined:'2025-10-01', recentActivity:['Sold 200 MT Coconuts','Listed 500 MT'] },
-  { id:102, name:'Georgia Nut Growers', revenue:18200, country:'USA', email:'sales@ga-peanuts.com', phone:'+1 (404) 555-2101', type:'Seller', trades:189, rating:4.8, joined:'2025-11-15', recentActivity:['Sold 300 MT Peanuts'] },
-  { id:103, name:'Kerala Spice Growers', revenue:12800, country:'India', email:'spice@keralacoop.in', phone:'+91 471 231 0987', type:'Seller', trades:156, rating:4.7, joined:'2025-12-01', recentActivity:['Sold 50 MT Turmeric'] },
-  { id:104, name:'Davao Coconut Producers', revenue:9800, country:'Philippines', email:'oil@phorganic.ph', phone:'+63 2 8532 1122', type:'Seller', trades:134, rating:4.6, joined:'2026-01-10', recentActivity:[] },
-  { id:105, name:'California Crown', revenue:7500, country:'USA', email:'hello@cal-almonds.coop', phone:'+1 (916) 555-6723', type:'Seller', trades:98, rating:4.9, joined:'2026-02-01', recentActivity:[] },
-  { id:106, name:'Viet Delta', revenue:6200, country:'Vietnam', email:'cashew@vietdelta.vn', phone:'+84 28 3920 1188', type:'Seller', trades:87, rating:4.5, joined:'2026-02-15', recentActivity:[] },
-  { id:107, name:'Ivory Harvest', revenue:5400, country:'Ivory Coast', email:'contact@ivoirecacao.ci', phone:'+225 27 2245 9912', type:'Seller', trades:76, rating:4.4, joined:'2026-03-01', recentActivity:[] },
-  { id:108, name:'PeruBio', revenue:4300, country:'Peru', email:'mango@perubio.pe', phone:'+51 1 654 9988', type:'Seller', trades:65, rating:4.6, joined:'2026-03-15', recentActivity:[] },
-  { id:109, name:'Queensland Nut', revenue:3200, country:'Australia', email:'info@macadamia.au', phone:'+61 7 4123 4567', type:'Seller', trades:54, rating:4.8, joined:'2026-04-01', recentActivity:[] },
-  { id:110, name:'Southern Nut', revenue:2100, country:'Chile', email:'ventas@nueces.cl', phone:'+56 2 2789 1122', type:'Seller', trades:43, rating:4.5, joined:'2026-04-10', recentActivity:[] }
-];
-const transportAuctions = [
-  { id:1, route:'Colombo → Rotterdam', mode:'Ocean + Rail', cargo:'Coconuts', quantity:500, bids:8, lowestBid:2850, winner:'Maersk', status:'active', timeLeft:'2:34', carrierBids:[{name:'Maersk',price:2850,eta:'28 days'},{name:'MSC',price:2920,eta:'26 days'},{name:'CMA CGM',price:3050,eta:'27 days'}] },
-  { id:2, route:'Wareham, MA → Kenosha, WI', mode:'Truck', cargo:'Cranberries', quantity:40, bids:5, lowestBid:1250, winner:'J.B. Hunt', status:'active', timeLeft:'1:45', carrierBids:[{name:'J.B. Hunt',price:1250,eta:'2 days'},{name:'Schneider',price:1280,eta:'2 days'}] },
-  { id:3, route:'Colombo → Budapest', mode:'Intermodal', cargo:'Almonds', quantity:100, bids:12, lowestBid:3420, winner:'Hapag-Lloyd', status:'closed', timeLeft:'0:00', carrierBids:[{name:'Hapag-Lloyd',price:3420,eta:'25 days'},{name:'Maersk',price:3550,eta:'26 days'}] },
-  { id:4, route:'Colombo → Manila', mode:'Ship', cargo:'Potatoes', quantity:500, bids:6, lowestBid:4100, winner:'MSC', status:'active', timeLeft:'3:22', carrierBids:[{name:'MSC',price:4100,eta:'21 days'},{name:'COSCO',price:4250,eta:'22 days'}] },
-  { id:5, route:'Colombo → Luxembourg', mode:'Air', cargo:'Coffee', quantity:15, bids:4, lowestBid:12500, winner:'Cargolux', status:'active', timeLeft:'4:10', carrierBids:[{name:'Cargolux',price:12500,eta:'3 days'},{name:'FedEx',price:13200,eta:'4 days'}] }
-];
-const allClients = [...buyers.map(b=>({...b,role:'Buyer'})), ...sellers.map(s=>({...s,role:'Seller'}))].sort((a,b)=>a.name.localeCompare(b.name));
-function updateStats(){ document.getElementById('totalUsers').textContent = allClients.length; document.getElementById('totalFees').textContent = `$${(buyers.reduce((s,b)=>s+b.spent,0)*0.02).toFixed(0)}`; document.getElementById('activeAuctions').textContent = transportAuctions.filter(a=>a.status==='active').length + 8; document.getElementById('activeBots').textContent = '12'; }
-function renderTopBuyers(){ document.getElementById('topBuyersList').innerHTML = buyers.sort((a,b)=>b.spent-a.spent).slice(0,10).map(b=>`<div class="clickable-item" data-user-id="${b.id}" data-user-type="buyer"><div class="item-title"><span>${b.name}</span><span class="badge">$${b.spent.toLocaleString()}</span></div><div class="item-details">📍 ${b.country} · ${b.trades} trades · Win Rate ${b.winRate}%</div></div>`).join(''); attachUserClicks(); }
-function renderTopSellers(){ document.getElementById('topSellersList').innerHTML = sellers.sort((a,b)=>b.revenue-a.revenue).slice(0,10).map(s=>`<div class="clickable-item" data-user-id="${s.id}" data-user-type="seller"><div class="item-title"><span>${s.name}</span><span class="badge">$${s.revenue.toLocaleString()}</span></div><div class="item-details">📍 ${s.country} · ⭐ ${s.rating} ★ · ${s.trades} trades</div></div>`).join(''); attachUserClicks(); }
-function renderTransportAuctions(){ document.getElementById('transportAuctionsList').innerHTML = transportAuctions.map(a=>`<div class="clickable-item" data-transport-id="${a.id}"><div class="item-title"><span>🚢 ${a.route}</span><span>${a.status === 'active' ? '🟢 LIVE' : '🔒 CLOSED'}</span></div><div class="item-details">📦 ${a.cargo} · ${a.quantity} MT · ${a.mode} · ${a.bids} bids · Lowest: $${a.lowestBid.toLocaleString()}</div></div>`).join(''); attachTransportClicks(); }
-function renderAlphabeticalClients(){ const letters={}; allClients.forEach(c=>{ const letter=c.name.charAt(0).toUpperCase(); if(!letters[letter]) letters[letter]=[]; letters[letter].push(c); }); let html=''; Object.keys(letters).sort().forEach(letter=>{ html+=`<div class="alphabet-letter">${letter}</div>`; letters[letter].forEach(client=>{ html+=`<div class="clickable-item" data-user-id="${client.id}" data-user-type="${client.type.toLowerCase()}"><div class="item-title"><span>${client.name}</span><span class="badge">${client.role}</span></div><div class="item-details">📍 ${client.country || 'N/A'} · ${client.email}</div></div>`; }); }); document.getElementById('alphabeticalClientList').innerHTML = html; attachUserClicks(); }
-function attachUserClicks(){ document.querySelectorAll('[data-user-id][data-user-type]').forEach(el=>{ el.addEventListener('click',()=>{ const id=parseInt(el.dataset.userId); const type=el.dataset.userType; const user = type==='buyer' ? buyers.find(b=>b.id===id) : sellers.find(s=>s.id===id); if(user) showUserDetails(user,type); }); }); }
-function attachTransportClicks(){ document.querySelectorAll('[data-transport-id]').forEach(el=>{ el.addEventListener('click',()=>{ const id=parseInt(el.dataset.transportId); const auction=transportAuctions.find(a=>a.id===id); if(auction) showTransportDetails(auction); }); }); }
-function showUserDetails(user,role){ const activityHtml = user.recentActivity?.length ? user.recentActivity.map(a=>`<div class="bot-detail-row"><span>📌 ${a}</span></div>`).join('') : '<div class="bot-detail-row"><span>No recent activity</span></div>'; document.getElementById('detailModalContent').innerHTML = `<div><h2>${user.name}</h2></div><div class="bot-detail-row"><span>Role:</span><span>${role === 'buyer' ? 'Buyer' : 'Seller'}</span></div><div class="bot-detail-row"><span>Country:</span><span>${user.country}</span></div><div class="bot-detail-row"><span>Email:</span><span>${user.email}</span></div><div class="bot-detail-row"><span>Phone:</span><span>${user.phone}</span></div><div class="bot-detail-row"><span>Member Since:</span><span>${user.joined}</span></div><div class="bot-detail-row"><span>Total Trades:</span><span>${user.trades}</span></div>${role === 'buyer' ? `<div class="bot-detail-row"><span>Total Spent:</span><span style="color:#7CFC00;">$${user.spent.toLocaleString()}</span></div><div class="bot-detail-row"><span>Win Rate:</span><span>${user.winRate}%</span></div>` : `<div class="bot-detail-row"><span>Total Revenue:</span><span style="color:#FFD966;">$${user.revenue.toLocaleString()}</span></div><div class="bot-detail-row"><span>Rating:</span><span>⭐ ${user.rating} ★</span></div>`}<div class="bot-detail-row"><span>Recent Activity:</span></div>${activityHtml}`; document.getElementById('detailModal').style.display = 'flex'; }
-function showTransportDetails(auction){ const carrierHtml = auction.carrierBids.map(b=>`<div class="bot-detail-row"><span>${b.name}</span><span>$${b.price.toLocaleString()} · ${b.eta}</span></div>`).join(''); document.getElementById('detailModalContent').innerHTML = `<div><h2>🚢 Transport: ${auction.route}</h2></div><div class="bot-detail-row"><span>Mode:</span><span>${auction.mode}</span></div><div class="bot-detail-row"><span>Cargo:</span><span>${auction.cargo} · ${auction.quantity} MT</span></div><div class="bot-detail-row"><span>Status:</span><span>${auction.status === 'active' ? '🟢 Active' : '🔒 Closed'}</span></div><div class="bot-detail-row"><span>Time Left:</span><span>${auction.timeLeft}</span></div><div class="bot-detail-row"><span>Total Bids:</span><span>${auction.bids} carriers</span></div><div class="bot-detail-row"><span>Lowest Bid:</span><span style="color:#7CFC00;">$${auction.lowestBid.toLocaleString()}</span></div><div class="bot-detail-row"><span>Winner:</span><span>${auction.winner || 'Pending'}</span></div><div class="bot-detail-row"><span>Carrier Bids:</span></div>${carrierHtml}`; document.getElementById('detailModal').style.display = 'flex'; }
-function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'),3000); }
-document.getElementById('closeDetailModal').onclick = ()=>document.getElementById('detailModal').style.display='none';
-document.getElementById('closeDetailBtn').onclick = ()=>document.getElementById('detailModal').style.display='none';
-document.getElementById('logoutBtn').onclick = ()=>{ showToast('Logged out (demo)'); setTimeout(()=>window.location.href='/',1000); };
-updateStats(); renderTopBuyers(); renderTopSellers(); renderTransportAuctions(); renderAlphabeticalClients();
+// ========== SUPABASE CONFIG ==========
+const supabaseUrl = 'https://pfutaovwbygefummienf.supabase.co';
+const supabaseKey = 'sb_publishable_1ngaTghS1bKggMYEyxKVTw_zVpd16Zm';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+let buyers = [];
+let sellers = [];
+let transportAuctions = [];
+let allClients = [];
+let bots = [];
+let wallets = [];
+let totalWalletBalance = 0;
+
+// ========== AUTH & ADMIN CHECK ==========
+async function checkAdmin() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { window.location.href = '/login.html'; return false; }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    showToast('Access denied: Admin only', true);
+    setTimeout(() => window.location.href = '/dashboard.html', 1500);
+    return false;
+  }
+  return true;
+}
+
+// ========== DATA LOADING ==========
+async function loadBuyers() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', 'buyer')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('Buyers error:', error); return; }
+  buyers = (data || []).map(p => ({
+    id: p.id,
+    name: p.full_name || p.email,
+    spent: p.total_spent || 0,
+    country: p.country || 'Unknown',
+    email: p.email,
+    phone: p.phone || 'N/A',
+    type: 'Buyer',
+    trades: p.total_trades || 0,
+    winRate: p.win_rate || 0,
+    joined: p.created_at ? p.created_at.split('T')[0] : 'N/A',
+    recentActivity: p.recent_activity || []
+  }));
+}
+
+async function loadSellers() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', 'seller')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('Sellers error:', error); return; }
+  sellers = (data || []).map(p => ({
+    id: p.id,
+    name: p.full_name || p.email,
+    revenue: p.total_revenue || 0,
+    country: p.country || 'Unknown',
+    email: p.email,
+    phone: p.phone || 'N/A',
+    type: 'Seller',
+    trades: p.total_trades || 0,
+    rating: p.rating || 0,
+    joined: p.created_at ? p.created_at.split('T')[0] : 'N/A',
+    recentActivity: p.recent_activity || []
+  }));
+}
+
+async function loadTransportAuctions() {
+  const { data, error } = await supabase
+    .from('transport_auctions')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('Transport error:', error); return; }
+  transportAuctions = (data || []).map(t => ({
+    id: t.id,
+    route: `${t.origin || '?'} → ${t.destination || '?'}`,
+    mode: t.mode || 'Unknown',
+    cargo: t.cargo_type || 'Unknown',
+    quantity: t.weight_kg || 0,
+    bids: t.bid_count || 0,
+    lowestBid: t.lowest_bid || 0,
+    winner: 'Pending',  // your table doesn't have winner_name
+    status: t.status || 'active',
+    timeLeft: t.end_time ? `${Math.max(0, Math.ceil((new Date(t.end_time) - new Date()) / (1000 * 60 * 60)))}h left` : 'N/A',
+    carrierBids: []  // your table doesn't have carrier_bids
+  }));
+
+}
+
+async function loadBots() {
+  const { data, error } = await supabase
+    .from('bots')
+    .select('*, profiles(full_name, email)')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('Bots error:', error); return; }
+  bots = (data || []).map(b => ({
+    id: b.id,
+    name: b.name,
+    owner: b.profiles?.full_name || b.profiles?.email || 'Unknown',
+    commodity: b.commodity_filter || 'N/A',
+    strategy: b.strategy || 'Balanced',
+    totalTrades: b.total_trades || 0,
+    totalSpent: b.total_spent || 0,
+    winRate: b.win_rate || 0,
+    status: b.status
+  }));
+}
+
+async function loadWallets() {
+  const { data, error } = await supabase
+    .from('wallets')
+    .select('*, profiles(full_name, email)')
+    .order('balance', { ascending: true });
+  if (error) { console.error('Wallets error:', error); return; }
+  wallets = data || [];
+  totalWalletBalance = wallets.reduce((sum, w) => sum + (w.balance || 0), 0);
+}
+
+async function loadAllData() {
+  showToast('Loading data...');
+  await Promise.all([
+    loadBuyers(),
+    loadSellers(),
+    loadTransportAuctions(),
+    loadBots(),
+    loadWallets()
+  ]);
+  allClients = [...buyers.map(b => ({...b, role: 'Buyer'})), ...sellers.map(s => ({...s, role: 'Seller'}))].sort((a, b) => a.name.localeCompare(b.name));
+  updateStats();
+  renderTopBuyers();
+  renderTopSellers();
+  renderTransportAuctions();
+  renderWalletAlerts();
+  renderBotMonitoring();
+  renderAlphabeticalClients();
+  showToast('Data refreshed');
+}
+
+// ========== RENDER FUNCTIONS ==========
+function updateStats() {
+  document.getElementById('totalUsers').textContent = allClients.length;
+  const totalFees = buyers.reduce((s, b) => s + (b.spent || 0), 0) * 0.02;
+  document.getElementById('totalFees').textContent = `$${totalFees.toFixed(0)}`;
+  document.getElementById('activeAuctions').textContent = transportAuctions.filter(a => a.status === 'active').length;
+  document.getElementById('activeBots').textContent = bots.length;
+}
+
+function renderTopBuyers() {
+  const container = document.getElementById('topBuyersList');
+  if (!buyers.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No buyers found</div>'; return; }
+  container.innerHTML = buyers.sort((a, b) => (b.spent || 0) - (a.spent || 0)).slice(0, 10).map(b => `
+    <div class="clickable-item" data-user-id="${b.id}" data-user-type="buyer">
+      <div class="item-title"><span>${b.name}</span><span class="badge">$${(b.spent || 0).toLocaleString()}</span></div>
+      <div class="item-details">📍 ${b.country} · ${b.trades || 0} trades · Win Rate ${b.winRate || 0}%</div>
+    </div>
+  `).join('');
+  attachUserClicks();
+}
+
+function renderTopSellers() {
+  const container = document.getElementById('topSellersList');
+  if (!sellers.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No sellers found</div>'; return; }
+  container.innerHTML = sellers.sort((a, b) => (b.revenue || 0) - (a.revenue || 0)).slice(0, 10).map(s => `
+    <div class="clickable-item" data-user-id="${s.id}" data-user-type="seller">
+      <div class="item-title"><span>${s.name}</span><span class="badge">$${(s.revenue || 0).toLocaleString()}</span></div>
+      <div class="item-details">📍 ${s.country} · ⭐ ${s.rating || 0} ★ · ${s.trades || 0} trades</div>
+    </div>
+  `).join('');
+  attachUserClicks();
+}
+
+function renderTransportAuctions() {
+  const container = document.getElementById('transportAuctionsList');
+  if (!transportAuctions.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No transport auctions</div>'; return; }
+  container.innerHTML = transportAuctions.map(a => `
+    <div class="clickable-item" data-transport-id="${a.id}">
+      <div class="item-title"><span>🚢 ${a.route}</span><span>${a.status === 'active' ? '🟢 LIVE' : '🔒 CLOSED'}</span></div>
+      <div class="item-details">📦 ${a.cargo} · ${a.quantity} MT · ${a.mode} · ${a.bids} bids · Lowest: $${(a.lowestBid || 0).toLocaleString()}</div>
+    </div>
+  `).join('');
+  attachTransportClicks();
+}
+
+function renderWalletAlerts() {
+  const container = document.getElementById('walletAlertsList');
+  const lowBalanceUsers = wallets.filter(w => (w.balance || 0) < 500);
+  if (!lowBalanceUsers.length) {
+    container.innerHTML = `<div style="color:#7CFC00; text-align:center; padding:20px;">✅ All users have sufficient balance</div><div style="color:#9ca3af; text-align:center; padding:10px;">Total across all wallets: $${(totalWalletBalance || 0).toLocaleString()}</div>`;
+    return;
+  }
+  container.innerHTML = `
+    <div style="color:#ff3b3b; font-size:12px; margin-bottom:12px;">⚠️ ${lowBalanceUsers.length} user(s) with balance below $500</div>
+    <div style="color:#9ca3af; font-size:11px; margin-bottom:12px;">Total across all wallets: $${(totalWalletBalance || 0).toLocaleString()}</div>
+    ${lowBalanceUsers.map(w => `
+      <div class="clickable-item">
+        <div class="item-title"><span>${w.profiles?.full_name || w.profiles?.email || 'Unknown'}</span><span class="badge" style="background:rgba(255,59,59,0.3); color:#ff3b3b;">$${(w.balance || 0).toFixed(2)}</span></div>
+        <div class="item-details">User ID: ${w.user_id?.slice(0, 8)}... · Last updated: ${w.updated_at ? w.updated_at.split('T')[0] : 'N/A'}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderBotMonitoring() {
+  const container = document.getElementById('botMonitoringList');
+  if (!bots.length) {
+    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bots</div>';
+    return;
+  }
+  container.innerHTML = bots.map(b => `
+    <div class="clickable-item">
+      <div class="item-title"><span>🤖 ${b.name}</span><span class="badge">${b.status === 'active' ? '● ACTIVE' : '○ IDLE'}</span></div>
+      <div class="item-details">👤 Owner: ${b.owner} · 🎯 ${b.commodity} · 📊 ${b.strategy}</div>
+      <div class="item-details">Trades: ${b.totalTrades} · Spent: $${(b.totalSpent || 0).toLocaleString()} · WR: ${b.winRate}%</div>
+    </div>
+  `).join('');
+}
+
+function renderAlphabeticalClients() {
+  const container = document.getElementById('alphabeticalClientList');
+  if (!allClients.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No clients found</div>'; return; }
+  const letters = {};
+  allClients.forEach(c => {
+    const letter = c.name.charAt(0).toUpperCase();
+    if (!letters[letter]) letters[letter] = [];
+    letters[letter].push(c);
+  });
+  let html = '';
+  Object.keys(letters).sort().forEach(letter => {
+    html += `<div class="alphabet-letter">${letter}</div>`;
+    letters[letter].forEach(client => {
+      html += `<div class="clickable-item" data-user-id="${client.id}" data-user-type="${client.type?.toLowerCase() || 'buyer'}"><div class="item-title"><span>${client.name}</span><span class="badge">${client.role}</span></div><div class="item-details">📍 ${client.country || 'N/A'} · ${client.email}</div></div>`;
+    });
+  });
+  container.innerHTML = html;
+  attachUserClicks();
+}
+
+function attachUserClicks() {
+  document.querySelectorAll('[data-user-id][data-user-type]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.userId;
+      const type = el.dataset.userType;
+      const user = type === 'buyer' ? buyers.find(b => b.id === id) : sellers.find(s => s.id === id);
+      if (user) showUserDetails(user, type);
+    });
+  });
+}
+
+function attachTransportClicks() {
+  document.querySelectorAll('[data-transport-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.dataset.transportId);
+      const auction = transportAuctions.find(a => a.id === id);
+      if (auction) showTransportDetails(auction);
+    });
+  });
+}
+
+function showUserDetails(user, role) {
+  const activityHtml = user.recentActivity?.length ? user.recentActivity.map(a => `<div class="bot-detail-row"><span>📌 ${a}</span></div>`).join('') : '<div class="bot-detail-row"><span>No recent activity</span></div>';
+  document.getElementById('detailModalContent').innerHTML = `
+    <div><h2>${user.name}</h2></div>
+    <div class="bot-detail-row"><span>Role:</span><span>${role === 'buyer' ? 'Buyer' : 'Seller'}</span></div>
+    <div class="bot-detail-row"><span>Country:</span><span>${user.country || 'N/A'}</span></div>
+    <div class="bot-detail-row"><span>Email:</span><span>${user.email}</span></div>
+    <div class="bot-detail-row"><span>Phone:</span><span>${user.phone || 'N/A'}</span></div>
+    <div class="bot-detail-row"><span>Member Since:</span><span>${user.joined}</span></div>
+    <div class="bot-detail-row"><span>Total Trades:</span><span>${user.trades || 0}</span></div>
+    ${role === 'buyer'
+      ? `<div class="bot-detail-row"><span>Total Spent:</span><span style="color:#7CFC00;">$${(user.spent || 0).toLocaleString()}</span></div><div class="bot-detail-row"><span>Win Rate:</span><span>${user.winRate || 0}%</span></div>`
+      : `<div class="bot-detail-row"><span>Total Revenue:</span><span style="color:#FFD966;">$${(user.revenue || 0).toLocaleString()}</span></div><div class="bot-detail-row"><span>Rating:</span><span>⭐ ${user.rating || 0} ★</span></div>`
+    }
+    <div class="bot-detail-row"><span>Recent Activity:</span></div>
+    ${activityHtml}
+  `;
+  document.getElementById('detailModal').style.display = 'flex';
+}
+
+function showTransportDetails(auction) {
+  const carrierHtml = (auction.carrierBids || []).map(b => `<div class="bot-detail-row"><span>${b.name}</span><span>$${(b.price || 0).toLocaleString()} · ${b.eta}</span></div>`).join('');
+  document.getElementById('detailModalContent').innerHTML = `
+    <div><h2>🚢 Transport: ${auction.route}</h2></div>
+    <div class="bot-detail-row"><span>Mode:</span><span>${auction.mode}</span></div>
+    <div class="bot-detail-row"><span>Cargo:</span><span>${auction.cargo} · ${auction.quantity} MT</span></div>
+    <div class="bot-detail-row"><span>Status:</span><span>${auction.status === 'active' ? '🟢 Active' : '🔒 Closed'}</span></div>
+    <div class="bot-detail-row"><span>Time Left:</span><span>${auction.timeLeft}</span></div>
+    <div class="bot-detail-row"><span>Total Bids:</span><span>${auction.bids} carriers</span></div>
+    <div class="bot-detail-row"><span>Lowest Bid:</span><span style="color:#7CFC00;">$${(auction.lowestBid || 0).toLocaleString()}</span></div>
+    <div class="bot-detail-row"><span>Winner:</span><span>${auction.winner || 'Pending'}</span></div>
+    <div class="bot-detail-row"><span>Carrier Bids:</span></div>
+    ${carrierHtml || '<div class="bot-detail-row"><span>No bids yet</span></div>'}
+  `;
+  document.getElementById('detailModal').style.display = 'flex';
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'toast error' : 'toast';
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+document.getElementById('closeDetailModal').onclick = () => document.getElementById('detailModal').style.display = 'none';
+document.getElementById('closeDetailBtn').onclick = () => document.getElementById('detailModal').style.display = 'none';
+document.getElementById('logoutBtn').onclick = () => { showToast('Logged out'); setTimeout(() => window.location.href = '/login.html', 1000); };
+document.getElementById('refreshBtn').onclick = () => loadAllData();
+
+// ========== INIT ==========
+(async function init() {
+  const isAdmin = await checkAdmin();
+  if (!isAdmin) return;
+  await loadAllData();
+})();
 </script>
 </body>
 </html>
