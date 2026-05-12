@@ -234,13 +234,6 @@ body {
     <div class="auth-links">
       Don't have an account? <a href="signup.html">Sign Up</a>
     </div>
-
-    <div class="demo-login">
-      <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px; font-family: 'Orbitron'; letter-spacing: 1px;">DEMO ACCOUNTS</div>
-      <button class="demo-btn" onclick="fillDemo('demo.buyer@tradeaux.com')">Buyer Demo</button>
-      <button class="demo-btn" onclick="fillDemo('demo.farmer@tradeaux.com')">Farmer Demo</button>
-      <button class="demo-btn" onclick="fillDemo('demo.coop@tradeaux.com')">Co-op Demo</button>
-    </div>
   </div>
 </div>
 
@@ -249,11 +242,6 @@ const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-function fillDemo(email) {
-  document.getElementById('email').value = email;
-  document.getElementById('password').value = 'demo123';
-}
 
 function showError(msg) {
   const el = document.getElementById('errorMsg');
@@ -278,20 +266,26 @@ async function handleSignin(e) {
 
     if (error) throw error;
 
-    // Get user role
-    const { data: userData } = await supabaseClient
-      .from('users')
+    // Get user role from profiles table
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
       .select('role')
       .eq('id', data.user.id)
       .single();
 
+    if (profileError) throw profileError;
+
     // Redirect based on role
-    if (userData.role === 'buyer') {
-      window.location.href = 'buyer.html';
-    } else if (userData.role === 'farmer') {
-      window.location.href = 'farmer.html';
+    if (profile.role === 'admin') {
+      window.location.href = 'dashboard-admin.html';
+    } else if (profile.role === 'buyer') {
+      window.location.href = 'auction-floor-buyer.html';
+    } else if (profile.role === 'seller') {
+      window.location.href = 'auction-floor-seller.html';
+    } else if (profile.role === 'carrier') {
+      window.location.href = 'auction-floor-transport.html';
     } else {
-      window.location.href = 'coop.html';
+      window.location.href = 'dashboard.html';
     }
 
   } catch (err) {
