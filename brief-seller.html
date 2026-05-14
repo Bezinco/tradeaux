@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>TradeAux • List Inventory — Fixed Varieties</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --neon-green: #7CFC00;
+    --gold: #FFD966;
+    --cyan: #00ced1;
+    --muted: #9ca3af;
+  }
+  body {
+    background: #020617;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #F0F3FA;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .bg-waves {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .wave-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    filter: blur(100px);
+    opacity: 0.15;
+    animation: waveBgDrift 24s ease-in-out infinite;
+    border-radius: 50%;
+  }
+  .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+  .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.3), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+  .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,217,102,0.3), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+  @keyframes waveBgDrift {
+    0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+    50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+    100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+  }
+
+  .gem-logo-corner {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transform: scale(0.35);
+    transform-origin: top left;
+    pointer-events: none;
+  }
+  .gem-text {
+    font-size: 160px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    display: flex;
+    text-transform: uppercase;
+    line-height: 0.9;
+    font-family: 'Orbitron', sans-serif;
+    gap: 2px;
+  }
+  .gem-letter {
+    display: inline-block;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: letterFloat 6s ease-in-out infinite;
+  }
+  .gem-letter:nth-child(1) { animation-delay: 0s; }
+  .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+  .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+  .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+  .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+  .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+  .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+  .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+  @keyframes letterFloat {
+    0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+    50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+  }
+  .gem-letter:nth-child(1)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(2)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(3)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(4)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(5)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+  .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay; }
+  @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+  .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none; }
+  @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+  .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+  .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+  .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+  .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+  .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+  .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+  .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+  .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+  .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+  .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+  .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+  .container { max-width: 1300px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
+  .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 40px; }
+  .nav { display: flex; gap: 20px; }
+  .nav a { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; font-weight: 600; color: #BFC9E0; text-decoration: none; padding: 6px 18px; border-radius: 40px; border: 1px solid rgba(124,252,0,0.3); background: rgba(0,0,0,0.3); transition: all 0.3s; cursor: pointer; }
+  .nav a:hover { border-color: var(--neon-green); color: var(--neon-green); }
+  
+  .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin: 40px 0; }
+  .gem-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.98)); backdrop-filter: blur(8px); border-radius: 24px; border: 2px solid rgba(124,252,0,0.4); padding: 24px; transition: all 0.4s ease; position: relative; overflow: hidden; }
+  .gem-card:hover { transform: translateY(-6px); border-color: var(--neon-green); }
+  .gem-card.selected { border-color: var(--neon-green); box-shadow: 0 0 20px rgba(124,252,0,0.3); }
+  .gem-card.locked { opacity: 0.6; pointer-events: none; position: relative; }
+  .card-wave { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(124,252,0,0.05) 0px, rgba(124,252,0,0.05) 40px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.1) 80px); background-size: 200% 200%; animation: waveFlow 6s linear infinite; pointer-events: none; border-radius: 24px; }
+  @keyframes waveFlow { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+  .card-icon { font-size: 48px; margin-bottom: 16px; position: relative; z-index: 1; }
+  .card-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; position: relative; z-index: 1; }
+  .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 20px; position: relative; z-index: 1; }
+  .category-select, .variety-select { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.3); border-radius: 12px; color: white; font-family: inherit; cursor: pointer; position: relative; z-index: 1; margin-top: 8px; }
+  .variety-select { display: none; margin-top: 12px; }
+  .variety-select.visible { display: block; }
+  
+  .continue-container { text-align: center; margin: 30px 0 50px; display: none; }
+  .continue-container.visible { display: block; }
+  .continue-btn { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px 48px; border-radius: 48px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px; color: #010101; cursor: pointer; transition: transform 0.2s; }
+  .continue-btn:hover { transform: translateY(-2px); }
+  
+  .big-card-container { max-width: 700px; margin: 0 auto; }
+  .back-btn { background: none; border: none; color: var(--neon-green); font-family: 'Orbitron', sans-serif; cursor: pointer; margin-bottom: 20px; font-size: 14px; }
+  .big-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.95), rgba(2, 6, 23, 0.99)); border-radius: 32px; border: 2px solid rgba(124,252,0,0.4); overflow: hidden; position: relative; }
+  .big-card-wave { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(124,252,0,0.05) 0px, rgba(124,252,0,0.05) 40px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.1) 80px); background-size: 200% 200%; animation: waveFlow 6s linear infinite; pointer-events: none; }
+  .big-card-content { padding: 32px; position: relative; z-index: 1; }
+  .big-card-header { font-size: 28px; font-weight: 800; margin-bottom: 28px; text-align: center; }
+  .form-row { margin-bottom: 24px; }
+  .form-grid { display: flex; flex-direction: column; gap: 8px; }
+  .form-label { font-size: 14px; font-weight: 500; color: var(--muted); }
+  .form-input, .form-select { background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.3); border-radius: 12px; padding: 12px 16px; color: white; font-family: inherit; font-size: 14px; }
+  .fee-notice { background: rgba(124,252,0,0.1); border: 1px solid rgba(124,252,0,0.3); border-radius: 12px; padding: 16px; margin: 20px 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+  .action-btn { width: 100%; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 48px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px; color: #010101; cursor: pointer; margin-top: 20px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+  .summary-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; }
+  .summary-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
+  .summary-value { font-size: 14px; font-weight: 600; }
+  .fee-display { text-align: center; padding: 20px; background: rgba(124,252,0,0.1); border-radius: 16px; margin: 20px 0; }
+  .fee-amount { font-size: 32px; font-weight: 800; color: var(--neon-green); }
+  .hidden { display: none; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: #0f1a2e; padding: 12px 28px; border-radius: 60px; border-left: 4px solid var(--neon-green); transition: 0.3s; opacity: 0; z-index: 2000; white-space: nowrap; }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+  
+  /* Varieties modal panel */
+  .varieties-panel {
+    background: rgba(2,6,23,0.96);
+    backdrop-filter: blur(12px);
+    border-radius: 32px;
+    padding: 24px;
+    margin-top: 40px;
+    border: 1px solid rgba(124,252,0,0.4);
+  }
+  .varieties-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 20px;
+    justify-content: center;
+  }
+  .variety-badge {
+    background: rgba(0,0,0,0.5);
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 13px;
+    border: 1px solid rgba(124,252,0,0.3);
+    transition: 0.2s;
+  }
+  .variety-badge strong {
+    color: var(--neon-green);
+  }
+  .section-title {
+    font-size: 18px;
+    font-family: 'Orbitron', sans-serif;
+    margin: 20px 0 10px;
+    border-left: 3px solid var(--neon-green);
+    padding-left: 16px;
+  }
+  @media (max-width: 800px) {
+    .cards-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .fee-notice { flex-direction: column; text-align: center; }
+    .gem-logo-corner { transform: scale(0.25); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T</span>
+    <span class="gem-letter" data-letter="R">R</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="D">D</span>
+    <span class="gem-letter" data-letter="E">E</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="U">U</span>
+    <span class="gem-letter" data-letter="X">X</span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="nav">
+      <a href="#">How It Works</a>
+      <a href="auction-floor-seller.html">Auctions</a>
+      <a href="#" id="showVarietiesBtn">📋 Show All Varieties</a>
+    </div>
+  </header>
+
+  <!-- VARIETIES PAGE (modal-like inline) hidden by default -->
+  <div id="varietiesPage" class="hidden">
+    <button class="back-btn" id="closeVarietiesBtn">← Back to Listing</button>
+    <div class="varieties-panel">
+      <h2 style="font-family:Orbitron; margin-bottom: 12px;">🌱 Complete Varieties Catalog</h2>
+      <p style="color: var(--muted); margin-bottom: 24px;">All available varieties per product. Select any product from main grid → variety dropdown will load specifics.</p>
+      <div id="varietiesListContainer"></div>
+    </div>
+  </div>
+
+  <div id="stage1">
+    <div class="cards-grid" id="cardsGrid">
+      <!-- dynamic cards will be populated by JS to ensure correct variety data -->
+    </div>
+
+    <div class="continue-container" id="continueContainer">
+      <button class="continue-btn" onclick="goToStage2()">Continue →</button>
+    </div>
+  </div>
+
+  <div class="hidden" id="stage2">
+    <div class="big-card-container">
+      <button class="back-btn" onclick="backToStage1()">← Back to Categories</button>
+      <div class="big-card" id="stage2Card">
+        <div class="big-card-wave"></div>
+        <div class="big-card-content">
+          <div class="big-card-header">List Your Inventory</div>
+          <div class="form-row"><div class="form-grid"><label class="form-label">Quantity (metric tons)</label><input type="number" class="form-input" id="quantityInput" value="100" min="1" step="1"><small style="color: var(--muted);">Total volume available for auction</small></div></div>
+          <div class="form-row"><div class="form-grid"><label class="form-label">FOB Port</label><input type="text" class="form-input" id="fobPort" placeholder="e.g., Tauranga, New Zealand"></div></div>
+          <div class="form-row"><div class="form-grid"><label class="form-label">Origin Country</label><input type="text" class="form-input" id="originCountry" placeholder="e.g., New Zealand"></div></div>
+          <div class="form-row"><div class="form-grid"><label class="form-label">Harvest Date</label><input type="month" class="form-input" id="harvestDate"></div></div>
+          <div class="form-row"><div class="form-grid"><label class="form-label">Quality Grade</label><select class="form-select" id="gradeSelect"><option value="">Select Grade...</option><option value="Grade A">Grade A (Premium)</option><option value="Grade B">Grade B (Standard)</option><option value="Grade C">Grade C (Processing)</option><option value="Organic Certified">Organic Certified</option></select></div></div>
+          <div class="form-row"><div class="form-grid"><label class="form-label">Certifications (optional)</label><input type="text" class="form-input" id="certifications" placeholder="e.g., Organic, Fairtrade"></div></div>
+          <div class="fee-notice"><span>💰 Buyers bid. Your bot aggregates offers</span><span>🏷️ $50 discount per winning bid</span><span>🚛 Winning buyers launch transport auction</span></div>
+          <button class="action-btn" onclick="goToStage3()">Next: Confirm Listing</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hidden" id="stage3">
+    <div class="big-card-container">
+      <button class="back-btn" onclick="backToStage2()">← Back to Listing Brief</button>
+      <div class="big-card"><div class="big-card-wave"></div><div class="big-card-content"><div class="big-card-header">Confirm Your Listing</div><div class="summary-grid" id="summaryGrid"></div><div class="fee-display"><div class="fee-amount">$50 discount</div><div class="fee-note">You give $50 discount per winning bid.</div></div><button class="action-btn" onclick="saveInventory()">List Inventory →</button></div></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUserId = null;
+(async () => { const { data: { user } } = await supabaseClient.auth.getUser(); if (user) currentUserId = user.id; })();
+
+// MASTER VARIETIES DATABASE (fully populated so dropdown works)
+const productVarieties = {
+  "Apples": ["Gala", "Fuji", "Granny Smith", "Honeycrisp", "Pink Lady"],
+  "Bananas": ["Cavendish", "Red Banana", "Plantain", "Lady Finger"],
+  "Mangoes": ["Alphonso", "Kent", "Tommy Atkins", "Ataulfo", "Keitt"],
+  "Oranges": ["Navel", "Valencia", "Blood Orange", "Cara Cara"],
+  "Pineapples": ["Smooth Cayenne", "Queen", "Red Spanish", "MD-2"],
+  "Potatoes": ["Russet", "Yukon Gold", "Red Pontiac", "Fingerling"],
+  "Tomatoes": ["Roma", "Cherry", "Beefsteak", "Heirloom"],
+  "Onions": ["Yellow Sweet", "Red Cipollini", "White Granex", "Shallots"],
+  "Carrots": ["Imperator", "Nantes", "Chantenay", "Purple Haze"],
+  "Broccoli": ["Green Magic", "Belstar", "Marathon", "Eastern Crown"],
+  "Corn": ["Sweet Yellow", "White Corn", "Bi-Color", "Flint Corn"],
+  "Rice": ["Basmati", "Jasmine", "Arborio", "Brown Rice", "Red Rice"],
+  "Wheat": ["Hard Red Winter", "Soft White", "Durum", "Spring Wheat"],
+  "Soybeans": ["Non-GMO", "Organic", "High-Protein", "Edamame"],
+  "Chickpeas": ["Kabuli", "Desi", "Black Chickpeas"],
+  "Lentils": ["Brown", "Green", "Red", "Black Beluga"],
+  "Almonds": ["Nonpareil", "Carmel", "Monterey", "Butte"],
+  "Cashews": ["W-180", "W-240", "W-320", "Scorched"],
+  "Peanuts": ["Valencia", "Virginia", "Runner", "Spanish"],
+  "Black Pepper": ["Lampong", "Tellicherry", "Vietnam Black", "Malabar"],
+  "Cinnamon": ["Ceylon", "Cassia", "Indonesian", "Saigon"],
+  "Turmeric": ["Alleppey", "Madras", "Indonesian", "African"],
+  "Coffee - Arabica": ["Typica", "Bourbon", "Caturra", "Gesha", "SL28"],
+  "Coffee - Robusta": ["Nganda", "Erecta", "Conilon", "Java Robusta"],
+  "Tea - Black": ["Assam", "Darjeeling", "Ceylon", "Keemun"],
+  "Tea - Green": ["Sencha", "Matcha", "Dragonwell", "Gunpowder"],
+  "Cassava (Yuca)": ["Sweet Cassava", "Bitter Cassava", "Valencia"],
+  "Sweet Potatoes": ["Beauregard", "Covington", "Japanese", "Purple"],
+  "Yams": ["Dioscorea alata", "Yellow Yams", "Chinese Yam"],
+  "Coconut Oil": ["Virgin", "Refined", "Organic Cold-Pressed"],
+  "Olive Oil": ["Extra Virgin", "Virgin", "Pure", "Pomace"],
+  "Palm Oil": ["Crude", "RBD", "Organic", "Sustainable RSPO"],
+  "Sunflower Seed Oil": ["High Oleic", "Linoleic", "Cold Pressed"]
+};
+
+// Category definitions
+const categoriesData = [
+  { id: "fruits", title: "Fresh Fruits", icon: "🍎", options: ["Apples","Bananas","Mangoes","Oranges","Pineapples"] },
+  { id: "vegetables", title: "Fresh Vegetables", icon: "🥬", options: ["Potatoes","Tomatoes","Onions","Carrots","Broccoli"] },
+  { id: "grains", title: "Grains & Cereals", icon: "🌾", options: ["Corn","Rice","Wheat","Soybeans"] },
+  { id: "legumes", title: "Legumes & Beans", icon: "🫘", options: ["Chickpeas","Lentils","Soybeans"] },
+  { id: "nuts", title: "Nuts & Kernels", icon: "🥜", options: ["Almonds","Cashews","Peanuts"] },
+  { id: "spices", title: "Spices & Herbs", icon: "🌿", options: ["Black Pepper","Cinnamon","Turmeric"] },
+  { id: "coffee", title: "Coffee, Tea & Cocoa", icon: "☕", options: ["Coffee - Arabica","Coffee - Robusta","Tea - Black","Tea - Green"] },
+  { id: "roots", title: "Roots & Tubers", icon: "🥔", options: ["Cassava (Yuca)","Sweet Potatoes","Yams"] },
+  { id: "oils", title: "Bulk Oils", icon: "🛢️", options: ["Coconut Oil","Olive Oil","Palm Oil","Sunflower Seed Oil"] }
+];
+
+let selectedCategory = null, selectedSubcategory = null, selectedVariety = null;
+
+function buildCards() {
+  const grid = document.getElementById("cardsGrid");
+  grid.innerHTML = "";
+  categoriesData.forEach(cat => {
+    const card = document.createElement("div");
+    card.className = "gem-card";
+    card.dataset.category = cat.id;
+    card.innerHTML = `
+      <div class="card-wave"></div>
+      <div class="card-icon">${cat.icon}</div>
+      <div class="card-title">${cat.title}</div>
+      <div class="card-desc">${cat.options.join(", ")}</div>
+      <select class="category-select" data-category="${cat.id}" onchange="updateSelectionFromEvent(this, '${cat.id}')">
+        <option value="">Select ${cat.title.toLowerCase()}...</option>
+        ${cat.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+      </select>
+      <select class="variety-select" id="variety-${cat.id}" data-category="${cat.id}" onchange="updateVarietyFromEvent(this, '${cat.id}')">
+        <option value="">Select variety...</option>
+      </select>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function updateVarietyDropdown(category, product) {
+  const varietySelect = document.getElementById(`variety-${category}`);
+  if (!varietySelect) return;
+  const varieties = productVarieties[product] || ["Standard Grade", "Premium Select", "Organic Harvest"];
+  varietySelect.innerHTML = '<option value="">Select variety...</option>';
+  varieties.forEach(variety => {
+    const option = document.createElement('option');
+    option.value = variety;
+    option.textContent = variety;
+    varietySelect.appendChild(option);
+  });
+  varietySelect.classList.add('visible');
+  varietySelect.value = '';
+  selectedVariety = null;
+}
+
+window.updateSelectionFromEvent = (selectElement, category) => {
+  const value = selectElement.value;
+  if (value && value !== "") {
+    selectedCategory = category;
+    selectedSubcategory = value;
+    updateVarietyDropdown(category, value);
+    document.querySelectorAll('.gem-card').forEach(card => {
+      if (card.dataset.category === category) {
+        card.classList.add('selected');
+        card.classList.remove('locked');
+      } else {
+        card.classList.add('locked');
+        card.classList.remove('selected');
+        const otherVariety = card.querySelector('.variety-select');
+        if (otherVariety) otherVariety.classList.remove('visible');
+      }
+    });
+    checkContinue();
+  } else {
+    selectedSubcategory = null;
+    selectedVariety = null;
+    const varietySelect = document.getElementById(`variety-${category}`);
+    if (varietySelect) {
+      varietySelect.classList.remove('visible');
+      varietySelect.innerHTML = '<option value="">Select variety...</option>';
+    }
+    checkContinue();
+  }
+};
+
+window.updateVarietyFromEvent = (selectElement, category) => {
+  selectedVariety = selectElement.value;
+  checkContinue();
+};
+
+function checkContinue() {
+  const cont = document.getElementById('continueContainer');
+  if (selectedCategory && selectedSubcategory && selectedVariety) cont.classList.add('visible');
+  else cont.classList.remove('visible');
+}
+
+function goToStage2() { if (!selectedCategory || !selectedSubcategory || !selectedVariety) { showToast('Please select product & variety'); return; } document.getElementById('stage1').classList.add('hidden'); document.getElementById('stage2').classList.remove('hidden'); }
+function backToStage1() { document.getElementById('stage2').classList.add('hidden'); document.getElementById('stage3').classList.add('hidden'); document.getElementById('stage1').classList.remove('hidden'); }
+function backToStage2() { document.getElementById('stage3').classList.add('hidden'); document.getElementById('stage2').classList.remove('hidden'); }
+
+function goToStage3() {
+  const quantity = document.getElementById('quantityInput').value;
+  const fobPort = document.getElementById('fobPort').value;
+  const originCountry = document.getElementById('originCountry').value;
+  const grade = document.getElementById('gradeSelect').value;
+  if (!quantity || quantity<1) { showToast('Valid quantity'); return; }
+  if (!fobPort || !originCountry || !grade) { showToast('Please fill FOB, origin & grade'); return; }
+  const categoryNames = { fruits:'Fresh Fruits', vegetables:'Fresh Vegetables', legumes:'Legumes & Beans', grains:'Grains & Cereals', nuts:'Nuts & Kernels', spices:'Spices & Herbs', coffee:'Coffee, Tea & Cocoa', roots:'Roots & Tubers', oils:'Bulk Oils' };
+  const summaryGrid = document.getElementById('summaryGrid');
+  summaryGrid.innerHTML = `
+    <div class="summary-item"><div class="summary-label">Category</div><div class="summary-value">${categoryNames[selectedCategory] || selectedCategory}</div></div>
+    <div class="summary-item"><div class="summary-label">Product</div><div class="summary-value">${selectedSubcategory}</div></div>
+    <div class="summary-item"><div class="summary-label">Variety</div><div class="summary-value">${selectedVariety}</div></div>
+    <div class="summary-item"><div class="summary-label">Quantity (MT)</div><div class="summary-value">${quantity} MT</div></div>
+    <div class="summary-item"><div class="summary-label">FOB Port</div><div class="summary-value">${fobPort}</div></div>
+    <div class="summary-item"><div class="summary-label">Origin</div><div class="summary-value">${originCountry}</div></div>
+    <div class="summary-item"><div class="summary-label">Harvest Date</div><div class="summary-value">${document.getElementById('harvestDate').value || 'Not specified'}</div></div>
+    <div class="summary-item"><div class="summary-label">Grade</div><div class="summary-value">${grade}</div></div>
+    <div class="summary-item"><div class="summary-label">Certifications</div><div class="summary-value">${document.getElementById('certifications').value || 'None'}</div></div>
+  `;
+  document.getElementById('stage2').classList.add('hidden');
+  document.getElementById('stage3').classList.remove('hidden');
+}
+
+async function saveInventory() {
+  if (!currentUserId) { showToast('Please login to list inventory'); return; }
+  const inventoryData = {
+    user_id: currentUserId, category: selectedCategory, product: selectedSubcategory, variety: selectedVariety,
+    quantity_mt: parseInt(document.getElementById('quantityInput').value), fob_port: document.getElementById('fobPort').value,
+    origin: document.getElementById('originCountry').value, harvest_date: document.getElementById('harvestDate').value || null,
+    grade: document.getElementById('gradeSelect').value, certifications: document.getElementById('certifications').value || null,
+    status: 'active', created_at: new Date().toISOString()
+  };
+  try {
+    const { error } = await supabaseClient.from('seller_inventory').insert([inventoryData]);
+    if (error) throw error;
+    showToast('Inventory listed successfully!');
+    setTimeout(() => { backToStage1(); resetSelections(); }, 1500);
+  } catch (err) { showToast('Error listing inventory'); }
+}
+
+function resetSelections() {
+  selectedCategory = null; selectedSubcategory = null; selectedVariety = null;
+  document.querySelectorAll('.gem-card').forEach(c => { c.classList.remove('selected','locked'); });
+  document.querySelectorAll('.category-select').forEach(s => s.value = '');
+  document.querySelectorAll('.variety-select').forEach(v => { v.classList.remove('visible'); v.innerHTML = '<option value="">Select variety...</option>'; });
+  checkContinue();
+}
+
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('visible'); setTimeout(() => t.classList.remove('visible'), 3000); }
+
+// Varieties Page Builder (full catalog)
+function buildVarietiesCatalog() {
+  const container = document.getElementById('varietiesListContainer');
+  container.innerHTML = '';
+  for (const [product, varieties] of Object.entries(productVarieties)) {
+    const section = document.createElement('div');
+    section.style.marginBottom = '24px';
+    section.innerHTML = `<div class="section-title">🍱 ${product}</div><div class="varieties-grid">${varieties.map(v => `<span class="variety-badge"><strong>${v}</strong></span>`).join('')}</div>`;
+    container.appendChild(section);
+  }
+}
+document.getElementById('showVarietiesBtn').addEventListener('click', () => {
+  buildVarietiesCatalog();
+  document.getElementById('stage1').classList.add('hidden');
+  document.getElementById('stage2').classList.add('hidden');
+  document.getElementById('stage3').classList.add('hidden');
+  document.getElementById('varietiesPage').classList.remove('hidden');
+});
+document.getElementById('closeVarietiesBtn').addEventListener('click', () => {
+  document.getElementById('varietiesPage').classList.add('hidden');
+  document.getElementById('stage1').classList.remove('hidden');
+});
+buildCards();
+</script>
+</body>
+</html>
