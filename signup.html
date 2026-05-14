@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account • TradeAux</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #020617;
+  font-family: 'Inter', sans-serif;
+  color: #F0F3FA;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== BACKGROUND WAVES ===== */
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+.wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(74, 158, 90, 0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+.wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(58, 110, 165, 0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+}
+
+/* ===== 3D TRADEAUX LOGO ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(124,252,0,0.5));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+  font-size: 160px;
+  font-weight: 900;
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 1.0s; }
+.gem-letter:nth-child(7) { animation-delay: 1.2s; }
+.gem-letter:nth-child(8) { animation-delay: 1.4s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+/* T - Blue */
+.gem-letter[data-letter="T"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* R - Green */
+.gem-letter[data-letter="R"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* A - Red */
+.gem-letter[data-letter="A"] {
+  background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* D - Blue */
+.gem-letter[data-letter="D"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* E - Green */
+.gem-letter[data-letter="E"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* U - Blue */
+.gem-letter[data-letter="U"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* X - Green */
+.gem-letter[data-letter="X"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 3D EDGES */
+.gem-letter .edge-top, .gem-letter .edge-right, .gem-letter .edge-bottom, .gem-letter .edge-left { display: none; }
+
+.light-source {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+  animation: sparkleFlash 4s ease-in-out infinite;
+  opacity: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(124,252,0,0.3) 0%, transparent 80%);
+  filter: blur(20px);
+  z-index: -1;
+}
+
+/* ===== SIGNUP CARD ===== */
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.signup-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.95), rgba(2, 6, 23, 0.99));
+  border-radius: 32px;
+  border: 2px solid rgba(124,252,0,0.4);
+  padding: 48px 40px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.signup-card h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #7CFC00, #FFD966);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.signup-card .subhead {
+  color: #9ca3af;
+  margin-bottom: 32px;
+  font-size: 0.9rem;
+}
+
+.google-btn {
+  background: linear-gradient(105deg, #10b981, #2dd4bf);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 48px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #010101;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.google-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16,185,129,0.4);
+}
+
+.divider {
+  margin: 24px 0;
+  position: relative;
+  text-align: center;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.divider span {
+  background: rgba(15, 32, 64, 0.95);
+  padding: 0 16px;
+  position: relative;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.signin-link {
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.signin-link a {
+  color: #7CFC00;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signin-link a:hover {
+  text-decoration: underline;
+}
+
+.feature-list {
+  margin-top: 32px;
+  text-align: left;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 24px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: #C0C7D9;
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 500px) {
+  .signup-card { padding: 32px 24px; }
+  .signup-card h1 { font-size: 1.5rem; }
+  .gem-logo-corner { transform: scale(0.25); }
+}
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND WAVES -->
+<div class="bg-waves">
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T</span>
+    <span class="gem-letter" data-letter="R">R</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="D">D</span>
+    <span class="gem-letter" data-letter="E">E</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="U">U</span>
+    <span class="gem-letter" data-letter="X">X</span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <div class="signup-card">
+    <h1>Create Account</h1>
+    <div class="subhead">Join the global surplus exchange</div>
+
+    <button class="google-btn" id="googleSignUp">
+      <span>🔐</span> Continue with Google
+    </button>
+
+    <div class="divider"><span>Why join?</span></div>
+
+    <div class="feature-list">
+      <div class="feature-item"><span class="feature-icon">🏆</span> <span>Access live auctions for commodities</span></div>
+      <div class="feature-item"><span class="feature-icon">🤖</span> <span>Deploy Zuhe and Cai bots to optimize trades</span></div>
+      <div class="feature-item"><span class="feature-icon">💰</span> <span>$25 flat fee per contract — no surprises</span></div>
+      <div class="feature-item"><span class="feature-icon">🌍</span> <span>Trade with co-ops, buyers, and carriers worldwide</span></div>
+    </div>
+
+    <div class="signin-link">
+      Already have an account? <a href="signin.html">Sign in →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+document.getElementById('googleSignUp').addEventListener('click', async () => {
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { 
+        redirectTo: window.location.origin + '/dashboard.html'
+      }
+    });
+    if (error) throw error;
+  } catch (error) {
+    console.error('Sign up error:', error);
+    alert('Sign up failed: ' + error.message);
+  }
+});
+</script>
+</body>
+</html>
