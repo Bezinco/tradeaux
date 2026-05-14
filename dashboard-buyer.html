@@ -6,6 +6,8 @@
   <title>TradeAux • Buyer Dashboard | Bot-Powered Trading</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -663,24 +665,16 @@ let commodityPrices = {
   Almonds: { price: 6.48, change: 0.3, emoji: "🌰" },
   Coffee: { price: 4.85, change: 0.9, emoji: "☕" }
 };
+// ========== SUPABASE CONFIG ==========
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_1ngaTghS1bKggMYEyxKVTw_zVpd16Zm';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let walletBalance = 5000;
-let bots = [
-  { id: '1', name: 'Apple Hunter', commodity: 'Apples', varieties: ['Honeycrisp', 'McIntosh', 'Gala'], emoji: '🍎', status: 'active', trades: 47, pnl: 1250, winRate: 72, strategy: 'Sniper', maxPrice: 0.48, budget: 500 },
-  { id: '2', name: 'Potato Pro', commodity: 'Potatoes', varieties: ['Russet', 'Yukon Gold'], emoji: '🥔', status: 'active', trades: 32, pnl: 875, winRate: 68, strategy: 'Aggressive', maxPrice: 0.45, budget: 800 },
-  { id: '3', name: 'Banana Bot', commodity: 'Bananas', varieties: [], emoji: '🍌', status: 'idle', trades: 18, pnl: 420, winRate: 65, strategy: 'Conservative', maxPrice: 0.55, budget: 300 }
-];
-
-let activeBids = [
-  { id: 'b1', product: 'Apples', variety: 'Honeycrisp', quantity: 50, price: 1.85, seller: 'Washington Orchards', sellerContact: 'Mike Peterson', sellerEmail: 'sales@waorchards.com', sellerPhone: '+1 (509) 555-0123', timeLeft: '2:34', auctionId: 'auc_001' },
-  { id: 'b2', product: 'Potatoes', variety: 'Russet', quantity: 100, price: 0.41, seller: 'Idaho Farms', sellerContact: 'Sarah Johnson', sellerEmail: 'sales@idahofarms.com', sellerPhone: '+1 (208) 555-0123', timeLeft: '1:45', auctionId: 'auc_002' }
-];
-
-let wonAuctions = [
-  { id: 'w1', product: 'Apples', variety: 'Gala', quantity: 30, price: 1.18, seller: 'New York Apple Co', sellerContact: 'John Davis', sellerEmail: 'sales@nyapple.com', sellerPhone: '+1 (315) 555-0123', status: 'Transport needed', date: '2026-04-29' },
-  { id: 'w2', product: 'Bananas', variety: 'Cavendish', quantity: 20, price: 0.48, seller: 'Ecuador Farms', sellerContact: 'Maria Santos', sellerEmail: 'sales@ecuadorfarms.ec', sellerPhone: '+593 4 259 8877', status: 'Delivery pending', date: '2026-04-28' }
-];
-
+let currentUser = null;
+let walletBalance = 0;
+let bots = [];
+let activeBids = [];
+let wonAuctions = [];
 let filedBriefs = [];
 let priceInterval = null;
 let currentEditingBot = null;
@@ -692,7 +686,7 @@ function updateWalletDisplay() {
 }
 
 function renderTicker() {
-  const botCommodities = [...new Set(bots.map(b => b.commodity))];
+  const botCommodities = [...new Set(bots.map(b => b.commodity || b.commodity_filter))];
   const container = document.getElementById('liveTicker');
   if (botCommodities.length === 0) {
     container.innerHTML = '<div style="color:#9ca3af;">Deploy bots to see live prices here</div>';
@@ -823,24 +817,7 @@ function openBotConfig(bot) {
   document.getElementById('botConfigModal').style.display = 'flex';
 }
 
-function saveBotConfig() {
-  if (!currentEditingBot) return;
-  const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
-  currentEditingBot.name = document.getElementById('editBotName').value;
-  currentEditingBot.commodity = document.getElementById('editBotCommodity').value;
-  currentEditingBot.varieties = selectedVarieties;
-  currentEditingBot.maxPrice = parseFloat(document.getElementById('editMaxPrice').value);
-  currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
-  currentEditingBot.strategy = document.getElementById('editStrategy').value;
-  currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
-  
-  saveToStorage();
-  renderBots();
-  renderTicker();
-  showToast(`${currentEditingBot.name} configuration saved`);
-  document.getElementById('botConfigModal').style.display = 'none';
-  currentEditingBot = null;
-}
+
 
 function showBidDetails(bidId) {
   const bid = activeBids.find(b => b.id === bidId);
@@ -872,6 +849,119 @@ function showWonDetails(wonId) {
   document.getElementById('wonDetailModal').style.display = 'flex';
 }
 
+
+
+
+
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = isError ? 'toast error' : 'toast';
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+// ========== AUTH & DATA LOADING ==========
+async function checkAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = '/signin.html';
+    return null;
+  }
+  currentUser = session.user;
+  return currentUser;
+}
+
+async function loadWallet() {
+  const { data, error } = await supabase
+    .from('wallets')
+    .select('balance')
+    .eq('user_id', currentUser.id)
+    .single();
+  
+  if (data) {
+    walletBalance = data.balance;
+  } else {
+    const { data: newWallet } = await supabase
+      .from('wallets')
+      .insert([{ user_id: currentUser.id, balance: 5000 }])
+      .select()
+      .single();
+    walletBalance = newWallet ? newWallet.balance : 5000;
+  }
+  updateWalletDisplay();
+}
+
+async function loadBots() {
+  const { data, error } = await supabase
+    .from('bots')
+    .select('*')
+    .eq('owner_id', currentUser.id);
+  
+  if (data) {
+    bots = data.map(b => ({
+      id: b.id,
+      name: b.name,
+      commodity: b.commodity_filter,
+      varieties: b.varieties || [],
+      emoji: '🤖',
+      status: b.status,
+      trades: b.total_trades || 0,
+      pnl: b.total_spent || 0,
+      winRate: b.win_rate || 0,
+      strategy: b.strategy,
+      maxPrice: b.max_price,
+      budget: b.daily_budget
+    }));
+  }
+  renderBots();
+}
+
+async function loadActiveBids() {
+  const { data, error } = await supabase
+    .from('bids')
+    .select('*')
+    .eq('bidder_id', currentUser.id)
+    .eq('hold_released', false);
+  
+  activeBids = data || [];
+  renderActiveBids();
+}
+
+async function loadWonAuctions() {
+  const { data, error } = await supabase
+    .from('contracts')
+    .select('*')
+    .eq('buyer_id', currentUser.id);
+  
+  wonAuctions = data || [];
+  renderWonAuctions();
+}
+async function depositFunds() {
+  const amount = parseFloat(document.getElementById('depositAmount').value);
+  if (isNaN(amount) || amount < 100) { showToast('Minimum deposit $100', true); return; }
+  
+  walletBalance += amount;
+  
+  await supabase
+    .from('wallets')
+    .update({ balance: walletBalance })
+    .eq('user_id', currentUser.id);
+  
+  await supabase
+    .from('transactions')
+    .insert([{
+      user_id: currentUser.id,
+      amount: amount,
+      type: 'deposit',
+      description: 'Manual deposit',
+      status: 'completed'
+    }]);
+  
+  updateWalletDisplay();
+  showToast(`$${amount} deposited!`);
+  document.getElementById('depositModal').style.display = 'none';
+}
+
 async function submitBrief() {
   const commodity = document.getElementById('briefCommodity').value;
   const variety = document.getElementById('briefVariety').value;
@@ -888,6 +978,22 @@ async function submitBrief() {
   }
   
   walletBalance -= 25;
+  
+  await supabase
+    .from('wallets')
+    .update({ balance: walletBalance })
+    .eq('user_id', currentUser.id);
+  
+  await supabase
+    .from('transactions')
+    .insert([{
+      user_id: currentUser.id,
+      amount: 25,
+      type: 'fee',
+      description: `Brief filing: ${quantity}MT ${commodity} (${variety}) to ${destination}`,
+      status: 'completed'
+    }]);
+  
   updateWalletDisplay();
   
   const newBrief = {
@@ -900,49 +1006,41 @@ async function submitBrief() {
   filedBriefs.push(newBrief);
   showToast(`Brief filed: ${quantity}MT ${commodity} (${variety}) to ${destination}`);
   document.getElementById('fileBriefModal').style.display = 'none';
-  console.log('Brief filed:', newBrief);
 }
 
-async function depositFunds() {
-  const amount = parseFloat(document.getElementById('depositAmount').value);
-  if (isNaN(amount) || amount < 100) { showToast('Minimum deposit $100', true); return; }
-  walletBalance += amount;
-  updateWalletDisplay();
-  saveToStorage();
-  showToast(`$${amount} deposited!`);
-  document.getElementById('depositModal').style.display = 'none';
+function saveBotConfig() {
+  if (!currentEditingBot) return;
+  const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
+  currentEditingBot.name = document.getElementById('editBotName').value;
+  currentEditingBot.commodity = document.getElementById('editBotCommodity').value;
+  currentEditingBot.varieties = selectedVarieties;
+  currentEditingBot.maxPrice = parseFloat(document.getElementById('editMaxPrice').value);
+  currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
+  currentEditingBot.strategy = document.getElementById('editStrategy').value;
+  currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
+  
+  supabase.from('bots').upsert({
+    id: currentEditingBot.id,
+    owner_id: currentUser.id,
+    name: currentEditingBot.name,
+    commodity_filter: currentEditingBot.commodity,
+    varieties: currentEditingBot.varieties,
+    max_price: currentEditingBot.maxPrice,
+    daily_budget: currentEditingBot.budget,
+    strategy: currentEditingBot.strategy,
+    status: currentEditingBot.status,
+    total_trades: currentEditingBot.trades || 0,
+    total_spent: currentEditingBot.pnl || 0,
+    win_rate: currentEditingBot.winRate || 0,
+    updated_at: new Date()
+  });
+  
+  renderBots();
+  renderTicker();
+  showToast(`${currentEditingBot.name} configuration saved`);
+  document.getElementById('botConfigModal').style.display = 'none';
+  currentEditingBot = null;
 }
-
-function saveToStorage() {
-  localStorage.setItem('buyer_bots', JSON.stringify(bots));
-  localStorage.setItem('buyer_wallet', walletBalance.toString());
-  localStorage.setItem('buyer_bids', JSON.stringify(activeBids));
-  localStorage.setItem('buyer_won', JSON.stringify(wonAuctions));
-}
-
-function loadSavedData() {
-  const savedBots = localStorage.getItem('buyer_bots');
-  const savedWallet = localStorage.getItem('buyer_wallet');
-  const savedBids = localStorage.getItem('buyer_bids');
-  const savedWon = localStorage.getItem('buyer_won');
-  if (savedBots) bots = JSON.parse(savedBots);
-  if (savedWallet) walletBalance = parseFloat(savedWallet);
-  if (savedBids) activeBids = JSON.parse(savedBids);
-  if (savedWon) wonAuctions = JSON.parse(savedWon);
-  if (isNaN(walletBalance)) walletBalance = 5000;
-  if (!Array.isArray(bots)) bots = [];
-  if (!Array.isArray(activeBids)) activeBids = [];
-  if (!Array.isArray(wonAuctions)) wonAuctions = [];
-}
-
-function showToast(msg, isError = false) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = isError ? 'toast error' : 'toast';
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 3000);
-}
-
 // Event listeners
 document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
 document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
@@ -966,11 +1064,11 @@ document.getElementById('cancelBidBtn').onclick = () => document.getElementById(
 document.getElementById('closeWonModal').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
 document.getElementById('cancelWonBtn').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
 
-document.getElementById('botsGrid').addEventListener('click', (e) => {
+document.getElementById('botsGrid').addEventListener('click', async (e) => {
   const card = e.target.closest('.bot-card');
   if (!card) return;
   if (card.id === 'addBotCard') {
-    const newBot = {
+   const newBot = {
       id: 'bot_' + Date.now(),
       name: 'New Buyer Bot',
       commodity: 'Apples',
@@ -984,9 +1082,27 @@ document.getElementById('botsGrid').addEventListener('click', (e) => {
       maxPrice: 0.60,
       budget: 500
     };
-    bots.push(newBot);
-    renderBots();
-    openBotConfig(newBot);
+    
+    const { data: inserted } = await supabase.from('bots').insert({
+      owner_id: currentUser.id,
+      name: newBot.name,
+      commodity_filter: newBot.commodity,
+      varieties: newBot.varieties,
+      max_price: newBot.maxPrice,
+      daily_budget: newBot.budget,
+      strategy: newBot.strategy,
+      status: 'active',
+      total_trades: 0,
+      total_spent: 0,
+      win_rate: 0
+    }).select().single();
+    
+    if (inserted) {
+      newBot.id = inserted.id;
+      bots.push(newBot);
+      renderBots();
+      openBotConfig(newBot);
+    }
     return;
   }
   const botId = card.getAttribute('data-bot-id');
@@ -1005,12 +1121,18 @@ document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
 });
 
 // Initialize
-loadSavedData();
-updateWalletDisplay();
-renderBots();
-renderActiveBids();
-renderWonAuctions();
-startPriceSimulation();
+(async function() {
+  await checkAuth();
+  await loadWallet();
+  await loadBots();
+  await loadActiveBids();
+  await loadWonAuctions();
+  updateWalletDisplay();
+  renderBots();
+  renderActiveBids();
+  renderWonAuctions();
+  startPriceSimulation();
+})();
 </script>
 </body>
 </html>
