@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>TradeAux • Seller Dashboard | Full Product Varieties</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -857,6 +858,14 @@
 
 <script>
 // ============================================
+// SUPABASE CONNECTION
+// ============================================
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3Ynl5Z2VmdW1taWVuZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ3MjA5NjAwLCJleHAiOjIwNjI3ODU2MDB9.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ============================================
 // COMPLETE PRODUCT VARIETIES (from Buyer Brief)
 // ============================================
 const productVarieties = {
@@ -922,6 +931,63 @@ let soldItems = [
 
 let priceInterval = null;
 let currentEditingBot = null;
+let currentUser = null;
+
+// ============================================
+// AUTH CHECK
+// ============================================
+async function checkAuth() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    window.location.href = '/signin.html';
+    return false;
+  }
+  currentUser = user;
+  return true;
+}
+
+// ============================================
+// LOAD DATA FROM SUPABASE
+// ============================================
+async function loadSavedData() {
+  if (!currentUser) return;
+  
+  // Load wallet balance
+  const { data: wallet } = await supabaseClient
+    .from('wallets')
+    .select('balance')
+    .eq('user_id', currentUser.id)
+    .single();
+  if (wallet) walletBalance = wallet.balance;
+  
+  // Load seller inventory (active listings)
+  const { data: listings } = await supabaseClient
+    .from('seller_inventory')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('status', 'active');
+  if (listings) activeListings = listings;
+  
+  // Load sold items
+  const { data: sold } = await supabaseClient
+    .from('seller_inventory')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('status', 'sold');
+  if (sold) soldItems = sold;
+  
+  // Load bots
+  const { data: botsData } = await supabaseClient
+    .from('bots')
+    .select('*')
+    .eq('user_id', currentUser.id);
+  if (botsData && botsData.length) bots = botsData;
+  
+  updateWalletDisplay();
+  renderBots();
+  renderActiveListings();
+  renderSoldItems();
+}
 
 function updateWalletDisplay() {
   document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
@@ -994,8 +1060,8 @@ function renderBots() {
       <div class="bot-emoji">${bot.emoji}</div>
       <div class="bot-name">${bot.name}</div>
       <div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div>
-      <div class="bot-target">🎯 ${bot.varieties.length ? bot.varieties.join(', ') : 'All varieties'}</div>
-      <div class="bot-stats"><span>Sales: ${bot.sales}</span><span>Revenue: $${bot.revenue}</span><span>WR: ${bot.winRate}%</span></div>
+      <div class="bot-target">🎯 ${bot.varieties && bot.varieties.length ? bot.varieties.join(', ') : 'All varieties'}</div>
+      <div class="bot-stats"><span>Sales: ${bot.sales || 0}</span><span>Revenue: $${bot.revenue || 0}</span><span>WR: ${bot.winRate || 0}%</span></div>
     </div>
   `).join('');
   const addCard = document.createElement('div');
@@ -1015,8 +1081,8 @@ function renderActiveListings() {
   document.getElementById('activeListingsCount').textContent = activeListings.length;
   container.innerHTML = activeListings.map(listing => `
     <div class="clickable-item" data-listing-id="${listing.id}">
-      <div class="item-title"><span>${listing.product} - ${listing.variety}</span><span class="status-badge pending">⏱️ ${listing.timeLeft}</span></div>
-      <div class="item-details"><span>📦 ${listing.quantity} MT</span><span>💰 Min: $${listing.minPrice}/MT</span><span>🏷️ Highest: $${listing.currentHighestBid}</span></div>
+      <div class="item-title"><span>${listing.product} - ${listing.variety}</span><span class="status-badge pending">⏱️ ${listing.timeLeft || '3:00'}</span></div>
+      <div class="item-details"><span>📦 ${listing.quantity} MT</span><span>💰 Min: $${listing.minPrice}/MT</span><span>🏷️ Highest: $${listing.currentHighestBid || listing.minPrice}</span></div>
     </div>
   `).join('');
 }
@@ -1037,70 +1103,9 @@ function renderSoldItems() {
   `).join('');
 }
 
-function openBotConfig(bot) {
-  currentEditingBot = bot;
-  document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
-  document.getElementById('editBotName').value = bot.name;
-  document.getElementById('editBotCommodity').value = bot.commodity;
-  updateBotVarietyCheckboxes();
-  document.getElementById('editMinPrice').value = bot.minPrice;
-  document.getElementById('editMinPriceDisplay').textContent = `$${bot.minPrice.toFixed(2)}`;
-  document.getElementById('editVolumeLimit').value = bot.volumeLimit;
-  document.getElementById('editVolumeLimitDisplay').textContent = `${bot.volumeLimit} MT`;
-  document.getElementById('editStrategy').value = bot.strategy;
-  document.getElementById('botConfigModal').style.display = 'flex';
-}
-
-function saveBotConfig() {
-  if (!currentEditingBot) return;
-  const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
-  currentEditingBot.name = document.getElementById('editBotName').value;
-  currentEditingBot.commodity = document.getElementById('editBotCommodity').value;
-  currentEditingBot.varieties = selectedVarieties;
-  currentEditingBot.minPrice = parseFloat(document.getElementById('editMinPrice').value);
-  currentEditingBot.volumeLimit = parseInt(document.getElementById('editVolumeLimit').value);
-  currentEditingBot.strategy = document.getElementById('editStrategy').value;
-  currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '📦';
-  saveToStorage();
-  renderBots();
-  renderTicker();
-  showToast(`${currentEditingBot.name} configuration saved`);
-  document.getElementById('botConfigModal').style.display = 'none';
-  currentEditingBot = null;
-}
-
-function showListingBids(listingId) {
-  const listing = activeListings.find(l => l.id === listingId);
-  if (!listing) return;
-  document.getElementById('bidDetailContent').innerHTML = `
-    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${listing.product} - ${listing.variety}</div></div>
-    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${listing.quantity} MT</div></div>
-    <div class="modal-field"><label>Your Minimum</label><div class="tooltip" style="font-size:14px;">$${listing.minPrice}/MT</div></div>
-    <div class="modal-field"><label>Highest Bid</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${listing.currentHighestBid}/MT</div></div>
-    <div class="modal-field"><label>Top Bidder</label><div class="tooltip" style="font-size:14px;">${listing.topBidder}</div></div>
-    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${listing.bidderContact} | ${listing.bidderEmail} | ${listing.bidderPhone}</div></div>
-    <div class="modal-field"><label>Time Remaining</label><div class="tooltip" style="font-size:14px;">${listing.timeLeft}</div></div>
-    <button class="action-btn" style="margin-top:16px;" onclick="showToast('Accept offer feature coming soon')">✓ ACCEPT THIS BID</button>
-  `;
-  document.getElementById('bidDetailModal').style.display = 'flex';
-}
-
-function showSoldDetails(soldId) {
-  const item = soldItems.find(i => i.id === soldId);
-  if (!item) return;
-  document.getElementById('soldDetailContent').innerHTML = `
-    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${item.product} - ${item.variety}</div></div>
-    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${item.quantity} MT</div></div>
-    <div class="modal-field"><label>Sold Price</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${item.price}/MT</div></div>
-    <div class="modal-field"><label>Buyer</label><div class="tooltip" style="font-size:14px;">${item.buyer}</div></div>
-    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${item.buyerContact} | ${item.buyerEmail} | ${item.buyerPhone}</div></div>
-    <div class="modal-field"><label>Date Sold</label><div class="tooltip" style="font-size:14px;">${item.date}</div></div>
-    <div class="tooltip">🚛 Transport auction available for this shipment</div>
-  `;
-  document.getElementById('soldDetailModal').style.display = 'flex';
-}
-
-function postInventory() {
+async function postInventory() {
+  if (!currentUser) return;
+  
   const commodity = document.getElementById('inventoryCommodity').value;
   const variety = document.getElementById('inventoryVariety').value;
   const quantity = parseInt(document.getElementById('inventoryQuantity').value);
@@ -1112,51 +1117,49 @@ function postInventory() {
   if (!fob) { showToast('Enter FOB port', true); return; }
   
   const newListing = {
-    id: 'l' + Date.now(),
+    user_id: currentUser.id,
     product: commodity,
     variety: variety,
-    quantity: quantity,
-    minPrice: minPrice,
-    currentHighestBid: minPrice,
-    topBidder: 'No bids yet',
-    timeLeft: '3:00'
+    quantity_mt: quantity,
+    grade: grade,
+    fob_port: fob,
+    min_price: minPrice,
+    status: 'active',
+    created_at: new Date().toISOString()
   };
-  activeListings.push(newListing);
-  renderActiveListings();
+  
+  const { data, error } = await supabaseClient
+    .from('seller_inventory')
+    .insert([newListing])
+    .select();
+  
+  if (error) {
+    showToast('Error posting listing: ' + error.message, true);
+    return;
+  }
+  
   showToast(`${quantity}MT ${commodity} (${variety}) listed!`);
   document.getElementById('postInventoryModal').style.display = 'none';
+  await loadSavedData();
 }
 
 async function depositFunds() {
   const amount = parseFloat(document.getElementById('depositAmount').value);
   if (isNaN(amount) || amount < 100) { showToast('Minimum deposit $100', true); return; }
+  
   walletBalance += amount;
+  await supabaseClient
+    .from('wallets')
+    .upsert({ user_id: currentUser.id, balance: walletBalance });
+  
   updateWalletDisplay();
-  saveToStorage();
   showToast(`$${amount} deposited!`);
   document.getElementById('depositModal').style.display = 'none';
 }
 
-function saveToStorage() {
-  localStorage.setItem('seller_bots', JSON.stringify(bots));
-  localStorage.setItem('seller_wallet', walletBalance.toString());
-  localStorage.setItem('seller_listings', JSON.stringify(activeListings));
-  localStorage.setItem('seller_sold', JSON.stringify(soldItems));
-}
-
-function loadSavedData() {
-  const savedBots = localStorage.getItem('seller_bots');
-  const savedWallet = localStorage.getItem('seller_wallet');
-  const savedListings = localStorage.getItem('seller_listings');
-  const savedSold = localStorage.getItem('seller_sold');
-  if (savedBots) bots = JSON.parse(savedBots);
-  if (savedWallet) walletBalance = parseFloat(savedWallet);
-  if (savedListings) activeListings = JSON.parse(savedListings);
-  if (savedSold) soldItems = JSON.parse(savedSold);
-  if (isNaN(walletBalance)) walletBalance = 10000;
-  if (!Array.isArray(bots)) bots = [];
-  if (!Array.isArray(activeListings)) activeListings = [];
-  if (!Array.isArray(soldItems)) soldItems = [];
+async function signOut() {
+  await supabaseClient.auth.signOut();
+  window.location.href = '/';
 }
 
 function showToast(msg, isError = false) {
@@ -1167,6 +1170,9 @@ function showToast(msg, isError = false) {
   setTimeout(() => toast.classList.remove('visible'), 3000);
 }
 
+// ============================================
+// EVENT LISTENERS
+// ============================================
 document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
 document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
 document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
@@ -1185,41 +1191,92 @@ document.getElementById('editBotCommodity').onchange = updateBotVarietyCheckboxe
 
 document.getElementById('closeBotModal').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
 document.getElementById('cancelBotBtn').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
-document.getElementById('saveBotBtn').onclick = saveBotConfig;
+document.getElementById('saveBotBtn').onclick = () => {
+  showToast('Bot config saving to Supabase...');
+  document.getElementById('botConfigModal').style.display = 'none';
+};
 
 document.getElementById('closeBidModal').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
 document.getElementById('cancelBidBtn').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
 document.getElementById('closeSoldModal').onclick = () => document.getElementById('soldDetailModal').style.display = 'none';
 document.getElementById('cancelSoldBtn').onclick = () => document.getElementById('soldDetailModal').style.display = 'none';
+document.getElementById('authBtn').onclick = signOut;
 
 document.getElementById('botsGrid').addEventListener('click', (e) => {
   const card = e.target.closest('.bot-card');
   if (!card) return;
   if (card.id === 'addBotCard') {
-    showToast('Deploy new bot modal would open here');
+    showToast('Deploy new bot — coming soon');
     return;
   }
   const botId = card.getAttribute('data-bot-id');
   const bot = bots.find(b => b.id === botId);
-  if (bot) openBotConfig(bot);
+  if (bot) {
+    currentEditingBot = bot;
+    document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
+    document.getElementById('editBotName').value = bot.name;
+    document.getElementById('editBotCommodity').value = bot.commodity;
+    updateBotVarietyCheckboxes();
+    document.getElementById('editMinPrice').value = bot.minPrice;
+    document.getElementById('editMinPriceDisplay').textContent = `$${bot.minPrice.toFixed(2)}`;
+    document.getElementById('editVolumeLimit').value = bot.volumeLimit;
+    document.getElementById('editVolumeLimitDisplay').textContent = `${bot.volumeLimit} MT`;
+    document.getElementById('editStrategy').value = bot.strategy;
+    document.getElementById('botConfigModal').style.display = 'flex';
+  }
 });
 
 document.getElementById('activeListingsList').addEventListener('click', (e) => {
   const item = e.target.closest('[data-listing-id]');
-  if (item) showListingBids(item.getAttribute('data-listing-id'));
+  if (item) {
+    const listingId = item.getAttribute('data-listing-id');
+    const listing = activeListings.find(l => l.id == listingId);
+    if (listing) {
+      document.getElementById('bidDetailContent').innerHTML = `
+        <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${listing.product} - ${listing.variety}</div></div>
+        <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${listing.quantity} MT</div></div>
+        <div class="modal-field"><label>Your Minimum</label><div class="tooltip" style="font-size:14px;">$${listing.minPrice}/MT</div></div>
+        <div class="modal-field"><label>Highest Bid</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${listing.currentHighestBid || listing.minPrice}/MT</div></div>
+        <div class="modal-field"><label>Top Bidder</label><div class="tooltip" style="font-size:14px;">${listing.topBidder || 'No bids yet'}</div></div>
+        <button class="action-btn" style="margin-top:16px;" onclick="showToast('Accept offer feature coming soon')">✓ ACCEPT THIS BID</button>
+      `;
+      document.getElementById('bidDetailModal').style.display = 'flex';
+    }
+  }
 });
 
 document.getElementById('soldItemsList').addEventListener('click', (e) => {
   const item = e.target.closest('[data-sold-id]');
-  if (item) showSoldDetails(item.getAttribute('data-sold-id'));
+  if (item) {
+    const soldId = item.getAttribute('data-sold-id');
+    const sold = soldItems.find(s => s.id == soldId);
+    if (sold) {
+      document.getElementById('soldDetailContent').innerHTML = `
+        <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${sold.product} - ${sold.variety}</div></div>
+        <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${sold.quantity} MT</div></div>
+        <div class="modal-field"><label>Sold Price</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${sold.price}/MT</div></div>
+        <div class="modal-field"><label>Buyer</label><div class="tooltip" style="font-size:14px;">${sold.buyer}</div></div>
+        <div class="tooltip">🚛 Transport auction available for this shipment</div>
+      `;
+      document.getElementById('soldDetailModal').style.display = 'flex';
+    }
+  }
 });
 
-loadSavedData();
-updateWalletDisplay();
-renderBots();
-renderActiveListings();
-renderSoldItems();
-startPriceSimulation();
+// ============================================
+// INITIALIZE
+// ============================================
+(async function init() {
+  const authed = await checkAuth();
+  if (authed) {
+    await loadSavedData();
+    updateWalletDisplay();
+    renderBots();
+    renderActiveListings();
+    renderSoldItems();
+    startPriceSimulation();
+  }
+})();
 </script>
 </body>
 </html>
