@@ -21,237 +21,196 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-  .container {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 20px 24px 60px;
-    position: relative;
-    z-index: 2;
+  .bg-waves {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
   }
-  .header {
+  .wave-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    filter: blur(100px);
+    opacity: 0.15;
+    animation: waveBgDrift 24s ease-in-out infinite;
+    border-radius: 50%;
+  }
+  .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+  .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.3), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+  .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,217,102,0.3), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+  @keyframes waveBgDrift {
+    0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+    50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+    100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+  }
+
+  .gem-logo-corner {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transform: scale(0.35);
+    transform-origin: top left;
+    pointer-events: none;
+  }
+  .gem-text {
+    font-size: 160px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
     display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 20px 0 40px;
-  }
-  .nav {
-    display: flex;
-    gap: 20px;
-  }
-  .nav a {
+    text-transform: uppercase;
+    line-height: 0.9;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #BFC9E0;
-    text-decoration: none;
-    padding: 6px 18px;
-    border-radius: 40px;
-    border: 1px solid rgba(124,252,0,0.3);
-    background: rgba(0,0,0,0.3);
-    transition: all 0.3s;
+    gap: 2px;
   }
+  .gem-letter {
+    display: inline-block;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: letterFloat 6s ease-in-out infinite;
+  }
+  .gem-letter:nth-child(1) { animation-delay: 0s; }
+  .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+  .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+  .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+  .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+  .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+  .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+  .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+  @keyframes letterFloat {
+    0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+    50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+  }
+  .gem-letter:nth-child(1)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(2)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(3)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(4)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(5)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+  .gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+  .gem-letter .edge-top, .gem-letter .edge-right, .gem-letter .edge-bottom, .gem-letter .edge-left { display: none; }
+  .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay; }
+  @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+  .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none; }
+  @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+  .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+  .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+  .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+  .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+  .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+  .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+  .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+  .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+  .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+  .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+  .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+  .container { max-width: 1300px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
+  .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 40px; }
+  .nav { display: flex; gap: 20px; }
+  .nav a { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; font-weight: 600; color: #BFC9E0; text-decoration: none; padding: 6px 18px; border-radius: 40px; border: 1px solid rgba(124,252,0,0.3); background: rgba(0,0,0,0.3); transition: all 0.3s; }
   .nav a:hover { border-color: var(--neon-green); color: var(--neon-green); }
   
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    margin: 40px 0;
-  }
-  .gem-card {
-    background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.98));
-    backdrop-filter: blur(8px);
-    border-radius: 24px;
-    border: 2px solid rgba(124,252,0,0.4);
-    padding: 24px;
-    cursor: pointer;
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
-  }
+  .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin: 40px 0; }
+  .gem-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.98)); backdrop-filter: blur(8px); border-radius: 24px; border: 2px solid rgba(124,252,0,0.4); padding: 24px; cursor: pointer; transition: all 0.4s ease; position: relative; overflow: hidden; }
   .gem-card:hover { transform: translateY(-6px); border-color: var(--neon-green); }
   .gem-card.selected { border-color: var(--neon-green); box-shadow: 0 0 20px rgba(124,252,0,0.3); }
   .gem-card.locked { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
-  .card-wave {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: repeating-linear-gradient(45deg, rgba(124,252,0,0.05) 0px, rgba(124,252,0,0.05) 40px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.1) 80px);
-    background-size: 200% 200%;
-    animation: waveFlow 6s linear infinite;
-    pointer-events: none;
-    border-radius: 24px;
-  }
+  .card-wave { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(124,252,0,0.05) 0px, rgba(124,252,0,0.05) 40px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.1) 80px); background-size: 200% 200%; animation: waveFlow 6s linear infinite; pointer-events: none; border-radius: 24px; }
   @keyframes waveFlow { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
   .card-icon { font-size: 48px; margin-bottom: 16px; position: relative; z-index: 1; }
   .card-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; position: relative; z-index: 1; }
   .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 20px; position: relative; z-index: 1; }
-  .category-select, .variety-select {
-    width: 100%;
-    padding: 12px;
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(124,252,0,0.3);
-    border-radius: 12px;
-    color: white;
-    font-family: inherit;
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-    margin-top: 8px;
-  }
+  .category-select, .variety-select { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.3); border-radius: 12px; color: white; font-family: inherit; cursor: pointer; position: relative; z-index: 1; margin-top: 8px; }
   .variety-select { display: none; }
   .variety-select.visible { display: block; }
   
-  .continue-container {
-    text-align: center;
-    margin: 30px 0 50px;
-    display: none;
-  }
+  .continue-container { text-align: center; margin: 30px 0 50px; display: none; }
   .continue-container.visible { display: block; }
-  .continue-btn {
-    background: linear-gradient(105deg, #10b981, #2dd4bf);
-    border: none;
-    padding: 14px 48px;
-    border-radius: 48px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    color: #010101;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
+  .continue-btn { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px 48px; border-radius: 48px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px; color: #010101; cursor: pointer; transition: transform 0.2s; }
   .continue-btn:hover { transform: translateY(-2px); }
   
   .big-card-container { max-width: 700px; margin: 0 auto; }
-  .back-btn {
-    background: none;
-    border: none;
-    color: var(--neon-green);
-    font-family: 'Orbitron', sans-serif;
-    cursor: pointer;
-    margin-bottom: 20px;
-    font-size: 14px;
-  }
-  .big-card {
-    background: linear-gradient(145deg, rgba(15, 32, 64, 0.95), rgba(2, 6, 23, 0.99));
-    border-radius: 32px;
-    border: 2px solid rgba(124,252,0,0.4);
-    overflow: hidden;
-    position: relative;
-  }
-  .big-card-wave {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: repeating-linear-gradient(45deg, rgba(124,252,0,0.05) 0px, rgba(124,252,0,0.05) 40px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.1) 80px);
-    background-size: 200% 200%;
-    animation: waveFlow 6s linear infinite;
-    pointer-events: none;
-  }
+  .back-btn { background: none; border: none; color: var(--neon-green); font-family: 'Orbitron', sans-serif; cursor: pointer; margin-bottom: 20px; font-size: 14px; }
+  .big-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.95), rgba(2, 6, 23, 0.99)); border-radius: 32px; border: 2px solid rgba(124,252,0,0.4); overflow: hidden; position: relative; }
+  .big-card-wave { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(124,252,0,0.05) 0px, rgba(124,252,0,0.05) 40px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.1) 80px); background-size: 200% 200%; animation: waveFlow 6s linear infinite; pointer-events: none; }
   .big-card-content { padding: 32px; position: relative; z-index: 1; }
   .big-card-header { font-size: 28px; font-weight: 800; margin-bottom: 28px; text-align: center; }
   
   .form-row { margin-bottom: 24px; }
   .form-grid { display: flex; flex-direction: column; gap: 8px; }
   .form-label { font-size: 14px; font-weight: 500; color: var(--muted); }
-  .form-input, .form-select {
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(124,252,0,0.3);
-    border-radius: 12px;
-    padding: 12px 16px;
-    color: white;
-    font-family: inherit;
-    font-size: 14px;
-  }
-  .fee-notice {
-    background: rgba(124,252,0,0.1);
-    border: 1px solid rgba(124,252,0,0.3);
-    border-radius: 12px;
-    padding: 16px;
-    margin: 20px 0;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 13px;
-  }
-  .action-btn {
-    width: 100%;
-    background: linear-gradient(105deg, #10b981, #2dd4bf);
-    border: none;
-    padding: 14px;
-    border-radius: 48px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    color: #010101;
-    cursor: pointer;
-    margin-top: 20px;
-  }
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin: 20px 0;
-  }
-  .summary-item {
-    background: rgba(0,0,0,0.3);
-    border-radius: 12px;
-    padding: 12px;
-  }
+  .form-input, .form-select { background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.3); border-radius: 12px; padding: 12px 16px; color: white; font-family: inherit; font-size: 14px; }
+  .fee-notice { background: rgba(124,252,0,0.1); border: 1px solid rgba(124,252,0,0.3); border-radius: 12px; padding: 16px; margin: 20px 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+  .action-btn { width: 100%; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 48px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px; color: #010101; cursor: pointer; margin-top: 20px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+  .summary-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; }
   .summary-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
   .summary-value { font-size: 14px; font-weight: 600; }
-  .fee-display {
-    text-align: center;
-    padding: 20px;
-    background: rgba(124,252,0,0.1);
-    border-radius: 16px;
-    margin: 20px 0;
-  }
+  .fee-display { text-align: center; padding: 20px; background: rgba(124,252,0,0.1); border-radius: 16px; margin: 20px 0; }
   .fee-amount { font-size: 32px; font-weight: 800; color: var(--neon-green); }
   .fee-note { font-size: 11px; color: var(--muted); margin-top: 8px; }
   .hidden { display: none; }
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #0f1a2e;
-    padding: 12px 28px;
-    border-radius: 60px;
-    border-left: 4px solid var(--neon-green);
-    transition: 0.3s;
-    opacity: 0;
-    z-index: 2000;
-    white-space: nowrap;
-  }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: #0f1a2e; padding: 12px 28px; border-radius: 60px; border-left: 4px solid var(--neon-green); transition: 0.3s; opacity: 0; z-index: 2000; white-space: nowrap; }
   .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
   @media (max-width: 800px) {
     .cards-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
     .summary-grid { grid-template-columns: 1fr; }
     .fee-notice { flex-direction: column; text-align: center; }
+    .gem-logo-corner { transform: scale(0.25); }
   }
 </style>
 </head>
 <body>
 
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T</span>
+    <span class="gem-letter" data-letter="R">R</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="D">D</span>
+    <span class="gem-letter" data-letter="E">E</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="U">U</span>
+    <span class="gem-letter" data-letter="X">X</span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
 <div class="container">
   <header class="header">
     <div class="nav">
       <a href="#">How It Works</a>
-      <a href="#">Auctions</a>
+      <a href="auction-floor-buyer.html">Auctions</a>
       <a href="#">Rules</a>
     </div>
   </header>
 
-  <!-- STAGE 1: Category Selection -->
   <div id="stage1">
     <div class="cards-grid">
-      <!-- Fruits Card -->
       <div class="gem-card" data-category="fruits">
         <div class="card-wave"></div>
         <div class="card-icon">🍎</div>
@@ -270,7 +229,6 @@
         </select>
       </div>
 
-      <!-- Vegetables Card -->
       <div class="gem-card" data-category="vegetables">
         <div class="card-wave"></div>
         <div class="card-icon">🥬</div>
@@ -289,7 +247,6 @@
         </select>
       </div>
 
-      <!-- Grains Card -->
       <div class="gem-card" data-category="grains">
         <div class="card-wave"></div>
         <div class="card-icon">🌾</div>
@@ -411,7 +368,6 @@
     </div>
   </div>
 
-  <!-- STAGE 2: Trade Brief -->
   <div class="hidden" id="stage2">
     <div class="big-card-container">
       <button class="back-btn" onclick="backToStage1()">← Back to Categories</button>
@@ -431,7 +387,7 @@
             <div class="form-grid">
               <label class="form-label">Target Price (USD/ton)</label>
               <input type="number" class="form-input" id="priceInput" value="1000" min="100" step="50">
-              <small style="color: var(--muted); margin-top: 4px; display: block;">For internal reference only — not displayed on auction floor.</small>
+              <small style="color: var(--muted); margin-top: 4px;">For internal reference only — not displayed on auction floor.</small>
             </div>
           </div>
 
@@ -442,7 +398,7 @@
                 Select a product to see which countries can bid.
               </div>
             </div>
-            <small style="color: var(--muted); margin-top: 4px; display: block;">Sellers from these countries will receive your brief.</small>
+            <small style="color: var(--muted); margin-top: 4px;">Sellers from these countries will receive your brief.</small>
           </div>
 
           <div class="form-row">
@@ -450,7 +406,7 @@
               <label class="form-label">Auction Fee</label>
               <div class="form-input" id="feeDisplay" style="background: rgba(0,0,0,0.5); display: flex; align-items: center;">$25.00</div>
             </div>
-            <small style="color: var(--muted); margin-top: 4px; display: block;">Flat fee per auction.</small>
+            <small style="color: var(--muted); margin-top: 4px;">Flat fee per auction.</small>
           </div>
 
           <div class="form-row">
@@ -478,7 +434,6 @@
     </div>
   </div>
 
-  <!-- STAGE 3: Auction Confirmation -->
   <div class="hidden" id="stage3">
     <div class="big-card-container">
       <button class="back-btn" onclick="backToStage2()">← Back to Trade Brief</button>
@@ -517,79 +472,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Product countries (same as before)
-const productCountries = {
-  'Apples': ['Argentina', 'Australia', 'Brazil', 'Canada', 'Chile', 'China', 'France', 'Germany', 'Italy', 'New Zealand', 'South Africa', 'United States'],
-  'Bananas': ['Brazil', 'Colombia', 'Costa Rica', 'Dominican Republic', 'Ecuador', 'Guatemala', 'India', 'Philippines'],
-  'Mangoes': ['Brazil', 'Ecuador', 'Haiti', 'India', 'Mexico', 'Peru', 'Philippines', 'Thailand'],
-  'Oranges': ['Brazil', 'China', 'Egypt', 'India', 'Italy', 'Mexico', 'South Africa', 'Spain', 'United States'],
-  'Pineapples': ['Brazil', 'Costa Rica', 'India', 'Nigeria', 'Philippines', 'Thailand'],
-  'Potatoes': ['China', 'Germany', 'India', 'Poland', 'Russia', 'United States'],
-  'Tomatoes': ['China', 'Egypt', 'India', 'Italy', 'Spain', 'Turkey', 'United States'],
-  'Onions': ['China', 'Egypt', 'India', 'Mexico', 'Netherlands', 'Pakistan', 'United States'],
-  'Carrots': ['China', 'Germany', 'India', 'Mexico', 'Russia', 'United States'],
-  'Broccoli': ['China', 'India', 'Italy', 'Mexico', 'Spain', 'United States'],
-  'Chickpeas': ['Australia', 'Canada', 'India', 'Myanmar', 'Turkey'],
-  'Lentils': ['Australia', 'Canada', 'India', 'Nepal', 'Turkey', 'United States'],
-  'Soybeans': ['Argentina', 'Brazil', 'China', 'India', 'Paraguay', 'United States'],
-  'Corn': ['Argentina', 'Brazil', 'China', 'India', 'Mexico', 'Ukraine', 'United States'],
-  'Rice': ['Bangladesh', 'China', 'India', 'Indonesia', 'Thailand', 'Vietnam'],
-  'Wheat': ['Australia', 'Canada', 'China', 'France', 'Germany', 'India', 'Russia', 'United States'],
-  'Almonds': ['Australia', 'Spain', 'United States'],
-  'Cashews': ['India', 'Vietnam', 'Nigeria', 'Ivory Coast', 'Brazil'],
-  'Peanuts': ['China', 'India', 'Nigeria', 'United States', 'Argentina'],
-  'Black Pepper': ['Brazil', 'India', 'Indonesia', 'Vietnam'],
-  'Cinnamon': ['Indonesia', 'China', 'Vietnam', 'Sri Lanka'],
-  'Turmeric': ['India', 'Bangladesh', 'Myanmar', 'Pakistan'],
-  'Coffee - Arabica': ['Brazil', 'Colombia', 'Ethiopia', 'Honduras', 'India', 'Indonesia', 'Peru', 'Vietnam'],
-  'Coffee - Robusta': ['Brazil', 'India', 'Indonesia', 'Uganda', 'Vietnam'],
-  'Tea - Black': ['China', 'India', 'Kenya', 'Sri Lanka', 'Turkey', 'Vietnam'],
-  'Tea - Green': ['China', 'Japan', 'Vietnam'],
-  'Cassava (Yuca)': ['Brazil', 'Indonesia', 'Nigeria', 'Thailand', 'Vietnam'],
-  'Sweet Potatoes': ['China', 'India', 'Indonesia', 'Nigeria', 'Uganda', 'United States'],
-  'Yams': ['Benin', 'Ghana', 'Ivory Coast', 'Nigeria', 'Togo'],
-  'Coconut Oil': ['Philippines', 'Indonesia', 'India', 'Vietnam', 'Sri Lanka'],
-  'Olive Oil': ['Spain', 'Italy', 'Greece', 'Turkey', 'Tunisia', 'Morocco'],
-  'Palm Oil': ['Indonesia', 'Malaysia', 'Thailand', 'Colombia', 'Nigeria'],
-  'Sunflower Seed Oil': ['Ukraine', 'Russia', 'Argentina', 'China', 'Romania', 'Turkey']
-};
+// ============================================
+// TEMPORARY: Replace this with actual user_id from your logged-in user
+// For now, you can manually put a user ID from your profiles table
+// ============================================
+let currentUserId = null;  // <-- REPLACE WITH ACTUAL USER ID FROM PROFILES TABLE
 
-// Product varieties (for all categories)
-const productVarieties = {
-  'Apples': ['Red Delicious', 'Golden Delicious', 'McIntosh', 'Gala', 'Fuji', 'Honeycrisp', 'Granny Smith', 'Pink Lady', 'Braeburn', 'Jonagold', 'Empire', 'Cortland', 'Mutsu (Crispin)', 'Rome', 'Winesap', 'Jazz', 'Envy', 'Cosmic Crisp', 'Pazazz', 'EverCrisp', 'Macoun', 'Spartan', 'Paula Red', 'Lodi', 'Gravenstein'],
-  'Bananas': ['Cavendish', 'Lady Finger', 'Red Banana', 'Organic Cavendish', 'Baby Banana'],
-  'Mangoes': ['Kent', 'Tommy Atkins', 'Ataulfo (Honey)', 'Keitt', 'Organic Kent', 'Francis'],
-  'Oranges': ['Navel', 'Valencia', 'Blood Orange', 'Cara Cara', 'Seville'],
-  'Pineapples': ['Smooth Cayenne', 'Queen', 'Red Spanish', 'Organic Smooth Cayenne'],
-  'Potatoes': ['Russet', 'Yukon Gold', 'Red', 'Fingerling', 'Organic Russet', 'Purple', 'White'],
-  'Tomatoes': ['Round', 'Cherry', 'Roma', 'Heirloom', 'Organic Roma', 'Beefsteak', 'Plum'],
-  'Onions': ['Yellow', 'Red', 'White', 'Sweet', 'Organic Yellow', 'Shallot'],
-  'Carrots': ['Imperator', 'Nantes', 'Chantenay', 'Organic Imperator', 'Purple', 'Baby'],
-  'Broccoli': ['Green Magic', 'Eastern Crown', 'Organic Green Magic', 'Belstar'],
-  'Corn': ['Yellow Dent', 'White', 'Sweet Yellow', 'Organic Sweet Corn', 'Blue Corn'],
-  'Rice': ['Jasmine', 'Basmati', 'Arborio', 'Calrose', 'Organic Jasmine', 'Brown Rice', 'White Rice'],
-  'Wheat': ['Hard Red Winter', 'Soft Red Winter', 'Hard White', 'Organic Hard Red', 'Spring Wheat'],
-  'Soybeans': ['Non-GMO', 'GMO', 'Organic Non-GMO', 'Edamame'],
-  'Chickpeas': ['Kabuli', 'Desi', 'Organic Kabuli', 'Black Chickpea'],
-  'Lentils': ['Brown', 'Green', 'Red', 'French Green', 'Organic Brown', 'Black Beluga'],
-  'Almonds': ['Nonpareil', 'Carmel', 'Monterey', 'Butte', 'Organic Nonpareil'],
-  'Cashews': ['W240', 'W320', 'W450', 'Organic W320', 'Scorched'],
-  'Peanuts': ['Runner', 'Virginia', 'Spanish', 'Valencia', 'Organic Runner'],
-  'Black Pepper': ['Black', 'White', 'Red', 'Green', 'Organic Black'],
-  'Cinnamon': ['Ceylon', 'Cassia', 'Organic Ceylon', 'Indonesian'],
-  'Turmeric': ['Alleppey', 'Madras', 'Organic Alleppey', 'Rajapore'],
-  'Coffee - Arabica': ['Typica', 'Bourbon', 'Caturra', 'Geisha', 'Organic Typica', 'Catuai'],
-  'Coffee - Robusta': ['Java', 'Conilon', 'Organic Java', 'Nganda'],
-  'Tea - Black': ['Assam', 'Darjeeling', 'Ceylon', 'Organic Assam', 'Keemun', 'Lapsang Souchong'],
-  'Tea - Green': ['Sencha', 'Matcha', 'Gunpowder', 'Organic Sencha', 'Dragonwell', 'Genmaicha'],
-  'Cassava (Yuca)': ['Sweet', 'Bitter', 'Organic Sweet', 'Valencia'],
-  'Sweet Potatoes': ['Beauregard', 'Covington', 'Japanese', 'Organic Beauregard', 'Purple', 'White'],
-  'Yams': ['African', 'Asian', 'Organic African', 'Nagaimo'],
-  'Coconut Oil': ['Virgin', 'Refined', 'Organic Virgin', 'Extra Virgin', 'RBD'],
-  'Olive Oil': ['Extra Virgin', 'Virgin', 'Refined', 'Organic Extra Virgin', 'Pomace'],
-  'Palm Oil': ['Crude', 'RBD', 'Organic Crude', 'Red Palm'],
-  'Sunflower Seed Oil': ['High Oleic', 'Linoleic', 'Organic High Oleic', 'Mid Oleic']
-};
+// Optional: Auto-fetch user ID if session exists (no redirect)
+(async function getUserId() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (user) currentUserId = user.id;
+  console.log('Current user ID:', currentUserId);
+})();
+
+const productCountries = { ... }; // (keep your existing productCountries object)
+const productVarieties = { ... }; // (keep your existing productVarieties object)
 
 let selectedCategory = null;
 let selectedSubcategory = null;
@@ -598,7 +495,6 @@ let selectedVariety = null;
 function updateVarietyDropdown(category, product) {
   const varietySelect = document.getElementById(`variety-${category}`);
   if (!varietySelect) return;
-  
   const varieties = productVarieties[product] || [];
   varietySelect.innerHTML = '<option value="">Select variety...</option>';
   varieties.forEach(variety => {
@@ -635,7 +531,6 @@ function updateSelectionFromEvent(selectElement, category) {
     selectedSubcategory = value;
     updateVarietyDropdown(category, value);
     updateCountriesDisplay(value);
-    
     const allCards = document.querySelectorAll('.gem-card');
     allCards.forEach(card => {
       if (card.dataset.category === category) {
@@ -644,7 +539,6 @@ function updateSelectionFromEvent(selectElement, category) {
       } else {
         card.classList.add('locked');
         card.classList.remove('selected');
-        // Hide variety dropdowns on other cards
         const otherVariety = card.querySelector('.variety-select');
         if (otherVariety) otherVariety.classList.remove('visible');
       }
@@ -721,7 +615,13 @@ function goToStage3() {
 }
 
 async function saveCampaign() {
+  if (!currentUserId) {
+    showToast('No user ID. Please make sure you are logged in.', true);
+    return;
+  }
+
   const campaignData = {
+    user_id: currentUserId,
     category: selectedCategory,
     product: selectedSubcategory,
     variety: selectedVariety,
