@@ -292,6 +292,54 @@ body {
   backdrop-filter: blur(20px);
 }
 
+.google-btn {
+  width: 100%;
+  padding: 14px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(124,252,0,0.5);
+  border-radius: 10px;
+  color: white;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+
+.google-btn:hover {
+  background: #7CFC00;
+  color: #020617;
+  border-color: #7CFC00;
+}
+
+.divider {
+  text-align: center;
+  margin: 24px 0;
+  position: relative;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.divider span {
+  background: rgba(15, 32, 64, 0.8);
+  padding: 0 16px;
+  position: relative;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
 .form-group {
   margin-bottom: 24px;
 }
@@ -364,6 +412,10 @@ body {
   font-weight: 600;
 }
 
+.auth-links a:hover {
+  color: #7CFC00;
+}
+
 .error-msg {
   background: rgba(217, 43, 43, 0.2);
   border: 1px solid rgba(217, 43, 43, 0.5);
@@ -406,6 +458,13 @@ body {
   <div class="auth-card">
     <div class="error-msg" id="errorMsg"></div>
     
+    <!-- Google Sign In Button -->
+    <button class="google-btn" id="googleSignInBtn">
+      <span>🔐</span> Continue with Google
+    </button>
+
+    <div class="divider"><span>or sign in with email</span></div>
+    
     <form id="signinForm" onsubmit="handleSignin(event)">
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -421,7 +480,7 @@ body {
     </form>
 
     <div class="auth-links">
-      Don't have an account? <a href="signup.html">Sign Up</a>
+      Don't have an account? <a href="index.html">Create Account</a>
     </div>
   </div>
 </div>
@@ -438,6 +497,20 @@ function showError(msg) {
   el.classList.add('visible');
 }
 
+// Google Sign In
+document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/dashboard.html' }
+    });
+    if (error) throw error;
+  } catch (err) {
+    showError(err.message);
+  }
+});
+
+// Email/Password Sign In
 async function handleSignin(e) {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
@@ -455,14 +528,20 @@ async function handleSignin(e) {
 
     if (error) throw error;
 
+    // Check if user has a role in profiles
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('role')
       .eq('id', data.user.id)
       .single();
 
-    if (profileError) throw profileError;
+    if (profileError) {
+      // No profile found — redirect to dashboard to create one
+      window.location.href = 'dashboard.html';
+      return;
+    }
 
+    // Redirect based on role
     if (profile.role === 'admin') {
       window.location.href = 'dashboard-admin.html';
     } else if (profile.role === 'buyer') {
