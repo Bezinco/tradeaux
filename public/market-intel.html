@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeAux • Market Intel | Live Commodity Tickers</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { 
+  width: 100%; 
+  min-height: 100%; 
+  font-family: 'Inter', sans-serif; 
+  overflow-x: hidden; 
+}
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-emerald-bg { 
+  background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.4), transparent 70%); 
+  top: -40%; left: -20%; animation-delay: 0s; 
+}
+.wave-sapphire-bg { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%; animation-delay: 8s; 
+}
+.wave-ruby-bg { 
+  background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); 
+  top: -20%; left: 0%; animation-delay: 16s; 
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+}
+
+/* ===== 3D LOGO - TRADEAUX ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+/* Letter T - Blue */
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter R - Green */
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter A - Red */
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter D - Blue */
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter E - Green */
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter A - Red */
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter U - Blue */
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter X - Green */
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex; justify-content: flex-end; align-items: center;
+  padding: 20px 0 40px;
+}
+
+.nav { display: flex; gap: 12px; }
+
+.nav a {
+  font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500;
+  padding: 8px 16px; border: 2px solid #d92b2b; border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px);
+  color: #e5e7eb; text-decoration: none; transition: all 0.3s ease;
+}
+
+.nav a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #fff; }
+
+/* Market Intel Content */
+.intel-hero {
+  text-align: center;
+  margin: 40px 0 40px;
+}
+
+.intel-hero h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 64px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00ced1, #7CFC00, #FFD966);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+.intel-hero p {
+  font-size: 18px;
+  color: #9ca3af;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Category Grid - Same as Brief Selection */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 40px 0;
+}
+
+.category-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+  border: 2px solid rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.category-card:hover {
+  transform: translateY(-6px);
+  border-color: #00ced1;
+  box-shadow: 0 20px 40px rgba(0, 206, 209, 0.15);
+}
+
+.category-card.active {
+  border-color: #7CFC00;
+  background: rgba(124, 252, 0, 0.08);
+  box-shadow: 0 0 30px rgba(124, 252, 0, 0.2);
+}
+
+.category-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.category-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #e5e7eb;
+}
+
+.category-count {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Ticker Panel */
+.ticker-panel {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 24px;
+  padding: 28px;
+  margin: 30px 0;
+}
+
+.ticker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 206, 209, 0.2);
+}
+
+.ticker-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #00ced1;
+}
+
+.refresh-time {
+  font-size: 11px;
+  color: #9ca3af;
+  background: rgba(0,0,0,0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.ticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.ticker-card {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+  border-left: 4px solid #7CFC00;
+}
+
+.ticker-card:hover {
+  transform: translateX(4px);
+  background: rgba(0, 206, 209, 0.05);
+}
+
+.ticker-info {
+  flex: 1;
+}
+
+.ticker-product {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.ticker-variety {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.ticker-price-section {
+  text-align: right;
+}
+
+.ticker-price {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: #FFD966;
+}
+
+.ticker-change {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.ticker-change.up { color: #7CFC00; }
+.ticker-change.down { color: #ff3b3b; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+  font-size: 16px;
+}
+
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 40px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+@media (max-width: 900px) {
+  .category-grid { grid-template-columns: repeat(2, 1fr); }
+  .intel-hero h1 { font-size: 48px; }
+}
+
+@media (max-width: 600px) {
+  .category-grid { grid-template-columns: 1fr; }
+  .ticker-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <nav class="nav">
+      <a href="#">Trade Brief</a>
+      <a href="#">Auctions</a>
+      <a href="#">Market Intelligence</a>
+      <a href="#">Sign In</a>
+    </nav>
+  </header>
+
+  <div class="intel-hero">
+    <h1>📈 MARKET INTEL</h1>
+    <p>Live commodity prices powered by real-time auction data. Select a category to see current market trends and live bid activity.</p>
+  </div>
+
+  <div class="category-grid" id="categoryGrid"></div>
+
+  <div class="ticker-panel" id="tickerPanel">
+    <div class="ticker-header">
+      <div class="ticker-title" id="selectedCategoryTitle">Select a category</div>
+      <div class="refresh-time">Live updates every 3 seconds</div>
+    </div>
+    <div id="tickerGrid" class="ticker-grid">
+      <div class="empty-state">Click a category above to view live tickers</div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>TRADEAUX © 2026 • Global Commodity Exchange • $25 flat fee. Port on every card.</p>
+  </footer>
+</div>
+
+<script>
+// Category Data - Same 9 categories as Trade Brief
+const categories = [
+  { name: 'Fresh Fruits', icon: '🍎', products: ['Apples', 'Avocados', 'Bananas', 'Mangoes', 'Oranges', 'Pineapples'] },
+  { name: 'Fresh Vegetables', icon: '🥬', products: ['Broccoli', 'Carrots', 'Onions', 'Potatoes', 'Tomatoes'] },
+  { name: 'Legumes & Beans', icon: '🫘', products: ['Chickpeas', 'Lentils', 'Soybeans'] },
+  { name: 'Grains & Cereals', icon: '🌾', products: ['Corn', 'Rice', 'Wheat'] },
+  { name: 'Nuts & Kernels', icon: '🥜', products: ['Almonds', 'Cashews', 'Peanuts'] },
+  { name: 'Spices & Herbs', icon: '🌿', products: ['Black Pepper', 'Cinnamon', 'Turmeric'] },
+  { name: 'Coffee, Tea & Cocoa', icon: '☕', products: ['Coffee - Arabica', 'Coffee - Robusta', 'Tea - Black', 'Tea - Green'] },
+  { name: 'Roots & Tubers', icon: '🥔', products: ['Cassava (Yuca)', 'Sweet Potatoes', 'Yams'] },
+  { name: 'Bulk Oils', icon: '🛢️', products: ['Coconut Oil', 'Olive Oil', 'Palm Oil', 'Sunflower Seed Oil'] }
+];
+
+// Variety data for products
+const productVarieties = {
+  'Apples': ['McIntosh', 'Honeycrisp', 'Gala', 'Fuji', 'Granny Smith'],
+  'Avocados': ['Hass', 'Fuerte', 'Reed'],
+  'Bananas': ['Cavendish', 'Lady Finger', 'Red Banana'],
+  'Mangoes': ['Kent', 'Tommy Atkins', 'Ataulfo'],
+  'Oranges': ['Navel', 'Valencia', 'Blood Orange'],
+  'Pineapples': ['Smooth Cayenne', 'Queen', 'Red Spanish'],
+  'Potatoes': ['Russet', 'Yukon Gold', 'Red', 'Fingerling'],
+  'Tomatoes': ['Round', 'Cherry', 'Roma', 'Heirloom'],
+  'Onions': ['Yellow', 'Red', 'White', 'Sweet'],
+  'Carrots': ['Imperator', 'Nantes', 'Chantenay'],
+  'Broccoli': ['Green Magic', 'Eastern Crown', 'Belstar'],
+  'Corn': ['Yellow Dent', 'White', 'Sweet Yellow'],
+  'Rice': ['Jasmine', 'Basmati', 'Arborio', 'Calrose'],
+  'Wheat': ['Hard Red Winter', 'Soft Red Winter', 'Hard White'],
+  'Chickpeas': ['Kabuli', 'Desi'],
+  'Lentils': ['Brown', 'Green', 'Red'],
+  'Soybeans': ['Non-GMO', 'GMO', 'Organic'],
+  'Almonds': ['Nonpareil', 'Carmel', 'Monterey'],
+  'Cashews': ['W240', 'W320', 'W450'],
+  'Peanuts': ['Runner', 'Virginia', 'Spanish'],
+  'Black Pepper': ['Black', 'White', 'Red'],
+  'Cinnamon': ['Ceylon', 'Cassia'],
+  'Turmeric': ['Alleppey', 'Madras'],
+  'Coffee - Arabica': ['Typica', 'Bourbon', 'Caturra', 'Geisha'],
+  'Coffee - Robusta': ['Java', 'Conilon'],
+  'Tea - Black': ['Assam', 'Darjeeling', 'Ceylon'],
+  'Tea - Green': ['Sencha', 'Matcha', 'Gunpowder'],
+  'Cassava (Yuca)': ['Sweet', 'Bitter'],
+  'Sweet Potatoes': ['Beauregard', 'Covington', 'Japanese'],
+  'Yams': ['African', 'Asian'],
+  'Coconut Oil': ['Virgin', 'Refined', 'Extra Virgin'],
+  'Olive Oil': ['Extra Virgin', 'Virgin', 'Refined'],
+  'Palm Oil': ['Crude', 'RBD', 'Red Palm'],
+  'Sunflower Seed Oil': ['High Oleic', 'Linoleic']
+};
+
+// Generate random price data for products
+let priceData = {};
+
+function initPrices() {
+  categories.forEach(cat => {
+    cat.products.forEach(prod => {
+      const varieties = productVarieties[prod] || ['Standard'];
+      const variety = varieties[Math.floor(Math.random() * varieties.length)];
+      priceData[prod] = {
+        variety: variety,
+        price: (Math.random() * 10 + 0.5).toFixed(2),
+        change: (Math.random() * 12 - 6).toFixed(1),
+        volume: Math.floor(Math.random() * 5000) + 100
+      };
+    });
+  });
+}
+
+function updatePrice(product) {
+  const current = parseFloat(priceData[product].price);
+  const volatility = (Math.random() - 0.5) * 4;
+  let newPrice = current * (1 + volatility / 100);
+  newPrice = Math.max(0.20, Math.min(50, newPrice));
+  const change = ((newPrice - current) / current) * 100;
+  priceData[product].price = newPrice.toFixed(2);
+  priceData[product].change = change.toFixed(1);
+}
+
+function renderCategories() {
+  const container = document.getElementById('categoryGrid');
+  container.innerHTML = categories.map((cat, idx) => `
+    <div class="category-card" data-cat-idx="${idx}">
+      <div class="category-icon">${cat.icon}</div>
+      <div class="category-name">${cat.name}</div>
+      <div class="category-count">${cat.products.length} commodities</div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      const idx = parseInt(card.dataset.catIdx);
+      showTickers(idx);
+    });
+  });
+}
+
+function showTickers(catIdx) {
+  const category = categories[catIdx];
+  document.getElementById('selectedCategoryTitle').innerHTML = `${category.icon} ${category.name}`;
+  renderTickers(category.products);
+}
+
+function renderTickers(products) {
+  const container = document.getElementById('tickerGrid');
+  if (!products || products.length === 0) {
+    container.innerHTML = '<div class="empty-state">No products available for this category</div>';
+    return;
+  }
+
+  container.innerHTML = products.map(prod => {
+    const data = priceData[prod];
+    if (!data) return '';
+    const changeClass = parseFloat(data.change) >= 0 ? 'up' : 'down';
+    const sign = parseFloat(data.change) >= 0 ? '+' : '';
+    return `
+      <div class="ticker-card">
+        <div class="ticker-info">
+          <div class="ticker-product">${prod}</div>
+          <div class="ticker-variety">${data.variety} · FOB</div>
+        </div>
+        <div class="ticker-price-section">
+          <div class="ticker-price">$${data.price}</div>
+          <div class="ticker-change ${changeClass}">${sign}${data.change}%</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function startLiveUpdates() {
+  setInterval(() => {
+    const activeCard = document.querySelector('.category-card.active');
+    if (activeCard) {
+      const idx = parseInt(activeCard.dataset.catIdx);
+      const products = categories[idx].products;
+      products.forEach(prod => updatePrice(prod));
+      renderTickers(products);
+    } else {
+      // Update all prices in background
+      categories.forEach(cat => {
+        cat.products.forEach(prod => updatePrice(prod));
+      });
+    }
+  }, 3000);
+}
+
+// Initialize
+initPrices();
+renderCategories();
+
+// Auto-select first category after a moment to show some data
+setTimeout(() => {
+  const firstCard = document.querySelector('.category-card');
+  if (firstCard) {
+    firstCard.click();
+  }
+}, 500);
+
+startLiveUpdates();
+</script>
+</body>
+</html>

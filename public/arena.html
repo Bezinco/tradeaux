@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Arena — TradeAux</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --type1: #f86939;
+  --type2: #00ced1;
+  --type3: #7CFC00;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-orange { 
+  background: radial-gradient(circle at 30% 40%, rgba(248, 105, 57, 0.4), transparent 70%); 
+  top: -40%; left: -20%;
+}
+.wave-cyan { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%;
+}
+.wave-green { 
+  background: radial-gradient(circle at 70% 60%, rgba(124, 252, 0, 0.4), transparent 70%); 
+  top: -20%; left: 0%;
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.05); }
+  100% { transform: translate(-30px, 20px) scale(1); }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0 40px;
+  position: relative;
+  z-index: 100;
+}
+
+.nav { display: flex; gap: 12px; margin-left: auto; }
+
+.nav a {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 2px solid rgba(0, 206, 209, 0.5);
+  border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  color: var(--text);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.nav a:hover {
+  border-color: #fff;
+}
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  background: rgba(0,0,0,0.3);
+  padding: 8px;
+  border-radius: 16px;
+}
+
+.tab {
+  flex: 1;
+  padding: 20px;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab.active-type1 { background: rgba(248, 105, 57, 0.1); border-color: var(--type1); color: var(--type1); }
+.tab.active-type2 { background: rgba(0, 206, 209, 0.1); border-color: var(--type2); color: var(--type2); }
+.tab.active-type3 { background: rgba(124, 252, 0, 0.1); border-color: var(--type3); color: var(--type3); }
+
+.tab-desc {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-top: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Content Area */
+.arena-content {
+  display: none;
+}
+
+.arena-content.active {
+  display: block;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Forms */
+.arena-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  border-radius: 20px;
+  padding: 40px;
+  border: 2px solid rgba(255,255,255,0.1);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.type1-border { border-color: rgba(248, 105, 57, 0.5); }
+.type2-border { border-color: rgba(0, 206, 209, 0.5); }
+.type3-border { border-color: rgba(124, 252, 0, 0.5); }
+
+.card-header {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-subheader {
+  color: var(--muted);
+  margin-bottom: 32px;
+  font-size: 14px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  margin-bottom: 4px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 14px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.type1-border .form-input:focus { border-color: var(--type1); box-shadow: 0 0 20px rgba(248, 105, 57, 0.2); }
+.type2-border .form-input:focus { border-color: var(--type2); box-shadow: 0 0 20px rgba(0, 206, 209, 0.2); }
+.type3-border .form-input:focus { border-color: var(--type3); box-shadow: 0 0 20px rgba(124, 252, 0, 0.2); }
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 24px;
+  transition: all 0.3s;
+}
+
+.type1-btn { background: linear-gradient(135deg, var(--type1), #ff9f6b); color: #fff; }
+.type2-btn { background: linear-gradient(135deg, var(--type2), #00ff7f); color: #000; }
+.type3-btn { background: linear-gradient(135deg, var(--type3), #00ff7f); color: #000; }
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+/* Listings Display */
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.listing-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.6) 0%, rgba(2, 6, 23, 0.9) 100%);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s;
+}
+
+.listing-card:hover {
+  transform: translateY(-4px);
+}
+
+.listing-card.type1 { border-color: rgba(248, 105, 57, 0.3); }
+.listing-card.type2 { border-color: rgba(0, 206, 209, 0.3); }
+.listing-card.type3 { border-color: rgba(124, 252, 0, 0.3); }
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.badge-type1 { background: rgba(248, 105, 57, 0.2); color: var(--type1); }
+.badge-type2 { background: rgba(0, 206, 209, 0.2); color: var(--type2); }
+.badge-type3 { background: rgba(124, 252, 0, 0.2); color: var(--type3); }
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .tabs-container { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-orange"></div>
+  <div class="wave-bg wave-cyan"></div>
+  <div class="wave-bg wave-green"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div style="width: 220px; flex-shrink: 0;"></div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="buyer.html">Buy</a>
+      <a href="farmer.html">Sell</a>
+    </nav>
+  </header>
+
+  <div class="tabs-container">
+    <button class="tab active-type1" onclick="switchTab('type1')">
+      TYPE 1
+      <div class="tab-desc">Buyer Brief<br>"I need to buy"</div>
+    </button>
+    <button class="tab active-type2" onclick="switchTab('type2')">
+      TYPE 2
+      <div class="tab-desc">Futures<br>"Buy future harvest"</div>
+    </button>
+    <button class="tab active-type3" onclick="switchTab('type3')">
+      TYPE 3
+      <div class="tab-desc">Inventory<br>"Buy available now"</div>
+    </button>
+  </div>
+
+  <!-- Type 1: Buyer Brief -->
+  <div id="type1" class="arena-content active">
+    <div class="arena-card type1-border">
+      <div class="card-header" style="color: var(--type1);">
+        <span>📋</span> Post a Buyer Brief
+      </div>
+      <div class="card-subheader">
+        Describe what you need. Sellers will bid to supply your requirements.
+      </div>
+
+      <form onsubmit="postBuyerBrief(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Product Needed</label>
+            <select class="form-select" required>
+              <option value="">Select...</option>
+              <option>Avocados</option>
+              <option>Coconuts</option>
+              <option>Almonds</option>
+              <option>Coffee</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quantity (MT)</label>
+            <input type="number" class="form-input" required placeholder="e.g., 100">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Target Price (USD/MT)</label>
+            <input type="number" class="form-input" required placeholder="e.g., 2500">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Delivery Date</label>
+            <input type="date" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Origin Preference</label>
+            <select class="form-select">
+              <option value="">Any</option>
+              <option>Mexico</option>
+              <option>Sri Lanka</option>
+              <option>USA</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quality Grade</label>
+            <select class="form-select">
+              <option>Grade A (Premium)</option>
+              <option>Grade B (Standard)</option>
+              <option>Organic Certified</option>
+            </select>
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label">Detailed Requirements</label>
+            <textarea class="form-textarea" placeholder="Packaging requirements, inspection standards, delivery terms (FOB/CIF), etc."></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn type1-btn">Post Brief (Free) →</button>
+      </form>
+    </div>
+
+    <!-- Type 1 Listings -->
+    <div class="listings-grid" id="type1Listings">
+      <div class="listing-card type1">
+        <div class="card-meta">
+          <span class="badge badge-type1">Type 1</span>
+          <span style="color: var(--muted); font-size: 12px;">Ends in 3 days</span>
+        </div>
+        <h3 style="font-family: 'Orbitron'; margin-bottom: 8px;">Avocados Needed</h3>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 16px;">5,000 MT • Target: $2,400/MT • Mexico preferred</p>
+        <button class="submit-btn type1-btn" style="margin-top: 0; padding: 12px;">Bid to Supply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Type 2: Futures -->
+  <div id="type2" class="arena-content">
+    <div class="arena-card type2-border">
+      <div class="card-header" style="color: var(--type2);">
+        <span>📅</span> Create Futures Auction
+      </div>
+      <div class="card-subheader">
+        Bid on future harvests. Lock in prices for delivery months from now.
+      </div>
+
+      <form onsubmit="postFutures(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Product</label>
+            <select class="form-select" required>
+              <option value="">Select...</option>
+              <option>Almonds</option>
+              <option>Cherries</option>
+              <option>Apples</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Expected Harvest</label>
+            <select class="form-select" required>
+              <option value="">Select season...</option>
+              <option>Fall 2025 (Sep-Nov)</option>
+              <option>Spring 2026 (Mar-May)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quantity (MT)</label>
+            <input type="number" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bid Price (USD/MT)</label>
+            <input type="number" class="form-input" required placeholder="Your offer price">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Delivery Location</label>
+            <select class="form-select">
+              <option>FOB (Port of Origin)</option>
+              <option>CIF (Destination Port)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Origin</label>
+            <select class="form-select">
+              <option>USA (California)</option>
+              <option>Spain</option>
+              <option>Chile</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn type2-btn">Place Futures Bid ($8) →</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Type 3: Inventory -->
+  <div id="type3" class="arena-content">
+    <div class="arena-card type3-border">
+      <div class="card-header" style="color: var(--type3);">
+        <span>📦</span> Available Inventory
+      </div>
+      <div class="card-subheader">
+        Buy available stock for immediate delivery. Verified quality and ready to ship.
+      </div>
+
+      <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(124, 252, 0, 0.2);">
+        <strong style="color: var(--type3);">💡 Tip:</strong> Use the Buyer Dashboard to filter inventory by country and quality grade. Dashbots can auto-bid on inventory that matches your criteria.
+      </div>
+
+      <div style="text-align: center;">
+        <a href="buyer.html" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, var(--type3), #00ff7f); color: #000; text-decoration: none; border-radius: 10px; font-family: 'Orbitron'; font-weight: 800;">
+          Browse All Inventory →
+        </a>
+      </div>
+    </div>
+
+    <div class="listings-grid" id="type3Listings">
+      <div class="listing-card type3">
+        <div class="card-meta">
+          <span class="badge badge-type3">Type 3</span>
+          <span style="color: var(--muted); font-size: 12px;">Available Now</span>
+        </div>
+        <h3 style="font-family: 'Orbitron'; margin-bottom: 8px;">🥑 Avocados</h3>
+        <p style="color: var(--muted); font-size: 14px;">Mexico • 10,000 kg • Grade A</p>
+        <div style="margin: 16px 0; font-size: 24px; font-family: 'Orbitron'; color: var(--type3);">$2.50/kg</div>
+        <button class="submit-btn type3-btn" style="margin-top: 0; padding: 12px;">Bid $8 to Buy</button>
+      </div>
+
+      <div class="listing-card type3">
+        <div class="card-meta">
+          <span class="badge badge-type3">Type 3</span>
+          <span style="color: var(--muted); font-size: 12px;">Available Now</span>
+        </div>
+        <h3 style="font-family: 'Orbitron'; margin-bottom: 8px;">🥥 Coconuts</h3>
+        <p style="color: var(--muted); font-size: 14px;">Sri Lanka • 50,000 nuts</p>
+        <div style="margin: 16px 0; font-size: 24px; font-family: 'Orbitron'; color: var(--type3);">$0.42/nut</div>
+        <button class="submit-btn type3-btn" style="margin-top: 0; padding: 12px;">Bid $8 to Buy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(type) {
+  // Update buttons
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.classList.remove('active-type1', 'active-type2', 'active-type3');
+  });
+  
+  // Hide all content
+  document.querySelectorAll('.arena-content').forEach(content => {
+    content.classList.remove('active');
+  });
+
+  // Show selected
+  document.getElementById(type).classList.add('active');
+  
+  // Highlight correct tab
+  const tabIndex = type === 'type1' ? 0 : type === 'type2' ? 1 : 2;
+  const colors = ['active-type1', 'active-type2', 'active-type3'];
+  document.querySelectorAll('.tab')[tabIndex].classList.add(colors[tabIndex]);
+}
+
+function postBuyerBrief(e) {
+  e.preventDefault();
+  alert('Buyer Brief posted! Sellers can now bid to supply your requirements.');
+}
+
+function postFutures(e) {
+  e.preventDefault();
+  alert('Futures bid placed! You will be matched when harvest season approaches.');
+}
+</script>
+
+</body>
+</html>

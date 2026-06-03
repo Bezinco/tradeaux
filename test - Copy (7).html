@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AdAux — The Ad Auction Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  /* AdAux Red Theme Variables */
+  --adaux-red-primary: #d92b2b;
+  --adaux-red-dark: #6b1616;
+  --adaux-red-light: #ff6b6b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { 
+  width: 100%; 
+  min-height: 100%; 
+  font-family: 'Orbitron', sans-serif; 
+  overflow-x: hidden; 
+}
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+/* ===== BACKGROUND WAVES (Identical structure, adjusted colors for Red Theme) ===== */
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-1 { background: radial-gradient(circle at 30% 40%, rgba(217, 43, 43, 0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+.wave-2 { background: radial-gradient(circle at 50% 50%, rgba(107, 22, 22, 0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 107, 107, 0.3), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== ADAUX LOGO (Modified from PCAux) ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(217, 43, 43, 0.5));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+  pointer-events: none; /* Allow clicking through the logo area */
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+/* UNIFIED RED GRADIENT FOR ALL LETTERS */
+.gem-letter::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Red Gradient applied to all letters */
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217,43,43,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(217,43,43,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #ff3b3b;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+/* Sparkles positioned for ADAUX (5 letters) */
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(217,43,43,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex; justify-content: flex-end; align-items: center;
+  padding: 20px 0 40px;
+}
+
+.nav { display: flex; gap: 12px; align-items: center;}
+
+.nav a {
+  font-size: 14px; font-weight: 500; padding: 8px 16px;
+  border: 2px solid var(--adaux-red-primary); border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px); color: var(--text);
+  text-decoration: none; transition: all 0.3s ease;
+  font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 1px;
+}
+
+.nav a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  border-color: #fff;
+  background: rgba(217, 43, 43, 0.2);
+}
+
+.user-info { display: none; align-items: center; gap: 10px; }
+.user-info.show { display: flex; }
+
+/* ===== ADVERTISING CARDS ===== */
+.gem-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin: 40px 0 60px;
+}
+
+.gem-card {
+  border-radius: 20px; overflow: hidden;
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  backdrop-filter: blur(4px); transition: all 0.4s ease;
+  border-width: 2px; border-style: solid; position: relative;
+  display: flex; flex-direction: column;
+}
+
+.gem-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+}
+
+.card-red { border-color: #d92b2b; }
+.card-dark-red { border-color: #6b1616; }
+.card-light-red { border-color: #ff6b6b; }
+
+/* Card Wave Animation (Red Theme) */
+.card-wave {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0; pointer-events: none; border-radius: 20px; opacity: 0.3;
+}
+
+.card-red .card-wave, .card-dark-red .card-wave, .card-light-red .card-wave {
+  background: repeating-linear-gradient(45deg, 
+    rgba(217, 43, 43, 0.15) 0px, rgba(217, 43, 43, 0.15) 40px,
+    rgba(255, 107, 107, 0.25) 40px, rgba(255, 107, 107, 0.25) 80px,
+    rgba(217, 43, 43, 0.35) 80px, rgba(217, 43, 43, 0.35) 120px);
+  background-size: 200% 200%;
+  animation: waveFlow 3s linear infinite;
+}
+
+@keyframes waveFlow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+.preview-area {
+  position: relative; width: 100%; padding: 30px;
+  z-index: 1; display: flex; justify-content: center; align-items: center;
+  flex-grow: 1; min-height: 200px;
+}
+
+.video-container {
+  position: relative; width: 100%; aspect-ratio: 1 / 1;
+  overflow: hidden; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  background: #000; display: flex; justify-content: center; align-items: center;
+}
+
+/* Use emoji as fallback/content placeholder */
+.card-icon {
+  font-size: 80px;
+  filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.card-info {
+  padding: 24px; position: relative; z-index: 1;
+  background: rgba(2, 6, 23, 0.8);
+  text-align: center;
+  flex-grow: 0;
+}
+
+.card-title {
+  font-size: 20px; font-weight: 800; margin-bottom: 10px;
+  text-transform: uppercase; letter-spacing: 1px; color: #fff;
+}
+
+.card-desc {
+  font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 16px;
+  min-height: 40px;
+}
+
+.card-price {
+  font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 20px;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.card-btn {
+  display: block; width: 100%; padding: 12px 0;
+  border: 1px solid var(--adaux-red-primary);
+  background: rgba(217, 43, 43, 0.1);
+  color: #fff; text-transform: uppercase; font-weight: 700; font-size: 12px;
+  letter-spacing: 2px; border-radius: 6px; cursor: pointer; text-decoration: none;
+  transition: all 0.3s;
+}
+
+.card-btn:hover {
+  background: var(--adaux-red-primary);
+  box-shadow: 0 0 15px var(--adaux-red-primary);
+}
+
+/* Magnum Specifics */
+.platform-list {
+  font-size: 11px; color: var(--muted); text-align: left; margin-bottom: 20px;
+  line-height: 1.6; padding-left: 10px;
+}
+
+.platform-list li {
+  list-style: none;
+  position: relative;
+  padding-left: 12px;
+}
+
+.platform-list li::before {
+  content: "•"; position: absolute; left: 0; color: var(--adaux-red-primary);
+}
+
+/* ===== HOW IT WORKS SECTION ===== */
+.how-it-works {
+  margin: 80px 0 60px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.step-card {
+  background: rgba(15, 32, 64, 0.4); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; padding: 30px; position: relative;
+  transition: 0.3s;
+}
+
+.step-card:hover {
+  border-color: var(--adaux-red-primary);
+  background: rgba(217, 43, 43, 0.05);
+}
+
+.step-number {
+  font-size: 60px; font-weight: 900; color: rgba(255,255,255,0.05);
+  position: absolute; top: 10px; right: 20px; line-height: 1;
+}
+
+.step-title {
+  font-size: 18px; font-weight: 700; color: var(--adaux-red-light);
+  margin-bottom: 15px; text-transform: uppercase;
+}
+
+.step-desc {
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+}
+
+/* ===== TRUST & FOOTER ===== */
+.trust {
+  margin: 60px 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+}
+
+.trust-item {
+  padding: 20px; border: 1px solid rgba(217, 43, 43, 0.3);
+  border-radius: 12px;
+  background: rgba(15, 32, 64, 0.5);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.trust-item strong {
+  display: block;
+  color: #fff;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+footer {
+  margin-top: 80px;
+  padding: 30px 0 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+footer a:hover {
+  color: var(--adaux-red-primary);
+}
+
+@media (max-width: 1000px) {
+  .gem-cards {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .trust {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .how-it-works {
+    grid-template-columns: 1fr;
+  }
+  .gem-logo-corner {
+    transform: scale(0.25);
+  }
+}
+
+@media (max-width: 600px) {
+  .trust {
+    grid-template-columns: 1fr;
+  }
+  .nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .header {
+    justify-content: center;
+  }
+}
+</style>
+<base target="_blank">
+</head>
+
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<!-- 3D ADAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="A">
+      A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="D">
+      D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="A">
+      A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="U">
+      U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="X">
+      X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <nav class="nav">
+      <a href="#how-it-works">How It Works</a>
+      <a href="app.html">Platform</a>
+      <a href="#" id="login-btn">Sign In</a>
+      <div class="user-info" id="user-info">
+        <span id="user-email"></span>
+        <a href="#" id="logout-btn">Logout</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN 3-CARD GRID -->
+  <div class="gem-cards">
+
+    <!-- CARD 1: FOR ADVERTISERS -->
+    <div class="gem-card card-red">
+      <div class="card-wave"></div>
+      <div class="preview-area">
+        <div class="card-icon">🚀</div>
+      </div>
+      <div class="card-info">
+        <div class="card-title">For Advertisers</div>
+        <div class="card-desc">
+          Run auctions across YouTube, TikTok, Roku, and more. Pay only flat fees. 0% commission.
+        </div>
+        <div class="card-price">$25 per auction</div>
+        <a href="brief.html" class="card-btn">Start Campaign</a>
+      </div>
+    </div>
+
+    <!-- CARD 2: FOR CREATORS -->
+    <div class="gem-card card-dark-red">
+      <div class="card-wave"></div>
+      <div class="preview-area">
+        <div class="card-icon">🎬</div>
+      </div>
+      <div class="card-info">
+        <div class="card-title">For Creators</div>
+        <div class="card-desc">
+          List your channels. Set your bot. Earn from advertisers directly. No platform fees.
+        </div>
+        <div class="card-price">Free to join</div>
+        <a href="creator-onboarding.html" class="card-btn">Join as Creator</a>
+      </div>
+    </div>
+
+    <!-- CARD 3: MAGNUM SEARCH (FLAGSHIP) -->
+    <div class="gem-card card-light-red">
+      <div class="card-wave"></div>
+      <div class="preview-area">
+        <div class="card-icon">🔫</div>
+      </div>
+      <div class="card-info">
+        <div class="card-title">MAGNUM SEARCH</div>
+        <div class="card-desc" style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--adaux-red-light);">
+          The biggest search in advertising.
+        </div>
+        <div class="card-desc">
+          One brief. All platforms. <strong>$199</strong>.
+        </div>
+        
+        <!-- Platform List -->
+        <ul class="platform-list">
+          <li>YouTube • TikTok • Twitch</li>
+          <li>Roku • Hulu • Instagram</li>
+          <li>Facebook • Discord • Snapchat</li>
+          <li>Online mags • Forex • Cruise TV</li>
+        </ul>
+
+        <a href="brief.html" class="card-btn" style="background: var(--adaux-red-primary); color: white; border: none;">
+          FIRE MAGNUM SEARCH
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HOW IT WORKS SECTION -->
+  <div id="how-it-works" class="how-it-works">
+    <div class="step-card">
+      <div class="step-number">01</div>
+      <div class="step-title">Create a Brief</div>
+      <div class="step-desc">
+        Tell us your target audience, budget, and goals. We define the scope of your campaign instantly.
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-number">02</div>
+      <div class="step-title">Run the Auction</div>
+      <div class="step-desc">
+        Watch creators compete in 3 minutes. Cards flip. Bids happen live in real-time.
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-number">03</div>
+      <div class="step-title">Select the Winner</div>
+      <div class="step-desc">
+        Choose the creator that best fits your campaign. Pay them directly. No hidden cuts.
+      </div>
+    </div>
+  </div>
+
+  <!-- TRUST SECTION -->
+  <div class="trust">
+    <div class="trust-item">
+      <strong>Canadian Platform</strong>
+      AdAux is a Canadian platform. Flat fees. No hidden costs.
+    </div>
+    <div class="trust-item">
+      <strong>0% Commission</strong>
+      0% commission on ad spend. Creators keep 100% of their earnings.
+    </div>
+    <div class="trust-item">
+      <strong>Transparent Matching</strong>
+      Transparent matching. You see every bid and every creator metric.
+    </div>
+    <div class="trust-item">
+      <strong>Legal Compliance</strong>
+      Governed by Canadian law. Secure and audited transactions.
+    </div>
+  </div>
+
+  <footer>
+    <div>© 2024 AdAux Inc.</div>
+    <div><a href="#">Legal</a> · <a href="#">Privacy</a> · <a href="#">Terms</a></div>
+  </footer>
+</div>
+
+<script>
+// Supabase Auth (Preserved from PCAux)
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+document.addEventListener('DOMContentLoaded', async function() {
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userInfo = document.getElementById('user-info');
+  const userEmail = document.getElementById('user-email');
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) showLoggedIn(session.user);
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) showLoggedIn(session.user);
+    else if (event === 'SIGNED_OUT') showLoggedOut();
+  });
+
+  function showLoggedIn(user) {
+    loginBtn.style.display = 'none';
+    userInfo.classList.add('show');
+    userEmail.textContent = user.email;
+  }
+
+  function showLoggedOut() {
+    loginBtn.style.display = 'block';
+    userInfo.classList.remove('show');
+  }
+
+  if (logoutBtn) logoutBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await supabaseClient.auth.signOut();
+  });
+
+  if (loginBtn) loginBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    // Redirect to your login page or trigger auth
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+    if (error) console.error('Login error:', error);
+  });
+});
+</script>
+
+</body>
+</html>

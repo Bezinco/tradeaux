@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Live Commodity Auction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --neon-green: #7CFC00;
+      --gold: #FFD966;
+      --silver: #C0C7D9;
+      --bronze: #CD7F32;
+      --cyan: #00ced1;
+      --muted: #9ca3af;
+    }
+    
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #F0F3FA;
+      background: #020617;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    .bg-waves {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .wave-bg {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      filter: blur(100px);
+      opacity: 0.15;
+      animation: waveBgDrift 24s ease-in-out infinite;
+      border-radius: 50%;
+    }
+    .wave-1 {
+      background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.5), transparent 70%);
+      top: -40%;
+      left: -20%;
+      animation-delay: 0s;
+    }
+    .wave-2 {
+      background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%);
+      top: -30%;
+      left: -10%;
+      animation-delay: 8s;
+    }
+    .wave-3 {
+      background: radial-gradient(circle at 70% 60%, rgba(255, 217, 102, 0.4), transparent 70%);
+      top: -20%;
+      left: 0%;
+      animation-delay: 16s;
+    }
+    @keyframes waveBgDrift {
+      0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+      50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+      100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+    }
+    
+    .gem-logo-corner {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(124, 252, 0, 0.3));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
+    }
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.12s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.5s; }
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+    .gem-letter::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #1a3a1a 0%, #2d5a2d 15%, #7CFC00 30%, #aaff44 45%, #7CFC00 60%, #2d5a2d 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(124, 252, 0, 0.35);
+      transform: translateZ(2px);
+    }
+    .gem-letter .edge-top {
+      position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .light-source {
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+    }
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+    .sparkle {
+      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+    }
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .depth-shadow {
+      position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+      background: radial-gradient(ellipse at center, rgba(124, 252, 0, 0.3) 0%, transparent 80%);
+      filter: blur(20px); z-index: -1;
+    }
+    
+    .glass-header {
+      backdrop-filter: blur(14px);
+      background: rgba(3,5,12,0.5);
+      border-bottom: 1px solid rgba(124,252,0,0.35);
+      padding: 12px 28px;
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 100;
+    }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #BFC9E0;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      border: 1px solid rgba(124,252,0,0.3);
+      background: rgba(0,0,0,0.3);
+      transition: all 0.3s;
+    }
+    .nav-links a:hover { border-color: var(--neon-green); color: var(--neon-green); transform: translateY(-2px); }
+    
+    .main-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 40px 60px 220px;
+      position: relative;
+      z-index: 2;
+    }
+    @media (max-width: 1000px) {
+      .main-container { padding: 20px 20px 60px 20px; }
+      .gem-logo-corner { transform: scale(0.25); }
+    }
+    
+    .auction-cockpit {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .timer-panel {
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 8px 28px;
+      text-align: center;
+      border: 1px solid rgba(124,252,0,0.5);
+    }
+    .status-label { font-size: 0.7rem; letter-spacing: 2px; color: #FFD966; font-family: 'Orbitron', sans-serif; }
+    .timer-digits {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--neon-green);
+    }
+    .timer-digits.warning { color: #ff5050; animation: pulse 0.8s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    .stats-group {
+      display: flex;
+      gap: 28px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      padding: 8px 28px;
+      border-radius: 60px;
+    }
+    .stat { text-align: center; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94A3B8; font-family: 'Orbitron', sans-serif; }
+    .stat-value { font-weight: 800; font-size: 1.3rem; color: var(--neon-green); font-family: 'Orbitron', monospace; }
+    .controls { display: flex; gap: 16px; margin: 16px 0 24px; justify-content: center; }
+    .btn {
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 10px 32px;
+      border-radius: 48px;
+      cursor: pointer;
+      background: rgba(20,30,50,0.9);
+      color: white;
+      transition: all 0.3s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(105deg, #10b981, #2dd4bf); color: #010101; }
+    .btn-reset { background: linear-gradient(105deg, #9b2c2c, #e54848); }
+    
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 165px));
+      gap: 22px;
+      justify-content: center;
+      margin: 28px 0;
+    }
+    @media (max-width: 920px) { .cards-grid { grid-template-columns: repeat(4, minmax(0, 165px)); } }
+    @media (max-width: 720px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 180px)); } }
+    
+    .market-card {
+      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      border: 2px solid rgba(124,252,0,0.3);
+      padding: 14px 10px;
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .market-card:hover { transform: translateY(-8px); border-color: var(--neon-green); }
+    
+    .card-wave {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.2;
+      background: repeating-linear-gradient(45deg, rgba(124,252,0,0.1) 0px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.15) 80px, rgba(124,252,0,0.2) 120px);
+      background-size: 200% 200%;
+      animation: waveFlow 6s linear infinite;
+      border-radius: 24px;
+    }
+    @keyframes waveFlow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+    
+    .rank-flag {
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 40px;
+      z-index: 3;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; }
+    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+    .verified-badge {
+      position: absolute;
+      top: -6px;
+      right: 10px;
+      background: rgba(0,0,0,0.85);
+      border-radius: 30px;
+      padding: 3px 10px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--neon-green);
+      border: 1px solid #7CFC00;
+      z-index: 3;
+    }
+    .product-emoji { font-size: 2.8rem; margin-bottom: 10px; }
+    .card-title { font-weight: 800; font-size: 0.95rem; }
+    .origin { font-size: 0.65rem; color: #9ca6bb; margin-bottom: 8px; }
+    .price-row { display: flex; justify-content: center; gap: 8px; margin: 6px 0; }
+    .current-price { font-weight: 800; font-size: 1.2rem; color: #FFE484; }
+    .change-badge { font-size: 0.7rem; font-weight: 600; }
+    .up { color: #7CFC00; }
+    .down { color: #FF5E5E; }
+    .heat-bar-container { margin: 8px 0; background: #1e293b; border-radius: 12px; height: 5px; width: 100%; }
+    .heat-fill { height: 100%; background: linear-gradient(90deg, #7CFC00, #FFD966); }
+    .card-meta { display: flex; justify-content: space-between; font-size: 0.62rem; margin-top: 8px; color: #a0aec0; width: 100%; gap: 8px; }
+    .score-pill { background: #1E293B; padding: 2px 8px; border-radius: 40px; color: #7CFC00; }
+    
+    body.auction-frozen .card-wave,
+    body.auction-frozen .wave-bg,
+    body.auction-frozen .sparkle,
+    body.auction-frozen .light-source,
+    body.auction-frozen .gem-letter {
+      animation-play-state: paused !important;
+    }
+    
+    .info-bar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      border-left: 3px solid #7CFC00;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(70px);
+      background: rgba(15, 32, 64, 0.98);
+      backdrop-filter: blur(12px);
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-family: 'Orbitron', sans-serif;
+      border-left: 4px solid #7CFC00;
+      transition: 0.3s;
+      opacity: 0;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+    
+    .winners-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: linear-gradient(145deg, #071126, #020617);
+      border: 3px solid #FFD966;
+      border-radius: 52px;
+      padding: 32px 48px;
+      text-align: center;
+      z-index: 1100;
+      transition: 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      font-family: 'Orbitron', sans-serif;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .winners-overlay.show { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+    .winners-list {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .winner-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px;
+      border-bottom: 1px solid rgba(124,252,0,0.2);
+    }
+    .winner-rank {
+      font-size: 1.5rem;
+      font-weight: 800;
+      min-width: 60px;
+    }
+    .winner-info {
+      flex: 1;
+    }
+    .winner-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .winner-price {
+      color: var(--neon-green);
+      font-size: 0.9rem;
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-card {
+      background: linear-gradient(145deg, #0B1122, #030712);
+      max-width: 500px;
+      width: 92%;
+      border-radius: 32px;
+      border: 2px solid #7CFC00;
+      padding: 28px 24px;
+      position: relative;
+    }
+    .modal-close { position: absolute; right: 22px; top: 18px; font-size: 28px; color: #ccc; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="glass-header">
+  <div class="nav-links"><a href="#">LIVE</a><a href="#">CO-OPS</a><a href="#">LEADERBOARD</a></div>
+</div>
+
+<div class="main-container">
+  <div class="auction-cockpit">
+    <div class="timer-panel">
+      <div class="status-label" id="statusLabel">READY</div>
+      <div class="timer-digits" id="timerMain">03:00</div>
+    </div>
+    <div class="stats-group">
+      <div class="stat"><div class="stat-label">ACTIVE</div><div class="stat-value" id="statActive">0</div></div>
+      <div class="stat"><div class="stat-label">TOTAL</div><div class="stat-value" id="statTotal">0</div></div>
+      <div class="stat"><div class="stat-label">🔥 TOP</div><div class="stat-value" id="statTopScore">0%</div></div>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button class="btn btn-primary" id="startBtn">▶ START AUCTION</button>
+    <button class="btn btn-reset" id="resetBtn">⟳ RESET</button>
+  </div>
+  
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<div class="info-bar" id="infoBar"></div>
+<div class="toast-msg" id="toastMsg"></div>
+<div class="winners-overlay" id="winnersOverlay">
+  <div style="font-size: 48px;">🏆 TOP 5 WINNERS 🏆</div>
+  <div class="winners-list" id="winnersList"></div>
+  <button class="btn" style="margin-top: 20px; background:#2d3748;" onclick="closeWinnersOverlay()">Close</button>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <button class="modal-close" id="closeModalBtn">✕</button>
+    <div class="modal-emoji" id="modalEmoji" style="font-size: 48px; text-align: center;">🌾</div>
+    <div class="modal-title" id="modalName" style="font-size: 24px; font-weight: 800; text-align: center; margin: 12px 0;"></div>
+    <div class="modal-origin" id="modalOrigin" style="text-align: center; color: var(--muted);"></div>
+    <div style="text-align:center; margin: 20px 0;">
+      <span style="font-size:2rem; font-weight:800; color:#FFD966;" id="modalPrice"></span>
+      <span id="modalChange" style="margin-left:12px;"></span>
+    </div>
+    <div>📧 <span id="modalEmail"></span></div>
+    <div>📱 <span id="modalPhone"></span></div>
+  </div>
+</div>
+
+<script>
+  // Data
+  const baseItems = [
+    { id:1, name:"Savannah Peanuts", coop:"Georgia Nut Growers", origin:"Georgia", price:1.24, heat:78, bids:47, volume:50200, momentum:0.62, cropEmoji:"🥜", email:"sales@ga-peanuts.com", phone:"+1 (404) 555-2101" },
+    { id:2, name:"Gold Almonds", coop:"California Crown", origin:"California", price:6.48, heat:55, bids:32, volume:24800, momentum:0.31, cropEmoji:"🌰", email:"hello@cal-almonds.coop", phone:"+1 (916) 555-6723" },
+    { id:3, name:"Ceylon Coconuts", coop:"Sri Lanka Direct", origin:"Sri Lanka", price:0.44, heat:65, bids:89, volume:102000, momentum:-0.18, cropEmoji:"🥥", email:"export@ceylon-coconut.lk", phone:"+94 77 123 4567" },
+    { id:4, name:"Green Avocados", coop:"Michoacán Harvest", origin:"Mexico", price:2.52, heat:72, bids:56, volume:31200, momentum:0.79, cropEmoji:"🥑", email:"ventas@aguacate.mx", phone:"+52 (443) 234-8765" },
+    { id:5, name:"Colombian Excelso", coop:"Andean Coffee", origin:"Colombia", price:4.85, heat:48, bids:23, volume:20500, momentum:0.42, cropEmoji:"☕", email:"trade@coffeeandean.co", phone:"+57 601 789 1234" },
+    { id:6, name:"Cashew W320", coop:"Viet Delta", origin:"Vietnam", price:3.22, heat:62, bids:41, volume:15800, momentum:0.51, cropEmoji:"🫘", email:"cashew@vietdelta.vn", phone:"+84 28 3920 1188" },
+    { id:7, name:"Forastero Cocoa", coop:"Ivory Harvest", origin:"Ivory Coast", price:2.85, heat:44, bids:18, volume:29500, momentum:-0.28, cropEmoji:"🍫", email:"contact@ivoirecacao.ci", phone:"+225 27 2245 9912" },
+    { id:8, name:"Kent Mangoes", coop:"PeruBio", origin:"Peru", price:1.18, heat:51, bids:27, volume:42000, momentum:0.19, cropEmoji:"🥭", email:"mango@perubio.pe", phone:"+51 1 654 9988" },
+    { id:9, name:"Macadamia Nuts", coop:"Queensland", origin:"Australia", price:8.45, heat:38, bids:12, volume:7800, momentum:0.68, cropEmoji:"🥜", email:"info@macadamia.au", phone:"+61 7 4123 4567" },
+    { id:10, name:"Chile Walnuts", coop:"Southern Nut", origin:"Chile", price:4.22, heat:42, bids:19, volume:22500, momentum:-0.09, cropEmoji:"🌰", email:"ventas@nueces.cl", phone:"+56 2 2789 1122" }
+  ];
+  for (let i = 11; i <= 47; i++) {
+    baseItems.push({
+      id: i, name: `Bidder ${i}`, coop: `Co-op ${i}`, origin: ["USA","Mexico","Brazil","India","Vietnam"][i%5],
+      price: 0.5 + Math.random()*15, heat: 20+Math.random()*70, bids: Math.floor(Math.random()*35)+5,
+      volume: Math.floor(Math.random()*80000)+5000, momentum: (Math.random()-0.5)*0.8,
+      cropEmoji: ["🌾","🌽","🍎","🍇","🍅"][i%5], email: `bidder${i}@tradeaux.com`, phone: `+1 (555) 555-${1000+i}`
+    });
+  }
+
+  // Game State - SIMPLE: just running or finished, no rounds
+  let allBidders = [];
+  let auctionRunning = false;
+  let auctionFinished = false;
+  let timerSeconds = 180;
+  let timerId = null;
+  let marketId = null;
+
+  function computeScore(card, list) {
+    let maxP = Math.max(...list.map(c=>c.price),0.01);
+    let maxB = Math.max(...list.map(c=>c.bids),1);
+    let maxV = Math.max(...list.map(c=>c.volume),1);
+    return (card.price/maxP)*0.4 + Math.min(1,card.heat/100)*0.2 + (card.bids/maxB)*0.2 + (card.volume/maxV)*0.1 + Math.min(1,Math.max(0,(card.momentum+0.5)))*0.1;
+  }
+
+  function recalcAndSort() {
+    for (let c of allBidders) c.score = computeScore(c, allBidders);
+    allBidders.sort((a,b)=>b.score - a.score);
+  }
+
+  function updateUI() {
+    let visible = allBidders.slice(0, Math.min(20, allBidders.length));
+    document.getElementById('statActive').innerText = visible.length;
+    document.getElementById('statTotal').innerText = allBidders.length;
+    if (visible.length) document.getElementById('statTopScore').innerText = (visible[0].score*100).toFixed(1)+'%';
+    else document.getElementById('statTopScore').innerText = "0%";
+    
+    if (auctionFinished) {
+      document.getElementById('statusLabel').innerHTML = '🏆 AUCTION ENDED';
+    } else if (auctionRunning) {
+      document.getElementById('statusLabel').innerHTML = 'LIVE AUCTION';
+    } else {
+      document.getElementById('statusLabel').innerHTML = 'READY';
+    }
+    
+    document.getElementById('infoBar').innerHTML = auctionFinished ? '🔒 AUCTION ENDED - TOP 5 WINNERS' : (auctionRunning ? `${allBidders.length} bidders competing` : 'Press START');
+    
+    const container = document.getElementById('cardsGrid');
+    const oldCards = Array.from(container.children);
+    const oldPositions = new Map();
+    
+    if (auctionRunning && !auctionFinished) {
+      oldCards.forEach(el => {
+        let id = el.getAttribute('data-id');
+        if (id) {
+          let rect = el.getBoundingClientRect();
+          oldPositions.set(id, { left: rect.left, top: rect.top });
+        }
+      });
+    }
+    
+    container.innerHTML = '';
+    visible.forEach((card, idx) => {
+      let div = document.createElement('div');
+      div.className = 'market-card';
+      div.setAttribute('data-id', card.id);
+      
+      let cardWave = document.createElement('div');
+      cardWave.className = 'card-wave';
+      div.appendChild(cardWave);
+      
+      let rankVal = idx+1;
+      let rankHtml = rankVal <= 3 ? `<div class="rank-flag ${rankVal===1?'rank-1':rankVal===2?'rank-2':'rank-3'}">#${rankVal}</div>` : `<div class="rank-flag" style="background:#1e293b;">#${rankVal}</div>`;
+      let changeClass = (card.change||0) >= 0 ? 'up' : 'down';
+      let sign = (card.change||0) >= 0 ? '+' : '';
+      div.innerHTML += `
+        ${rankHtml}
+        <div class="verified-badge">✓ Co-op</div>
+        <div class="product-emoji">${card.cropEmoji}</div>
+        <div class="card-title">${card.name}</div>
+        <div class="origin">${card.origin}</div>
+        <div class="price-row"><span class="current-price">$${card.price.toFixed(2)}</span><span class="change-badge ${changeClass}">${sign}${(card.change||0).toFixed(1)}%</span></div>
+        <div class="heat-bar-container"><div class="heat-fill" style="width: ${Math.min(100,card.heat)}%"></div></div>
+        <div class="card-meta"><span>📊 ${card.bids} bids</span><span class="score-pill">⚡ ${(card.score*100).toFixed(0)}%</span></div>
+        <div class="card-meta"><span>📦 ${card.volume.toLocaleString()} u</span><span>🔥 ${Math.round(card.heat)}°</span></div>
+      `;
+      div.onclick = () => openModal(card, rankVal);
+      container.appendChild(div);
+    });
+    
+    if (auctionRunning && !auctionFinished && oldPositions.size > 0) {
+      requestAnimationFrame(() => {
+        const newCards = Array.from(container.children);
+        newCards.forEach(el => {
+          const id = el.getAttribute('data-id');
+          const oldPos = oldPositions.get(id);
+          if (oldPos) {
+            const rect = el.getBoundingClientRect();
+            const dx = oldPos.left - rect.left;
+            const dy = oldPos.top - rect.top;
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+              el.style.transform = `translate(${dx}px, ${dy}px)`;
+              el.style.transition = 'none';
+              el.offsetHeight;
+              el.style.transition = 'transform 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+              el.style.transform = '';
+            }
+          }
+        });
+      });
+    }
+  }
+
+  function updatePrices() {
+    if (auctionFinished || !auctionRunning) return;
+    for (let c of allBidders) {
+      let volatility = (Math.random()-0.5)*7;
+      let newPrice = c.price * (1 + volatility/100);
+      newPrice = Math.max(0.07, newPrice);
+      let old = c.price;
+      c.price = parseFloat(newPrice.toFixed(2));
+      c.change = ((c.price - old)/old)*100;
+      if (Math.abs(c.change) > 2) c.heat = Math.min(96, c.heat + 2.5);
+      else c.heat = Math.min(95, Math.max(12, c.heat + (Math.random()-0.5)*5));
+      if (Math.random()<0.28) c.bids += Math.floor(Math.random()*2)+1;
+      c.momentum = Math.min(0.92, Math.max(-0.85, c.momentum + (Math.random()-0.5)*0.23));
+    }
+    recalcAndSort();
+    updateUI();
+  }
+
+  function killAllTimers() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    if (marketId) { clearInterval(marketId); marketId = null; }
+  }
+
+  function endAuctionAndShowWinners() {
+    killAllTimers();
+    auctionRunning = false;
+    auctionFinished = true;
+    document.body.classList.add('auction-frozen');
+    
+    // Get top 5 winners based on final scores
+    let winners = allBidders.slice(0, 5);
+    updateUI();
+    
+    const medals = ['🥇', '🥈', '🥉', '🏅', '🏅'];
+    let winnersHtml = '';
+    winners.forEach((winner, idx) => {
+      winnersHtml += `
+        <div class="winner-item">
+          <div class="winner-rank">${medals[idx]} #${idx+1}</div>
+          <div class="winner-info">
+            <div class="winner-name">${winner.name}</div>
+            <div class="winner-price">$${winner.price.toFixed(2)} · ${winner.origin}</div>
+          </div>
+          <div class="score-pill">⚡ ${(winner.score*100).toFixed(0)}%</div>
+        </div>
+      `;
+    });
+    
+    document.getElementById('winnersList').innerHTML = winnersHtml;
+    document.getElementById('winnersOverlay').classList.add('show');
+    showToast(`🏆 AUCTION COMPLETE! Top 5 winners crowned.`);
+  }
+
+  function startTimer() {
+    if (timerId) clearInterval(timerId);
+    timerId = setInterval(() => {
+      if (!auctionRunning || auctionFinished) return;
+      if (timerSeconds <= 1) {
+        clearInterval(timerId);
+        timerId = null;
+        endAuctionAndShowWinners();
+      } else {
+        timerSeconds--;
+        let mins = Math.floor(timerSeconds/60), secs = timerSeconds%60;
+        document.getElementById('timerMain').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        if (timerSeconds <= 10) document.getElementById('timerMain').classList.add('warning');
+        else document.getElementById('timerMain').classList.remove('warning');
+      }
+    }, 1000);
+  }
+
+  function startAuction() {
+    if (auctionRunning) {
+      showToast("Auction already running! Press RESET first.");
+      return;
+    }
+    if (auctionFinished) {
+      resetGame();
+    }
+    
+    killAllTimers();
+    document.body.classList.remove('auction-frozen');
+    auctionRunning = true;
+    auctionFinished = false;
+    timerSeconds = 180;
+    
+    let mins = Math.floor(timerSeconds/60), secs = timerSeconds%60;
+    document.getElementById('timerMain').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    document.getElementById('timerMain').classList.remove('warning');
+    
+    startTimer();
+    marketId = setInterval(() => updatePrices(), 2800);
+    updateUI();
+    showToast(`🎬 AUCTION STARTED! ${allBidders.length} bidders competing for Top 5!`);
+  }
+
+  function resetGame() {
+    killAllTimers();
+    auctionRunning = false;
+    auctionFinished = false;
+    document.body.classList.remove('auction-frozen');
+    
+    allBidders = baseItems.map(c => ({...c, change:0, score:0, heat: c.heat * (0.7+Math.random()*0.6), price: c.price * (0.85+Math.random()*0.3)}));
+    for (let c of allBidders) { 
+      c.price = parseFloat(c.price.toFixed(2)); 
+      c.heat = Math.min(95, Math.max(10, c.heat));
+    }
+    recalcAndSort();
+    
+    timerSeconds = 180;
+    let mins = Math.floor(timerSeconds/60), secs = timerSeconds%60;
+    document.getElementById('timerMain').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    document.getElementById('timerMain').classList.remove('warning');
+    
+    updateUI();
+    document.getElementById('winnersOverlay').classList.remove('show');
+    showToast(`🔄 Game reset. ${allBidders.length} bidders ready.`);
+  }
+
+  function showToast(msg) { 
+    let t = document.getElementById('toastMsg'); 
+    t.innerText = msg; 
+    t.classList.add('visible'); 
+    setTimeout(() => t.classList.remove('visible'), 2500);
+  }
+  
+  function closeWinnersOverlay() {
+    document.getElementById('winnersOverlay').classList.remove('show');
+  }
+  
+  function openModal(card, rank) {
+    document.getElementById('modalEmoji').innerHTML = card.cropEmoji;
+    document.getElementById('modalName').innerHTML = card.name;
+    document.getElementById('modalOrigin').innerHTML = `${card.coop} • ${card.origin}`;
+    document.getElementById('modalPrice').innerHTML = `$${card.price.toFixed(2)}`;
+    let chSpan = document.getElementById('modalChange');
+    chSpan.innerHTML = `${(card.change||0)>=0?'+':''}${(card.change||0).toFixed(1)}%`;
+    chSpan.style.color = (card.change||0)>=0?'#7CFC00':'#FF5E5E';
+    document.getElementById('modalEmail').innerHTML = card.email;
+    document.getElementById('modalPhone').innerHTML = card.phone;
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+  
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+  document.getElementById('startBtn').onclick = startAuction;
+  document.getElementById('resetBtn').onclick = resetGame;
+  document.getElementById('closeModalBtn').onclick = closeModal;
+  document.getElementById('modalOverlay').onclick = (e) => { if(e.target === document.getElementById('modalOverlay')) closeModal(); };
+  
+  resetGame();
+</script>
+</body>
+</html>

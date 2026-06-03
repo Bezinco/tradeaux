@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>TradeAux • Bot Fleet Oversight | Admin Command</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+.bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
+.wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0,206,209,0.3), transparent 70%); top:-40%; left:-20%; }
+.wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124,252,0,0.2), transparent 70%); top:-30%; left:-10%; animation-delay:8s; }
+.wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,59,59,0.15), transparent 70%); top:-20%; left:0%; animation-delay:16s; }
+@keyframes waveBgDrift { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(40px,-30px) scale(1.05);} 100%{transform:translate(-30px,20px) scale(1);} }
+
+.gem-logo-corner { display: inline-block; filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4)); transform-style: preserve-3d; perspective: 1000px; transform: scale(0.55); transform-origin: left center; }
+.gem-text { font-size: 80px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; gap: 2px; }
+.gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
+.gem-letter:nth-child(1) { animation-delay: 0s; } .gem-letter:nth-child(2) { animation-delay: 0.2s; } .gem-letter:nth-child(3) { animation-delay: 0.4s; } .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; } .gem-letter:nth-child(6) { animation-delay: 0.10s; } .gem-letter:nth-child(7) { animation-delay: 0.30s; } .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+@keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+.gem-letter:nth-child(1)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+.gem-letter:nth-child(2)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+.gem-letter:nth-child(3)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px); }
+.gem-letter:nth-child(4)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+.gem-letter:nth-child(5)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+.gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px); }
+.gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px); }
+.gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px); }
+.light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay; }
+@keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+.sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none; }
+@keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; } .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; } .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; } .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; } .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; } .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; } .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; } .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+.depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+.container { max-width: 1600px; margin: 0 auto; padding: 20px 24px 40px; position: relative; z-index: 2; }
+.header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+.nav { display: flex; gap: 12px; align-items: center; }
+.nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px; background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; }
+.nav a:hover { border-color: #00ced1; }
+.page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800; color: #00ced1; margin-bottom: 8px; }
+.page-subtitle { font-size: 14px; color: #9ca3af; margin-bottom: 30px; }
+
+.card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; margin-bottom: 24px; }
+.card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 30px; }
+@media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+.stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
+.stat-value { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800; color: #00ced1; }
+.stat-label { font-size: 11px; color: #9ca3af; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+.bot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 1200px) { .bot-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .bot-grid { grid-template-columns: 1fr; } }
+
+.bot-card {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.2); border-radius: 16px;
+  padding: 18px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+}
+.bot-card:hover { border-color: rgba(0,206,209,0.5); transform: translateY(-3px); }
+.bot-card.active { border-color: #7CFC00; }
+.bot-card.inactive { border-color: rgba(255,59,59,0.3); opacity: 0.7; }
+.bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.bot-emoji { font-size: 28px; }
+.bot-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+.bot-owner { font-size: 12px; color: #9ca3af; }
+.bot-type-badge {
+  padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  display: inline-block; margin-bottom: 10px;
+}
+.type-buyer { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+.type-seller { background: rgba(0,102,255,0.15); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
+.type-transport { background: rgba(255,165,0,0.15); color: #FFA500; border: 1px solid rgba(255,165,0,0.3); }
+
+.bot-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.bot-stat { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px; text-align: center; }
+.bot-stat-val { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #00ced1; }
+.bot-stat-label { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+.weapon-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; margin: 2px;
+  background: rgba(0,206,209,0.1); color: #00ced1; border: 1px solid rgba(0,206,209,0.2);
+}
+.weapon-tag.off { background: rgba(30,41,59,0.5); color: #5c6b8a; border-color: rgba(255,255,255,0.05); }
+
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.status-dot.on { background: #7CFC00; box-shadow: 0 0 8px #7CFC00; }
+.status-dot.off { background: #ff3b3b; }
+
+.search-bar { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.3); border-radius: 10px; color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; margin-bottom: 14px; }
+.search-bar:focus { outline: none; border-color: #00ced1; }
+.search-bar::placeholder { color: #5c6b8a; }
+
+.filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3);
+  color: #9ca3af; transition: all 0.2s;
+}
+.filter-tab:hover { border-color: #00ced1; color: #00ced1; }
+.filter-tab.active { background: rgba(0,206,209,0.15); color: #00ced1; border-color: #00ced1; }
+
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.admin-table th { text-align: left; padding: 10px 12px; font-family: 'Orbitron', sans-serif; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.2); }
+.admin-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+.admin-table tr:hover td { background: rgba(0,206,209,0.04); }
+.admin-table tr:last-child td { border-bottom: none; }
+.table-wrap { overflow-x: auto; max-height: 500px; overflow-y: auto; }
+
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
+.modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+.modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; }
+.modal-close:hover { color: #00ced1; }
+
+.config-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+.config-row:last-child { border-bottom: none; }
+.config-label { color: #9ca3af; }
+.config-value { font-weight: 600; color: #fff; }
+.config-value.highlight { color: #00ced1; font-family: 'Orbitron', sans-serif; }
+.config-section-title {
+  font-family: 'Orbitron', sans-serif; font-size: 12px; color: #FFD966;
+  text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px;
+  border-bottom: 1px solid rgba(255,217,102,0.2); padding-bottom: 4px;
+}
+
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; }
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+
+.user-display { display: flex; align-items: center; gap: 8px; margin-left: 12px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #00ced1; }
+.user-name { font-size: 12px; color: #9ca3af; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.empty-state { color: #5c6b8a; text-align: center; padding: 40px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T</span>
+          <span class="gem-letter" data-letter="R">R</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="D">D</span>
+          <span class="gem-letter" data-letter="E">E</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="U">U</span>
+          <span class="gem-letter" data-letter="X">X</span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div><div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div><div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+        <div class="depth-shadow"></div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <nav class="nav">
+        <a href="admin-dashboard.html">← Admin</a>
+        <a href="#" onclick="loadAllBots(); return false;">🔄 Refresh</a>
+        <div class="user-display" id="userDisplay">
+          <img class="user-avatar" id="userAvatar" src="" alt="" style="display:none;">
+          <span class="user-name" id="userName"></span>
+        </div>
+        <a href="#" id="authBtn">Sign Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-title">🤖 Bot Fleet Oversight</div>
+  <div class="page-subtitle">Monitor all buyer, seller, and transport bots across the platform.</div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="statTotalBots">0</div><div class="stat-label">Total Bots</div></div>
+    <div class="stat-card"><div class="stat-value" id="statActiveBots">0</div><div class="stat-label">Active</div></div>
+    <div class="stat-card"><div class="stat-value" id="statBuyerBots">0</div><div class="stat-label">Buyer Bots</div></div>
+    <div class="stat-card"><div class="stat-value" id="statSellerBots">0</div><div class="stat-label">Seller Bots</div></div>
+    <div class="stat-card"><div class="stat-value" id="statTransportBots">0</div><div class="stat-label">Transport Bots</div></div>
+    <div class="stat-card"><div class="stat-value" id="statTotalBids">0</div><div class="stat-label">Total Bot Bids</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span>🔍 Filter & Search</span>
+    </div>
+    <input type="text" class="search-bar" id="botSearch" placeholder="Search by bot name, owner, or strategy..." oninput="filterBots()">
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="setFilter('all')" id="filter-all">All Bots</div>
+      <div class="filter-tab" onclick="setFilter('buyer')" id="filter-buyer">Buyer Bots</div>
+      <div class="filter-tab" onclick="setFilter('seller')" id="filter-seller">Seller Bots</div>
+      <div class="filter-tab" onclick="setFilter('transport')" id="filter-transport">Transport Bots</div>
+      <div class="filter-tab" onclick="setFilter('active')" id="filter-active">Active Only</div>
+      <div class="filter-tab" onclick="setFilter('inactive')" id="filter-inactive">Inactive Only</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span>🤖 Bot Fleet Grid</span>
+      <span style="font-size:12px; color:#9ca3af;" id="botCountLabel">Loading...</span>
+    </div>
+    <div class="bot-grid" id="botGrid">
+      <div class="empty-state" style="grid-column:1/-1;">Loading bots from Firestore...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span>📊 Bot Configuration Table</span>
+    </div>
+    <div class="table-wrap" id="botTableContainer">
+      <div class="empty-state">Select a bot to view full configuration</div>
+    </div>
+  </div>
+</div>
+
+<!-- Bot Detail Modal -->
+<div id="botDetailModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeBotModal()">&times;</span>
+    <div id="botDetailContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let allBots = [];
+let currentFilter = 'all';
+
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  document.getElementById('userName').textContent = user.displayName || user.email;
+  if (user.photoURL) { document.getElementById('userAvatar').src = user.photoURL; document.getElementById('userAvatar').style.display = 'block'; }
+
+  // Admin check
+  const tokenResult = await user.getIdTokenResult(true);
+  if (tokenResult.claims.admin !== true) {
+    const profileDoc = await db.collection('profiles').doc(user.uid).get();
+    if (!profileDoc.exists || profileDoc.data().role !== 'admin') {
+      showToast('Admin access required', true);
+      setTimeout(() => window.location.href = 'dashboard.html', 1500);
+      return;
+    }
+  }
+  loadAllBots();
+});
+
+document.getElementById('authBtn').onclick = () => auth.signOut().then(() => window.location.href = 'signin.html');
+
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = isError ? 'toast error visible' : 'toast visible';
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+async function loadAllBots() {
+  showToast('Loading bot fleet...');
+  allBots = [];
+
+  // Load Buyer Bots
+  try {
+    const buyerSnap = await db.collection('buyer_bots').get();
+    for (const doc of buyerSnap.docs) {
+      const data = doc.data();
+      let ownerName = data.buyer_name || 'Unknown';
+      let ownerEmail = '';
+      if (data.buyer_id || data.uid) {
+        const profile = await db.collection('profiles').doc(data.buyer_id || data.uid).get();
+        if (profile.exists) { ownerName = profile.data().full_name || profile.data().email || ownerName; ownerEmail = profile.data().email || ''; }
+      }
+      allBots.push({
+        id: doc.id, type: 'buyer', botName: data.bot_name || data.name || 'Unnamed',
+        ownerName, ownerEmail, ownerId: data.buyer_id || data.uid,
+        isActive: data.is_active || data.isActive || false,
+        strategy: data.strategy || data.escalationStrategy || 'balanced',
+        weapons: data.weapons || {}, guardrails: data.guardrails || {},
+        totalBids: data.total_bids || data.totalBids || 0,
+        totalWins: data.total_wins || data.totalWins || 0,
+        commodity: data.commodity || 'All',
+        maxBid: data.max_bid || data.maxBid || 0,
+        dailyBudget: data.daily_budget || data.dailyBudget || 0,
+        createdAt: data.created_at || data.createdAt,
+        updatedAt: data.updated_at || data.updatedAt
+      });
+    }
+  } catch (e) { console.error('Buyer bots error:', e); }
+
+  // Load Seller Bots
+  try {
+    const sellerSnap = await db.collection('seller_bots').get();
+    for (const doc of sellerSnap.docs) {
+      const data = doc.data();
+      let ownerName = data.seller_name || 'Unknown';
+      let ownerEmail = '';
+      if (data.seller_id || data.uid) {
+        const profile = await db.collection('profiles').doc(data.seller_id || data.uid).get();
+        if (profile.exists) { ownerName = profile.data().full_name || profile.data().email || ownerName; ownerEmail = profile.data().email || ''; }
+      }
+      allBots.push({
+        id: doc.id, type: 'seller', botName: data.bot_name || data.name || 'Unnamed',
+        ownerName, ownerEmail, ownerId: data.seller_id || data.uid,
+        isActive: data.is_active || data.isActive || false,
+        strategy: data.strategy || data.escalationStrategy || 'balanced',
+        weapons: data.weapons || {}, guardrails: data.guardrails || {},
+        totalBids: data.total_bids || data.totalBids || 0,
+        totalWins: data.total_wins || data.totalWins || 0,
+        minMargin: data.min_margin || (data.guardrails?.minMarginPercent) || 0,
+        maxAuctions: data.max_auctions || (data.guardrails?.maxAuctions) || 0,
+        createdAt: data.created_at || data.createdAt,
+        updatedAt: data.updated_at || data.updatedAt
+      });
+    }
+  } catch (e) { console.error('Seller bots error:', e); }
+
+  // Load Transport Bots
+  try {
+    const transportSnap = await db.collection('transport_bots').get();
+    for (const doc of transportSnap.docs) {
+      const data = doc.data();
+      let ownerName = data.carrier_name || 'Unknown';
+      let ownerEmail = '';
+      if (data.uid) {
+        const profile = await db.collection('profiles').doc(data.uid).get();
+        if (profile.exists) { ownerName = profile.data().full_name || profile.data().email || ownerName; ownerEmail = profile.data().email || ''; }
+      }
+      allBots.push({
+        id: doc.id, type: 'transport', botName: data.botName || data.bot_name || data.name || 'Unnamed',
+        ownerName, ownerEmail, ownerId: data.uid,
+        isActive: data.isActive || data.is_active || false,
+        strategy: data.escalationStrategy || data.strategy || 'aggressive',
+        weapons: data.weapons || {}, guardrails: data.guardrails || {},
+        totalBids: data.totalBids || data.total_bids || 0,
+        totalWins: data.totalWins || data.total_wins || 0,
+        costBasis: data.guardrails?.costBasis || 0,
+        minMargin: data.guardrails?.minMarginPercent || 0,
+        maxAuctions: data.guardrails?.maxAuctions || 0,
+        createdAt: data.createdAt || data.created_at,
+        updatedAt: data.updatedAt || data.updated_at
+      });
+    }
+  } catch (e) { console.error('Transport bots error:', e); }
+
+  updateStats();
+  renderBotGrid();
+  renderBotTable();
+  showToast(`Loaded ${allBots.length} bots`);
+}
+
+function updateStats() {
+  const active = allBots.filter(b => b.isActive);
+  const buyers = allBots.filter(b => b.type === 'buyer');
+  const sellers = allBots.filter(b => b.type === 'seller');
+  const transports = allBots.filter(b => b.type === 'transport');
+  const totalBids = allBots.reduce((sum, b) => sum + (b.totalBids || 0), 0);
+
+  document.getElementById('statTotalBots').textContent = allBots.length;
+  document.getElementById('statActiveBots').textContent = active.length;
+  document.getElementById('statBuyerBots').textContent = buyers.length;
+  document.getElementById('statSellerBots').textContent = sellers.length;
+  document.getElementById('statTransportBots').textContent = transports.length;
+  document.getElementById('statTotalBids').textContent = totalBids.toLocaleString();
+}
+
+function getFilteredBots() {
+  const query = document.getElementById('botSearch').value.toLowerCase();
+  return allBots.filter(b => {
+    const matchesFilter = currentFilter === 'all' ||
+      (currentFilter === 'active' && b.isActive) ||
+      (currentFilter === 'inactive' && !b.isActive) ||
+      b.type === currentFilter;
+    const matchesSearch = !query ||
+      (b.botName || '').toLowerCase().includes(query) ||
+      (b.ownerName || '').toLowerCase().includes(query) ||
+      (b.strategy || '').toLowerCase().includes(query);
+    return matchesFilter && matchesSearch;
+  });
+}
+
+function setFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('filter-' + filter).classList.add('active');
+  renderBotGrid();
+  renderBotTable();
+}
+
+function filterBots() {
+  renderBotGrid();
+  renderBotTable();
+}
+
+function renderBotGrid() {
+  const grid = document.getElementById('botGrid');
+  const bots = getFilteredBots();
+  document.getElementById('botCountLabel').textContent = `${bots.length} bot${bots.length !== 1 ? 's' : ''}`;
+
+  if (!bots.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">No bots match your filters</div>';
+    return;
+  }
+
+  grid.innerHTML = bots.map(bot => {
+    const typeClass = bot.type === 'buyer' ? 'type-buyer' : bot.type === 'seller' ? 'type-seller' : 'type-transport';
+    const typeLabel = bot.type === 'buyer' ? 'BUYER' : bot.type === 'seller' ? 'SELLER' : 'TRANSPORT';
+    const statusClass = bot.isActive ? 'active' : 'inactive';
+    const winRate = bot.totalBids > 0 ? Math.round((bot.totalWins / bot.totalBids) * 100) : 0;
+
+    const weaponTags = [];
+    const w = bot.weapons || {};
+    if (w.price?.enabled) weaponTags.push('💰Price');
+    if (w.speed?.enabled) weaponTags.push('⚡Speed');
+    if (w.capacity?.enabled) weaponTags.push('📦Cap');
+    if (w.reliability?.enabled) weaponTags.push('⭐Rel');
+    if (w.twoProngedSnipe?.enabled) weaponTags.push('🎯Snipe');
+    if (w.quality?.enabled) weaponTags.push('🔬Quality');
+    if (w.volume?.enabled) weaponTags.push('📊Vol');
+    if (w.pacing?.enabled) weaponTags.push('⏱️Pace');
+
+    return `
+    <div class="bot-card ${statusClass}" onclick="showBotDetail('${bot.id}')">
+      <div class="bot-header">
+        <div>
+          <div class="bot-emoji">${bot.type === 'buyer' ? '🛒' : bot.type === 'seller' ? '🏭' : '🚛'}</div>
+          <div class="bot-name">${bot.botName}</div>
+          <div class="bot-owner">👤 ${bot.ownerName}</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="bot-type-badge ${typeClass}">${typeLabel}</span>
+          <div style="margin-top:6px; font-size:12px;">
+            <span class="status-dot ${bot.isActive ? 'on' : 'off'}"></span>
+            <span style="color:${bot.isActive ? '#7CFC00' : '#ff3b3b'}; font-size:11px;">${bot.isActive ? 'ACTIVE' : 'INACTIVE'}</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px; color:#9ca3af; margin-bottom:8px;">
+        🎯 ${bot.strategy || 'balanced'} · ${weaponTags.length} weapon${weaponTags.length !== 1 ? 's' : ''} armed
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">
+        ${weaponTags.length ? weaponTags.map(t => `<span class="weapon-tag">${t}</span>`).join('') : '<span class="weapon-tag off">No weapons</span>'}
+      </div>
+      <div class="bot-stats">
+        <div class="bot-stat"><div class="bot-stat-val">${bot.totalBids || 0}</div><div class="bot-stat-label">Bids</div></div>
+        <div class="bot-stat"><div class="bot-stat-val">${bot.totalWins || 0}</div><div class="bot-stat-label">Wins</div></div>
+        <div class="bot-stat"><div class="bot-stat-val">${winRate}%</div><div class="bot-stat-label">Win Rate</div></div>
+        <div class="bot-stat"><div class="bot-stat-val">${bot.guardrails?.maxAuctions || bot.maxAuctions || '—'}</div><div class="bot-stat-label">Max Auc</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderBotTable() {
+  const container = document.getElementById('botTableContainer');
+  const bots = getFilteredBots();
+
+  if (!bots.length) {
+    container.innerHTML = '<div class="empty-state">No bots to display</div>';
+    return;
+  }
+
+  let html = '<table class="admin-table"><thead><tr><th>Type</th><th>Bot Name</th><th>Owner</th><th>Status</th><th>Strategy</th><th>Weapons</th><th>Max Bid</th><th>Budget</th><th>Bids</th><th>Wins</th><th>Win %</th></tr></thead><tbody>';
+
+  for (const bot of bots) {
+    const w = bot.weapons || {};
+    const weaponList = [];
+    if (w.price?.enabled) weaponList.push('Price');
+    if (w.speed?.enabled) weaponList.push('Speed');
+    if (w.capacity?.enabled) weaponList.push('Cap');
+    if (w.reliability?.enabled) weaponList.push('Rel');
+    if (w.twoProngedSnipe?.enabled) weaponList.push('Snipe');
+    if (w.quality?.enabled) weaponList.push('Quality');
+    if (w.volume?.enabled) weaponList.push('Volume');
+    if (w.pacing?.enabled) weaponList.push('Pacing');
+
+    const winRate = bot.totalBids > 0 ? Math.round((bot.totalWins / bot.totalBids) * 100) : 0;
+    const typeEmoji = bot.type === 'buyer' ? '🛒' : bot.type === 'seller' ? '🏭' : '🚛';
+    const statusClass = bot.isActive ? 'status-active' : 'status-suspended';
+
+    html += `<tr onclick="showBotDetail('${bot.id}')" style="cursor:pointer;">
+      <td>${typeEmoji} ${bot.type}</td>
+      <td><strong>${bot.botName}</strong></td>
+      <td style="font-size:12px;">${bot.ownerName}</td>
+      <td class="${statusClass}">${bot.isActive ? '● Active' : '○ Inactive'}</td>
+      <td>${bot.strategy || '—'}</td>
+      <td style="font-size:11px;">${weaponList.join(', ') || 'None'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;">$${(bot.maxBid || bot.guardrails?.maxBid || 0).toLocaleString()}</td>
+      <td style="font-family:'JetBrains Mono',monospace;">$${(bot.dailyBudget || bot.guardrails?.dailyBudget || 0).toLocaleString()}</td>
+      <td style="text-align:center;">${bot.totalBids || 0}</td>
+      <td style="text-align:center;">${bot.totalWins || 0}</td>
+      <td style="text-align:center; color:${winRate >= 50 ? '#7CFC00' : winRate >= 25 ? '#FFD966' : '#ff3b3b'}; font-weight:700;">${winRate}%</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function showBotDetail(botId) {
+  const bot = allBots.find(b => b.id === botId);
+  if (!bot) return;
+
+  const w = bot.weapons || {};
+  const g = bot.guardrails || {};
+  const typeEmoji = bot.type === 'buyer' ? '🛒' : bot.type === 'seller' ? '🏭' : '🚛';
+  const typeLabel = bot.type === 'buyer' ? 'BUYER BOT' : bot.type === 'seller' ? 'SELLER BOT' : 'TRANSPORT BOT';
+
+  let weaponsHtml = '';
+  const weaponKeys = Object.keys(w);
+  if (weaponKeys.length === 0) {
+    weaponsHtml = '<div style="color:#5c6b8a; font-size:13px;">No weapons configured</div>';
+  } else {
+    weaponKeys.forEach(key => {
+      const weapon = w[key];
+      const isOn = weapon && (weapon.enabled === true);
+      const name = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      let details = '';
+      if (key === 'price' && isOn) details = `Drop: ${weapon.dropPercent || weapon.drop_percent || 0}% | Max: ${weapon.maxDropPercent || weapon.max_drop_percent || 0}%`;
+      if (key === 'speed' && isOn) details = `Boost: ${weapon.boostPercent || weapon.boost_percent || 0}% | Max: ${weapon.maxBoostPercent || weapon.max_boost_percent || 0}%`;
+      if (key === 'capacity' && isOn) details = `Boost: ${weapon.boostPercent || weapon.boost_percent || 0}% | Max: ${weapon.maxBoostPercent || weapon.max_boost_percent || 0}%`;
+      if (key === 'reliability' && isOn) details = `Rating: ${weapon.rating || 0}/100`;
+      if (key === 'twoProngedSnipe' && isOn) details = `Price: ${weapon.priceDropPercent || 0}% | Speed: ${weapon.speedBoostPercent || 0}%`;
+      if (key === 'quality' && isOn) details = `Boost: ${weapon.boostPercent || 0}%`;
+      if (key === 'volume' && isOn) details = `Boost: ${weapon.boostPercent || 0}%`;
+      if (key === 'pacing' && isOn) details = `Interval: ${weapon.interval || 0}min`;
+
+      weaponsHtml += `
+        <div class="config-row">
+          <span class="config-label">${name}</span>
+          <span class="config-value ${isOn ? 'highlight' : ''}">${isOn ? '✅ ON' : '❌ OFF'} ${details ? '· ' + details : ''}</span>
+        </div>`;
+    });
+  }
+
+  let guardrailsHtml = '';
+  if (bot.type === 'buyer') {
+    guardrailsHtml = `
+      <div class="config-row"><span class="config-label">Max Bid</span><span class="config-value highlight">$${(g.maxBid || bot.maxBid || 0).toLocaleString()}</span></div>
+      <div class="config-row"><span class="config-label">Daily Budget</span><span class="config-value highlight">$${(g.dailyBudget || bot.dailyBudget || 0).toLocaleString()}</span></div>
+      <div class="config-row"><span class="config-label">Max Auctions</span><span class="config-value">${g.maxAuctions || bot.maxAuctions || '—'}</span></div>
+      <div class="config-row"><span class="config-label">Commodity</span><span class="config-value">${bot.commodity || 'All'}</span></div>
+    `;
+  } else if (bot.type === 'seller') {
+    guardrailsHtml = `
+      <div class="config-row"><span class="config-label">Min Margin %</span><span class="config-value highlight">${g.minMarginPercent || bot.minMargin || 0}%</span></div>
+      <div class="config-row"><span class="config-label">Max Auctions</span><span class="config-value">${g.maxAuctions || bot.maxAuctions || '—'}</span></div>
+      <div class="config-row"><span class="config-label">Rank Threshold</span><span class="config-value">${g.rankThreshold || '—'}</span></div>
+      <div class="config-row"><span class="config-label">Snipe Window</span><span class="config-value">${g.snipeWindow || '—'}s</span></div>
+    `;
+  } else if (bot.type === 'transport') {
+    guardrailsHtml = `
+      <div class="config-row"><span class="config-label">Cost Basis</span><span class="config-value highlight">$${g.costBasis || bot.costBasis || 0}/km</span></div>
+      <div class="config-row"><span class="config-label">Min Margin %</span><span class="config-value highlight">${g.minMarginPercent || bot.minMargin || 0}%</span></div>
+      <div class="config-row"><span class="config-label">Floor Price</span><span class="config-value highlight">$${g.costBasis ? (g.costBasis * (1 + (g.minMarginPercent || 0)/100)).toFixed(2) : '—'}/km</span></div>
+      <div class="config-row"><span class="config-label">Max Auctions</span><span class="config-value">${g.maxAuctions || bot.maxAuctions || '—'}</span></div>
+      <div class="config-row"><span class="config-label">Rank Threshold</span><span class="config-value">${g.rankThreshold || '—'}</span></div>
+      <div class="config-row"><span class="config-label">Snipe Window</span><span class="config-value">${g.snipeWindow || '—'}s</span></div>
+    `;
+  }
+
+  document.getElementById('botDetailContent').innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+      <div>
+        <div style="font-size:32px; margin-bottom:4px;">${typeEmoji}</div>
+        <h2 style="font-family:'Orbitron',sans-serif; color:#00ced1; margin-bottom:4px;">${bot.botName}</h2>
+        <div style="color:#9ca3af; font-size:13px;">${typeLabel} · ID: ${bot.id.slice(0,12)}...</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:28px; font-weight:800; color:${bot.isActive ? '#7CFC00' : '#ff3b3b'}; font-family:'Orbitron',sans-serif;">${bot.isActive ? '● ACTIVE' : '○ INACTIVE'}</div>
+        <div style="font-size:12px; color:#9ca3af; margin-top:4px;">Strategy: ${bot.strategy || '—'}</div>
+      </div>
+    </div>
+
+    <div class="config-section-title">👤 Owner</div>
+    <div class="config-row"><span class="config-label">Name</span><span class="config-value">${bot.ownerName}</span></div>
+    <div class="config-row"><span class="config-label">Email</span><span class="config-value">${bot.ownerEmail || '—'}</span></div>
+    <div class="config-row"><span class="config-label">User ID</span><span class="config-value">${bot.ownerId || '—'}</span></div>
+
+    <div class="config-section-title">🛡️ Weapons Arsenal</div>
+    ${weaponsHtml}
+
+    <div class="config-section-title">🚧 Guardrails</div>
+    ${guardrailsHtml}
+
+    <div class="config-section-title">📊 Performance</div>
+    <div class="config-row"><span class="config-label">Total Bids</span><span class="config-value highlight">${bot.totalBids || 0}</span></div>
+    <div class="config-row"><span class="config-label">Total Wins</span><span class="config-value highlight">${bot.totalWins || 0}</span></div>
+    <div class="config-row"><span class="config-label">Win Rate</span><span class="config-value highlight">${bot.totalBids > 0 ? Math.round((bot.totalWins / bot.totalBids) * 100) : 0}%</span></div>
+
+    <div class="config-section-title">⏱️ Timeline</div>
+    <div class="config-row"><span class="config-label">Created</span><span class="config-value">${bot.createdAt?.toDate ? bot.createdAt.toDate().toLocaleString() : '—'}</span></div>
+    <div class="config-row"><span class="config-label">Last Updated</span><span class="config-value">${bot.updatedAt?.toDate ? bot.updatedAt.toDate().toLocaleString() : '—'}</span></div>
+
+    <div style="margin-top:24px; display:flex; gap:12px;">
+      <button class="btn" style="background:linear-gradient(135deg,#00ced1,#00ff7f); color:#000; padding:10px 20px; border-radius:8px; border:none; font-family:'Orbitron',sans-serif; font-weight:700; cursor:pointer;" onclick="toggleBotStatus('${bot.id}')">${bot.isActive ? '⏸ Deactivate' : '▶ Activate'}</button>
+      <button class="btn" style="background:rgba(255,59,59,0.2); color:#ff3b3b; border:1px solid rgba(255,59,59,0.4); padding:10px 20px; border-radius:8px; font-family:'Orbitron',sans-serif; font-weight:700; cursor:pointer;" onclick="deleteBot('${bot.id}')">🗑 Delete</button>
+    </div>
+  `;
+
+  document.getElementById('botDetailModal').style.display = 'flex';
+}
+
+function closeBotModal() {
+  document.getElementById('botDetailModal').style.display = 'none';
+}
+
+async function toggleBotStatus(botId) {
+  const bot = allBots.find(b => b.id === botId);
+  if (!bot) return;
+
+  const collection = bot.type === 'buyer' ? 'buyer_bots' : bot.type === 'seller' ? 'seller_bots' : 'transport_bots';
+  const newStatus = !bot.isActive;
+
+  try {
+    await db.collection(collection).doc(botId).update({
+      isActive: newStatus,
+      is_active: newStatus,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    bot.isActive = newStatus;
+    showToast(`${bot.botName} ${newStatus ? 'activated' : 'deactivated'}`);
+    renderBotGrid();
+    renderBotTable();
+    closeBotModal();
+    showBotDetail(botId);
+  } catch (err) {
+    showToast('Error: ' + err.message, true);
+  }
+}
+
+async function deleteBot(botId) {
+  const bot = allBots.find(b => b.id === botId);
+  if (!bot) return;
+  if (!confirm(`Delete bot "${bot.botName}" permanently?`)) return;
+
+  const collection = bot.type === 'buyer' ? 'buyer_bots' : bot.type === 'seller' ? 'seller_bots' : 'transport_bots';
+  try {
+    await db.collection(collection).doc(botId).delete();
+    allBots = allBots.filter(b => b.id !== botId);
+    showToast(`${bot.botName} deleted`);
+    updateStats();
+    renderBotGrid();
+    renderBotTable();
+    closeBotModal();
+  } catch (err) {
+    showToast('Delete failed: ' + err.message, true);
+  }
+}
+
+window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+</script>
+</body>
+</html>

@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdAux — Agent Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+ --text: #e5e7eb;
+ --muted: #9ca3af;
+ --accent-emerald: #4a9e5a;
+ --accent-sapphire: #3a6ea5;
+ --accent-ruby: #9e4a4a;
+ 
+ /* Category Colors */
+ --social-red: #ff3b3b;
+ --digital-blue: #2f6bff;
+ --streaming-orange: #f86939;
+ --gaming-pink: #ff00b7;
+ --travel-gold: #e5b80b;
+ --finance-green: #004225;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { 
+ width: 100%; 
+ min-height: 100%; 
+ font-family: 'Inter', sans-serif; 
+ overflow-x: hidden; 
+}
+
+body {
+ background: #020617;
+ min-height: 100vh;
+ position: relative;
+ z-index: 0;
+}
+
+/* ===== BACKGROUND WAVES (EXACT FROM PCAUX) ===== */
+.bg-waves {
+ position: fixed;
+ inset: 0;
+ z-index: 0;
+ overflow: hidden;
+ pointer-events: none;
+}
+
+.wave-bg {
+ position: absolute;
+ width: 200%;
+ height: 200%;
+ filter: blur(100px);
+ opacity: 0.2;
+ animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-emerald-bg { 
+ background: radial-gradient(circle at 30% 40%, rgba(74, 158, 90, 0.4), transparent 70%); 
+ top: -40%; left: -20%; animation-delay: 0s; 
+}
+.wave-sapphire-bg { 
+ background: radial-gradient(circle at 50% 50%, rgba(58, 110, 165, 0.4), transparent 70%); 
+ top: -30%; left: -10%; animation-delay: 8s; 
+}
+.wave-ruby-bg { 
+ background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); 
+ top: -20%; left: 0%; animation-delay: 16s; 
+}
+
+@keyframes waveBgDrift {
+ 0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
+ 50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
+ 100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+ max-width: 1400px;
+ margin: 0 auto;
+ padding: 20px 24px 80px;
+ position: relative;
+ z-index: 2;
+}
+
+/* ===== 3D LOGO (EXACT FROM PCAUX) ===== */
+.gem-logo-corner {
+ position: fixed;
+ top: 20px;
+ left: 20px;
+ z-index: 9999;
+ filter: drop-shadow(0 30px 50px rgba(0, 255, 128, 0.6));
+ transform-style: preserve-3d;
+ perspective: 1000px;
+ transform: scale(0.35);
+ transform-origin: top left;
+}
+
+.gem-text {
+ font-size: 160px;
+ font-weight: 900;
+ letter-spacing: -0.02em;
+ position: relative;
+ display: flex;
+ text-transform: uppercase;
+ line-height: 0.9;
+ font-family: 'Orbitron', sans-serif;
+ transform-style: preserve-3d;
+ gap: 2px;
+}
+
+.gem-letter {
+ display: inline-block;
+ position: relative;
+ transform-style: preserve-3d;
+ animation: letterFloat 6s ease-in-out infinite;
+ filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes letterFloat {
+ 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+ 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.gem-letter::before {
+ content: attr(data-letter);
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background: linear-gradient(145deg, #7CFC00 0%, #00FA9A 15%, #2E8B57 30%, #228B22 45%, #006400 60%, #0A5C2E 75%, #013220 90%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ text-shadow: 0 0 20px rgba(124,252,0,0.5), 2px 2px 4px rgba(0,0,0,0.3);
+ transform: translateZ(2px);
+}
+
+/* A and X keep their special colors from PCAUX. D and U use default emerald (green) */
+.gem-letter[data-letter="X"]::before {
+ background: linear-gradient(145deg, #050f22 0%, #0b1f4a 15%, #123a7a 30%, #1a4fb0 45%, #2a66e0 60%, #1a4fb0 75%, #0b1f4a 90%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ text-shadow: 0 0 18px rgba(60,120,255,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.gem-letter[data-letter="A"]::before {
+ background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ text-shadow: 0 0 18px rgba(255,60,60,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.gem-letter .edge-top {
+ position: absolute;
+ top: -2px;
+ left: 0;
+ width: 100%;
+ height: 20%;
+ background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+ mix-blend-mode: overlay;
+ pointer-events: none;
+ z-index: 5;
+}
+
+.gem-letter .edge-right {
+ position: absolute;
+ top: 0;
+ right: -2px;
+ width: 10%;
+ height: 100%;
+ background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+ mix-blend-mode: overlay;
+ pointer-events: none;
+ z-index: 5;
+}
+
+.gem-letter .edge-bottom {
+ position: absolute;
+ bottom: -2px;
+ left: 0;
+ width: 100%;
+ height: 20%;
+ background: linear-gradient(0deg, rgba(0,50,0,0.4) 0%, transparent 100%);
+ mix-blend-mode: multiply;
+ pointer-events: none;
+ z-index: 5;
+}
+
+.gem-letter .edge-left {
+ position: absolute;
+ top: 0;
+ left: -2px;
+ width: 10%;
+ height: 100%;
+ background: linear-gradient(90deg, rgba(0,50,0,0.3) 0%, transparent 100%);
+ mix-blend-mode: multiply;
+ pointer-events: none;
+ z-index: 5;
+}
+
+.light-source {
+ position: absolute;
+ top: -50%;
+ left: -50%;
+ width: 200%;
+ height: 200%;
+ background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+ animation: rotateLight 15s linear infinite;
+ pointer-events: none;
+ z-index: 10;
+ mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+ 0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+ 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+ 100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+ position: absolute;
+ width: 4px;
+ height: 4px;
+ background: white;
+ border-radius: 50%;
+ box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+ animation: sparkleFlash 4s ease-in-out infinite;
+ opacity: 0;
+ z-index: 20;
+ pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+ 0% { opacity: 0; transform: scale(0.5); }
+ 10% { opacity: 1; transform: scale(1.2); }
+ 20% { opacity: 0.6; transform: scale(0.9); }
+ 30% { opacity: 1; transform: scale(1.1); }
+ 40% { opacity: 0; transform: scale(0.5); }
+ 100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+ position: absolute;
+ bottom: -30px;
+ left: 0;
+ width: 100%;
+ height: 60px;
+ background: radial-gradient(ellipse at center, rgba(0,255,128,0.3) 0%, transparent 80%);
+ filter: blur(20px);
+ z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.header {
+ display: flex;
+ justify-content: flex-end;
+ align-items: center;
+ padding: 20px 0 40px;
+}
+
+.nav {
+ display: flex;
+ gap: 12px;
+}
+
+.nav a {
+ font-family: 'Orbitron', sans-serif;
+ font-size: 14px;
+ font-weight: 500;
+ padding: 8px 16px;
+ border: 2px solid #4a9e5a;
+ border-radius: 8px;
+ background: rgba(15, 32, 64, 0.7);
+ backdrop-filter: blur(4px);
+ color: var(--text);
+ text-decoration: none;
+ transition: all 0.3s ease;
+}
+
+.nav a:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+ border-color: #fff;
+}
+
+/* ===== INTENT BRIEF BAR (AGENT BRIEF LAYER) ===== */
+.brief-bar {
+ background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+ backdrop-filter: blur(20px);
+ border: 1px solid rgba(124, 252, 0, 0.2);
+ border-radius: 16px;
+ padding: 24px;
+ margin-bottom: 40px;
+ display: grid;
+ grid-template-columns: 200px 1fr auto;
+ gap: 32px;
+ align-items: center;
+}
+
+@media (max-width: 900px) {
+ .brief-bar { grid-template-columns: 1fr; gap: 20px; }
+}
+
+.brief-title {
+ font-family: 'Orbitron', sans-serif;
+ font-size: 12px;
+ letter-spacing: 3px;
+ color: var(--accent-emerald);
+ text-transform: uppercase;
+ margin-bottom: 12px;
+}
+
+.budget-display {
+ font-family: 'Orbitron', sans-serif;
+ font-size: 32px;
+ color: var(--accent-emerald);
+ text-shadow: 0 0 20px rgba(124,252,0,0.3);
+}
+
+.budget-input {
+ background: transparent;
+ border: 1px solid rgba(124,252,0,0.3);
+ color: var(--accent-emerald);
+ font-family: 'Orbitron';
+ font-size: 24px;
+ padding: 8px 12px;
+ border-radius: 8px;
+ width: 160px;
+ outline: none;
+}
+
+.weights {
+ display: flex;
+ gap: 24px;
+ flex-wrap: wrap;
+}
+
+.weight-control {
+ flex: 1;
+ min-width: 120px;
+}
+
+.weight-label {
+ display: flex;
+ justify-content: space-between;
+ font-family: 'Orbitron';
+ font-size: 10px;
+ letter-spacing: 1px;
+ color: var(--muted);
+ margin-bottom: 8px;
+ text-transform: uppercase;
+}
+
+.weight-value {
+ color: var(--accent-emerald);
+}
+
+input[type="range"] {
+ -webkit-appearance: none;
+ width: 100%;
+ height: 4px;
+ background: rgba(255,255,255,0.1);
+ border-radius: 2px;
+ outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+ -webkit-appearance: none;
+ width: 16px;
+ height: 16px;
+ background: var(--accent-emerald);
+ border-radius: 50%;
+ cursor: pointer;
+ box-shadow: 0 0 10px rgba(124,252,0,0.6);
+}
+
+/* ===== SIX CATEGORY CARDS (REPLACEMENT FOR GEM CARDS) ===== */
+.gem-cards {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 24px;
+ margin: 40px 0 40px;
+}
+
+@media (max-width: 1000px) {
+ .gem-cards {
+   grid-template-columns: repeat(2, 1fr);
+ }
+}
+
+@media (max-width: 600px) {
+ .gem-cards {
+   grid-template-columns: 1fr;
+ }
+}
+
+.gem-card {
+ border-radius: 20px;
+ overflow: hidden;
+ background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+ backdrop-filter: blur(4px);
+ transition: all 0.4s ease;
+ border-width: 2px;
+ border-style: solid;
+ position: relative;
+ min-height: 200px;
+ cursor: pointer;
+}
+
+.gem-card:hover {
+ transform: translateY(-8px);
+ box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+}
+
+/* Category Specific Colors */
+.card-social { border-color: rgba(255, 59, 59, 0.4); }
+.card-social:hover:not(.locked):not(.selected) { 
+ border-color: #ff3b3b; 
+ box-shadow: 0 0 20px rgba(255, 59, 59, 0.3); 
+}
+
+.card-digital { border-color: rgba(47, 107, 255, 0.4); }
+.card-digital:hover:not(.locked):not(.selected) { 
+ border-color: #2f6bff; 
+ box-shadow: 0 0 20px rgba(47, 107, 255, 0.3); 
+}
+
+.card-streaming { border-color: rgba(248, 105, 57, 0.4); }
+.card-streaming:hover:not(.locked):not(.selected) { 
+ border-color: #f86939; 
+ box-shadow: 0 0 20px rgba(248, 105, 57, 0.3); 
+}
+
+.card-gaming { border-color: rgba(255, 0, 183, 0.4); }
+.card-gaming:hover:not(.locked):not(.selected) { 
+ border-color: #ff00b7; 
+ box-shadow: 0 0 20px rgba(255, 0, 183, 0.3); 
+}
+
+.card-travel { border-color: rgba(229, 184, 11, 0.4); }
+.card-travel:hover:not(.locked):not(.selected) { 
+ border-color: #e5b80b; 
+ box-shadow: 0 0 20px rgba(229, 184, 11, 0.3); 
+}
+
+.card-finance { border-color: rgba(0, 66, 37, 0.5); }
+.card-finance:hover:not(.locked):not(.selected) { 
+ border-color: #004225; 
+ box-shadow: 0 0 20px rgba(0, 66, 37, 0.3); 
+}
+
+/* Selection States */
+.gem-card.selected {
+ border-width: 3px;
+}
+
+.card-social.selected { 
+ border-color: #ff3b3b; 
+ box-shadow: 0 0 30px rgba(255, 59, 59, 0.5), inset 0 0 20px rgba(255, 59, 59, 0.1); 
+}
+.card-digital.selected { 
+ border-color: #2f6bff; 
+ box-shadow: 0 0 30px rgba(47, 107, 255, 0.5), inset 0 0 20px rgba(47, 107, 255, 0.1); 
+}
+.card-streaming.selected { 
+ border-color: #f86939; 
+ box-shadow: 0 0 30px rgba(248, 105, 57, 0.5), inset 0 0 20px rgba(248, 105, 57, 0.1); 
+}
+.card-gaming.selected { 
+ border-color: #ff00b7; 
+ box-shadow: 0 0 30px rgba(255, 0, 183, 0.5), inset 0 0 20px rgba(255, 0, 183, 0.1); 
+}
+.card-travel.selected { 
+ border-color: #e5b80b; 
+ box-shadow: 0 0 30px rgba(229, 184, 11, 0.5), inset 0 0 20px rgba(229, 184, 11, 0.1); 
+}
+.card-finance.selected { 
+ border-color: #004225; 
+ box-shadow: 0 0 30px rgba(0, 66, 37, 0.5), inset 0 0 20px rgba(0, 66, 37, 0.1); 
+}
+
+/* Checkmark for selected */
+.gem-card.selected::after {
+ content: "✓";
+ position: absolute;
+ top: 16px;
+ right: 16px;
+ width: 32px;
+ height: 32px;
+ border-radius: 50%;
+ background: rgba(255,255,255,0.1);
+ border: 2px solid currentColor;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-family: 'Orbitron';
+ font-weight: 700;
+ font-size: 16px;
+ z-index: 10;
+}
+
+.card-social.selected::after { color: #ff3b3b; border-color: #ff3b3b; }
+.card-digital.selected::after { color: #2f6bff; border-color: #2f6bff; }
+.card-streaming.selected::after { color: #f86939; border-color: #f86939; }
+.card-gaming.selected::after { color: #ff00b7; border-color: #ff00b7; }
+.card-travel.selected::after { color: #e5b80b; border-color: #e5b80b; }
+.card-finance.selected::after { color: #004225; border-color: #004225; }
+
+/* Locked State */
+.gem-card.locked {
+ opacity: 0.5;
+ pointer-events: none;
+ filter: grayscale(0.8);
+}
+
+/* Card Wave Animation (EXACT FROM PCAUX) */
+.card-wave {
+ position: absolute;
+ top: 0; left: 0; right: 0; bottom: 0;
+ z-index: 0;
+ pointer-events: none;
+ border-radius: 20px;
+ opacity: 0.3;
+}
+
+.card-social .card-wave {
+ background: repeating-linear-gradient(45deg, 
+   rgba(255, 59, 59, 0.2) 0px, rgba(255, 59, 59, 0.2) 40px,
+   rgba(255, 100, 100, 0.3) 40px, rgba(255, 100, 100, 0.3) 80px,
+   rgba(255, 150, 150, 0.4) 80px, rgba(255, 150, 150, 0.4) 120px);
+ background-size: 200% 200%;
+ animation: waveFlow 3s linear infinite;
+}
+
+.card-digital .card-wave {
+ background: repeating-linear-gradient(45deg, 
+   rgba(47, 107, 255, 0.2) 0px, rgba(47, 107, 255, 0.2) 40px,
+   rgba(100, 150, 255, 0.3) 40px, rgba(100, 150, 255, 0.3) 80px,
+   rgba(150, 180, 255, 0.4) 80px, rgba(150, 180, 255, 0.4) 120px);
+ background-size: 200% 200%;
+ animation: waveFlow 3s linear infinite;
+}
+
+.card-streaming .card-wave {
+ background: repeating-linear-gradient(45deg, 
+   rgba(248, 105, 57, 0.2) 0px, rgba(248, 105, 57, 0.2) 40px,
+   rgba(255, 150, 100, 0.3) 40px, rgba(255, 150, 100, 0.3) 80px,
+   rgba(255, 180, 140, 0.4) 80px, rgba(255, 180, 140, 0.4) 120px);
+ background-size: 200% 200%;
+ animation: waveFlow 3s linear infinite;
+}
+
+.card-gaming .card-wave {
+ background: repeating-linear-gradient(45deg, 
+   rgba(255, 0, 183, 0.2) 0px, rgba(255, 0, 183, 0.2) 40px,
+   rgba(255, 100, 220, 0.3) 40px, rgba(255, 100, 220, 0.3) 80px,
+   rgba(255, 150, 240, 0.4) 80px, rgba(255, 150, 240, 0.4) 120px);
+ background-size: 200% 200%;
+ animation: waveFlow 3s linear infinite;
+}
+
+.card-travel .card-wave {
+ background: repeating-linear-gradient(45deg, 
+   rgba(229, 184, 11, 0.2) 0px, rgba(229, 184, 11, 0.2) 40px,
+   rgba(255, 220, 100, 0.3) 40px, rgba(255, 220, 100, 0.3) 80px,
+   rgba(255, 240, 150, 0.4) 80px, rgba(255, 240, 150, 0.4) 120px);
+ background-size: 200% 200%;
+ animation: waveFlow 3s linear infinite;
+}
+
+.card-finance .card-wave {
+ background: repeating-linear-gradient(45deg, 
+   rgba(0, 66, 37, 0.2) 0px, rgba(0, 66, 37, 0.2) 40px,
+   rgba(50, 120, 80, 0.3) 40px, rgba(50, 120, 80, 0.3) 80px,
+   rgba(100, 160, 120, 0.4) 80px, rgba(100, 160, 120, 0.4) 120px);
+ background-size: 200% 200%;
+ animation: waveFlow 3s linear infinite;
+}
+
+@keyframes waveFlow {
+ 0% { background-position: 0% 0%; }
+ 100% { background-position: 100% 100%; }
+}
+
+/* Card Content */
+.card-info {
+ padding: 24px;
+ position: relative;
+ z-index: 1;
+ display: flex;
+ flex-direction: column;
+ gap: 16px;
+ height: 100%;
+}
+
+.ticker-symbol {
+ font-family: 'Orbitron', sans-serif;
+ font-size: 18px;
+ font-weight: 700;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+}
+
+.card-social .ticker-symbol { color: #ff3b3b; }
+.card-digital .ticker-symbol { color: #2f6bff; }
+.card-streaming .ticker-symbol { color: #f86939; }
+.card-gaming .ticker-symbol { color: #ff00b7; }
+.card-travel .ticker-symbol { color: #e5b80b; }
+.card-finance .ticker-symbol { color: #004225; text-shadow: 0 0 10px rgba(0,255,128,0.3); }
+
+.category-select {
+ width: 100%;
+ padding: 14px;
+ background: rgba(0,0,0,0.5);
+ border: 1px solid rgba(255,255,255,0.1);
+ border-radius: 10px;
+ color: white;
+ font-family: 'Inter', sans-serif;
+ font-size: 14px;
+ cursor: pointer;
+ outline: none;
+ transition: all 0.3s;
+ appearance: none;
+ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white'%3E%3Cpath d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+ background-repeat: no-repeat;
+ background-position: right 14px center;
+ padding-right: 40px;
+}
+
+.card-social .category-select { border-color: rgba(255, 59, 59, 0.4); }
+.card-digital .category-select { border-color: rgba(47, 107, 255, 0.4); }
+.card-streaming .category-select { border-color: rgba(248, 105, 57, 0.4); }
+.card-gaming .category-select { border-color: rgba(255, 0, 183, 0.4); }
+.card-travel .category-select { border-color: rgba(229, 184, 11, 0.4); }
+.card-finance .category-select { border-color: rgba(0, 66, 37, 0.5); }
+
+.category-select:focus {
+ border-color: currentColor;
+ box-shadow: 0 0 15px rgba(255,255,255,0.1);
+}
+
+.category-select option {
+ background: rgba(2, 6, 23, 0.95);
+ color: white;
+ padding: 8px;
+}
+
+/* Continue Button */
+.continue-container {
+ text-align: center;
+ margin-top: 40px;
+ opacity: 0;
+ transform: translateY(20px);
+ transition: all 0.5s ease;
+ pointer-events: none;
+}
+
+.continue-container.visible {
+ opacity: 1;
+ transform: translateY(0);
+ pointer-events: all;
+}
+
+.continue-btn {
+ background: linear-gradient(135deg, #7CFC00, #00D4FF);
+ color: #000;
+ border: none;
+ padding: 20px 60px;
+ border-radius: 12px;
+ font-family: 'Orbitron', sans-serif;
+ font-weight: 800;
+ font-size: 16px;
+ letter-spacing: 2px;
+ cursor: pointer;
+ text-transform: uppercase;
+ box-shadow: 0 10px 40px rgba(124,252,0,0.3);
+ transition: all 0.3s;
+}
+
+.continue-btn:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 15px 50px rgba(124,252,0,0.5);
+}
+
+.footer-note {
+ margin-top: 60px;
+ text-align: center;
+ font-size: 12px;
+ color: var(--muted);
+ font-family: 'Orbitron';
+ letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+ <div class="wave-bg wave-emerald-bg"></div>
+ <div class="wave-bg wave-sapphire-bg"></div>
+ <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D ADAUX LOGO -->
+<div class="gem-logo-corner">
+ <div class="gem-text">
+   <span class="gem-letter" data-letter="A">
+     A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+   </span>
+   <span class="gem-letter" data-letter="D">
+     D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+   </span>
+   <span class="gem-letter" data-letter="A">
+     A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+   </span>
+   <span class="gem-letter" data-letter="U">
+     U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+   </span>
+   <span class="gem-letter" data-letter="X">
+     X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+   </span>
+ </div>
+ <div class="light-source"></div>
+ <div class="sparkle sparkle-1"></div>
+ <div class="sparkle sparkle-2"></div>
+ <div class="sparkle sparkle-3"></div>
+ <div class="sparkle sparkle-4"></div>
+ <div class="sparkle sparkle-5"></div>
+ <div class="sparkle sparkle-6"></div>
+ <div class="sparkle sparkle-7"></div>
+ <div class="sparkle sparkle-8"></div>
+ <div class="sparkle sparkle-9"></div>
+ <div class="sparkle sparkle-10"></div>
+ <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+ <header class="header">
+   <nav class="nav">
+     <a href="#">Agent Brief</a>
+     <a href="#">Auctions</a>
+     <a href="#">Intelligence</a>
+     <a href="#">Sign In</a>
+   </nav>
+ </header>
+
+ <!-- INTENT LAYER: AGENT BRIEF -->
+ <div class="brief-bar" id="briefBar">
+   <div>
+     <div class="brief-title">Mission Budget</div>
+     <input type="number" class="budget-input" id="budgetInput" value="15000" min="1000" step="500">
+   </div>
+   
+   <div class="weights">
+     <div class="weight-control">
+       <div class="weight-label">
+         <span>Reach</span>
+         <span class="weight-value" id="val-reach">25%</span>
+       </div>
+       <input type="range" id="weight-reach" min="0" max="100" value="25" oninput="updateWeights()">
+     </div>
+     <div class="weight-control">
+       <div class="weight-label">
+         <span>Quality</span>
+         <span class="weight-value" id="val-quality">25%</span>
+       </div>
+       <input type="range" id="weight-quality" min="0" max="100" value="25" oninput="updateWeights()">
+     </div>
+     <div class="weight-control">
+       <div class="weight-label">
+         <span>Speed</span>
+         <span class="weight-value" id="val-speed">25%</span>
+       </div>
+       <input type="range" id="weight-speed" min="0" max="100" value="25" oninput="updateWeights()">
+     </div>
+     <div class="weight-control">
+       <div class="weight-label">
+         <span>Cost</span>
+         <span class="weight-value" id="val-price">25%</span>
+       </div>
+       <input type="range" id="weight-price" min="0" max="100" value="25" oninput="updateWeights()">
+     </div>
+   </div>
+   
+   <div style="text-align: right;">
+     <div class="brief-title" style="opacity: 0;">.</div>
+     <div style="font-family: 'Orbitron'; font-size: 11px; color: var(--muted); letter-spacing: 1px;">
+       SELECT ONE CATEGORY
+     </div>
+   </div>
+ </div>
+
+ <!-- SIX CATEGORY CARDS -->
+ <div class="gem-cards" id="categoryGrid">
+   
+   <!-- Social Media -->
+   <div class="gem-card card-social" data-category="social" onclick="selectCard(this)">
+     <div class="card-wave"></div>
+     <div class="card-info">
+       <div class="ticker-symbol">Social Media</div>
+       <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelection('social', this.value)">
+         <option value="">Select Platform...</option>
+         <option>YouTube</option>
+         <option>Instagram</option>
+         <option>TikTok</option>
+         <option>Facebook</option>
+         <option>LinkedIn</option>
+         <option>Twitter/X</option>
+         <option>Snapchat</option>
+       </select>
+     </div>
+   </div>
+
+   <!-- Digital -->
+   <div class="gem-card card-digital" data-category="digital" onclick="selectCard(this)">
+     <div class="card-wave"></div>
+     <div class="card-info">
+       <div class="ticker-symbol">Digital</div>
+       <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelection('digital', this.value)">
+         <option value="">Select Format...</option>
+         <option>Web Display</option>
+         <option>Editorial/News</option>
+         <option>404 Pages</option>
+         <option>Banner Ads</option>
+         <option>Native Articles</option>
+         <option>Pop-unders</option>
+       </select>
+     </div>
+   </div>
+
+   <!-- Streaming TV -->
+   <div class="gem-card card-streaming" data-category="streaming" onclick="selectCard(this)">
+     <div class="card-wave"></div>
+     <div class="card-info">
+       <div class="ticker-symbol">Streaming TV</div>
+       <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelection('streaming', this.value)">
+         <option value="">Select Channel...</option>
+         <option>Hulu</option>
+         <option>Roku</option>
+         <option>Samsung TV+</option>
+         <option>Pluto TV</option>
+         <option>Tubi</option>
+         <option>Amazon Freevee</option>
+         <option>LG Channels</option>
+         <option>Peacock</option>
+         <option>Paramount+</option>
+       </select>
+     </div>
+   </div>
+
+   <!-- Gaming -->
+   <div class="gem-card card-gaming" data-category="gaming" onclick="selectCard(this)">
+     <div class="card-wave"></div>
+     <div class="card-info">
+       <div class="ticker-symbol">Gaming</div>
+       <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelection('gaming', this.value)">
+         <option value="">Select Channel...</option>
+         <option>Mobile Games</option>
+         <option>Console Ads</option>
+         <option>In-Game Billboards</option>
+         <option>Twitch</option>
+         <option>Discord</option>
+         <option>Steam</option>
+         <option>Epic Games</option>
+       </select>
+     </div>
+   </div>
+
+   <!-- Travel -->
+   <div class="gem-card card-travel" data-category="travel" onclick="selectCard(this)">
+     <div class="card-wave"></div>
+     <div class="card-info">
+       <div class="ticker-symbol">Travel</div>
+       <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelection('travel', this.value)">
+         <option value="">Select Vertical...</option>
+         <option>Airlines</option>
+         <option>Hotels</option>
+         <option>Cruises</option>
+         <option>Booking Sites</option>
+         <option>OTAs</option>
+         <option>Vacation Rentals</option>
+         <option>Travel Aggregators</option>
+       </select>
+     </div>
+   </div>
+
+   <!-- Finance -->
+   <div class="gem-card card-finance" data-category="finance" onclick="selectCard(this)">
+     <div class="card-wave"></div>
+     <div class="card-info">
+       <div class="ticker-symbol">Finance</div>
+       <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelection('finance', this.value)">
+         <option value="">Select Platform...</option>
+         <option>Forex Platforms</option>
+         <option>Crypto Exchanges</option>
+         <option>Trading Dashboards</option>
+         <option>Stock Screeners</option>
+         <option>Banking Apps</option>
+         <option>Fintech Dashboards</option>
+       </select>
+     </div>
+   </div>
+ </div>
+
+ <!-- Continue Button -->
+ <div class="continue-container" id="continueContainer">
+   <button class="continue-btn" onclick="deployBrief()">
+     Deploy Brief →
+   </button>
+ </div>
+
+ <div class="footer-note">
+   ONE CATEGORY SELECTION REQUIRED • DETERMINISTIC OPTIMIZATION ENGINE STANDING BY
+ </div>
+</div>
+
+<script>
+let selectedCategory = null;
+let selectedSubcategory = null;
+
+function updateWeights() {
+ const r = parseInt(document.getElementById('weight-reach').value);
+ const q = parseInt(document.getElementById('weight-quality').value);
+ const s = parseInt(document.getElementById('weight-speed').value);
+ const p = parseInt(document.getElementById('weight-price').value);
+ 
+ const total = r + q + s + p || 1;
+ const normalize = (val) => Math.round((val / total) * 100);
+ 
+ document.getElementById('val-reach').textContent = normalize(r) + '%';
+ document.getElementById('val-quality').textContent = normalize(q) + '%';
+ document.getElementById('val-speed').textContent = normalize(s) + '%';
+ document.getElementById('val-price').textContent = normalize(p) + '%';
+}
+
+function selectCard(card) {
+ const category = card.dataset.category;
+ const allCards = document.querySelectorAll('.gem-card');
+ 
+ // If clicking already selected, deselect
+ if (selectedCategory === category) {
+   selectedCategory = null;
+   selectedSubcategory = null;
+   allCards.forEach(c => {
+     c.classList.remove('selected', 'locked');
+   });
+   document.getElementById('continueContainer').classList.remove('visible');
+   return;
+ }
+ 
+ // Select new
+ selectedCategory = category;
+ allCards.forEach(c => {
+   if (c === card) {
+     c.classList.add('selected');
+     c.classList.remove('locked');
+     // Open dropdown automatically on selection
+     const select = c.querySelector('.category-select');
+     if (select && !select.value) {
+       select.focus();
+     }
+   } else {
+     c.classList.add('locked');
+     c.classList.remove('selected');
+   }
+ });
+ 
+ checkContinue();
+}
+
+function updateSelection(category, value) {
+ if (value) {
+   selectedSubcategory = value;
+   selectedCategory = category;
+   checkContinue();
+ }
+}
+
+function checkContinue() {
+ const hasCategory = selectedCategory !== null;
+ const hasSubcategory = selectedSubcategory !== null;
+ const continueBtn = document.getElementById('continueContainer');
+ 
+ if (hasCategory && hasSubcategory) {
+   continueBtn.classList.add('visible');
+ } else {
+   continueBtn.classList.remove('visible');
+ }
+}
+
+function deployBrief() {
+ const budget = document.getElementById('budgetInput').value;
+ const weights = {
+   reach: parseInt(document.getElementById('weight-reach').value),
+   quality: parseInt(document.getElementById('weight-quality').value),
+   speed: parseInt(document.getElementById('weight-speed').value),
+   price: parseInt(document.getElementById('weight-price').value)
+ };
+ 
+ alert(`BRIEF DEPLOYED\nCategory: ${selectedCategory}\nSubcategory: ${selectedSubcategory}\nBudget: $${budget}\nWeights: ${JSON.stringify(weights)}`);
+ // Here you would transition to the Deal Room view
+}
+
+// Initialize
+updateWeights();
+</script>
+
+</body>
+</html>

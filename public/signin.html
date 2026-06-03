@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — TradeAux</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+  overflow-x: hidden;
+}
+
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-sapphire-bg { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%; 
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.05); }
+  100% { transform: translate(-30px, 20px) scale(1); }
+}
+
+.gem-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.gem-text {
+  font-size: 64px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.depth-shadow {
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px);
+  z-index: -1;
+}
+
+.container {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+
+.auth-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 206, 209, 0.25);
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #00ced1;
+  box-shadow: 0 0 12px rgba(0, 206, 209, 0.2);
+}
+
+.form-group input::placeholder {
+  color: #5c6b8a;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  margin-bottom: 12px;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 206, 209, 0.3);
+}
+
+.auth-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.toggle-link {
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 16px;
+}
+
+.toggle-link a {
+  color: #00ced1;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-link a:hover {
+  text-decoration: underline;
+}
+
+.error-msg {
+  background: rgba(217, 43, 43, 0.2);
+  border: 1px solid rgba(217, 43, 43, 0.5);
+  color: #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.error-msg.visible {
+  display: block;
+}
+
+.user-info {
+  text-align: center;
+  padding: 20px;
+  display: none;
+}
+
+.user-info.visible {
+  display: block;
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #00ced1;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #1a2a3a, #0a1222);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.user-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.user-email {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 20px;
+}
+
+.user-role {
+  font-size: 11px;
+  color: #7CFC00;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.continue-btn {
+  display: inline-block;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.signout-btn {
+  display: block;
+  margin: 12px auto 0;
+  background: transparent;
+  border: 1px solid rgba(255, 59, 59, 0.5);
+  color: #ff6b6b;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.signout-btn:hover {
+  background: rgba(255, 59, 59, 0.1);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  color: #5c6b8a;
+  font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(0, 206, 209, 0.2);
+}
+
+.divider span {
+  padding: 0 12px;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-sapphire-bg"></div>
+</div>
+
+<div class="container">
+  <div class="gem-logo">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="depth-shadow"></div>
+  </div>
+  <div class="subtitle" id="subtitleText">Welcome back</div>
+
+  <div class="auth-card">
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Sign-in view -->
+    <div id="signinView">
+      <button id="googleSigninBtn" class="auth-btn" style="background:#fff;color:#333;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Sign in with Google
+      </button>
+      <div class="divider"><span>or</span></div>
+      <div class="form-group">
+        <label for="emailInput">Email</label>
+        <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="passwordInput">Password</label>
+        <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button id="signinBtn" class="auth-btn">Sign In</button>
+      <div class="toggle-link">
+        No account? <a id="showSignup">Create one</a>
+      </div>
+    </div>
+
+    <!-- Sign-up view -->
+    <div id="signupView" style="display:none;">
+      <div class="form-group">
+        <label for="signupEmail">Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="signupPassword">Password</label>
+        <input type="password" id="signupPassword" placeholder="Min 6 characters" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label for="signupName">Full Name</label>
+        <input type="text" id="signupName" placeholder="Your name">
+      </div>
+      <button id="signupBtn" class="auth-btn">Create Account</button>
+      <div class="toggle-link">
+        Already have an account? <a id="showSignin">Sign in</a>
+      </div>
+    </div>
+
+    <!-- Signed-in view -->
+    <div id="userView" class="user-info">
+      <div class="user-avatar" id="userAvatar">👤</div>
+      <div id="userName" class="user-name"></div>
+      <div id="userEmail" class="user-email"></div>
+      <div id="userRole" class="user-role"></div>
+      <a href="dashboard-buyer.html" class="continue-btn" id="continueBtn">Continue →</a>
+      <button id="signoutBtn" class="signout-btn">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ========== ADMIN EMAILS ==========
+// Add your admin email(s) here. These users get role='admin' on first sign-up.
+const ADMIN_EMAILS = [
+  // 'your-email@example.com',  // ← Replace with your email
+];
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 5000);
+}
+
+function clearError() {
+  document.getElementById('errorMsg').classList.remove('visible');
+}
+
+// ========== TOGGLE VIEWS ==========
+document.getElementById('showSignup').onclick = () => {
+  document.getElementById('signinView').style.display = 'none';
+  document.getElementById('signupView').style.display = 'block';
+  document.getElementById('subtitleText').textContent = 'Create your account';
+  clearError();
+};
+
+document.getElementById('showSignin').onclick = () => {
+  document.getElementById('signupView').style.display = 'none';
+  document.getElementById('signinView').style.display = 'block';
+  document.getElementById('subtitleText').textContent = 'Welcome back';
+  clearError();
+};
+
+// ========== GOOGLE SIGN IN ==========
+document.getElementById('googleSigninBtn').onclick = async () => {
+  clearError();
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
+
+  try {
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+    const isNewUser = result.additionalUserInfo?.isNewUser || false;
+
+    if (isNewUser) {
+      // Determine role: admin if email is in ADMIN_EMAILS
+      const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+      const role = isAdmin ? 'admin' : 'buyer';
+
+      await db.collection('profiles').doc(user.uid).set({
+        full_name: user.displayName || '',
+        email: user.email,
+        photoURL: user.photoURL || '',
+        provider: 'google',
+        role: role,
+        country: '',
+        phone: '',
+        total_spent: 0,
+        total_revenue: 0,
+        total_trades: 0,
+        win_rate: 0,
+        rating: 0,
+        created_at: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('wallets').doc(user.uid).set({
+        userId: user.uid,
+        balance: 0,
+        held_amount: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('users').doc(user.uid).set({
+        name: user.displayName || '',
+        email: user.email,
+        photoURL: user.photoURL || '',
+        provider: 'google',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } else {
+      // Update last login for existing users
+      await db.collection('profiles').doc(user.uid).update({
+        last_login: firebase.firestore.FieldValue.serverTimestamp(),
+        photoURL: user.photoURL || ''
+      });
+    }
+
+    // onAuthStateChanged will handle redirect
+  } catch (error) {
+    if (error.code === 'auth/popup-closed-by-user') {
+      showError('Sign-in popup was closed. Please try again.');
+    } else if (error.code === 'auth/popup-blocked') {
+      showError('Popup was blocked. Please allow popups for this site.');
+    } else if (error.code === 'auth/account-exists-with-different-credential') {
+      showError('An account already exists with this email using a different sign-in method.');
+    } else if (error.code === 'auth/network-request-failed') {
+      showError('Network error. Please check your connection and try again.');
+    } else {
+      showError(error.message);
+    }
+  }
+};
+
+// ========== EMAIL SIGN IN ==========
+document.getElementById('signinBtn').onclick = async () => {
+  clearError();
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+
+  if (!email || !password) {
+    showError('Please enter both email and password.');
+    return;
+  }
+
+  const btn = document.getElementById('signinBtn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+    // onAuthStateChanged will handle redirect
+  } catch (error) {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+    if (error.code === 'auth/user-not-found') {
+      showError('No account found with this email. Create one below.');
+    } else if (error.code === 'auth/wrong-password') {
+      showError('Incorrect password. Try again.');
+    } else if (error.code === 'auth/invalid-email') {
+      showError('Please enter a valid email address.');
+    } else if (error.code === 'auth/too-many-requests') {
+      showError('Too many failed attempts. Please try again later.');
+    } else {
+      showError(error.message);
+    }
+  }
+};
+
+// ========== SIGN UP ==========
+document.getElementById('signupBtn').onclick = async () => {
+  clearError();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const name = document.getElementById('signupName').value.trim();
+
+  if (!email || !password) {
+    showError('Please enter email and password.');
+    return;
+  }
+  if (password.length < 6) {
+    showError('Password must be at least 6 characters.');
+    return;
+  }
+
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+
+  try {
+    const result = await auth.createUserWithEmailAndPassword(email, password);
+    const user = result.user;
+
+    // Determine role: admin if email is in ADMIN_EMAILS, otherwise buyer
+    const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+    const role = isAdmin ? 'admin' : 'buyer';
+
+    // Update auth profile
+    await user.updateProfile({ displayName: name || email.split('@')[0] });
+
+    // Create profile in Firestore
+    await db.collection('profiles').doc(user.uid).set({
+      full_name: name || email.split('@')[0],
+      email: email,
+      photoURL: '',
+      provider: 'email',
+      role: role,
+      country: '',
+      phone: '',
+      total_spent: 0,
+      total_revenue: 0,
+      total_trades: 0,
+      win_rate: 0,
+      rating: 0,
+      created_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Create wallet
+    await db.collection('wallets').doc(user.uid).set({
+      userId: user.uid,
+      balance: 0,
+      held_amount: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Also maintain users collection for backwards compatibility
+    await db.collection('users').doc(user.uid).set({
+      name: name || email.split('@')[0],
+      email: email,
+      provider: 'email',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    showToast('Account created! Redirecting...');
+    // onAuthStateChanged will handle redirect
+  } catch (error) {
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+    if (error.code === 'auth/email-already-in-use') {
+      showError('An account with this email already exists. Sign in instead.');
+    } else if (error.code === 'auth/invalid-email') {
+      showError('Please enter a valid email address.');
+    } else if (error.code === 'auth/weak-password') {
+      showError('Password is too weak. Use at least 6 characters.');
+    } else {
+      showError(error.message);
+    }
+  }
+};
+
+// ========== SIGN OUT ==========
+document.getElementById('signoutBtn').onclick = async () => {
+  try {
+    await auth.signOut();
+    document.getElementById('signinView').style.display = 'block';
+    document.getElementById('userView').classList.remove('visible');
+    document.getElementById('subtitleText').textContent = 'Welcome back';
+    clearError();
+  } catch (err) {
+    showError('Sign out failed: ' + err.message);
+  }
+};
+
+// ========== SHOW SIGNED-IN USER ==========
+async function showUser(user) {
+  document.getElementById('signinView').style.display = 'none';
+  document.getElementById('signupView').style.display = 'none';
+  document.getElementById('userView').classList.add('visible');
+
+  const profileDoc = await db.collection('profiles').doc(user.uid).get();
+  const profile = profileDoc.exists ? profileDoc.data() : {};
+  const role = profile.role || 'buyer';
+  const name = profile.full_name || user.displayName || user.email.split('@')[0];
+
+  // Show Google avatar if available, otherwise emoji
+  const avatarEl = document.getElementById('userAvatar');
+  if (user.photoURL) {
+    avatarEl.innerHTML = '<img src="' + user.photoURL + '" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">"';
+  } else {
+    avatarEl.textContent = '👤';
+  }
+
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userEmail').textContent = user.email;
+  document.getElementById('userRole').textContent = role;
+
+  // Update continue button based on role
+  const continueBtn = document.getElementById('continueBtn');
+  if (role === 'admin') {
+    continueBtn.href = 'dashboard-admin.html';
+    document.getElementById('userRole').textContent = '👑 Admin';
+    document.getElementById('userRole').style.color = '#FFD966';
+  } else if (role === 'seller') {
+    continueBtn.href = 'seller-auction.html';
+    document.getElementById('userRole').textContent = '🏪 Seller';
+    document.getElementById('userRole').style.color = '#00D4FF';
+  } else {
+    continueBtn.href = 'dashboard-buyer.html';
+    document.getElementById('userRole').textContent = '🛒 Buyer';
+    document.getElementById('userRole').style.color = '#7CFC00';
+  }
+}
+
+// ========== TOAST ==========
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#0a1424cc;backdrop-filter:blur(12px);padding:10px 24px;border-radius:60px;font-size:0.8rem;border-left:4px solid #7CFC00;color:#fff;z-index:200;white-space:nowrap;transition:0.2s;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.style.opacity = '1');
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, 3000);
+}
+
+// ========== AUTH STATE LISTENER ==========
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    await showUser(user);
+    // Auto-redirect after 1.5s so user sees their role badge
+    const profileDoc = await db.collection('profiles').doc(user.uid).get();
+    const role = profileDoc.exists ? profileDoc.data().role : 'buyer';
+    setTimeout(() => {
+      if (role === 'admin') {
+        window.location.href = 'dashboard-admin.html';
+      } else if (role === 'seller') {
+        window.location.href = 'seller-auction.html';
+      } else {
+        window.location.href = 'dashboard-buyer.html';
+      }
+    }, 1500);
+  }
+});
+
+// ========== ENTER KEY SUPPORT ==========
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('signinBtn').click();
+});
+document.getElementById('signupPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('signupBtn').click();
+});
+</script>
+</body>
+</html>

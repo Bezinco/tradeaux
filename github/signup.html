@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — TradeAux</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+  overflow-x: hidden;
+}
+
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-sapphire-bg { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%; 
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.05); }
+  100% { transform: translate(-30px, 20px) scale(1); }
+}
+
+.gem-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.gem-text {
+  font-size: 64px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+  animation: sparkleFlash 4s ease-in-out infinite;
+  opacity: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.depth-shadow {
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px);
+  z-index: -1;
+}
+
+.container {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+
+.auth-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 10px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  border-color: #00ced1;
+  box-shadow: 0 0 20px rgba(0, 206, 209, 0.2);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 8px;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-links {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.auth-links a {
+  color: #00ced1;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.error-msg {
+  background: rgba(217, 43, 43, 0.2);
+  border: 1px solid rgba(217, 43, 43, 0.5);
+  color: #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.error-msg.visible {
+  display: block;
+}
+
+.github-btn {
+  width: 100%;
+  padding: 14px;
+  background: #24292e;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+
+.github-btn:hover {
+  background: #444c56;
+  transform: translateY(-2px);
+}
+
+.github-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.divider span {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+  padding: 0 16px;
+  position: relative;
+  font-size: 12px;
+  color: #9ca3af;
+}
+</style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-sapphire-bg"></div>
+</div>
+
+<div class="container">
+  <div class="gem-logo">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="depth-shadow"></div>
+  </div>
+  <div class="subtitle">Join the future of commodity trading</div>
+
+  <div class="auth-card">
+    <div class="error-msg" id="errorMsg"></div>
+
+    <button class="github-btn" id="githubSignUp">
+      <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      Continue with GitHub
+    </button>
+
+    <div class="divider"><span>OR</span></div>
+
+    <form id="signupForm">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="fullName" required placeholder="John Doe">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Company / Co-op Name</label>
+        <input type="text" class="form-input" id="companyName" required placeholder="Pacific Coconut Co-op">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="email" required placeholder="you@company.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-input" id="role">
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller / Co-op</option>
+          <option value="carrier">Carrier / Logistics</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="password" required placeholder="••••••••">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" class="form-input" id="confirmPassword" required placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Create Account →</button>
+    </form>
+
+    <div class="auth-links">
+      Already have an account? <a href="signin.html">Sign In</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- Role Selection Modal (for GitHub sign-up) -->
+<div id="roleModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width:400px;">
+    <div class="modal-header"><h2>🎭 Select Your Role</h2></div>
+    <div style="color:#9ca3af; margin-bottom:20px; font-size:13px;">Welcome! Please select your role to complete registration.</div>
+    <div class="modal-field">
+      <label>I am a:</label>
+      <select class="form-input" id="githubRoleSelect">
+        <option value="buyer">Buyer (I want to buy commodities)</option>
+        <option value="seller">Seller / Co-op (I sell commodities)</option>
+        <option value="carrier">Carrier / Logistics (I transport goods)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelRoleBtn">Cancel</button>
+      <button class="create-btn" id="confirmRoleBtn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let pendingGithubUser = null;
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 6000);
+}
+
+function hideError() {
+  document.getElementById('errorMsg').classList.remove('visible');
+}
+
+function showToast(msg, isError = false) {
+  const toast = document.createElement('div');
+  toast.textContent = msg;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: ${isError ? 'rgba(217,43,43,0.9)' : '#0a1424cc'};
+    backdrop-filter: blur(12px);
+    padding: 12px 28px;
+    border-radius: 60px;
+    font-size: 0.85rem;
+    border-left: 4px solid ${isError ? '#ff3b3b' : '#7CFC00'};
+    z-index: 2000;
+    color: white;
+    font-family: 'Inter', sans-serif;
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function setButtonLoading(btn, loading) {
+  btn.disabled = loading;
+  btn.dataset.originalText = btn.dataset.originalText || btn.textContent;
+  btn.textContent = loading ? 'Please wait...' : btn.dataset.originalText;
+}
+
+function validatePassword(password) {
+  const errors = [];
+  if (password.length < 8) errors.push('At least 8 characters');
+  if (!/[A-Z]/.test(password)) errors.push('One uppercase letter');
+  if (!/[a-z]/.test(password)) errors.push('One lowercase letter');
+  if (!/[0-9]/.test(password)) errors.push('One number');
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?]/.test(password)) errors.push('One special character');
+  return errors;
+}
+
+// ========== GITHUB SIGN UP ==========
+document.getElementById('githubSignUp').addEventListener('click', async () => {
+  hideError();
+  const btn = document.getElementById('githubSignUp');
+  setButtonLoading(btn, true);
+
+  const provider = new firebase.auth.GithubAuthProvider();
+  provider.addScope('read:user');
+  provider.addScope('user:email');
+
+  try {
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+
+    // Check if profile exists
+    const profileDoc = await db.collection('profiles').doc(user.uid).get();
+    if (!profileDoc.exists) {
+      // New user — show role selection modal
+      pendingGithubUser = user;
+      document.getElementById('roleModal').style.display = 'flex';
+      setButtonLoading(btn, false);
+      return;
+    }
+
+    // Existing user — redirect
+    showToast('Welcome back!');
+    setTimeout(() => redirectByRole(profileDoc.data().role), 1000);
+
+  } catch (error) {
+    console.error('GitHub auth error:', error);
+    if (error.code === 'auth/popup-closed-by-user') {
+      showError('Sign-in popup was closed. Please try again.');
+    } else if (error.code === 'auth/account-exists-with-different-credential') {
+      showError('An account already exists with this email using a different sign-in method.');
+    } else if (error.code === 'auth/network-request-failed') {
+      showError('Network error. Please check your connection and try again.');
+    } else {
+      showError(error.message);
+    }
+    setButtonLoading(btn, false);
+  }
+});
+
+// Role modal handlers
+document.getElementById('cancelRoleBtn').onclick = () => {
+  document.getElementById('roleModal').style.display = 'none';
+  pendingGithubUser = null;
+};
+
+document.getElementById('confirmRoleBtn').onclick = async () => {
+  if (!pendingGithubUser) return;
+  const role = document.getElementById('githubRoleSelect').value;
+  const btn = document.getElementById('confirmRoleBtn');
+  setButtonLoading(btn, true);
+
+  try {
+    await createUserProfile(pendingGithubUser, {
+      fullName: pendingGithubUser.displayName || 'GitHub User',
+      companyName: '',
+      email: pendingGithubUser.email,
+      role: role,
+      provider: 'github'
+    });
+
+    document.getElementById('roleModal').style.display = 'none';
+    pendingGithubUser = null;
+    showToast('Account created! Redirecting...');
+    setTimeout(() => redirectByRole(role), 1500);
+  } catch (err) {
+    showError('Failed to create profile: ' + err.message);
+    setButtonLoading(btn, false);
+  }
+};
+
+// ========== EMAIL/PASSWORD SIGN UP ==========
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideError();
+
+  const btn = document.getElementById('submitBtn');
+  setButtonLoading(btn, true);
+
+  const fullName = document.getElementById('fullName').value.trim();
+  const companyName = document.getElementById('companyName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const role = document.getElementById('role').value;
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  // Validation
+  if (!fullName || !email || !password) {
+    showError('Please fill in all required fields');
+    setButtonLoading(btn, false);
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showError('Passwords do not match');
+    setButtonLoading(btn, false);
+    return;
+  }
+
+  const pwErrors = validatePassword(password);
+  if (pwErrors.length > 0) {
+    showError('Password must have: ' + pwErrors.join(', '));
+    setButtonLoading(btn, false);
+    return;
+  }
+
+  try {
+    // 1. Create user with Firebase Auth
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    // 2. Update profile
+    await user.updateProfile({ displayName: fullName });
+
+    // 3. Create profile
+    await createUserProfile(user, {
+      fullName: fullName,
+      companyName: companyName,
+      email: email,
+      role: role,
+      provider: 'email'
+    });
+
+    showToast('Account created successfully! Redirecting...');
+    setTimeout(() => redirectByRole(role), 1500);
+
+  } catch (err) {
+    console.error('Sign up error:', err);
+    if (err.code === 'auth/email-already-in-use') {
+      showError('An account with this email already exists. Please sign in instead.');
+    } else if (err.code === 'auth/invalid-email') {
+      showError('Invalid email address. Please check and try again.');
+    } else if (err.code === 'auth/weak-password') {
+      showError('Password is too weak. Please use a stronger password.');
+    } else if (err.code === 'auth/network-request-failed') {
+      showError('Network error. Please check your connection and try again.');
+    } else {
+      showError(err.message);
+    }
+    setButtonLoading(btn, false);
+  }
+});
+
+// ========== CREATE USER PROFILE (shared helper) ==========
+async function createUserProfile(user, data) {
+  const batch = db.batch();
+
+  const profileRef = db.collection('profiles').doc(user.uid);
+  batch.set(profileRef, {
+    uid: user.uid,
+    full_name: data.fullName,
+    fullName: data.fullName,
+    companyName: data.companyName || '',
+    email: data.email,
+    role: data.role,
+    photoURL: user.photoURL || '',
+    provider: data.provider,
+    country: '',
+    phone: '',
+    total_spent: 0,
+    total_revenue: 0,
+    total_trades: 0,
+    win_rate: 0,
+    rating: 0,
+    created_at: firebase.firestore.FieldValue.serverTimestamp(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  const walletRef = db.collection('wallets').doc(user.uid);
+  batch.set(walletRef, {
+    userId: user.uid,
+    balance: 0,
+    held_amount: 0,
+    email: data.email,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  const userRef = db.collection('users').doc(user.uid);
+  batch.set(userRef, {
+    name: data.fullName,
+    email: data.email,
+    photoURL: user.photoURL || '',
+    provider: data.provider,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  await batch.commit();
+}
+
+// ========== REDIRECT ==========
+function redirectByRole(role) {
+  const urls = {
+    buyer: 'dashboard-buyer.html',
+    seller: 'dashboard-seller.html',
+    carrier: 'dashboard-transport.html',
+    admin: 'dashboard-admin.html'
+  };
+  window.location.href = urls[role] || 'dashboard-buyer.html';
+}
+
+// ========== AUTO-REDIRECT IF ALREADY SIGNED IN ==========
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    const profileDoc = await db.collection('profiles').doc(user.uid).get();
+    if (profileDoc.exists) {
+      showToast('Already signed in. Redirecting...');
+      setTimeout(() => redirectByRole(profileDoc.data().role), 1000);
+    }
+  }
+});
+</script>
+</body>
+</html>

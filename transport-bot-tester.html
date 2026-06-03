@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>TradeAux • Transport Bot Arena | Simulation & Duhe Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb;
+  min-height: 100vh; overflow-x: hidden;
+}
+.bg-waves {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+}
+.wave-bg {
+  position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+.wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
+.wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+@keyframes waveBgDrift {
+  0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } 100% { transform: translate(-30px,20px) scale(1); }
+}
+
+.gem-logo-corner {
+  display: inline-block; filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d; perspective: 1000px; transform: scale(0.55); transform-origin: left center;
+}
+.gem-text {
+  font-size: 80px; font-weight: 900; letter-spacing: -0.02em; position: relative;
+  display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; gap: 2px;
+}
+.gem-letter {
+  display: inline-block; position: relative; transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2);
+}
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px);
+}
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay;
+}
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none;
+}
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); }
+}
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; } .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; } .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; } .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; } .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; } .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 0 30px; flex-wrap: wrap; gap: 16px;
+}
+.nav { display: flex; gap: 12px; align-items: center; }
+.nav a {
+  font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500;
+  padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb;
+  text-decoration: none; transition: all 0.3s;
+}
+.nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+.wallet-section {
+  display: flex; align-items: center; gap: 16px;
+  background: rgba(0, 206, 209, 0.1); padding: 8px 20px; border-radius: 40px;
+  border: 1px solid rgba(0, 206, 209, 0.3);
+}
+.wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+.wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+.wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+
+.page-title {
+  font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800;
+  color: #00ced1; margin-bottom: 8px;
+}
+.page-subtitle { font-size: 14px; color: #9ca3af; margin-bottom: 30px; }
+
+.card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.95));
+  border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; margin-bottom: 20px;
+}
+.card-header {
+  font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700;
+  color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px;
+}
+
+.grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+label {
+  display: block; font-size: 12px; color: #9ca3af; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 500;
+}
+input, select {
+  width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,206,209,0.3); border-radius: 8px;
+  color: white; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
+  margin-bottom: 10px;
+}
+input:focus, select:focus { border-color: #00ced1; }
+input[type="range"] { padding: 0; height: 4px; accent-color: #00ced1; margin-bottom: 4px; }
+.range-val { text-align: right; font-size: 13px; color: #00ced1; font-weight: 700; margin-bottom: 10px; font-family: 'Orbitron', sans-serif; }
+
+.toggle-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.toggle-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.toggle {
+  width: 40px; height: 22px; background: #1e293b; border-radius: 11px; position: relative;
+  cursor: pointer; transition: background 0.2s;
+}
+.toggle.on { background: #00ced1; }
+.toggle::after {
+  content: ''; position: absolute; width: 18px; height: 18px; background: white;
+  border-radius: 50%; top: 2px; left: 2px; transition: left 0.2s;
+}
+.toggle.on::after { left: 20px; }
+
+.btn {
+  padding: 10px 18px; border-radius: 8px; border: none;
+  font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px;
+  cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(0,206,209,0.4); }
+.btn-secondary {
+  background: rgba(15, 32, 64, 0.7); color: #e5e7eb; border: 1px solid rgba(0,206,209,0.3);
+}
+.btn-secondary:hover { border-color: #00ced1; }
+
+.score-bar {
+  height: 28px; background: rgba(0,0,0,0.4); border-radius: 6px; overflow: hidden;
+  position: relative; margin: 6px 0;
+}
+.score-fill {
+  height: 100%; border-radius: 6px; transition: width 0.5s ease;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+  font-size: 12px; font-weight: 700; color: #000;
+}
+.score-fill.price { background: linear-gradient(90deg, #10b981, #34d399); }
+.score-fill.speed { background: linear-gradient(90deg, #00ced1, #22d3ee); }
+.score-fill.capacity { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.score-fill.duhe { background: linear-gradient(90deg, #FFD966, #fbbf24); }
+
+.leaderboard-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px;
+  background: rgba(0,0,0,0.3); margin-bottom: 8px; border: 1px solid rgba(0,206,209,0.1);
+}
+.leaderboard-item.winner { border-color: #7CFC00; background: rgba(124,252,0,0.05); }
+.leaderboard-item.bot { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+.rank-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background: rgba(0,0,0,0.4); }
+.rank-num.gold { background: rgba(245,158,11,0.2); color: #FFD966; }
+.rank-num.silver { background: rgba(148,163,184,0.2); color: #cbd5e1; }
+.rank-num.bronze { background: rgba(180,83,9,0.2); color: #d97706; }
+.bidder-info { flex: 1; }
+.bidder-name { font-weight: 700; font-size: 14px; }
+.bidder-meta { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+.bidder-score { font-weight: 700; color: #00ced1; font-size: 16px; font-family: 'Orbitron', sans-serif; }
+
+.brief-card {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 12px;
+  padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s;
+}
+.brief-card:hover { border-color: rgba(0,206,209,0.4); }
+.brief-card.selected { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+.brief-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+.brief-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: #9ca3af; }
+.brief-meta span { background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; }
+
+.formula-box {
+  background: rgba(0,0,0,0.5); padding: 16px; border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #00ced1;
+  line-height: 1.8; border: 1px dashed rgba(0,206,209,0.3);
+}
+
+.toast {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px;
+  border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px;
+  transition: 0.3s; opacity: 0; z-index: 2000;
+}
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+
+.user-display { display: flex; align-items: center; gap: 8px; margin-left: 12px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #00ced1; }
+.user-name { font-size: 12px; color: #9ca3af; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T</span>
+          <span class="gem-letter" data-letter="R">R</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="D">D</span>
+          <span class="gem-letter" data-letter="E">E</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="U">U</span>
+          <span class="gem-letter" data-letter="X">X</span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div><div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div><div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+        <div class="depth-shadow"></div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="wallet-section">
+        <div class="wallet-balance">
+          <span class="wallet-label">WALLET</span>
+          <span class="wallet-amount" id="walletAmount">$0.00</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="transport-carrier-dashboard.html">← Dashboard</a>
+        <a href="transport-bot-config.html">Config</a>
+        <a href="transport-bot-runner.html">Runner</a>
+        <div class="user-display" id="userDisplay">
+          <img class="user-avatar" id="userAvatar" src="" alt="" style="display:none;">
+          <span class="user-name" id="userName"></span>
+        </div>
+        <a href="#" id="authBtn">Sign Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-title">🧪 Transport Bot Arena</div>
+  <div class="page-subtitle">Simulate freight auctions. Preview Duhe scores against AI competitors.</div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="card-header" style="border:none;padding:0;margin-bottom:14px;">📋 Select Auction</div>
+        <div id="briefList"><div style="color:#9ca3af;font-size:14px;">Click "New Mock Auctions" to generate freight loads.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="border:none;padding:0;margin-bottom:14px;">⚙️ Weapon Loadout</div>
+        <div class="toggle-wrap">
+          <span class="toggle-name">💰 Price Drop</span>
+          <div class="toggle" id="tPrice" onclick="toggle('tPrice')"></div>
+        </div>
+        <label>Drop %</label>
+        <input type="range" id="vPriceDrop" min="0" max="50" value="10" oninput="updateVal('vPriceDrop')">
+        <div class="range-val" id="vPriceDropVal">10%</div>
+
+        <div class="toggle-wrap" style="margin-top:12px;">
+          <span class="toggle-name">⚡ Speed Boost</span>
+          <div class="toggle" id="tSpeed" onclick="toggle('tSpeed')"></div>
+        </div>
+        <label>Boost %</label>
+        <input type="range" id="vSpeedBoost" min="0" max="100" value="20" oninput="updateVal('vSpeedBoost')">
+        <div class="range-val" id="vSpeedBoostVal">20%</div>
+
+        <div class="toggle-wrap" style="margin-top:12px;">
+          <span class="toggle-name">📦 Capacity Boost</span>
+          <div class="toggle" id="tCap" onclick="toggle('tCap')"></div>
+        </div>
+        <label>Boost %</label>
+        <input type="range" id="vCapBoost" min="0" max="100" value="10" oninput="updateVal('vCapBoost')">
+        <div class="range-val" id="vCapBoostVal">10%</div>
+
+        <div class="toggle-wrap" style="margin-top:12px;">
+          <span class="toggle-name">⭐ Reliability</span>
+          <div class="toggle" id="tRel" onclick="toggle('tRel')"></div>
+        </div>
+        <label>Rating</label>
+        <input type="range" id="vRel" min="50" max="100" value="90" oninput="updateVal('vRel')">
+        <div class="range-val" id="vRelVal">90</div>
+
+        <div class="toggle-wrap" style="margin-top:12px;">
+          <span class="toggle-name">🎯 Two-Pronged Snipe</span>
+          <div class="toggle" id="tSnipe" onclick="toggle('tSnipe')"></div>
+        </div>
+        <label>Snipe Price Drop %</label>
+        <input type="range" id="vSnipePrice" min="0" max="50" value="20" oninput="updateVal('vSnipePrice')">
+        <div class="range-val" id="vSnipePriceVal">20%</div>
+        <label>Snipe Speed Boost %</label>
+        <input type="range" id="vSnipeSpeed" min="0" max="100" value="30" oninput="updateVal('vSnipeSpeed')">
+        <div class="range-val" id="vSnipeSpeedVal">30%</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="border:none;padding:0;margin-bottom:14px;">🚧 Guardrails</div>
+        <label>Cost Basis ($/km)</label>
+        <input type="number" id="gCost" value="1.50" step="0.01">
+        <label>Min Margin %</label>
+        <input type="number" id="gMargin" value="15">
+        <label>Floor Preview</label>
+        <div style="font-size:1.1rem;font-weight:700;color:#00ced1;font-family:'Orbitron',sans-serif;" id="gFloor">$1.73/km</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header" style="border:none;padding:0;margin-bottom:14px;">📊 Duhe Score Formula</div>
+        <div class="formula-box">
+duheScore = (priceScore + speedScore + capacityScore) × (reliability / 100)<br><br>
+priceScore  = ((budget − bidPrice) / budget) × 100<br>
+speedScore  = (requiredSpeed / bidSpeed) × 100<br>
+capacityScore = (bidCapacity / requiredCapacity) × 100
+        </div>
+      </div>
+
+      <div class="card" id="briefDetail" style="display:none;">
+        <div class="card-header" style="border:none;padding:0;margin-bottom:14px;">📦 Auction Details</div>
+        <div id="detailContent"></div>
+      </div>
+
+      <div class="card" id="simResult" style="display:none;">
+        <div class="card-header" style="border:none;padding:0;margin-bottom:14px;">🏆 Simulation Results</div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Price Score</span><span id="rPriceScore">0</span></div>
+          <div class="score-bar"><div class="score-fill price" id="barPrice" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Speed Score</span><span id="rSpeedScore">0</span></div>
+          <div class="score-bar"><div class="score-fill speed" id="barSpeed" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Capacity Score</span><span id="rCapScore">0</span></div>
+          <div class="score-bar"><div class="score-fill capacity" id="barCap" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:15px;margin-top:12px;font-weight:700;"><span>🔥 DUHE SCORE</span><span id="rDuhe">0</span></div>
+          <div class="score-bar"><div class="score-fill duhe" id="barDuhe" style="width:0%"></div></div>
+        </div>
+        <div id="leaderboard"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+auth.onAuthStateChanged(user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  document.getElementById('userName').textContent = user.displayName || user.email;
+  if (user.photoURL) { document.getElementById('userAvatar').src = user.photoURL; document.getElementById('userAvatar').style.display = 'block'; }
+  loadWallet();
+});
+document.getElementById('authBtn').onclick = () => auth.signOut().then(() => window.location.href = 'signin.html');
+
+async function loadWallet() {
+  const doc = await db.collection('wallets').doc(auth.currentUser.uid).get();
+  const bal = doc.exists ? (doc.data().balance || 0) : 0;
+  document.getElementById('walletAmount').textContent = '$' + bal.toFixed(2);
+}
+
+let mockAuctions = [];
+let selectedAuctionId = null;
+let mockCompetitors = ['FastFreight Co', 'GlobalHaul Ltd', 'SwiftTransit', 'HeavyMovers Inc', 'PrimeLogistics'];
+
+function toggle(id) { document.getElementById(id).classList.toggle('on'); calcFloor(); }
+function updateVal(id) { document.getElementById(id+'Val').textContent = document.getElementById(id).value + (id==='vRel' ? '' : '%'); calcFloor(); }
+function calcFloor() { const cb=parseFloat(document.getElementById('gCost').value)||0; const mm=parseFloat(document.getElementById('gMargin').value)||0; document.getElementById('gFloor').textContent = cb ? '$'+(cb*(1+mm/100)).toFixed(2)+'/km' : '—'; }
+document.getElementById('gCost').addEventListener('input', calcFloor);
+document.getElementById('gMargin').addEventListener('input', calcFloor);
+
+function showToast(msg, isError=false) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.className=isError?'toast error visible':'toast visible';
+  setTimeout(()=>t.classList.remove('visible'),3000);
+}
+
+function generateMockAuctions() {
+  const origins = ['Shanghai', 'Rotterdam', 'Los Angeles', 'Singapore', 'Dubai', 'Hamburg', 'Ningbo'];
+  const destinations = ['New York', 'London', 'Tokyo', 'Sydney', 'Mumbai', 'São Paulo', 'Moscow'];
+  const cargoTypes = ['Container', 'Bulk', 'Reefer', 'Flatbed', 'Tanker'];
+  mockAuctions = [];
+  for (let i=0; i<5; i++) {
+    const distance = Math.floor(Math.random()*8000)+500;
+    const budget = Math.round(distance * (Math.random()*2 + 1.5));
+    mockAuctions.push({
+      id: 'mock-'+i,
+      title: `${cargoTypes[Math.floor(Math.random()*cargoTypes.length)]} Freight #${1000+i}`,
+      origin: origins[Math.floor(Math.random()*origins.length)],
+      destination: destinations[Math.floor(Math.random()*destinations.length)],
+      cargoType: cargoTypes[Math.floor(Math.random()*cargoTypes.length)],
+      weight: Math.floor(Math.random()*20000)+1000,
+      weightUnit: 'kg',
+      distance: distance,
+      startingBid: budget,
+      requiredSpeed: Math.floor(Math.random()*72)+24,
+      requiredCapacity: Math.floor(Math.random()*5)+1,
+      deadline: new Date(Date.now() + Math.random()*7*24*60*60*1000).toISOString(),
+      status: 'active'
+    });
+  }
+  renderAuctionList();
+  showToast('Generated 5 mock transport auctions');
+}
+
+function renderAuctionList() {
+  const list = document.getElementById('briefList');
+  list.innerHTML = mockAuctions.map(a => `
+    <div class="brief-card ${a.id===selectedAuctionId?'selected':''}" onclick="selectAuction('${a.id}')">
+      <div class="brief-title">${a.title}</div>
+      <div class="brief-meta">
+        <span>📍 ${a.origin} → ${a.destination}</span>
+        <span>💰 $${a.startingBid.toLocaleString()}</span>
+        <span>📏 ${a.distance} km</span>
+        <span>⚡ ${a.requiredSpeed}h</span>
+        <span>📦 ${a.requiredCapacity} trucks</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectAuction(id) {
+  selectedAuctionId = id;
+  renderAuctionList();
+  const a = mockAuctions.find(x => x.id === id);
+  document.getElementById('briefDetail').style.display = 'block';
+  document.getElementById('detailContent').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;">
+      <div><strong style="color:#9ca3af;">Route:</strong> ${a.origin} → ${a.destination}</div>
+      <div><strong style="color:#9ca3af;">Distance:</strong> ${a.distance} km</div>
+      <div><strong style="color:#9ca3af;">Budget:</strong> $${a.startingBid.toLocaleString()}</div>
+      <div><strong style="color:#9ca3af;">Required Speed:</strong> ${a.requiredSpeed} hours</div>
+      <div><strong style="color:#9ca3af;">Required Capacity:</strong> ${a.requiredCapacity} trucks</div>
+      <div><strong style="color:#9ca3af;">Cargo:</strong> ${a.cargoType}</div>
+      <div><strong style="color:#9ca3af;">Weight:</strong> ${a.weight.toLocaleString()} ${a.weightUnit}</div>
+      <div><strong style="color:#9ca3af;">Deadline:</strong> ${new Date(a.deadline).toLocaleString()}</div>
+    </div>
+  `;
+  document.getElementById('simResult').style.display = 'none';
+}
+
+function runSimulation() {
+  if (!selectedAuctionId) { showToast('Select an auction first!', true); return; }
+  const auction = mockAuctions.find(x => x.id === selectedAuctionId);
+  const costBasis = parseFloat(document.getElementById('gCost').value) || 1.50;
+  const minMargin = parseFloat(document.getElementById('gMargin').value) || 15;
+  const floorPrice = costBasis * (1 + minMargin / 100);
+
+  let bidPrice = auction.startingBid;
+  let bidSpeed = auction.requiredSpeed;
+  let bidCapacity = auction.requiredCapacity;
+  let bidRel = 70;
+  let weapons = [];
+
+  if (document.getElementById('tPrice').classList.contains('on')) {
+    const drop = parseInt(document.getElementById('vPriceDrop').value);
+    bidPrice = auction.startingBid * (1 - drop/100);
+    weapons.push('Price');
+  }
+  if (document.getElementById('tSpeed').classList.contains('on')) {
+    const boost = parseInt(document.getElementById('vSpeedBoost').value);
+    bidSpeed = auction.requiredSpeed / (1 + boost/100);
+    weapons.push('Speed');
+  }
+  if (document.getElementById('tCap').classList.contains('on')) {
+    const boost = parseInt(document.getElementById('vCapBoost').value);
+    bidCapacity = auction.requiredCapacity * (1 + boost/100);
+    weapons.push('Capacity');
+  }
+  if (document.getElementById('tRel').classList.contains('on')) {
+    bidRel = parseInt(document.getElementById('vRel').value);
+    weapons.push('Reliability');
+  }
+
+  if (document.getElementById('tSnipe').classList.contains('on')) {
+    const snipePriceDrop = parseInt(document.getElementById('vSnipePrice').value);
+    const snipeSpeedBoost = parseInt(document.getElementById('vSnipeSpeed').value);
+    bidPrice = auction.startingBid * (1 - snipePriceDrop/100);
+    bidSpeed = auction.requiredSpeed / (1 + snipeSpeedBoost/100);
+    weapons = ['Two-Pronged Snipe'];
+  }
+
+  const pricePerKm = bidPrice / auction.distance;
+  if (pricePerKm < floorPrice) {
+    bidPrice = floorPrice * auction.distance;
+    weapons.push('(Floor Guard)');
+  }
+
+  const priceScore = ((auction.startingBid - bidPrice) / auction.startingBid) * 100;
+  const speedScore = (auction.requiredSpeed / bidSpeed) * 100;
+  const capacityScore = (bidCapacity / auction.requiredCapacity) * 100;
+  const duheScore = (priceScore + speedScore + capacityScore) * (bidRel / 100);
+
+  const competitors = mockCompetitors.map((name, idx) => {
+    const cPrice = auction.startingBid * (1 - (Math.random()*20 + 5)/100);
+    const cSpeed = auction.requiredSpeed / (1 + (Math.random()*30)/100);
+    const cCap = auction.requiredCapacity * (1 + (Math.random()*20)/100);
+    const cRel = Math.floor(Math.random()*30) + 70;
+    const cPriceScore = ((auction.startingBid - cPrice) / auction.startingBid) * 100;
+    const cSpeedScore = (auction.requiredSpeed / cSpeed) * 100;
+    const cCapScore = (cCap / auction.requiredCapacity) * 100;
+    const cDuhe = (cPriceScore + cSpeedScore + cCapScore) * (cRel / 100);
+    return { name, price: cPrice, speed: cSpeed, capacity: cCap, reliability: cRel, duheScore: cDuhe };
+  });
+
+  const allBids = [...competitors, {
+    name: '🤖 YOUR BOT',
+    price: bidPrice, speed: bidSpeed, capacity: bidCapacity,
+    reliability: bidRel, duheScore: duheScore,
+    isBot: true, weapons: weapons
+  }];
+
+  allBids.sort((a,b) => b.duheScore - a.duheScore);
+
+  document.getElementById('simResult').style.display = 'block';
+  document.getElementById('rPriceScore').textContent = Math.round(priceScore*10)/10;
+  document.getElementById('rSpeedScore').textContent = Math.round(speedScore*10)/10;
+  document.getElementById('rCapScore').textContent = Math.round(capacityScore*10)/10;
+  document.getElementById('rDuhe').textContent = Math.round(duheScore*10)/10;
+
+  const maxScore = Math.max(duheScore, ...competitors.map(c=>c.duheScore), 100);
+  document.getElementById('barPrice').style.width = Math.min(Math.max(priceScore,0),100)+'%';
+  document.getElementById('barSpeed').style.width = Math.min(Math.max(speedScore,0),100)+'%';
+  document.getElementById('barCap').style.width = Math.min(Math.max(capacityScore,0),100)+'%';
+  document.getElementById('barDuhe').style.width = Math.min((duheScore/maxScore)*100,100)+'%';
+
+  document.getElementById('leaderboard').innerHTML = allBids.map((bid, idx) => {
+    const rankClass = idx===0 ? 'gold' : idx===1 ? 'silver' : idx===2 ? 'bronze' : '';
+    const winnerClass = idx===0 ? 'winner' : '';
+    const botClass = bid.isBot ? 'bot' : '';
+    return `
+      <div class="leaderboard-item ${winnerClass} ${botClass}">
+        <div class="rank-num ${rankClass}">${idx+1}</div>
+        <div class="bidder-info">
+          <div class="bidder-name">${bid.name} ${bid.isBot ? '<span style="color:#00ced1;font-size:11px;">['+bid.weapons.join('+')+']</span>' : ''}</div>
+          <div class="bidder-meta">
+            $${Math.round(bid.price).toLocaleString()} · ${Math.round(bid.speed*10)/10}h · ${Math.round(bid.capacity*10)/10} trucks · Rel: ${bid.reliability}
+          </div>
+        </div>
+        <div class="bidder-score">${Math.round(bid.duheScore*10)/10}</div>
+      </div>
+    `;
+  }).join('');
+
+  const botRank = allBids.findIndex(b => b.isBot) + 1;
+  showToast(botRank === 1 ? '🏆 Your bot wins! Rank #1' : `Your bot ranked #${botRank}`, botRank !== 1);
+}
+
+calcFloor();
+</script>
+</body>
+</html>

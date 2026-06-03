@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeAux • Rules of the Exchange</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #020617;
+  font-family: 'Inter', sans-serif;
+  color: #F0F3FA;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+.wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(74, 158, 90, 0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+.wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(58, 110, 165, 0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+}
+
+/* ===== TRADEAUX 3D LOGO WITH COLORED LETTERS ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(124,252,0,0.5));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+  font-size: 160px;
+  font-weight: 900;
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 1.0s; }
+.gem-letter:nth-child(7) { animation-delay: 1.2s; }
+.gem-letter:nth-child(8) { animation-delay: 1.4s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+/* T - Blue */
+.gem-letter[data-letter="T"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* R - Green */
+.gem-letter[data-letter="R"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A - Red */
+.gem-letter[data-letter="A"] {
+  background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* D - Blue */
+.gem-letter[data-letter="D"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* E - Green */
+.gem-letter[data-letter="E"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* U - Blue */
+.gem-letter[data-letter="U"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* X - Green */
+.gem-letter[data-letter="X"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 3D EDGE BOXES */
+.gem-letter .edge-top {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-right {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 10%;
+  height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-bottom {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(0deg, rgba(0,50,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-left {
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 10%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,50,0,0.2) 0%, transparent 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.light-source {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+  animation: sparkleFlash 4s ease-in-out infinite;
+  opacity: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(124,252,0,0.3) 0%, transparent 80%);
+  filter: blur(20px);
+  z-index: -1;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 20px 0 40px;
+}
+
+.nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav a {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 2px solid #4a9e5a;
+  border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px);
+  color: #e5e7eb;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.nav a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  border-color: #7CFC00;
+  color: #7CFC00;
+}
+
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #7CFC00, #FFD966);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rules-section {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.98));
+  border-radius: 24px;
+  border: 1px solid rgba(124,252,0,0.3);
+  padding: 32px;
+  margin-bottom: 30px;
+}
+
+.rule-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  color: #7CFC00;
+  margin-bottom: 20px;
+  border-left: 3px solid #7CFC00;
+  padding-left: 16px;
+}
+
+.rule-list {
+  list-style: none;
+}
+
+.rule-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  gap: 12px;
+}
+
+.rule-number {
+  color: #7CFC00;
+  font-weight: 700;
+  min-width: 30px;
+}
+
+.rule-text {
+  color: #C0C7D9;
+  line-height: 1.5;
+}
+
+.highlight {
+  color: #7CFC00;
+  font-weight: 600;
+}
+
+.fee-box {
+  background: rgba(124,252,0,0.1);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  margin: 30px 0;
+  border: 1px solid rgba(124,252,0,0.4);
+}
+
+.fee-amount {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #7CFC00;
+  font-family: 'Orbitron', sans-serif;
+}
+
+footer {
+  margin-top: 60px;
+  padding: 30px 0 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+footer a {
+  color: #9ca3af;
+  text-decoration: none;
+  margin: 0 12px;
+}
+
+footer a:hover { color: #7CFC00; }
+
+@media (max-width: 700px) {
+  .container { padding: 24px 16px; }
+  h1 { font-size: 1.8rem; }
+  .rule-title { font-size: 1.2rem; }
+  .gem-logo-corner { transform: scale(0.25); }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="auction-floor-buyer.html">Auctions</a>
+      <a href="rules.html" class="active">Rules</a>
+      <a href="signin.html">Sign In</a>
+    </nav>
+  </header>
+
+  <h1>📜 Rules of the Exchange</h1>
+
+  <div class="fee-box">
+    <div class="fee-amount">$25 USD</div>
+    <div style="margin-top: 8px;">Flat fee per winning auction</div>
+    <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">Paid by the buyer. No subscriptions. No hidden fees.</div>
+  </div>
+
+  <div class="rules-section">
+    <div class="rule-title">🏷️ 1. Listing Rules</div>
+    <ul class="rule-list">
+      <li><span class="rule-number">1.1</span><span class="rule-text">All listings must include <span class="highlight">FOB port</span> and <span class="highlight">origin country</span></span></li>
+      <li><span class="rule-number">1.2</span><span class="rule-text">Sellers must specify <span class="highlight">quantity in metric tons</span> and <span class="highlight">quality grade</span></span></li>
+      <li><span class="rule-number">1.3</span><span class="rule-text">Buyers must specify <span class="highlight">target price per MT</span> and <span class="highlight">delivery deadline</span></span></li>
+      <li><span class="rule-number">1.4</span><span class="rule-text">No speculative listings. You must have the product or capacity you list.</span></li>
+    </ul>
+  </div>
+
+  <div class="rules-section">
+    <div class="rule-title">🤖 2. Bot Rules (Zuhe & Cai)</div>
+    <ul class="rule-list">
+      <li><span class="rule-number">2.1</span><span class="rule-text">Seller bots (<span class="highlight">Zuhe Bots</span>) aggregate multiple buyer offers into optimal组合</span></li>
+      <li><span class="rule-number">2.2</span><span class="rule-text">Buyer bots (<span class="highlight">Cai Bots</span>) scan listings and gather best available deals</span></li>
+      <li><span class="rule-number">2.3</span><span class="rule-text">Bots cannot collude or coordinate outside the auction system</span></li>
+      <li><span class="rule-number">2.4</span><span class="rule-text">Bot performance is publicly rated. Low-rated bots may be throttled.</span></li>
+    </ul>
+  </div>
+
+  <div class="rules-section">
+    <div class="rule-title">⏱️ 3. Auction Rules</div>
+    <ul class="rule-list">
+      <li><span class="rule-number">3.1</span><span class="rule-text">Auctions run for <span class="highlight">3 minutes</span> from start to finish</span></li>
+      <li><span class="rule-number">3.2</span><span class="rule-text">All bids are final and binding</span></li>
+      <li><span class="rule-number">3.3</span><span class="rule-text">Seller bots may accept multiple bids (Zuhe) to maximize total value</span></li>
+      <li><span class="rule-number">3.4</span><span class="rule-text">Winning buyers pay <span class="highlight">$25 USD fee</span> directly to TradeAux</span></li>
+    </ul>
+  </div>
+
+  <div class="rules-section">
+    <div class="rule-title">⚖️ 4. Dispute Resolution</div>
+    <ul class="rule-list">
+      <li><span class="rule-number">4.1</span><span class="rule-text">TradeAux is a neutral marketplace. We do not take possession of product.</span></li>
+      <li><span class="rule-number">4.2</span><span class="rule-text">Disputes resolved via <span class="highlight">reputation system</span> and binding arbitration in <span class="highlight">Vancouver, Canada</span></span></li>
+      <li><span class="rule-number">4.3</span><span class="rule-text">Bad faith actors (non-delivery, non-payment) will be permanently banned</span></li>
+    </ul>
+  </div>
+
+  <div class="rules-section">
+    <div class="rule-title">🔒 5. Privacy & Data</div>
+    <ul class="rule-list">
+      <li><span class="rule-number">5.1</span><span class="rule-text">Seller contact info visible only to winning bidders</span></li>
+      <li><span class="rule-number">5.2</span><span class="rule-text">Bot performance metrics are public (wins, ratings, premium)</span></li>
+      <li><span class="rule-number">5.3</span><span class="rule-text">Bot strategies and algorithms remain private to their owners</span></li>
+    </ul>
+  </div>
+
+  <div class="rules-section">
+    <div class="rule-title">🚫 6. Prohibited Conduct</div>
+    <ul class="rule-list">
+      <li><span class="rule-number">6.1</span><span class="rule-text">No shill bidding or fake accounts</span></li>
+      <li><span class="rule-number">6.2</span><span class="rule-text">No market manipulation or price fixing</span></li>
+      <li><span class="rule-number">6.3</span><span class="rule-text">No scraping or data mining without permission</span></li>
+    </ul>
+  </div>
+
+  <footer>
+    <div>© TradeAux — Global Surplus Exchange</div>
+    <div>
+      <a href="how-it-works.html">How It Works</a> · 
+      <a href="rules.html">Rules</a> · 
+      <a href="#">Legal</a> · 
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>

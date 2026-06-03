@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeAux • Seller Bot Runner | Reverse Auction Execution</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --neon: #7CFC00; --gold: #FFD966; --cyan: #00ced1; --red: #ff3b3b; }
+    body { min-height: 100vh; font-family: 'Inter', sans-serif; color: #F0F3FA; background: #020617; overflow-x: hidden; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px 24px 40px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .header h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: var(--gold); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-dot.on { background: var(--gold); box-shadow: 0 0 8px var(--gold); animation: pulse 2s infinite; }
+    .status-dot.off { background: #5c6b8a; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: linear-gradient(145deg, #0B1122, #030712); border: 1px solid rgba(255,217,102,0.15); border-radius: 16px; padding: 16px; }
+    .card-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: var(--gold); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .card-sub { font-size: 10px; color: #5c6b8a; }
+
+    .log-entry { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px; border-left: 2px solid transparent; }
+    .log-entry.bid { background: rgba(255,217,102,0.05); border-left-color: var(--gold); }
+    .log-entry.think { background: rgba(0,206,209,0.05); border-left-color: var(--cyan); }
+    .log-entry.warn { background: rgba(255,165,0,0.05); border-left-color: #FFA500; }
+    .log-entry.err { background: rgba(255,59,59,0.05); border-left-color: var(--red); }
+    .log-time { color: #5c6b8a; font-size: 9px; margin-right: 6px; }
+    .log-weapon { font-weight: 700; color: var(--gold); }
+    .log-scroll { max-height: 300px; overflow-y: auto; }
+
+    .auction-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 6px; font-size: 12px; }
+    .auction-row .commodity { font-weight: 600; color: #fff; }
+    .auction-row .detail { color: #9ca3af; font-size: 10px; }
+    .auction-row .status { font-family: 'Orbitron', sans-serif; font-size: 9px; padding: 2px 8px; border-radius: 10px; }
+    .status-watching { background: rgba(0,206,209,0.1); color: var(--cyan); border: 1px solid rgba(0,206,209,0.3); }
+    .status-bidding { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.3); }
+    .status-sniping { background: rgba(255,165,0,0.1); color: #FFA500; border: 1px solid rgba(255,165,0,0.3); }
+    .status-placed { background: rgba(124,252,0,0.1); color: var(--neon); border: 1px solid rgba(124,252,0,0.3); }
+
+    .metric { text-align: center; padding: 10px; }
+    .metric-value { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: var(--gold); }
+    .metric-label { font-size: 9px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    .btn { border: none; font-family: 'Orbitron', sans-serif; font-weight: 700; cursor: pointer; padding: 8px 16px; border-radius: 30px; font-size: 11px; transition: 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--gold), #ff8c00); color: #000; }
+    .btn-danger { background: linear-gradient(135deg, var(--red), #ff6b6b); color: #fff; }
+    .btn-sm { padding: 4px 10px; font-size: 9px; }
+
+    .weapon-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; font-family: 'Orbitron', sans-serif; margin-left: 4px; }
+    .tag-price { background: rgba(255,59,59,0.15); color: #ff6b6b; }
+    .tag-tonnage { background: rgba(0,206,209,0.15); color: var(--cyan); }
+    .tag-payment { background: rgba(124,252,0,0.15); color: var(--neon); }
+    .tag-snipe { background: rgba(255,217,102,0.15); color: var(--gold); }
+
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: #0a1424cc; backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 40px; font-size: 0.75rem; border-left: 3px solid var(--gold); transition: 0.2s; opacity: 0; z-index: 20000; font-family: 'Orbitron', sans-serif; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>🏪 SELLER BOT RUNNER <span class="status-dot on" id="runnerDot"></span><span id="runnerStatus" style="font-size:12px; color:#9ca3af;">ACTIVE</span></h1>
+        <div style="font-size:11px; color:#5c6b8a; margin-top:2px;">Monitoring buyer briefs • Bidding on reverse auctions</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Restart</button>
+        <button class="btn btn-danger btn-sm" onclick="pauseBot()">⏸ Pause</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">📊 LIVE METRICS</div>
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+            <div class="metric"><div class="metric-value" id="mAuctions">0</div><div class="metric-label">Watching</div></div>
+            <div class="metric"><div class="metric-value" id="mBids">0</div><div class="metric-label">Bids Placed</div></div>
+            <div class="metric"><div class="metric-value" id="mWins">0</div><div class="metric-label">Wins</div></div>
+            <div class="metric"><div class="metric-value" id="mRank">—</div><div class="metric-label">Avg Rank</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔥 ACTIVE REVERSE AUCTIONS <span class="card-sub" id="auctionCount">0</span></div>
+          <div id="activeAuctions"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="height:100%; display:flex; flex-direction:column;">
+          <div class="card-title">🧠 DECISION LOG <button class="btn btn-sm btn-primary" onclick="clearLog()">Clear</button></div>
+          <div class="log-scroll" id="decisionLog" style="flex:1;">
+            <div class="log-entry think"><span class="log-time">--:--:--</span> Seller bot initializing...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let botSettings = null;
+let activeAuctions = [];
+let auctionBids = new Map();
+let auctionStates = new Map();
+let sniperTimers = new Map();
+let totalBidsPlaced = 0;
+let totalWins = 0;
+let rankSum = 0;
+let isPaused = false;
+
+const PAYMENT_MULT = { wire: 0.8, lc_sight: 0.9, lc_30: 1.0, lc_60: 1.1, lc_90: 1.2 };
+const TERM_ORDER = ['wire', 'lc_sight', 'lc_30', 'lc_60', 'lc_90'];
+
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  await loadBotSettings();
+  if (!botSettings || !botSettings.active) {
+    log('Seller bot is INACTIVE. Configure at seller-bot-config.html', 'err');
+    document.getElementById('runnerStatus').textContent = 'INACTIVE';
+    document.getElementById('runnerDot').className = 'status-dot off';
+    return;
+  }
+  setupAuctionsListener();
+  setupMyBidsListener();
+  log('Seller Bot RUNNER activated', 'think');
+});
+
+async function loadBotSettings() {
+  const doc = await db.collection('seller_bots').doc(currentUser.uid).get();
+  if (doc.exists) botSettings = doc.data();
+}
+
+function setupAuctionsListener() {
+  db.collection('buyer_briefs').where('status', 'in', ['active', 'auctioning']).where('remaining_mt', '>', 0)
+    .onSnapshot(snapshot => {
+      const prev = new Set(activeAuctions.map(a => a.id));
+      activeAuctions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('auctionCount').textContent = activeAuctions.length;
+      document.getElementById('mAuctions').textContent = activeAuctions.length;
+      renderAuctions();
+      activeAuctions.forEach(a => {
+        if (!prev.has(a.id)) {
+          auctionStates.set(a.id, { status: 'watching', weapon: null, bidCount: 0, lastBidTime: 0, currentPrice: null, currentFree: 0, currentTerm: null });
+          setupBidListener(a.id);
+          evaluateAuction(a.id);
+        }
+      });
+    });
+}
+
+function setupBidListener(briefId) {
+  db.collection('buyer_brief_bids').where('briefId', '==', briefId).where('status', '==', 'pending')
+    .onSnapshot(snapshot => {
+      auctionBids.set(briefId, snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      const state = auctionStates.get(briefId);
+      if (state && state.status !== 'sniping') evaluateAuction(briefId);
+    });
+}
+
+function setupMyBidsListener() {
+  db.collection('buyer_brief_bids').where('sellerId', '==', currentUser.uid).where('status', '==', 'accepted')
+    .onSnapshot(snapshot => {
+      totalWins = snapshot.size;
+      document.getElementById('mWins').textContent = totalWins;
+    });
+}
+
+// ========== EVALUATE AUCTION ==========
+function evaluateAuction(briefId) {
+  if (isPaused) return;
+  const auction = activeAuctions.find(a => a.id === briefId);
+  if (!auction) return;
+  const state = auctionStates.get(briefId);
+  if (!state) return;
+
+  const bids = auctionBids.get(briefId) || [];
+  const myBids = bids.filter(b => b.sellerId === currentUser.uid);
+  const otherBids = bids.filter(b => b.sellerId !== currentUser.uid);
+
+  // Calculate my current rank
+  const allScored = scoreAllBids(bids);
+  const myRank = myBids.length > 0 ? Math.min(...myBids.map(b => {
+    const idx = allScored.findIndex(s => s.id === b.id);
+    return idx >= 0 ? idx + 1 : 999;
+  })) : 999;
+
+  const g = botSettings.global || {};
+  const minRank = g.minRank || 4;
+  const costBasis = g.costBasis || 600;
+  const minMargin = g.minMargin || 10;
+  const floorPrice = costBasis * (1 + minMargin / 100);
+
+  // Check max active auctions
+  const activeCount = Array.from(auctionStates.values()).filter(s => s.status === 'bidding' || s.status === 'sniping').length;
+  if (activeCount >= (g.maxAuctions || 5) && state.status === 'watching') {
+    log(`[${auction.commodity}] Max auctions reached`, 'warn'); return;
+  }
+
+  // If rank is good enough, just watch
+  if (myRank <= minRank && myRank !== 999) {
+    log(`[${auction.commodity}] Rank #${myRank} — within target. Watching.`, 'think');
+    return;
+  }
+
+  // Decide weapon based on strategy and current state
+  const w = botSettings;
+  const priceCfg = w.price || {};
+  const tonnageCfg = w.tonnage || {};
+  const paymentCfg = w.payment || {};
+  const snipeCfg = w.snipe || {};
+
+  // Initialize state if first bid
+  if (!state.currentPrice) {
+    state.currentPrice = priceCfg.startPrice || 800;
+    state.currentFree = 0;
+    state.currentTerm = paymentCfg.startTerm || 'lc_30';
+  }
+
+  // Check floor price
+  if (state.currentPrice <= floorPrice) {
+    log(`[${auction.commodity}] At floor price $${floorPrice.toFixed(0)}. Cannot go lower.`, 'warn');
+    return;
+  }
+
+  // Determine escalation strategy
+  const priceStrat = priceCfg.strategy || 'aggressive';
+  const tonnageStrat = tonnageCfg.strategy || 'aggressive';
+
+  // AGGRESSIVE: Escalate immediately
+  if (priceStrat === 'aggressive' || tonnageStrat === 'aggressive') {
+    deployEscalation(briefId, auction, state, bids, floorPrice);
+    return;
+  }
+
+  // SNIPER: Wait for strike window
+  if (priceStrat === 'sniper' || tonnageStrat === 'sniper') {
+    deploySnipe(briefId, auction, state, floorPrice);
+    return;
+  }
+
+  // PASSIVE: One bid only
+  if (priceStrat === 'passive' && tonnageStrat === 'passive') {
+    if (myBids.length === 0) {
+      placeSellerBid(briefId, auction, state.currentPrice, state.currentFree, state.currentTerm, 'passive');
+    }
+    return;
+  }
+}
+
+// ========== ESCALATION ==========
+async function deployEscalation(briefId, auction, state, bids, floorPrice) {
+  if (state.status === 'bidding') return;
+  state.status = 'bidding';
+
+  const w = botSettings;
+  const priceCfg = w.price || {};
+  const tonnageCfg = w.tonnage || {};
+  const paymentCfg = w.payment || {};
+
+  let newPrice = state.currentPrice;
+  let newFree = state.currentFree;
+  let newTerm = state.currentTerm;
+  let weaponsUsed = [];
+
+  // Price escalation
+  if (priceCfg.enabled !== false && newPrice > floorPrice) {
+    const dec = priceCfg.decrement || 5;
+    newPrice = Math.max(floorPrice, newPrice - dec);
+    weaponsUsed.push('price');
+  }
+
+  // Tonnage escalation
+  if (tonnageCfg.enabled !== false) {
+    const maxFree = tonnageCfg.maxFree || 20;
+    const inc = tonnageCfg.increment || 5;
+    if (newFree < maxFree) {
+      newFree = Math.min(maxFree, newFree + inc);
+      weaponsUsed.push('tonnage');
+    }
+  }
+
+  // Payment escalation
+  if (paymentCfg.enabled !== false) {
+    const step = paymentCfg.step || '2';
+    const maxTerm = paymentCfg.maxTerm || 'lc_90';
+    const currIdx = TERM_ORDER.indexOf(newTerm);
+    const maxIdx = TERM_ORDER.indexOf(maxTerm);
+    if (currIdx < maxIdx) {
+      const jump = step === 'max' ? maxIdx : Math.min(maxIdx, currIdx + (step === '1' ? 1 : 2));
+      newTerm = TERM_ORDER[jump];
+      weaponsUsed.push('payment');
+    }
+  }
+
+  if (weaponsUsed.length === 0) {
+    log(`[${auction.commodity}] No escalation possible. At limits.`, 'warn');
+    state.status = 'watching';
+    return;
+  }
+
+  state.currentPrice = newPrice;
+  state.currentFree = newFree;
+  state.currentTerm = newTerm;
+
+  await placeSellerBid(briefId, auction, newPrice, newFree, newTerm, weaponsUsed.join('+'));
+
+  // Re-evaluate after delay
+  const delay = priceCfg.delay || 2000;
+  setTimeout(() => {
+    state.status = 'watching';
+    evaluateAuction(briefId);
+  }, delay);
+}
+
+// ========== SNIPER ==========
+function deploySnipe(briefId, auction, state, floorPrice) {
+  if (state.status === 'sniping') return;
+
+  const snipeCfg = botSettings.snipe || {};
+  const window = (snipeCfg.window || 5) * 1000;
+  const endsAt = auction.endsAt?.toDate ? auction.endsAt.toDate() : new Date(Date.now() + 3600000);
+  const strikeTime = endsAt.getTime() - window - Date.now();
+
+  if (strikeTime <= 0) {
+    fireSnipe(briefId, auction, state, floorPrice);
+    return;
+  }
+
+  state.status = 'sniping';
+  log(`[${auction.commodity}] Sniper armed. Striking in ${(strikeTime/1000).toFixed(1)}s`, 'think');
+
+  const timer = setTimeout(() => {
+    fireSnipe(briefId, auction, state, floorPrice);
+  }, strikeTime);
+  sniperTimers.set(briefId, timer);
+}
+
+async function fireSnipe(briefId, auction, state, floorPrice) {
+  sniperTimers.delete(briefId);
+  const s = auctionStates.get(briefId);
+  if (!s || s.status !== 'sniping') return;
+
+  const snipeCfg = botSettings.snipe || {};
+  const action = snipeCfg.action || 'both';
+  const priceDrop = snipeCfg.priceDrop || 10;
+  const tonnageAdd = snipeCfg.tonnageAdd || 10;
+
+  let newPrice = state.currentPrice;
+  let newFree = state.currentFree;
+  let weaponsUsed = [];
+
+  if ((action === 'both' || action === 'price') && newPrice - priceDrop >= floorPrice) {
+    newPrice -= priceDrop;
+    weaponsUsed.push('price');
+  }
+  if ((action === 'both' || action === 'tonnage')) {
+    const maxFree = (botSettings.tonnage?.maxFree || 20);
+    newFree = Math.min(maxFree, newFree + tonnageAdd);
+    weaponsUsed.push('tonnage');
+  }
+
+  state.currentPrice = newPrice;
+  state.currentFree = newFree;
+
+  await placeSellerBid(briefId, auction, newPrice, newFree, state.currentTerm, 'snipe-' + weaponsUsed.join('+'));
+  s.status = 'placed';
+}
+
+// ========== PLACE BID ==========
+async function placeSellerBid(briefId, auction, price, freeTonnage, term, weapon) {
+  const totalQty = (auction.quantity_mt || 0) + freeTonnage;
+  const effectivePrice = price * (PAYMENT_MULT[term] || 1.0);
+  const duheScore = (1000 / price) + (freeTonnage * 2);
+
+  try {
+    await db.collection('buyer_brief_bids').add({
+      briefId: briefId,
+      sellerId: currentUser.uid,
+      price: price,
+      quantity_mt: totalQty,
+      baseQuantity: auction.quantity_mt || 0,
+      freeTonnage: freeTonnage,
+      paymentTerm: term,
+      effectivePrice: effectivePrice,
+      duheScore: duheScore,
+      isBot: true,
+      botWeapon: weapon,
+      status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    totalBidsPlaced++;
+    document.getElementById('mBids').textContent = totalBidsPlaced;
+    log(`[${auction.commodity}] ${weapon.toUpperCase()} — $${price}/MT + ${freeTonnage}MT free + ${term} (score: ${duheScore.toFixed(0)})`, 'bid');
+  } catch (err) {
+    log(`[${auction.commodity}] Bid failed: ${err.message}`, 'err');
+  }
+}
+
+// ========== SCORE BIDS ==========
+function scoreAllBids(bids) {
+  return bids.map(b => {
+    const priceScore = (1 / (b.price || 1)) * 1000;
+    const tonnageScore = (b.freeTonnage || 0) * 2;
+    const mult = PAYMENT_MULT[b.paymentTerm] || 1.0;
+    const total = (priceScore + tonnageScore) * mult;
+    return { ...b, total };
+  }).sort((a, b) => b.total - a.total);
+}
+
+// ========== RENDER ==========
+function renderAuctions() {
+  const container = document.getElementById('activeAuctions');
+  if (activeAuctions.length === 0) { container.innerHTML = '<div style="color:#5c6b8a; text-align:center; padding:20px;">No active reverse auctions</div>'; return; }
+
+  container.innerHTML = activeAuctions.map(a => {
+    const state = auctionStates.get(a.id) || { status: 'watching', weapon: null };
+    const bids = auctionBids.get(a.id) || [];
+    const myBids = bids.filter(b => b.sellerId === currentUser.uid);
+    const allScored = scoreAllBids(bids);
+    const myRank = myBids.length > 0 ? Math.min(...myBids.map(b => {
+      const idx = allScored.findIndex(s => s.id === b.id);
+      return idx >= 0 ? idx + 1 : 999;
+    })) : '—';
+
+    let statusClass = 'status-watching', statusText = 'WATCHING';
+    if (state.status === 'bidding') { statusClass = 'status-bidding'; statusText = 'BIDDING'; }
+    else if (state.status === 'sniping') { statusClass = 'status-sniping'; statusText = 'SNIPING'; }
+    else if (state.status === 'placed') { statusClass = 'status-placed'; statusText = 'PLACED'; }
+
+    const tag = state.weapon ? `<span class="weapon-tag tag-${state.weapon.split('-')[0]}">${state.weapon.toUpperCase()}</span>` : '';
+
+    return `<div class="auction-row">
+      <div><div class="commodity">${a.commodity || '—'} ${tag}</div>
+      <div class="detail">${a.variety || ''} • ${a.quantity_mt || 0} MT wanted • Rank: #${myRank} • Bids: ${bids.length}</div></div>
+      <span class="status ${statusClass}">${statusText}</span>
+    </div>`;
+  }).join('');
+}
+
+// ========== LOGGING ==========
+function log(msg, type) {
+  const now = new Date();
+  const time = now.toTimeString().slice(0, 8);
+  const container = document.getElementById('decisionLog');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.innerHTML = `<span class="log-time">${time}</span> ${msg}`;
+  container.insertBefore(entry, container.firstChild);
+  if (container.children.length > 100) container.removeChild(container.lastChild);
+}
+
+function clearLog() { document.getElementById('decisionLog').innerHTML = ''; }
+
+function pauseBot() {
+  isPaused = !isPaused;
+  document.getElementById('runnerStatus').textContent = isPaused ? 'PAUSED' : 'ACTIVE';
+  document.getElementById('runnerDot').className = isPaused ? 'status-dot off' : 'status-dot on';
+  log(isPaused ? 'Seller bot PAUSED' : 'Seller bot RESUMED', isPaused ? 'warn' : 'think');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast visible';
+  setTimeout(() => t.classList.remove('visible'), 2500);
+}
+</script>
+</body>
+</html>

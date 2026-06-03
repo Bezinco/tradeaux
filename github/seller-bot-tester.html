@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeAux • Seller Bot Test Arena | Reverse Auction Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --neon: #7CFC00; --gold: #FFD966; --cyan: #00ced1; --red: #ff3b3b; }
+    body { min-height: 100vh; font-family: 'Inter', sans-serif; color: #F0F3FA;
+      background: radial-gradient(ellipse at 20% 30%, rgba(124,252,0,0.08), transparent 55%),
+                  radial-gradient(ellipse at 85% 70%, rgba(255,217,102,0.08), transparent 60%),
+                  linear-gradient(125deg, #03050C 0%, #0A111F 100%); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 30px 24px 60px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 800; color: var(--gold); }
+    .header p { color: #9ca3af; margin-top: 6px; font-size: 13px; }
+
+    .nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .nav a { color: #9ca3af; text-decoration: none; font-size: 12px; padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,217,102,0.2); transition: 0.2s; }
+    .nav a:hover { color: var(--gold); border-color: var(--gold); }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: linear-gradient(145deg, #0B1122, #030712); border: 1px solid rgba(255,217,102,0.2); border-radius: 20px; padding: 20px; }
+    .card-title { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: var(--gold); margin-bottom: 14px; }
+    .card-sub { font-size: 11px; color: #5c6b8a; margin-bottom: 12px; }
+
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .field input, .field select {
+      width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,217,102,0.3); border-radius: 10px; color: #fff;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--gold); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-hint { font-size: 10px; color: #5c6b8a; margin-top: 3px; }
+
+    .btn { border: none; font-family: 'Orbitron', sans-serif; font-weight: 700; cursor: pointer; padding: 12px 24px; border-radius: 40px; font-size: 13px; transition: 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--gold), #ff8c00); color: #000; }
+    .btn-primary:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,217,102,0.4); }
+    .btn-secondary { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.4); }
+    .btn-group { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+    .bid-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 6px; font-size: 12px; border-left: 3px solid transparent; }
+    .bid-row.winner { border-left-color: var(--gold); background: rgba(255,217,102,0.08); }
+    .bid-row.bot { border-left-color: var(--cyan); background: rgba(0,206,209,0.08); }
+    .bid-name { font-weight: 600; color: #fff; }
+    .bid-detail { color: #9ca3af; font-size: 10px; }
+    .bid-amount { font-family: 'JetBrains Mono', monospace; color: var(--gold); font-weight: 700; }
+    .bid-score { font-family: 'JetBrains Mono', monospace; color: var(--neon); font-size: 10px; }
+
+    .duhe-result { background: rgba(255,217,102,0.08); border: 1px solid rgba(255,217,102,0.3); border-radius: 12px; padding: 14px; margin-top: 12px; }
+    .duhe-result-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--gold); margin-bottom: 8px; }
+    .duhe-winner { font-size: 13px; font-weight: 600; color: #fff; }
+    .duhe-reason { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+    .scenario-card { padding: 10px; border-radius: 10px; border: 1px solid rgba(255,217,102,0.2); background: rgba(0,0,0,0.3); cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
+    .scenario-card:hover { border-color: var(--gold); }
+    .scenario-card .title { font-weight: 600; font-size: 12px; color: #fff; }
+    .scenario-card .desc { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+    .weapon-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #9ca3af; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: #0a1424cc; backdrop-filter: blur(12px); padding: 10px 24px; border-radius: 40px; font-size: 0.8rem; border-left: 3px solid var(--gold); transition: 0.2s; opacity: 0; z-index: 20000; font-family: 'Orbitron', sans-serif; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 SELLER BOT TEST ARENA</h1>
+      <p>Simulate reverse auctions, test weapons, preview Duhe selection — no real money.</p>
+    </div>
+
+    <div class="nav">
+      <a href="seller-bot-config.html">⚔️ Config</a>
+      <a href="seller-bot-runner.html" target="_blank">🚀 Runner</a>
+      <a href="dashboard-seller.html">← Dashboard</a>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Create Mock Reverse Auction -->
+      <div>
+        <div class="card">
+          <div class="card-title">📦 CREATE MOCK REVERSE AUCTION</div>
+          <div class="field-row">
+            <div class="field"><label>Commodity</label><input type="text" id="tCommodity" value="Coconut"></div>
+            <div class="field"><label>Variety</label><input type="text" id="tVariety" value="Dried"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Quantity Wanted (MT)</label><input type="number" id="tQty" value="100" min="1"></div>
+            <div class="field"><label>Budget ($/MT)</label><input type="number" id="tBudget" value="900" min="1"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Destination</label><input type="text" id="tDest" value="Rotterdam, NL"></div>
+            <div class="field"><label>Duration (min)</label><input type="number" id="tDuration" value="5" min="1" max="60"></div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="createMockAuction()">🎯 Create & Run</button>
+            <button class="btn btn-secondary" onclick="loadScenario('price')">⚔️ Price Demo</button>
+            <button class="btn btn-secondary" onclick="loadScenario('tonnage')">📦 Tonnage Demo</button>
+            <button class="btn btn-secondary" onclick="loadScenario('payment')">💳 Payment Demo</button>
+            <button class="btn btn-secondary" onclick="loadScenario('snipe')">⏱️ Snipe Demo</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🎬 QUICK SCENARIOS</div>
+          <div class="scenario-card" onclick="loadScenario('price')">
+            <div class="title">⚔️ Price Undercut</div>
+            <div class="desc">Competitor bids $850. Bot drops to $845, then $840...</div>
+          </div>
+          <div class="scenario-card" onclick="loadScenario('tonnage')">
+            <div class="title">📦 Free Tonnage Sweetener</div>
+            <div class="desc">Same price as competitor, but bot offers +10 MT free.</div>
+          </div>
+          <div class="scenario-card" onclick="loadScenario('payment')">
+            <div class="title">💳 Payment Terms Win</div>
+            <div class="desc">Competitor offers LC 30. Bot escalates to LC 90 for better Duhe score.</div>
+          </div>
+          <div class="scenario-card" onclick="loadScenario('snipe')">
+            <div class="title">⏱️ Two-Pronged Snipe</div>
+            <div class="desc">At last second: drop price $10 AND add 10 MT free simultaneously.</div>
+          </div>
+          <div class="scenario-card" onclick="loadScenario('combined')">
+            <div class="title">🔥 Combined Assault</div>
+            <div class="desc">Bot uses all weapons: lower price + free tonnage + LC 90.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Simulation Results -->
+      <div>
+        <div class="card">
+          <div class="card-title">📊 SIMULATION RESULTS</div>
+          <div class="weapon-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--gold);"></div>Duhe Winner</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--cyan);"></div>Your Bot</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#5c6b8a;"></div>Competitor</div>
+          </div>
+          <div id="simResults">
+            <div style="color:#5c6b8a; text-align:center; padding:30px;">Create a mock reverse auction or pick a scenario</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🧮 DUHE SCORING LOGIC</div>
+          <div class="card-sub">How buyers evaluate seller bids</div>
+          <div style="font-size:12px; line-height:1.8;">
+            <div><strong style="color:var(--gold);">Price Score:</strong> <code>(1 / price) × 1000</code></div>
+            <div><strong style="color:var(--cyan);">Tonnage Score:</strong> <code>freeTonnage × 2</code></div>
+            <div><strong style="color:var(--neon);">Payment Multiplier:</strong> wire(0.8) → LC90(1.2)</div>
+            <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1);">
+              <strong style="color:#fff;">Total =</strong> (priceScore + tonnageScore) × paymentMult
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let botSettings = null;
+const PAYMENT_MULT = { wire: 0.8, lc_sight: 0.9, lc_30: 1.0, lc_60: 1.1, lc_90: 1.2 };
+
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  const doc = await db.collection('seller_bots').doc(user.uid).get();
+  if (doc.exists) botSettings = doc.data();
+});
+
+async function createMockAuction() {
+  const commodity = document.getElementById('tCommodity').value || 'Coconut';
+  const variety = document.getElementById('tVariety').value || 'Dried';
+  const qty = parseFloat(document.getElementById('tQty').value) || 100;
+  const budget = parseFloat(document.getElementById('tBudget').value) || 900;
+  const dest = document.getElementById('tDest').value || 'Rotterdam';
+  const duration = parseFloat(document.getElementById('tDuration').value) || 5;
+
+  const briefRef = db.collection('test_buyer_briefs').doc();
+  await briefRef.set({
+    commodity, variety, quantity_mt: qty, budget, destination: dest,
+    status: 'active', endsAt: firebase.firestore.Timestamp.fromDate(new Date(Date.now() + duration * 60000)),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    isTest: true, createdBy: currentUser.uid
+  });
+  showToast('Mock reverse auction created!');
+  runSimulation(briefRef.id, { commodity, variety, quantity_mt: qty, budget });
+}
+
+function loadScenario(type) {
+  const scenarios = {
+    price: { commodity: 'Coffee', variety: 'Arabica', qty: 50, budget: 1200, botWeapon: 'price', competitorBids: [{ name: 'Competitor A', price: 850, free: 0, term: 'lc_30' }] },
+    tonnage: { commodity: 'Rice', variety: 'Jasmine', qty: 100, budget: 600, botWeapon: 'tonnage', competitorBids: [{ name: 'Competitor A', price: 580, free: 0, term: 'lc_30' }] },
+    payment: { commodity: 'Cocoa', variety: 'Bulk', qty: 80, budget: 2500, botWeapon: 'payment', competitorBids: [{ name: 'Competitor A', price: 2400, free: 0, term: 'lc_30' }] },
+    snipe: { commodity: 'Peanuts', variety: 'Raw', qty: 40, budget: 900, botWeapon: 'snipe', competitorBids: [{ name: 'Competitor A', price: 880, free: 5, term: 'lc_60' }, { name: 'Competitor B', price: 890, free: 0, term: 'lc_30' }] },
+    combined: { commodity: 'Vanilla', variety: 'Bourbon', qty: 20, budget: 3500, botWeapon: 'combined', competitorBids: [{ name: 'Competitor A', price: 3200, free: 0, term: 'wire' }, { name: 'Competitor B', price: 3100, free: 2, term: 'lc_30' }] }
+  };
+
+  const s = scenarios[type];
+  document.getElementById('tCommodity').value = s.commodity;
+  document.getElementById('tVariety').value = s.variety;
+  document.getElementById('tQty').value = s.qty;
+  document.getElementById('tBudget').value = s.budget;
+
+  const briefId = 'mock_' + Date.now();
+  const auction = { commodity: s.commodity, variety: s.variety, quantity_mt: s.qty, budget: s.budget };
+  runSimulation(briefId, auction, s.competitorBids, s.botWeapon);
+}
+
+function runSimulation(briefId, auction, competitorBids, forcedWeapon) {
+  const w = botSettings?.weapons || {};
+
+  let botBid = null;
+  const worstComp = competitorBids && competitorBids.length > 0 ? Math.max(...competitorBids.map(b => b.price)) : (auction.budget || 100);
+
+  if (forcedWeapon === 'price') {
+    const dec = w.price?.decrement || 5;
+    botBid = { name: '🤖 YOUR BOT', price: worstComp - dec, free: 0, term: 'lc_30', weapon: 'price' };
+  } else if (forcedWeapon === 'tonnage') {
+    botBid = { name: '🤖 YOUR BOT', price: worstComp, free: 10, term: 'lc_30', weapon: 'tonnage' };
+  } else if (forcedWeapon === 'payment') {
+    botBid = { name: '🤖 YOUR BOT', price: worstComp + 20, free: 0, term: 'lc_90', weapon: 'payment' };
+  } else if (forcedWeapon === 'snipe') {
+    botBid = { name: '🤖 YOUR BOT', price: worstComp - 10, free: 10, term: 'lc_90', weapon: 'snipe' };
+  } else if (forcedWeapon === 'combined') {
+    botBid = { name: '🤖 YOUR BOT', price: worstComp - 15, free: 15, term: 'lc_90', weapon: 'combined' };
+  }
+
+  const allBids = [...(competitorBids || [])];
+  if (botBid) allBids.push(botBid);
+
+  const scored = allBids.map(b => {
+    const priceScore = (1 / (b.price || 1)) * 1000;
+    const tonnageScore = (b.free || 0) * 2;
+    const mult = PAYMENT_MULT[b.term] || 1.0;
+    const total = (priceScore + tonnageScore) * mult;
+    return { ...b, priceScore, tonnageScore, total };
+  }).sort((a, b) => b.total - a.total);
+
+  const winner = scored[0];
+
+  let html = `<div style="margin-bottom:12px;"><strong style="color:#fff; font-size:14px;">${auction.commodity} — ${auction.variety}</strong>
+    <div style="font-size:11px; color:#9ca3af;">Buyer wants ${auction.quantity_mt} MT @ budget $${auction.budget}/MT</div></div>`;
+
+  html += '<div style="margin-bottom:8px; font-size:11px; color:#5c6b8a;">Seller bids ranked by Duhe score:</div>';
+
+  scored.forEach((b, i) => {
+    const isWinner = i === 0;
+    const isBot = b.name.includes('BOT');
+    const rowClass = isWinner ? 'winner' : (isBot ? 'bot' : '');
+    const termLabel = b.term === 'lc_90' ? '💳 LC90' : (b.term === 'lc_60' ? '💳 LC60' : (b.term === 'wire' ? '💳 Wire' : '💳 LC30'));
+    html += `<div class="bid-row ${rowClass}">
+      <div><div class="bid-name">${isWinner ? '👑 ' : ''}${b.name} ${isBot ? '<span style="color:var(--cyan); font-size:10px;">[' + b.weapon.toUpperCase() + ']</span>' : ''}</div>
+      <div class="bid-detail">${termLabel} • ${b.free > 0 ? '+' + b.free + 'MT free ' : ''}Score: ${b.total.toFixed(1)}</div></div>
+      <div style="text-align:right;"><div class="bid-amount">$${b.price.toFixed(0)}/MT</div>
+      <div class="bid-score">P:${b.priceScore.toFixed(0)} T:${b.tonnageScore.toFixed(0)}</div></div>
+    </div>`;
+  });
+
+  html += `<div class="duhe-result">
+    <div class="duhe-result-title">🏆 DUHE SELECTS</div>
+    <div class="duhe-winner">${winner.name} — $${winner.price.toFixed(0)}/MT ${winner.free > 0 ? '+ ' + winner.free + 'MT free' : ''}</div>
+    <div class="duhe-reason">Price: ${winner.priceScore.toFixed(0)} + Tonnage: ${winner.tonnageScore.toFixed(0)} × Payment: ${PAYMENT_MULT[winner.term] || 1.0} = <strong>${winner.total.toFixed(1)}</strong></div>
+  </div>`;
+
+  if (winner.name.includes('BOT')) {
+    html += `<div style="margin-top:10px; padding:10px; background:rgba(255,217,102,0.05); border-radius:8px; border:1px solid rgba(255,217,102,0.2); font-size:12px; color:var(--gold);">✓ Your bot WINS with ${winner.weapon.toUpperCase()}! ${winner.weapon === 'snipe' ? 'Last-second combo was devastating.' : (winner.weapon === 'payment' ? 'Better terms tipped the scale.' : (winner.weapon === 'tonnage' ? 'Free goods made the difference.' : 'Price undercut won the day.'))}</div>`;
+  } else {
+    html += `<div style="margin-top:10px; padding:10px; background:rgba(255,59,59,0.05); border-radius:8px; border:1px solid rgba(255,59,59,0.2); font-size:12px; color:var(--red);">✗ Competitor wins. Try enabling more weapons or increasing free tonnage.</div>`;
+  }
+
+  document.getElementById('simResults').innerHTML = html;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast visible';
+  setTimeout(() => t.classList.remove('visible'), 2500);
+}
+</script>
+</body>
+</html>

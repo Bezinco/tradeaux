@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — TradeAux</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent-cyan: #00ced1;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-sapphire-bg { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%; 
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.05); }
+  100% { transform: translate(-30px, 20px) scale(1); }
+}
+
+.container {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logo-small {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #00ced1, #7CFC00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+
+.auth-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+  backdrop-filter: blur(20px);
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 10px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  border-color: #00ced1;
+  box-shadow: 0 0 20px rgba(0, 206, 209, 0.2);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 8px;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-links {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.auth-links a {
+  color: #00ced1;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.demo-login {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+}
+
+.demo-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--muted);
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  margin: 4px;
+  transition: all 0.3s;
+}
+
+.demo-btn:hover {
+  border-color: #00ced1;
+  color: #00ced1;
+}
+
+.error-msg {
+  background: rgba(217, 43, 43, 0.2);
+  border: 1px solid rgba(217, 43, 43, 0.5);
+  color: #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.error-msg.visible {
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-sapphire-bg"></div>
+</div>
+
+<div class="container">
+  <div class="logo-small">TRADEAUX</div>
+  <div class="subtitle">Welcome back</div>
+
+  <div class="auth-card">
+    <div class="error-msg" id="errorMsg"></div>
+    
+    <form id="signinForm" onsubmit="handleSignin(event)">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="email" required placeholder="you@company.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="password" required placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Sign In →</button>
+    </form>
+
+    <div class="auth-links">
+      Don't have an account? <a href="signup.html">Sign Up</a>
+    </div>
+
+    <div class="demo-login">
+      <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px; font-family: 'Orbitron'; letter-spacing: 1px;">DEMO ACCOUNTS</div>
+      <button class="demo-btn" onclick="fillDemo('demo.buyer@tradeaux.com')">Buyer Demo</button>
+      <button class="demo-btn" onclick="fillDemo('demo.farmer@tradeaux.com')">Farmer Demo</button>
+      <button class="demo-btn" onclick="fillDemo('demo.coop@tradeaux.com')">Co-op Demo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function fillDemo(email) {
+  document.getElementById('email').value = email;
+  document.getElementById('password').value = 'demo123';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+async function handleSignin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+
+    // Get user role
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
+
+    // Redirect based on role
+    if (userData.role === 'buyer') {
+      window.location.href = 'buyer.html';
+    } else if (userData.role === 'farmer') {
+      window.location.href = 'farmer.html';
+    } else {
+      window.location.href = 'coop.html';
+    }
+
+  } catch (err) {
+    showError(err.message);
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
+  }
+}
+</script>
+
+</body>
+</html>

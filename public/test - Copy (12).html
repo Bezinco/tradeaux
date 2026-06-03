@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Transit Auction | Carriers & Brokers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --neon-green: #7CFC00;
+      --gold: #FFD966;
+      --silver: #C0C7D9;
+      --bronze: #CD7F32;
+      --cyan: #00ced1;
+      --muted: #9ca3af;
+    }
+    
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #F0F3FA;
+      background: #020617;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    .bg-waves {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .wave-bg {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      filter: blur(100px);
+      opacity: 0.15;
+      animation: waveBgDrift 24s ease-in-out infinite;
+      border-radius: 50%;
+    }
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.5), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 217, 102, 0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift {
+      0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+      50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+      100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+    }
+    
+    .gem-logo-corner {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(124, 252, 0, 0.3));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      animation: letterFloat 6s ease-in-out infinite;
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.12s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.5s; }
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+    .gem-letter::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #1a3a1a 0%, #2d5a2d 15%, #7CFC00 30%, #aaff44 45%, #7CFC00 60%, #2d5a2d 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(124, 252, 0, 0.35);
+      transform: translateZ(2px);
+    }
+    .light-source {
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay;
+    }
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+    .sparkle {
+      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none;
+    }
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    
+    .glass-header {
+      backdrop-filter: blur(14px);
+      background: rgba(3,5,12,0.5);
+      border-bottom: 1px solid rgba(124,252,0,0.35);
+      padding: 12px 28px;
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 100;
+    }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #BFC9E0;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      border: 1px solid rgba(124,252,0,0.3);
+      background: rgba(0,0,0,0.3);
+      transition: all 0.3s;
+    }
+    .nav-links a:hover { border-color: var(--neon-green); color: var(--neon-green); transform: translateY(-2px); }
+    
+    /* HERO BOX with Shipment Details */
+    .hero-box {
+      background: linear-gradient(135deg, rgba(0,20,30,0.85), rgba(0,0,0,0.75));
+      backdrop-filter: blur(12px);
+      border-radius: 32px;
+      padding: 18px 28px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(124,252,0,0.5);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      font-family: 'Orbitron', monospace;
+    }
+    .hero-item {
+      background: rgba(0,0,0,0.6);
+      border-radius: 48px;
+      padding: 8px 20px;
+      text-align: center;
+    }
+    .hero-label { font-size: 0.65rem; letter-spacing: 1px; color: var(--gold); }
+    .hero-value { font-size: 1rem; font-weight: 700; color: #fff; }
+    .hero-highlight { color: var(--neon-green); font-weight: 800; }
+    
+    .main-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 20px 40px 60px 220px;
+      position: relative;
+      z-index: 2;
+    }
+    @media (max-width: 1000px) {
+      .main-container { padding: 20px 20px 60px 20px; }
+      .gem-logo-corner { transform: scale(0.25); }
+    }
+    
+    .auction-cockpit {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .timer-panel {
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 8px 28px;
+      text-align: center;
+      border: 1px solid rgba(124,252,0,0.5);
+    }
+    .status-label { font-size: 0.7rem; letter-spacing: 2px; color: #FFD966; font-family: 'Orbitron', sans-serif; }
+    .timer-digits {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--neon-green);
+    }
+    .timer-digits.warning { color: #ff5050; animation: pulse 0.8s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    .stats-group {
+      display: flex;
+      gap: 28px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      padding: 8px 28px;
+      border-radius: 60px;
+    }
+    .stat { text-align: center; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94A3B8; font-family: 'Orbitron', sans-serif; }
+    .stat-value { font-weight: 800; font-size: 1.3rem; color: var(--neon-green); font-family: 'Orbitron', monospace; }
+    .controls { display: flex; gap: 16px; margin: 16px 0 24px; justify-content: center; }
+    .btn {
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 10px 32px;
+      border-radius: 48px;
+      cursor: pointer;
+      background: rgba(20,30,50,0.9);
+      color: white;
+      transition: all 0.3s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(105deg, #10b981, #2dd4bf); color: #010101; }
+    .btn-reset { background: linear-gradient(105deg, #9b2c2c, #e54848); }
+    
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 185px));
+      gap: 24px;
+      justify-content: center;
+      margin: 28px 0;
+    }
+    @media (max-width: 1000px) { .cards-grid { grid-template-columns: repeat(4, minmax(0, 185px)); } }
+    @media (max-width: 800px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 190px)); } }
+    
+    .cards-grid.hidden-grid { display: none; }
+    
+    .market-card {
+      background: linear-gradient(145deg, rgba(15, 32, 64, 0.9) 0%, rgba(2, 6, 23, 0.98) 100%);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      border: 2px solid rgba(124,252,0,0.4);
+      padding: 16px 12px;
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s;
+      position: relative;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .market-card:hover { transform: translateY(-6px); border-color: var(--neon-green); }
+    
+    .card-wave {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.2;
+      background: repeating-linear-gradient(45deg, rgba(124,252,0,0.1) 0px, rgba(124,252,0,0.1) 40px, rgba(124,252,0,0.15) 80px, rgba(124,252,0,0.2) 120px);
+      background-size: 200% 200%;
+      animation: waveFlow 6s linear infinite;
+      border-radius: 24px;
+    }
+    @keyframes waveFlow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+    
+    .rank-flag {
+      position: absolute;
+      top: -14px;
+      left: -10px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 40px;
+      z-index: 20;
+      font-family: 'Orbitron', sans-serif;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; }
+    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+    
+    .verified-badge {
+      position: absolute;
+      top: -14px;
+      right: -10px;
+      background: rgba(0,0,0,0.9);
+      border-radius: 40px;
+      padding: 4px 12px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--neon-green);
+      border: 1px solid #7CFC00;
+      z-index: 20;
+      backdrop-filter: blur(4px);
+      font-family: 'Orbitron', sans-serif;
+      white-space: nowrap;
+    }
+    
+    .company-logo { font-size: 2.4rem; margin-bottom: 6px; margin-top: 4px; filter: drop-shadow(0 0 6px rgba(124,252,0,0.3)); }
+    .card-title { font-weight: 800; font-size: 0.9rem; margin-top: 4px; }
+    .origin { font-size: 0.6rem; color: #9ca6bb; margin-bottom: 6px; }
+    .service-blurb {
+      font-size: 0.6rem;
+      color: #cbd5e6;
+      background: rgba(0,0,0,0.5);
+      padding: 4px 8px;
+      border-radius: 20px;
+      margin: 6px 0;
+      width: 100%;
+      line-height: 1.2;
+    }
+    .price-row { display: flex; justify-content: center; gap: 8px; margin: 6px 0; }
+    .current-price { font-weight: 800; font-size: 1.2rem; color: #FFE484; }
+    .change-badge { font-size: 0.65rem; font-weight: 600; }
+    .up { color: #7CFC00; }
+    .down { color: #FF5E5E; }
+    .heat-bar-container { margin: 8px 0; background: #1e293b; border-radius: 12px; height: 4px; width: 100%; }
+    .heat-fill { height: 100%; background: linear-gradient(90deg, #7CFC00, #FFD966); border-radius: 12px; }
+    .card-meta { display: flex; justify-content: space-between; font-size: 0.6rem; margin-top: 6px; color: #a0aec0; width: 100%; gap: 6px; }
+    .score-pill { background: #1E293B; padding: 2px 8px; border-radius: 40px; color: #7CFC00; }
+    
+    .route-value-row {
+      background: #0a1222;
+      border-radius: 20px;
+      padding: 8px 6px;
+      margin: 8px 0;
+      width: 100%;
+      font-size: 0.7rem;
+      font-weight: 600;
+      border: 1px solid rgba(255,217,102,0.3);
+    }
+    .route-value-row span { color: var(--gold); }
+    
+    .contact-info-mini {
+      background: rgba(0,0,0,0.7);
+      border-radius: 16px;
+      padding: 6px 5px;
+      margin-top: 8px;
+      width: 100%;
+      font-size: 0.55rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+      border-top: 1px solid rgba(124,252,0,0.3);
+    }
+    .contact-chip {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 20px;
+      color: #7CFC00;
+    }
+    
+    body.auction-frozen .card-wave, body.auction-frozen .wave-bg, body.auction-frozen .sparkle,
+    body.auction-frozen .light-source, body.auction-frozen .gem-letter { animation-play-state: paused !important; }
+    body.auction-frozen .market-card:not(.winner-finalist) { display: none; }
+    
+    .info-bar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      border-left: 3px solid #7CFC00;
+      font-family: 'Orbitron', sans-serif;
+      z-index: 200;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(70px);
+      background: rgba(15, 32, 64, 0.98);
+      backdrop-filter: blur(12px);
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-family: 'Orbitron', sans-serif;
+      border-left: 4px solid #7CFC00;
+      transition: 0.3s;
+      opacity: 0;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+    
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-card {
+      background: linear-gradient(145deg, #0B1122, #030712);
+      max-width: 560px;
+      width: 92%;
+      border-radius: 32px;
+      border: 2px solid #7CFC00;
+      padding: 28px 24px;
+      position: relative;
+    }
+    .modal-close { position: absolute; right: 22px; top: 18px; font-size: 28px; color: #ccc; cursor: pointer; }
+    .media-placeholder {
+      background: #0a1222;
+      border-radius: 24px;
+      padding: 20px;
+      margin: 16px 0;
+      text-align: center;
+      border: 1px dashed var(--neon-green);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="bg-waves"><div class="wave-bg wave-1"></div><div class="wave-bg wave-2"></div><div class="wave-bg wave-3"></div></div>
+<div class="gem-logo-corner"><div class="gem-text"><span class="gem-letter" data-letter="T">T</span><span class="gem-letter" data-letter="R">R</span><span class="gem-letter" data-letter="A">A</span><span class="gem-letter" data-letter="N">N</span><span class="gem-letter" data-letter="S">S</span><span class="gem-letter" data-letter="I">I</span><span class="gem-letter" data-letter="T">T</span></div><div class="light-source"></div><div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div><div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div></div>
+<div class="glass-header"><div class="nav-links"><a href="#">TRANSIT</a><a href="#">CARRIERS</a><a href="#">FREIGHT</a></div></div>
+<div class="main-container">
+  <!-- Hero Box with Shipment Details -->
+  <div class="hero-box" id="heroBox">
+    <div class="hero-item"><div class="hero-label">SHIPMENT</div><div class="hero-value">Almonds / Marzipan</div></div>
+    <div class="hero-item"><div class="hero-label">ROUTE</div><div class="hero-value">Colombo → Budapest</div></div>
+    <div class="hero-item"><div class="hero-label">CONTAINERS</div><div class="hero-value">20 × 20ft</div></div>
+    <div class="hero-item"><div class="hero-label">DELIVERY WINDOW</div><div class="hero-value">14–30 days</div></div>
+    <div class="hero-item"><div class="hero-label">MODE</div><div class="hero-value" id="modeLabel">🚢🚆🚛 Multi‑modal</div></div>
+  </div>
+  
+  <div class="auction-cockpit">
+    <div class="timer-panel"><div class="status-label" id="statusLabel">READY</div><div class="timer-digits" id="timerMain">03:00</div></div>
+    <div class="stats-group"><div class="stat"><div class="stat-label">ACTIVE</div><div class="stat-value" id="statActive">0</div></div>
+    <div class="stat"><div class="stat-label">TOTAL</div><div class="stat-value" id="statTotal">0</div></div>
+    <div class="stat"><div class="stat-label">🔥 TOP</div><div class="stat-value" id="statTopScore">0%</div></div></div>
+  </div>
+  <div class="controls"><button class="btn btn-primary" id="startBtn">▶ START AUCTION</button><button class="btn btn-reset" id="resetBtn">⟳ RESET</button></div>
+  <div class="cards-grid hidden-grid" id="cardsGrid"></div>
+</div>
+<div class="info-bar" id="infoBar">Auction idle • Freight carriers ready</div>
+<div class="toast-msg" id="toastMsg"></div>
+<div class="modal-overlay" id="modalOverlay"><div class="modal-card"><button class="modal-close" id="closeModalBtn">✕</button><div id="modalContent"></div></div></div>
+
+<script>
+  // ============================================================
+  // TRANSIT AUCTION - Carriers & Brokers (NOT commodity growers)
+  // ============================================================
+  
+  // Generate 30+ transport companies (carriers + brokers)
+  const baseCarriers = [];
+  const carrierNames = [
+    "Hapag-Lloyd", "Maersk", "MSC", "CMA CGM", "COSCO", "ONE", "Evergreen", "ZIM",
+    "J.B. Hunt", "Schneider National", "Swift Transportation", "Knight-Swift", "Prime Inc.",
+    "DB Cargo", "Rail Cargo Group", "PKP Cargo", "Cargolux", "FedEx Freight", "DHL Air",
+    "Kuehne+Nagel", "DSV", "CH Robinson", "Expeditors", "BlueGrace Logistics"
+  ];
+  const modes = ["🚢 Container Ship", "🚛 Reefer Truck", "🚆 Intermodal Rail", "✈️ Air Cargo", "🚢🚆🚛 Multi-modal"];
+  const routes = [
+    "Colombo → Koper → Budapest", "Colombo → Hamburg → Budapest", "Colombo → Rotterdam → Budapest",
+    "Wareham, MA → Kenosha, WI", "Colombo → Luxembourg → Budapest", "Colombo → Dubai → Budapest"
+  ];
+  const descriptions = [
+    "Weekly sailings, GPS tracked", "Reefer with temp monitoring", "Express intermodal service",
+    "Door-to-door, customs clearance", "24/7 customer support", "Insured cargo, fast transit"
+  ];
+  
+  for (let i = 1; i <= 35; i++) {
+    let isBroker = (i % 7 === 0); // every 7th is a broker
+    let modeIdx = i % modes.length;
+    let routeIdx = i % routes.length;
+    let baseRate = modeIdx === 0 ? 3200 + Math.random() * 600 : 
+                   modeIdx === 1 ? 2500 + Math.random() * 400 :
+                   modeIdx === 2 ? 2800 + Math.random() * 500 :
+                   modeIdx === 3 ? 62000 + Math.random() * 8000 :
+                   3300 + Math.random() * 700;
+    
+    baseCarriers.push({
+      id: i,
+      name: carrierNames[i % carrierNames.length] + (isBroker ? " (Broker)" : ""),
+      logo: modes[modeIdx].charAt(0) + (modeIdx === 4 ? "🔗" : ""),
+      modeIcon: modes[modeIdx].substring(0, 2),
+      mode: modes[modeIdx],
+      route: routes[routeIdx],
+      totalRate: Math.round(baseRate),
+      transitDays: modeIdx === 0 ? 24 + Math.floor(Math.random() * 8) :
+                   modeIdx === 1 ? 2 + Math.floor(Math.random() * 2) :
+                   modeIdx === 2 ? 12 + Math.floor(Math.random() * 5) :
+                   modeIdx === 3 ? 2 + Math.floor(Math.random() * 2) :
+                   22 + Math.floor(Math.random() * 8),
+      customsBroker: Math.random() > 0.6,
+      isBroker: isBroker,
+      heat: 40 + Math.random() * 50,
+      bids: Math.floor(Math.random() * 60) + 10,
+      serviceDesc: descriptions[i % descriptions.length],
+      contactName: ["Klaus Schmidt", "Lars Jensen", "Ray Greer", "Amy Clark", "Marc Hoffmann", "Elena Rossi"][i % 6],
+      email: `dispatch@${carrierNames[i % carrierNames.length].toLowerCase().replace(/\s/g, "")}.com`,
+      phone: `+${44 + (i % 30)} 555 ${1000 + i}`,
+      whatsapp: `+${44 + (i % 30)} 555 ${2000 + i}`
+    });
+  }
+  
+  let allCarriers = [];
+  let auctionRunning = false, auctionFinished = false;
+  let timerSeconds = 180, timerId = null, marketId = null;
+  
+  function computeScore(card, list) {
+    let minRate = Math.min(...list.map(c=>c.totalRate), 1);
+    let maxRate = Math.max(...list.map(c=>c.totalRate), 1);
+    // Lower rate = higher score (normalized inversely)
+    let rateScore = (maxRate - card.totalRate) / (maxRate - minRate || 1);
+    let heatScore = Math.min(1, card.heat / 100);
+    let bidScore = Math.min(1, card.bids / 100);
+    return rateScore * 0.6 + heatScore * 0.2 + bidScore * 0.2;
+  }
+  
+  function recalcAndSort() {
+    for (let c of allCarriers) c.score = computeScore(c, allCarriers);
+    allCarriers.sort((a,b) => b.score - a.score);
+  }
+  
+  function renderCards() {
+    if (!auctionRunning && !auctionFinished) return;
+    let visible = auctionFinished ? allCarriers.slice(0, 5) : allCarriers.slice(0, Math.min(20, allCarriers.length));
+    document.getElementById('statActive').innerText = visible.length;
+    document.getElementById('statTotal').innerText = allCarriers.length;
+    if(visible.length) document.getElementById('statTopScore').innerText = (visible[0].score * 100).toFixed(1) + '%';
+    if(auctionFinished) document.getElementById('statusLabel').innerHTML = '🏆 AUCTION ENDED';
+    else if(auctionRunning) document.getElementById('statusLabel').innerHTML = 'LIVE TRANSIT AUCTION';
+    else document.getElementById('statusLabel').innerHTML = 'READY';
+    document.getElementById('infoBar').innerHTML = auctionFinished ? '🏆 FINAL 5 WINNERS · Contact carriers' : (auctionRunning ? '🔥 Carriers bidding · Lowest rate wins' : 'Auction ready · 20+ carriers');
+    
+    const container = document.getElementById('cardsGrid');
+    const oldPositions = new Map();
+    if (auctionRunning && !auctionFinished) {
+      Array.from(container.children).forEach(el => { 
+        let id = el.getAttribute('data-id'); 
+        if(id) { 
+          let rect = el.getBoundingClientRect(); 
+          oldPositions.set(id, { left: rect.left, top: rect.top }); 
+        } 
+      });
+    }
+    container.innerHTML = '';
+    
+    visible.forEach((card, idx) => {
+      let div = document.createElement('div');
+      div.className = 'market-card';
+      if(auctionFinished) div.classList.add('winner-finalist');
+      div.setAttribute('data-id', card.id);
+      let rankVal = idx+1;
+      let rankHtml = `<div class="rank-flag ${rankVal===1?'rank-1':rankVal===2?'rank-2':rankVal===3?'rank-3':''}" style="${rankVal>3?'background:#1e293b;':''}">#${rankVal}</div>`;
+      let changeClass = (card.change||0) >= 0 ? 'up' : 'down';
+      let sign = (card.change||0) >= 0 ? '+' : '';
+      
+      div.innerHTML = `
+        ${rankHtml}
+        <div class="verified-badge">${card.isBroker ? "Broker" : "Carrier"}</div>
+        <div class="company-logo">${card.modeIcon}</div>
+        <div class="card-title">${card.name}</div>
+        <div class="origin">${card.mode}</div>
+        <div class="service-blurb">✨ ${card.serviceDesc}</div>
+        <div class="price-row"><span class="current-price">$${card.totalRate.toLocaleString()}</span><span class="change-badge ${changeClass}">${sign}${(card.change||0).toFixed(1)}%</span></div>
+        <div class="route-value-row">
+          📍 ${card.route}<br>
+          ⏱️ ${card.transitDays} days transit ${card.customsBroker ? '· 🛃 Customs broker avail' : ''}
+        </div>
+        <div class="heat-bar-container"><div class="heat-fill" style="width: ${Math.min(100,card.heat)}%"></div></div>
+        <div class="card-meta"><span>📊 ${card.bids} bids</span><span class="score-pill">⚡ ${(card.score*100).toFixed(0)}%</span></div>
+        <div class="card-meta"><span>🔥 ${Math.round(card.heat)}° heat</span><span>💰 All-in rate</span></div>
+      `;
+      
+      if (auctionFinished) {
+        div.innerHTML += `<div class="contact-info-mini">
+          <span class="contact-chip">👤 ${card.contactName}</span>
+          <span class="contact-chip">📧 ${card.email.slice(0,14)}</span>
+          <span class="contact-chip">📞 ${card.phone}</span>
+          <span class="contact-chip">💬 ${card.whatsapp}</span>
+        </div>`;
+      } else {
+        div.innerHTML += `<div class="contact-info-mini" style="opacity:0.5;"><span class="contact-chip">🔒 Contact after auction</span></div>`;
+      }
+      div.onclick = () => openModal(card);
+      container.appendChild(div);
+    });
+    
+    if (auctionRunning && !auctionFinished && oldPositions.size) {
+      requestAnimationFrame(() => {
+        Array.from(container.children).forEach(el => {
+          const id = el.getAttribute('data-id');
+          const oldPos = oldPositions.get(id);
+          if (oldPos) {
+            const rect = el.getBoundingClientRect();
+            const dx = oldPos.left - rect.left, dy = oldPos.top - rect.top;
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+              el.style.transform = `translate(${dx}px, ${dy}px)`;
+              el.style.transition = 'none';
+              el.offsetHeight;
+              el.style.transition = 'transform 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+              el.style.transform = '';
+            }
+          }
+        });
+      });
+    }
+  }
+  
+  function updatePrices() {
+    if (auctionFinished || !auctionRunning) return;
+    for (let c of allCarriers) {
+      let volatility = (Math.random() - 0.5) * 4.5;
+      let newRate = c.totalRate * (1 + volatility / 100);
+      newRate = Math.max(1800, Math.min(75000, newRate));
+      let old = c.totalRate;
+      c.totalRate = Math.round(newRate);
+      c.change = ((c.totalRate - old) / old) * 100;
+      if (Math.abs(c.change) > 2) c.heat = Math.min(96, c.heat + 2);
+      else c.heat = Math.min(95, Math.max(12, c.heat + (Math.random() - 0.5) * 4));
+      if (Math.random() < 0.3) c.bids += Math.floor(Math.random() * 2) + 1;
+    }
+    recalcAndSort();
+    renderCards();
+  }
+  
+  function killAllTimers() { 
+    if(timerId){ clearInterval(timerId); timerId = null; } 
+    if(marketId){ clearInterval(marketId); marketId = null; } 
+  }
+  
+  function endAuction() {
+    killAllTimers();
+    auctionRunning = false;
+    auctionFinished = true;
+    document.body.classList.add('auction-frozen');
+    recalcAndSort();
+    renderCards();
+    showToast(`🏆 TRANSIT AUCTION CLOSED! Top 5 carriers ready. Contact them for transport.`);
+  }
+  
+  function startTimer() {
+    if(timerId) clearInterval(timerId);
+    timerId = setInterval(() => {
+      if(!auctionRunning || auctionFinished) return;
+      if(timerSeconds <= 1) {
+        clearInterval(timerId); timerId = null;
+        endAuction();
+      } else {
+        timerSeconds--;
+        let mins = Math.floor(timerSeconds/60), secs = timerSeconds%60;
+        document.getElementById('timerMain').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        if(timerSeconds <= 10) document.getElementById('timerMain').classList.add('warning');
+        else document.getElementById('timerMain').classList.remove('warning');
+      }
+    }, 1000);
+  }
+  
+  function startAuction() {
+    if(auctionRunning) { showToast("Auction already running! Press RESET first."); return; }
+    if(auctionFinished) resetGame();
+    killAllTimers();
+    document.body.classList.remove('auction-frozen');
+    auctionRunning = true;
+    auctionFinished = false;
+    timerSeconds = 180;
+    document.getElementById('timerMain').innerText = "03:00";
+    const grid = document.getElementById('cardsGrid');
+    grid.classList.remove('hidden-grid');
+    startTimer();
+    marketId = setInterval(() => updatePrices(), 2700);
+    renderCards();
+    showToast(`🚛 TRANSIT AUCTION STARTED! ${allCarriers.length} carriers competing. Lowest all-in rate wins.`);
+  }
+  
+  function resetGame() {
+    killAllTimers();
+    auctionRunning = false;
+    auctionFinished = false;
+    document.body.classList.remove('auction-frozen');
+    allCarriers = baseCarriers.map(c => ({ 
+      ...c, 
+      change: 0, 
+      score: 0, 
+      heat: c.heat * (0.7 + Math.random() * 0.6),
+      totalRate: Math.max(2000, Math.round(c.totalRate * (0.85 + Math.random() * 0.3))),
+      bids: Math.floor(c.bids * (0.6 + Math.random() * 0.6))
+    }));
+    for(let c of allCarriers) { 
+      c.heat = Math.min(95, Math.max(12, c.heat)); 
+    }
+    recalcAndSort();
+    timerSeconds = 180;
+    document.getElementById('timerMain').innerText = "03:00";
+    document.getElementById('timerMain').classList.remove('warning');
+    document.getElementById('cardsGrid').classList.add('hidden-grid');
+    document.getElementById('cardsGrid').innerHTML = '';
+    document.getElementById('statActive').innerText = "0";
+    document.getElementById('statTotal').innerText = allCarriers.length;
+    document.getElementById('statTopScore').innerText = "0%";
+    document.getElementById('statusLabel').innerHTML = 'READY';
+    showToast(`🔄 Reset. ${allCarriers.length} carriers ready. Press START to begin bidding.`);
+  }
+  
+  function showToast(msg) { 
+    let t = document.getElementById('toastMsg'); 
+    t.innerText = msg; 
+    t.classList.add('visible'); 
+    setTimeout(() => t.classList.remove('visible'), 2500);
+  }
+  
+  function openModal(card) {
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
+      <div style="text-align:center;">
+        <div style="font-size:52px;">${card.modeIcon}</div>
+        <div style="font-size:24px; font-weight:800;">${card.name}</div>
+        <div style="color:var(--gold);">${card.mode} · ${card.isBroker ? "Licensed Broker" : "Certified Carrier"}</div>
+        <div class="media-placeholder" id="modalMediaBtn">
+          <div>📸 📹</div>
+          <div style="margin-top:6px;">Fleet Gallery & Certificates</div>
+          <div style="font-size:0.7rem; color:#7CFC00;">(Click to upload/view media)</div>
+        </div>
+        <div style="margin:16px 0; background:#0a1222; border-radius:24px; padding:12px;">
+          <div>📍 ROUTE: <strong>${card.route}</strong></div>
+          <div>💰 ALL-IN RATE: <strong style="color:#FFD966;">$${card.totalRate.toLocaleString()}</strong></div>
+          <div>⏱️ TRANSIT: ${card.transitDays} days</div>
+          <div>${card.customsBroker ? '🛃 Customs brokerage included' : '🛃 Customs clearance available'}</div>
+          <div>📊 ${card.bids} current bids · 🔥 ${Math.round(card.heat)}° heat</div>
+          <div class="service-blurb" style="margin-top:10px;">${card.serviceDesc}</div>
+        </div>
+        <div class="contact-info-mini" style="justify-content:center;">
+          <span class="contact-chip">👤 ${card.contactName}</span>
+          <span class="contact-chip">📧 ${card.email}</span>
+          <span class="contact-chip">📞 ${card.phone}</span>
+          <span class="contact-chip">💬 ${card.whatsapp}</span>
+        </div>
+        <div style="margin-top:12px; font-size:0.7rem;">✍️ After auction ends, full contact details unlocked. Transport contract ready.</div>
+      </div>
+    `;
+    const btn = document.getElementById('modalMediaBtn');
+    if(btn) btn.onclick = (e) => { 
+      e.stopPropagation(); 
+      alert("📸 Media Hub: Carriers can upload fleet photos, insurance certificates, safety records, and compliance docs."); 
+    };
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+  
+  function closeModal() { 
+    document.getElementById('modalOverlay').classList.remove('active'); 
+  }
+  
+  document.getElementById('startBtn').onclick = startAuction;
+  document.getElementById('resetBtn').onclick = resetGame;
+  document.getElementById('closeModalBtn').onclick = closeModal;
+  document.getElementById('modalOverlay').onclick = (e) => { 
+    if(e.target === document.getElementById('modalOverlay')) closeModal(); 
+  };
+  
+  resetGame();
+</script>
+</body>
+</html>

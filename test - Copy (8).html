@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buyer Dashboard — TradeAux</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ===== SHARED STYLES (From Index) ===== */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --bg-dark: #020617;
+  
+  /* Category Colors */
+  --fruits-green: #7CFC00;
+  --vegetables-orange: #f86939;
+  --legumes-blue: #2f6bff;
+  --grains-gold: #ffd700;
+  --nuts-brown: #cd853f;
+  --spices-red: #ff3b3b;
+  --coffee-teal: #00ced1;
+  --roots-purple: #9b59b6;
+  --flowers-pink: #ff69b4;
+  
+  /* TradeAux Accent */
+  --cyan: #00ced1;
+  --cyan-glow: rgba(0, 206, 209, 0.3);
+  --gold: #ffd700;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { 
+  width: 100%; 
+  min-height: 100%; 
+  font-family: 'Inter', sans-serif; 
+  overflow-x: hidden; 
+}
+
+body {
+  background: var(--bg-dark);
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+/* ===== BACKGROUND WAVES ===== */
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-1 { 
+  background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.4), transparent 70%); 
+  top: -40%; left: -20%; animation-delay: 0s; 
+}
+.wave-2 { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%; animation-delay: 8s; 
+}
+.wave-3 { 
+  background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); 
+  top: -20%; left: 0%; animation-delay: 16s; 
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+}
+
+/* ===== 3D LOGO - TRADEAUX ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+/* T - Blue */
+.gem-letter:nth-child(1)::before {
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* R - Green */
+.gem-letter:nth-child(2)::before {
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* A - Red (first A) */
+.gem-letter:nth-child(3)::before {
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* D - Blue */
+.gem-letter:nth-child(4)::before {
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* E - Green */
+.gem-letter:nth-child(5)::before {
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* A - Red (second A) */
+.gem-letter:nth-child(6)::before {
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* U - Blue */
+.gem-letter:nth-child(7)::before {
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* X - Green */
+.gem-letter:nth-child(8)::before {
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex; justify-content: flex-end; align-items: center;
+  padding: 20px 0 40px;
+}
+
+.nav { display: flex; gap: 12px; }
+
+.nav a {
+  font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500;
+  padding: 8px 16px; border: 2px solid #d92b2b;
+  border-radius: 8px; background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px);
+  color: var(--text); text-decoration: none; transition: all 0.3s ease;
+}
+
+.nav a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #fff; }
+
+/* ===== MAIN DASHBOARD LAYOUT ===== */
+.buyer-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 30px;
+  min-height: 80vh;
+}
+
+/* ===== SIDEBAR: FILTERS ===== */
+.filters-card {
+  background: rgba(15, 32, 64, 0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 24px;
+  height: fit-content;
+  display: flex; flex-direction: column; gap: 30px;
+}
+
+.filter-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px; margin-bottom: 15px;
+  color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 8px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+}
+
+.form-select, .form-input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.form-select:focus, .form-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 15px rgba(0, 206, 209, 0.2);
+}
+
+/* SLIDER */
+.slider-wrapper {
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.slider-label { font-size: 14px; font-weight: 500; }
+.slider-value { color: var(--cyan); font-weight: bold; }
+
+.range-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: var(--cyan);
+}
+
+.slider-fee-breakdown {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* DASHBOT PANEL */
+.dashbot-panel {
+  margin-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 20px;
+}
+
+.dashbot-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+
+.dashbot-label { font-size: 12px; color: var(--muted); }
+.dashbot-input { width: 60%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; text-align: right; font-family: 'Orbitron'; }
+.dashbot-select { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; }
+
+.dashbot-btn {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 206, 209, 0.1);
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  border-radius: 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: 0.3s;
+}
+
+.dashbot-btn:hover { background: var(--cyan); color: #000; box-shadow: 0 0 15px rgba(0, 206, 209, 0.3); }
+
+/* ===== MAIN CONTENT: RESULTS ===== */
+.results-area {
+}
+
+.page-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.results-count {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.result-card {
+  background: rgba(15, 32, 64, 0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.result-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--cyan);
+  box-shadow: 0 10px 20px rgba(0, 206, 209, 0.2);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.product-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.badge-coop {
+  background: rgba(255, 215, 0, 0.2);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.result-meta {
+  font-size: 13px;
+  color: var(--muted);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.result-price {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 0 10px rgba(0, 206, 209, 0.4);
+}
+
+.result-seller {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.bid-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--cyan);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: 0.3s;
+}
+
+.bid-btn:hover {
+  box-shadow: 0 0 15px var(--cyan-glow);
+  transform: translateY(-2px);
+}
+
+.bid-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #333;
+  color: #777;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(15, 32, 64, 0.98);
+  border: 1px solid rgba(0, 206, 209, 0.5);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  opacity: 0;
+  transition: all 0.5s ease;
+  z-index: 10001;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 900px) {
+  .buyer-layout { grid-template-columns: 1fr; }
+  .results-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner" onclick="window.location.href='index.html'">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <!-- HEADER -->
+  <header class="header">
+    <nav class="nav">
+      <a href="arena.html" class="nav-link">Arena</a>
+      <a href="#" class="nav-link" id="walletBtn">Wallet ($0.00)</a>
+      <a href="#" class="nav-link" onclick="signOut()">Sign Out</a>
+    </nav>
+  </header>
+
+  <!-- MAIN DASHBOARD -->
+  <div class="buyer-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="filters-card">
+      <div class="filter-section-title">Search Filters</div>
+      
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select">
+          <option value="all">All Categories</option>
+          <option value="fruits">Fruits</option>
+          <option value="vegetables">Vegetables</option>
+          <option value="grains">Grains</option>
+          <option value="spices">Spices</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Origin Country</label>
+        <select class="form-select">
+          <option value="all">All Origins</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Colombia">Colombia</option>
+          <option value="Peru">Peru</option>
+          <option value="India">India</option>
+          <option value="Brazil">Brazil</option>
+        </select>
+      </div>
+
+      <div class="filter-section-title" style="margin-top: 20px;">Auction Scope</div>
+
+      <div class="slider-wrapper">
+        <div class="slider-header">
+          <span class="slider-label">Countries</span>
+          <span class="slider-value">1</span>
+        </div>
+        <input type="range" min="1" max="9" value="1" class="range-slider" id="countrySlider" oninput="updateFee(this.value)">
+        <div class="slider-fee-breakdown">
+          <span id="feeDisplay">Fee: $13</span> <br>
+          <small>Search + Bid ($8)</small>
+        </div>
+      </div>
+
+      <div class="dashbot-panel">
+        <div class="filter-section-title">Dashbot Config</div>
+        
+        <div class="dashbot-row">
+          <label class="dashbot-label">Max Price</label>
+          <input type="number" class="dashbot-input" value="0.50" placeholder="e.g. 0.50/nut">
+        </div>
+
+        <div class="dashbot-row">
+          <label class="dashbot-label">Strategy</label>
+          <select class="dashbot-select">
+            <option>Aggressive</option>
+            <option>Conservative</option>
+            <option selected>Balanced</option>
+          </select>
+        </div>
+
+        <div class="dashbot-row">
+          <label class="dashbot-label">Target</label>
+          <select class="dashbot-select">
+            <option>Top 10%</option>
+            <option selected>Top 5%</option>
+          </select>
+        </div>
+
+        <button class="dashbot-btn">Save Config</button>
+      </div>
+    </aside>
+
+    <!-- MAIN RESULTS -->
+    <main class="results-area">
+      <div class="page-title">
+        <span>Available Suppliers</span>
+        <span class="results-count">N Results</span>
+      </div>
+
+      <div class="results-grid" id="resultsGrid">
+        <!-- Card 1 -->
+        <div class="result-card">
+          <div class="result-header">
+            <div class="product-title">Avocados - Grade A</div>
+            <span class="badge-coop">Co-op</span>
+          </div>
+          <div class="result-meta">
+            <div>Mexico</div>
+            <div>10,000 kg</div>
+          </div>
+          <div class="result-price">$2.50/kg</div>
+          <div class="result-seller">Matana Co-op</div>
+          <button class="bid-btn" onclick="placeBid(this, 13)">Place Bid ($13)</button>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="result-card">
+          <div class="result-header">
+            <div class="product-title">Coconuts - Grade A</div>
+          </div>
+          <div class="result-meta">
+            <div>Sri Lanka</div>
+            <div>50,000 nuts</div>
+          </div>
+          <div class="result-price">$0.42/nut</div>
+          <div class="result-seller">Tropical Exports Ltd</div>
+          <button class="bid-btn" onclick="placeBid(this, 13)">Place Bid ($13)</button>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="result-card">
+          <div class="result-header">
+            <div class="product-title">Mangoes - Alphonso</div>
+            <span class="badge-coop" style="border-color: var(--text); color: var(--muted); background: rgba(255,255,255,0.1);">Indie</span>
+          </div>
+          <div class="result-meta">
+            <div>India</div>
+            <div>25,000 kg</div>
+          </div>
+          <div class="result-price">$1.20/kg</div>
+          <div class="result-seller">Highland Farms</div>
+          <button class="bid-btn" onclick="placeBid(this, 13)">Place Bid ($13)</button>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="result-card">
+          <div class="result-header">
+            <div class="product-title">Almonds - Non-Pareil</div>
+            <span class="badge-coop">Co-op</span>
+          </div>
+          <div class="result-meta">
+            <div>USA (California)</div>
+            <div>10,000 kg</div>
+          </div>
+          <div class="result-price">$6.50/kg</div>
+          <div class="result-seller">Golden Harvest Co-op</div>
+          <button class="bid-btn" onclick="placeBid(this, 13)">Place Bid ($13)</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast">Bid placed successfully!</div>
+
+<script>
+// Supabase Config
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Logic
+const SEARCH_FEE_MAP = {
+  1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10, 7: 11, 8: 12, 9: 13
+};
+const BID_FEE = 8;
+
+function updateFee(sliderValue) {
+  const fee = SEARCH_FEE_MAP[sliderValue] || 5;
+  const totalFee = fee + BID_FEE;
+  
+  document.getElementById('feeDisplay').textContent = `Fee: $${totalFee}`;
+  document.querySelector('.slider-value').textContent = sliderValue;
+  document.querySelector('.results-count').textContent = `${sliderValue} Results`;
+  
+  // Update all bid buttons to reflect new fee
+  document.querySelectorAll('.bid-btn').forEach(btn => {
+    if(btn.textContent !== "Bid Placed") {
+       // Logic: If bid button is not disabled, update text
+       btn.textContent = `Place Bid ($${totalFee})`;
+    }
+  });
+}
+
+function placeBid(btn, fee) {
+  // Mock wallet check
+  const confirmed = confirm(`Deduct $${fee} from wallet and place bid?`);
+  if(confirmed) {
+    btn.textContent = "Bid Placed";
+    btn.disabled = true;
+    btn.classList.add('bid-btn:disabled');
+    showToast('Bid placed successfully!');
+  }
+}
+
+function signOut() {
+  supabaseClient.auth.signOut().then(() => {
+    window.location.href = 'index.html';
+  });
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('visible');
+  setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 3000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  updateFee(1);
+});
+</script>
+
+</body>
+</html>

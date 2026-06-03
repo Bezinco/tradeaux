@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdAux — Agent Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+--text: #e5e7eb;
+--muted: #9ca3af;
+--accent-ruby: #9e4a4a;
+
+/* Category Colors */
+--social-red: #ff3b3b;
+--digital-blue: #2f6bff;
+--streaming-orange: #f86939;
+--gaming-pink: #ff00b7;
+--travel-gold: #e5b80b;
+--finance-green: #00ff7f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { 
+width: 100%; 
+min-height: 100%; 
+font-family: 'Inter', sans-serif; 
+overflow-x: hidden; 
+}
+
+body {
+background: #020617;
+min-height: 100vh;
+position: relative;
+z-index: 0;
+}
+
+/* ===== BACKGROUND WAVES ===== */
+.bg-waves {
+position: fixed;
+inset: 0;
+z-index: 0;
+overflow: hidden;
+pointer-events: none;
+}
+
+.wave-bg {
+position: absolute;
+width: 200%;
+height: 200%;
+filter: blur(100px);
+opacity: 0.2;
+animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-emerald-bg { 
+background: radial-gradient(circle at 30% 40%, rgba(74, 158, 90, 0.4), transparent 70%); 
+top: -40%; left: -20%; animation-delay: 0s; 
+}
+.wave-sapphire-bg { 
+background: radial-gradient(circle at 50% 50%, rgba(58, 110, 165, 0.4), transparent 70%); 
+top: -30%; left: -10%; animation-delay: 8s; 
+}
+.wave-ruby-bg { 
+background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); 
+top: -20%; left: 0%; animation-delay: 16s; 
+}
+
+@keyframes waveBgDrift {
+0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
+50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
+100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+max-width: 1400px;
+margin: 0 auto;
+padding: 20px 24px 80px;
+position: relative;
+z-index: 2;
+min-height: 100vh;
+}
+
+/* ===== 3D LOGO ===== */
+.gem-logo-corner {
+position: fixed;
+top: 20px;
+left: 20px;
+z-index: 9999;
+filter: drop-shadow(0 30px 50px rgba(255, 0, 0, 0.4));
+transform-style: preserve-3d;
+perspective: 1000px;
+transform: scale(0.35);
+transform-origin: top left;
+}
+
+.gem-text {
+font-size: 160px;
+font-weight: 900;
+letter-spacing: -0.02em;
+position: relative;
+display: flex;
+text-transform: uppercase;
+line-height: 0.9;
+font-family: 'Orbitron', sans-serif;
+transform-style: preserve-3d;
+gap: 2px;
+}
+
+.gem-letter {
+display: inline-block;
+position: relative;
+transform-style: preserve-3d;
+animation: letterFloat 6s ease-in-out infinite;
+filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes letterFloat {
+0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.gem-letter::before {
+content: attr(data-letter);
+position: absolute;
+top: 0; left: 0; width: 100%; height: 100%;
+background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+text-shadow: 0 0 18px rgba(255,60,60,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(255,60,60,0.1) 30%, transparent 70%);
+animation: rotateLight 15s linear infinite;
+pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+box-shadow: 0 0 15px 3px white, 0 0 25px 6px #ff3b3b;
+animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+0% { opacity: 0; transform: scale(0.5); }
+10% { opacity: 1; transform: scale(1.2); }
+20% { opacity: 0.6; transform: scale(0.9); }
+30% { opacity: 1; transform: scale(1.1); }
+40% { opacity: 0; transform: scale(0.5); }
+100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+background: radial-gradient(ellipse at center, rgba(255,0,0,0.3) 0%, transparent 80%);
+filter: blur(20px); z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.header {
+display: flex; justify-content: flex-end; align-items: center;
+padding: 20px 0 40px;
+}
+
+.nav { display: flex; gap: 12px; }
+
+.nav a {
+font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500;
+padding: 8px 16px; border: 2px solid #d92b2b; border-radius: 8px;
+background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px);
+color: var(--text); text-decoration: none; transition: all 0.3s ease;
+}
+
+.nav a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #fff; }
+
+/* ===== STAGE TRANSITIONS ===== */
+.stage-container {
+opacity: 1;
+transform: translateY(0);
+transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.stage-container.hidden {
+opacity: 0;
+transform: translateY(20px);
+pointer-events: none;
+position: absolute;
+width: 100%;
+left: 0;
+top: 0;
+}
+
+/* ===== STAGE 1: CATEGORY GRID ===== */
+.stage-1 { position: relative; }
+
+.brief-bar {
+background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+backdrop-filter: blur(20px);
+border: 1px solid rgba(217, 43, 43, 0.3);
+border-radius: 16px;
+padding: 24px;
+margin-bottom: 40px;
+text-align: center;
+}
+
+.brief-title {
+font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 3px;
+color: #d92b2b; text-transform: uppercase;
+}
+
+/* Category Grid */
+.gem-cards {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 24px;
+margin: 40px 0 40px;
+}
+
+@media (max-width: 1000px) { .gem-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .gem-cards { grid-template-columns: 1fr; } }
+
+.gem-card {
+border-radius: 20px; overflow: hidden;
+background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+backdrop-filter: blur(4px);
+transition: all 0.4s ease;
+border-width: 2px; border-style: solid;
+position: relative; min-height: 200px; cursor: pointer;
+}
+
+.gem-card:hover { transform: translateY(-8px); box-shadow: 0 30px 50px rgba(0,0,0,0.6); }
+
+/* Category Colors */
+.card-social { border-color: rgba(255, 59, 59, 0.4); }
+.card-social:hover:not(.locked):not(.selected) { border-color: #ff3b3b; box-shadow: 0 0 20px rgba(255, 59, 59, 0.3); }
+
+.card-digital { border-color: rgba(47, 107, 255, 0.4); }
+.card-digital:hover:not(.locked):not(.selected) { border-color: #2f6bff; box-shadow: 0 0 20px rgba(47, 107, 255, 0.3); }
+
+.card-streaming { border-color: rgba(248, 105, 57, 0.4); }
+.card-streaming:hover:not(.locked):not(.selected) { border-color: #f86939; box-shadow: 0 0 20px rgba(248, 105, 57, 0.3); }
+
+.card-gaming { border-color: rgba(255, 0, 183, 0.4); }
+.card-gaming:hover:not(.locked):not(.selected) { border-color: #ff00b7; box-shadow: 0 0 20px rgba(255, 0, 183, 0.3); }
+
+.card-travel { border-color: rgba(229, 184, 11, 0.4); }
+.card-travel:hover:not(.locked):not(.selected) { border-color: #e5b80b; box-shadow: 0 0 20px rgba(229, 184, 11, 0.3); }
+
+.card-finance { border-color: rgba(0, 255, 127, 0.5); }
+.card-finance:hover:not(.locked):not(.selected) { border-color: #00ff7f; box-shadow: 0 0 20px rgba(0, 255, 127, 0.3); }
+
+/* Selection States */
+.gem-card.selected { border-width: 3px; }
+
+.card-social.selected { border-color: #ff3b3b; box-shadow: 0 0 30px rgba(255, 59, 59, 0.5), inset 0 0 20px rgba(255, 59, 59, 0.1); }
+.card-digital.selected { border-color: #2f6bff; box-shadow: 0 0 30px rgba(47, 107, 255, 0.5), inset 0 0 20px rgba(47, 107, 255, 0.1); }
+.card-streaming.selected { border-color: #f86939; box-shadow: 0 0 30px rgba(248, 105, 57, 0.5), inset 0 0 20px rgba(248, 105, 57, 0.1); }
+.card-gaming.selected { border-color: #ff00b7; box-shadow: 0 0 30px rgba(255, 0, 183, 0.5), inset 0 0 20px rgba(255, 0, 183, 0.1); }
+.card-travel.selected { border-color: #e5b80b; box-shadow: 0 0 30px rgba(229, 184, 11, 0.5), inset 0 0 20px rgba(229, 184, 11, 0.1); }
+.card-finance.selected { border-color: #00ff7f; box-shadow: 0 0 30px rgba(0, 255, 127, 0.5), inset 0 0 20px rgba(0, 255, 127, 0.1); }
+
+.gem-card.selected::after {
+content: "✓"; position: absolute; top: 16px; right: 16px;
+width: 32px; height: 32px; border-radius: 50%;
+background: rgba(255,255,255,0.1); border: 2px solid currentColor;
+display: flex; align-items: center; justify-content: center;
+font-family: 'Orbitron'; font-weight: 700; font-size: 16px; z-index: 10;
+}
+
+.card-social.selected::after { color: #ff3b3b; border-color: #ff3b3b; }
+.card-digital.selected::after { color: #2f6bff; border-color: #2f6bff; }
+.card-streaming.selected::after { color: #f86939; border-color: #f86939; }
+.card-gaming.selected::after { color: #ff00b7; border-color: #ff00b7; }
+.card-travel.selected::after { color: #e5b80b; border-color: #e5b80b; }
+.card-finance.selected::after { color: #00ff7f; border-color: #00ff7f; }
+
+.gem-card.locked { opacity: 0.4; pointer-events: none; filter: grayscale(0.8); transform: scale(0.98); }
+
+/* Card Waves */
+.card-wave {
+position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+z-index: 0; pointer-events: none; border-radius: 20px; opacity: 0.3;
+}
+
+.card-social .card-wave {
+background: repeating-linear-gradient(45deg, rgba(255, 59, 59, 0.2) 0px, rgba(255, 59, 59, 0.2) 40px, rgba(255, 100, 100, 0.3) 40px, rgba(255, 100, 100, 0.3) 80px, rgba(255, 150, 150, 0.4) 80px, rgba(255, 150, 150, 0.4) 120px);
+background-size: 200% 200%; animation: waveFlow 3s linear infinite;
+}
+.card-digital .card-wave {
+background: repeating-linear-gradient(45deg, rgba(47, 107, 255, 0.2) 0px, rgba(47, 107, 255, 0.2) 40px, rgba(100, 150, 255, 0.3) 40px, rgba(100, 150, 255, 0.3) 80px, rgba(150, 180, 255, 0.4) 80px, rgba(150, 180, 255, 0.4) 120px);
+background-size: 200% 200%; animation: waveFlow 3s linear infinite;
+}
+.card-streaming .card-wave {
+background: repeating-linear-gradient(45deg, rgba(248, 105, 57, 0.2) 0px, rgba(248, 105, 57, 0.2) 40px, rgba(255, 150, 100, 0.3) 40px, rgba(255, 150, 100, 0.3) 80px, rgba(255, 180, 140, 0.4) 80px, rgba(255, 180, 140, 0.4) 120px);
+background-size: 200% 200%; animation: waveFlow 3s linear infinite;
+}
+.card-gaming .card-wave {
+background: repeating-linear-gradient(45deg, rgba(255, 0, 183, 0.2) 0px, rgba(255, 0, 183, 0.2) 40px, rgba(255, 100, 220, 0.3) 40px, rgba(255, 100, 220, 0.3) 80px, rgba(255, 150, 240, 0.4) 80px, rgba(255, 150, 240, 0.4) 120px);
+background-size: 200% 200%; animation: waveFlow 3s linear infinite;
+}
+.card-travel .card-wave {
+background: repeating-linear-gradient(45deg, rgba(229, 184, 11, 0.2) 0px, rgba(229, 184, 11, 0.2) 40px, rgba(255, 220, 100, 0.3) 40px, rgba(255, 220, 100, 0.3) 80px, rgba(255, 240, 150, 0.4) 80px, rgba(255, 240, 150, 0.4) 120px);
+background-size: 200% 200%; animation: waveFlow 3s linear infinite;
+}
+.card-finance .card-wave {
+background: repeating-linear-gradient(45deg, rgba(0, 255, 127, 0.2) 0px, rgba(0, 255, 127, 0.2) 40px, rgba(100, 255, 180, 0.3) 40px, rgba(100, 255, 180, 0.3) 80px, rgba(150, 255, 200, 0.4) 80px, rgba(150, 255, 200, 0.4) 120px);
+background-size: 200% 200%; animation: waveFlow 3s linear infinite;
+}
+
+@keyframes waveFlow {
+0% { background-position: 0% 0%; }
+100% { background-position: 100% 100%; }
+}
+
+.card-info {
+padding: 24px; position: relative; z-index: 1;
+display: flex; flex-direction: column; gap: 16px; height: 100%;
+}
+
+.ticker-symbol {
+font-family: 'Orbitron', sans-serif; font-size: 18px;
+font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+}
+
+.card-social .ticker-symbol { color: #ff3b3b; }
+.card-digital .ticker-symbol { color: #2f6bff; }
+.card-streaming .ticker-symbol { color: #f86939; }
+.card-gaming .ticker-symbol { color: #ff00b7; }
+.card-travel .ticker-symbol { color: #e5b80b; }
+.card-finance .ticker-symbol { color: #00ff7f; text-shadow: 0 0 10px rgba(0,255,127,0.3); }
+
+.category-select {
+width: 100%; padding: 14px; background: rgba(0,0,0,0.5);
+border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+color: white; font-family: 'Inter', sans-serif; font-size: 14px;
+cursor: pointer; outline: none; transition: all 0.3s;
+appearance: none;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white'%3E%3Cpath d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+background-repeat: no-repeat; background-position: right 14px center;
+padding-right: 40px;
+}
+
+.card-social .category-select { border-color: rgba(255, 59, 59, 0.4); }
+.card-digital .category-select { border-color: rgba(47, 107, 255, 0.4); }
+.card-streaming .category-select { border-color: rgba(248, 105, 57, 0.4); }
+.card-gaming .category-select { border-color: rgba(255, 0, 183, 0.4); }
+.card-travel .category-select { border-color: rgba(229, 184, 11, 0.4); }
+.card-finance .category-select { border-color: rgba(0, 255, 127, 0.5); }
+
+.category-select:focus { border-color: currentColor; box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+.category-select option { background: rgba(2, 6, 23, 0.95); color: white; padding: 8px; }
+
+/* Fee display styling */
+.fee-display-card {
+font-family: 'Orbitron', sans-serif;
+font-size: 11px;
+letter-spacing: 1px;
+margin-top: 8px;
+opacity: 0;
+transform: translateY(-5px);
+transition: all 0.3s ease;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.fee-display-card.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+.card-social .fee-display-card { color: #ff6b6b; }
+.card-digital .fee-display-card { color: #6b9fff; }
+.card-streaming .fee-display-card { color: #ff9f6b; }
+.card-gaming .fee-display-card { color: #ff6bd9; }
+.card-travel .fee-display-card { color: #ffd700; }
+.card-finance .fee-display-card { color: #00ff7f; }
+
+.fee-icon {
+font-size: 12px;
+}
+
+/* Continue Button */
+.continue-container {
+text-align: center; margin-top: 40px;
+opacity: 0; 
+pointer-events: none;
+height: 0;
+overflow: hidden;
+transition: opacity 0.5s ease, height 0.3s ease;
+}
+
+.continue-container.visible { 
+opacity: 1; 
+pointer-events: all;
+height: auto;
+overflow: visible;
+}
+
+.continue-btn {
+background: linear-gradient(135deg, #d92b2b, #ff6b6b);
+color: #fff; border: none; padding: 20px 60px;
+border-radius: 12px; font-family: 'Orbitron', sans-serif;
+font-weight: 800; font-size: 16px; letter-spacing: 2px;
+cursor: pointer; text-transform: uppercase;
+box-shadow: 0 10px 40px rgba(217, 43, 43, 0.3);
+transition: all 0.3s;
+}
+
+.continue-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 50px rgba(217, 43, 43, 0.5); }
+
+/* ===== STAGE 2 & 3: BIG CARD ===== */
+.big-card-container {
+max-width: 800px;
+margin: 0 auto;
+padding: 40px 20px;
+}
+
+.big-card {
+border-radius: 24px;
+overflow: hidden;
+background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+backdrop-filter: blur(20px);
+border-width: 2px;
+border-style: solid;
+position: relative;
+padding: 32px;
+animation: cardEnter 0.5s ease;
+}
+
+@keyframes cardEnter {
+from { opacity: 0; transform: translateY(20px) scale(0.98); }
+to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.big-card-wave {
+position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+z-index: 0; pointer-events: none; border-radius: 24px; opacity: 0.4;
+}
+
+.big-card-content {
+position: relative;
+z-index: 1;
+}
+
+.big-card-header {
+font-family: 'Orbitron', sans-serif;
+font-size: 24px;
+font-weight: 700;
+letter-spacing: 2px;
+margin-bottom: 32px;
+text-transform: uppercase;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+padding-bottom: 20px;
+}
+
+/* Dynamic Category Styles for Big Card */
+.big-card.social { border-color: rgba(255, 59, 59, 0.6); box-shadow: 0 0 60px rgba(255, 59, 59, 0.2); }
+.big-card.social .big-card-header { color: #ff3b3b; }
+.big-card.social .big-card-wave {
+background: repeating-linear-gradient(45deg, rgba(255, 59, 59, 0.15) 0px, rgba(255, 59, 59, 0.15) 40px, rgba(255, 100, 100, 0.25) 40px, rgba(255, 100, 100, 0.25) 80px, rgba(255, 150, 150, 0.35) 80px, rgba(255, 150, 150, 0.35) 120px);
+background-size: 200% 200%; animation: waveFlow 4s linear infinite;
+}
+
+.big-card.digital { border-color: rgba(47, 107, 255, 0.6); box-shadow: 0 0 60px rgba(47, 107, 255, 0.2); }
+.big-card.digital .big-card-header { color: #2f6bff; }
+.big-card.digital .big-card-wave {
+background: repeating-linear-gradient(45deg, rgba(47, 107, 255, 0.15) 0px, rgba(47, 107, 255, 0.15) 40px, rgba(100, 150, 255, 0.25) 40px, rgba(100, 150, 255, 0.25) 80px, rgba(150, 180, 255, 0.35) 80px, rgba(150, 180, 255, 0.35) 120px);
+background-size: 200% 200%; animation: waveFlow 4s linear infinite;
+}
+
+.big-card.streaming { border-color: rgba(248, 105, 57, 0.6); box-shadow: 0 0 60px rgba(248, 105, 57, 0.2); }
+.big-card.streaming .big-card-header { color: #f86939; }
+.big-card.streaming .big-card-wave {
+background: repeating-linear-gradient(45deg, rgba(248, 105, 57, 0.15) 0px, rgba(248, 105, 57, 0.15) 40px, rgba(255, 150, 100, 0.25) 40px, rgba(255, 150, 100, 0.25) 80px, rgba(255, 180, 140, 0.35) 80px, rgba(255, 180, 140, 0.35) 120px);
+background-size: 200% 200%; animation: waveFlow 4s linear infinite;
+}
+
+.big-card.gaming { border-color: rgba(255, 0, 183, 0.6); box-shadow: 0 0 60px rgba(255, 0, 183, 0.2); }
+.big-card.gaming .big-card-header { color: #ff00b7; }
+.big-card.gaming .big-card-wave {
+background: repeating-linear-gradient(45deg, rgba(255, 0, 183, 0.15) 0px, rgba(255, 0, 183, 0.15) 40px, rgba(255, 100, 220, 0.25) 40px, rgba(255, 100, 220, 0.25) 80px, rgba(255, 150, 240, 0.35) 80px, rgba(255, 150, 240, 0.35) 120px);
+background-size: 200% 200%; animation: waveFlow 4s linear infinite;
+}
+
+.big-card.travel { border-color: rgba(229, 184, 11, 0.6); box-shadow: 0 0 60px rgba(229, 184, 11, 0.2); }
+.big-card.travel .big-card-header { color: #e5b80b; }
+.big-card.travel .big-card-wave {
+background: repeating-linear-gradient(45deg, rgba(229, 184, 11, 0.15) 0px, rgba(229, 184, 11, 0.15) 40px, rgba(255, 220, 100, 0.25) 40px, rgba(255, 220, 100, 0.25) 80px, rgba(255, 240, 150, 0.35) 80px, rgba(255, 240, 150, 0.35) 120px);
+background-size: 200% 200%; animation: waveFlow 4s linear infinite;
+}
+
+.big-card.finance { border-color: rgba(0, 255, 127, 0.6); box-shadow: 0 0 60px rgba(0, 255, 127, 0.2); }
+.big-card.finance .big-card-header { color: #00ff7f; }
+.big-card.finance .big-card-wave {
+background: repeating-linear-gradient(45deg, rgba(0, 255, 127, 0.15) 0px, rgba(0, 255, 127, 0.15) 40px, rgba(100, 255, 180, 0.25) 40px, rgba(100, 255, 180, 0.25) 80px, rgba(150, 255, 200, 0.35) 80px, rgba(150, 255, 200, 0.35) 120px);
+background-size: 200% 200%; animation: waveFlow 4s linear infinite;
+}
+
+/* Form Styles */
+.form-grid {
+display: grid;
+grid-template-columns: 200px 1fr;
+gap: 24px;
+align-items: center;
+}
+
+@media (max-width: 600px) {
+.form-grid { grid-template-columns: 1fr; gap: 8px; }
+}
+
+.form-label {
+font-family: 'Orbitron', sans-serif;
+font-size: 12px;
+letter-spacing: 1px;
+color: var(--muted);
+text-transform: uppercase;
+}
+
+.form-select, .form-textarea, .form-input {
+width: 100%;
+padding: 14px;
+background: rgba(0,0,0,0.5);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 12px;
+color: white;
+font-family: 'Inter', sans-serif;
+font-size: 14px;
+outline: none;
+transition: all 0.3s;
+}
+
+.form-select:focus, .form-textarea:focus, .form-input:focus {
+border-color: currentColor;
+box-shadow: 0 0 20px rgba(255,255,255,0.1);
+}
+
+.big-card.social .form-select, .big-card.social .form-textarea, .big-card.social .form-input { border-color: rgba(255, 59, 59, 0.4); }
+.big-card.social .form-select:focus, .big-card.social .form-textarea:focus, .big-card.social .form-input:focus { border-color: #ff3b3b; box-shadow: 0 0 20px rgba(255, 59, 59, 0.2); }
+
+.big-card.digital .form-select, .big-card.digital .form-textarea, .big-card.digital .form-input { border-color: rgba(47, 107, 255, 0.4); }
+.big-card.digital .form-select:focus, .big-card.digital .form-textarea:focus, .big-card.digital .form-input:focus { border-color: #2f6bff; box-shadow: 0 0 20px rgba(47, 107, 255, 0.2); }
+
+.big-card.streaming .form-select, .big-card.streaming .form-textarea, .big-card.streaming .form-input { border-color: rgba(248, 105, 57, 0.4); }
+.big-card.streaming .form-select:focus, .big-card.streaming .form-textarea:focus, .big-card.streaming .form-input:focus { border-color: #f86939; box-shadow: 0 0 20px rgba(248, 105, 57, 0.2); }
+
+.big-card.gaming .form-select, .big-card.gaming .form-textarea, .big-card.gaming .form-input { border-color: rgba(255, 0, 183, 0.4); }
+.big-card.gaming .form-select:focus, .big-card.gaming .form-textarea:focus, .big-card.gaming .form-input:focus { border-color: #ff00b7; box-shadow: 0 0 20px rgba(255, 0, 183, 0.2); }
+
+.big-card.travel .form-select, .big-card.travel .form-textarea, .big-card.travel .form-input { border-color: rgba(229, 184, 11, 0.4); }
+.big-card.travel .form-select:focus, .big-card.travel .form-textarea:focus, .big-card.travel .form-input:focus { border-color: #e5b80b; box-shadow: 0 0 20px rgba(229, 184, 11, 0.2); }
+
+.big-card.finance .form-select, .big-card.finance .form-textarea, .big-card.finance .form-input { border-color: rgba(0, 255, 127, 0.4); }
+.big-card.finance .form-select:focus, .big-card.finance .form-textarea:focus, .big-card.finance .form-input:focus { border-color: #00ff7f; box-shadow: 0 0 20px rgba(0, 255, 127, 0.2); }
+
+.form-textarea {
+min-height: 120px;
+resize: vertical;
+}
+
+.form-row { margin-bottom: 24px; }
+
+.action-btn {
+width: 100%;
+padding: 18px;
+border: none;
+border-radius: 12px;
+font-family: 'Orbitron', sans-serif;
+font-weight: 800;
+font-size: 16px;
+letter-spacing: 2px;
+cursor: pointer;
+text-transform: uppercase;
+margin-top: 32px;
+transition: all 0.3s;
+position: relative;
+overflow: hidden;
+}
+
+.action-btn:hover { transform: translateY(-2px); }
+
+.big-card.social .action-btn { background: linear-gradient(135deg, #ff3b3b, #ff6b6b); color: white; box-shadow: 0 10px 40px rgba(255, 59, 59, 0.3); }
+.big-card.social .action-btn:hover { box-shadow: 0 15px 50px rgba(255, 59, 59, 0.5); }
+
+.big-card.digital .action-btn { background: linear-gradient(135deg, #2f6bff, #6b9fff); color: white; box-shadow: 0 10px 40px rgba(47, 107, 255, 0.3); }
+.big-card.digital .action-btn:hover { box-shadow: 0 15px 50px rgba(47, 107, 255, 0.5); }
+
+.big-card.streaming .action-btn { background: linear-gradient(135deg, #f86939, #ff9f6b); color: white; box-shadow: 0 10px 40px rgba(248, 105, 57, 0.3); }
+.big-card.streaming .action-btn:hover { box-shadow: 0 15px 50px rgba(248, 105, 57, 0.5); }
+
+.big-card.gaming .action-btn { background: linear-gradient(135deg, #ff00b7, #ff6bd9); color: white; box-shadow: 0 10px 40px rgba(255, 0, 183, 0.3); }
+.big-card.gaming .action-btn:hover { box-shadow: 0 15px 50px rgba(255, 0, 183, 0.5); }
+
+.big-card.travel .action-btn { background: linear-gradient(135deg, #e5b80b, #ffd700); color: #000; box-shadow: 0 10px 40px rgba(229, 184, 11, 0.3); }
+.big-card.travel .action-btn:hover { box-shadow: 0 15px 50px rgba(229, 184, 11, 0.5); }
+
+.big-card.finance .action-btn { background: linear-gradient(135deg, #00ff7f, #00d4ff); color: #000; box-shadow: 0 10px 40px rgba(0, 255, 127, 0.3); }
+.big-card.finance .action-btn:hover { box-shadow: 0 15px 50px rgba(0, 255, 127, 0.5); }
+
+/* Summary Grid for Stage 3 */
+.summary-grid {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 20px;
+margin-bottom: 32px;
+}
+
+@media (max-width: 600px) { .summary-grid { grid-template-columns: 1fr; } }
+
+.summary-item {
+background: rgba(0,0,0,0.3);
+padding: 20px;
+border-radius: 12px;
+border: 1px solid rgba(255,255,255,0.05);
+}
+
+.summary-label {
+font-family: 'Orbitron', sans-serif;
+font-size: 10px;
+letter-spacing: 1px;
+color: var(--muted);
+text-transform: uppercase;
+margin-bottom: 8px;
+}
+
+.summary-value {
+font-family: 'Inter', sans-serif;
+font-size: 16px;
+color: white;
+font-weight: 500;
+}
+
+.fee-display {
+text-align: center;
+padding: 32px;
+background: rgba(0,0,0,0.4);
+border-radius: 16px;
+margin: 32px 0;
+border: 1px solid rgba(255,255,255,0.1);
+}
+
+.fee-amount {
+font-family: 'Orbitron', sans-serif;
+font-size: 48px;
+font-weight: 800;
+margin-bottom: 8px;
+}
+
+.fee-note {
+font-size: 13px;
+color: var(--muted);
+font-style: italic;
+}
+
+.big-card.social .fee-amount { color: #ff3b3b; text-shadow: 0 0 30px rgba(255, 59, 59, 0.4); }
+.big-card.digital .fee-amount { color: #2f6bff; text-shadow: 0 0 30px rgba(47, 107, 255, 0.4); }
+.big-card.streaming .fee-amount { color: #f86939; text-shadow: 0 0 30px rgba(248, 105, 57, 0.4); }
+.big-card.gaming .fee-amount { color: #ff00b7; text-shadow: 0 0 30px rgba(255, 0, 183, 0.4); }
+.big-card.travel .fee-amount { color: #e5b80b; text-shadow: 0 0 30px rgba(229, 184, 11, 0.4); }
+.big-card.finance .fee-amount { color: #00ff7f; text-shadow: 0 0 30px rgba(0, 255, 127, 0.4); }
+
+/* Toast Notification */
+.toast {
+position: fixed;
+bottom: 100px;
+left: 50%;
+transform: translateX(-50%) translateY(100px);
+background: rgba(15, 32, 64, 0.98);
+border: 1px solid rgba(124, 252, 0, 0.5);
+color: white;
+padding: 16px 32px;
+border-radius: 12px;
+font-family: 'Orbitron', sans-serif;
+font-size: 14px;
+letter-spacing: 1px;
+box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+opacity: 0;
+transition: all 0.5s ease;
+z-index: 10000;
+}
+
+.toast.visible {
+opacity: 1;
+transform: translateX(-50%) translateY(0);
+}
+
+/* Back Button */
+.back-btn {
+background: none;
+border: 1px solid rgba(255,255,255,0.2);
+color: var(--muted);
+padding: 12px 24px;
+border-radius: 8px;
+font-family: 'Orbitron', sans-serif;
+font-size: 12px;
+cursor: pointer;
+margin-bottom: 20px;
+transition: all 0.3s;
+}
+
+.back-btn:hover {
+border-color: white;
+color: white;
+background: rgba(255,255,255,0.1);
+}
+
+.footer-note {
+margin-top: 60px;
+text-align: center;
+font-size: 12px;
+color: var(--muted);
+font-family: 'Orbitron';
+letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+<div class="wave-bg wave-emerald-bg"></div>
+<div class="wave-bg wave-sapphire-bg"></div>
+<div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D ADAUX LOGO -->
+<div class="gem-logo-corner">
+<div class="gem-text">
+  <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+</div>
+<div class="light-source"></div>
+<div class="sparkle sparkle-1"></div>
+<div class="sparkle sparkle-2"></div>
+<div class="sparkle sparkle-3"></div>
+<div class="sparkle sparkle-4"></div>
+<div class="sparkle sparkle-5"></div>
+<div class="sparkle sparkle-6"></div>
+<div class="sparkle sparkle-7"></div>
+<div class="sparkle sparkle-8"></div>
+<div class="sparkle sparkle-9"></div>
+<div class="sparkle sparkle-10"></div>
+<div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+<header class="header">
+  <nav class="nav">
+    <a href="#">Agent Brief</a>
+    <a href="#">Auctions</a>
+    <a href="#">Intelligence</a>
+    <a href="#">Sign In</a>
+  </nav>
+</header>
+
+<!-- STAGE 1: Category Grid -->
+<div class="stage-container stage-1" id="stage1">
+  <div class="brief-bar" id="briefBar">
+    <div class="brief-title">SELECT ONE CATEGORY</div>
+  </div>
+
+  <div class="gem-cards" id="categoryGrid">
+    <div class="gem-card card-social" data-category="social" onclick="selectCard(this)">
+      <div class="card-wave"></div>
+      <div class="card-info">
+        <div class="ticker-symbol">Social Media</div>
+        <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelectionFromEvent(this, 'social')">
+          <option value="">Select Platform...</option>
+          <option>YouTube</option>
+          <option>Instagram</option>
+          <option>TikTok</option>
+          <option>Facebook</option>
+          <option>LinkedIn</option>
+          <option>Twitter/X</option>
+          <option>Snapchat</option>
+        </select>
+        <div class="fee-display-card" id="fee-social">
+          <span class="fee-icon">💰</span>
+          <span class="fee-text">Auction fee: $<span class="fee-value">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gem-card card-digital" data-category="digital" onclick="selectCard(this)">
+      <div class="card-wave"></div>
+      <div class="card-info">
+        <div class="ticker-symbol">Digital</div>
+        <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelectionFromEvent(this, 'digital')">
+          <option value="">Select Format...</option>
+          <option>Web Display</option>
+          <option>Editorial/News</option>
+          <option>404 Pages</option>
+          <option>Banner Ads</option>
+          <option>Native Articles</option>
+          <option>Pop-unders</option>
+        </select>
+        <div class="fee-display-card" id="fee-digital">
+          <span class="fee-icon">💰</span>
+          <span class="fee-text">Auction fee: $<span class="fee-value">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gem-card card-streaming" data-category="streaming" onclick="selectCard(this)">
+      <div class="card-wave"></div>
+      <div class="card-info">
+        <div class="ticker-symbol">Streaming TV</div>
+        <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelectionFromEvent(this, 'streaming')">
+          <option value="">Select Channel...</option>
+          <option>Hulu</option>
+          <option>Roku</option>
+          <option>Samsung TV+</option>
+          <option>Pluto TV</option>
+          <option>Tubi</option>
+          <option>Amazon Freevee</option>
+          <option>LG Channels</option>
+          <option>Peacock</option>
+          <option>Paramount+</option>
+        </select>
+        <div class="fee-display-card" id="fee-streaming">
+          <span class="fee-icon">💰</span>
+          <span class="fee-text">Auction fee: $<span class="fee-value">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gem-card card-gaming" data-category="gaming" onclick="selectCard(this)">
+      <div class="card-wave"></div>
+      <div class="card-info">
+        <div class="ticker-symbol">Gaming</div>
+        <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelectionFromEvent(this, 'gaming')">
+          <option value="">Select Channel...</option>
+          <option>Mobile Games</option>
+          <option>Console Ads</option>
+          <option>In-Game Billboards</option>
+          <option>Twitch</option>
+          <option>Discord</option>
+          <option>Steam</option>
+          <option>Epic Games</option>
+          <option>Fortnite</option>
+          <option>Roblox</option>
+        </select>
+        <div class="fee-display-card" id="fee-gaming">
+          <span class="fee-icon">💰</span>
+          <span class="fee-text">Auction fee: $<span class="fee-value">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gem-card card-travel" data-category="travel" onclick="selectCard(this)">
+      <div class="card-wave"></div>
+      <div class="card-info">
+        <div class="ticker-symbol">Travel</div>
+        <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelectionFromEvent(this, 'travel')">
+          <option value="">Select Vertical...</option>
+          <option>Airlines</option>
+          <option>Hotels</option>
+          <option>Cruises</option>
+          <option>Booking Sites</option>
+          <option>OTAs</option>
+          <option>Vacation Rentals</option>
+          <option>Travel Aggregators</option>
+        </select>
+        <div class="fee-display-card" id="fee-travel">
+          <span class="fee-icon">💰</span>
+          <span class="fee-text">Auction fee: $<span class="fee-value">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gem-card card-finance" data-category="finance" onclick="selectCard(this)">
+      <div class="card-wave"></div>
+      <div class="card-info">
+        <div class="ticker-symbol">Finance</div>
+        <select class="category-select" onclick="event.stopPropagation()" onchange="updateSelectionFromEvent(this, 'finance')">
+          <option value="">Select Platform...</option>
+          <option>Forex Platforms</option>
+          <option>Crypto Exchanges</option>
+          <option>Trading Dashboards</option>
+          <option>Stock Screeners</option>
+          <option>Banking Apps</option>
+          <option>Fintech Dashboards</option>
+        </select>
+        <div class="fee-display-card" id="fee-finance">
+          <span class="fee-icon">💰</span>
+          <span class="fee-text">Auction fee: $<span class="fee-value">0</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="continue-container" id="continueContainer">
+    <button class="continue-btn" onclick="goToStage2()">START AUCTION →</button>
+  </div>
+
+  <div class="footer-note">ONE CATEGORY SELECTION REQUIRED • DETERMINISTIC OPTIMIZATION ENGINE STANDING BY</div>
+</div>
+
+<!-- STAGE 2: Campaign Brief -->
+<div class="stage-container hidden" id="stage2">
+  <div class="big-card-container">
+    <button class="back-btn" onclick="backToStage1()">← Back to Categories</button>
+    <div class="big-card" id="stage2Card">
+      <div class="big-card-wave"></div>
+      <div class="big-card-content">
+        <div class="big-card-header">Campaign Brief</div>
+        
+        <div class="form-row">
+          <div class="form-grid">
+            <label class="form-label">Budget</label>
+            <input type="number" class="form-input" id="budgetInput" value="15000" min="1000" step="500">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-grid">
+            <label class="form-label">Geography</label>
+            <select class="form-select" id="geoSelect">
+              <option value="">Select Primary Market...</option>
+              <option>United States</option>
+              <option>United Kingdom</option>
+              <option>Canada</option>
+              <option>Australia</option>
+              <option>European Union</option>
+              <option>Asia Pacific</option>
+              <option>Global</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-grid">
+            <label class="form-label">Age Range</label>
+            <select class="form-select" id="ageSelect">
+              <option value="">Select Age Group...</option>
+              <option>18-24</option>
+              <option>25-34</option>
+              <option>35-44</option>
+              <option>45-54</option>
+              <option>55+</option>
+              <option>All Ages</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-grid">
+            <label class="form-label">Gender</label>
+            <select class="form-select" id="genderSelect">
+              <option value="">Select Gender...</option>
+              <option>All Genders</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Non-binary</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-grid">
+            <label class="form-label">Target Views</label>
+            <input type="number" class="form-input" id="targetViews" 
+                   placeholder="e.g., 500,000" value="100000" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-grid">
+            <label class="form-label">Content Category</label>
+            <select class="form-select" id="contentSelect">
+              <option value="">Select Content Category...</option>
+              <option>Technology</option>
+              <option>Finance / Investing</option>
+              <option>Crypto / Web3</option>
+              <option>Business / Entrepreneurship</option>
+              <option>Beauty / Skincare</option>
+              <option>Fashion / Lifestyle</option>
+              <option>Health / Fitness</option>
+              <option>Food / Cooking</option>
+              <option>Travel</option>
+              <option>Gaming</option>
+              <option>Entertainment</option>
+              <option>Education</option>
+              <option>News / Politics</option>
+              <option>Family / Parenting</option>
+              <option>Luxury</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-grid" style="align-items: flex-start;">
+            <label class="form-label" style="padding-top: 14px;">Campaign Brief</label>
+            <textarea class="form-textarea" id="briefText" placeholder="Describe your campaign objectives, target audience, creative requirements, and any specific constraints or goals..."></textarea>
+          </div>
+        </div>
+
+        <button class="action-btn" onclick="goToStage3()">Next: Confirm Auction</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE 3: Auction Confirmation -->
+<div class="stage-container hidden" id="stage3">
+  <div class="big-card-container">
+    <button class="back-btn" onclick="backToStage2()">← Back to Brief</button>
+    <div class="big-card" id="stage3Card">
+      <div class="big-card-wave"></div>
+      <div class="big-card-content">
+        <div class="big-card-header">Confirm Your Auction</div>
+        
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">Category</div>
+            <div class="summary-value" id="summaryCategory">-</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Subcategory</div>
+            <div class="summary-value" id="summarySubcategory">-</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Budget</div>
+            <div class="summary-value" id="summaryBudget">-</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Target Views</div>
+            <div class="summary-value" id="summaryTargetViews">-</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Geography</div>
+            <div class="summary-value" id="summaryGeo">-</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Demographics</div>
+            <div class="summary-value" id="summaryDemo">-</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Content Type</div>
+            <div class="summary-value" id="summaryContent">-</div>
+          </div>
+        </div>
+
+        <div class="fee-display">
+          <div class="fee-amount" id="feeAmount">$0.00</div>
+          <div class="fee-note">Creator payment is separate. This fee covers the auction only.</div>
+        </div>
+
+        <button class="action-btn" onclick="saveCampaign()">Save Campaign →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">Campaign saved successfully</div>
+
+<script>
+// Supabase Configuration
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// STATE MANAGEMENT
+let selectedCategory = null;
+let selectedSubcategory = null;
+let currentFee = 0;
+
+console.log('Script loaded. Initial state:', { selectedCategory, selectedSubcategory });
+
+// Platform fee tiers
+const platformFees = {
+  // $25 tier
+  'YouTube': 25,
+  'TikTok': 25,
+  'Instagram': 25,
+  'Roku': 25,
+  'Hulu': 25,
+  'Pluto TV': 25,
+  'Samsung TV+': 25,
+  'Twitch': 25,
+  'Fortnite': 25,
+  'Roblox': 25,
+  // $15 tier
+  'Facebook': 15,
+  'LinkedIn': 15,
+  'Twitter/X': 15,
+  'Snapchat': 15,
+  'Discord': 15,
+  'Steam': 15,
+  // Default $10 for all others
+};
+
+function getPlatformFee(platform) {
+  return platformFees[platform] || 10;
+}
+
+function updateFeeDisplay(category, platform) {
+  const feeDisplay = document.getElementById(`fee-${category}`);
+  if (feeDisplay && platform) {
+    const fee = getPlatformFee(platform);
+    feeDisplay.querySelector('.fee-value').textContent = fee;
+    feeDisplay.classList.add('visible');
+    currentFee = fee;
+  } else if (feeDisplay) {
+    feeDisplay.classList.remove('visible');
+  }
+}
+
+function selectCard(card) {
+console.log('selectCard clicked:', card.dataset.category);
+
+const category = card.dataset.category;
+const allCards = document.querySelectorAll('.gem-card');
+
+// If clicking already selected card with subcategory, deselect everything
+if (selectedCategory === category && selectedSubcategory) {
+  console.log('Deselecting everything');
+  selectedCategory = null;
+  selectedSubcategory = null;
+  currentFee = 0;
+  allCards.forEach(c => {
+    c.classList.remove('selected', 'locked');
+    // Hide fee displays
+    const feeDisp = c.querySelector('.fee-display-card');
+    if (feeDisp) feeDisp.classList.remove('visible');
+    // Reset dropdowns
+    const select = c.querySelector('.category-select');
+    if (select) select.value = "";
+  });
+  document.getElementById('continueContainer').classList.remove('visible');
+  return;
+}
+
+// If clicking a new card while another is selected, switch selection
+if (selectedCategory && selectedCategory !== category) {
+  // Clear previous selections
+  allCards.forEach(c => {
+    c.classList.remove('selected', 'locked');
+    const feeDisp = c.querySelector('.fee-display-card');
+    if (feeDisp) feeDisp.classList.remove('visible');
+    const select = c.querySelector('.category-select');
+    if (select && c !== card) select.value = "";
+  });
+  selectedSubcategory = null;
+  currentFee = 0;
+}
+
+// Select new category
+selectedCategory = category;
+
+// LOCK ALL OTHER CARDS immediately
+allCards.forEach(c => {
+  if (c === card) {
+    c.classList.add('selected');
+    c.classList.remove('locked');
+    // Focus the dropdown
+    const select = c.querySelector('.category-select');
+    if (select) {
+      setTimeout(() => select.focus(), 100);
+    }
+  } else {
+    c.classList.add('locked');
+    c.classList.remove('selected');
+  }
+});
+
+// Clear any previous subcategory selection when clicking new card
+if (!selectedSubcategory || selectedCategory !== category) {
+  selectedSubcategory = null;
+  updateFeeDisplay(category, null);
+}
+
+checkContinue();
+}
+
+function updateSelectionFromEvent(selectElement, category) {
+const value = selectElement.value;
+console.log('Dropdown changed:', category, value);
+
+if (value && value !== "") {
+  selectedCategory = category;
+  selectedSubcategory = value;
+  
+  // Calculate and display fee
+  updateFeeDisplay(category, value);
+  
+  // LOCK ALL OTHER CARDS IMMEDIATELY
+  const allCards = document.querySelectorAll('.gem-card');
+  allCards.forEach(card => {
+    const cardCategory = card.dataset.category;
+    if (cardCategory === category) {
+      card.classList.add('selected');
+      card.classList.remove('locked');
+    } else {
+      card.classList.add('locked');
+      card.classList.remove('selected');
+      // Hide fee displays on other cards
+      const feeDisp = card.querySelector('.fee-display-card');
+      if (feeDisp) feeDisp.classList.remove('visible');
+    }
+  });
+  
+  console.log('Selection confirmed:', { selectedCategory, selectedSubcategory, currentFee });
+  checkContinue();
+} else {
+  console.log('Empty selection, clearing subcategory');
+  selectedSubcategory = null;
+  currentFee = 0;
+  updateFeeDisplay(category, null);
+  checkContinue();
+}
+}
+
+function checkContinue() {
+console.log('Checking continue button...', { selectedCategory, selectedSubcategory });
+
+const hasCategory = selectedCategory !== null && selectedCategory !== "";
+const hasSubcategory = selectedSubcategory !== null && selectedSubcategory !== "";
+const continueContainer = document.getElementById('continueContainer');
+
+if (hasCategory && hasSubcategory) {
+  console.log('Showing continue button');
+  continueContainer.classList.add('visible');
+} else {
+  console.log('Hiding continue button');
+  continueContainer.classList.remove('visible');
+}
+}
+
+function goToStage2() {
+console.log('goToStage2 called', { selectedCategory, selectedSubcategory, currentFee });
+
+if (!selectedCategory || !selectedSubcategory) {
+  console.error('Cannot proceed - missing selection', { selectedCategory, selectedSubcategory });
+  alert('Please select a category and platform first');
+  return;
+}
+
+// Apply category styling to big card
+const card = document.getElementById('stage2Card');
+card.className = 'big-card ' + selectedCategory;
+
+// Transition
+document.getElementById('stage1').classList.add('hidden');
+document.getElementById('stage2').classList.remove('hidden');
+
+console.log('Transitioned to Stage 2');
+}
+
+function backToStage1() {
+console.log('Going back to Stage 1');
+document.getElementById('stage2').classList.add('hidden');
+document.getElementById('stage1').classList.remove('hidden');
+}
+
+function goToStage3() {
+console.log('goToStage3 called');
+
+const budget = document.getElementById('budgetInput').value;
+const geo = document.getElementById('geoSelect').value;
+const age = document.getElementById('ageSelect').value;
+const gender = document.getElementById('genderSelect').value;
+const content = document.getElementById('contentSelect').value;
+const targetViews = document.getElementById('targetViews').value;
+
+if (!budget || !geo || !age || !gender || !content || !targetViews) {
+  alert('Please complete all fields');
+  return;
+}
+
+// Apply category styling
+const card = document.getElementById('stage3Card');
+card.className = 'big-card ' + selectedCategory;
+
+// Populate summary
+const categoryNames = {
+  'social': 'Social Media',
+  'digital': 'Digital',
+  'streaming': 'Streaming TV',
+  'gaming': 'Gaming',
+  'travel': 'Travel',
+  'finance': 'Finance'
+};
+
+document.getElementById('summaryCategory').textContent = categoryNames[selectedCategory];
+document.getElementById('summarySubcategory').textContent = selectedSubcategory;
+document.getElementById('summaryBudget').textContent = '$' + parseInt(budget).toLocaleString();
+document.getElementById('summaryTargetViews').textContent = parseInt(targetViews).toLocaleString();
+document.getElementById('summaryGeo').textContent = geo;
+document.getElementById('summaryDemo').textContent = age + ' • ' + gender;
+document.getElementById('summaryContent').textContent = content;
+
+// Use the platform-specific fee calculated in Stage 1
+document.getElementById('feeAmount').textContent = '$' + currentFee.toFixed(2);
+
+// Transition
+document.getElementById('stage2').classList.add('hidden');
+document.getElementById('stage3').classList.remove('hidden');
+
+console.log('Transitioned to Stage 3');
+}
+
+function backToStage2() {
+console.log('Going back to Stage 2');
+document.getElementById('stage3').classList.add('hidden');
+document.getElementById('stage2').classList.remove('hidden');
+}
+
+async function saveCampaign() {
+console.log('Saving campaign...');
+
+const campaignData = {
+  category: selectedCategory,
+  subcategory: selectedSubcategory,
+  budget: parseInt(document.getElementById('budgetInput').value),
+  target_views: parseInt(document.getElementById('targetViews').value),
+  geography: document.getElementById('geoSelect').value,
+  age_range: document.getElementById('ageSelect').value,
+  gender: document.getElementById('genderSelect').value,
+  content_criteria: document.getElementById('contentSelect').value,
+  brief: document.getElementById('briefText').value,
+  auction_fee: currentFee,
+  created_at: new Date().toISOString(),
+  status: 'pending'
+};
+
+console.log('Data to save:', campaignData);
+
+try {
+  const { data, error } = await supabaseClient
+    .from('campaigns')
+    .insert([campaignData]);
+  
+  if (error) throw error;
+  
+  console.log('Save successful');
+  showToast('Campaign saved successfully');
+} catch (err) {
+  console.error('Save failed:', err);
+  showToast('Error saving campaign');
+}
+}
+
+function showToast(message) {
+const toast = document.getElementById('toast');
+toast.textContent = message;
+toast.classList.add('visible');
+setTimeout(() => {
+  toast.classList.remove('visible');
+}, 3000);
+}
+
+// Initialize
+console.log('Initializing...');
+</script>
+
+</body>
+</html>

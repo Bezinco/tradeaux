@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeAux • Bot Runner | Live Execution</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --neon: #7CFC00; --gold: #FFD966; --cyan: #00ced1; --red: #ff3b3b; }
+    body { min-height: 100vh; font-family: 'Inter', sans-serif; color: #F0F3FA;
+      background: #020617; overflow-x: hidden; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px 24px 40px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .header h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: var(--cyan); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-dot.on { background: var(--neon); box-shadow: 0 0 8px var(--neon); animation: pulse 2s infinite; }
+    .status-dot.off { background: #5c6b8a; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: linear-gradient(145deg, #0B1122, #030712); border: 1px solid rgba(0,206,209,0.2); border-radius: 16px; padding: 16px; }
+    .card-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: var(--cyan); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .card-sub { font-size: 10px; color: #5c6b8a; }
+
+    .log-entry { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px; border-left: 2px solid transparent; }
+    .log-entry.bid { background: rgba(124,252,0,0.05); border-left-color: var(--neon); }
+    .log-entry.think { background: rgba(0,206,209,0.05); border-left-color: var(--cyan); }
+    .log-entry.warn { background: rgba(255,217,102,0.05); border-left-color: var(--gold); }
+    .log-entry.err { background: rgba(255,59,59,0.05); border-left-color: var(--red); }
+    .log-time { color: #5c6b8a; font-size: 9px; margin-right: 6px; }
+    .log-weapon { font-weight: 700; color: var(--neon); }
+    .log-auction { color: var(--cyan); }
+    .log-scroll { max-height: 300px; overflow-y: auto; }
+
+    .auction-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 6px; font-size: 12px; }
+    .auction-row .commodity { font-weight: 600; color: #fff; }
+    .auction-row .detail { color: #9ca3af; font-size: 10px; }
+    .auction-row .status { font-family: 'Orbitron', sans-serif; font-size: 9px; padding: 2px 8px; border-radius: 10px; }
+    .status-watching { background: rgba(0,206,209,0.1); color: var(--cyan); border: 1px solid rgba(0,206,209,0.3); }
+    .status-bidding { background: rgba(124,252,0,0.1); color: var(--neon); border: 1px solid rgba(124,252,0,0.3); }
+    .status-sniping { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.3); }
+    .status-won { background: rgba(0,206,209,0.1); color: var(--cyan); border: 1px solid rgba(0,206,209,0.3); }
+
+    .metric { text-align: center; padding: 10px; }
+    .metric-value { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: var(--cyan); }
+    .metric-label { font-size: 9px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    .btn { border: none; font-family: 'Orbitron', sans-serif; font-weight: 700; cursor: pointer; padding: 8px 16px; border-radius: 30px; font-size: 11px; transition: 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--cyan), #00ff7f); color: #000; }
+    .btn-danger { background: linear-gradient(135deg, var(--red), #ff6b6b); color: #fff; }
+    .btn-sm { padding: 4px 10px; font-size: 9px; }
+
+    .weapon-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; font-family: 'Orbitron', sans-serif; margin-left: 4px; }
+    .tag-aggressor { background: rgba(255,59,59,0.15); color: #ff6b6b; }
+    .tag-sniper { background: rgba(255,217,102,0.15); color: var(--gold); }
+    .tag-fit { background: rgba(0,206,209,0.15); color: var(--cyan); }
+    .tag-payment { background: rgba(124,252,0,0.15); color: var(--neon); }
+    .tag-exw { background: rgba(0,102,255,0.15); color: #0066ff; }
+
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: #0a1424cc; backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 40px; font-size: 0.75rem; border-left: 3px solid var(--neon); transition: 0.2s; opacity: 0; z-index: 20000; font-family: 'Orbitron', sans-serif; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>🤖 BOT RUNNER <span class="status-dot on" id="runnerDot"></span><span id="runnerStatus" style="font-size:12px; color:#9ca3af;">ACTIVE</span></h1>
+        <div style="font-size:11px; color:#5c6b8a; margin-top:2px;">Listening to live auctions • Adapting weapons • Placing bids</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="location.reload()">🔄 Restart</button>
+        <button class="btn btn-danger btn-sm" onclick="pauseBot()">⏸ Pause</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Metrics + Active Auctions -->
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">📊 LIVE METRICS</div>
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+            <div class="metric"><div class="metric-value" id="mAuctions">0</div><div class="metric-label">Watching</div></div>
+            <div class="metric"><div class="metric-value" id="mBids">0</div><div class="metric-label">Bids Placed</div></div>
+            <div class="metric"><div class="metric-value" id="mWins">0</div><div class="metric-label">Wins</div></div>
+            <div class="metric"><div class="metric-value" id="mWallet">$0</div><div class="metric-label">Wallet</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔥 ACTIVE AUCTIONS <span class="card-sub" id="auctionCount">0</span></div>
+          <div id="activeAuctions"></div>
+        </div>
+      </div>
+
+      <!-- Right: Decision Log -->
+      <div>
+        <div class="card" style="height:100%; display:flex; flex-direction:column;">
+          <div class="card-title">🧠 DECISION LOG <button class="btn btn-sm btn-primary" onclick="clearLog()" style="float:right;">Clear</button></div>
+          <div class="log-scroll" id="decisionLog" style="flex:1;">
+            <div class="log-entry think"><span class="log-time">--:--:--</span> Bot initializing...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let botSettings = null;
+let walletBalance = 0;
+let activeAuctions = [];
+let auctionBids = new Map(); // briefId -> bids[]
+let auctionStates = new Map(); // briefId -> { status, weapon, bidCount, lastBidTime }
+let sniperTimers = new Map(); // briefId -> timeoutId
+let totalBidsPlaced = 0;
+let totalWins = 0;
+let isPaused = false;
+
+// ========== PAYMENT MULTIPLIERS ==========
+const PAYMENT_MULT = { wire: 1.20, lc_sight: 1.10, lc_30: 1.00, net_30: 0.95 };
+
+// ========== AUTH ==========
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  await loadBotSettings();
+  if (!botSettings || !botSettings.active) {
+    log('Bot is INACTIVE. Configure at bot-config.html', 'err');
+    document.getElementById('runnerStatus').textContent = 'INACTIVE';
+    document.getElementById('runnerDot').className = 'status-dot off';
+    return;
+  }
+  setupWalletListener();
+  setupAuctionsListener();
+  setupMyBidsListener();
+  log('Bot RUNNER activated. Mode: ' + botSettings.mode, 'think');
+});
+
+async function loadBotSettings() {
+  const doc = await db.collection('buyer_bots').doc(currentUser.uid).get();
+  if (doc.exists) botSettings = doc.data();
+}
+
+function setupWalletListener() {
+  db.collection('wallets').doc(currentUser.uid).onSnapshot(doc => {
+    walletBalance = doc.exists ? (doc.data().balance || 0) : 0;
+    document.getElementById('mWallet').textContent = '$' + walletBalance.toLocaleString();
+  });
+}
+
+// ========== AUCTION LISTENER ==========
+function setupAuctionsListener() {
+  db.collection('seller_briefs')
+    .where('status', 'in', ['active', 'auctioning'])
+    .where('remaining_mt', '>', 0)
+    .onSnapshot(snapshot => {
+      const previous = new Set(activeAuctions.map(a => a.id));
+      activeAuctions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('auctionCount').textContent = activeAuctions.length;
+      document.getElementById('mAuctions').textContent = activeAuctions.length;
+      renderAuctions();
+
+      activeAuctions.forEach(a => {
+        if (!previous.has(a.id)) {
+          auctionStates.set(a.id, { status: 'watching', weapon: null, bidCount: 0, lastBidTime: 0 });
+          setupBidListener(a.id);
+          evaluateAuction(a.id);
+        }
+      });
+    });
+}
+
+function setupBidListener(briefId) {
+  db.collection('bids').where('briefId', '==', briefId).where('status', '==', 'pending')
+    .onSnapshot(snapshot => {
+      auctionBids.set(briefId, snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      const state = auctionStates.get(briefId);
+      if (state && state.status !== 'sniping') {
+        evaluateAuction(briefId);
+      }
+    });
+}
+
+function setupMyBidsListener() {
+  db.collection('bids').where('buyerId', '==', currentUser.uid).where('status', '==', 'accepted')
+    .onSnapshot(snapshot => {
+      totalWins = snapshot.size;
+      document.getElementById('mWins').textContent = totalWins;
+    });
+}
+
+// ========== DYNAMIC WEAPON SELECTION ==========
+function evaluateAuction(briefId) {
+  if (isPaused) return;
+  const auction = activeAuctions.find(a => a.id === briefId);
+  if (!auction) return;
+  const state = auctionStates.get(briefId);
+  if (!state) return;
+
+  const bids = auctionBids.get(briefId) || [];
+  const myBids = bids.filter(b => b.buyerId === currentUser.uid);
+  const otherBids = bids.filter(b => b.buyerId !== currentUser.uid);
+  const highestBid = otherBids.length > 0 ? Math.max(...otherBids.map(b => b.amount || 0)) : 0;
+  const remaining = auction.remaining_mt || 0;
+
+  // GUARDRAILS
+  const guards = botSettings.guards || {};
+  const maxSpend = walletBalance * (guards.maxWalletPct || 80) / 100;
+  const available = maxSpend - (guards.minBuffer || 100);
+  if (available <= 0) { log(`[${auction.commodity}] Wallet too low. Skipping.`, 'warn'); return; }
+
+  // Check max active auctions
+  const activeCount = Array.from(auctionStates.values()).filter(s => s.status === 'bidding' || s.status === 'sniping').length;
+  if (activeCount >= (guards.maxAuctions || 5) && state.status === 'watching') {
+    log(`[${auction.commodity}] Max auctions reached. Watching only.`, 'warn');
+    return;
+  }
+
+  // MODE: FIXED — use primary weapon always
+  if (botSettings.mode === 'fixed') {
+    deployWeapon(botSettings.primaryWeapon || 'sniper', briefId, auction, bids, highestBid, remaining, available);
+    return;
+  }
+
+  // MODE: ADAPTIVE — model Duhe and pick best weapon
+  const weaponScores = scoreWeapons(briefId, auction, bids, highestBid, remaining, available);
+  const bestWeapon = Object.entries(weaponScores).sort((a, b) => b[1] - a[1])[0][0];
+
+  log(`[${auction.commodity}] Scored: Aggressor=${weaponScores.aggressor.toFixed(2)} Sniper=${weaponScores.sniper.toFixed(2)} Fit=${weaponScores.fit.toFixed(2)} Pay=${weaponScores.payment.toFixed(2)} EXW=${weaponScores.exw.toFixed(2)} → ${bestWeapon.toUpperCase()}`, 'think');
+
+  deployWeapon(bestWeapon, briefId, auction, bids, highestBid, remaining, available);
+}
+
+function scoreWeapons(briefId, auction, bids, highestBid, remaining, available) {
+  const w = botSettings.weapons || {};
+  const d = botSettings.duhe || {};
+  const weights = { price: d.priceWeight || 0.40, fit: d.fitWeight || 0.25, payment: d.paymentWeight || 0.20, exw: d.exwWeight || 0.15 };
+
+  // AGGRESSOR: Can we outbid within budget?
+  const agg = w.aggressor || {};
+  const aggMax = agg.maxBid || 1000;
+  const aggPrice = highestBid + (agg.increment || 5);
+  const aggCanWin = aggPrice <= aggMax && aggPrice * remaining <= available;
+  const aggScore = aggCanWin ? (1 - (aggPrice / aggMax)) * weights.price : 0;
+
+  // SNIPER: Can we win with last-second strike?
+  const snp = w.sniper || {};
+  const snpMax = snp.maxBid || 1000;
+  const snpPrice = highestBid + 1;
+  const snpCanWin = snpPrice <= snpMax && snpPrice * remaining <= available;
+  const endsAt = auction.endsAt?.toDate ? auction.endsAt.toDate() : new Date(Date.now() + 3600000);
+  const timeLeft = (endsAt - Date.now()) / 1000;
+  const snpTimeOk = timeLeft > 0 && timeLeft < 300; // Only score high when close to end
+  const snpScore = snpCanWin && snpTimeOk ? (1 - (snpPrice / snpMax)) * weights.price * 1.2 : (snpCanWin ? 0.3 : 0);
+
+  // FIT: Can we fill the exact remaining gap?
+  const fit = w.fit || {};
+  const fitTolerance = (fit.tolerance || 10) / 100;
+  const totalQty = auction.quantity_mt || 0;
+  const bidQtySum = bids.reduce((sum, b) => sum + (b.quantity_mt || 0), 0);
+  const gap = totalQty - bidQtySum;
+  const fitQty = Math.min(remaining, gap > 0 ? gap : remaining);
+  const fitExact = gap > 0 && fitQty >= gap * (1 - fitTolerance) && fitQty <= gap * (1 + fitTolerance);
+  const fitPrice = highestBid > 0 ? highestBid : (auction.est_price || 100);
+  const fitCanWin = fitPrice * fitQty <= available;
+  const fitAdvantage = fit.minAdvantage || 1.05;
+  const fitScore = fitExact && fitCanWin ? fitAdvantage * weights.fit : (fitCanWin && gap > 0 ? weights.fit * 0.5 : 0);
+
+  // PAYMENT: Can we win with better terms?
+  const pay = w.payment || {};
+  const payTerm = pay.term || 'wire';
+  const payMult = PAYMENT_MULT[payTerm] || 1.0;
+  const payPrice = highestBid > 0 ? highestBid - 5 : (auction.est_price || 100);
+  const payEffective = payPrice * payMult;
+  const payCanWin = payPrice * remaining <= available && payEffective > highestBid;
+  const payScore = payCanWin ? (payMult - 1.0) * 5 * weights.payment : 0;
+
+  // EXW: Can we win with pickup savings?
+  const exw = w.exw || {};
+  const exwEnabled = exw.enabled !== false;
+  const exwSavings = exw.savingsPerMt || 50;
+  const exwPrice = highestBid > 0 ? highestBid - exwSavings + 5 : (auction.est_price || 100);
+  const exwEffective = exwPrice + exwSavings;
+  const exwCanWin = exwEnabled && exwPrice * remaining <= available && exwEffective > highestBid;
+  const exwScore = exwCanWin ? (exwSavings / 100) * weights.exw : 0;
+
+  return { aggressor: aggScore, sniper: snpScore, fit: fitScore, payment: payScore, exw: exwScore };
+}
+
+// ========== DEPLOY WEAPON ==========
+function deployWeapon(weapon, briefId, auction, bids, highestBid, remaining, available) {
+  const state = auctionStates.get(briefId);
+  if (!state) return;
+
+  const w = botSettings.weapons || {};
+  const guards = botSettings.guards || {};
+
+  switch (weapon) {
+    case 'aggressor':
+      deployAggressor(briefId, auction, highestBid, remaining, available, w.aggressor);
+      break;
+    case 'sniper':
+      deploySniper(briefId, auction, highestBid, remaining, available, w.sniper);
+      break;
+    case 'fit':
+      deployFit(briefId, auction, bids, highestBid, remaining, available, w.fit);
+      break;
+    case 'payment':
+      deployPayment(briefId, auction, highestBid, remaining, available, w.payment);
+      break;
+    case 'exw':
+      deployExw(briefId, auction, highestBid, remaining, available, w.exw);
+      break;
+  }
+}
+
+// ========== AGGRESSOR ==========
+async function deployAggressor(briefId, auction, highestBid, remaining, available, settings) {
+  const state = auctionStates.get(briefId);
+  if (state.status === 'bidding') return; // Already bidding
+
+  const maxBid = settings.maxBid || 1000;
+  const increment = settings.increment || 5;
+  const delay = settings.rebidDelay || 2000;
+
+  const myBids = (auctionBids.get(briefId) || []).filter(b => b.buyerId === currentUser.uid);
+  const myHighest = myBids.length > 0 ? Math.max(...myBids.map(b => b.amount || 0)) : 0;
+
+  let bidAmount = highestBid + increment;
+  if (bidAmount > maxBid) { log(`[${auction.commodity}] Aggressor: Max reached ($${maxBid})`, 'warn'); return; }
+  if (bidAmount * remaining > available) { log(`[${auction.commodity}] Aggressor: Over budget`, 'warn'); return; }
+  if (myHighest >= bidAmount) { log(`[${auction.commodity}] Aggressor: Already highest`, 'think'); return; }
+
+  state.status = 'bidding';
+  state.weapon = 'aggressor';
+  await placeBid(briefId, auction, bidAmount, remaining, 'FOB', 'wire', bidAmount, 'aggressor');
+
+  // Set up re-bid listener
+  setTimeout(() => {
+    state.status = 'watching';
+    evaluateAuction(briefId);
+  }, delay);
+}
+
+// ========== SNIPER ==========
+function deploySniper(briefId, auction, highestBid, remaining, available, settings) {
+  const state = auctionStates.get(briefId);
+  if (state.status === 'sniping') return;
+
+  const offset = (settings.strikeOffset || 3) * 1000;
+  const endsAt = auction.endsAt?.toDate ? auction.endsAt.toDate() : new Date(Date.now() + 3600000);
+  const strikeTime = endsAt.getTime() - offset - Date.now();
+
+  if (strikeTime <= 0) {
+    // Auction ending soon — strike now
+    fireSniper(briefId, auction, highestBid, remaining, available, settings);
+    return;
+  }
+
+  state.status = 'sniping';
+  state.weapon = 'sniper';
+  log(`[${auction.commodity}] Sniper: Armed. Striking in ${(strikeTime/1000).toFixed(1)}s`, 'think');
+
+  const timer = setTimeout(() => {
+    fireSniper(briefId, auction, highestBid, remaining, available, settings);
+  }, strikeTime);
+  sniperTimers.set(briefId, timer);
+}
+
+async function fireSniper(briefId, auction, highestBid, remaining, available, settings) {
+  sniperTimers.delete(briefId);
+  const state = auctionStates.get(briefId);
+  if (!state || state.status !== 'sniping') return;
+
+  const maxBid = settings.maxBid || 1000;
+  const bidAmount = highestBid + 1;
+
+  if (bidAmount > maxBid) { log(`[${auction.commodity}] Sniper: Missed — over max`, 'warn'); state.status = 'watching'; return; }
+  if (bidAmount * remaining > available) { log(`[${auction.commodity}] Sniper: Missed — over budget`, 'warn'); state.status = 'watching'; return; }
+
+  await placeBid(briefId, auction, bidAmount, remaining, 'FOB', 'wire', bidAmount, 'sniper');
+  state.status = 'won'; // Sniper fires once
+}
+
+// ========== FIT ==========
+async function deployFit(briefId, auction, bids, highestBid, remaining, available, settings) {
+  const state = auctionStates.get(briefId);
+  if (state.status === 'bidding') return;
+
+  const totalQty = auction.quantity_mt || 0;
+  const bidQtySum = bids.reduce((sum, b) => sum + (b.quantity_mt || 0), 0);
+  const gap = totalQty - bidQtySum;
+  const tolerance = (settings.tolerance || 10) / 100;
+
+  let qty = gap > 0 ? gap : remaining;
+  if (qty <= 0) { log(`[${auction.commodity}] Fit: No gap to fill`, 'warn'); return; }
+
+  // Check if we can match within tolerance
+  const minFit = gap * (1 - tolerance);
+  const maxFit = gap * (1 + tolerance);
+  if (qty < minFit || qty > maxFit) {
+    qty = Math.min(remaining, Math.max(minFit, Math.min(maxFit, qty)));
+  }
+
+  const bidAmount = highestBid > 0 ? highestBid : (auction.est_price || 100);
+  if (bidAmount * qty > available) { log(`[${auction.commodity}] Fit: Over budget`, 'warn'); return; }
+
+  state.status = 'bidding';
+  state.weapon = 'fit';
+  await placeBid(briefId, auction, bidAmount, qty, 'FOB', 'wire', bidAmount, 'fit');
+}
+
+// ========== PAYMENT ==========
+async function deployPayment(briefId, auction, highestBid, remaining, available, settings) {
+  const state = auctionStates.get(briefId);
+  if (state.status === 'bidding') return;
+
+  const term = settings.term || 'wire';
+  const mult = PAYMENT_MULT[term] || 1.0;
+  const bidAmount = highestBid > 0 ? highestBid - 5 : (auction.est_price || 100);
+  const effective = bidAmount * mult;
+
+  if (bidAmount * remaining > available) { log(`[${auction.commodity}] Payment: Over budget`, 'warn'); return; }
+
+  state.status = 'bidding';
+  state.weapon = 'payment';
+  await placeBid(briefId, auction, bidAmount, remaining, 'FOB', term, effective, 'payment');
+}
+
+// ========== EXW ==========
+async function deployExw(briefId, auction, highestBid, remaining, available, settings) {
+  const state = auctionStates.get(briefId);
+  if (state.status === 'bidding') return;
+
+  const savings = settings.savingsPerMt || 50;
+  const bidAmount = highestBid > 0 ? highestBid - savings + 5 : (auction.est_price || 100);
+  const effective = bidAmount + savings;
+
+  if (bidAmount * remaining > available) { log(`[${auction.commodity}] EXW: Over budget`, 'warn'); return; }
+
+  state.status = 'bidding';
+  state.weapon = 'exw';
+  await placeBid(briefId, auction, bidAmount, remaining, 'EXW', 'wire', effective, 'exw');
+}
+
+// ========== PLACE BID ==========
+async function placeBid(briefId, auction, amount, qty, term, paymentType, effectiveValue, weapon) {
+  const total = amount * qty;
+  if (total > walletBalance) { log(`[${auction.commodity}] Insufficient wallet: need $${total}, have $${walletBalance}`, 'err'); return; }
+
+  try {
+    await db.collection('bids').add({
+      briefId: briefId,
+      buyerId: currentUser.uid,
+      amount: amount,
+      quantity_mt: qty,
+      term: term,
+      paymentType: paymentType,
+      effectiveValue: effectiveValue,
+      isBot: true,
+      botWeapon: weapon,
+      status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    totalBidsPlaced++;
+    document.getElementById('mBids').textContent = totalBidsPlaced;
+    log(`[${auction.commodity}] ${weapon.toUpperCase()} bid $${amount}/MT × ${qty}MT (eff: $${effectiveValue.toFixed(0)})`, 'bid');
+  } catch (err) {
+    log(`[${auction.commodity}] Bid failed: ${err.message}`, 'err');
+  }
+}
+
+// ========== RENDER ==========
+function renderAuctions() {
+  const container = document.getElementById('activeAuctions');
+  if (activeAuctions.length === 0) { container.innerHTML = '<div style="color:#5c6b8a; text-align:center; padding:20px;">No active auctions</div>'; return; }
+
+  container.innerHTML = activeAuctions.map(a => {
+    const state = auctionStates.get(a.id) || { status: 'watching', weapon: null };
+    const bids = auctionBids.get(a.id) || [];
+    const highest = bids.length > 0 ? Math.max(...bids.map(b => b.amount || 0)) : 0;
+    const myBids = bids.filter(b => b.buyerId === currentUser.uid);
+    const myHighest = myBids.length > 0 ? Math.max(...myBids.map(b => b.amount || 0)) : 0;
+
+    let statusClass = 'status-watching';
+    let statusText = 'WATCHING';
+    if (state.status === 'bidding') { statusClass = 'status-bidding'; statusText = 'BIDDING'; }
+    else if (state.status === 'sniping') { statusClass = 'status-sniping'; statusText = 'SNIPING'; }
+    else if (state.status === 'won') { statusClass = 'status-won'; statusText = 'PLACED'; }
+
+    const weaponTag = state.weapon ? `<span class="weapon-tag tag-${state.weapon}">${state.weapon.toUpperCase()}</span>` : '';
+
+    return `<div class="auction-row">
+      <div><div class="commodity">${a.commodity || '—'} ${weaponTag}</div>
+      <div class="detail">${a.variety || ''} • ${a.remaining_mt || 0} MT left • HB: $${highest.toFixed(0)}${myHighest > 0 ? ' • You: $' + myHighest.toFixed(0) : ''}</div></div>
+      <span class="status ${statusClass}">${statusText}</span>
+    </div>`;
+  }).join('');
+}
+
+// ========== LOGGING ==========
+function log(msg, type) {
+  const now = new Date();
+  const time = now.toTimeString().slice(0, 8);
+  const container = document.getElementById('decisionLog');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.innerHTML = `<span class="log-time">${time}</span> ${msg}`;
+  container.insertBefore(entry, container.firstChild);
+  if (container.children.length > 100) container.removeChild(container.lastChild);
+}
+
+function clearLog() { document.getElementById('decisionLog').innerHTML = ''; }
+
+function pauseBot() {
+  isPaused = !isPaused;
+  document.getElementById('runnerStatus').textContent = isPaused ? 'PAUSED' : 'ACTIVE';
+  document.getElementById('runnerDot').className = isPaused ? 'status-dot off' : 'status-dot on';
+  log(isPaused ? 'Bot PAUSED by user' : 'Bot RESUMED', isPaused ? 'warn' : 'think');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast visible';
+  setTimeout(() => t.classList.remove('visible'), 2500);
+}
+</script>
+</body>
+</html>

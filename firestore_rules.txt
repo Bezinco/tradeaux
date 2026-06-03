@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========== PROFILES ==========
+    match /profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ========== WALLETS ==========
+    // Users can only read/write their own wallet.
+    // Deposits must increase balance and log a transaction.
+    match /wallets/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.data.userId == userId
+        && request.resource.data.balance >= 0
+        && request.resource.data.transactions is list
+        && request.resource.data.transactions.size() == 1;
+
+      allow update: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.data.userId == userId
+        && request.resource.data.balance >= resource.data.balance
+        && request.resource.data.transactions.size() == resource.data.transactions.size() + 1
+        && request.resource.data.balance == resource.data.balance + request.resource.data.transactions[request.resource.data.transactions.size()-1].amount;
+    }
+
+    // ========== SELLER BRIEFS ==========
+    match /seller_briefs/{briefId} {
+      // Anyone can read active briefs (buyers need to browse)
+      allow read: if request.auth != null;
+
+      // Sellers can create their own briefs
+      allow create: if request.auth != null
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.status == "active"
+        && request.resource.data.remaining_mt == request.resource.data.quantity_mt
+        && request.resource.data.fees_collected == 0;
+
+      // Sellers can update their own briefs — only allowed fields
+      allow update: if request.auth != null
+        && resource.data.sellerId == request.auth.uid
+        && request.resource.data.sellerId == resource.data.sellerId
+        && (
+          // Starting auction: status active → auctioning
+          (request.resource.data.status == "auctioning" && resource.data.status == "active")
+          ||
+          // Accepting bids: only remaining_mt, fees_collected, status, timestamps change
+          (
+            request.resource.data.keys().hasOnly([
+              "remaining_mt", "fees_collected", "status", 
+              "startedAt", "endedAt", "updatedAt"
+            ])
+            && request.resource.data.remaining_mt <= resource.data.remaining_mt
+            && request.resource.data.fees_collected >= resource.data.fees_collected
+            && (
+              request.resource.data.status == resource.data.status
+              || request.resource.data.status == "completed"
+            )
+          )
+        );
+    }
+
+    // ========== BIDS ==========
+    match /bids/{bidId} {
+      // Buyers and sellers can read bids they own
+      allow read: if request.auth != null 
+        && (
+          resource.data.buyerId == request.auth.uid 
+          || resource.data.sellerId == request.auth.uid
+        );
+
+      // Buyers can create bids on any brief
+      allow create: if request.auth != null
+        && request.resource.data.buyerId == request.auth.uid
+        && request.resource.data.status == "pending"
+        && request.resource.data.amount > 0
+        && request.resource.data.quantity_mt >= 1;
+
+      // Buyers can only RAISE their bid amount (bid war)
+      allow update: if request.auth != null
+        && resource.data.buyerId == request.auth.uid
+        && request.resource.data.buyerId == resource.data.buyerId
+        && request.resource.data.status == "pending"
+        && request.resource.data.amount > resource.data.amount
+        && request.resource.data.keys().hasOnly([
+          "amount", "quantity_mt", "previous_amount", 
+          "bid_count", "updatedAt"
+        ]);
+
+      // Sellers can ONLY change status to accepted
+      allow update: if request.auth != null
+        && resource.data.sellerId == request.auth.uid
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.status == "accepted"
+        && resource.data.status == "pending"
+        && request.resource.data.keys().hasOnly([
+          "status", "acceptedAt"
+        ]);
+    }
+  }
+}

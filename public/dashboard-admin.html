@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Admin Dashboard | Complete Oversight</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0,206,209,0.3), transparent 70%); top:-40%; left:-20%; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124,252,0,0.2), transparent 70%); top:-30%; left:-10%; animation-delay:8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,59,59,0.15), transparent 70%); top:-20%; left:0%; animation-delay:16s; }
+    @keyframes waveBgDrift { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(40px,-30px) scale(1.05);} 100%{transform:translate(-30px,20px) scale(1);} }
+    
+    /* ===== 3D LOGO - TRADEAUX ===== */
+    .gem-logo-corner {
+      display: inline-block;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.65);
+      transform-origin: left center;
+      vertical-align: middle;
+    }
+    
+    .gem-text {
+      font-size: 80px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+    
+    /* Letter T - Blue */
+    .gem-letter:nth-child(1)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter R - Green */
+    .gem-letter:nth-child(2)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter A - Red */
+    .gem-letter:nth-child(3)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter D - Blue */
+    .gem-letter:nth-child(4)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter E - Green */
+    .gem-letter:nth-child(5)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter A - Red */
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter U - Blue */
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter X - Green */
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    .gem-letter .edge-top {
+      position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-right {
+      position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+      background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-bottom {
+      position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-left {
+      position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+      background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+    
+    .light-source {
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite;
+      pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+    }
+    
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+    
+    .sparkle {
+      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+    }
+    
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+    
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    
+    .depth-shadow {
+      position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+      background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+      filter: blur(20px); z-index: -1;
+    }
+    
+    .container { max-width: 1800px; margin: 0 auto; padding: 20px 24px 40px; position: relative; z-index: 2; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+    
+    .logo-area { display: inline-flex; align-items: center; position: relative; }
+    
+    .admin-badge { 
+      font-family: 'Orbitron', sans-serif; 
+      font-size: 14px; 
+      font-weight: 500; 
+      background: rgba(0,206,209,0.2); 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      margin-left: 15px;
+      letter-spacing: 1px;
+      border: 1px solid rgba(0,206,209,0.5);
+    }
+    
+    .nav { display: flex; gap: 12px; align-items: center; }
+    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; }
+    .nav a:hover { border-color: #00ced1; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: linear-gradient(145deg,rgba(15,32,64,0.85),rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
+    .stat-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .stat-icon { font-size: 32px; margin-bottom: 12px; }
+    .stat-value { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 800; color: #00ced1; }
+    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-change { font-size: 11px; margin-top: 8px; }
+    .stat-change.up { color: #7CFC00; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; margin-bottom: 30px; }
+    .dashboard-card { background: linear-gradient(145deg,rgba(15,32,64,0.8),rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; }
+    .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; }
+    .clickable-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+    .clickable-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
+    .item-title { font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .item-details { font-size: 11px; color: #9ca3af; }
+    .alphabet-list { max-height: 400px; overflow-y: auto; }
+    .alphabet-letter { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: #FFD966; margin: 12px 0 8px; border-bottom: 1px solid rgba(255,217,102,0.2); padding-bottom: 4px; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-content { background: linear-gradient(145deg,#0a1228,#020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 650px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; }
+    .modal-close:hover { color: #00ced1; }
+    .bot-detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .btn { padding: 8px 16px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg,#00ced1,#00ff7f); color: #000; }
+    .btn-danger { background: linear-gradient(135deg,#ff3b3b,#ff6b6b); color: #fff; }
+    .btn-sm { padding: 4px 12px; font-size: 11px; }
+    .btn-warning { background: linear-gradient(135deg,#FFD966,#F5A623); color: #000; }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #0f1a2e; border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; transition: 0.3s; opacity: 0; z-index: 2000; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .leaderboard-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .leaderboard-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
+    .badge { background: rgba(0,206,209,0.2); padding: 2px 8px; border-radius: 20px; font-size: 10px; }
+    .duhe-controls { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,206,209,0.2); }
+    .action-buttons { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  
+    /* ===== TABLES ===== */
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .admin-table th { text-align: left; padding: 10px 12px; font-family: 'Orbitron', sans-serif; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.2); }
+    .admin-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+    .admin-table tr:hover td { background: rgba(0,206,209,0.04); }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .table-wrap { overflow-x: auto; max-height: 400px; overflow-y: auto; }
+
+    /* ===== SEARCH BAR ===== */
+    .search-bar { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.3); border-radius: 10px; color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; margin-bottom: 14px; }
+    .search-bar:focus { outline: none; border-color: #00ced1; }
+    .search-bar::placeholder { color: #5c6b8a; }
+
+    /* ===== ROLE BADGES ===== */
+    .role-buyer { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+    .role-seller { background: rgba(0,102,255,0.15); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
+    .role-carrier { background: rgba(255,165,0,0.15); color: #FFA500; border: 1px solid rgba(255,165,0,0.3); }
+    .role-admin { background: rgba(255,217,102,0.15); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
+    .role-badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+
+    /* ===== STATUS BADGES ===== */
+    .status-active { color: #7CFC00; font-weight: 700; }
+    .status-suspended { color: #ff3b3b; font-weight: 700; }
+    .status-pending { color: #FFD966; font-weight: 700; }
+    .status-accepted { color: #7CFC00; font-weight: 700; }
+    .status-declined { color: #ff3b3b; font-weight: 700; }
+
+    /* ===== ACTION BUTTONS ===== */
+    .btn-action { padding: 4px 10px; border-radius: 6px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; margin-right: 4px; }
+    .btn-action:hover { transform: scale(1.05); }
+    .btn-fund { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .btn-suspend { background: linear-gradient(135deg, #ff3b3b, #ff6b6b); color: #fff; }
+    .btn-activate { background: linear-gradient(135deg, #7CFC00, #2dd4bf); color: #000; }
+    .btn-role { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.4); }
+    .btn-export { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.4); float: right; }
+
+    /* ===== SELECT DROPDOWN ===== */
+    .role-select { padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); color: #fff; font-size: 11px; font-family: 'Inter', sans-serif; }
+    .role-select:focus { outline: none; border-color: #00ced1; }
+
+    /* ===== PAGINATION ===== */
+    .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+    .page-btn { padding: 4px 10px; border-radius: 6px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.2); color: #9ca3af; font-size: 11px; cursor: pointer; }
+    .page-btn:hover { border-color: #00ced1; color: #00ced1; }
+    .page-btn.active { background: rgba(0,206,209,0.2); color: #00ced1; border-color: #00ced1; }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ===== MODAL FORMS ===== */
+    .form-field { margin-bottom: 14px; }
+    .form-field label { display: block; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .form-field input, .form-field select, .form-field textarea {
+      width: 100%; padding: 10px; background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,206,209,0.3); border-radius: 8px;
+      color: white; font-family: 'Inter', sans-serif; font-size: 13px;
+    }
+    .form-field input:focus, .form-field select:focus { outline: none; border-color: #00ced1; }
+    .form-hint { font-size: 11px; color: #5c6b8a; margin-top: 4px; }
+
+    /* ===== SECTION HEADER WITH EXPORT ===== */
+    .card-header-flex { display: flex; justify-content: space-between; align-items: center; }
+
+    /* ===== STATS 6-COLUMN ===== */
+    .stats-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 30px; }
+    @media (max-width: 1200px) { .stats-grid-6 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) { .stats-grid-6 { grid-template-columns: repeat(2, 1fr); } }
+
+    /* ===== TRANSPORT OVERSIGHT ===== */
+    .transport-subsection { margin-bottom: 16px; }
+    .transport-subsection-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #FFD966; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,217,102,0.2); padding-bottom: 4px; }
+
+    /* ===== ACTIVITY LOG ===== */
+    .log-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
+    .log-row:last-child { border-bottom: none; }
+    .log-action { font-weight: 600; color: #00ced1; }
+    .log-target { color: #9ca3af; }
+    .log-time { font-size: 11px; color: #5c6b8a; white-space: nowrap; margin-left: 12px; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state { color: #5c6b8a; text-align: center; padding: 20px; font-size: 13px; }
+</style>
+  <!-- Firebase Auth SDK -->
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+<div class="bg-waves"><div class="wave-bg wave-1"></div><div class="wave-bg wave-2"></div><div class="wave-bg wave-3"></div></div>
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div>
+        <div class="sparkle sparkle-2"></div>
+        <div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div>
+        <div class="sparkle sparkle-5"></div>
+        <div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div>
+        <div class="sparkle sparkle-8"></div>
+        <div class="sparkle sparkle-9"></div>
+        <div class="sparkle sparkle-10"></div>
+        <div class="depth-shadow"></div>
+      </div>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="nav"><a href="#">Dashboard</a><a href="#">Clients</a><a href="#">Transport</a><a href="admin-bot-fleet.html">🤖 Bot Fleet</a><button id="refreshBtn" class="btn btn-sm btn-primary" style="margin-left:8px;">🔄 Refresh</button><span id="userDisplay" style="display:flex;align-items:center;gap:8px;margin-left:12px;"><img id="userAvatar" src="" style="width:28px;height:28px;border-radius:50%;border:1px solid #00ced1;display:none;"><span id="userName" style="font-size:12px;color:#9ca3af;"></span></span><a href="#" id="logoutBtn">Sign Out</a></nav>
+  </header>
+  
+  <div class="stats-grid-6">
+    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="totalUsers">0</div><div class="stat-label">Total Users</div></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value" id="totalFees">$0</div><div class="stat-label">Fees Collected</div></div>
+    <div class="stat-card"><div class="stat-icon">🟢</div><div class="stat-value" id="activeAuctions">0</div><div class="stat-label">Active Auctions</div></div>
+    <div class="stat-card"><div class="stat-icon">🤖</div><div class="stat-value" id="activeBots">0</div><div class="stat-label">Active Bots</div></div>
+    <div class="stat-card"><div class="stat-icon">🚛</div><div class="stat-value" id="activeTransportAuctions">0</div><div class="stat-label">Active Transport</div></div>
+    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-value" id="transportFees">$0</div><div class="stat-label">Transport Fees</div></div>
+  </div>
+  
+  <div class="dashboard-card" style="margin-bottom:30px;">
+    <div class="card-header">🤖 DUHE MANUAL OVERRIDE</div>
+    <div id="duheControls">
+      <div style="color:#9ca3af; text-align:center; padding:20px;">Loading active briefs...</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: TRANSPORT OVERSIGHT -->
+  <div class="dashboard-card" style="margin-bottom:30px;">
+    <div class="card-header card-header-flex">
+      <span>🚛 TRANSPORT OVERSIGHT <span style="font-size:11px; color:#9ca3af;">(Freight Auctions)</span></span>
+      <button class="btn-action btn-export" onclick="exportTableToCSV('transportOversight', 'transport_oversight.csv')">📤 Export CSV</button>
+    </div>
+    <div id="transportOversight">
+      <div style="color:#9ca3af; text-align:center; padding:20px;">Loading transport data...</div>
+    </div>
+  </div>
+  
+  <div class="dashboard-card" style="margin-bottom:30px;"><div class="card-header">💰 WALLET ALERTS</div><div id="walletAlertsList"><div style="color:#9ca3af; text-align:center; padding:20px;">Loading wallet data...</div></div></div>
+
+  <!-- SECTION 2: USER MANAGEMENT -->
+  <div class="dashboard-card" style="margin-bottom:30px;">
+    <div class="card-header card-header-flex">
+      <span>👥 USER MANAGEMENT</span>
+      <button class="btn-action btn-export" onclick="exportTableToCSV('userManagement', 'users.csv')">📤 Export CSV</button>
+    </div>
+    <input type="text" class="search-bar" id="userSearch" placeholder="🔍 Search users by email or name..." oninput="filterUsers()">
+    <div id="userManagement">
+      <div style="color:#9ca3af; text-align:center; padding:20px;">Loading users...</div>
+    </div>
+    <div class="pagination" id="userPagination"></div>
+  </div>
+  
+  <div class="dashboard-grid">
+    <div class="dashboard-card"><div class="card-header">🏆 TOP 10 BUYERS</div><div id="topBuyersList"></div></div>
+    <div class="dashboard-card"><div class="card-header">🏆 TOP 10 SELLERS</div><div id="topSellersList"></div></div>
+  </div>
+  
+  <div class="dashboard-card" style="margin-bottom:30px;"><div class="card-header">🚢 TRANSPORT AUCTIONS</div><div id="transportAuctionsList"></div></div>
+  
+  <div class="dashboard-card" style="margin-bottom:30px;"><div class="card-header">🤖 BOT MONITORING</div><div id="botMonitoringList"><div style="color:#9ca3af; text-align:center; padding:20px;">Loading bot data...</div></div></div>
+
+  <!-- SECTION 3: ALL COMMODITY BIDS -->
+  <div class="dashboard-card" style="margin-bottom:30px;">
+    <div class="card-header card-header-flex">
+      <span>📊 ALL COMMODITY BIDS</span>
+      <button class="btn-action btn-export" onclick="exportTableToCSV('allBidsList', 'commodity_bids.csv')">📤 Export CSV</button>
+    </div>
+    <div id="allBidsList">
+      <div style="color:#9ca3af; text-align:center; padding:20px;">Loading bids...</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: ALL TRANSPORT BIDS -->
+  <div class="dashboard-card" style="margin-bottom:30px;">
+    <div class="card-header card-header-flex">
+      <span>🚚 ALL TRANSPORT BIDS</span>
+      <button class="btn-action btn-export" onclick="exportTableToCSV('allTransportBidsList', 'transport_bids.csv')">📤 Export CSV</button>
+    </div>
+    <div id="allTransportBidsList">
+      <div style="color:#9ca3af; text-align:center; padding:20px;">Loading transport bids...</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: ACTIVITY LOG -->
+  <div class="dashboard-card" style="margin-bottom:30px;">
+    <div class="card-header card-header-flex">
+      <span>📜 ADMIN ACTIVITY LOG</span>
+      <button class="btn-action btn-export" onclick="exportTableToCSV('activityLogList', 'activity_log.csv')">📤 Export CSV</button>
+    </div>
+    <div id="activityLogList">
+      <div style="color:#9ca3af; text-align:center; padding:20px;">Loading activity...</div>
+    </div>
+  </div>
+  
+  <div class="dashboard-card"><div class="card-header">📋 CLIENTS (A-Z)</div><div id="alphabeticalClientList" class="alphabet-list"></div></div>
+  
+  <footer class="footer" style="margin-top:30px;"><p>TRADEAUX ADMIN © 2026</p></footer>
+</div>
+
+<div id="detailModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeDetailModal">&times;</span><div id="detailModalContent"></div><div class="modal-actions" style="margin-top:20px;"><button class="btn" id="closeDetailBtn">Close</button></div></div></div>
+
+<!-- Add Funds Modal -->
+<div id="addFundsModal" class="modal"><div class="modal-content" style="max-width:420px;"><span class="modal-close" id="closeAddFundsModal">&times;</span>
+  <div class="modal-header" style="margin-bottom:20px;"><h2 style="font-family:'Orbitron',sans-serif; color:#00ced1;">💰 Add Funds</h2></div>
+  <div class="form-field"><label>User</label><div id="addFundsUserName" style="font-size:14px; font-weight:600; color:#fff; padding:4px 0;"></div></div>
+  <div class="form-field"><label>Amount (USD)</label><input type="number" id="addFundsAmount" min="1" step="1" value="100"></div>
+  <div class="form-field"><label>Reason</label><input type="text" id="addFundsReason" placeholder="Manual credit by admin"></div>
+  <div class="modal-actions"><button class="btn btn-sm" id="cancelAddFundsBtn" style="background:rgba(255,255,255,0.1); color:#e5e7eb;">Cancel</button><button class="btn btn-primary" id="confirmAddFundsBtn">Add Funds</button></div>
+</div></div>
+
+<!-- Confirm Action Modal -->
+<div id="confirmModal" class="modal"><div class="modal-content" style="max-width:420px;"><span class="modal-close" id="closeConfirmModal">&times;</span>
+  <div class="modal-header" style="margin-bottom:20px;"><h2 style="font-family:'Orbitron',sans-serif; color:#00ced1;" id="confirmTitle">Confirm Action</h2></div>
+  <p id="confirmMessage" style="color:#9ca3af; font-size:13px; margin-bottom:20px;"></p>
+  <div class="modal-actions"><button class="btn btn-sm" id="cancelConfirmBtn" style="background:rgba(255,255,255,0.1); color:#e5e7eb;">Cancel</button><button class="btn btn-danger" id="confirmActionBtn">Confirm</button></div>
+</div></div>
+<div class="toast" id="toast">Action completed</div>
+
+<script>
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const functions = firebase.functions();
+
+let currentFirebaseUser = null;
+let buyers = [];
+let sellers = [];
+let transportAuctions = [];
+let allClients = [];
+let bots = [];
+let wallets = [];
+let sellerBriefs = [];
+let totalWalletBalance = 0;
+let totalFeesCollected = 0;
+
+// ========== FIREBASE AUTH & ADMIN CHECK ==========
+async function checkAdmin(user) {
+  if (!user) { window.location.href = 'signin.html'; return false; }
+  currentFirebaseUser = user;
+
+  // Verify admin via Custom Claims (secure - server-side)
+  const tokenResult = await user.getIdTokenResult(true);
+  if (tokenResult.claims.admin !== true) {
+    // Fallback: check Firestore profile (for migration period)
+    const profileDoc = await db.collection('profiles').doc(user.uid).get();
+    const role = profileDoc.exists ? profileDoc.data().role : null;
+    if (role !== 'admin') {
+      showToast('Access denied: Admin only', true);
+      setTimeout(() => window.location.href = 'dashboard.html', 1500);
+      return false;
+    }
+  }
+  showHeaderUser(user);
+  return true;
+}
+
+function showHeaderUser(user) {
+  const avatar = document.getElementById('userAvatar');
+  const name = document.getElementById('userName');
+  if (avatar && user.photoURL) { avatar.src = user.photoURL; avatar.style.display = 'block'; }
+  if (name) { name.textContent = user.displayName || user.email; }
+}
+
+// ========== DATA LOADING FROM FIRESTORE ==========
+async function loadBuyers() {
+  const snapshot = await db.collection('profiles').where('role', '==', 'buyer').get();
+  buyers = snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.full_name || data.email,
+      spent: data.total_spent || 0,
+      country: data.country || 'Unknown',
+      email: data.email,
+      phone: data.phone || 'N/A',
+      type: 'Buyer',
+      trades: data.total_trades || 0,
+      winRate: data.win_rate || 0,
+      joined: data.created_at?.toDate ? data.created_at.toDate().toISOString().split('T')[0] : 'N/A'
+    };
+  });
+}
+
+async function loadSellers() {
+  const snapshot = await db.collection('profiles').where('role', '==', 'seller').get();
+  sellers = snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.full_name || data.email,
+      revenue: data.total_revenue || 0,
+      country: data.country || 'Unknown',
+      email: data.email,
+      phone: data.phone || 'N/A',
+      type: 'Seller',
+      trades: data.total_trades || 0,
+      rating: data.rating || 0,
+      joined: data.created_at?.toDate ? data.created_at.toDate().toISOString().split('T')[0] : 'N/A'
+    };
+  });
+}
+
+async function loadSellerBriefs() {
+  const snapshot = await db.collection('seller_briefs').where('status', 'in', ['active', 'ended']).get();
+  sellerBriefs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+async function loadTransportAuctions() {
+  const snapshot = await db.collection('transport_auctions').orderBy('created_at', 'desc').get();
+  transportAuctions = snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      route: `${data.origin_port || '?'} → ${data.destination_port || '?'}`,
+      mode: data.container_type || 'Unknown',
+      cargo: data.commodity || 'Unknown',
+      quantity: data.quantity_mt || 0,
+      bids: data.bid_count || 0,
+      lowestBid: data.lowest_bid || 0,
+      winner: data.winning_carrier || 'Pending',
+      status: data.status || 'active',
+      timeLeft: data.ends_at?.toDate ? `${Math.max(0, Math.ceil((data.ends_at.toDate() - new Date()) / (1000 * 60 * 60)))}h left` : 'N/A'
+    };
+  });
+}
+
+// ========== BOT FLEET LOADING ==========
+let allBots = [];
+
+async function loadAllBots() {
+  allBots = [];
+
+  // Load Buyer Bots
+  try {
+    const buyerSnap = await db.collection('buyer_bots').get();
+    for (const doc of buyerSnap.docs) {
+      const data = doc.data();
+      let ownerName = data.buyer_name || 'Unknown';
+      let ownerEmail = '';
+      if (data.buyer_id || data.uid) {
+        const profile = await db.collection('profiles').doc(data.buyer_id || data.uid).get();
+        if (profile.exists) { ownerName = profile.data().full_name || profile.data().email || ownerName; ownerEmail = profile.data().email || ''; }
+      }
+      allBots.push({
+        id: doc.id, type: 'buyer', botName: data.bot_name || data.name || 'Unnamed',
+        ownerName, ownerEmail, ownerId: data.buyer_id || data.uid,
+        isActive: data.is_active || data.isActive || false,
+        strategy: data.strategy || data.escalationStrategy || 'balanced',
+        weapons: data.weapons || {}, guardrails: data.guardrails || {},
+        totalBids: data.total_bids || data.totalBids || 0,
+        totalWins: data.total_wins || data.totalWins || 0,
+        commodity: data.commodity || 'All',
+        maxBid: data.max_bid || data.maxBid || 0,
+        dailyBudget: data.daily_budget || data.dailyBudget || 0,
+        createdAt: data.created_at || data.createdAt,
+        updatedAt: data.updated_at || data.updatedAt
+      });
+    }
+  } catch (e) { console.error('Buyer bots error:', e); }
+
+  // Load Seller Bots
+  try {
+    const sellerSnap = await db.collection('seller_bots').get();
+    for (const doc of sellerSnap.docs) {
+      const data = doc.data();
+      let ownerName = data.seller_name || 'Unknown';
+      let ownerEmail = '';
+      if (data.seller_id || data.uid) {
+        const profile = await db.collection('profiles').doc(data.seller_id || data.uid).get();
+        if (profile.exists) { ownerName = profile.data().full_name || profile.data().email || ownerName; ownerEmail = profile.data().email || ''; }
+      }
+      allBots.push({
+        id: doc.id, type: 'seller', botName: data.bot_name || data.name || 'Unnamed',
+        ownerName, ownerEmail, ownerId: data.seller_id || data.uid,
+        isActive: data.is_active || data.isActive || false,
+        strategy: data.strategy || data.escalationStrategy || 'balanced',
+        weapons: data.weapons || {}, guardrails: data.guardrails || {},
+        totalBids: data.total_bids || data.totalBids || 0,
+        totalWins: data.total_wins || data.totalWins || 0,
+        minMargin: data.min_margin || (data.guardrails?.minMarginPercent) || 0,
+        maxAuctions: data.max_auctions || (data.guardrails?.maxAuctions) || 0,
+        createdAt: data.created_at || data.createdAt,
+        updatedAt: data.updated_at || data.updatedAt
+      });
+    }
+  } catch (e) { console.error('Seller bots error:', e); }
+
+  // Load Transport Bots
+  try {
+    const transportSnap = await db.collection('transport_bots').get();
+    for (const doc of transportSnap.docs) {
+      const data = doc.data();
+      let ownerName = data.carrier_name || 'Unknown';
+      let ownerEmail = '';
+      if (data.uid) {
+        const profile = await db.collection('profiles').doc(data.uid).get();
+        if (profile.exists) { ownerName = profile.data().full_name || profile.data().email || ownerName; ownerEmail = profile.data().email || ''; }
+      }
+      allBots.push({
+        id: doc.id, type: 'transport', botName: data.botName || data.bot_name || data.name || 'Unnamed',
+        ownerName, ownerEmail, ownerId: data.uid,
+        isActive: data.isActive || data.is_active || false,
+        strategy: data.escalationStrategy || data.strategy || 'aggressive',
+        weapons: data.weapons || {}, guardrails: data.guardrails || {},
+        totalBids: data.totalBids || data.total_bids || 0,
+        totalWins: data.totalWins || data.total_wins || 0,
+        costBasis: data.guardrails?.costBasis || 0,
+        minMargin: data.guardrails?.minMarginPercent || 0,
+        maxAuctions: data.guardrails?.maxAuctions || 0,
+        createdAt: data.createdAt || data.created_at,
+        updatedAt: data.updatedAt || data.updated_at
+      });
+    }
+  } catch (e) { console.error('Transport bots error:', e); }
+
+  // Update legacy bots array for backward compatibility
+  bots = allBots.filter(b => b.isActive).map(b => ({
+    id: b.id,
+    name: b.botName,
+    owner: b.ownerName,
+    commodity: b.commodity || 'N/A',
+    strategy: b.strategy || 'Balanced',
+    totalTrades: b.totalBids || 0,
+    totalSpent: 0,
+    winRate: b.totalBids > 0 ? Math.round((b.totalWins / b.totalBids) * 100) : 0,
+    status: b.isActive ? 'active' : 'inactive'
+  }));
+}
+
+// Legacy alias for backward compatibility
+async function loadBuyerBots() {
+  await loadAllBots();
+}
+
+async function loadWallets() {
+  const walletsSnap = await db.collection('wallets').get();
+  wallets = walletsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  totalWalletBalance = wallets.reduce((sum, w) => sum + (w.balance || 0), 0);
+
+  const holdsSnap = await db.collection('auction_holds').where('status', '==', 'collected').get();
+  totalFeesCollected = holdsSnap.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0);
+}
+
+async function loadAllData() {
+  showToast('Loading data from Firestore...');
+  await Promise.all([
+    loadBuyers(),
+    loadSellers(),
+    loadSellerBriefs(),
+    loadTransportAuctions(),
+    loadAllBots(),
+    loadWallets()
+  ]);
+  allClients = [...buyers.map(b => ({...b, role: 'Buyer'})), ...sellers.map(s => ({...s, role: 'Seller'}))].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  updateStats();
+  renderTopBuyers();
+  renderTopSellers();
+  renderTransportAuctions();
+  renderWalletAlerts();
+  renderBotMonitoring();
+  renderAlphabeticalClients();
+  renderDuheControls();
+  showToast('Data refreshed from Firebase');
+}
+
+// ========== DUHE MANUAL OVERRIDE (Cloud Functions) ==========
+async function renderDuheControls() {
+  const container = document.getElementById('duheControls');
+  const endedBriefs = sellerBriefs.filter(b => b.status === 'ended');
+  const activeBriefs = sellerBriefs.filter(b => b.status === 'active');
+
+  if (endedBriefs.length === 0 && activeBriefs.length === 0) {
+    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No briefs available</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="margin-bottom:16px;">
+      <div style="color:#FFD966; margin-bottom:8px;">🟢 ACTIVE BRIEFS (${activeBriefs.length})</div>
+      ${activeBriefs.map(b => `
+        <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:12px; margin-bottom:8px;">
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span>${b.commodity} - ${b.quantity_mt} MT @ $${b.est_price}/MT</span>
+            <span class="badge">${b.coop_name || 'N/A'}</span>
+            <button class="btn btn-sm btn-primary" onclick="endAuctionManually('${b.id}')">⏹️ End Auction</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div>
+      <div style="color:#7CFC00; margin-bottom:8px;">✅ ENDED BRIEFS (${endedBriefs.length})</div>
+      ${endedBriefs.map(b => `
+        <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:12px; margin-bottom:8px;">
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span>${b.commodity} - ${b.quantity_mt} MT @ $${b.est_price}/MT</span>
+            <span class="badge">${b.coop_name || 'N/A'}</span>
+            <button class="btn btn-sm btn-warning" onclick="runDuheManually('${b.id}')">🧩 Run Duhe</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function endAuctionManually(briefId) {
+  showToast('🔒 Ending auction via Cloud Function...');
+  try {
+    await functions.httpsCallable('endAuction')({ briefId });
+    showToast('✅ Auction ended. Run Duhe to settle winners.');
+    await loadSellerBriefs();
+    renderDuheControls();
+  } catch (error) {
+    showToast('Error ending auction: ' + error.message, true);
+  }
+}
+
+async function runDuheManually(briefId) {
+  showToast('🧩 Running Duhe solver (Cloud Function)...');
+  try {
+    const result = await functions.httpsCallable('runDuhe')({ briefId });
+    if (result.data.success) {
+      showToast(`🧩 Duhe solved! ${result.data.winners} winners, ${result.data.losers} losers processed.`);
+    } else {
+      showToast(result.data.message || 'Duhe completed', true);
+    }
+    await loadAllData();
+  } catch (error) {
+    showToast('Duhe error: ' + error.message, true);
+  }
+}
+
+// ========== RENDER FUNCTIONS (UNCHANGED) ==========
+function updateStats() {
+  document.getElementById('totalUsers').textContent = allClients.length;
+  document.getElementById('totalFees').textContent = `$${totalFeesCollected.toLocaleString()}`;
+  document.getElementById('activeAuctions').textContent = sellerBriefs.filter(b => b.status === 'active').length;
+  document.getElementById('activeBots').textContent = bots.length;
+
+  // Bot Fleet Preview Stats
+  const activeBotsCount = allBots.filter(b => b.isActive).length;
+  const buyerBots = allBots.filter(b => b.type === 'buyer');
+  const sellerBots = allBots.filter(b => b.type === 'seller');
+  const transportBots = allBots.filter(b => b.type === 'transport');
+  const totalBotBids = allBots.reduce((sum, b) => sum + (b.totalBids || 0), 0);
+
+  const fleetTotal = document.getElementById('fleetTotalBots');
+  const fleetActive = document.getElementById('fleetActiveBots');
+  const fleetBuyers = document.getElementById('fleetBuyerBots');
+  const fleetSellers = document.getElementById('fleetSellerBots');
+  const fleetTransport = document.getElementById('fleetTransportBots');
+  const fleetBids = document.getElementById('fleetTotalBids');
+
+  if (fleetTotal) fleetTotal.textContent = allBots.length;
+  if (fleetActive) fleetActive.textContent = activeBotsCount;
+  if (fleetBuyers) fleetBuyers.textContent = buyerBots.length;
+  if (fleetSellers) fleetSellers.textContent = sellerBots.length;
+  if (fleetTransport) fleetTransport.textContent = transportBots.length;
+  if (fleetBids) fleetBids.textContent = totalBotBids.toLocaleString();
+
+  // Render top 3 bots in preview
+  const topBots = allBots
+    .filter(b => b.isActive)
+    .sort((a, b) => (b.totalBids || 0) - (a.totalBids || 0))
+    .slice(0, 3);
+
+  const fleetTopContainer = document.getElementById('fleetTopBots');
+  if (fleetTopContainer) {
+    if (topBots.length === 0) {
+      fleetTopContainer.innerHTML = '<div style="color:#5c6b8a; text-align:center; padding:8px; font-size:12px;">No active bots</div>';
+    } else {
+      fleetTopContainer.innerHTML = topBots.map(bot => {
+        const typeEmoji = bot.type === 'buyer' ? '🛒' : bot.type === 'seller' ? '🏭' : '🚛';
+        const winRate = bot.totalBids > 0 ? Math.round((bot.totalWins / bot.totalBids) * 100) : 0;
+        return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px;">
+          <div><span style="margin-right:6px;">${typeEmoji}</span><strong>${bot.botName}</strong> <span style="color:#9ca3af;">· ${bot.ownerName}</span></div>
+          <div style="display:flex; gap:12px;">
+            <span style="color:#00ced1;">${bot.totalBids || 0} bids</span>
+            <span style="color:${winRate >= 50 ? '#7CFC00' : winRate >= 25 ? '#FFD966' : '#ff3b3b'};">${winRate}% WR</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+function renderTopBuyers() {
+  const container = document.getElementById('topBuyersList');
+  if (!buyers.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No buyers found</div>'; return; }
+  container.innerHTML = buyers.sort((a, b) => (b.spent || 0) - (a.spent || 0)).slice(0, 10).map(b => `
+    <div class="clickable-item" data-user-id="${b.id}" data-user-type="buyer">
+      <div class="item-title"><span>${b.name}</span><span class="badge">$${(b.spent || 0).toLocaleString()}</span></div>
+      <div class="item-details">📍 ${b.country} · ${b.trades || 0} trades · Win Rate ${b.winRate || 0}%</div>
+    </div>
+  `).join('');
+  attachUserClicks();
+}
+
+function renderTopSellers() {
+  const container = document.getElementById('topSellersList');
+  if (!sellers.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No sellers found</div>'; return; }
+  container.innerHTML = sellers.sort((a, b) => (b.revenue || 0) - (a.revenue || 0)).slice(0, 10).map(s => `
+    <div class="clickable-item" data-user-id="${s.id}" data-user-type="seller">
+      <div class="item-title"><span>${s.name}</span><span class="badge">$${(s.revenue || 0).toLocaleString()}</span></div>
+      <div class="item-details">📍 ${s.country} · ⭐ ${s.rating || 0} ★ · ${s.trades || 0} trades</div>
+    </div>
+  `).join('');
+  attachUserClicks();
+}
+
+function renderTransportAuctions() {
+  const container = document.getElementById('transportAuctionsList');
+  if (!transportAuctions.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No transport auctions</div>'; return; }
+  container.innerHTML = transportAuctions.map(a => `
+    <div class="clickable-item" data-transport-id="${a.id}">
+      <div class="item-title"><span>🚢 ${a.route}</span><span>${a.status === 'active' ? '🟢 LIVE' : '🔒 CLOSED'}</span></div>
+      <div class="item-details">📦 ${a.cargo} · ${a.quantity} MT · ${a.mode} · ${a.bids} bids · Lowest: $${(a.lowestBid || 0).toLocaleString()}</div>
+    </div>
+  `).join('');
+  attachTransportClicks();
+}
+
+function renderWalletAlerts() {
+  const container = document.getElementById('walletAlertsList');
+  const lowBalanceUsers = wallets.filter(w => (w.balance || 0) < 500);
+  if (!lowBalanceUsers.length) {
+    container.innerHTML = `<div style="color:#7CFC00; text-align:center; padding:20px;">✅ All users have sufficient balance</div><div style="color:#9ca3af; text-align:center; padding:10px;">Total across all wallets: $${(totalWalletBalance || 0).toLocaleString()}</div>`;
+    return;
+  }
+  container.innerHTML = `
+    <div style="color:#ff3b3b; font-size:12px; margin-bottom:12px;">⚠️ ${lowBalanceUsers.length} user(s) with balance below $500</div>
+    <div style="color:#9ca3af; font-size:11px; margin-bottom:12px;">Total across all wallets: $${(totalWalletBalance || 0).toLocaleString()}</div>
+    ${lowBalanceUsers.slice(0, 10).map(w => `
+      <div class="clickable-item">
+        <div class="item-title"><span>${w.user_id || 'Unknown'}</span><span class="badge" style="background:rgba(255,59,59,0.3); color:#ff3b3b;">$${(w.balance || 0).toFixed(2)}</span></div>
+        <div class="item-details">Wallet ID: ${w.id?.slice(0, 8)}... · Updated: ${w.updated_at?.toDate ? w.updated_at.toDate().toISOString().split('T')[0] : 'N/A'}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderBotMonitoring() {
+  const container = document.getElementById('botMonitoringList');
+  if (!bots.length) {
+    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bots</div>';
+    return;
+  }
+  container.innerHTML = bots.map(b => `
+    <div class="clickable-item">
+      <div class="item-title"><span>🤖 ${b.name}</span><span class="badge">${b.status === 'active' ? '● ACTIVE' : '○ IDLE'}</span></div>
+      <div class="item-details">👤 Owner: ${b.owner} · 🎯 ${b.commodity} · 📊 ${b.strategy}</div>
+      <div class="item-details">Trades: ${b.totalTrades} · WR: ${b.winRate}%</div>
+    </div>
+  `).join('');
+}
+
+function renderAlphabeticalClients() {
+  const container = document.getElementById('alphabeticalClientList');
+  if (!allClients.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No clients found</div>'; return; }
+  const letters = {};
+  allClients.forEach(c => {
+    const firstChar = (c.name || 'Unknown').charAt(0).toUpperCase();
+    if (/[A-Z]/.test(firstChar)) {
+      if (!letters[firstChar]) letters[firstChar] = [];
+      letters[firstChar].push(c);
+    } else {
+      if (!letters['#']) letters['#'] = [];
+      letters['#'].push(c);
+    }
+  });
+  let html = '';
+  Object.keys(letters).sort().forEach(letter => {
+    html += `<div class="alphabet-letter">${letter}</div>`;
+    letters[letter].forEach(client => {
+      html += `<div class="clickable-item" data-user-id="${client.id}" data-user-type="${client.type?.toLowerCase()}"><div class="item-title"><span>${client.name || 'Unknown'}</span><span class="badge">${client.role}</span></div><div class="item-details">📍 ${client.country || 'N/A'} · ${client.email || 'N/A'}</div></div>`;
+    });
+  });
+  container.innerHTML = html;
+  attachUserClicks();
+}
+
+function attachUserClicks() {
+  document.querySelectorAll('[data-user-id][data-user-type]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.userId;
+      const type = el.dataset.userType;
+      const user = type === 'buyer' ? buyers.find(b => b.id === id) : sellers.find(s => s.id === id);
+      if (user) showUserDetails(user, type);
+    });
+  });
+}
+
+function attachTransportClicks() {
+  document.querySelectorAll('[data-transport-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.transportId;
+      const auction = transportAuctions.find(a => a.id === id);
+      if (auction) showTransportDetails(auction);
+    });
+  });
+}
+
+function showUserDetails(user, role) {
+  document.getElementById('detailModalContent').innerHTML = `
+    <div><h2>${user.name || 'Unknown'}</h2></div>
+    <div class="bot-detail-row"><span>Role:</span><span>${role === 'buyer' ? 'Buyer' : 'Seller'}</span></div>
+    <div class="bot-detail-row"><span>Country:</span><span>${user.country || 'N/A'}</span></div>
+    <div class="bot-detail-row"><span>Email:</span><span>${user.email || 'N/A'}</span></div>
+    <div class="bot-detail-row"><span>Phone:</span><span>${user.phone || 'N/A'}</span></div>
+    <div class="bot-detail-row"><span>Member Since:</span><span>${user.joined || 'N/A'}</span></div>
+    <div class="bot-detail-row"><span>Total Trades:</span><span>${user.trades || 0}</span></div>
+    ${role === 'buyer'
+      ? `<div class="bot-detail-row"><span>Total Spent:</span><span style="color:#7CFC00;">$${(user.spent || 0).toLocaleString()}</span></div><div class="bot-detail-row"><span>Win Rate:</span><span>${user.winRate || 0}%</span></div>`
+      : `<div class="bot-detail-row"><span>Total Revenue:</span><span style="color:#FFD966;">$${(user.revenue || 0).toLocaleString()}</span></div><div class="bot-detail-row"><span>Rating:</span><span>⭐ ${user.rating || 0} ★</span></div>`
+    }
+    <div class="action-buttons">
+      <button class="btn btn-sm btn-warning" onclick="showToast('Feature: Edit user profile (Firestore update)')">✏️ Edit</button>
+    </div>
+  `;
+  document.getElementById('detailModal').style.display = 'flex';
+}
+
+function showTransportDetails(auction) {
+  document.getElementById('detailModalContent').innerHTML = `
+    <div><h2>🚢 Transport: ${auction.route}</h2></div>
+    <div class="bot-detail-row"><span>Mode:</span><span>${auction.mode}</span></div>
+    <div class="bot-detail-row"><span>Cargo:</span><span>${auction.cargo} · ${auction.quantity} MT</span></div>
+    <div class="bot-detail-row"><span>Status:</span><span>${auction.status === 'active' ? '🟢 Active' : '🔒 Closed'}</span></div>
+    <div class="bot-detail-row"><span>Time Left:</span><span>${auction.timeLeft}</span></div>
+    <div class="bot-detail-row"><span>Total Bids:</span><span>${auction.bids} carriers</span></div>
+    <div class="bot-detail-row"><span>Lowest Bid:</span><span style="color:#7CFC00;">$${(auction.lowestBid || 0).toLocaleString()}</span></div>
+    <div class="bot-detail-row"><span>Winner:</span><span>${auction.winner || 'Pending'}</span></div>
+  `;
+  document.getElementById('detailModal').style.display = 'flex';
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'toast error' : 'toast';
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+// Make functions globally accessible for buttons
+window.endAuctionManually = endAuctionManually;
+window.runDuheManually = runDuheManually;
+window.showToast = showToast;
+
+document.getElementById('closeDetailModal').onclick = () => document.getElementById('detailModal').style.display = 'none';
+document.getElementById('closeDetailBtn').onclick = () => document.getElementById('detailModal').style.display = 'none';
+document.getElementById('logoutBtn').onclick = async () => { await auth.signOut(); window.location.href = 'signin.html'; };
+document.getElementById('refreshBtn').onclick = () => loadAllData();
+
+// ========== INIT ==========
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = 'signin.html';
+    return;
+  }
+  const isAdmin = await checkAdmin(user);
+  if (!isAdmin) return;
+  await loadAllData();
+});
+
+
+// ========== NEW DATA STATE ==========
+let allUsers = [];
+let allBids = [];
+let allTransportBids = [];
+let adminLogs = [];
+let transportAuctionsRaw = [];
+let transportFeesTotal = 0;
+let pendingAction = null;
+
+// ========== TRANSPORT OVERSIGHT ==========
+async function loadTransportOversight() {
+  const container = document.getElementById('transportOversight');
+  try {
+    const [auctionsSnap, bidsSnap, feesSnap] = await Promise.all([
+      db.collection('transport_auctions').where('status', '==', 'active').orderBy('createdAt', 'desc').limit(10).get(),
+      db.collection('transport_bids').where('status', '==', 'pending').orderBy('createdAt', 'desc').limit(20).get(),
+      db.collection('fee_records').where('type', 'in', ['transport_brief', 'transport_bid']).get()
+    ]);
+
+    transportAuctionsRaw = auctionsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const transportBids = bidsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    transportFeesTotal = feesSnap.docs.reduce((sum, d) => sum + (d.data().amount || 0), 0);
+
+    let html = '';
+
+    // Active Transport Auctions
+    html += '<div class="transport-subsection"><div class="transport-subsection-title">🟢 Active Transport Auctions</div>';
+    if (transportAuctionsRaw.length === 0) {
+      html += '<div class="empty-state">No active transport auctions</div>';
+    } else {
+      html += '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Route</th><th>Cargo</th><th>Weight</th><th>Deadline</th><th>Bids</th><th>Status</th></tr></thead><tbody>';
+      transportAuctionsRaw.forEach(t => {
+        html += `<tr><td>${t.origin || '—'} → ${t.destination || '—'}</td><td>${t.cargoType || '—'}</td><td>${(t.weightKg || 0).toLocaleString()} kg</td><td>${t.deadline || '—'}</td><td>${t.bidCount || 0}</td><td class="status-active">Active</td></tr>`;
+      });
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+
+    // Transport Bids
+    html += '<div class="transport-subsection"><div class="transport-subsection-title">📥 Pending Transport Bids</div>';
+    if (transportBids.length === 0) {
+      html += '<div class="empty-state">No pending transport bids</div>';
+    } else {
+      html += '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Carrier</th><th>Route</th><th>Amount</th><th>Transit Days</th><th>Date</th></tr></thead><tbody>';
+      for (const b of transportBids) {
+        const auction = transportAuctionsRaw.find(a => a.id === b.transportAuctionId) || {};
+        html += `<tr><td>${b.carrierName || '—'}</td><td>${auction.origin || '—'} → ${auction.destination || '—'}</td><td style="color:#FFD966; font-weight:700;">$${(b.amount || 0).toLocaleString()}</td><td>${b.transitDays || '—'}</td><td style="font-size:11px; color:#5c6b8a;">${b.createdAt?.toDate ? b.createdAt.toDate().toLocaleDateString() : '—'}</td></tr>`;
+      }
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+
+    // Transport Fees
+    html += `<div class="transport-subsection"><div class="transport-subsection-title">💰 Transport Fees Collected</div><div style="font-size:24px; font-family:'Orbitron',sans-serif; color:#FFD966; font-weight:800;">$${transportFeesTotal.toLocaleString()}</div><div style="font-size:11px; color:#5c6b8a; margin-top:4px;">From ${feesSnap.size} fee records</div></div>`;
+
+    container.innerHTML = html;
+  } catch (err) {
+    console.error('Transport oversight error:', err);
+    container.innerHTML = '<div style="color:#ff3b3b; text-align:center; padding:20px;">Error loading transport data</div>';
+  }
+}
+
+// ========== USER MANAGEMENT ==========
+let userPage = 1;
+const USERS_PER_PAGE = 10;
+
+async function loadUserManagement() {
+  const container = document.getElementById('userManagement');
+  try {
+    const snap = await db.collection('profiles').orderBy('created_at', 'desc').get();
+    allUsers = snap.docs.map(d => {
+      const data = d.data();
+      const wallet = wallets.find(w => w.user_id === d.id || w.id === d.id);
+      return {
+        id: d.id,
+        name: data.full_name || data.email || 'Unknown',
+        email: data.email || '—',
+        role: data.role || 'buyer',
+        country: data.country || '—',
+        isActive: data.isActive !== false,
+        balance: wallet ? (wallet.balance || 0) : 0,
+        createdAt: data.created_at
+      };
+    });
+    renderUserTable();
+  } catch (err) {
+    console.error('User management error:', err);
+    container.innerHTML = '<div style="color:#ff3b3b; text-align:center; padding:20px;">Error loading users</div>';
+  }
+}
+
+function renderUserTable(filtered = null) {
+  const container = document.getElementById('userManagement');
+  const users = filtered || allUsers;
+  const start = (userPage - 1) * USERS_PER_PAGE;
+  const pageUsers = users.slice(start, start + USERS_PER_PAGE);
+  const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+
+  if (pageUsers.length === 0) {
+    container.innerHTML = '<div class="empty-state">No users found</div>';
+    document.getElementById('userPagination').innerHTML = '';
+    return;
+  }
+
+  let html = '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Wallet</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  pageUsers.forEach(u => {
+    const roleClass = `role-${u.role}`;
+    const statusClass = u.isActive ? 'status-active' : 'status-suspended';
+    html += `<tr>
+      <td><strong>${u.name}</strong></td>
+      <td style="font-size:12px; color:#9ca3af;">${u.email}</td>
+      <td><span class="role-badge ${roleClass}">${u.role}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace; color:#FFD966;">$${u.balance.toFixed(2)}</td>
+      <td class="${statusClass}">${u.isActive ? 'Active' : 'Suspended'}</td>
+      <td>
+        <button class="btn-action btn-fund" onclick="openAddFunds('${u.id}', '${u.name.replace(/'/g, "\'")}')">💰 Fund</button>
+        <button class="btn-action btn-role" onclick="changeUserRolePrompt('${u.id}', '${u.role}')">Role</button>
+        ${u.isActive
+          ? `<button class="btn-action btn-suspend" onclick="suspendUser('${u.id}')">Suspend</button>`
+          : `<button class="btn-action btn-activate" onclick="activateUser('${u.id}')">Activate</button>`
+        }
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+
+  // Pagination
+  let pagHtml = '';
+  if (totalPages > 1) {
+    pagHtml += `<button class="page-btn" onclick="changeUserPage(${userPage - 1})" ${userPage === 1 ? 'disabled' : ''}>← Prev</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      pagHtml += `<button class="page-btn ${i === userPage ? 'active' : ''}" onclick="changeUserPage(${i})">${i}</button>`;
+    }
+    pagHtml += `<button class="page-btn" onclick="changeUserPage(${userPage + 1})" ${userPage === totalPages ? 'disabled' : ''}>Next →</button>`;
+  }
+  document.getElementById('userPagination').innerHTML = pagHtml;
+}
+
+function filterUsers() {
+  const query = document.getElementById('userSearch').value.toLowerCase();
+  const filtered = allUsers.filter(u =>
+    (u.name || '').toLowerCase().includes(query) ||
+    (u.email || '').toLowerCase().includes(query)
+  );
+  userPage = 1;
+  renderUserTable(filtered);
+}
+
+function changeUserPage(page) {
+  userPage = page;
+  const query = document.getElementById('userSearch').value.toLowerCase();
+  const filtered = query ? allUsers.filter(u =>
+    (u.name || '').toLowerCase().includes(query) ||
+    (u.email || '').toLowerCase().includes(query)
+  ) : null;
+  renderUserTable(filtered);
+}
+
+async function changeUserRolePrompt(userId, currentRole) {
+  const newRole = prompt(`Change role from ${currentRole} to: (buyer, seller, carrier, admin)`);
+  if (!newRole || !['buyer', 'seller', 'carrier', 'admin'].includes(newRole)) {
+    showToast('Invalid role. Use: buyer, seller, carrier, admin', true);
+    return;
+  }
+  try {
+    await db.collection('profiles').doc(userId).update({
+      role: newRole,
+      roleChangedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      roleChangedBy: currentFirebaseUser.uid
+    });
+    await db.collection('admin_logs').add({
+      action: 'role_change',
+      targetUserId: userId,
+      oldRole: currentRole,
+      newRole: newRole,
+      adminId: currentFirebaseUser.uid,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast(`Role changed to ${newRole}`);
+    await loadUserManagement();
+    await loadActivityLog();
+  } catch (err) {
+    showToast('Role change failed: ' + err.message, true);
+  }
+}
+
+async function suspendUser(userId) {
+  try {
+    await db.collection('profiles').doc(userId).update({ isActive: false, suspendedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await db.collection('admin_logs').add({
+      action: 'user_suspend',
+      targetUserId: userId,
+      adminId: currentFirebaseUser.uid,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast('User suspended');
+    await loadUserManagement();
+    await loadActivityLog();
+  } catch (err) { showToast('Error: ' + err.message, true); }
+}
+
+async function activateUser(userId) {
+  try {
+    await db.collection('profiles').doc(userId).update({ isActive: true, activatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await db.collection('admin_logs').add({
+      action: 'user_activate',
+      targetUserId: userId,
+      adminId: currentFirebaseUser.uid,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast('User activated');
+    await loadUserManagement();
+    await loadActivityLog();
+  } catch (err) { showToast('Error: ' + err.message, true); }
+}
+
+// ========== ADD FUNDS ==========
+let pendingFundUserId = null;
+
+function openAddFunds(userId, userName) {
+  pendingFundUserId = userId;
+  document.getElementById('addFundsUserName').textContent = userName;
+  document.getElementById('addFundsAmount').value = '100';
+  document.getElementById('addFundsReason').value = 'Manual credit by admin';
+  document.getElementById('addFundsModal').style.display = 'flex';
+}
+
+async function confirmAddFunds() {
+  if (!pendingFundUserId) return;
+  const amount = parseFloat(document.getElementById('addFundsAmount').value);
+  const reason = document.getElementById('addFundsReason').value || 'Manual credit';
+  if (!amount || amount <= 0) { showToast('Enter a valid amount', true); return; }
+
+  const walletRef = db.collection('wallets').doc(pendingFundUserId);
+  try {
+    await db.runTransaction(async t => {
+      const doc = await t.get(walletRef);
+      const current = doc.exists ? (doc.data().balance || 0) : 0;
+      t.set(walletRef, {
+        balance: current + amount,
+        userId: pendingFundUserId,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      t.set(db.collection('transactions').doc(), {
+        userId: pendingFundUserId,
+        amount: amount,
+        type: 'admin_deposit',
+        reason: reason,
+        adminId: currentFirebaseUser.uid,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+    await db.collection('admin_logs').add({
+      action: 'manual_deposit',
+      targetUserId: pendingFundUserId,
+      amount: amount,
+      reason: reason,
+      adminId: currentFirebaseUser.uid,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast(`$${amount.toFixed(2)} added to user wallet`);
+    document.getElementById('addFundsModal').style.display = 'none';
+    pendingFundUserId = null;
+    await loadWallets();
+    await loadUserManagement();
+    await loadActivityLog();
+  } catch (err) {
+    showToast('Add funds failed: ' + err.message, true);
+  }
+}
+
+// ========== ALL BIDS ==========
+async function loadAllBids() {
+  const container = document.getElementById('allBidsList');
+  try {
+    const snap = await db.collection('bids').orderBy('createdAt', 'desc').limit(50).get();
+    allBids = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (allBids.length === 0) {
+      container.innerHTML = '<div class="empty-state">No bids found</div>';
+      return;
+    }
+
+    let html = '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Commodity</th><th>Buyer</th><th>Bid</th><th>Qty</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+    for (const bid of allBids) {
+      const brief = bid.briefId ? (await db.collection('seller_briefs').doc(bid.briefId).get()).data() : null;
+      const buyer = bid.buyerId ? (await db.collection('profiles').doc(bid.buyerId).get()).data() : null;
+      const statusClass = bid.status === 'accepted' ? 'status-accepted' : (bid.status === 'declined' ? 'status-declined' : 'status-pending');
+      html += `<tr>
+        <td><strong>${brief?.commodity || '—'}</strong><div style="font-size:11px; color:#5c6b8a;">${brief?.variety || ''}</div></td>
+        <td style="font-size:12px;">${buyer?.full_name || buyer?.email || bid.buyerId?.slice(0,8) || '—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace; color:#FFD966; font-weight:700;">$${(bid.amount || 0).toFixed(2)}</td>
+        <td>${bid.quantity_mt || 0} MT</td>
+        <td class="${statusClass}">${bid.status || 'pending'}</td>
+        <td style="font-size:11px; color:#5c6b8a;">${bid.createdAt?.toDate ? bid.createdAt.toDate().toLocaleDateString() : '—'}</td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch (err) {
+    console.error('All bids error:', err);
+    container.innerHTML = '<div style="color:#ff3b3b; text-align:center; padding:20px;">Error loading bids</div>';
+  }
+}
+
+// ========== ALL TRANSPORT BIDS ==========
+async function loadAllTransportBids() {
+  const container = document.getElementById('allTransportBidsList');
+  try {
+    const snap = await db.collection('transport_bids').orderBy('createdAt', 'desc').limit(50).get();
+    allTransportBids = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (allTransportBids.length === 0) {
+      container.innerHTML = '<div class="empty-state">No transport bids found</div>';
+      return;
+    }
+
+    let html = '<div class="table-wrap"><table class="admin-table"><thead><tr><th>Route</th><th>Carrier</th><th>Bid</th><th>Transit</th><th>Status</th></tr></thead><tbody>';
+    for (const bid of allTransportBids) {
+      const auction = bid.transportAuctionId ? (await db.collection('transport_auctions').doc(bid.transportAuctionId).get()).data() : null;
+      const carrier = bid.carrierId ? (await db.collection('profiles').doc(bid.carrierId).get()).data() : null;
+      const statusClass = bid.status === 'accepted' ? 'status-accepted' : (bid.status === 'declined' ? 'status-declined' : 'status-pending');
+      html += `<tr>
+        <td><strong>${auction?.origin || '—'} → ${auction?.destination || '—'}</strong><div style="font-size:11px; color:#5c6b8a;">${auction?.cargoType || ''}</div></td>
+        <td style="font-size:12px;">${carrier?.full_name || bid.carrierName || bid.carrierId?.slice(0,8) || '—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace; color:#FFD966; font-weight:700;">$${(bid.amount || 0).toLocaleString()}</td>
+        <td>${bid.transitDays || '—'} days</td>
+        <td class="${statusClass}">${bid.status || 'pending'}</td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch (err) {
+    console.error('All transport bids error:', err);
+    container.innerHTML = '<div style="color:#ff3b3b; text-align:center; padding:20px;">Error loading transport bids</div>';
+  }
+}
+
+// ========== ACTIVITY LOG ==========
+async function loadActivityLog() {
+  const container = document.getElementById('activityLogList');
+  try {
+    const snap = await db.collection('admin_logs').orderBy('timestamp', 'desc').limit(30).get();
+    adminLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (adminLogs.length === 0) {
+      container.innerHTML = '<div class="empty-state">No admin activity yet</div>';
+      return;
+    }
+
+    let html = '';
+    for (const log of adminLogs) {
+      const time = log.timestamp?.toDate ? log.timestamp.toDate().toLocaleString() : '—';
+      let actionText = '';
+      let targetText = '';
+      switch (log.action) {
+        case 'role_change':
+          actionText = `Role: ${log.oldRole} → ${log.newRole}`;
+          targetText = log.targetUserId?.slice(0, 8) || '—';
+          break;
+        case 'manual_deposit':
+          actionText = `+$${(log.amount || 0).toFixed(2)}`;
+          targetText = log.targetUserId?.slice(0, 8) || '—';
+          break;
+        case 'user_suspend':
+          actionText = 'Suspended user';
+          targetText = log.targetUserId?.slice(0, 8) || '—';
+          break;
+        case 'user_activate':
+          actionText = 'Activated user';
+          targetText = log.targetUserId?.slice(0, 8) || '—';
+          break;
+        case 'auction_end':
+          actionText = 'Ended auction';
+          targetText = log.briefId?.slice(0, 8) || '—';
+          break;
+        case 'duhe_run':
+          actionText = 'Ran Duhe solver';
+          targetText = log.briefId?.slice(0, 8) || '—';
+          break;
+        default:
+          actionText = log.action;
+          targetText = log.targetUserId?.slice(0, 8) || '—';
+      }
+      html += `<div class="log-row"><div><span class="log-action">${actionText}</span> <span class="log-target">→ ${targetText}</span></div><span class="log-time">${time}</span></div>`;
+    }
+    container.innerHTML = html;
+  } catch (err) {
+    console.error('Activity log error:', err);
+    container.innerHTML = '<div style="color:#ff3b3b; text-align:center; padding:20px;">Error loading activity log</div>';
+  }
+}
+
+// ========== EXPORT CSV ==========
+function exportTableToCSV(containerId, filename) {
+  const container = document.getElementById(containerId);
+  const table = container.querySelector('table');
+  if (!table) { showToast('No table to export', true); return; }
+
+  let csv = '';
+  const rows = table.querySelectorAll('tr');
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('th, td');
+    const rowData = Array.from(cells).map(cell => `"${cell.textContent.replace(/"/g, '""').trim()}"`).join(',');
+    csv += rowData + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${filename}`);
+}
+
+// ========== LOG DUHE ACTIONS ==========
+async function logDuheAction(action, briefId, details) {
+  try {
+    await db.collection('admin_logs').add({
+      action: action,
+      briefId: briefId,
+      details: details,
+      adminId: currentFirebaseUser.uid,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await loadActivityLog();
+  } catch (err) { console.error('Log error:', err); }
+}
+
+// Make new functions global
+window.loadTransportOversight = loadTransportOversight;
+window.loadUserManagement = loadUserManagement;
+window.loadAllBids = loadAllBids;
+window.loadAllTransportBids = loadAllTransportBids;
+window.loadActivityLog = loadActivityLog;
+window.filterUsers = filterUsers;
+window.changeUserPage = changeUserPage;
+window.changeUserRolePrompt = changeUserRolePrompt;
+window.suspendUser = suspendUser;
+window.activateUser = activateUser;
+window.openAddFunds = openAddFunds;
+window.confirmAddFunds = confirmAddFunds;
+window.exportTableToCSV = exportTableToCSV;
+window.logDuheAction = logDuheAction;
+window.loadAllBots = loadAllBots;
+
+// ========== MODAL EVENTS ==========
+document.getElementById('closeAddFundsModal').onclick = () => document.getElementById('addFundsModal').style.display = 'none';
+document.getElementById('cancelAddFundsBtn').onclick = () => document.getElementById('addFundsModal').style.display = 'none';
+document.getElementById('confirmAddFundsBtn').onclick = confirmAddFunds;
+document.getElementById('closeConfirmModal').onclick = () => document.getElementById('confirmModal').style.display = 'none';
+document.getElementById('cancelConfirmBtn').onclick = () => document.getElementById('confirmModal').style.display = 'none';
+
+// ========== UPDATE LOAD ALL DATA ==========
+const originalLoadAllData = loadAllData;
+loadAllData = async function() {
+  showToast('Loading data from Firestore...');
+  await Promise.all([
+    loadBuyers(),
+    loadSellers(),
+    loadSellerBriefs(),
+    loadTransportAuctions(),
+    loadAllBots(),
+    loadWallets()
+  ]);
+  allClients = [...buyers.map(b => ({...b, role: 'Buyer'})), ...sellers.map(s => ({...s, role: 'Seller'}))].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  updateStats();
+  renderTopBuyers();
+  renderTopSellers();
+  renderTransportAuctions();
+  renderWalletAlerts();
+  renderBotMonitoring();
+  renderAlphabeticalClients();
+  renderDuheControls();
+  // New sections
+  await loadTransportOversight();
+  await loadUserManagement();
+  await loadAllBids();
+  await loadAllTransportBids();
+  await loadActivityLog();
+  showToast('Data refreshed from Firebase');
+};
+
+// ========== UPDATE UPDATESTATS ==========
+const originalUpdateStats = updateStats;
+updateStats = function() {
+  document.getElementById('totalUsers').textContent = allClients.length;
+  document.getElementById('totalFees').textContent = `$${totalFeesCollected.toLocaleString()}`;
+  document.getElementById('activeAuctions').textContent = sellerBriefs.filter(b => b.status === 'active').length;
+  document.getElementById('activeBots').textContent = bots.length;
+  document.getElementById('activeTransportAuctions').textContent = transportAuctionsRaw.length;
+  document.getElementById('transportFees').textContent = `$${transportFeesTotal.toLocaleString()}`;
+};
+
+// ========== UPDATE DUHE FUNCTIONS TO LOG ==========
+const originalEndAuction = endAuctionManually;
+endAuctionManually = async function(briefId) {
+  showToast('🔒 Ending auction via Cloud Function...');
+  try {
+    await functions.httpsCallable('endAuction')({ briefId });
+    showToast('✅ Auction ended. Run Duhe to settle winners.');
+    await logDuheAction('auction_end', briefId, { message: 'Manually ended auction' });
+    await loadSellerBriefs();
+    renderDuheControls();
+  } catch (error) {
+    showToast('Error ending auction: ' + error.message, true);
+  }
+};
+
+const originalRunDuhe = runDuheManually;
+runDuheManually = async function(briefId) {
+  showToast('🧩 Running Duhe solver (Cloud Function)...');
+  try {
+    const result = await functions.httpsCallable('runDuhe')({ briefId });
+    if (result.data.success) {
+      showToast(`🧩 Duhe solved! ${result.data.winners} winners, ${result.data.losers} losers processed.`);
+    } else {
+      showToast(result.data.message || 'Duhe completed', true);
+    }
+    await logDuheAction('duhe_run', briefId, { winners: result.data.winners, losers: result.data.losers });
+    await loadAllData();
+  } catch (error) {
+    showToast('Duhe error: ' + error.message, true);
+  }
+};
+
+window.endAuctionManually = endAuctionManually;
+window.runDuheManually = runDuheManually;
+</script>
+</body>
+</html
+  <!-- BOT FLEET PREVIEW -->
+  <div class="dashboard-card" style="margin-bottom:30px; cursor:pointer;" onclick="location.href='admin-bot-fleet.html'">
+    <div class="card-header card-header-flex">
+      <span>🤖 BOT FLEET PREVIEW</span>
+      <span style="font-size:12px; color:#00ced1;">View Full Fleet →</span>
+    </div>
+    <div class="stats-grid-6" style="margin-bottom:0;">
+      <div class="stat-card" style="border-color:rgba(0,206,209,0.2);">
+        <div class="stat-value" id="fleetTotalBots" style="font-size:24px;">—</div>
+        <div class="stat-label">Total Bots</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(124,252,0,0.3);">
+        <div class="stat-value" id="fleetActiveBots" style="font-size:24px; color:#7CFC00;">—</div>
+        <div class="stat-label">Active</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(0,102,255,0.3);">
+        <div class="stat-value" id="fleetBuyerBots" style="font-size:24px; color:#0066ff;">—</div>
+        <div class="stat-label">Buyers</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(255,165,0,0.3);">
+        <div class="stat-value" id="fleetSellerBots" style="font-size:24px; color:#FFA500;">—</div>
+        <div class="stat-label">Sellers</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(255,217,102,0.3);">
+        <div class="stat-value" id="fleetTransportBots" style="font-size:24px; color:#FFD966;">—</div>
+        <div class="stat-label">Transport</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(0,206,209,0.2);">
+        <div class="stat-value" id="fleetTotalBids" style="font-size:24px;">—</div>
+        <div class="stat-label">Total Bids</div>
+      </div>
+    </div>
+    <div id="fleetTopBots" style="margin-top:16px;"></div>
+  </div>
+>

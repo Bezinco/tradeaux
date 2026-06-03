@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeAux • How It Works | Global Commodity Exchange</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { 
+  width: 100%; 
+  min-height: 100%; 
+  font-family: 'Inter', sans-serif; 
+  overflow-x: hidden; 
+}
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+/* ===== BACKGROUND WAVES ===== */
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-emerald-bg { 
+  background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.4), transparent 70%); 
+  top: -40%; left: -20%; animation-delay: 0s; 
+}
+.wave-sapphire-bg { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%; animation-delay: 8s; 
+}
+.wave-ruby-bg { 
+  background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); 
+  top: -20%; left: 0%; animation-delay: 16s; 
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+}
+
+/* ===== 3D LOGO - TRADEAUX ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+/* Letter T - Blue */
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter R - Green */
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter A - Red */
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter D - Blue */
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter E - Green */
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter A - Red */
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter U - Blue */
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+/* Letter X - Green */
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex; justify-content: flex-end; align-items: center;
+  padding: 20px 0 40px;
+}
+
+.nav { display: flex; gap: 12px; }
+
+.nav a {
+  font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500;
+  padding: 8px 16px; border: 2px solid #d92b2b; border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px);
+  color: #e5e7eb; text-decoration: none; transition: all 0.3s ease;
+}
+
+.nav a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #fff; }
+
+/* How It Works Content */
+.how-hero {
+  text-align: center;
+  margin: 40px 0 60px;
+}
+
+.how-hero h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 64px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00ced1, #7CFC00, #FFD966);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 24px;
+  letter-spacing: 2px;
+}
+
+.how-hero p {
+  font-size: 18px;
+  color: #9ca3af;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+.steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin: 60px 0;
+}
+
+.step {
+  display: flex;
+  gap: 30px;
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.6), rgba(2, 6, 23, 0.8));
+  border: 1px solid rgba(0, 206, 209, 0.2);
+  border-radius: 28px;
+  padding: 32px;
+  transition: all 0.3s;
+}
+
+.step:hover {
+  transform: translateX(8px);
+  border-color: #00ced1;
+}
+
+.step-number {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 64px;
+  font-weight: 800;
+  color: #00ced1;
+  opacity: 0.4;
+  min-width: 100px;
+  text-align: center;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #FFD966;
+  margin-bottom: 16px;
+}
+
+.step-desc {
+  font-size: 16px;
+  color: #cbd5e6;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.step-example {
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 3px solid #7CFC00;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-family: 'Monaco', monospace;
+  font-size: 13px;
+  color: #7CFC00;
+}
+
+.fee-section {
+  background: linear-gradient(145deg, rgba(124, 252, 0, 0.08), rgba(0, 0, 0, 0.4));
+  border: 1px solid rgba(124, 252, 0, 0.3);
+  border-radius: 28px;
+  padding: 40px;
+  margin: 60px 0;
+  text-align: center;
+}
+
+.fee-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #7CFC00;
+  margin-bottom: 24px;
+}
+
+.fee-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 32px;
+}
+
+.fee-card {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+
+.fee-amount {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  color: #FFD966;
+  margin-bottom: 8px;
+}
+
+.fee-who {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 8px;
+}
+
+.fee-note {
+  font-size: 12px;
+  color: #7CFC00;
+}
+
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 60px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+@media (max-width: 900px) {
+  .step { flex-direction: column; text-align: center; }
+  .step-number { margin-bottom: 16px; }
+  .fee-grid { grid-template-columns: 1fr; }
+  .how-hero h1 { font-size: 48px; }
+}
+
+@media (max-width: 600px) {
+  .step { padding: 20px; }
+  .step-title { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <nav class="nav">
+      <a href="#">Trade Brief</a>
+      <a href="#">Auctions</a>
+      <a href="#">Market Intelligence</a>
+      <a href="#">Sign In</a>
+    </nav>
+  </header>
+
+  <div class="how-hero">
+    <h1>✦ HOW IT WORKS ✦</h1>
+    <p>From posting a brief to accepting the best offer — TradeAux makes global trading simple, transparent, and fair.</p>
+  </div>
+
+  <div class="steps-container">
+    <div class="step">
+      <div class="step-number">01</div>
+      <div class="step-content">
+        <div class="step-title">📝 Post a Brief or List Inventory</div>
+        <div class="step-desc">Buyers post what they need (commodity, quantity, destination, grade). Sellers list what they have (product, variety, FOB port, quantity). Choose from 9 commodity categories and hundreds of varieties.</div>
+        <div class="step-example">Example: "500 MT Coconuts — Mature — FOB Colombo — Destination Rotterdam"</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">02</div>
+      <div class="step-content">
+        <div class="step-title">🤖 Bots & Humans Bid</div>
+        <div class="step-desc">Sellers bid down on buyer briefs. Buyers bid down on seller inventory. Deploy trading bots to bid 24/7 with custom strategies — sniper, aggressive, balanced, or conservative.</div>
+        <div class="step-example">Live bidding updates every 2-3 seconds. Lowest unique bid wins. Bots never sleep.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">03</div>
+      <div class="step-content">
+        <div class="step-title">✅ Accept the Best Offer</div>
+        <div class="step-desc">Sellers see ALL bids — not just top 5. Select which offers to accept. Multiple buyers can clear inventory in one auction. Click [ACCEPT OFFER] — $25 fee captured instantly from buyer's wallet.</div>
+        <div class="step-example">One seller. Six buyers. Six accept clicks. $150 in fees. Inventory cleared.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">04</div>
+      <div class="step-content">
+        <div class="step-title">🚛 Transport Auction (Optional)</div>
+        <div class="step-desc">After winning a commodity auction, launch a transport auction instantly. Carriers (ship, rail, truck, air, intermodal) compete to move your cargo from FOB port to final destination. Lowest bid wins.</div>
+        <div class="step-example">Buyer pays $25. Winning carrier gives $50 discount off invoice.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fee-section">
+    <div class="fee-title">💰 THE $25 FLAT FEE</div>
+    <div class="step-desc" style="margin-bottom: 24px;">No percentages. No hidden costs. Just one flat fee per auction. Everyone knows the rules.</div>
+    <div class="fee-grid">
+      <div class="fee-card">
+        <div class="fee-amount">$25</div>
+        <div class="fee-who">Buyer pays upon winning</div>
+        <div class="fee-note">Captured from wallet when offer accepted</div>
+      </div>
+      <div class="fee-card">
+        <div class="fee-amount">$50</div>
+        <div class="fee-who">Seller gives discount</div>
+        <div class="fee-note">Off invoice — never paid to TradeAux</div>
+      </div>
+      <div class="fee-card">
+        <div class="fee-amount">$25</div>
+        <div class="fee-who">Carrier gives discount</div>
+        <div class="fee-note">Transport auction winner</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>TRADEAUX © 2026 • Global Commodity Exchange • $25 flat fee. Port on every card.</p>
+  </footer>
+</div>
+
+</body>
+</html>

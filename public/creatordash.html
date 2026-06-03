@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PCAux — Gem Trading</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent-emerald: #4a9e5a;
+  --accent-sapphire: #3a6ea5;
+  --accent-ruby: #9e4a4a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { 
+  width: 100%; 
+  min-height: 100%; 
+  font-family: 'Orbitron', sans-serif; 
+  overflow-x: hidden; 
+}
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+/* ===== BACKGROUND WAVES ===== */
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(74, 158, 90, 0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+.wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(58, 110, 165, 0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== GEM LOGO ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(0, 255, 128, 0.6));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.gem-letter::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #7CFC00 0%, #00FA9A 15%, #2E8B57 30%, #228B22 45%, #006400 60%, #0A5C2E 75%, #013220 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(124,252,0,0.5), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter[data-letter="P"]::before,
+.gem-letter[data-letter="X"]::before {
+  background: linear-gradient(145deg, #050f22 0%, #0b1f4a 15%, #123a7a 30%, #1a4fb0 45%, #2a66e0 60%, #1a4fb0 75%, #0b1f4a 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(60,120,255,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.gem-letter[data-letter="A"]::before {
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(255,60,60,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.gem-letter .edge-top {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-right {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 10%;
+  height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-bottom {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(0deg, rgba(0,50,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-left {
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 10%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,50,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.light-source {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+  animation: sparkleFlash 4s ease-in-out infinite;
+  opacity: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,255,128,0.3) 0%, transparent 80%);
+  filter: blur(20px);
+  z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 20px 0 40px;
+}
+
+.nav {
+  display: flex;
+  gap: 12px;
+}
+
+.nav a {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 2px solid #4a9e5a;
+  border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px);
+  color: var(--text);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.nav a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  border-color: #fff;
+}
+
+.user-info { display: none; align-items: center; gap: 10px; }
+.user-info.show { display: flex; }
+
+/* ===== THREE GEM CARDS ===== */
+.gem-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin: 40px 0 60px;
+}
+
+.gem-card {
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  backdrop-filter: blur(4px);
+  transition: all 0.4s ease;
+  border-width: 2px;
+  border-style: solid;
+  position: relative;
+}
+
+.gem-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+}
+
+.card-emerald { border-color: #4a9e5a; }
+.card-sapphire { border-color: #3a6ea5; }
+.card-ruby { border-color: #9e4a4a; }
+
+/* DYNAMIC WAVE IN THE BACKGROUND OF THE CARD */
+.card-wave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 20px;
+  opacity: 0.5;
+}
+
+.card-emerald .card-wave {
+  background: repeating-linear-gradient(45deg, 
+    rgba(0, 255, 0, 0.2) 0px,
+    rgba(0, 255, 0, 0.2) 40px,
+    rgba(0, 200, 0, 0.3) 40px,
+    rgba(0, 200, 0, 0.3) 80px,
+    rgba(50, 255, 50, 0.4) 80px,
+    rgba(50, 255, 50, 0.4) 120px);
+  background-size: 200% 200%;
+  animation: waveFlow 3s linear infinite;
+}
+
+.card-sapphire .card-wave {
+  background: repeating-linear-gradient(45deg, 
+    rgba(0, 100, 255, 0.2) 0px,
+    rgba(0, 100, 255, 0.2) 40px,
+    rgba(0, 150, 255, 0.3) 40px,
+    rgba(0, 150, 255, 0.3) 80px,
+    rgba(100, 150, 255, 0.4) 80px,
+    rgba(100, 150, 255, 0.4) 120px);
+  background-size: 200% 200%;
+  animation: waveFlow 3s linear infinite;
+}
+
+.card-ruby .card-wave {
+  background: repeating-linear-gradient(45deg, 
+    rgba(255, 0, 0, 0.2) 0px,
+    rgba(255, 0, 0, 0.2) 40px,
+    rgba(255, 50, 50, 0.3) 40px,
+    rgba(255, 50, 50, 0.3) 80px,
+    rgba(255, 100, 100, 0.4) 80px,
+    rgba(255, 100, 100, 0.4) 120px);
+  background-size: 200% 200%;
+  animation: waveFlow 3s linear infinite;
+}
+
+@keyframes waveFlow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+.preview-area {
+  position: relative;
+  width: 100%;
+  padding: 20px;
+  z-index: 1;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  background: #000;
+}
+
+.gem-video {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.video-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f1a2a, #030712);
+  border-radius: 16px;
+}
+
+.fallback-gem {
+  font-size: 60px;
+  animation: fallbackSpin 6s ease-in-out infinite;
+}
+
+.fallback-text {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@keyframes fallbackSpin {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.6; }
+  50% { transform: rotate(180deg) scale(1.1); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.6; }
+}
+
+.card-info {
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  background: rgba(2, 6, 23, 0.6);
+}
+
+.ticker {
+  background: rgba(0,0,0,0.5);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ticker-symbol {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.ticker-price {
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+}
+
+.ticker-change {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.change-positive { color: #4a9e5a; }
+.change-negative { color: #9e4a4a; }
+
+.trading-status {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.trading-now {
+  display: inline-block;
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.card-emerald .trading-now { border: 1px solid #4a9e5a; color: #4a9e5a; background: rgba(74, 158, 90, 0.15); }
+.card-sapphire .trading-now { border: 1px solid #3a6ea5; color: #3a6ea5; background: rgba(58, 110, 165, 0.15); }
+.card-ruby .trading-now { border: 1px solid #9e4a4a; color: #9e4a4a; background: rgba(158, 74, 74, 0.15); }
+
+.gem-specs {
+  text-align: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.carat {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.no-enhance {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+.trust {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.trust-item {
+  padding: 20px;
+  border: 1px solid rgba(74, 158, 90, 0.3);
+  border-radius: 12px;
+  background: rgba(15, 32, 64, 0.5);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 80px;
+  padding: 30px 0 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #4a9e5a;
+}
+
+@media (max-width: 1000px) {
+  .gem-cards {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .trust {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gem-logo-corner {
+    transform: scale(0.25);
+  }
+}
+
+@media (max-width: 600px) {
+  .trust {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+<base target="_blank">
+</head>
+
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D PCAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="P">
+      P<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="C">
+      C<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="A">
+      A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="U">
+      U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+    <span class="gem-letter" data-letter="X">
+      X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span>
+    </span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <nav class="nav">
+      <a href="#">How It Works</a>
+      <a href="#">Auctions</a>
+      <a href="#">Rules</a>
+      <a href="#" id="login-btn">Sign In</a>
+      <div class="user-info" id="user-info">
+        <span id="user-email"></span>
+        <a href="#" id="logout-btn">Logout</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="gem-cards">
+
+    <!-- EMERALD CARD -->
+    <div class="gem-card card-emerald">
+      <div class="card-wave"></div>
+      <div class="preview-area">
+        <div class="video-container">
+          <video class="gem-video" autoplay loop muted playsinline>
+            <source src="gems/emerald.mp4" type="video/mp4">
+          </video>
+          <div class="video-fallback" style="display: none;">
+            <div class="fallback-gem">💚</div>
+            <div class="fallback-text">EMERALD</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="ticker">
+          <div class="ticker-symbol">EMR / USD</div>
+          <div class="ticker-price" id="emerald-price">$2,847.32</div>
+          <div class="ticker-change change-positive" id="emerald-change">▲ 1.8%</div>
+        </div>
+        <div class="trading-status"><span class="trading-now">TRADING NOW</span></div>
+        <div class="gem-specs">
+          <div class="carat">3.42 CT</div>
+          <div class="no-enhance">NO ENHANCEMENTS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAPPHIRE CARD -->
+    <div class="gem-card card-sapphire">
+      <div class="card-wave"></div>
+      <div class="preview-area">
+        <div class="video-container">
+          <video class="gem-video" autoplay loop muted playsinline>
+            <source src="gems/sapphire.mp4" type="video/mp4">
+          </video>
+          <div class="video-fallback" style="display: none;">
+            <div class="fallback-gem">💙</div>
+            <div class="fallback-text">SAPPHIRE</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="ticker">
+          <div class="ticker-symbol">SAP / USD</div>
+          <div class="ticker-price" id="sapphire-price">$4,201.88</div>
+          <div class="ticker-change change-positive" id="sapphire-change">▲ 2.3%</div>
+        </div>
+        <div class="trading-status"><span class="trading-now">TRADING NOW</span></div>
+        <div class="gem-specs">
+          <div class="carat">4.01 CT</div>
+          <div class="no-enhance">NO ENHANCEMENTS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUBY CARD -->
+    <div class="gem-card card-ruby">
+      <div class="card-wave"></div>
+      <div class="preview-area">
+        <div class="video-container">
+          <video class="gem-video" autoplay loop muted playsinline>
+            <source src="gems/ruby.mp4" type="video/mp4">
+          </video>
+          <div class="video-fallback" style="display: none;">
+            <div class="fallback-gem">❤️</div>
+            <div class="fallback-text">RUBY</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="ticker">
+          <div class="ticker-symbol">RUBY / USD</div>
+          <div class="ticker-price" id="ruby-price">$1,892.45</div>
+          <div class="ticker-change change-negative" id="ruby-change">▼ 0.6%</div>
+        </div>
+        <div class="trading-status"><span class="trading-now">TRADING NOW</span></div>
+        <div class="gem-specs">
+          <div class="carat">2.18 CT</div>
+          <div class="no-enhance">NO ENHANCEMENTS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trust">
+    <div class="trust-item">PCAux is the seller of record for all items.</div>
+    <div class="trust-item">Participation grants no ownership until auction close.</div>
+    <div class="trust-item">No pricing, valuation, or investment guidance provided.</div>
+    <div class="trust-item">Governed by Canadian law.</div>
+  </div>
+
+  <footer>
+    <div>© PCAux</div>
+    <div><a href="#">Legal</a> · <a href="#">Responsible Play</a> · <a href="#">Terms</a></div>
+  </footer>
+</div>
+
+<script>
+// Video error handling - shows fallback if video fails to load
+const videos = document.querySelectorAll('.gem-video');
+videos.forEach(video => {
+  video.addEventListener('error', function() {
+    const fallback = this.parentElement.querySelector('.video-fallback');
+    if (fallback) {
+      this.style.display = 'none';
+      fallback.style.display = 'flex';
+    }
+  });
+
+  // Also check if video exists
+  video.addEventListener('loadeddata', function() {
+    if (this.videoWidth === 0) {
+      const fallback = this.parentElement.querySelector('.video-fallback');
+      if (fallback) {
+        this.style.display = 'none';
+        fallback.style.display = 'flex';
+      }
+    }
+  });
+});
+
+// Price ticker simulation
+let emeraldPrice = 2847.32;
+let sapphirePrice = 4201.88;
+let rubyPrice = 1892.45;
+let initialEmerald = 2847.32;
+let initialSapphire = 4201.88;
+let initialRuby = 1892.45;
+
+function updatePrices() {
+  emeraldPrice += (Math.random() - 0.5) * 15;
+  sapphirePrice += (Math.random() - 0.5) * 18;
+  rubyPrice += (Math.random() - 0.5) * 12;
+
+  let emeraldChange = ((emeraldPrice - initialEmerald) / initialEmerald * 100).toFixed(1);
+  let sapphireChange = ((sapphirePrice - initialSapphire) / initialSapphire * 100).toFixed(1);
+  let rubyChange = ((rubyPrice - initialRuby) / initialRuby * 100).toFixed(1);
+
+  document.getElementById('emerald-price').textContent = '$' + emeraldPrice.toFixed(2);
+  document.getElementById('sapphire-price').textContent = '$' + sapphirePrice.toFixed(2);
+  document.getElementById('ruby-price').textContent = '$' + rubyPrice.toFixed(2);
+
+  let emeraldElem = document.getElementById('emerald-change');
+  let sapphireElem = document.getElementById('sapphire-change');
+  let rubyElem = document.getElementById('ruby-change');
+
+  emeraldElem.textContent = (parseFloat(emeraldChange) >= 0 ? '▲ ' : '▼ ') + Math.abs(emeraldChange) + '%';
+  emeraldElem.className = 'ticker-change ' + (parseFloat(emeraldChange) >= 0 ? 'change-positive' : 'change-negative');
+
+  sapphireElem.textContent = (parseFloat(sapphireChange) >= 0 ? '▲ ' : '▼ ') + Math.abs(sapphireChange) + '%';
+  sapphireElem.className = 'ticker-change ' + (parseFloat(sapphireChange) >= 0 ? 'change-positive' : 'change-negative');
+
+  rubyElem.textContent = (parseFloat(rubyChange) >= 0 ? '▲ ' : '▼ ') + Math.abs(rubyChange) + '%';
+  rubyElem.className = 'ticker-change ' + (parseFloat(rubyChange) >= 0 ? 'change-positive' : 'change-negative');
+}
+
+setInterval(updatePrices, 8000);
+
+// Supabase auth
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+document.addEventListener('DOMContentLoaded', async function() {
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userInfo = document.getElementById('user-info');
+  const userEmail = document.getElementById('user-email');
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) showLoggedIn(session.user);
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) showLoggedIn(session.user);
+    else if (event === 'SIGNED_OUT') showLoggedOut();
+  });
+
+  function showLoggedIn(user) {
+    loginBtn.style.display = 'none';
+    userInfo.classList.add('show');
+    userEmail.textContent = user.email;
+  }
+
+  function showLoggedOut() {
+    loginBtn.style.display = 'block';
+    userInfo.classList.remove('show');
+  }
+
+  if (logoutBtn) logoutBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await supabaseClient.auth.signOut();
+  });
+
+  if (loginBtn) loginBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    // Redirect to your login page or trigger auth
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+    if (error) console.error('Login error:', error);
+  });
+});
+</script>
+
+</body>
+</html>

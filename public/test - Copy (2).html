@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediBid — Trusted Medical Tourism Marketplace</title>
+<style>
+@import url('https://googleapis.com');
+
+:root {
+  --accent-emerald: #7CFC00;
+  --accent-blue: #00D4FF;
+  --accent-purple: #A855F7;
+  --accent-gold: #FFD700;
+  --card-width: 240px;
+  --card-height: 380px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
+
+body {
+  background:
+    radial-gradient(1400px 700px at 15% 10%, rgba(0, 212, 255, 0.15), transparent 60%),
+    radial-gradient(1200px 900px at 85% 20%, rgba(124, 252, 0, 0.2), transparent 65%),
+    radial-gradient(1000px 800px at 50% 85%, rgba(168, 85, 247, 0.15), transparent 70%),
+    linear-gradient(135deg, #040812 0%, #0a1228 50%, #020617 100%);
+  min-height: 100vh;
+  animation: backgroundDrift 25s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundDrift {
+  0% { background-position: 15% 10%, 85% 20%, 50% 85%, center; }
+  50% { background-position: 18% 15%, 82% 25%, 53% 80%, center; }
+  100% { background-position: 15% 10%, 85% 20%, 50% 85%, center; }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(124,252,0,0.3);
+  backdrop-filter: blur(10px);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.logo-container {
+  position: relative;
+  display: inline-block;
+  filter: drop-shadow(0 20px 40px rgba(0, 212, 255, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.logo-text {
+  font-size: clamp(36px, 8vw, 60px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.logo-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+  background: linear-gradient(145deg, #00D4FF 0%, #7CFC00 50%, #00D4FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.logo-letter:nth-child(1) { animation-delay: 0s; }
+.logo-letter:nth-child(2) { animation-delay: 0.2s; }
+.logo-letter:nth-child(3) { animation-delay: 0.4s; }
+.logo-letter:nth-child(4) { animation-delay: 0.6s; }
+.logo-letter:nth-child(5) { animation-delay: 0.8s; }
+.logo-letter:nth-child(6) { animation-delay: 1.0s; }
+.logo-letter:nth-child(7) { animation-delay: 1.2s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.nav { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.nav a, .nav button {
+  font-size: 14px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-decoration: none;
+  padding: 10px 24px;
+  border: 1px solid rgba(124,252,0,0.4);
+  border-radius: 30px;
+  background: rgba(10, 18, 40, 0.6);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  white-space: nowrap;
+}
+
+.nav a:hover, .nav button:hover {
+  border-color: #7CFC00;
+  color: #7CFC00;
+  box-shadow: 0 0 15px rgba(124,252,0,0.3);
+}
+
+.hero {
+  text-align: center;
+  padding: 40px 20px 20px;
+}
+
+.hero h1 {
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 700;
+  color: #7CFC00;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  font-family: 'Orbitron', sans-serif;
+  text-shadow: 0 0 30px rgba(124, 252, 0, 0.3);
+}
+
+.hero p {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: 15px;
+  color: #9ca3af;
+  line-height: 1.6;
+}
+
+.auction-banner {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(124, 252, 0, 0.15), rgba(0, 212, 255, 0.15));
+  padding: 16px 32px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 20px auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #7CFC00;
+  font-family: 'Orbitron', sans-serif;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.timer-display {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ff4d4d;
+  text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
+}
+
+.bid-display {
+  font-size: 28px;
+  color: #7CFC00;
+  text-shadow: 0 0 10px rgba(124, 252, 0, 0.5);
+}
+
+.customer-form {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 30px;
+  background: rgba(10, 18, 40, 0.7);
+  border: 1px solid rgba(124, 252, 0, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7CFC00;
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.form-group select, .form-group input {
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(124, 252, 0, 0.3);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  width: 100%;
+}
+
+.bid-button {
+  background: var(--accent-emerald);
+  color: black;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-weight: 800;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 20px;
+  box-shadow: 0 0 20px rgba(124, 252, 0, 0.4);
+}
+
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo-container">
+    <div class="logo-text">
+      <span class="logo-letter">M</span><span class="logo-letter">E</span><span class="logo-letter">D</span><span class="logo-letter">I</span><span class="logo-letter">B</span><span class="logo-letter">I</span><span class="logo-letter">D</span>
+    </div>
+  </div>
+  <nav class="nav">
+    <button onclick="startMediBidAuction()">LAUNCH AUCTION TEST</button>
+    <a href="#">AGENT PORTAL</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>GLOBAL MEDICAL REVERSE AUCTION</h1>
+  <p>Clinics bid down in real-time. The most efficient patient acquisition system ever built.</p>
+</div>
+
+<!-- YOUR AUCTION BANNER INTEGRATED -->
+<div class="auction-banner" id="auctionBox">
+  <div style="font-size: 10px; color: #9ca3af; letter-spacing: 2px;">LIVE AUCTION WINDOW</div>
+  <div class="timer-display" id="timer">03:00</div>
+  <div class="bid-display" id="bidDisplay">$5,000</div>
+</div>
+
+<div class="customer-form">
+  <div class="form-group">
+    <label>Clinic Action</label>
+    <p style="color: #9ca3af; margin: 10px 0; font-size: 13px;">Secure this lead at the current bid before a competitor undercuts you.</p>
+    <button class="bid-button" onclick="handleWin('Global Clinic Alpha')">ACCEPT BID & CLOSE</button>
+  </div>
+</div>
+
+<script>
+// --- MEDIBID ENGINE LOGIC ---
+const auctionConfig = {
+    start: 5000,
+    floor: 3800,
+    duration: 180, // 3 Minutes
+    interval: 10   // Drop every 10 secs
+};
+
+let currentPrice = auctionConfig.start;
+let timeLeft = auctionConfig.duration;
+let auctionActive = false;
+let timerLoop;
+
+// Math to hit floor exactly at 0:00
+const dropAmount = (auctionConfig.start - auctionConfig.floor) / (auctionConfig.duration / auctionConfig.interval);
+
+function startMediBidAuction() {
+    if(auctionActive) return;
+    auctionActive = true;
+    
+    timerLoop = setInterval(() => {
+        timeLeft--;
+        
+        // 1. Update Timer UI
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+        // 2. The "Boolean" Drop Trigger
+        if (timeLeft % auctionConfig.interval === 0 && currentPrice > auctionConfig.floor) {
+            currentPrice -= dropAmount;
+            const priceBox = document.getElementById('bidDisplay');
+            priceBox.innerText = `$${Math.round(currentPrice).toLocaleString()}`;
+            
+            // Subtle "Jossle" Effect for Urgency
+            document.getElementById('auctionBox').style.transform = "scale(1.05)";
+            setTimeout(() => { document.getElementById('auctionBox').style.transform = "scale(1)"; }, 300);
+        }
+
+        if (timeLeft <= 0) {
+            clearInterval(timerLoop);
+            auctionActive = false;
+            alert("Auction Ended - No Winner");
+        }
+    }, 1000);
+}
+
+function handleWin(clinicName) {
+    if(!auctionActive) return alert("Auction is not live.");
+    clearInterval(timerLoop);
+    auctionActive = false;
+    
+    const finalPrice = Math.round(currentPrice);
+    const comm = finalPrice * 0.08; // 8% Procedure Fee
+    
+    alert(`SOLD! ${clinicName} locked in patient at $${finalPrice}.\nPlatform Fee: $${comm}`);
+}
+</script>
+
+</body>
+</html>

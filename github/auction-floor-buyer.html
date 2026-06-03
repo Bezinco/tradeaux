@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://*.googleapis.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://firestore.googleapis.com;">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>TradeAux • Final Auction Floor | 20 Cards + Winner's Circle</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --neon-green: #7CFC00;
+      --gold: #FFD966;
+      --silver: #C0C7D9;
+      --bronze: #CD7F32;
+      --card-bg: linear-gradient(145deg, #0B1122, #030712);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #F0F3FA;
+      background: radial-gradient(ellipse at 20% 30%, rgba(124,252,0,0.08), transparent 55%),
+                  radial-gradient(ellipse at 85% 70%, rgba(255,217,102,0.08), transparent 60%),
+                  linear-gradient(125deg, #03050C 0%, #0A111F 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: radial-gradient(circle at 30% 20%, rgba(124,252,0,0.04) 0%, transparent 45%),
+                  radial-gradient(circle at 80% 70%, rgba(255,217,102,0.04) 0%, transparent 50%);
+      animation: slowDrift 24s infinite alternate ease-in-out;
+      z-index: 0;
+    }
+
+    @keyframes slowDrift {
+      0% { transform: translate(0%, 0%) scale(1); opacity: 0.5; }
+      100% { transform: translate(1.5%, 1%) scale(1.03); opacity: 1; }
+    }
+
+    .dynamic-bg-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image: radial-gradient(#7CFC00 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.04;
+      animation: floatParticles 32s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes floatParticles {
+      0% { background-position: 0 0; }
+      100% { background-position: 120px 120px; }
+    }
+
+    .glass-header {
+      backdrop-filter: blur(14px);
+      background: rgba(3, 5, 12, 0.7);
+      border-bottom: 1px solid rgba(124,252,0,0.35);
+      padding: 12px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 12;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, #7CFC00, #00D4FF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #BFC9E0;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      border: 1px solid rgba(124,252,0,0.3);
+      transition: 0.2s;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .nav-links a:hover {
+      border-color: var(--neon-green);
+      color: var(--neon-green);
+      box-shadow: 0 0 12px rgba(124,252,0,0.3);
+    }
+
+    .auction-cockpit {
+      max-width: 1100px;
+      margin: 24px auto 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .timer-panel {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 8px 28px;
+      text-align: center;
+      border: 1px solid rgba(124,252,0,0.5);
+    }
+
+    .round-label {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: #FFD966;
+    }
+
+    .timer-digits {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--neon-green);
+      text-shadow: 0 0 8px rgba(124,252,0,0.5);
+    }
+
+    .timer-digits.warning {
+      color: #FF4D4D;
+      animation: pulseRed 0.7s infinite;
+    }
+
+    @keyframes pulseRed {
+      0% { opacity: 1; text-shadow: 0 0 0px red; }
+      100% { opacity: 0.9; text-shadow: 0 0 8px #ff4d4d; }
+    }
+
+    .stats-group {
+      display: flex;
+      gap: 28px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 28px;
+      border-radius: 60px;
+      backdrop-filter: blur(6px);
+    }
+
+    .stat { text-align: center; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94A3B8; }
+    .stat-value { font-weight: 800; font-size: 1.3rem; color: var(--neon-green); }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin: 16px 24px 24px;
+      justify-content: center;
+      z-index: 10;
+      position: relative;
+    }
+
+    .btn {
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 10px 32px;
+      border-radius: 48px;
+      cursor: pointer;
+      transition: 0.2s;
+      background: rgba(20, 30, 50, 0.9);
+      color: white;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      color: #010101;
+      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,252,0,0.4); }
+    .btn-reset { background: linear-gradient(105deg, #9b2c2c, #e54848); }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 165px));
+      gap: 22px;
+      justify-content: center;
+      max-width: 980px;
+      margin: 28px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 8;
+    }
+
+    @media (max-width: 920px) { .cards-grid { grid-template-columns: repeat(4, minmax(0, 165px)); max-width: 740px; } }
+    @media (max-width: 720px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 180px)); gap: 20px; } }
+    @media (max-width: 460px) { .cards-grid { grid-template-columns: repeat(1, 190px); } }
+
+    .market-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      border: 1px solid rgba(124,252,0,0.35);
+      padding: 14px 10px 14px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      position: relative;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 12px 20px -12px black;
+    }
+
+    .market-card:hover {
+      border-color: var(--neon-green);
+      transform: translateY(-5px);
+      box-shadow: 0 25px 30px -14px rgba(124,252,0,0.25);
+    }
+
+    .rank-flag {
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 40px;
+      z-index: 3;
+      backdrop-filter: blur(4px);
+    }
+    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; box-shadow: 0 0 8px gold; }
+    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+
+    .verified-badge {
+      position: absolute;
+      top: -6px;
+      right: 10px;
+      background: rgba(0,0,0,0.85);
+      border-radius: 30px;
+      padding: 3px 10px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--neon-green);
+      border: 1px solid #7CFC00;
+      backdrop-filter: blur(4px);
+      z-index: 3;
+    }
+
+    .product-visual { text-align: center; margin-bottom: 10px; background: rgba(0, 0, 0, 0.25); border-radius: 40px; padding: 8px 6px; }
+    .product-emoji { font-size: 2.8rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+    .card-title { font-weight: 800; font-size: 0.95rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .origin { font-size: 0.65rem; text-align: center; color: #9ca6bb; margin-bottom: 8px; }
+    .price-row { display: flex; justify-content: center; gap: 8px; align-items: baseline; margin: 6px 0 5px; }
+    .current-price { font-weight: 800; font-size: 1.2rem; color: #FFE484; }
+    .change-badge { font-size: 0.7rem; font-weight: 600; }
+    .up { color: #7CFC00; }
+    .down { color: #FF5E5E; }
+    .heat-bar-container { margin: 8px 0 6px; background: #1e293b; border-radius: 12px; height: 5px; overflow: hidden; }
+    .heat-fill { height: 100%; background: linear-gradient(90deg, #7CFC00, #FFD966); border-radius: 12px; }
+    .card-meta { display: flex; justify-content: space-between; font-size: 0.62rem; margin-top: 8px; color: #a0aec0; }
+    .score-pill { background: #1E293B; padding: 2px 8px; border-radius: 40px; font-weight: 700; font-size: 0.65rem; color: #7CFC00; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-card {
+      background: #0B1122;
+      max-width: 500px;
+      width: 92%;
+      border-radius: 40px;
+      border: 1px solid #7CFC00;
+      padding: 28px 24px;
+      position: relative;
+      box-shadow: 0 40px 70px black;
+    }
+    .modal-close {
+      position: absolute;
+      right: 22px;
+      top: 18px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .modal-header { text-align: center; margin-bottom: 20px; }
+    .modal-emoji { font-size: 56px; margin-bottom: 4px; }
+    .modal-title-xl { font-size: 26px; font-weight: 800; }
+    .modal-coop-line { font-size: 13px; color: var(--neon-green); margin-top: 6px; }
+    .contact-block { background: #03050C; border-radius: 24px; padding: 14px 18px; margin: 16px 0; font-size: 0.8rem; }
+    .contact-row { display: flex; gap: 10px; margin: 8px 0; align-items: center; }
+    .top5-badge { background: rgba(255,217,102,0.2); padding: 4px 12px; border-radius: 60px; font-size: 0.7rem; font-weight: 600; display: inline-block; margin-bottom: 12px; }
+    .winner-celebration {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: #071126;
+      border: 3px solid #FFD966;
+      border-radius: 52px;
+      padding: 32px 48px;
+      text-align: center;
+      z-index: 1100;
+      transition: 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+      opacity: 0;
+      pointer-events: none;
+      backdrop-filter: blur(20px);
+      width: 320px;
+    }
+    .winner-celebration.show { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+    .toast-msg {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(70px);
+      background: #0a1424cc;
+      backdrop-filter: blur(12px);
+      padding: 10px 24px;
+      border-radius: 60px;
+      font-size: 0.8rem;
+      border-left: 4px solid #7CFC00;
+      transition: 0.2s;
+      opacity: 0;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+    footer { text-align: center; padding: 20px; font-size: 10px; color: #5c6b8a; border-top: 1px solid rgba(124,252,0,0.15); margin-top: 20px; position: relative; z-index: 5; }
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+<base target="_blank">
+</head>
+<body>
+<div class="dynamic-bg-overlay"></div>
+
+<div class="glass-header">
+  <div class="logo">⚡ TRADEAUX • AUCTION FLOOR</div>
+  <div class="nav-links"><a href="#">LIVE</a><a href="#">CO-OPS</a><a href="#">LEADERBOARD</a></div>
+</div>
+
+<div class="auction-cockpit">
+  <div class="timer-panel"><div class="round-label" id="roundLabel">ROUND 1 • TOP 5</div><div class="timer-digits" id="timerMain">03:00</div></div>
+  <div class="stats-group"><div class="stat"><div class="stat-label">ACTIVE</div><div class="stat-value" id="statActive">20</div></div><div class="stat"><div class="stat-label">🔥 TOP SCORE</div><div class="stat-value" id="statTopScore">0%</div></div><div class="stat"><div class="stat-label">❌ ELIMINATED</div><div class="stat-value" id="statElim">0</div></div></div>
+</div>
+<div class="controls"><button class="btn btn-primary" id="startBtn">▶ START AUCTION</button><button class="btn btn-reset" id="resetBtn">⟳ RESET (20 CARDS)</button></div>
+<div class="cards-grid" id="cardsGrid"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card"><button class="modal-close" id="closeModalBtn" aria-label="Close modal">✕</button>
+    <div class="modal-header"><div class="modal-emoji" id="modalEmoji">🌾</div><div class="modal-title-xl" id="modalName">Product</div><div class="modal-coop-line" id="modalOrigin">Co-op · Origin</div></div>
+    <div style="text-align:center; margin-bottom:12px;"><span style="font-size:2rem; font-weight:800; color:#FFD966;" id="modalPrice">$0.00</span><span id="modalChange" style="margin-left:12px;">+0%</span></div>
+    <div class="contact-block"><div class="top5-badge" id="modalTop5Msg">🌟 Finalist: Top 5 Achieved</div><div>📞 <strong>Seller contact</strong></div><div class="contact-row">📧 <span id="modalEmail">coop@example.com</span></div><div class="contact-row">📱 <span id="modalPhone">+1 (555) 220-1234</span></div><div class="contact-row" style="margin-top:6px;">🏷️ <span id="modalAuctionRank">Auction rank: #1</span></div></div>
+    <div style="background:#03050C; border-radius: 20px; padding: 12px; margin-top:8px;"><div style="font-weight:600;">📊 Boolean Score</div><div style="background:#1e293b; border-radius:10px; margin:8px 0;"><div id="scoreBarFill" style="height:6px; width:0%; background:#7CFC00; border-radius:10px;"></div></div><div id="modalScoreDetail">Overall: 0%</div></div>
+    <div id="bidSection" style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(124,252,0,0.3);display:none;">
+      <div style="font-weight:600;margin-bottom:8px;">💰 Place Your Bid</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="color:#9ca3af;">$</span>
+        <input type="number" id="bidAmountInput" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(124,252,0,0.3);border-radius:8px;padding:8px;color:white;font-family:'Inter',sans-serif;" placeholder="Per MT">
+        <button id="placeBidBtn" style="background:linear-gradient(105deg,#10b981,#2dd4bf);border:none;padding:8px 16px;border-radius:20px;font-weight:700;cursor:pointer;color:#010101;">💰 PLACE BID ($25)</button>
+      </div>
+      <div style="font-size:0.7rem;color:#9ca3af;margin-top:6px;">$25 fee. Bid in USD per metric ton.</div>
+    </div>
+  </div>
+</div>
+
+<div class="winner-celebration" id="winnerOverlay"><div style="font-size: 58px;">🏆</div><div style="font-size: 26px; font-weight:800;" id="winnerName"></div><div id="winnerScore" style="color:#7CFC00;"></div><div id="winnerPrice"></div><button style="margin-top:14px; background:#1f2a3a; border:none; padding:6px 20px; border-radius:40px; cursor:pointer;" id="winnerCloseBtn">Close</button></div>
+<div class="toast-msg" id="toastMsg" role="status" aria-live="polite"></div>
+<<footer>⚡ 20 cards → 5 → 3 → 2 → 1 • Gold/Silver/Bronze badges • Click any card for seller contact & rank</footer>
+
+<script>
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const functions = firebase.functions();
+
+// ========== STATE ==========
+let currentUser = null;
+let activeBriefs = [];
+let allBids = [];
+let myBids = [];
+let auctionActive = false;
+let timerSeconds = 180;
+let timerInterval = null;
+let priceInterval = null;
+let elimCounter = 0;
+let currentRound = 1;
+let animationLock = false;
+let auctionEnded = false;
+let selectedBrief = null;
+
+// ========== AUTH GUARD ==========
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  await initAuction();
+});
+
+// ========== LOAD DATA ==========
+async function initAuction() {
+  showToast('Loading auction data...');
+  await loadActiveBriefs();
+  await loadAllBids();
+  await loadMyBids();
+  if (activeBriefs.length === 0) {
+    showToast('No active auctions', true);
+    document.getElementById('cardsGrid').innerHTML = '<div style="color:#9ca3af;text-align:center;padding:40px;">No active seller briefs. Check back later.</div>';
+    return;
+  }
+  recalcAndSort();
+  renderGridWithJostle();
+  updateStatsUI();
+  showToast(`${activeBriefs.length} briefs loaded. Click START.`);
+}
+
+async function loadActiveBriefs() {
+  const snapshot = await db.collection('seller_briefs').where('status', '==', 'active').orderBy('createdAt', 'desc').limit(20).get();
+  if (snapshot.empty) {
+    const upcoming = await db.collection('seller_briefs').where('status', '==', 'upcoming').orderBy('createdAt', 'desc').limit(20).get();
+    activeBriefs = upcoming.docs.map(doc => formatBrief(doc.id, doc.data()));
+  } else {
+    activeBriefs = snapshot.docs.map(doc => formatBrief(doc.id, doc.data()));
+  }
+}
+
+function formatBrief(id, data) {
+  const commodities = {
+    'Coconut': { emoji: '🥥', basePrice: 230 }, 'Coffee': { emoji: '☕', basePrice: 185 },
+    'Cocoa': { emoji: '🍫', basePrice: 2850 }, 'Vanilla': { emoji: '🌿', basePrice: 65 },
+    'Peanuts': { emoji: '🥜', basePrice: 1.24 }, 'Almonds': { emoji: '🌰', basePrice: 6.48 },
+    'Cashews': { emoji: '🫘', basePrice: 3.22 }, 'Mangoes': { emoji: '🥭', basePrice: 1.18 },
+    'Bananas': { emoji: '🍌', basePrice: 0.52 }, 'Oranges': { emoji: '🍊', basePrice: 0.48 },
+    'Rice': { emoji: '🌾', basePrice: 450 }, 'Wheat': { emoji: '🌾', basePrice: 280 },
+    'Soybeans': { emoji: '🫘', basePrice: 520 }, 'Turmeric': { emoji: '🟡', basePrice: 1.85 },
+    'Cinnamon': { emoji: '🪵', basePrice: 3.45 }, 'Black Pepper': { emoji: '🌶️', basePrice: 2.95 },
+    'Ginger': { emoji: '🫚', basePrice: 0.95 }, 'Coconut Oil': { emoji: '🛢️', basePrice: 1.25 },
+    'Olive Oil': { emoji: '🫒', basePrice: 5.20 }, 'Palm Oil': { emoji: '🛢️', basePrice: 0.85 }
+  };
+  const comm = commodities[data.commodity] || { emoji: '📦', basePrice: 100 };
+  const estPrice = data.est_price || comm.basePrice;
+  const bidCount = data.bid_count || 0;
+  const quantity = data.quantity_mt || 100;
+  return {
+    id: id, briefId: id, name: `${data.variety || data.commodity} ${data.commodity}`,
+    coop: data.coop_name || 'Unknown Co-op', origin: data.origin || data.fob_port || 'Unknown',
+    price: estPrice, basePrice: estPrice, heat: Math.min(95, Math.max(10, bidCount * 2 + 20)),
+    bids: bidCount, volume: quantity * 1000, momentum: 0, change: 0, booleanScore: 0,
+    cropEmoji: comm.emoji, email: data.sellerEmail || 'contact@tradeaux.com',
+    phone: data.sellerPhone || '+1 (800) 555-1212', commodity: data.commodity,
+    variety: data.variety, grade: data.grade, quantity_mt: quantity, sellerId: data.sellerId
+  };
+}
+
+async function loadAllBids() {
+  const briefIds = activeBriefs.map(b => b.briefId);
+  if (briefIds.length === 0) return;
+  allBids = [];
+  for (let i = 0; i < briefIds.length; i += 10) {
+    const chunk = briefIds.slice(i, i + 10);
+    const snapshot = await db.collection('bids').where('brief_id', 'in', chunk).where('status', '==', 'pending').get();
+    allBids.push(...snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  }
+  activeBriefs.forEach(brief => {
+    const briefBids = allBids.filter(b => b.brief_id === brief.briefId);
+    brief.bids = briefBids.length;
+    brief.myBid = briefBids.find(b => b.buyer_id === currentUser?.uid);
+  });
+}
+
+async function loadMyBids() {
+  if (!currentUser) return;
+  const snapshot = await db.collection('bids').where('buyer_id', '==', currentUser.uid).where('status', '==', 'pending').get();
+  myBids = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+// ========== SCORING ==========
+function computeScore(card, allCards) {
+  const maxPrice = Math.max(...allCards.map(c => c.price), 0.01);
+  const priceScore = card.price / maxPrice;
+  const heatScore = Math.min(1, card.heat / 100);
+  const maxBids = Math.max(...allCards.map(c => c.bids), 1);
+  const bidScore = card.bids / maxBids;
+  const maxVol = Math.max(...allCards.map(c => c.volume), 1);
+  const volScore = card.volume / maxVol;
+  const momentumNorm = Math.min(1, Math.max(0, (card.momentum + 0.5)));
+  return (priceScore * 0.4) + (heatScore * 0.2) + (bidScore * 0.2) + (volScore * 0.1) + (momentumNorm * 0.1);
+}
+
+function recalcAndSort() {
+  for (let c of activeBriefs) c.booleanScore = computeScore(c, activeBriefs);
+  activeBriefs.sort((a, b) => b.booleanScore - a.booleanScore);
+}
+
+function getKeepCount() {
+  const len = activeBriefs.length;
+  if (len >= 20) return 5;
+  if (len >= 5) return 3;
+  if (len >= 3) return 2;
+  return 1;
+}
+
+// ========== RENDER ==========
+function renderGridWithJostle() {
+  const container = document.getElementById('cardsGrid');
+  const oldChildren = Array.from(container.children);
+  const posMap = new Map();
+  oldChildren.forEach(el => {
+    let id = el.getAttribute('data-id');
+    if (id) { let rect = el.getBoundingClientRect(); posMap.set(id, { left: rect.left, top: rect.top }); }
+  });
+  container.innerHTML = '';
+  activeBriefs.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = 'market-card';
+    div.setAttribute('data-id', card.id);
+    const rankVal = idx + 1;
+    const rankHtml = rankVal <= 3 ? `<div class="rank-flag ${rankVal === 1 ? 'rank-1' : rankVal === 2 ? 'rank-2' : 'rank-3'}">#${rankVal}</div>` : `<div class="rank-flag" style="background:#1e293b;">#-</div>`;
+    const changePct = card.change || 0;
+    const changeClass = changePct >= 0 ? 'up' : 'down';
+    const heatPercent = Math.min(100, Math.max(8, card.heat));
+    const hasMyBid = card.myBid ? '💚' : '';
+    div.innerHTML = `${rankHtml}<div class="verified-badge">✓ Co-op Verified</div><div class="product-visual"><div class="product-emoji">${card.cropEmoji || "📦"}</div></div><div class="card-title">${card.name} ${hasMyBid}</div><div class="origin">${card.origin}</div><div class="price-row"><span class="current-price">$${card.price.toFixed(2)}</span><span class="change-badge ${changeClass}">${changePct >= 0 ? '+' : ''}${changePct.toFixed(1)}%</span></div><div class="heat-bar-container"><div class="heat-fill" style="width: ${heatPercent}%;"></div></div><div class="card-meta"><span>📊 ${card.bids} bids</span><span class="score-pill">⚡ ${(card.booleanScore * 100).toFixed(0)}%</span></div><div class="card-meta" style="margin-top:2px;"><span>📦 ${card.volume.toLocaleString()} kg</span><span>🔥 ${Math.round(card.heat)}°</span></div>`;
+    div.onclick = (e) => { e.stopPropagation(); openModal(card, idx + 1); };
+    container.appendChild(div);
+  });
+  requestAnimationFrame(() => {
+    const newCards = Array.from(container.children);
+    newCards.forEach(el => {
+      let id = el.getAttribute('data-id');
+      let old = posMap.get(id);
+      if (old) { let rect = el.getBoundingClientRect(); let dx = old.left - rect.left, dy = old.top - rect.top; if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { el.style.transform = `translate(${dx}px, ${dy}px)`; el.style.transition = 'none'; el.offsetHeight; el.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1)'; el.style.transform = ''; } }
+    });
+  });
+  updateStatsUI();
+}
+
+function updateStatsUI() {
+  document.getElementById('statActive').innerText = activeBriefs.length;
+  document.getElementById('statElim').innerText = elimCounter;
+  document.getElementById('roundLabel').innerHTML = `ROUND ${currentRound} • TOP ${getKeepCount()}`;
+  document.getElementById('statTopScore').innerText = activeBriefs.length ? `${(activeBriefs[0].booleanScore * 100).toFixed(1)}%` : "0%";
+}
+
+// ========== MARKET SIMULATION ==========
+function updateMarket() {
+  if (!auctionActive || animationLock || auctionEnded) return;
+  for (let card of activeBriefs) {
+    let volatility = (Math.random() - 0.5) * 3;
+    let newPrice = card.price * (1 + volatility / 100);
+    newPrice = Math.max(card.basePrice * 0.5, Math.min(card.basePrice * 1.5, newPrice));
+    let old = card.price;
+    card.price = parseFloat(newPrice.toFixed(2));
+    card.change = ((card.price - old) / old) * 100;
+    if (Math.abs(card.change) > 2) card.heat = Math.min(96, card.heat + 1);
+    else card.heat = Math.min(95, Math.max(12, card.heat + (Math.random() - 0.5) * 3));
+    card.momentum = Math.min(0.92, Math.max(-0.85, card.momentum + (Math.random() - 0.5) * 0.15));
+  }
+  recalcAndSort();
+  renderGridWithJostle();
+}
+
+// ========== TIMER & ELIMINATION ==========
+function stopAllIntervals() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (priceInterval) { clearInterval(priceInterval); priceInterval = null; }
+}
+
+async function eliminationStep() {
+  if (!auctionActive || animationLock || auctionEnded) return;
+  animationLock = true;
+  const keep = getKeepCount();
+  const eliminatedCount = activeBriefs.length - keep;
+  if (eliminatedCount <= 0) { animationLock = false; return; }
+  elimCounter += eliminatedCount;
+  activeBriefs = activeBriefs.slice(0, keep);
+  currentRound++;
+  updateStatsUI();
+  showToast(`⚡ ROUND ${currentRound - 1} ENDED — ${eliminatedCount} eliminated, ${activeBriefs.length} advance`);
+  recalcAndSort();
+  renderGridWithJostle();
+  timerSeconds = 180;
+  updateTimerDisplay();
+  if (activeBriefs.length === 1 && !auctionEnded) {
+    auctionActive = false; auctionEnded = true; stopAllIntervals();
+    showWinner(activeBriefs[0]);
+    showToast(`🏆 AUCTION FINISHED! Winner: ${activeBriefs[0].name}`);
+  }
+  animationLock = false;
+}
+
+function updateTimerDisplay() {
+  let mins = Math.floor(timerSeconds / 60), secs = timerSeconds % 60;
+  let el = document.getElementById('timerMain');
+  el.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  if (timerSeconds <= 10) el.classList.add('warning'); else el.classList.remove('warning');
+}
+
+function startTimerLoop() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (!auctionActive || animationLock || auctionEnded) return;
+    if (timerSeconds <= 1) { clearInterval(timerInterval); timerInterval = null; eliminationStep(); }
+    else { timerSeconds--; updateTimerDisplay(); }
+  }, 1000);
+}
+
+function startAuction() {
+  if (auctionActive) { showToast("Auction already live!"); return; }
+  if (auctionEnded) resetInternal();
+  if (activeBriefs.length === 0) { showToast("No briefs to auction", true); return; }
+  auctionActive = true; auctionEnded = false;
+  startTimerLoop();
+  if (priceInterval) clearInterval(priceInterval);
+  priceInterval = setInterval(() => updateMarket(), 4000);
+  showToast("🎬 AUCTION LIVE — Bid now!");
+}
+
+function resetInternal() {
+  stopAllIntervals(); auctionActive = false; auctionEnded = false;
+  elimCounter = 0; currentRound = 1; timerSeconds = 180; updateTimerDisplay();
+  document.getElementById('winnerOverlay').classList.remove('show');
+  initAuction();
+}
+
+function resetAuction() { resetInternal(); showToast("🔄 Reloading..."); }
+
+// ========== PLACE BID (Cloud Function) ==========
+async function placeBid() {
+  if (!currentUser) { showToast('Please sign in', true); return; }
+  if (!selectedBrief) return;
+  const bidAmount = parseFloat(document.getElementById('bidAmountInput').value);
+  if (isNaN(bidAmount) || bidAmount < 1) { showToast('Invalid bid amount', true); return; }
+  const btn = document.getElementById('placeBidBtn');
+  btn.disabled = true; btn.textContent = 'Placing...';
+  try {
+    const placeBidFn = functions.httpsCallable('placeBid');
+    const result = await placeBidFn({ briefId: selectedBrief.briefId, amount: bidAmount, quantity: selectedBrief.quantity_mt });
+    if (result.data.success) {
+      showToast(`Bid placed: $${bidAmount}/MT on ${selectedBrief.name}`);
+      closeModalFn();
+      await loadAllBids(); await loadMyBids();
+      recalcAndSort(); renderGridWithJostle();
+    } else { showToast(result.data.error || 'Bid failed', true); }
+  } catch (err) { showToast('Bid error: ' + err.message, true); }
+  finally { btn.disabled = false; btn.textContent = '💰 PLACE BID ($25)'; }
+}
+
+// ========== MODALS ==========
+function openModal(card, rank) {
+  selectedBrief = card;
+  const modal = document.getElementById('modalOverlay');
+  document.getElementById('modalEmoji').innerHTML = card.cropEmoji || "📦";
+  document.getElementById('modalName').innerHTML = card.name;
+  document.getElementById('modalOrigin').innerHTML = `${card.coop} • ${card.origin}`;
+  document.getElementById('modalPrice').innerHTML = `$${card.price.toFixed(2)}`;
+  let changeSpan = document.getElementById('modalChange');
+  changeSpan.innerHTML = `${card.change >= 0 ? '+' : ''}${card.change?.toFixed(1) || 0}%`;
+  changeSpan.style.color = card.change >= 0 ? '#7CFC00' : '#FF5E5E';
+  document.getElementById('scoreBarFill').style.width = `${card.booleanScore * 100}%`;
+  document.getElementById('modalScoreDetail').innerHTML = `Score: ${(card.booleanScore * 100).toFixed(1)}%`;
+  document.getElementById('modalEmail').innerText = card.email || "coop@tradeaux.com";
+  document.getElementById('modalPhone').innerText = card.phone || "+1 (800) 555-1212";
+  let top5msg = rank <= 5 ? "🏅 Finalist: Top 5" : "📈 Round " + currentRound;
+  if (rank === 1) top5msg = "🥇 GOLD • Top Rank"; else if (rank === 2) top5msg = "🥈 SILVER"; else if (rank === 3) top5msg = "🥉 BRONZE";
+  document.getElementById('modalTop5Msg').innerHTML = top5msg;
+  document.getElementById('modalAuctionRank').innerHTML = `Rank: #${rank} ${rank === 1 ? '👑' : ''}`;
+  const bidSection = document.getElementById('bidSection');
+  if (bidSection) { bidSection.style.display = 'block'; document.getElementById('bidAmountInput').value = Math.round(card.price); }
+  modal.classList.add('active');
+}
+
+function closeModalFn() { document.getElementById('modalOverlay').classList.remove('active'); selectedBrief = null; }
+function showWinner(winner) {
+  let w = document.getElementById('winnerOverlay');
+  document.getElementById('winnerName').innerText = winner.name;
+  document.getElementById('winnerScore').innerHTML = `⭐ Score: ${(winner.booleanScore * 100).toFixed(1)}%`;
+  document.getElementById('winnerPrice').innerHTML = `🏆 $${winner.price.toFixed(2)} · ${winner.origin}`;
+  w.classList.add('show');
+}
+function showToast(msg, isError = false) {
+  let t = document.getElementById('toastMsg'); t.innerText = msg;
+  t.style.borderLeftColor = isError ? '#ff3b3b' : '#7CFC00';
+  t.classList.add('visible'); setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+// ========== EVENTS ==========
+document.getElementById('startBtn').addEventListener('click', startAuction);
+document.getElementById('resetBtn').addEventListener('click', resetAuction);
+document.getElementById('closeModalBtn').addEventListener('click', closeModalFn);
+document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('modalOverlay')) closeModalFn(); });
+document.getElementById('placeBidBtn').addEventListener('click', placeBid);
+document.getElementById('winnerCloseBtn').addEventListener('click', () => { document.getElementById('winnerOverlay').classList.remove('show'); });
+
+showToast('Loading...');
+</script>
+</body>
+</html>

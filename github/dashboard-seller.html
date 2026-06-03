@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Seller Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --neon-green: #7CFC00;
+      --gold: #FFD966;
+      --cyan: #00ced1;
+      --red: #FF4D4D;
+      --muted: #9ca3af;
+      --bg: #020617;
+      --card-bg: linear-gradient(145deg, rgba(15,32,64,0.9), rgba(2,6,23,0.98));
+    }
+    body {
+      background: var(--bg);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #F0F3FA;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .bg-waves {
+      position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+    }
+    .wave-bg {
+      position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.12;
+      animation: waveBgDrift 24s ease-in-out infinite; border-radius: 50%;
+    }
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.3), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,217,102,0.25), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift {
+      0% { transform: translate(0,0) scale(1); opacity: 0.1; }
+      50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.18; }
+      100% { transform: translate(-30px,20px) scale(1); opacity: 0.1; }
+    }
+
+    /* Header */
+    .glass-header {
+      backdrop-filter: blur(14px);
+      background: rgba(3,5,12,0.8);
+      border-bottom: 1px solid rgba(124,252,0,0.3);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00ced1, #7CFC00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .wallet-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,206,209,0.1);
+      padding: 6px 16px;
+      border-radius: 40px;
+      border: 1px solid rgba(0,206,209,0.3);
+      font-size: 14px;
+    }
+    .wallet-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+    .btn-small {
+      background: linear-gradient(135deg, #00ced1, #00ff7f);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #000;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #BFC9E0;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--red); color: var(--red); }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(124,252,0,0.25);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(8px);
+    }
+    .section-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--neon-green);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header .badge {
+      background: rgba(0,206,209,0.2);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--cyan);
+    }
+
+    /* Forms */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-input, .form-select {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(124,252,0,0.3);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: white;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--neon-green);
+      box-shadow: 0 0 0 3px rgba(124,252,0,0.1);
+    }
+    .btn-primary {
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      border: none;
+      padding: 14px 32px;
+      border-radius: 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: #010101;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Active Brief */
+    .brief-display {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .brief-stat {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .brief-stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .brief-stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--neon-green);
+    }
+    .brief-stat-value.small {
+      font-size: 14px;
+      color: #F0F3FA;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-active { background: rgba(124,252,0,0.15); color: var(--neon-green); border: 1px solid rgba(124,252,0,0.3); }
+    .status-auctioning { background: rgba(0,206,209,0.15); color: var(--cyan); border: 1px solid rgba(0,206,209,0.3); animation: pulse 2s infinite; }
+    .status-ended { background: rgba(255,77,77,0.15); color: var(--red); border: 1px solid rgba(255,77,77,0.3); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    .timer-display {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--neon-green);
+      text-align: center;
+      margin: 16px 0;
+      text-shadow: 0 0 10px rgba(124,252,0,0.3);
+    }
+    .timer-display.warning { color: var(--red); animation: pulseRed 0.7s infinite; }
+    @keyframes pulseRed { 0% { opacity: 1; } 100% { opacity: 0.8; } }
+
+    /* Bids Table */
+    .bids-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .bids-table th {
+      text-align: left;
+      padding: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(124,252,0,0.2);
+    }
+    .bids-table td {
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+    .bids-table tr:hover { background: rgba(124,252,0,0.05); }
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; }
+    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+    .rank-other { background: rgba(30,41,59,0.8); color: #94A3B8; }
+    .btn-accept {
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      border: none;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12px;
+      color: #010101;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-accept:hover { transform: scale(1.05); box-shadow: 0 0 12px rgba(124,252,0,0.4); }
+    .btn-accept:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* History */
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+    .history-row:hover { background: rgba(124,252,0,0.05); }
+    .history-col { flex: 1; }
+    .history-col.name { flex: 1.5; }
+    .history-col.price { color: var(--gold); font-weight: 700; }
+    .history-col.date { color: var(--muted); font-size: 12px; }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15,32,64,0.98);
+      backdrop-filter: blur(12px);
+      padding: 14px 28px;
+      border-radius: 40px;
+      font-size: 14px;
+      border-left: 4px solid var(--neon-green);
+      transition: 0.3s;
+      opacity: 0;
+      z-index: 2000;
+      white-space: nowrap;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-left-color: var(--red); }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .brief-display { grid-template-columns: repeat(2, 1fr); }
+      .bids-table th:nth-child(4), .bids-table td:nth-child(4) { display: none; }
+      .history-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .timer-display { font-size: 24px; }
+      .glass-header { padding: 10px 12px; }
+      .logo-text { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="glass-header">
+  <div class="logo-text">TRADEAUX</div>
+  <div class="header-actions">
+    <div class="wallet-pill">
+      <span style="font-size:11px;color:var(--muted);">WALLET</span>
+      <span class="wallet-amount" id="walletAmount">$0.00</span>
+    </div>
+    <button class="btn-small" id="depositBtn">+ Deposit</button>
+    <button class="btn-outline" id="signOutBtn">Sign Out</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SECTION 1: CREATE NEW BRIEF -->
+  <div class="section-card" id="createSection">
+    <div class="section-header">📦 CREATE NEW BRIEF</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">Category *</label>
+        <select class="form-select" id="categorySelect">
+          <option value="">Select category...</option>
+          <option value="fruits">Fresh Fruits</option>
+          <option value="vegetables">Fresh Vegetables</option>
+          <option value="grains">Grains & Cereals</option>
+          <option value="legumes">Legumes & Beans</option>
+          <option value="nuts">Nuts & Kernels</option>
+          <option value="spices">Spices & Herbs</option>
+          <option value="coffee">Coffee, Tea & Cocoa</option>
+          <option value="roots">Roots & Tubers</option>
+          <option value="oils">Bulk Oils</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Product *</label>
+        <select class="form-select" id="productSelect" disabled>
+          <option value="">Select product...</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Variety *</label>
+        <select class="form-select" id="varietySelect" disabled>
+          <option value="">Select variety...</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Quantity (MT) *</label>
+        <input type="number" class="form-input" id="quantityInput" min="1" value="100">
+      </div>
+      <div class="form-field">
+        <label class="form-label">FOB Port *</label>
+        <input type="text" class="form-input" id="fobPort" placeholder="e.g., Colombo, Sri Lanka">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Origin Country *</label>
+        <input type="text" class="form-input" id="originCountry" placeholder="e.g., Sri Lanka">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Harvest Date</label>
+        <input type="month" class="form-input" id="harvestDate">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Quality Grade *</label>
+        <select class="form-select" id="gradeSelect">
+          <option value="">Select grade...</option>
+          <option value="Grade A">Grade A (Premium)</option>
+          <option value="Grade B">Grade B (Standard)</option>
+          <option value="Grade C">Grade C (Processing)</option>
+          <option value="Organic Certified">Organic Certified</option>
+        </select>
+      </div>
+      <div class="form-field" style="grid-column: 1 / -1;">
+        <label class="form-label">Certifications (optional)</label>
+        <input type="text" class="form-input" id="certifications" placeholder="e.g., Organic, Fairtrade, Rainforest Alliance">
+      </div>
+    </div>
+    <button class="btn-primary" id="createBriefBtn" style="margin-top: 20px;">CREATE BRIEF →</button>
+  </div>
+
+  <!-- SECTION 2: ACTIVE BRIEF -->
+  <div class="section-card" id="activeBriefSection">
+    <div class="section-header">📋 ACTIVE BRIEF <span class="badge" id="briefBadge">None</span></div>
+    <div id="activeBriefContent">
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <p>No active brief. Create one above.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: INCOMING BIDS -->
+  <div class="section-card" id="bidsSection">
+    <div class="section-header">🔥 INCOMING BIDS <span class="badge" id="bidCountBadge">0</span></div>
+    <div id="bidsContent">
+      <div class="empty-state">
+        <div class="empty-state-icon">🤖</div>
+        <p>No bids yet. Start auction to receive offers.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: ACCEPTED OFFERS / HISTORY -->
+  <div class="section-card" id="historySection">
+    <div class="section-header">✅ ACCEPTED OFFERS <span class="badge" id="historyCountBadge">0</span></div>
+    <div id="historyContent">
+      <div class="empty-state">
+        <div class="empty-state-icon">📜</div>
+        <p>No accepted offers yet.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Deposit Modal -->
+<div id="depositModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:1000;justify-content:center;align-items:center;">
+  <div style="background:linear-gradient(145deg,#0a1228,#020617);border:2px solid var(--cyan);border-radius:24px;max-width:400px;width:90%;padding:28px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 style="font-family:Orbitron;color:var(--cyan);">💰 Deposit Funds</h3>
+      <button onclick="closeDepositModal()" style="background:none;border:none;color:#9ca3af;font-size:24px;cursor:pointer;">×</button>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Amount (USD)</label>
+      <input type="number" class="form-input" id="depositAmount" min="100" value="500">
+    </div>
+    <button class="btn-primary" id="confirmDepositBtn" style="width:100%;margin-top:16px;">Deposit</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let currentBrief = null;
+let bidsUnsub = null;
+let timerInterval = null;
+let timerSeconds = 180;
+
+// ========== DATA ==========
+const productsByCategory = {
+  fruits: ["Apples","Bananas","Mangoes","Oranges","Pineapples"],
+  vegetables: ["Potatoes","Tomatoes","Onions","Carrots","Broccoli"],
+  grains: ["Corn","Rice","Wheat","Soybeans"],
+  legumes: ["Chickpeas","Lentils","Soybeans"],
+  nuts: ["Almonds","Cashews","Peanuts"],
+  spices: ["Black Pepper","Cinnamon","Turmeric"],
+  coffee: ["Coffee - Arabica","Coffee - Robusta","Tea - Black","Tea - Green"],
+  roots: ["Cassava (Yuca)","Sweet Potatoes","Yams"],
+  oils: ["Coconut Oil","Olive Oil","Palm Oil","Sunflower Seed Oil"]
+};
+
+const varietiesByProduct = {
+  "Apples": ["Gala","Fuji","Granny Smith","Honeycrisp","Pink Lady"],
+  "Bananas": ["Cavendish","Red Banana","Plantain","Lady Finger"],
+  "Mangoes": ["Alphonso","Kent","Tommy Atkins","Ataulfo","Keitt"],
+  "Oranges": ["Navel","Valencia","Blood Orange","Cara Cara"],
+  "Pineapples": ["Smooth Cayenne","Queen","Red Spanish","MD-2"],
+  "Potatoes": ["Russet","Yukon Gold","Red Pontiac","Fingerling"],
+  "Tomatoes": ["Roma","Cherry","Beefsteak","Heirloom"],
+  "Onions": ["Yellow Sweet","Red Cipollini","White Granex","Shallots"],
+  "Carrots": ["Imperator","Nantes","Chantenay","Purple Haze"],
+  "Broccoli": ["Green Magic","Belstar","Marathon","Eastern Crown"],
+  "Corn": ["Sweet Yellow","White Corn","Bi-Color","Flint Corn"],
+  "Rice": ["Basmati","Jasmine","Arborio","Brown Rice","Red Rice"],
+  "Wheat": ["Hard Red Winter","Soft White","Durum","Spring Wheat"],
+  "Soybeans": ["Non-GMO","Organic","High-Protein","Edamame"],
+  "Chickpeas": ["Kabuli","Desi","Black Chickpeas"],
+  "Lentils": ["Brown","Green","Red","Black Beluga"],
+  "Almonds": ["Nonpareil","Carmel","Monterey","Butte"],
+  "Cashews": ["W-180","W-240","W-320","Scorched"],
+  "Peanuts": ["Valencia","Virginia","Runner","Spanish"],
+  "Black Pepper": ["Lampong","Tellicherry","Vietnam Black","Malabar"],
+  "Cinnamon": ["Ceylon","Cassia","Indonesian","Saigon"],
+  "Turmeric": ["Alleppey","Madras","Indonesian","African"],
+  "Coffee - Arabica": ["Typica","Bourbon","Caturra","Gesha","SL28"],
+  "Coffee - Robusta": ["Nganda","Erecta","Conilon","Java Robusta"],
+  "Tea - Black": ["Assam","Darjeeling","Ceylon","Keemun"],
+  "Tea - Green": ["Sencha","Matcha","Dragonwell","Gunpowder"],
+  "Cassava (Yuca)": ["Sweet Cassava","Bitter Cassava","Valencia"],
+  "Sweet Potatoes": ["Beauregard","Covington","Japanese","Purple"],
+  "Yams": ["Dioscorea alata","Yellow Yams","Chinese Yam"],
+  "Coconut Oil": ["Virgin","Refined","Organic Cold-Pressed"],
+  "Olive Oil": ["Extra Virgin","Virgin","Pure","Pomace"],
+  "Palm Oil": ["Crude","RBD","Organic","Sustainable RSPO"],
+  "Sunflower Seed Oil": ["High Oleic","Linoleic","Cold Pressed"]
+};
+
+// ========== AUTH ==========
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  await loadWallet();
+  await loadActiveBrief();
+});
+
+document.getElementById('signOutBtn').onclick = () => auth.signOut().then(() => window.location.href = 'signin.html');
+
+// ========== FORM CHAIN ==========
+document.getElementById('categorySelect').onchange = function() {
+  const cat = this.value;
+  const productSel = document.getElementById('productSelect');
+  const varietySel = document.getElementById('varietySelect');
+  productSel.innerHTML = '<option value="">Select product...</option>';
+  varietySel.innerHTML = '<option value="">Select variety...</option>';
+  varietySel.disabled = true;
+  if (!cat) { productSel.disabled = true; return; }
+  productsByCategory[cat].forEach(p => {
+    const opt = document.createElement('option'); opt.value = p; opt.textContent = p; productSel.appendChild(opt);
+  });
+  productSel.disabled = false;
+};
+
+document.getElementById('productSelect').onchange = function() {
+  const prod = this.value;
+  const varietySel = document.getElementById('varietySelect');
+  varietySel.innerHTML = '<option value="">Select variety...</option>';
+  if (!prod) { varietySel.disabled = true; return; }
+  (varietiesByProduct[prod] || []).forEach(v => {
+    const opt = document.createElement('option'); opt.value = v; opt.textContent = v; varietySel.appendChild(opt);
+  });
+  varietySel.disabled = false;
+};
+
+// ========== CREATE BRIEF ==========
+document.getElementById('createBriefBtn').onclick = async () => {
+  const category = document.getElementById('categorySelect').value;
+  const product = document.getElementById('productSelect').value;
+  const variety = document.getElementById('varietySelect').value;
+  const quantity = parseInt(document.getElementById('quantityInput').value);
+  const fobPort = document.getElementById('fobPort').value.trim();
+  const origin = document.getElementById('originCountry').value.trim();
+  const grade = document.getElementById('gradeSelect').value;
+  const harvestDate = document.getElementById('harvestDate').value || null;
+  const certifications = document.getElementById('certifications').value.trim() || null;
+
+  if (!category || !product || !variety || !quantity || !fobPort || !origin || !grade) {
+    showToast('Please fill all required fields', true); return;
+  }
+
+  try {
+    // End any existing active brief
+    if (currentBrief && currentBrief.status !== 'completed') {
+      await db.collection('seller_briefs').doc(currentBrief.id).update({
+        status: 'ended',
+        endedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    const briefRef = db.collection('seller_briefs').doc();
+    await briefRef.set({
+      sellerId: currentUser.uid,
+      coopName: origin + ' ' + product + ' Co-op',
+      commodity: product,
+      variety: variety,
+      category: category,
+      quantity_mt: quantity,
+      remaining_mt: quantity,
+      grade: grade,
+      origin: origin,
+      fobPort: fobPort,
+      harvestDate: harvestDate,
+      certifications: certifications,
+      minPrice: 0,
+      est_price: 0,
+      duration: 2,
+      status: 'active',
+      fees_collected: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      startedAt: null,
+      endedAt: null
+    });
+
+    showToast('✅ Brief created successfully!');
+    // Reset form
+    document.getElementById('categorySelect').value = '';
+    document.getElementById('productSelect').innerHTML = '<option value="">Select product...</option>';
+    document.getElementById('productSelect').disabled = true;
+    document.getElementById('varietySelect').innerHTML = '<option value="">Select variety...</option>';
+    document.getElementById('varietySelect').disabled = true;
+    document.getElementById('quantityInput').value = '100';
+    document.getElementById('fobPort').value = '';
+    document.getElementById('originCountry').value = '';
+    document.getElementById('harvestDate').value = '';
+    document.getElementById('gradeSelect').value = '';
+    document.getElementById('certifications').value = '';
+
+    await loadActiveBrief();
+  } catch (err) {
+    showToast('Error: ' + err.message, true);
+  }
+};
+
+// ========== LOAD ACTIVE BRIEF ==========
+async function loadActiveBrief() {
+  const snapshot = await db.collection('seller_briefs')
+    .where('sellerId', '==', currentUser.uid)
+    .where('status', 'in', ['active', 'auctioning'])
+    .orderBy('createdAt', 'desc')
+    .limit(1)
+    .get();
+
+  const container = document.getElementById('activeBriefContent');
+
+  if (snapshot.empty) {
+    currentBrief = null;
+    document.getElementById('briefBadge').textContent = 'None';
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <p>No active brief. Create one above.</p>
+      </div>`;
+    document.getElementById('bidsContent').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🤖</div>
+        <p>No bids yet. Start auction to receive offers.</p>
+      </div>`;
+    document.getElementById('bidCountBadge').textContent = '0';
+    if (bidsUnsub) { bidsUnsub(); bidsUnsub = null; }
+    return;
+  }
+
+  const doc = snapshot.docs[0];
+  currentBrief = { id: doc.id, ...doc.data() };
+  const b = currentBrief;
+  const statusClass = b.status === 'active' ? 'status-active' : b.status === 'auctioning' ? 'status-auctioning' : 'status-ended';
+  const statusText = b.status === 'active' ? 'Active' : b.status === 'auctioning' ? '🔥 Auctioning' : 'Ended';
+
+  document.getElementById('briefBadge').textContent = statusText;
+
+  let timerHtml = '';
+  if (b.status === 'auctioning') {
+    timerHtml = `<div class="timer-display" id="auctionTimer">03:00</div>`;
+  }
+
+  const startBtn = b.status === 'active'
+    ? `<button class="btn-primary" id="startAuctionBtn" style="width:100%;margin-top:16px;">▶ START AUCTION</button>`
+    : b.status === 'auctioning'
+    ? `<button class="btn-primary" id="endAuctionBtn" style="width:100%;margin-top:16px;background:linear-gradient(105deg,#ef4444,#f87171);">⏹ END AUCTION</button>`
+    : '';
+
+  container.innerHTML = `
+    <div class="brief-display">
+      <div class="brief-stat"><div class="brief-stat-label">Commodity</div><div class="brief-stat-value small">${b.commodity}</div></div>
+      <div class="brief-stat"><div class="brief-stat-label">Variety</div><div class="brief-stat-value small">${b.variety}</div></div>
+      <div class="brief-stat"><div class="brief-stat-label">Remaining</div><div class="brief-stat-value">${b.remaining_mt} <span style="font-size:12px;color:var(--muted);">/ ${b.quantity_mt} MT</span></div></div>
+      <div class="brief-stat"><div class="brief-stat-label">Status</div><div class="brief-stat-value small"><span class="status-badge ${statusClass}">${statusText}</span></div></div>
+      <div class="brief-stat"><div class="brief-stat-label">FOB</div><div class="brief-stat-value small">${b.fobPort}</div></div>
+      <div class="brief-stat"><div class="brief-stat-label">Grade</div><div class="brief-stat-value small">${b.grade}</div></div>
+    </div>
+    ${timerHtml}
+    ${startBtn}
+  `;
+
+  if (b.status === 'active') {
+    document.getElementById('startAuctionBtn').onclick = startAuction;
+  } else if (b.status === 'auctioning') {
+    document.getElementById('endAuctionBtn').onclick = endAuction;
+    startTimerLoop();
+  }
+
+  // Load bids
+  loadBidsListener();
+  loadHistory();
+}
+
+// ========== AUCTION TIMER ==========
+function startTimerLoop() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerSeconds = 180;
+  const el = document.getElementById('auctionTimer');
+  if (el) {
+    el.innerText = '03:00';
+    el.classList.remove('warning');
+  }
+  timerInterval = setInterval(() => {
+    if (timerSeconds <= 1) {
+      clearInterval(timerInterval);
+      endAuction();
+      return;
+    }
+    timerSeconds--;
+    const mins = Math.floor(timerSeconds / 60);
+    const secs = timerSeconds % 60;
+    const timerEl = document.getElementById('auctionTimer');
+    if (timerEl) {
+      timerEl.innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+      if (timerSeconds <= 10) timerEl.classList.add('warning');
+    }
+  }, 1000);
+}
+
+async function startAuction() {
+  if (!currentBrief) return;
+  await db.collection('seller_briefs').doc(currentBrief.id).update({
+    status: 'auctioning',
+    startedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  showToast('🎬 Auction STARTED!');
+  await loadActiveBrief();
+}
+
+async function endAuction() {
+  if (timerInterval) clearInterval(timerInterval);
+  if (!currentBrief) return;
+  await db.collection('seller_briefs').doc(currentBrief.id).update({
+    status: 'ended',
+    endedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  showToast('⏹ Auction ended');
+  await loadActiveBrief();
+}
+
+// ========== BIDS LISTENER ==========
+function loadBidsListener() {
+  if (bidsUnsub) bidsUnsub();
+  if (!currentBrief) return;
+
+  bidsUnsub = db.collection('bids')
+    .where('briefId', '==', currentBrief.id)
+    .orderBy('amount', 'desc')
+    .onSnapshot(snapshot => {
+      const pending = [];
+      const accepted = [];
+      snapshot.docs.forEach(doc => {
+        const d = doc.data();
+        const bid = { id: doc.id, ...d, totalValue: (d.amount || 0) * (d.quantity_mt || 0) };
+        if (d.status === 'pending') pending.push(bid);
+        else if (d.status === 'accepted') accepted.push(bid);
+      });
+
+      renderBids(pending);
+      renderHistory(accepted);
+    });
+}
+
+function renderBids(bids) {
+  const container = document.getElementById('bidsContent');
+  document.getElementById('bidCountBadge').textContent = bids.length;
+
+  if (!bids.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🤖</div>
+        <p>No bids yet. Start auction to receive offers.</p>
+      </div>`;
+    return;
+  }
+
+  let html = `<table class="bids-table"><thead><tr>
+    <th>Rank</th><th>Buyer</th><th>Price/MT</th><th>Qty</th><th>Total</th><th></th>
+  </tr></thead><tbody>`;
+
+  bids.forEach((bid, idx) => {
+    const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : 'rank-other';
+    html += `<tr>
+      <td><span class="rank-badge ${rankClass}">${idx + 1}</span></td>
+      <td><strong>${bid.buyer_name || 'Unknown'}</strong><br><span style="font-size:11px;color:var(--muted);">${bid.buyer_contact || ''}</span></td>
+      <td style="color:var(--gold);font-weight:700;">$${(bid.amount || 0).toFixed(2)}</td>
+      <td>${bid.quantity_mt || 0} MT</td>
+      <td>$${(bid.totalValue || 0).toLocaleString()}</td>
+      <td><button class="btn-accept" onclick="acceptOffer('${bid.id}')">✓ ACCEPT</button></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderHistory(bids) {
+  const container = document.getElementById('historyContent');
+  document.getElementById('historyCountBadge').textContent = bids.length;
+
+  if (!bids.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📜</div>
+        <p>No accepted offers yet.</p>
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="display:flex;justify-content:space-between;padding:12px;font-size:11px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid rgba(124,252,0,0.2);">
+    <span class="history-col name">Buyer</span>
+    <span class="history-col">Qty</span>
+    <span class="history-col price">Price/MT</span>
+    <span class="history-col">Total</span>
+    <span class="history-col date">Date</span>
+  </div>`;
+
+  bids.forEach(bid => {
+    const date = bid.acceptedAt ? new Date(bid.acceptedAt.seconds * 1000).toLocaleDateString() : '—';
+    html += `<div class="history-row">
+      <span class="history-col name">${bid.buyer_name || 'Unknown'}</span>
+      <span class="history-col">${bid.quantity_mt || 0} MT</span>
+      <span class="history-col price">$${(bid.amount || 0).toFixed(2)}</span>
+      <span class="history-col">$${(bid.totalValue || 0).toLocaleString()}</span>
+      <span class="history-col date">${date}</span>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ========== ACCEPT BID ==========
+async function acceptOffer(bidId) {
+  if (!currentBrief) return;
+  try {
+    const result = await acceptBid(bidId, currentBrief.id);
+    if (result.success) {
+      showToast(`✓ Accepted! ${result.soldOut ? 'INVENTORY SOLD OUT!' : result.remaining_mt + ' MT remaining'}`);
+      if (result.soldOut) {
+        if (timerInterval) clearInterval(timerInterval);
+      }
+      await loadActiveBrief();
+    }
+  } catch (err) {
+    showToast('Error: ' + err.message, true);
+  }
+}
+
+async function acceptBid(bidId, briefId) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) throw new Error('Not authenticated');
+
+  const bidRef = db.collection('bids').doc(bidId);
+  const briefRef = db.collection('seller_briefs').doc(briefId);
+
+  return await db.runTransaction(async (t) => {
+    const bidSnap = await t.get(bidRef);
+    const briefSnap = await t.get(briefRef);
+    if (!bidSnap.exists) throw new Error('Bid not found');
+    if (!briefSnap.exists) throw new Error('Brief not found');
+
+    const bid = bidSnap.data();
+    const brief = briefSnap.data();
+
+    if (brief.sellerId !== uid) throw new Error('Not your brief');
+    if (bid.status !== 'pending') throw new Error('Bid no longer pending');
+
+    const qty = bid.quantity_mt || 20;
+    const remaining = brief.remaining_mt || 0;
+    if (qty > remaining) throw new Error(`Only ${remaining} MT remaining`);
+
+    const nextRemaining = remaining - qty;
+    const nextFees = (brief.fees_collected || 0) + 25;
+
+    t.update(bidRef, {
+      status: 'accepted',
+      acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    const briefUpdate = {
+      remaining_mt: nextRemaining,
+      fees_collected: nextFees,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (nextRemaining <= 0) {
+      briefUpdate.status = 'completed';
+      briefUpdate.endedAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+    t.update(briefRef, briefUpdate);
+
+    return { success: true, remaining_mt: nextRemaining, fees_collected: nextFees, soldOut: nextRemaining <= 0 };
+  });
+}
+
+// ========== HISTORY (fallback load) ==========
+async function loadHistory() {
+  if (!currentBrief) return;
+  const snapshot = await db.collection('bids')
+    .where('briefId', '==', currentBrief.id)
+    .where('status', '==', 'accepted')
+    .orderBy('acceptedAt', 'desc')
+    .get();
+  const bids = snapshot.docs.map(doc => {
+    const d = doc.data();
+    return { id: doc.id, ...d, totalValue: (d.amount || 0) * (d.quantity_mt || 0) };
+  });
+  renderHistory(bids);
+}
+
+// ========== WALLET ==========
+async function loadWallet() {
+  const doc = await db.collection('wallets').doc(currentUser.uid).get();
+  const balance = doc.exists ? (doc.data().balance || 0) : 0;
+  document.getElementById('walletAmount').textContent = '$' + balance.toFixed(2);
+}
+
+// ========== DEPOSIT ==========
+document.getElementById('depositBtn').onclick = () => {
+  document.getElementById('depositModal').style.display = 'flex';
+};
+
+function closeDepositModal() {
+  document.getElementById('depositModal').style.display = 'none';
+}
+
+document.getElementById('confirmDepositBtn').onclick = async () => {
+  const amount = parseFloat(document.getElementById('depositAmount').value);
+  if (isNaN(amount) || amount < 100) { showToast('Minimum deposit $100', true); return; }
+
+  try {
+    const result = await depositFunds(amount);
+    if (result.success) {
+      document.getElementById('walletAmount').textContent = '$' + result.newBalance.toFixed(2);
+      showToast(`$${amount} deposited!`);
+      closeDepositModal();
+    }
+  } catch (err) {
+    showToast('Deposit error: ' + err.message, true);
+  }
+};
+
+async function depositFunds(amount) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) throw new Error('Not authenticated');
+  const amt = parseFloat(amount);
+  if (isNaN(amt) || amt < 100) throw new Error('Minimum deposit is $100');
+
+  const walletRef = db.collection('wallets').doc(uid);
+  return await db.runTransaction(async (t) => {
+    const doc = await t.get(walletRef);
+    const current = doc.exists ? (doc.data().balance || 0) : 0;
+    const next = current + amt;
+    const tx = {
+      type: 'deposit',
+      amount: amt,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      description: `Deposit $${amt.toFixed(2)}`
+    };
+    if (doc.exists) {
+      t.update(walletRef, {
+        balance: next,
+        transactions: firebase.firestore.FieldValue.arrayUnion(tx),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      t.set(walletRef, {
+        userId: uid,
+        balance: next,
+        transactions: [tx],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    return next;
+  }).then(newBalance => ({ success: true, newBalance }));
+}
+
+// ========== TOAST ==========
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'toast error' : 'toast';
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 4000);
+}
+</script>
+</body>
+</html>

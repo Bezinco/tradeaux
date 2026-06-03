@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buyer Dashboard — TradeAux</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --bg-dark: #020617;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { 
+  width: 100%; 
+  min-height: 100%; 
+  font-family: 'Inter', sans-serif; 
+  overflow-x: hidden; 
+  background: var(--bg-dark);
+  color: var(--text);
+}
+
+/* ===== BACKGROUND WAVES ===== */
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-emerald-bg { 
+  background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.4), transparent 70%); 
+  top: -40%; left: -20%; animation-delay: 0s; 
+}
+.wave-sapphire-bg { 
+  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
+  top: -30%; left: -10%; animation-delay: 8s; 
+}
+.wave-ruby-bg { 
+  background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); 
+  top: -20%; left: 0%; animation-delay: 16s; 
+}
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+}
+
+/* ===== 3D LOGO ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+  cursor: pointer;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 1.0s; }
+.gem-letter:nth-child(7) { animation-delay: 1.2s; }
+.gem-letter:nth-child(8) { animation-delay: 1.4s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+  transform: translateZ(2px);
+}
+
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
+
+/* ===== HEADER ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 120px 40px 80px 180px;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 120px 24px 60px 24px; }
+  .gem-logo-corner { transform: scale(0.25); top: 10px; left: 10px; }
+}
+
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 20px 40px 20px 200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.8) 50%, transparent 100%);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+  .main-header { left: 0; padding: 15px 20px; flex-direction: column; gap: 15px; }
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-tab {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 2px solid #00ced1;
+  border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px);
+  color: var(--text);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.nav-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  border-color: #fff;
+}
+
+.nav-tab.active {
+  background: rgba(0, 206, 209, 0.3);
+  border-color: #00ced1;
+  color: white;
+}
+
+.wallet-display {
+  background: linear-gradient(145deg, rgba(0, 206, 209, 0.1), rgba(0, 206, 209, 0.05));
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  color: #00ced1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.wallet-label {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===== DASHBOARD LAYOUT ===== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 40px;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== SEARCH BAR ===== */
+.search-bar {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0, 206, 209, 0.4);
+  border-radius: 12px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  outline: none;
+  margin-bottom: 16px;
+}
+
+.search-input:focus {
+  border-color: #00ced1;
+  box-shadow: 0 0 20px rgba(0, 206, 209, 0.2);
+}
+
+.search-filters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .search-filters { grid-template-columns: repeat(2, 1fr); }
+}
+
+.filter-select {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+.filter-select option {
+  background: rgba(2, 6, 23, 0.95);
+  color: white;
+}
+
+/* ===== COUNTRY SLIDER ===== */
+.country-slider-container {
+  background: rgba(0,0,0,0.3);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 32px 0;
+  border: 1px solid rgba(0, 206, 209, 0.3);
+}
+
+.slider-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.slider-value {
+  color: #00ced1;
+  font-weight: 700;
+}
+
+.slider-track-container {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  margin: 24px 0;
+}
+
+.slider-track-fill {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(90deg, #00ced1, #00ff7f);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.slider-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.slider-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background: #00ced1;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(0, 206, 209, 0.8);
+  pointer-events: none;
+  z-index: 1;
+  border: 2px solid white;
+}
+
+.fee-display-large {
+  text-align: center;
+  padding: 24px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 12px;
+  margin: 24px 0;
+  border: 1px solid rgba(0, 206, 209, 0.3);
+}
+
+.fee-amount-large {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  color: #00ced1;
+  text-shadow: 0 0 30px rgba(0, 206, 209, 0.4);
+}
+
+.fee-breakdown {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.country-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .country-checkboxes { grid-template-columns: repeat(2, 1fr); }
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+
+.country-option:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(0, 206, 209, 0.3);
+}
+
+.country-option.selected {
+  background: rgba(0, 206, 209, 0.2);
+  border-color: #00ced1;
+}
+
+.country-option input[type="checkbox"] {
+  display: none;
+}
+
+/* ===== RESULTS GRID ===== */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin: 32px 0;
+}
+
+@media (max-width: 768px) {
+  .results-grid { grid-template-columns: 1fr; }
+}
+
+.result-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s;
+}
+
+.result-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 206, 209, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 206, 209, 0.2);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.result-category {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  color: #00ced1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.coop-badge {
+  background: rgba(255, 215, 0, 0.2);
+  color: #FFD700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.result-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.detail-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.bid-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bid-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 206, 209, 0.4);
+}
+
+.bid-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.sidebar-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+/* ===== MY BIDS ===== */
+.bid-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.bid-item:last-child {
+  border-bottom: none;
+}
+
+.bid-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bid-product {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.bid-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.bid-status {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.status-winning {
+  background: rgba(0, 255, 127, 0.2);
+  color: #00ff7f;
+  border: 1px solid rgba(0, 255, 127, 0.3);
+}
+
+.status-losing {
+  background: rgba(255, 59, 59, 0.2);
+  color: #ff3b3b;
+  border: 1px solid rgba(255, 59, 59, 0.3);
+}
+
+/* ===== DASHBOT PANEL ===== */
+.dashbot-setting {
+  margin-bottom: 20px;
+}
+
+.dashbot-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.dashbot-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  outline: none;
+}
+
+.dashbot-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #00ced1;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 206, 209, 0.5);
+}
+
+.dashbot-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: #00ced1;
+  margin-top: 8px;
+  text-align: right;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(15, 32, 64, 0.98);
+  border: 1px solid rgba(0, 206, 209, 0.5);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  opacity: 0;
+  transition: all 0.5s ease;
+  z-index: 10001;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+  border-color: rgba(255, 59, 59, 0.6);
+  background: rgba(64, 15, 15, 0.98);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+  font-size: 14px;
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner" onclick="window.location.href='index.html'">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="main-header">
+    <nav class="nav-tabs">
+      <a href="index.html" class="nav-tab">Home</a>
+      <a href="arena.html" class="nav-tab">Arena</a>
+      <a href="market-intel.html" class="nav-tab">Market Intel</a>
+      <a href="#" class="nav-tab" onclick="signOut()">Sign Out</a>
+    </nav>
+
+    <div class="wallet-display" onclick="window.location.href='wallet.html'">
+      <span class="wallet-label">Balance</span>
+      <span id="walletAmount">$0.00</span>
+    </div>
+  </header>
+
+  <div class="dashboard-grid">
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search commodities, products, origins..." onkeyup="handleSearch()">
+        <div class="search-filters">
+          <select class="filter-select" id="filterCategory" onchange="handleSearch()">
+            <option value="">All Categories</option>
+            <option value="fruits">Fruits</option>
+            <option value="vegetables">Vegetables</option>
+            <option value="legumes">Legumes</option>
+            <option value="grains">Grains</option>
+            <option value="nuts">Nuts</option>
+            <option value="spices">Spices</option>
+            <option value="coffee">Coffee/Tea</option>
+            <option value="roots">Roots</option>
+            <option value="flowers">Flowers</option>
+          </select>
+          <select class="filter-select" id="filterOrigin" onchange="handleSearch()">
+            <option value="">All Origins</option>
+            <option>Mexico</option>
+            <option>Colombia</option>
+            <option>Peru</option>
+            <option>Sri Lanka</option>
+            <option>Indonesia</option>
+            <option>India</option>
+            <option>USA</option>
+            <option>Spain</option>
+            <option>Turkey</option>
+            <option>Chile</option>
+          </select>
+          <select class="filter-select" id="filterGrade" onchange="handleSearch()">
+            <option value="">All Grades</option>
+            <option>Grade A</option>
+            <option>Grade B</option>
+            <option>Organic</option>
+            <option>Fairtrade</option>
+          </select>
+          <select class="filter-select" id="filterType" onchange="handleSearch()">
+            <option value="">All Auction Types</option>
+            <option value="type1">Type 1 - Buyer Brief</option>
+            <option value="type2">Type 2 - Futures</option>
+            <option value="type3">Type 3 - Inventory</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Country Selection Slider -->
+      <div class="country-slider-container">
+        <div class="slider-label">
+          <span>Number of Countries to Search</span>
+          <span class="slider-value" id="countryCount">1</span>
+        </div>
+
+        <div class="slider-track-container">
+          <div class="slider-track-fill" id="sliderFill" style="width: 0%;"></div>
+          <input type="range" class="slider-input" id="countrySlider" min="1" max="9" value="1" oninput="updateCountrySlider(this.value)">
+          <div class="slider-thumb" id="sliderThumb" style="left: 0%;"></div>
+        </div>
+
+        <div class="fee-display-large">
+          <div class="fee-amount-large" id="searchFee">$5.00</div>
+          <div class="fee-breakdown">
+            Search Fee: $<span id="searchFeeBreakdown">5</span> + Bid Fee: $8 per bid<br>
+            <small>Max results: <span id="maxResults">5</span> suppliers</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-grid" id="resultsGrid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="bid-btn" style="max-width: 300px; margin: 0 auto;" onclick="executeSearch()">Execute Search</button>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- My Bids -->
+      <div class="sidebar-card">
+        <h3 class="sidebar-title">My Bids</h3>
+        <div id="myBidsList">
+          <div class="empty-state">No active bids</div>
+        </div>
+      </div>
+
+      <!-- Dashbot Config -->
+      <div class="sidebar-card">
+        <h3 class="sidebar-title">Dashbot</h3>
+
+        <div class="dashbot-setting">
+          <label class="dashbot-label">Max Price per Unit</label>
+          <input type="range" class="dashbot-slider" id="dashbotMaxPrice" min="0" max="100" value="50" oninput="updateDashbotValue('dashbotMaxPrice', 'dashbotMaxPriceValue', '$')">
+          <div class="dashbot-value" id="dashbotMaxPriceValue">$50.00</div>
+        </div>
+
+        <div class="dashbot-setting">
+          <label class="dashbot-label">Strategy</label>
+          <select class="filter-select" id="dashbotStrategy" style="width: 100%;">
+            <option value="conservative">Conservative</option>
+            <option value="balanced" selected>Balanced</option>
+            <option value="aggressive">Aggressive</option>
+          </select>
+        </div>
+
+        <div class="dashbot-setting">
+          <label class="dashbot-label">Timing</label>
+          <select class="filter-select" id="dashbotTiming" style="width: 100%;">
+            <option value="early">Bid Early</option>
+            <option value="throughout">Bid Throughout</option>
+            <option value="snipe">Snipe (Last 30s)</option>
+          </select>
+        </div>
+
+        <button class="bid-btn" style="margin-top: 16px;" onclick="saveDashbotConfig()">Save Dashbot</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let walletBalance = 0;
+let selectedCountries = [];
+
+const searchFeeStructure = {
+  1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 
+  6: 6, 7: 7, 8: 8, 9: 9
+};
+
+const maxResultsStructure = {
+  1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 
+  6: 6, 7: 7, 8: 8, 9: 9
+};
+
+// Demo data
+const demoListings = [
+  { id: 1, product: 'Avocados', category: 'fruits', origin: 'Mexico', quantity: '10,000 kg', price: 2.50, seller: 'Demo Co-op Mexico', coop: true, grade: 'Grade A', endDate: new Date(Date.now() + 7 * 86400000) },
+  { id: 2, product: 'Avocados', category: 'fruits', origin: 'Colombia', quantity: '8,000 kg', price: 2.60, seller: 'Demo Co-op Colombia', coop: true, grade: 'Grade A', endDate: new Date(Date.now() + 5 * 86400000) },
+  { id: 3, product: 'Coconuts', category: 'nuts', origin: 'Sri Lanka', quantity: '50,000 nuts', price: 0.42, seller: 'Demo Co-op Sri Lanka', coop: true, grade: 'Standard', endDate: new Date(Date.now() + 10 * 86400000) },
+  { id: 4, product: 'Mangoes', category: 'fruits', origin: 'India', quantity: '25,000 kg', price: 1.20, seller: 'Demo Co-op India', coop: true, grade: 'Organic', endDate: new Date(Date.now() + 6 * 86400000) },
+  { id: 5, product: 'Almonds', category: 'nuts', origin: 'USA', quantity: '30,000 kg', price: 6.50, seller: 'Demo Co-op California', coop: true, grade: 'Grade A', endDate: new Date(Date.now() + 4 * 86400000) }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkAuth();
+  renderResults(demoListings);
+  loadMyBids();
+});
+
+async function checkAuth() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    window.location.href = 'signin.html';
+    return;
+  }
+  currentUser = session.user;
+
+  const { data } = await supabaseClient
+    .from('users')
+    .select('wallet_balance')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (data) {
+    walletBalance = data.wallet_balance;
+    document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
+  }
+}
+
+function updateCountrySlider(val) {
+  const count = parseInt(val);
+  const fee = searchFeeStructure[count];
+  const maxRes = maxResultsStructure[count];
+
+  document.getElementById('countryCount').textContent = count;
+  document.getElementById('searchFee').textContent = `$${fee}.00`;
+  document.getElementById('searchFeeBreakdown').textContent = fee;
+  document.getElementById('maxResults').textContent = maxRes;
+
+  const percent = ((count - 1) / 8) * 100;
+  document.getElementById('sliderFill').style.width = percent + '%';
+  document.getElementById('sliderThumb').style.left = percent + '%';
+}
+
+function updateDashbotValue(sliderId, displayId, prefix) {
+  const val = document.getElementById(sliderId).value;
+  document.getElementById(displayId).textContent = `${prefix}${parseFloat(val).toFixed(2)}`;
+}
+
+function renderResults(listings) {
+  const grid = document.getElementById('resultsGrid');
+
+  if (listings.length === 0) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">No results found. Adjust your filters.</div>';
+    return;
+  }
+
+  grid.innerHTML = listings.map(item => `
+    <div class="result-card">
+      <div class="result-header">
+        <span class="result-category">${item.category}</span>
+        ${item.coop ? '<span class="coop-badge">✓ Co-op Verified</span>' : ''}
+      </div>
+      <h3 style="font-family: Orbitron; color: white; margin-bottom: 8px; font-size: 18px;">${item.product}</h3>
+      <div style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">${item.origin} • ${item.grade}</div>
+
+      <div class="result-details">
+        <div class="detail-item">
+          <span class="detail-label">Available</span>
+          <span class="detail-value">${item.quantity}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Current Bid</span>
+          <span class="detail-value">$${item.price.toFixed(2)}/kg</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-size: 12px; color: var(--muted);">Seller: ${item.seller}</span>
+        <span style="font-size: 12px; color: var(--muted);">Ends: ${Math.ceil((item.endDate - Date.now()) / 86400000)} days</span>
+      </div>
+
+      <button class="bid-btn" onclick="placeBid(${item.id})">Place Bid ($8)</button>
+    </div>
+  `).join('');
+}
+
+function handleSearch() {
+  const category = document.getElementById('filterCategory').value;
+  const origin = document.getElementById('filterOrigin').value;
+  const grade = document.getElementById('filterGrade').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+
+  let filtered = demoListings;
+
+  if (category) filtered = filtered.filter(l => l.category === category);
+  if (origin) filtered = filtered.filter(l => l.origin === origin);
+  if (grade) filtered = filtered.filter(l => l.grade.includes(grade));
+  if (search) filtered = filtered.filter(l => l.product.toLowerCase().includes(search) || l.origin.toLowerCase().includes(search));
+
+  renderResults(filtered);
+}
+
+function executeSearch() {
+  const maxCount = parseInt(document.getElementById('countrySlider').value);
+  const fee = searchFeeStructure[maxCount];
+
+  if (walletBalance < fee) {
+    showToast('Insufficient balance for search fee', true);
+    return;
+  }
+
+  showToast(`Search executed! Fee: $${fee}`);
+  handleSearch();
+}
+
+async function placeBid(listingId) {
+  if (walletBalance < 8) {
+    showToast('Insufficient balance. Please deposit funds.', true);
+    return;
+  }
+
+  const listing = demoListings.find(l => l.id === listingId);
+  if (!listing) return;
+
+  // Deduct bid fee
+  walletBalance -= 8;
+  document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
+
+  // Save bid
+  const { error } = await supabaseClient
+    .from('bids')
+    .insert([{
+      buyer_id: currentUser.id,
+      auction_id: listingId,
+      amount: listing.price + 0.05,
+      status: 'active',
+      created_at: new Date().toISOString()
+    }]);
+
+  if (error) {
+    showToast('Failed to place bid', true);
+    return;
+  }
+
+  showToast(`Bid placed on ${listing.product}!`);
+  loadMyBids();
+}
+
+async function loadMyBids() {
+  if (!currentUser) return;
+
+  const { data } = await supabaseClient
+    .from('bids')
+    .select('*')
+    .eq('buyer_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  const container = document.getElementById('myBidsList');
+
+  if (!data || data.length === 0) {
+    container.innerHTML = '<div class="empty-state">No active bids</div>';
+    return;
+  }
+
+  container.innerHTML = data.map(bid => `
+    <div class="bid-item">
+      <div class="bid-info">
+        <div class="bid-product">Auction #${bid.auction_id}</div>
+        <div class="bid-meta">Your bid: $${bid.amount.toFixed(2)}</div>
+      </div>
+      <span class="bid-status status-${bid.status === 'winning' ? 'winning' : 'losing'}">${bid.status}</span>
+    </div>
+  `).join('');
+}
+
+async function saveDashbotConfig() {
+  if (!currentUser) return;
+
+  const config = {
+    user_id: currentUser.id,
+    max_price: parseFloat(document.getElementById('dashbotMaxPrice').value),
+    strategy: document.getElementById('dashbotStrategy').value,
+    timing: document.getElementById('dashbotTiming').value,
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await supabaseClient
+    .from('dashbot_config')
+    .upsert([config]);
+
+  if (!error) {
+    showToast('Dashbot configuration saved!');
+  } else {
+    showToast('Failed to save config', true);
+  }
+}
+
+async function signOut() {
+  await supabaseClient.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+function showToast(msg, error) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast' + (error ? ' error' : '') + ' visible';
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========== HELPERS ==========
+    function isAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(data) {
+      return request.auth != null &&
+        (data.ownerId == request.auth.uid ||
+         data.userId == request.auth.uid ||
+         data.uid == request.auth.uid ||
+         data.buyerId == request.auth.uid ||
+         data.sellerId == request.auth.uid ||
+         data.carrierId == request.auth.uid);
+    }
+
+    function isBotOwner(data) {
+      return request.auth != null && data.ownerId == request.auth.uid;
+    }
+
+    function isCounterOnlyUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly([
+          'total_bids','totalBids',
+          'total_wins','totalWins',
+          'updated_at','updatedAt'
+        ]);
+    }
+
+    // ========== PROFILES ==========
+    match /profiles/{userId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId || isAdmin()
+      );
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (
+        request.auth.uid == userId || isAdmin()
+      );
+    }
+
+    // ========== WALLETS ==========
+    match /wallets/{userId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId || isAdmin()
+      );
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.userId == userId
+        && request.resource.data.balance >= 0;
+      allow update: if request.auth != null && (
+        isAdmin() ||
+        (
+          request.auth.uid == userId
+          && request.resource.data.userId == userId
+          && request.resource.data.balance >= 0
+        )
+      );
+    }
+
+    // ========== TRANSACTIONS ==========
+    match /transactions/{transId} {
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if request.auth != null && (
+        request.resource.data.userId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // ========== SELLER BRIEFS ==========
+    match /seller_briefs/{briefId} {
+      allow read: if request.auth != null && (
+        resource.data.status == 'active' ||
+        resource.data.status == 'auctioning' ||
+        resource.data.sellerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if request.auth != null
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.status == "active"
+        && request.resource.data.remaining_mt == request.resource.data.quantity_mt
+        && request.resource.data.fees_collected == 0;
+      allow update: if request.auth != null && (
+        (
+          resource.data.sellerId == request.auth.uid
+          && request.resource.data.sellerId == resource.data.sellerId
+          && (
+            (request.resource.data.status == "auctioning" && resource.data.status == "active")
+            ||
+            (
+              request.resource.data.keys().hasOnly([
+                "remaining_mt", "fees_collected", "status",
+                "startedAt", "endedAt", "updatedAt"
+              ])
+              && request.resource.data.remaining_mt <= resource.data.remaining_mt
+              && request.resource.data.fees_collected >= resource.data.fees_collected
+              && (
+                request.resource.data.status == resource.data.status
+                || request.resource.data.status == "completed"
+                || request.resource.data.status == "ended"
+              )
+            )
+          )
+        )
+        || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ========== BIDS ==========
+    match /bids/{bidId} {
+      allow read: if request.auth != null && (
+        resource.data.buyerId == request.auth.uid ||
+        resource.data.sellerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if request.auth != null
+        && request.resource.data.buyerId == request.auth.uid
+        && request.resource.data.status == "pending"
+        && request.resource.data.amount > 0
+        && request.resource.data.quantity_mt >= 1;
+      allow update: if request.auth != null && (
+        // Buyer raising bid
+        (
+          resource.data.buyerId == request.auth.uid
+          && request.resource.data.buyerId == resource.data.buyerId
+          && request.resource.data.status == "pending"
+          && request.resource.data.amount > resource.data.amount
+          && request.resource.data.keys().hasOnly([
+            "amount", "quantity_mt", "previous_amount",
+            "bid_count", "updatedAt", "botId", "botWinCounted"
+          ])
+        )
+        // Seller accepting bid
+        ||
+        (
+          resource.data.sellerId == request.auth.uid
+          && request.resource.data.sellerId == resource.data.sellerId
+          && request.resource.data.status == "accepted"
+          && resource.data.status == "pending"
+          && request.resource.data.keys().hasOnly([
+            "status", "acceptedAt", "botWinCounted"
+          ])
+        )
+        // Admin override
+        || isAdmin()
+      );
+    }
+
+    // ========== TRANSPORT AUCTIONS ==========
+    match /transport_auctions/{auctionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.buyerId == request.auth.uid;
+      allow update: if request.auth != null && (
+        resource.data.buyerId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // ========== TRANSPORT BIDS ==========
+    match /transport_bids/{bidId} {
+      allow read: if request.auth != null && (
+        resource.data.carrierId == request.auth.uid ||
+        resource.data.buyerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if request.auth != null
+        && request.resource.data.carrierId == request.auth.uid
+        && request.resource.data.status == "pending";
+      allow update: if request.auth != null && (
+        // Buyer awarding the winning bid
+        (
+          resource.data.buyerId == request.auth.uid
+          && request.resource.data.keys().hasOnly(["status", "updatedAt", "botWinCounted"])
+          && request.resource.data.status == "accepted"
+          && resource.data.status == "pending"
+        )
+        // Carrier withdrawing their own bid
+        ||
+        (
+          resource.data.carrierId == request.auth.uid
+          && request.resource.data.keys().hasOnly(["status", "updatedAt"])
+          && request.resource.data.status == "withdrawn"
+          && resource.data.status == "pending"
+        )
+        // Admin override
+        || isAdmin()
+      );
+    }
+
+    // ========== BUYER BOTS ==========
+    match /buyer_bots/{botId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && isBotOwner(request.resource.data);
+      allow update: if request.auth != null && (
+        (isBotOwner(resource.data) && isCounterOnlyUpdate()) || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ========== SELLER BOTS ==========
+    match /seller_bots/{botId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && isBotOwner(request.resource.data);
+      allow update: if request.auth != null && (
+        (isBotOwner(resource.data) && isCounterOnlyUpdate()) || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ========== TRANSPORT BOTS ==========
+    match /transport_bots/{botId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && isBotOwner(request.resource.data);
+      allow update: if request.auth != null && (
+        (isBotOwner(resource.data) && isCounterOnlyUpdate()) || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ========== ADMIN LOGS ==========
+    match /admin_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+    }
+
+    // ========== FEE RECORDS ==========
+    match /fee_records/{feeId} {
+      allow read: if isAdmin();
+      allow create: if request.auth != null;
+    }
+
+    // ========== NOTIFICATIONS ==========
+    match /notifications/{notifId} {
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (
+        resource.data.userId == request.auth.uid
+      );
+    }
+
+    // ========== DISPUTES ==========
+    match /disputes/{disputeId} {
+      allow read: if request.auth != null && (
+        resource.data.plaintiffId == request.auth.uid ||
+        resource.data.defendantId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if request.auth != null && (
+        request.resource.data.plaintiffId == request.auth.uid
+      );
+      allow update: if request.auth != null && (
+        (
+          resource.data.plaintiffId == request.auth.uid
+          && request.resource.data.plaintiffId == resource.data.plaintiffId
+        )
+        || isAdmin()
+      );
+    }
+  }
+}

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>TradeAux • Transport Bot Config | Freight Bidding Arsenal</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb;
+  min-height: 100vh; overflow-x: hidden;
+}
+.bg-waves {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+}
+.wave-bg {
+  position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+.wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
+.wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+@keyframes waveBgDrift {
+  0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } 100% { transform: translate(-30px,20px) scale(1); }
+}
+
+.gem-logo-corner {
+  display: inline-block; filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d; perspective: 1000px; transform: scale(0.55); transform-origin: left center;
+}
+.gem-text {
+  font-size: 80px; font-weight: 900; letter-spacing: -0.02em; position: relative;
+  display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; gap: 2px;
+}
+.gem-letter {
+  display: inline-block; position: relative; transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2);
+}
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35); transform: translateZ(2px);
+}
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35); transform: translateZ(2px);
+}
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay;
+}
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none;
+}
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); }
+}
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; } .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; } .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; } .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; } .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; } .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 0 30px; flex-wrap: wrap; gap: 16px;
+}
+.nav { display: flex; gap: 12px; align-items: center; }
+.nav a {
+  font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500;
+  padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb;
+  text-decoration: none; transition: all 0.3s;
+}
+.nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+.wallet-section {
+  display: flex; align-items: center; gap: 16px;
+  background: rgba(0, 206, 209, 0.1); padding: 8px 20px; border-radius: 40px;
+  border: 1px solid rgba(0, 206, 209, 0.3);
+}
+.wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+.wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+.wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+
+.page-title {
+  font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800;
+  color: #00ced1; margin-bottom: 8px;
+}
+.page-subtitle { font-size: 14px; color: #9ca3af; margin-bottom: 30px; }
+
+.card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.95));
+  border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 24px; margin-bottom: 24px;
+}
+.card-header {
+  font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700;
+  color: #00ced1; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+}
+.card-header .icon { font-size: 20px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+label {
+  display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 500;
+}
+input, select {
+  width: 100%; padding: 12px; background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,206,209,0.3); border-radius: 8px;
+  color: white; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
+}
+input:focus, select:focus { border-color: #00ced1; }
+input[type="range"] { padding: 0; height: 6px; accent-color: #00ced1; }
+.range-val { text-align: right; font-size: 13px; color: #00ced1; font-weight: 700; margin-top: 4px; font-family: 'Orbitron', sans-serif; }
+
+.toggle-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.toggle-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.toggle {
+  width: 44px; height: 24px; background: #1e293b; border-radius: 12px; position: relative;
+  cursor: pointer; transition: background 0.2s;
+}
+.toggle.on { background: #00ced1; }
+.toggle::after {
+  content: ''; position: absolute; width: 20px; height: 20px; background: white;
+  border-radius: 50%; top: 2px; left: 2px; transition: left 0.2s;
+}
+.toggle.on::after { left: 22px; }
+
+.weapon-card {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.2); border-radius: 12px;
+  padding: 16px; transition: all 0.2s;
+}
+.weapon-card:hover { border-color: rgba(0,206,209,0.5); }
+.weapon-card.active { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+
+.snipe-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;
+  background: linear-gradient(90deg, #00ced1, #8b5cf6); color: white; margin-left: 6px;
+}
+
+.btn {
+  padding: 12px 24px; border-radius: 8px; border: none;
+  font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px;
+  cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,206,209,0.4); }
+.btn-secondary {
+  background: rgba(15, 32, 64, 0.7); color: #e5e7eb; border: 1px solid rgba(0,206,209,0.3);
+}
+.btn-secondary:hover { border-color: #00ced1; }
+.btn-danger {
+  background: rgba(239,68,68,0.15); color: #ff3b3b; border: 1px solid rgba(239,68,68,0.4);
+}
+
+.footer-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
+.help-text { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+
+.stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,206,209,0.1); }
+.stat-row:last-child { border-bottom: none; }
+.stat-label { color: #9ca3af; font-size: 13px; }
+.stat-value { font-weight: 700; color: #00ced1; font-family: 'Orbitron', sans-serif; }
+
+.formula-box {
+  background: rgba(0,0,0,0.5); padding: 16px; border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #00ced1;
+  line-height: 1.8; border: 1px dashed rgba(0,206,209,0.3);
+}
+
+.strategy-card {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.2); border-radius: 12px;
+  padding: 16px; cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.strategy-card:hover { border-color: rgba(0,206,209,0.5); transform: translateY(-2px); }
+.strategy-card.selected { border-color: #00ced1; background: rgba(0,206,209,0.08); }
+.strategy-name { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.strategy-desc { font-size: 12px; color: #9ca3af; }
+
+.toast {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px;
+  border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px;
+  transition: 0.3s; opacity: 0; z-index: 2000;
+}
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+
+.user-display { display: flex; align-items: center; gap: 8px; margin-left: 12px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #00ced1; }
+.user-name { font-size: 12px; color: #9ca3af; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.bot-status-badge {
+  padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+  background: rgba(30,41,59,0.8); color: #9ca3af; border: 1px solid rgba(0,206,209,0.2);
+}
+.bot-status-badge.active { background: rgba(0,206,209,0.15); color: #00ced1; border-color: #00ced1; }
+</style>
+</head>
+<body>
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T</span>
+          <span class="gem-letter" data-letter="R">R</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="D">D</span>
+          <span class="gem-letter" data-letter="E">E</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="U">U</span>
+          <span class="gem-letter" data-letter="X">X</span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div><div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div><div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+        <div class="depth-shadow"></div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="wallet-section">
+        <div class="wallet-balance">
+          <span class="wallet-label">WALLET</span>
+          <span class="wallet-amount" id="walletAmount">$0.00</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="transport-carrier-dashboard.html">← Dashboard</a>
+        <a href="transport-bot-runner.html">Runner</a>
+        <a href="transport-bot-tester.html">Arena</a>
+        <div class="user-display" id="userDisplay">
+          <img class="user-avatar" id="userAvatar" src="" alt="" style="display:none;">
+          <span class="user-name" id="userName"></span>
+        </div>
+        <a href="#" id="authBtn">Sign Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-title">🤖 Transport Bot Config</div>
+  <div class="page-subtitle">Configure your freight bidding arsenal. No auth needed — you're already signed in.</div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">⚙️</span> Bot Identity</div>
+    <div class="grid-2">
+      <div>
+        <label>Bot Name</label>
+        <input type="text" id="botName" placeholder="e.g. FreightHunter-01">
+      </div>
+      <div>
+        <label>Activation</label>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+          <div class="toggle" id="activeToggle" onclick="toggleActive()"></div>
+          <span id="activeLabel" style="font-size:14px;color:#9ca3af;">Inactive</span>
+        </div>
+        <div class="help-text">Bot only runs when activated</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">🛡️</span> Weapons Arsenal</div>
+    <div class="grid-2">
+      <div class="weapon-card" id="wcPrice">
+        <div class="toggle-wrap">
+          <div class="toggle-name">💰 Price Drop</div>
+          <div class="toggle" id="wPriceToggle" onclick="toggleWeapon('wPrice')"></div>
+        </div>
+        <label>Initial Drop %</label>
+        <input type="range" id="wPriceDrop" min="0" max="50" value="5" oninput="updateRange('wPriceDrop')">
+        <div class="range-val" id="wPriceDropVal">5%</div>
+        <label style="margin-top:10px;">Max Drop % (floor guard)</label>
+        <input type="range" id="wPriceMaxDrop" min="5" max="80" value="30" oninput="updateRange('wPriceMaxDrop')">
+        <div class="range-val" id="wPriceMaxDropVal">30%</div>
+        <div class="help-text">Lower bid price to win. Never below floor price.</div>
+      </div>
+      <div class="weapon-card" id="wcSpeed">
+        <div class="toggle-wrap">
+          <div class="toggle-name">⚡ Speed Boost</div>
+          <div class="toggle" id="wSpeedToggle" onclick="toggleWeapon('wSpeed')"></div>
+        </div>
+        <label>Boost % above required</label>
+        <input type="range" id="wSpeedBoost" min="0" max="100" value="10" oninput="updateRange('wSpeedBoost')">
+        <div class="range-val" id="wSpeedBoostVal">10%</div>
+        <label style="margin-top:10px;">Max Boost %</label>
+        <input type="range" id="wSpeedMaxBoost" min="10" max="200" value="50" oninput="updateRange('wSpeedMaxBoost')">
+        <div class="range-val" id="wSpeedMaxBoostVal">50%</div>
+        <div class="help-text">Faster delivery times than required.</div>
+      </div>
+      <div class="weapon-card" id="wcCap">
+        <div class="toggle-wrap">
+          <div class="toggle-name">📦 Capacity Boost</div>
+          <div class="toggle" id="wCapToggle" onclick="toggleWeapon('wCap')"></div>
+        </div>
+        <label>Boost % above required</label>
+        <input type="range" id="wCapBoost" min="0" max="100" value="5" oninput="updateRange('wCapBoost')">
+        <div class="range-val" id="wCapBoostVal">5%</div>
+        <label style="margin-top:10px;">Max Boost %</label>
+        <input type="range" id="wCapMaxBoost" min="10" max="200" value="40" oninput="updateRange('wCapMaxBoost')">
+        <div class="range-val" id="wCapMaxBoostVal">40%</div>
+        <div class="help-text">More trucks/containers than requested.</div>
+      </div>
+      <div class="weapon-card" id="wcRel">
+        <div class="toggle-wrap">
+          <div class="toggle-name">⭐ Reliability Rating</div>
+          <div class="toggle" id="wRelToggle" onclick="toggleWeapon('wRel')"></div>
+        </div>
+        <label>Static Rating (0-100)</label>
+        <input type="range" id="wRelRating" min="50" max="100" value="85" oninput="updateRange('wRelRating')">
+        <div class="range-val" id="wRelRatingVal">85</div>
+        <div class="help-text">Multiplies Duhe score. Higher = more trust.</div>
+      </div>
+    </div>
+    <div class="weapon-card" style="margin-top:16px; border-color:rgba(139,92,246,0.4);" id="wcSnipe">
+      <div class="toggle-wrap">
+        <div class="toggle-name">🎯 Two-Pronged Snipe <span class="snipe-badge">COMBO</span></div>
+        <div class="toggle" id="wSnipeToggle" onclick="toggleWeapon('wSnipe')"></div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <label>Price Drop % (snipe phase)</label>
+          <input type="range" id="wSnipePrice" min="0" max="50" value="15" oninput="updateRange('wSnipePrice')">
+          <div class="range-val" id="wSnipePriceVal">15%</div>
+        </div>
+        <div>
+          <label>Speed Boost % (snipe phase)</label>
+          <input type="range" id="wSnipeSpeed" min="0" max="100" value="25" oninput="updateRange('wSnipeSpeed')">
+          <div class="range-val" id="wSnipeSpeedVal">25%</div>
+        </div>
+      </div>
+      <div class="help-text">Deploys Price + Speed together in final moments. Overrides individual weapons during snipe.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">📈</span> Escalation Strategy</div>
+    <div class="grid-3">
+      <div class="strategy-card" onclick="selectStrategy('aggressive')" id="strat-aggressive">
+        <div class="strategy-name">🔥 Aggressive</div>
+        <div class="strategy-desc">Step-by-step improvements every cycle. Dominates early.</div>
+      </div>
+      <div class="strategy-card" onclick="selectStrategy('sniper')" id="strat-sniper">
+        <div class="strategy-name">🎯 Sniper</div>
+        <div class="strategy-desc">Waits until near auction end, then strikes hard.</div>
+      </div>
+      <div class="strategy-card" onclick="selectStrategy('passive')" id="strat-passive">
+        <div class="strategy-name">🛡️ Passive</div>
+        <div class="strategy-desc">One strong offer. No changes. Set and forget.</div>
+      </div>
+    </div>
+    <input type="hidden" id="escalationStrategy" value="aggressive">
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">🚧</span> Guardrails</div>
+    <div class="grid-3">
+      <div>
+        <label>Cost Basis ($/km)</label>
+        <input type="number" id="costBasis" placeholder="1.50" step="0.01" value="1.50">
+        <div class="help-text">Your internal cost per kilometer</div>
+      </div>
+      <div>
+        <label>Min Margin %</label>
+        <input type="number" id="minMargin" placeholder="15" value="15">
+        <div class="help-text">Floor = costBasis × (1 + margin%). Bot never bids below this.</div>
+      </div>
+      <div>
+        <label>Floor Price Preview</label>
+        <div style="font-size:1.2rem;font-weight:700;color:#00ced1;font-family:'Orbitron',sans-serif;margin-top:8px;" id="floorPreview">—</div>
+        <div class="help-text">Auto-calculated from cost + margin</div>
+      </div>
+      <div>
+        <label>Max Active Auctions</label>
+        <input type="number" id="maxAuctions" placeholder="5" value="5">
+        <div class="help-text">Limits simultaneous bidding focus</div>
+      </div>
+      <div>
+        <label>Rank Threshold (Top N)</label>
+        <input type="number" id="rankThreshold" placeholder="3" value="3">
+        <div class="help-text">Only bid when outside Top N. Saves money on auctions already winning.</div>
+      </div>
+      <div>
+        <label>Snipe Window (seconds before close)</label>
+        <input type="number" id="snipeWindow" placeholder="300" value="300">
+        <div class="help-text">For Sniper strategy. Seconds before deadline to strike.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">📊</span> Duhe Scoring Preview</div>
+    <div class="formula-box">
+duheScore = (priceScore + speedScore + capacityScore) × (reliability / 100)<br><br>
+priceScore  = ((budget − bidPrice) / budget) × 100<br>
+speedScore  = (requiredSpeed / bidSpeed) × 100<br>
+capacityScore = (bidCapacity / requiredCapacity) × 100
+    </div>
+    <div class="help-text" style="margin-top:10px;">
+      Lower bid price = higher priceScore. Faster delivery = higher speedScore. More capacity = higher capacityScore. Reliability multiplies everything.
+    </div>
+  </div>
+
+  <div class="footer-actions">
+    <button class="btn btn-secondary" onclick="loadConfig()">🔄 Reload Saved</button>
+    <button class="btn btn-primary" onclick="saveConfig()">💾 Save Configuration</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+let currentConfig = null;
+
+auth.onAuthStateChanged(user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  document.getElementById('userName').textContent = user.displayName || user.email;
+  if (user.photoURL) { document.getElementById('userAvatar').src = user.photoURL; document.getElementById('userAvatar').style.display = 'block'; }
+  loadWallet();
+  loadConfig();
+});
+
+document.getElementById('authBtn').onclick = () => auth.signOut().then(() => window.location.href = 'signin.html');
+
+async function loadWallet() {
+  const doc = await db.collection('wallets').doc(currentUser.uid).get();
+  const bal = doc.exists ? (doc.data().balance || 0) : 0;
+  document.getElementById('walletAmount').textContent = '$' + bal.toFixed(2);
+}
+
+function toggleActive() {
+  const t = document.getElementById('activeToggle');
+  t.classList.toggle('on');
+  const active = t.classList.contains('on');
+  document.getElementById('activeLabel').textContent = active ? 'Active' : 'Inactive';
+  document.getElementById('activeLabel').style.color = active ? '#00ced1' : '#9ca3af';
+}
+function toggleWeapon(prefix) {
+  const t = document.getElementById(prefix + 'Toggle');
+  t.classList.toggle('on');
+  const card = document.getElementById('wc' + prefix.replace('w',''));
+  if (card) card.classList.toggle('active', t.classList.contains('on'));
+}
+function updateRange(id) {
+  document.getElementById(id+'Val').textContent = document.getElementById(id).value + (id==='wRelRating' ? '' : '%');
+  if (id === 'costBasis' || id === 'minMargin') calcFloor();
+}
+function selectStrategy(strat) {
+  document.getElementById('escalationStrategy').value = strat;
+  ['aggressive','sniper','passive'].forEach(s => {
+    const el = document.getElementById('strat-'+s);
+    el.classList.toggle('selected', s === strat);
+  });
+}
+function calcFloor() {
+  const cb = parseFloat(document.getElementById('costBasis').value)||0;
+  const mm = parseFloat(document.getElementById('minMargin').value)||0;
+  document.getElementById('floorPreview').textContent = cb ? '$' + (cb * (1 + mm/100)).toFixed(2) + '/km' : '—';
+}
+document.getElementById('costBasis').addEventListener('input', calcFloor);
+document.getElementById('minMargin').addEventListener('input', calcFloor);
+
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = isError ? 'toast error visible' : 'toast visible';
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+async function loadConfig() {
+  if (!currentUser) return;
+  try {
+    const snap = await db.collection('transport_bots').doc(currentUser.uid).get();
+    if (snap.exists) {
+      const c = snap.data(); currentConfig = c;
+      document.getElementById('botName').value = c.botName || '';
+      if (c.isActive) { document.getElementById('activeToggle').classList.add('on'); toggleActive(); }
+      const w = c.weapons || {};
+      if (w.price?.enabled) { document.getElementById('wPriceToggle').classList.add('on'); document.getElementById('wPriceDrop').value = w.price.dropPercent||5; document.getElementById('wPriceMaxDrop').value = w.price.maxDropPercent||30; }
+      if (w.speed?.enabled) { document.getElementById('wSpeedToggle').classList.add('on'); document.getElementById('wSpeedBoost').value = w.speed.boostPercent||10; document.getElementById('wSpeedMaxBoost').value = w.speed.maxBoostPercent||50; }
+      if (w.capacity?.enabled) { document.getElementById('wCapToggle').classList.add('on'); document.getElementById('wCapBoost').value = w.capacity.boostPercent||5; document.getElementById('wCapMaxBoost').value = w.capacity.maxBoostPercent||40; }
+      if (w.reliability?.enabled) { document.getElementById('wRelToggle').classList.add('on'); document.getElementById('wRelRating').value = w.reliability.rating||85; }
+      if (w.twoProngedSnipe?.enabled) { document.getElementById('wSnipeToggle').classList.add('on'); document.getElementById('wSnipePrice').value = w.twoProngedSnipe.priceDropPercent||15; document.getElementById('wSnipeSpeed').value = w.twoProngedSnipe.speedBoostPercent||25; }
+      selectStrategy(c.escalationStrategy || 'aggressive');
+      document.getElementById('costBasis').value = c.guardrails?.costBasis || 1.50;
+      document.getElementById('minMargin').value = c.guardrails?.minMarginPercent || 15;
+      document.getElementById('maxAuctions').value = c.guardrails?.maxAuctions || 5;
+      document.getElementById('rankThreshold').value = c.guardrails?.rankThreshold || 3;
+      document.getElementById('snipeWindow').value = c.guardrails?.snipeWindow || 300;
+      ['wPriceDrop','wPriceMaxDrop','wSpeedBoost','wSpeedMaxBoost','wCapBoost','wCapMaxBoost','wRelRating','wSnipePrice','wSnipeSpeed'].forEach(updateRange);
+      calcFloor();
+      // Update weapon card active states
+      ['wPrice','wSpeed','wCap','wRel','wSnipe'].forEach(p => {
+        const t = document.getElementById(p+'Toggle');
+        const card = document.getElementById('wc'+p.replace('w',''));
+        if (card) card.classList.toggle('active', t.classList.contains('on'));
+      });
+      showToast('Configuration loaded');
+    } else {
+      selectStrategy('aggressive'); calcFloor();
+      showToast('No saved config — using defaults');
+    }
+  } catch (e) { showToast('Load failed: ' + e.message, true); }
+}
+
+async function saveConfig() {
+  if (!currentUser) return;
+  const payload = {
+    uid: currentUser.uid,
+    botName: document.getElementById('botName').value || 'TransportBot',
+    isActive: document.getElementById('activeToggle').classList.contains('on'),
+    weapons: {
+      price: { enabled: document.getElementById('wPriceToggle').classList.contains('on'), dropPercent: parseInt(document.getElementById('wPriceDrop').value), maxDropPercent: parseInt(document.getElementById('wPriceMaxDrop').value) },
+      speed: { enabled: document.getElementById('wSpeedToggle').classList.contains('on'), boostPercent: parseInt(document.getElementById('wSpeedBoost').value), maxBoostPercent: parseInt(document.getElementById('wSpeedMaxBoost').value) },
+      capacity: { enabled: document.getElementById('wCapToggle').classList.contains('on'), boostPercent: parseInt(document.getElementById('wCapBoost').value), maxBoostPercent: parseInt(document.getElementById('wCapMaxBoost').value) },
+      reliability: { enabled: document.getElementById('wRelToggle').classList.contains('on'), rating: parseInt(document.getElementById('wRelRating').value) },
+      twoProngedSnipe: { enabled: document.getElementById('wSnipeToggle').classList.contains('on'), priceDropPercent: parseInt(document.getElementById('wSnipePrice').value), speedBoostPercent: parseInt(document.getElementById('wSnipeSpeed').value) }
+    },
+    escalationStrategy: document.getElementById('escalationStrategy').value,
+    guardrails: {
+      costBasis: parseFloat(document.getElementById('costBasis').value) || 1.50,
+      minMarginPercent: parseFloat(document.getElementById('minMargin').value) || 15,
+      maxAuctions: parseInt(document.getElementById('maxAuctions').value) || 5,
+      rankThreshold: parseInt(document.getElementById('rankThreshold').value) || 3,
+      snipeWindow: parseInt(document.getElementById('snipeWindow').value) || 300
+    },
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try {
+    await db.collection('transport_bots').doc(currentUser.uid).set(payload, {merge:true});
+    showToast('Configuration saved successfully');
+  } catch (e) { showToast('Save failed: ' + e.message, true); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeAux • Seller Bot Config | Reverse Auction Weapons</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --neon: #7CFC00; --gold: #FFD966; --cyan: #00ced1; --red: #ff3b3b; }
+    body { min-height: 100vh; font-family: 'Inter', sans-serif; color: #F0F3FA;
+      background: radial-gradient(ellipse at 20% 30%, rgba(124,252,0,0.08), transparent 55%),
+                  radial-gradient(ellipse at 85% 70%, rgba(255,217,102,0.08), transparent 60%),
+                  linear-gradient(125deg, #03050C 0%, #0A111F 100%); }
+    .container { max-width: 1000px; margin: 0 auto; padding: 30px 24px 60px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 800; color: var(--gold); }
+    .header p { color: #9ca3af; margin-top: 6px; font-size: 13px; }
+
+    .nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .nav a { color: #9ca3af; text-decoration: none; font-size: 12px; padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,217,102,0.2); transition: 0.2s; }
+    .nav a:hover { color: var(--gold); border-color: var(--gold); }
+
+    .card { background: linear-gradient(145deg, #0B1122, #030712); border: 1px solid rgba(255,217,102,0.2); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
+    .card-title { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: var(--gold); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .card-sub { font-size: 11px; color: #5c6b8a; margin-bottom: 12px; }
+
+    .weapon-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; }
+    .weapon-toggle input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); }
+    .weapon-toggle label { font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; }
+    .weapon-toggle .desc { font-size: 11px; color: #9ca3af; margin-left: auto; }
+
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .field input, .field select {
+      width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,217,102,0.3); border-radius: 10px; color: #fff;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--gold); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-hint { font-size: 10px; color: #5c6b8a; margin-top: 3px; }
+
+    .strategy-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+    .strategy-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,217,102,0.2); background: rgba(0,0,0,0.3); color: #9ca3af; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .strategy-tab:hover { border-color: var(--gold); color: var(--gold); }
+    .strategy-tab.active { background: rgba(255,217,102,0.1); border-color: var(--gold); color: var(--gold); }
+
+    .btn { border: none; font-family: 'Orbitron', sans-serif; font-weight: 700; cursor: pointer; padding: 12px 24px; border-radius: 40px; font-size: 13px; transition: 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--gold), #ff8c00); color: #000; }
+    .btn-primary:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,217,102,0.4); }
+    .btn-secondary { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.4); }
+    .btn-danger { background: linear-gradient(135deg, var(--red), #ff6b6b); color: #fff; }
+    .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    .status-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; font-family: 'Orbitron', sans-serif; }
+    .status-on { background: rgba(255,217,102,0.15); color: var(--gold); border: 1px solid rgba(255,217,102,0.3); }
+    .status-off { background: rgba(255,59,59,0.15); color: var(--red); border: 1px solid rgba(255,59,59,0.3); }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: #0a1424cc; backdrop-filter: blur(12px); padding: 10px 24px; border-radius: 40px; font-size: 0.8rem; border-left: 3px solid var(--gold); transition: 0.2s; opacity: 0; z-index: 20000; font-family: 'Orbitron', sans-serif; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-left-color: var(--red); color: var(--red); }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏪 SELLER BOT — WEAPON CONFIG</h1>
+      <p>Configure weapons for reverse auctions. Lower price, add free tonnage, extend payment terms.</p>
+    </div>
+
+    <div class="nav">
+      <a href="dashboard-seller.html">← Seller Dashboard</a>
+      <a href="seller-bot-runner.html" target="_blank">🚀 Launch Runner</a>
+      <a href="seller-bot-tester.html">🧪 Test Arena</a>
+    </div>
+
+    <!-- Status -->
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-family:'Orbitron',sans-serif; font-size:13px; color:#fff;">Bot Status</div>
+        <div id="statusText" style="font-size:11px; color:#9ca3af;">Loading...</div>
+      </div>
+      <span class="status-pill status-off" id="statusPill">INACTIVE</span>
+    </div>
+
+    <!-- Price Weapon -->
+    <div class="card">
+      <div class="weapon-toggle">
+        <input type="checkbox" id="priceEnabled" checked>
+        <label for="priceEnabled">⚔️ PRICE WEAPON</label>
+        <span class="desc">Lower price to outrank competitors</span>
+      </div>
+      <div class="card-sub">Strategy: How the bot adjusts price when outranked</div>
+      <div class="strategy-tabs">
+        <button class="strategy-tab active" data-strat="aggressive" onclick="setPriceStrategy('aggressive')">⚔️ AGGRESSIVE</button>
+        <button class="strategy-tab" data-strat="sniper" onclick="setPriceStrategy('sniper')">🎯 SNIPER</button>
+        <button class="strategy-tab" data-strat="passive" onclick="setPriceStrategy('passive')">🛡️ PASSIVE</button>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Starting Price ($/MT)</label><input type="number" id="priceStart" value="800" min="1"></div>
+        <div class="field"><label>Minimum Price ($/MT)</label><input type="number" id="priceMin" value="700" min="1"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Decrement ($)</label>
+          <select id="priceDecrement">
+            <option value="1">$1</option>
+            <option value="5" selected>$5</option>
+            <option value="10">$10</option>
+          </select>
+        </div>
+        <div class="field"><label>Re-bid Delay (ms)</label><input type="number" id="priceDelay" value="2000" min="100" step="100"></div>
+      </div>
+    </div>
+
+    <!-- Extra Goods Weapon -->
+    <div class="card">
+      <div class="weapon-toggle">
+        <input type="checkbox" id="tonnageEnabled" checked>
+        <label for="tonnageEnabled">📦 EXTRA GOODS WEAPON</label>
+        <span class="desc">Add free tonnage to sweeten the deal</span>
+      </div>
+      <div class="card-sub">Strategy: How the bot adds free tonnage when outranked</div>
+      <div class="strategy-tabs">
+        <button class="strategy-tab active" data-strat="aggressive" onclick="setTonnageStrategy('aggressive')">⚔️ AGGRESSIVE</button>
+        <button class="strategy-tab" data-strat="sniper" onclick="setTonnageStrategy('sniper')">🎯 SNIPER</button>
+        <button class="strategy-tab" data-strat="passive" onclick="setTonnageStrategy('passive')">🛡️ PASSIVE</button>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Base Quantity (MT)</label><input type="number" id="tonnageBase" value="100" min="1"></div>
+        <div class="field"><label>Max Free Tonnage (MT)</label><input type="number" id="tonnageMax" value="20" min="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Increment (MT)</label>
+          <select id="tonnageIncrement">
+            <option value="1">1 MT</option>
+            <option value="5" selected>5 MT</option>
+            <option value="10">10 MT</option>
+          </select>
+        </div>
+        <div class="field"><label>Free Tonnage Value ($/MT)</label><input type="number" id="tonnageValue" value="50" min="0"></div>
+      </div>
+      <div class="field-hint">Value per MT of free tonnage for Duhe scoring. Higher = more attractive to buyer.</div>
+    </div>
+
+    <!-- Payment Weapon -->
+    <div class="card">
+      <div class="weapon-toggle">
+        <input type="checkbox" id="paymentEnabled" checked>
+        <label for="paymentEnabled">💳 PAYMENT TERMS WEAPON</label>
+        <span class="desc">Offer longer credit to win on cash flow</span>
+      </div>
+      <div class="field">
+        <label>Starting Term</label>
+        <select id="paymentStart">
+          <option value="wire">Wire Transfer (0.8x buyer score)</option>
+          <option value="lc_sight">LC at Sight (0.9x)</option>
+          <option value="lc_30" selected>LC 30 Days (1.0x)</option>
+          <option value="lc_60">LC 60 Days (1.1x)</option>
+          <option value="lc_90">LC 90 Days (1.2x)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Max Term</label>
+        <select id="paymentMax">
+          <option value="lc_30">LC 30 Days</option>
+          <option value="lc_60">LC 60 Days</option>
+          <option value="lc_90" selected>LC 90 Days</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Escalation Step</label>
+        <select id="paymentStep">
+          <option value="1">+1 term level</option>
+          <option value="2" selected>+2 term levels</option>
+          <option value="max">Jump to max</option>
+        </select>
+      </div>
+      <div class="field-hint">Longer terms = higher buyer Duhe score. But seller gets paid later.</div>
+    </div>
+
+    <!-- Two-Pronged Snipe -->
+    <div class="card">
+      <div class="weapon-toggle">
+        <input type="checkbox" id="snipeEnabled" checked>
+        <label for="snipeEnabled">⏱️ TWO-PRONGED SNIPE</label>
+        <span class="desc">Drop price AND add tonnage at last second</span>
+      </div>
+      <div class="card-sub">Devastating combo: lower price + more free goods simultaneously</div>
+      <div class="field-row">
+        <div class="field"><label>Strike Window (sec before end)</label><input type="number" id="snipeWindow" value="5" min="1" max="30"></div>
+        <div class="field"><label>Price Drop ($)</label><input type="number" id="snipePriceDrop" value="10" min="1"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Free Tonnage Add (MT)</label><input type="number" id="snipeTonnageAdd" value="10" min="0"></div>
+        <div class="field"><label>Snipe Action</label>
+          <select id="snipeAction">
+            <option value="both" selected>Both (Price + Tonnage)</option>
+            <option value="price">Price Drop Only</option>
+            <option value="tonnage">Free Tonnage Only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Settings -->
+    <div class="card">
+      <div class="card-title">⚙️ GLOBAL SETTINGS</div>
+      <div class="field-row">
+        <div class="field"><label>Max Active Auctions</label><input type="number" id="maxAuctions" value="5" min="1" max="20"></div>
+        <div class="field"><label>Min Rank to Bid (1=best)</label><input type="number" id="minRank" value="4" min="1" max="10"></div>
+      </div>
+      <div class="field-hint">Bot only bids when its current rank is worse than this. Set to 4 to bid when outside Top 3.</div>
+      <div class="field-row" style="margin-top:12px;">
+        <div class="field"><label>Min Profit Margin (%)</label><input type="number" id="minMargin" value="10" min="0" max="50"></div>
+        <div class="field"><label>Cost Basis ($/MT)</label><input type="number" id="costBasis" value="600" min="1"></div>
+      </div>
+      <div class="field-hint">Bot will never bid below cost basis + min margin. Cost $600 + 10% = $660 floor.</div>
+      <div style="margin-top:12px; padding:10px; background:rgba(255,217,102,0.05); border-radius:8px; border:1px solid rgba(255,217,102,0.2);">
+        <div style="font-size:11px; color:var(--gold); font-weight:600; margin-bottom:4px;">📊 DUHE SCORING PREVIEW</div>
+        <div style="font-size:11px; color:#9ca3af; line-height:1.6;">
+          Price Score = (1 / price) × 1000<br>
+          Tonnage Score = freeTonnage × 2<br>
+          Payment Multiplier = wire(0.8) → LC90(1.2)<br>
+          <strong style="color:#fff;">Total = (price + tonnage) × paymentMult</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveConfig()">💾 Save & Deploy</button>
+      <button class="btn btn-secondary" onclick="window.open('seller-bot-runner.html','_blank')">🚀 Open Runner</button>
+      <button class="btn btn-danger" onclick="deleteBot()">🗑️ Reset</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let settings = {
+  price: { enabled: true, strategy: 'aggressive', startPrice: 800, minPrice: 700, decrement: 5, delay: 2000 },
+  tonnage: { enabled: true, strategy: 'aggressive', baseQty: 100, maxFree: 20, increment: 5, valuePerMt: 50 },
+  payment: { enabled: true, startTerm: 'lc_30', maxTerm: 'lc_90', step: '2' },
+  snipe: { enabled: true, window: 5, priceDrop: 10, tonnageAdd: 10, action: 'both' },
+  global: { maxAuctions: 5, minRank: 4, minMargin: 10, costBasis: 600 },
+  active: true
+};
+
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  const doc = await db.collection('seller_bots').doc(user.uid).get();
+  if (doc.exists) {
+    settings = { ...settings, ...doc.data() };
+    applyUI();
+    showToast('Seller bot config loaded');
+  }
+});
+
+function applyUI() {
+  const p = settings.price || {};
+  document.getElementById('priceEnabled').checked = p.enabled !== false;
+  document.getElementById('priceStart').value = p.startPrice || 800;
+  document.getElementById('priceMin').value = p.minPrice || 700;
+  document.getElementById('priceDecrement').value = p.decrement || 5;
+  document.getElementById('priceDelay').value = p.delay || 2000;
+  setPriceStrategy(p.strategy || 'aggressive');
+
+  const t = settings.tonnage || {};
+  document.getElementById('tonnageEnabled').checked = t.enabled !== false;
+  document.getElementById('tonnageBase').value = t.baseQty || 100;
+  document.getElementById('tonnageMax').value = t.maxFree || 20;
+  document.getElementById('tonnageIncrement').value = t.increment || 5;
+  document.getElementById('tonnageValue').value = t.valuePerMt || 50;
+  setTonnageStrategy(t.strategy || 'aggressive');
+
+  const pay = settings.payment || {};
+  document.getElementById('paymentEnabled').checked = pay.enabled !== false;
+  document.getElementById('paymentStart').value = pay.startTerm || 'lc_30';
+  document.getElementById('paymentMax').value = pay.maxTerm || 'lc_90';
+  document.getElementById('paymentStep').value = pay.step || '2';
+
+  const s = settings.snipe || {};
+  document.getElementById('snipeEnabled').checked = s.enabled !== false;
+  document.getElementById('snipeWindow').value = s.window || 5;
+  document.getElementById('snipePriceDrop').value = s.priceDrop || 10;
+  document.getElementById('snipeTonnageAdd').value = s.tonnageAdd || 10;
+  document.getElementById('snipeAction').value = s.action || 'both';
+
+  const g = settings.global || {};
+  document.getElementById('maxAuctions').value = g.maxAuctions || 5;
+  document.getElementById('minRank').value = g.minRank || 4;
+  document.getElementById('minMargin').value = g.minMargin || 10;
+  document.getElementById('costBasis').value = g.costBasis || 600;
+
+  updateStatus();
+}
+
+function setPriceStrategy(strat) {
+  document.querySelectorAll('[onclick^="setPriceStrategy"]').forEach(b => b.classList.toggle('active', b.dataset.strat === strat));
+  if (!settings.price) settings.price = {};
+  settings.price.strategy = strat;
+}
+
+function setTonnageStrategy(strat) {
+  document.querySelectorAll('[onclick^="setTonnageStrategy"]').forEach(b => b.classList.toggle('active', b.dataset.strat === strat));
+  if (!settings.tonnage) settings.tonnage = {};
+  settings.tonnage.strategy = strat;
+}
+
+function updateStatus() {
+  const active = settings.active !== false;
+  document.getElementById('statusPill').className = 'status-pill ' + (active ? 'status-on' : 'status-off');
+  document.getElementById('statusPill').textContent = active ? 'ACTIVE' : 'INACTIVE';
+  document.getElementById('statusText').textContent = active ? 'Weapons: Price, Tonnage, Payment, Snipe' : 'Bot will not place any bids';
+}
+
+async function saveConfig() {
+  settings.price = {
+    enabled: document.getElementById('priceEnabled').checked,
+    strategy: settings.price?.strategy || 'aggressive',
+    startPrice: parseFloat(document.getElementById('priceStart').value) || 800,
+    minPrice: parseFloat(document.getElementById('priceMin').value) || 700,
+    decrement: parseFloat(document.getElementById('priceDecrement').value) || 5,
+    delay: parseFloat(document.getElementById('priceDelay').value) || 2000
+  };
+  settings.tonnage = {
+    enabled: document.getElementById('tonnageEnabled').checked,
+    strategy: settings.tonnage?.strategy || 'aggressive',
+    baseQty: parseFloat(document.getElementById('tonnageBase').value) || 100,
+    maxFree: parseFloat(document.getElementById('tonnageMax').value) || 20,
+    increment: parseFloat(document.getElementById('tonnageIncrement').value) || 5,
+    valuePerMt: parseFloat(document.getElementById('tonnageValue').value) || 50
+  };
+  settings.payment = {
+    enabled: document.getElementById('paymentEnabled').checked,
+    startTerm: document.getElementById('paymentStart').value,
+    maxTerm: document.getElementById('paymentMax').value,
+    step: document.getElementById('paymentStep').value
+  };
+  settings.snipe = {
+    enabled: document.getElementById('snipeEnabled').checked,
+    window: parseFloat(document.getElementById('snipeWindow').value) || 5,
+    priceDrop: parseFloat(document.getElementById('snipePriceDrop').value) || 10,
+    tonnageAdd: parseFloat(document.getElementById('snipeTonnageAdd').value) || 10,
+    action: document.getElementById('snipeAction').value
+  };
+  settings.global = {
+    maxAuctions: parseFloat(document.getElementById('maxAuctions').value) || 5,
+    minRank: parseFloat(document.getElementById('minRank').value) || 4,
+    minMargin: parseFloat(document.getElementById('minMargin').value) || 10,
+    costBasis: parseFloat(document.getElementById('costBasis').value) || 600
+  };
+  settings.active = true;
+  settings.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+  settings.sellerId = currentUser.uid;
+
+  try {
+    await db.collection('seller_bots').doc(currentUser.uid).set(settings, { merge: true });
+    updateStatus();
+    showToast('✓ Seller bot deployed. Open runner to activate.');
+  } catch (err) { showToast('Save failed: ' + err.message, true); }
+}
+
+async function deleteBot() {
+  if (!confirm('Reset seller bot to defaults?')) return;
+  try {
+    await db.collection('seller_bots').doc(currentUser.uid).delete();
+    showToast('Bot reset');
+    setTimeout(() => location.reload(), 800);
+  } catch (err) { showToast('Reset failed: ' + err.message, true); }
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = isError ? 'toast error visible' : 'toast visible';
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+</script>
+</body>
+</html>

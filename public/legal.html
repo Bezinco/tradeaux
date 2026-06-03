@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>TradeAux • Legal | Terms of Service & Privacy Policy</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --neon-green: #7CFC00;
+    --gold: #FFD966;
+    --cyan: #00ced1;
+    --muted: #9ca3af;
+  }
+  body {
+    background: #020617;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #F0F3FA;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .bg-waves {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .wave-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    filter: blur(100px);
+    opacity: 0.15;
+    animation: waveBgDrift 24s ease-in-out infinite;
+    border-radius: 50%;
+  }
+  .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+  .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.3), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+  .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,217,102,0.3), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+  @keyframes waveBgDrift {
+    0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+    50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+    100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+  }
+
+  /* ===== 3D LOGO - TRADEAUX ===== */
+  .logo-area {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+  }
+  .gem-logo-corner {
+    display: inline-block;
+    filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transform: scale(0.45);
+    transform-origin: left center;
+    vertical-align: middle;
+  }
+  
+  .gem-text {
+    font-size: 80px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    position: relative;
+    display: flex;
+    text-transform: uppercase;
+    line-height: 0.9;
+    font-family: 'Orbitron', sans-serif;
+    transform-style: preserve-3d;
+    gap: 2px;
+  }
+  
+  .gem-letter {
+    display: inline-block;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: letterFloat 6s ease-in-out infinite;
+    filter: brightness(1.2);
+  }
+  
+  .gem-letter:nth-child(1) { animation-delay: 0s; }
+  .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+  .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+  .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+  .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+  .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+  .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+  .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+  
+  @keyframes letterFloat {
+    0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+    50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+  }
+  
+  .gem-letter:nth-child(1)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+    transform: translateZ(2px);
+  }
+  .gem-letter:nth-child(2)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+    transform: translateZ(2px);
+  }
+  .gem-letter:nth-child(3)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+    transform: translateZ(2px);
+  }
+  .gem-letter:nth-child(4)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+    transform: translateZ(2px);
+  }
+  .gem-letter:nth-child(5)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+    transform: translateZ(2px);
+  }
+  .gem-letter:nth-child(6)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+    transform: translateZ(2px);
+  }
+  .gem-letter:nth-child(7)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+    transform: translateZ(2px);
+  }
+  .gem-letter:nth-child(8)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+    transform: translateZ(2px);
+  }
+  
+  .gem-letter .edge-top, .gem-letter .edge-right, .gem-letter .edge-bottom, .gem-letter .edge-left {
+    position: absolute; background: none; display: none;
+  }
+  
+  .light-source {
+    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+    animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay;
+  }
+  @keyframes rotateLight {
+    0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+    50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+    100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+  }
+  .sparkle {
+    position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+    box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+    animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none;
+  }
+  @keyframes sparkleFlash {
+    0% { opacity: 0; transform: scale(0.5); }
+    10% { opacity: 1; transform: scale(1.2); }
+    20% { opacity: 0.6; transform: scale(0.9); }
+    30% { opacity: 1; transform: scale(1.1); }
+    40% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 0; transform: scale(0.5); }
+  }
+  .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+  .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+  .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+  .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+  .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+  .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+  .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+  .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+  .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+  .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+  
+  .depth-shadow {
+    position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+    background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+    filter: blur(20px); z-index: -1;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 2;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .nav {
+    display: flex;
+    gap: 20px;
+  }
+  .nav a {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #BFC9E0;
+    text-decoration: none;
+    padding: 6px 18px;
+    border-radius: 40px;
+    border: 1px solid rgba(124,252,0,0.3);
+    background: rgba(0,0,0,0.3);
+    transition: all 0.3s;
+  }
+  .nav a:hover { border-color: var(--neon-green); color: var(--neon-green); }
+  
+  .legal-card {
+    background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.98));
+    backdrop-filter: blur(8px);
+    border-radius: 32px;
+    border: 2px solid rgba(124,252,0,0.4);
+    padding: 48px;
+    margin-bottom: 30px;
+  }
+  
+  .legal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--neon-green);
+    margin-bottom: 8px;
+  }
+  
+  .legal-subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(124,252,0,0.2);
+  }
+  
+  .toc {
+    background: rgba(0,0,0,0.3);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .toc h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .toc-link {
+    color: var(--cyan);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  
+  .toc-link:hover { color: var(--neon-green); }
+  
+  .legal-section {
+    margin-bottom: 32px;
+    scroll-margin-top: 20px;
+  }
+  
+  .legal-section h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 16px;
+    padding-left: 16px;
+    border-left: 4px solid var(--neon-green);
+  }
+  
+  .legal-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--cyan);
+    margin: 20px 0 12px 0;
+  }
+  
+  .legal-section p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #cbd5e6;
+    margin-bottom: 12px;
+  }
+  
+  .legal-section ul, .legal-section ol {
+    margin: 12px 0 12px 24px;
+    color: #cbd5e6;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .legal-section li {
+    margin-bottom: 8px;
+  }
+  
+  .legal-section strong {
+    color: #fff;
+  }
+  
+  .legal-highlight {
+    background: rgba(124,252,0,0.1);
+    border-left: 3px solid var(--neon-green);
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+  }
+  
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  
+  @media (max-width: 768px) {
+    .legal-card { padding: 24px; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .legal-title { font-size: 24px; }
+  }
+  
+  .back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(124,252,0,0.2);
+    border: 1px solid var(--neon-green);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+  
+  .back-to-top:hover {
+    background: rgba(124,252,0,0.4);
+    transform: translateY(-4px);
+  }
+  
+  .back-to-top span {
+    font-size: 24px;
+    color: var(--neon-green);
+  }
+  
+  .last-updated {
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T</span>
+          <span class="gem-letter" data-letter="R">R</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="D">D</span>
+          <span class="gem-letter" data-letter="E">E</span>
+          <span class="gem-letter" data-letter="A">A</span>
+          <span class="gem-letter" data-letter="U">U</span>
+          <span class="gem-letter" data-letter="X">X</span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div>
+        <div class="sparkle sparkle-2"></div>
+        <div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div>
+        <div class="sparkle sparkle-5"></div>
+        <div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div>
+        <div class="sparkle sparkle-8"></div>
+        <div class="sparkle sparkle-9"></div>
+        <div class="sparkle sparkle-10"></div>
+        <div class="depth-shadow"></div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#">Platform</a>
+      <a href="#">Auctions</a>
+      <a href="#">Support</a>
+    </nav>
+  </header>
+
+  <div class="legal-card">
+    <div class="legal-title">Legal</div>
+    <div class="legal-subtitle">Terms of Service · Privacy Policy · Auction Rules</div>
+    
+    <div class="toc">
+      <h3>📑 Table of Contents</h3>
+      <div class="toc-grid">
+        <a href="#section1" class="toc-link">1. Introduction & Company Information</a>
+        <a href="#section2" class="toc-link">2. Definitions</a>
+        <a href="#section3" class="toc-link">3. Account Registration & Eligibility</a>
+        <a href="#section4" class="toc-link">4. Auction Rules & Fee Structure</a>
+        <a href="#section5" class="toc-link">5. Buyer Obligations</a>
+        <a href="#section6" class="toc-link">6. Seller Obligations</a>
+        <a href="#section7" class="toc-link">7. Carrier/Broker Obligations</a>
+        <a href="#section8" class="toc-link">8. Bot-Powered Trading</a>
+        <a href="#section9" class="toc-link">9. Payment & Wallet System</a>
+        <a href="#section10" class="toc-link">10. Transport & Delivery</a>
+        <a href="#section11" class="toc-link">11. Reputation System & Disputes</a>
+        <a href="#section12" class="toc-link">12. Privacy Policy</a>
+        <a href="#section13" class="toc-link">13. Prohibited Conduct</a>
+        <a href="#section14" class="toc-link">14. Limitation of Liability</a>
+        <a href="#section15" class="toc-link">15. Governing Law & Dispute Resolution</a>
+        <a href="#section16" class="toc-link">16. Amendments & Contact</a>
+      </div>
+    </div>
+    
+    <!-- Section 1 -->
+    <div id="section1" class="legal-section">
+      <h2>1. Introduction & Company Information</h2>
+      <p>Welcome to TradeAux, a global commodity exchange platform. These Terms of Service ("Terms") govern your use of the TradeAux website, applications, and services (collectively, the "Platform"). By accessing or using TradeAux, you agree to be bound by these Terms.</p>
+      <div class="legal-highlight">
+        <strong>📌 Company Details:</strong><br>
+        TradeAux Ltd.<br>
+        Incorporated in the Province of British Columbia, Canada<br>
+        Business Number: [TBD]<br>
+        Registered Address: [TBD]<br>
+        Contact: legal@tradeaux.com
+      </div>
+      <p>If you do not agree to these Terms, please do not use the Platform.</p>
+    </div>
+    
+    <!-- Section 2 -->
+    <div id="section2" class="legal-section">
+      <h2>2. Definitions</h2>
+      <ul>
+        <li><strong>"Buyer"</strong> – A user who places bids on commodity or transport auctions.</li>
+        <li><strong>"Seller"</strong> – A user who lists commodities for auction.</li>
+        <li><strong>"Carrier/Broker"</strong> – A user who bids on transport contracts.</li>
+        <li><strong>"Auction"</strong> – A time-limited bidding event for commodities or transport services.</li>
+        <li><strong>"Brief"</strong> – A buyer's request for specific commodities or transport services.</li>
+        <li><strong>"Bot"</strong> – An automated bidding tool configured by users.</li>
+        <li><strong>"Winning Bid"</strong> – The highest valid bid at auction close (or lowest in transport auctions).</li>
+        <li><strong>"Flat Fee"</strong> – The US $25.00 fee charged per auction or brief submission.</li>
+      </ul>
+    </div>
+    
+    <!-- Section 3 -->
+    <div id="section3" class="legal-section">
+      <h2>3. Account Registration & Eligibility</h2>
+      <p>To use TradeAux, you must:</p>
+      <ul>
+        <li>Be at least 18 years of age.</li>
+        <li>Provide accurate, complete, and current registration information.</li>
+        <li>Maintain the security of your account credentials.</li>
+        <li>Not be located in a jurisdiction where access to the Platform is prohibited by law.</li>
+        <li>Complete KYC/AML verification as required by Canadian and international regulations.</li>
+      </ul>
+      <p>TradeAux Ltd reserves the right to refuse service, suspend, or terminate accounts at its sole discretion.</p>
+    </div>
+    
+    <!-- Section 4 -->
+    <div id="section4" class="legal-section">
+      <h2>4. Auction Rules & Fee Structure</h2>
+      <p><strong>4.1 Flat Fee Model</strong><br>TradeAux charges a flat fee of <strong>US $25.00</strong> per auction (commodity or transport) and per brief submission. This fee is non-refundable except as expressly provided in Section 11.</p>
+      <p><strong>4.2 Auction Types</strong></p>
+      <ul>
+        <li><strong>Commodity Auction:</strong> Sellers list products; Buyers bid. Highest bid at closing wins.</li>
+        <li><strong>Transport Auction:</strong> Carriers/Brokers bid on freight contracts. Lowest bid at closing wins.</li>
+      </ul>
+      <p><strong>4.3 Binding Nature of Bids</strong><br>All bids placed on the Platform are irrevocable and binding once submitted. Automated bot bids are considered valid bids placed by the account owner.</p>
+      <p><strong>4.4 Winner Obligations</strong><br>The winning bidder must complete the transaction within the specified timeframe. Failure to do so may result in account suspension and negative reputation flags ("Note of Shame").</p>
+    </div>
+    
+    <!-- Section 5 -->
+    <div id="section5" class="legal-section">
+      <h2>5. Buyer Obligations</h2>
+      <p>Buyers agree to:</p>
+      <ul>
+        <li>Maintain sufficient funds in their TradeAux wallet to cover auction fees and winning bids.</li>
+        <li>Complete payment to the Seller within 48 hours of winning a commodity auction.</li>
+        <li>Launch a transport auction or arrange shipping within 72 hours of winning a commodity auction.</li>
+        <li>Not engage in shill bidding, bid manipulation, or any fraudulent activity.</li>
+        <li>Provide accurate delivery information and destination details.</li>
+      </ul>
+    </div>
+    
+    <!-- Section 6 -->
+    <div id="section6" class="legal-section">
+      <h2>6. Seller Obligations</h2>
+      <p>Sellers agree to:</p>
+      <ul>
+        <li>Provide accurate and truthful descriptions of listed commodities (product, variety, grade, quantity, origin).</li>
+        <li>Honor winning bids and complete shipment as described.</li>
+        <li>Not cancel auctions after bidding has commenced without legitimate cause.</li>
+        <li>Provide necessary export documentation and comply with all applicable export laws.</li>
+        <li>Respond to buyer communications within 24 hours.</li>
+      </ul>
+    </div>
+    
+    <!-- Section 7 -->
+    <div id="section7" class="legal-section">
+      <h2>7. Carrier/Broker Obligations</h2>
+      <p>Carriers and Brokers agree to:</p>
+      <ul>
+        <li>Provide accurate pricing and transit time estimates.</li>
+        <li>Honor winning transport bids and execute the agreed-upon shipment.</li>
+        <li>Provide the $50 discount off invoice as specified in the transport auction terms.</li>
+        <li>Maintain valid licenses, insurance, and certifications required for the routes they bid on.</li>
+        <li>Notify all parties immediately of any delays or issues.</li>
+      </ul>
+    </div>
+    
+    <!-- Section 8 -->
+    <div id="section8" class="legal-section">
+      <h2>8. Bot-Powered Trading</h2>
+      <p>TradeAux allows users to deploy automated bidding bots ("Bots"). By using a Bot, you agree that:</p>
+      <ul>
+        <li>You are fully responsible for all bids placed by your Bot.</li>
+        <li>Your Bot will not exceed the maximum price or daily budget you configure.</li>
+        <li>TradeAux is not liable for any losses resulting from Bot configuration errors or technical issues.</li>
+        <li>Bots must comply with all auction rules, including no spamming or excessive bidding.</li>
+        <li>TradeAux reserves the right to throttle or disable Bots that negatively impact Platform performance.</li>
+      </ul>
+    </div>
+    
+    <!-- Section 9 -->
+    <div id="section9" class="legal-section">
+      <h2>9. Payment & Wallet System</h2>
+      <p><strong>9.1 Wallet Functionality</strong><br>All users maintain a virtual wallet for deposits, fee payments, and transaction settlements. Funds are held in accordance with Canadian financial regulations.</p>
+      <p><strong>9.2 Deposits</strong><br>Minimum deposit: $100 USD. Deposits are processed through third-party payment providers (e.g., Wise, Stripe). TradeAux does not store full payment card information.</p>
+      <p><strong>9.3 Withdrawals</strong><br>Users may withdraw wallet balances subject to verification and applicable processing fees. Withdrawal requests are processed within 5-7 business days.</p>
+      <p><strong>9.4 Fee Collection</strong><br>The $25 flat fee is deducted from the winner's wallet upon auction completion. For brief submissions, the fee is deducted at time of filing.</p>
+    </div>
+    
+    <!-- Section 10 -->
+    <div id="section10" class="legal-section">
+      <h2>10. Transport & Delivery</h2>
+      <p><strong>10.1 FOB Terms</strong><br>Unless otherwise specified, commodity auctions are offered on FOB (Free On Board) terms at the origin port. The Buyer is responsible for arranging and paying for transport from the origin.</p>
+      <p><strong>10.2 Transport Auction Requirement</strong><br>Buyers who win commodity auctions must either (a) launch a transport auction on TradeAux, or (b) provide proof of independently arranged shipping. Failure to do so may result in penalties.</p>
+      <p><strong>10.3 Risk of Loss</strong><br>Risk of loss transfers from Seller to Buyer upon loading at the FOB origin. TradeAux is not a carrier and assumes no liability for shipment delays, damages, or losses.</p>
+      <p><strong>10.4 Carrier Discount</strong><br>The winning Carrier/Broker must provide the advertised $50 discount off the final invoice, applied before payment.</p>
+    </div>
+    
+    <!-- Section 11 -->
+    <div id="section11" class="legal-section">
+      <h2>11. Reputation System & Disputes</h2>
+      <p><strong>11.1 "Note of Shame"</strong><br>TradeAux maintains a public reputation system. Users who fail to honor winning bids, cancel without cause, or engage in prohibited conduct may receive a "Note of Shame" visible to all Platform users.</p>
+      <p><strong>11.2 Dispute Resolution</strong><br>TradeAux encourages users to resolve disputes directly. If unresolved, users may submit a dispute to TradeAux within 14 days of the incident. TradeAux will review and may issue a binding determination, including fee refunds or account sanctions.</p>
+      <p><strong>11.3 Fee Refunds</strong><br>The $25 flat fee may be refunded only if TradeAux determines that the auction failed due to Platform error or Seller misconduct. Refunds are issued as wallet credits.</p>
+      <p><strong>11.4 Contact Sharing</strong><br>Full contact information (email, phone, WhatsApp) is shared between winning parties only after auction acceptance to protect privacy.</p>
+    </div>
+    
+    <!-- Section 12 -->
+    <div id="section12" class="legal-section">
+      <h2>12. Privacy Policy</h2>
+      <p><strong>12.1 Information We Collect</strong><br>TradeAux collects information you provide during registration (name, email, phone, business details), transaction data (bids, wins, payments), and technical data (IP address, device information, usage patterns).</p>
+      <p><strong>12.2 How We Use Your Information</strong><br>We use your information to operate the Platform, process transactions, communicate with you, enforce our Terms, and comply with legal obligations.</p>
+      <p><strong>12.3 Data Sharing</strong><br>Contact information is shared with counter-parties only after auction acceptance. We do not sell your personal data to third parties. We may share data with service providers (payment processors, hosting) who are bound by confidentiality agreements.</p>
+      <p><strong>12.4 Data Retention</strong><br>We retain your information for as long as your account is active and as necessary to comply with legal obligations (minimum 7 years for financial records per Canadian law).</p>
+      <p><strong>12.5 Your Rights (PIPEDA Compliance)</strong><br>As a Canadian company, TradeAux complies with the Personal Information Protection and Electronic Documents Act (PIPEDA). You have the right to access, correct, and request deletion of your personal information.</p>
+      <p><strong>12.6 International Data Transfers</strong><br>By using TradeAux, you acknowledge that your information may be transferred to and processed in countries outside Canada, which may have different data protection laws.</p>
+      <p><strong>12.7 Cookies</strong><br>TradeAux uses essential cookies for authentication and functionality, and optional analytics cookies to improve the Platform. You may disable cookies through your browser settings.</p>
+      <p><strong>12.8 Data Security</strong><br>We implement reasonable security measures, including encryption, access controls, and regular audits, to protect your information. However, no method of transmission over the Internet is 100% secure.</p>
+    </div>
+    
+    <!-- Section 13 -->
+    <div id="section13" class="legal-section">
+      <h2>13. Prohibited Conduct</h2>
+      <p>The following activities are strictly prohibited:</p>
+      <ul>
+        <li>Shill bidding, bid manipulation, or collusion with other users.</li>
+        <li>Listing commodities that you do not own or have the right to sell.</li>
+        <li>Fraudulent or deceptive practices, including misrepresenting product quality or origin.</li>
+        <li>Harassing, threatening, or abusing other users.</li>
+        <li>Attempting to circumvent the $25 flat fee through off-platform transactions ("fee avoidance").</li>
+        <li>Using the Platform for money laundering, sanctions evasion, or any illegal activity.</li>
+        <li>Uploading malicious code, attempting to hack, or disrupting Platform operations.</li>
+      </ul>
+      <p>Violation of these prohibitions may result in immediate account termination, forfeiture of wallet funds, and referral to law enforcement authorities.</p>
+    </div>
+    
+    <!-- Section 14 -->
+    <div id="section14" class="legal-section">
+      <h2>14. Limitation of Liability</h2>
+      <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, TRADEAUX LTD AND ITS DIRECTORS, OFFICERS, EMPLOYEES, AND AFFILIATES SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM:</p>
+      <ul>
+        <li>YOUR USE OR INABILITY TO USE THE PLATFORM;</li>
+        <li>ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE PLATFORM;</li>
+        <li>UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT;</li>
+        <li>COMMODITY PRICE FLUCTUATIONS, SHIPMENT DELAYS, OR COUNTERPARTY DEFAULT.</li>
+      </ul>
+      <p>IN NO EVENT SHALL TRADEAUX LTD'S TOTAL LIABILITY EXCEED THE TOTAL FEES PAID BY YOU TO TRADEAUX IN THE SIX (6) MONTHS PRECEDING THE CLAIM.</p>
+    </div>
+    
+    <!-- Section 15 -->
+    <div id="section15" class="legal-section">
+      <h2>15. Governing Law & Dispute Resolution</h2>
+      <p><strong>15.1 Governing Law</strong><br>These Terms and any dispute arising from or relating to the Platform shall be governed by and construed in accordance with the laws of the Province of British Columbia, Canada, and the applicable federal laws of Canada, without regard to conflict of law principles.</p>
+      <p><strong>15.2 Dispute Resolution – Arbitration</strong><br>Any dispute, claim, or controversy arising out of or relating to these Terms or the Platform shall be resolved through binding arbitration administered by the <strong>British Columbia International Commercial Arbitration Centre (BCICAC)</strong> in accordance with its rules. The arbitration shall take place in Vancouver, British Columbia, and shall be conducted in English.</p>
+      <p><strong>15.3 Small Claims Exception</strong><br>Either party may bring an individual action in small claims court in British Columbia for disputes within that court's jurisdiction, provided the dispute is not aggregated with any other claim.</p>
+      <p><strong>15.4 Class Action Waiver</strong><br>YOU AGREE THAT ANY DISPUTE MUST BE BROUGHT IN YOUR INDIVIDUAL CAPACITY AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY PURPORTED CLASS OR REPRESENTATIVE PROCEEDING.</p>
+      <p><strong>15.5 Statute of Limitations</strong><br>Any claim arising out of these Terms must be filed within one (1) year after the cause of action arises, or such claim is permanently barred.</p>
+    </div>
+    
+    <!-- Section 16 -->
+    <div id="section16" class="legal-section">
+      <h2>16. Amendments & Contact</h2>
+      <p><strong>16.1 Amendments</strong><br>TradeAux Ltd reserves the right to modify these Terms at any time. We will notify users of material changes via email or Platform notification. Continued use of the Platform after changes constitutes acceptance of the revised Terms.</p>
+      <p><strong>16.2 Severability</strong><br>If any provision of these Terms is found to be unenforceable or invalid, that provision shall be limited or eliminated to the minimum extent necessary, and the remaining provisions shall remain in full force and effect.</p>
+      <p><strong>16.3 Contact Information</strong><br>For legal inquiries, please contact:</p>
+      <div class="legal-highlight">
+        ✉️ <strong>Email:</strong> legal@tradeaux.com<br>
+        📧 <strong>Data Privacy Requests:</strong> privacy@tradeaux.com<br>
+        📍 <strong>Registered Office:</strong> TradeAux Ltd., [Full Address], British Columbia, Canada
+      </div>
+    </div>
+    
+    <div class="last-updated">
+      Last Updated: November 15, 2025<br>
+      Version: 1.0
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>TRADEAUX © 2026 • Global Commodity Exchange • Incorporated in British Columbia, Canada</p>
+    <p style="margin-top: 12px; font-size: 11px;">*This page represents the legal terms governing the TradeAux platform. By using TradeAux, you agree to these terms.*</p>
+  </footer>
+</div>
+
+<div class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <span>↑</span>
+</div>
+
+<script>
+  // Smooth scroll for anchor links
+  document.querySelectorAll('.toc-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeAux • Bot Config | Dynamic Weapon System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --neon: #7CFC00; --gold: #FFD966; --cyan: #00ced1; --red: #ff3b3b; }
+    body { min-height: 100vh; font-family: 'Inter', sans-serif; color: #F0F3FA;
+      background: radial-gradient(ellipse at 20% 30%, rgba(124,252,0,0.08), transparent 55%),
+                  radial-gradient(ellipse at 85% 70%, rgba(255,217,102,0.08), transparent 60%),
+                  linear-gradient(125deg, #03050C 0%, #0A111F 100%); }
+    .container { max-width: 1000px; margin: 0 auto; padding: 30px 24px 60px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 800; color: var(--cyan); }
+    .header p { color: #9ca3af; margin-top: 6px; font-size: 13px; }
+
+    .nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .nav a { color: #9ca3af; text-decoration: none; font-size: 12px; padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(0,206,209,0.2); transition: 0.2s; }
+    .nav a:hover { color: var(--cyan); border-color: var(--cyan); }
+
+    .card { background: linear-gradient(145deg, #0B1122, #030712); border: 1px solid rgba(0,206,209,0.25); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
+    .card-title { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: var(--cyan); margin-bottom: 14px; }
+    .card-sub { font-size: 11px; color: #5c6b8a; margin-bottom: 12px; }
+
+    .mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .mode-btn { padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(0,206,209,0.3); background: rgba(0,0,0,0.3); color: #9ca3af; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .mode-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .mode-btn.active { background: rgba(124,252,0,0.1); border-color: var(--neon); color: var(--neon); box-shadow: 0 0 12px rgba(124,252,0,0.15); }
+
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .field input, .field select {
+      width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,206,209,0.3); border-radius: 10px; color: #fff;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--neon); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-hint { font-size: 10px; color: #5c6b8a; margin-top: 3px; }
+
+    .weapon-panel { display: none; }
+    .weapon-panel.active { display: block; }
+
+    .strategy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .strategy-option { padding: 10px; border-radius: 12px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); cursor: pointer; text-align: center; transition: 0.2s; }
+    .strategy-option:hover { border-color: var(--cyan); }
+    .strategy-option.selected { border-color: var(--neon); background: rgba(124,252,0,0.05); }
+    .strategy-option .emoji { font-size: 20px; margin-bottom: 4px; }
+    .strategy-option .name { font-size: 11px; font-weight: 600; color: #fff; }
+    .strategy-option .desc { font-size: 9px; color: #9ca3af; margin-top: 2px; }
+
+    .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .toggle-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--neon); }
+    .toggle-row label { font-size: 13px; color: #fff; cursor: pointer; }
+
+    .btn { border: none; font-family: 'Orbitron', sans-serif; font-weight: 700; cursor: pointer; padding: 12px 24px; border-radius: 40px; font-size: 13px; transition: 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--cyan), #00ff7f); color: #000; }
+    .btn-primary:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(0,206,209,0.4); }
+    .btn-secondary { background: rgba(0,206,209,0.1); color: var(--cyan); border: 1px solid rgba(0,206,209,0.4); }
+    .btn-danger { background: linear-gradient(135deg, var(--red), #ff6b6b); color: #fff; }
+    .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    .status-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; font-family: 'Orbitron', sans-serif; }
+    .status-on { background: rgba(124,252,0,0.15); color: var(--neon); border: 1px solid rgba(124,252,0,0.3); }
+    .status-off { background: rgba(255,59,59,0.15); color: var(--red); border: 1px solid rgba(255,59,59,0.3); }
+
+    .preview-box { background: rgba(0,0,0,0.4); border-radius: 12px; padding: 14px; margin-top: 12px; border: 1px solid rgba(124,252,0,0.2); }
+    .preview-title { font-family: 'Orbitron', sans-serif; font-size: 11px; color: var(--neon); margin-bottom: 8px; }
+    .preview-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+    .preview-row .label { color: #9ca3af; }
+    .preview-row .value { color: #fff; font-weight: 600; }
+    .preview-row .value.highlight { color: var(--gold); font-family: 'JetBrains Mono', monospace; }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: #0a1424cc; backdrop-filter: blur(12px); padding: 10px 24px; border-radius: 40px; font-size: 0.8rem; border-left: 3px solid var(--neon); transition: 0.2s; opacity: 0; z-index: 20000; font-family: 'Orbitron', sans-serif; white-space: nowrap; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-left-color: var(--red); color: var(--red); }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🤖 DYNAMIC BUYER BOT</h1>
+      <p>Adapts its weapon in real-time based on auction conditions. Built to win Duhe.</p>
+    </div>
+
+    <div class="nav">
+      <a href="dashboard-buyer.html">← Dashboard</a>
+      <a href="bot-runner.html" target="_blank">🚀 Launch Runner</a>
+      <a href="bot-tester.html">🧪 Test Arena</a>
+    </div>
+
+    <!-- Status -->
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-family:'Orbitron',sans-serif; font-size:13px; color:#fff;">Bot Status</div>
+        <div id="statusText" style="font-size:11px; color:#9ca3af;">Loading...</div>
+      </div>
+      <span class="status-pill status-off" id="statusPill">INACTIVE</span>
+    </div>
+
+    <!-- Control Mode -->
+    <div class="card">
+      <div class="card-title">🎛️ CONTROL MODE</div>
+      <div class="card-sub">How the bot chooses which weapon to deploy</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="adaptive" onclick="setMode('adaptive')">🧠 ADAPTIVE</button>
+        <button class="mode-btn" data-mode="fixed" onclick="setMode('fixed')">🔒 FIXED</button>
+      </div>
+      <div id="adaptiveDesc" style="font-size:12px; color:#9ca3af; padding:8px; background:rgba(124,252,0,0.05); border-radius:8px; border:1px solid rgba(124,252,0,0.2);">
+        <strong style="color:var(--neon);">Adaptive:</strong> Bot analyzes each auction in real-time and picks the weapon most likely to win Duhe selection. Weapons switch dynamically per auction.
+      </div>
+      <div id="fixedDesc" style="display:none; font-size:12px; color:#9ca3af; padding:8px; background:rgba(0,206,209,0.05); border-radius:8px; border:1px solid rgba(0,206,209,0.2);">
+        <strong style="color:var(--cyan);">Fixed:</strong> Bot always uses your chosen primary weapon. If that weapon cannot win, it falls back to your secondary choice.
+      </div>
+    </div>
+
+    <!-- Weapon Arsenal -->
+    <div class="card">
+      <div class="card-title">⚔️ WEAPON ARSENAL</div>
+      <div class="card-sub">Configure each weapon. The bot will use these parameters when that weapon is deployed.</div>
+
+      <div class="strategy-grid">
+        <div class="strategy-option selected" data-weapon="aggressor" onclick="showWeapon('aggressor')">
+          <div class="emoji">⚔️</div><div class="name">AGGRESSOR</div><div class="desc">Climb the ladder</div>
+        </div>
+        <div class="strategy-option" data-weapon="sniper" onclick="showWeapon('sniper')">
+          <div class="emoji">🎯</div><div class="name">SNIPER</div><div class="desc">Last-second strike</div>
+        </div>
+        <div class="strategy-option" data-weapon="fit" onclick="showWeapon('fit')">
+          <div class="emoji">🧩</div><div class="name">FIT</div><div class="desc">Fill the gap</div>
+        </div>
+        <div class="strategy-option" data-weapon="payment" onclick="showWeapon('payment')">
+          <div class="emoji">💳</div><div class="name">PAYMENT</div><div class="desc">Better terms</div>
+        </div>
+        <div class="strategy-option" data-weapon="exw" onclick="showWeapon('exw')">
+          <div class="emoji">🚛</div><div class="name">EXW</div><div class="desc">Pickup from farm</div>
+        </div>
+        <div class="strategy-option" data-weapon="duhe" onclick="showWeapon('duhe')">
+          <div class="emoji">🧮</div><div class="name">DUHE MODEL</div><div class="desc">Preview engine</div>
+        </div>
+      </div>
+
+      <!-- AGGRESSOR PANEL -->
+      <div class="weapon-panel active" id="panel-aggressor">
+        <div class="field-row">
+          <div class="field"><label>Max Bid ($/MT)</label><input type="number" id="aggMax" value="1000" min="1"></div>
+          <div class="field"><label>Increment ($)</label><input type="number" id="aggInc" value="5" min="1"></div>
+        </div>
+        <div class="field"><label>Re-bid Delay (ms)</label><input type="number" id="aggDelay" value="2000" min="100" step="100"></div>
+        <div class="field-hint">How long to wait before re-bidding when outbid. Lower = more aggressive.</div>
+      </div>
+
+      <!-- SNIPER PANEL -->
+      <div class="weapon-panel" id="panel-sniper">
+        <div class="field-row">
+          <div class="field"><label>True Max ($/MT)</label><input type="number" id="snipeMax" value="1000" min="1"></div>
+          <div class="field"><label>Strike Window (sec)</label><input type="number" id="snipeWindow" value="5" min="1" max="60"></div>
+        </div>
+        <div class="field"><label>Strike Offset (sec before end)</label><input type="number" id="snipeOffset" value="3" min="0.5" max="30" step="0.5"></div>
+        <div class="field-hint">Bot wakes up at (endsAt - offset), then places bid within the strike window.</div>
+      </div>
+
+      <!-- FIT PANEL -->
+      <div class="weapon-panel" id="panel-fit">
+        <div class="field"><label>Fit Tolerance (%)</label><input type="number" id="fitTolerance" value="10" min="0" max="50"></div>
+        <div class="field-hint">How close to exact remaining quantity the bot will bid. 0% = exact match only.</div>
+        <div class="field"><label>Min Fit Advantage</label><input type="number" id="fitMinAdvantage" value="1.05" min="1" max="2" step="0.01"></div>
+        <div class="field-hint">Minimum effective value multiplier for Fit to be chosen over other weapons. 1.05 = 5% better.</div>
+      </div>
+
+      <!-- PAYMENT PANEL -->
+      <div class="weapon-panel" id="panel-payment">
+        <div class="field"><label>Default Payment Term</label>
+          <select id="payTerm">
+            <option value="wire">Wire Transfer (1.20x)</option>
+            <option value="lc_sight">LC at Sight (1.10x)</option>
+            <option value="lc_30">LC 30 Days (1.00x)</option>
+            <option value="net_30">Net 30 (0.95x)</option>
+          </select>
+        </div>
+        <div class="field"><label>Auto-escalate Terms</label>
+          <select id="payEscalate">
+            <option value="never">Never — stick to default</option>
+            <option value="competitive">Competitive — match best competitor term</option>
+            <option value="aggressive">Aggressive — always offer best possible</option>
+          </select>
+        </div>
+        <div class="field-hint">Competitive: If competitor offers wire, you offer wire. Aggressive: Always offer wire regardless.</div>
+      </div>
+
+      <!-- EXW PANEL -->
+      <div class="weapon-panel" id="panel-exw">
+        <div class="toggle-row"><input type="checkbox" id="exwEnable" checked><label for="exwEnable">Enable EXW pickup offers</label></div>
+        <div class="field"><label>Seller Savings per MT ($)</label><input type="number" id="exwSavings" value="50" min="1"></div>
+        <div class="field"><label>Min Distance for EXW (km)</label><input type="number" id="exwMinDist" value="500" min="0"></div>
+        <div class="field-hint">Only offer EXW when origin is at least this far from destination (high freight savings).</div>
+      </div>
+
+      <!-- DUHE MODEL PANEL -->
+      <div class="weapon-panel" id="panel-duhe">
+        <div class="card-sub">Configure how the bot models Duhe's selection. This affects which weapon the bot chooses in Adaptive mode.</div>
+        <div class="field-row">
+          <div class="field"><label>Price Weight</label><input type="number" id="duhePriceW" value="0.40" min="0" max="1" step="0.05"></div>
+          <div class="field"><label>Fit Weight</label><input type="number" id="duheFitW" value="0.25" min="0" max="1" step="0.05"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Payment Weight</label><input type="number" id="duhePayW" value="0.20" min="0" max="1" step="0.05"></div>
+          <div class="field"><label>EXW Weight</label><input type="number" id="duheExwW" value="0.15" min="0" max="1" step="0.05"></div>
+        </div>
+        <div class="field-hint">Weights should sum to 1.0. Higher price weight = bot prioritizes outbidding. Higher fit weight = bot prioritizes filling gaps.</div>
+
+        <div class="preview-box">
+          <div class="preview-title">📊 DUHE PREVIEW (Example)</div>
+          <div class="preview-row"><span class="label">Your bid $800 FOB</span><span class="value">Score: 0.40</span></div>
+          <div class="preview-row"><span class="label">Your bid $780 EXW</span><span class="value highlight">Score: 0.52 ← WINS</span></div>
+          <div class="preview-row"><span class="label">Competitor $820 FOB</span><span class="value">Score: 0.41</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Guardrails -->
+    <div class="card">
+      <div class="card-title">🛡️ GUARDRAILS</div>
+      <div class="field-row">
+        <div class="field"><label>Max Wallet Spend (%)</label><input type="number" id="guardMaxPct" value="80" min="1" max="100"></div>
+        <div class="field"><label>Min Wallet Buffer ($)</label><input type="number" id="guardMinBuf" value="100" min="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Max Active Auctions</label><input type="number" id="guardMaxAuctions" value="5" min="1" max="20"></div>
+        <div class="field"><label>Max Bid per Auction ($)</label><input type="number" id="guardMaxBid" value="5000" min="1"></div>
+      </div>
+      <div class="toggle-row" style="margin-top:10px;">
+        <input type="checkbox" id="botEnabled" checked>
+        <label for="botEnabled">Bot is ACTIVE — will place real bids on live auctions</label>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveConfig()">💾 Save & Deploy</button>
+      <button class="btn btn-secondary" onclick="window.open('bot-runner.html','_blank')">🚀 Open Runner</button>
+      <button class="btn btn-danger" onclick="deleteBot()">🗑️ Reset</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let settings = {
+  mode: 'adaptive',
+  weapons: {
+    aggressor: { maxBid: 1000, increment: 5, rebidDelay: 2000 },
+    sniper: { maxBid: 1000, strikeWindow: 5, strikeOffset: 3 },
+    fit: { tolerance: 10, minAdvantage: 1.05 },
+    payment: { term: 'wire', escalate: 'competitive' },
+    exw: { enabled: true, savingsPerMt: 50, minDistance: 500 }
+  },
+  duhe: { priceWeight: 0.40, fitWeight: 0.25, paymentWeight: 0.20, exwWeight: 0.15 },
+  guards: { maxWalletPct: 80, minBuffer: 100, maxAuctions: 5, maxBid: 5000 },
+  active: true
+};
+
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  currentUser = user;
+  const doc = await db.collection('buyer_bots').doc(user.uid).get();
+  if (doc.exists) {
+    const d = doc.data();
+    settings = { ...settings, ...d };
+    applyUI();
+    showToast('Bot config loaded');
+  }
+});
+
+function applyUI() {
+  // Mode
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === settings.mode));
+  document.getElementById('adaptiveDesc').style.display = settings.mode === 'adaptive' ? 'block' : 'none';
+  document.getElementById('fixedDesc').style.display = settings.mode === 'fixed' ? 'block' : 'none';
+
+  // Weapons
+  const w = settings.weapons || {};
+  document.getElementById('aggMax').value = w.aggressor?.maxBid || 1000;
+  document.getElementById('aggInc').value = w.aggressor?.increment || 5;
+  document.getElementById('aggDelay').value = w.aggressor?.rebidDelay || 2000;
+  document.getElementById('snipeMax').value = w.sniper?.maxBid || 1000;
+  document.getElementById('snipeWindow').value = w.sniper?.strikeWindow || 5;
+  document.getElementById('snipeOffset').value = w.sniper?.strikeOffset || 3;
+  document.getElementById('fitTolerance').value = w.fit?.tolerance || 10;
+  document.getElementById('fitMinAdvantage').value = w.fit?.minAdvantage || 1.05;
+  document.getElementById('payTerm').value = w.payment?.term || 'wire';
+  document.getElementById('payEscalate').value = w.payment?.escalate || 'competitive';
+  document.getElementById('exwEnable').checked = w.exw?.enabled !== false;
+  document.getElementById('exwSavings').value = w.exw?.savingsPerMt || 50;
+  document.getElementById('exwMinDist').value = w.exw?.minDistance || 500;
+
+  // Duhe
+  const d = settings.duhe || {};
+  document.getElementById('duhePriceW').value = d.priceWeight || 0.40;
+  document.getElementById('duheFitW').value = d.fitWeight || 0.25;
+  document.getElementById('duhePayW').value = d.paymentWeight || 0.20;
+  document.getElementById('duheExwW').value = d.exwWeight || 0.15;
+
+  // Guards
+  const g = settings.guards || {};
+  document.getElementById('guardMaxPct').value = g.maxWalletPct || 80;
+  document.getElementById('guardMinBuf').value = g.minBuffer || 100;
+  document.getElementById('guardMaxAuctions').value = g.maxAuctions || 5;
+  document.getElementById('guardMaxBid').value = g.maxBid || 5000;
+  document.getElementById('botEnabled').checked = settings.active !== false;
+
+  updateStatus();
+}
+
+function setMode(mode) {
+  settings.mode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('adaptiveDesc').style.display = mode === 'adaptive' ? 'block' : 'none';
+  document.getElementById('fixedDesc').style.display = mode === 'fixed' ? 'block' : 'none';
+}
+
+function showWeapon(weapon) {
+  document.querySelectorAll('.strategy-option').forEach(o => o.classList.toggle('selected', o.dataset.weapon === weapon));
+  document.querySelectorAll('.weapon-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + weapon));
+}
+
+function updateStatus() {
+  const active = settings.active !== false;
+  const pill = document.getElementById('statusPill');
+  const text = document.getElementById('statusText');
+  pill.className = 'status-pill ' + (active ? 'status-on' : 'status-off');
+  pill.textContent = active ? 'ACTIVE' : 'INACTIVE';
+  text.textContent = active ? `Mode: ${settings.mode} | Weapons: 5 configured` : 'Bot will not place any bids';
+}
+
+async function saveConfig() {
+  settings.weapons = {
+    aggressor: { maxBid: parseFloat(document.getElementById('aggMax').value) || 1000, increment: parseFloat(document.getElementById('aggInc').value) || 5, rebidDelay: parseFloat(document.getElementById('aggDelay').value) || 2000 },
+    sniper: { maxBid: parseFloat(document.getElementById('snipeMax').value) || 1000, strikeWindow: parseFloat(document.getElementById('snipeWindow').value) || 5, strikeOffset: parseFloat(document.getElementById('snipeOffset').value) || 3 },
+    fit: { tolerance: parseFloat(document.getElementById('fitTolerance').value) || 10, minAdvantage: parseFloat(document.getElementById('fitMinAdvantage').value) || 1.05 },
+    payment: { term: document.getElementById('payTerm').value, escalate: document.getElementById('payEscalate').value },
+    exw: { enabled: document.getElementById('exwEnable').checked, savingsPerMt: parseFloat(document.getElementById('exwSavings').value) || 50, minDistance: parseFloat(document.getElementById('exwMinDist').value) || 500 }
+  };
+  settings.duhe = {
+    priceWeight: parseFloat(document.getElementById('duhePriceW').value) || 0.40,
+    fitWeight: parseFloat(document.getElementById('duheFitW').value) || 0.25,
+    paymentWeight: parseFloat(document.getElementById('duhePayW').value) || 0.20,
+    exwWeight: parseFloat(document.getElementById('duheExwW').value) || 0.15
+  };
+  settings.guards = {
+    maxWalletPct: parseFloat(document.getElementById('guardMaxPct').value) || 80,
+    minBuffer: parseFloat(document.getElementById('guardMinBuf').value) || 100,
+    maxAuctions: parseFloat(document.getElementById('guardMaxAuctions').value) || 5,
+    maxBid: parseFloat(document.getElementById('guardMaxBid').value) || 5000
+  };
+  settings.active = document.getElementById('botEnabled').checked;
+  settings.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+  settings.buyerId = currentUser.uid;
+
+  try {
+    await db.collection('buyer_bots').doc(currentUser.uid).set(settings, { merge: true });
+    updateStatus();
+    showToast('✓ Bot deployed. Open runner to activate.');
+  } catch (err) { showToast('Save failed: ' + err.message, true); }
+}
+
+async function deleteBot() {
+  if (!confirm('Reset bot to defaults?')) return;
+  try {
+    await db.collection('buyer_bots').doc(currentUser.uid).delete();
+    showToast('Bot reset');
+    setTimeout(() => location.reload(), 800);
+  } catch (err) { showToast('Reset failed: ' + err.message, true); }
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = isError ? 'toast error visible' : 'toast visible';
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+</script>
+</body>
+</html>

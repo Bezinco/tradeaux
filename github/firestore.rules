@@ -1,0 +1,30 @@
+function isBotOwner(data) {
+  return request.auth != null &&
+    (data.buyer_id == request.auth.uid ||
+     data.seller_id == request.auth.uid ||
+     data.uid == request.auth.uid);
+}
+
+function isCounterOnlyUpdate() {
+  return request.resource.data.diff(resource.data).affectedKeys()
+    .hasOnly([
+      'total_bids','totalBids',
+      'total_wins','totalWins',
+      'updated_at','updatedAt'
+    ]);
+}
+
+match /buyer_bots/{botId} {
+  allow read: if request.auth != null;
+  allow update: if isBotOwner(resource.data) && isCounterOnlyUpdate();
+}
+
+match /seller_bots/{botId} {
+  allow read: if request.auth != null;
+  allow update: if isBotOwner(resource.data) && isCounterOnlyUpdate();
+}
+
+match /transport_bots/{botId} {
+  allow read: if request.auth != null;
+  allow update: if isBotOwner(resource.data) && isCounterOnlyUpdate();
+}

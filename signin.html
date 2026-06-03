@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — TradeAux</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+}
+.container {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.gem-text {
+  font-size: 64px;
+  font-weight: 900;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(135deg, #00ced1, #7CFC00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+}
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 40px;
+}
+.auth-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,206,209,0.3);
+  border-radius: 10px;
+  color: white;
+  font-family: inherit;
+  margin-bottom: 16px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.error {
+  color: #ff6b6b;
+  background: rgba(217,43,43,0.2);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+}
+.toggle {
+  text-align: center;
+  margin-top: 20px;
+  color: #9ca3af;
+}
+.toggle a {
+  color: #00ced1;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="gem-text">TRADEAUX</div>
+  <div class="subtitle" id="subtitle">Welcome back</div>
+  <div class="auth-card">
+    <div class="error" id="errorMsg"></div>
+    
+    <div id="signinView">
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
+      <button id="signinBtn">Sign In</button>
+      <div class="toggle">No account? <a id="showSignup">Create one</a></div>
+    </div>
+
+    <div id="signupView" style="display:none">
+      <input type="email" id="signupEmail" placeholder="Email">
+      <input type="password" id="signupPassword" placeholder="Password (min 6 chars)">
+      <input type="text" id="signupName" placeholder="Full Name">
+      <button id="signupBtn">Create Account</button>
+      <div class="toggle">Already have an account? <a id="showSignin">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let selectedRole = 'buyer';
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+document.getElementById('showSignup').onclick = () => {
+  document.getElementById('signinView').style.display = 'none';
+  document.getElementById('signupView').style.display = 'block';
+  document.getElementById('subtitle').textContent = 'Create your account';
+};
+
+document.getElementById('showSignin').onclick = () => {
+  document.getElementById('signupView').style.display = 'none';
+  document.getElementById('signinView').style.display = 'block';
+  document.getElementById('subtitle').textContent = 'Welcome back';
+};
+
+document.getElementById('signinBtn').onclick = async () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    
+    // Get user role from Firestore
+    const profileDoc = await db.collection('profiles').doc(user.uid).get();
+    const role = profileDoc.exists ? profileDoc.data().role : 'buyer';
+    
+    // Redirect based on role
+    if (role === 'admin') window.location.href = 'dashboard-admin.html';
+    else if (role === 'seller') window.location.href = 'dashboard-seller.html';
+    else window.location.href = 'dashboard-buyer.html';
+  } catch (error) {
+    showError(error.message);
+  }
+};
+
+document.getElementById('signupBtn').onclick = async () => {
+  const email = document.getElementById('signupEmail').value;
+  const password = document.getElementById('signupPassword').value;
+  const name = document.getElementById('signupName').value;
+  
+  if (password.length < 6) {
+    showError('Password must be at least 6 characters');
+    return;
+  }
+  
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    
+    await user.updateProfile({ displayName: name || email.split('@')[0] });
+    
+    // Create profile in Firestore
+    await db.collection('profiles').doc(user.uid).set({
+      full_name: name || email.split('@')[0],
+      email: email,
+      role: 'buyer',
+      created_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    window.location.href = 'dashboard-buyer.html';
+  } catch (error) {
+    showError(error.message);
+  }
+};
+</script>
+</body>
+</html>

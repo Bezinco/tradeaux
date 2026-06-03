@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Seller Dashboard | Full Product Varieties</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #020617;
+      font-family: 'Inter', sans-serif;
+      color: #e5e7eb;
+      min-height: 100vh;
+    }
+
+    .bg-waves {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .wave-bg {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      filter: blur(100px);
+      opacity: 0.15;
+      animation: waveBgDrift 24s ease-in-out infinite;
+    }
+
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+
+    @keyframes waveBgDrift {
+      0% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(40px,-30px) scale(1.05); }
+      100% { transform: translate(-30px,20px) scale(1); }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 24px 60px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0 30px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .gem-logo-corner {
+      display: inline-block;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.65);
+      transform-origin: left center;
+      vertical-align: middle;
+    }
+    
+    .gem-text {
+      font-size: 80px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+    
+    /* Letter T - Blue */
+    .gem-letter:nth-child(1)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter R - Green */
+    .gem-letter:nth-child(2)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter A - Red */
+    .gem-letter:nth-child(3)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter D - Blue */
+    .gem-letter:nth-child(4)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter E - Green */
+    .gem-letter:nth-child(5)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter A - Red */
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter U - Blue */
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    /* Letter X - Green */
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    
+    .gem-letter .edge-top {
+      position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-right {
+      position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+      background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-bottom {
+      position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-left {
+      position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+      background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+    
+    .light-source {
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite;
+      pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+    }
+    
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+    
+    .sparkle {
+      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+    }
+    
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+    
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    
+    .depth-shadow {
+      position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+      background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+      filter: blur(20px); z-index: -1;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0066ff, #00cc44, #d92b2b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 2px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav a {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border: 1px solid rgba(0, 206, 209, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 32, 64, 0.7);
+      backdrop-filter: blur(4px);
+      color: #e5e7eb;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+
+    .wallet-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(0, 206, 209, 0.1);
+      padding: 8px 20px;
+      border-radius: 40px;
+      border: 1px solid rgba(0, 206, 209, 0.3);
+    }
+
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .deposit-btn {
+      background: linear-gradient(135deg, #00ced1, #00ff7f);
+      border: none;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+
+    .top-seller {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 12px 24px;
+      border-radius: 40px;
+      display: inline-block;
+      width: auto;
+      margin: 20px auto;
+      border: 1px solid rgba(124, 252, 0, 0.3);
+      backdrop-filter: blur(4px);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+    }
+    .banner-container { text-align: center; }
+
+    .ticker-section {
+      margin: 20px 0 30px;
+      text-align: center;
+    }
+    .ticker-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      color: #9ca3af;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    .live-ticker {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .ticker-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 206, 209, 0.2);
+      border-radius: 40px;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 5px rgba(0,206,209,0.2); }
+      50% { box-shadow: 0 0 20px rgba(0,206,209,0.4); }
+    }
+    .ticker-commodity { font-family: 'Orbitron', sans-serif; font-weight: 600; }
+    .ticker-price { font-family: 'Orbitron', sans-serif; font-weight: 800; color: #00ced1; }
+    .ticker-change.up { color: #7CFC00; }
+    .ticker-change.down { color: #ff3b3b; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin: 20px 0;
+    }
+    .dashboard-card {
+      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+      border: 1px solid rgba(0, 206, 209, 0.3);
+      border-radius: 20px;
+      padding: 20px;
+    }
+    .card-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #00ced1;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0,206,209,0.2);
+      padding-bottom: 10px;
+    }
+    .badge-count {
+      background: rgba(0,206,209,0.2);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    .clickable-item {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .clickable-item:hover {
+      background: rgba(0,206,209,0.1);
+      transform: translateX(4px);
+    }
+    .item-title {
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .item-details {
+      font-size: 11px;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .status-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(124,252,0,0.2);
+      color: #7CFC00;
+    }
+    .status-badge.warning { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .status-badge.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+
+    .bots-section { margin-top: 30px; }
+    .bots-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #00ced1;
+    }
+    .bots-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .bot-card {
+      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+      border: 1px solid rgba(0, 206, 209, 0.3);
+      border-radius: 20px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .bot-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .bot-emoji { font-size: 32px; margin-bottom: 8px; }
+    .bot-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+    .bot-status { font-size: 10px; color: #7CFC00; margin-bottom: 8px; }
+    .bot-target { font-size: 10px; color: #FFD966; margin-bottom: 8px; }
+    .bot-stats { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; margin-top: 8px; }
+    .add-bot-card {
+      background: rgba(15, 32, 64, 0.4);
+      border: 2px dashed rgba(0, 206, 209, 0.3);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 150px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .add-bot-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
+    .add-bot-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
+    .add-bot-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; }
+    .action-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: linear-gradient(135deg, #00ced1, #00ff7f);
+      border: none;
+      border-radius: 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      color: #000;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 40px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: linear-gradient(145deg, #0a1228, #020617);
+      border: 2px solid #00ced1;
+      border-radius: 24px;
+      max-width: 550px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 28px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 28px;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+    .modal-close:hover { color: #00ced1; }
+    .modal-header {
+      border-bottom: 1px solid rgba(0,206,209,0.3);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-field { margin-bottom: 20px; }
+    .modal-field label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .modal-field input, .modal-field select, .modal-field textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,206,209,0.3);
+      border-radius: 8px;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+    }
+    .tooltip { font-size: 11px; color: #7CFC00; margin-top: 4px; display: block; }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,0,0,0.3);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(0,206,209,0.2);
+      cursor: pointer;
+    }
+    .checkbox-item:hover { border-color: #00ced1; }
+    .checkbox-item.selected { background: rgba(0,206,209,0.2); border-color: #00ced1; }
+    .slider-row { display: flex; align-items: center; gap: 16px; }
+    .slider-row input { flex: 1; }
+    .slider-value { font-family: 'Orbitron', sans-serif; color: #00ced1; min-width: 60px; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; color: #000; }
+
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15,32,64,0.98);
+      border: 1px solid #00ced1;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      transition: 0.3s;
+      opacity: 0;
+      z-index: 2000;
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+
+    @media (max-width: 1000px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .bots-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .bots-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div>
+        <div class="sparkle sparkle-2"></div>
+        <div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div>
+        <div class="sparkle sparkle-5"></div>
+        <div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div>
+        <div class="sparkle sparkle-8"></div>
+        <div class="sparkle sparkle-9"></div>
+        <div class="sparkle sparkle-10"></div>
+        <div class="depth-shadow"></div>
+      </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="wallet-section">
+        <div class="wallet-balance">
+          <span class="wallet-label">WALLET</span>
+          <span class="wallet-amount" id="walletAmount">$0.00</span>
+        </div>
+        <button class="deposit-btn" id="depositBtn">+ Deposit</button>
+      </div>
+      <nav class="nav">
+        <a href="#">Arena</a>
+        <a href="#">Market Intel</a>
+        <a href="#" id="authBtn">Sign Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="banner-container">
+    <div class="top-seller" id="topSellerBanner">🏆 TOP SELLER: Matale Co-op (+$24,500) | 2nd: Kerala Spice (+$18,200) | 3rd: Davao Coconut (+$12,800)</div>
+  </div>
+
+  <div class="ticker-section">
+    <div class="ticker-header">🔴 LIVE MARKET TICKER — YOUR COMMODITIES</div>
+    <div class="live-ticker" id="liveTicker"></div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <div class="card-header">📦 ACTIVE LISTINGS <span class="badge-count" id="activeListingsCount">0</span></div>
+      <div id="activeListingsList">
+        <div style="color:#9ca3af; text-align:center; padding:20px;">No active listings</div>
+      </div>
+      <button class="action-btn" id="postInventoryBtn">+ POST NEW INVENTORY</button>
+    </div>
+    <div class="dashboard-card">
+      <div class="card-header">✅ SOLD ITEMS <span class="badge-count" id="soldItemsCount">0</span></div>
+      <div id="soldItemsList">
+        <div style="color:#9ca3af; text-align:center; padding:20px;">No sold items</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bots-section">
+    <div class="bots-header">🤖 YOUR SELLER BOT FLEET</div>
+    <div class="bots-grid" id="botsGrid"></div>
+  </div>
+
+  <footer class="footer">
+    <p>TRADEAUX © 2026 • Global Commodity Exchange • All fees in USD</p>
+  </footer>
+</div>
+
+<!-- Deposit Modal -->
+<div id="depositModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeDepositModal">&times;</span>
+    <div class="modal-header"><h2>💰 Deposit Funds</h2></div>
+    <div class="modal-field">
+      <label>Amount (USD)</label>
+      <input type="number" id="depositAmount" min="100" step="100" value="500">
+      <small style="color:#9ca3af; display:block; margin-top:8px;">Minimum deposit: $100 USD</small>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelDepositBtn">Cancel</button>
+      <button class="create-btn" id="confirmDepositBtn">Continue to Wise →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Post Inventory Modal -->
+<div id="postInventoryModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeInventoryModal">&times;</span>
+    <div class="modal-header"><h2>📦 POST NEW INVENTORY</h2></div>
+    <div class="modal-field">
+      <label>Commodity</label>
+      <select id="inventoryCommodity">
+        <option value="Apples">Apples</option><option value="Bananas">Bananas</option><option value="Mangoes">Mangoes</option><option value="Oranges">Oranges</option><option value="Pineapples">Pineapples</option>
+        <option value="Potatoes">Potatoes</option><option value="Tomatoes">Tomatoes</option><option value="Onions">Onions</option><option value="Carrots">Carrots</option><option value="Broccoli">Broccoli</option>
+        <option value="Corn">Corn</option><option value="Rice">Rice</option><option value="Wheat">Wheat</option><option value="Soybeans">Soybeans</option>
+        <option value="Chickpeas">Chickpeas</option><option value="Lentils">Lentils</option>
+        <option value="Almonds">Almonds</option><option value="Cashews">Cashews</option><option value="Peanuts">Peanuts</option>
+        <option value="Black Pepper">Black Pepper</option><option value="Cinnamon">Cinnamon</option><option value="Turmeric">Turmeric</option>
+        <option value="Coffee - Arabica">Coffee - Arabica</option><option value="Coffee - Robusta">Coffee - Robusta</option><option value="Tea - Black">Tea - Black</option><option value="Tea - Green">Tea - Green</option>
+        <option value="Cassava (Yuca)">Cassava (Yuca)</option><option value="Sweet Potatoes">Sweet Potatoes</option><option value="Yams">Yams</option>
+        <option value="Coconut Oil">Coconut Oil</option><option value="Olive Oil">Olive Oil</option><option value="Palm Oil">Palm Oil</option><option value="Sunflower Seed Oil">Sunflower Seed Oil</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Variety</label>
+      <select id="inventoryVariety"><option value="">Select variety...</option></select>
+    </div>
+    <div class="modal-field">
+      <label>Quantity (MT)</label>
+      <input type="number" id="inventoryQuantity" min="1" step="10" value="100">
+    </div>
+    <div class="modal-field">
+      <label>Grade</label>
+      <select id="inventoryGrade">
+        <option value="Grade A">Grade A (Premium)</option>
+        <option value="Grade B">Grade B (Standard)</option>
+        <option value="Organic">Organic Certified</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>FOB Port</label>
+      <input type="text" id="inventoryFOB" placeholder="e.g., Colombo, Sri Lanka">
+    </div>
+    <div class="modal-field">
+      <label>Minimum Price (USD/MT)</label>
+      <input type="number" id="inventoryMinPrice" min="0.10" step="0.05" value="0.40">
+      <div class="tooltip">💡 Your floor price — bot will never accept below this</div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelInventoryBtn">Cancel</button>
+      <button class="create-btn" id="submitInventoryBtn">Post Listing →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bot Config Modal -->
+<div id="botConfigModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeBotModal">&times;</span>
+    <div class="modal-header"><h2 id="botModalTitle">Bot Configuration</h2></div>
+    <div class="modal-field">
+      <label>Bot Name</label>
+      <input type="text" id="editBotName">
+      <div class="tooltip">💡 Name your bot to identify it in your fleet</div>
+    </div>
+    <div class="modal-field">
+      <label>Commodity</label>
+      <select id="editBotCommodity">
+        <option value="Apples">Apples</option><option value="Bananas">Bananas</option><option value="Mangoes">Mangoes</option><option value="Oranges">Oranges</option><option value="Pineapples">Pineapples</option>
+        <option value="Potatoes">Potatoes</option><option value="Tomatoes">Tomatoes</option><option value="Onions">Onions</option><option value="Carrots">Carrots</option><option value="Broccoli">Broccoli</option>
+        <option value="Corn">Corn</option><option value="Rice">Rice</option><option value="Wheat">Wheat</option><option value="Soybeans">Soybeans</option>
+        <option value="Chickpeas">Chickpeas</option><option value="Lentils">Lentils</option>
+        <option value="Almonds">Almonds</option><option value="Cashews">Cashews</option><option value="Peanuts">Peanuts</option>
+        <option value="Black Pepper">Black Pepper</option><option value="Cinnamon">Cinnamon</option><option value="Turmeric">Turmeric</option>
+        <option value="Coffee - Arabica">Coffee - Arabica</option><option value="Coffee - Robusta">Coffee - Robusta</option><option value="Tea - Black">Tea - Black</option><option value="Tea - Green">Tea - Green</option>
+        <option value="Cassava (Yuca)">Cassava (Yuca)</option><option value="Sweet Potatoes">Sweet Potatoes</option><option value="Yams">Yams</option>
+        <option value="Coconut Oil">Coconut Oil</option><option value="Olive Oil">Olive Oil</option><option value="Palm Oil">Palm Oil</option><option value="Sunflower Seed Oil">Sunflower Seed Oil</option>
+      </select>
+      <div class="tooltip">💡 The bot will only list this commodity</div>
+    </div>
+    <div class="modal-field">
+      <label>Target Varieties (select all that apply)</label>
+      <div class="checkbox-group" id="varietyCheckboxes"></div>
+      <div class="tooltip">💡 The bot will only list these specific varieties. Leave unchecked to list all.</div>
+    </div>
+    <div class="modal-field">
+      <label>Minimum Price (USD/MT)</label>
+      <div class="slider-row">
+        <input type="range" id="editMinPrice" min="0.10" max="8.00" step="0.01" value="0.40">
+        <span class="slider-value" id="editMinPriceDisplay">$0.40</span>
+      </div>
+      <div class="tooltip">💡 Bot will never accept below this price (floor)</div>
+    </div>
+    <div class="modal-field">
+      <label>Daily Volume Limit (MT)</label>
+      <div class="slider-row">
+        <input type="range" id="editVolumeLimit" min="50" max="5000" step="50" value="500">
+        <span class="slider-value" id="editVolumeLimitDisplay">500 MT</span>
+      </div>
+      <div class="tooltip">💡 Bot stops listing after selling this volume per day</div>
+    </div>
+    <div class="modal-field">
+      <label>Strategy</label>
+      <select id="editStrategy">
+        <option value="Aggressive">Aggressive (list at market price)</option>
+        <option value="Balanced">Balanced (moderate pricing)</option>
+        <option value="Conservative">Conservative (list slightly above market)</option>
+      </select>
+      <div class="tooltip">💡 Aggressive sells fast; Conservative waits for better prices</div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelBotBtn">Cancel</button>
+      <button class="create-btn" id="saveBotBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bid Details Modal -->
+<div id="bidDetailModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeBidModal">&times;</span>
+    <div class="modal-header"><h2>📋 Listing Bids</h2></div>
+    <div id="bidDetailContent"></div>
+    <div class="modal-actions"><button class="cancel-btn" id="cancelBidBtn">Close</button></div>
+  </div>
+</div>
+
+<!-- Sold Item Detail Modal -->
+<div id="soldDetailModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeSoldModal">&times;</span>
+    <div class="modal-header"><h2>✅ Sold Item Details</h2></div>
+    <div id="soldDetailContent"></div>
+    <div class="modal-actions"><button class="cancel-btn" id="cancelSoldBtn">Close</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Action completed</div>
+
+<script>
+// ============================================
+// COMPLETE PRODUCT VARIETIES (from Buyer Brief)
+// ============================================
+const productVarieties = {
+  'Apples': ['Red Delicious', 'Golden Delicious', 'McIntosh', 'Gala', 'Fuji', 'Honeycrisp', 'Granny Smith', 'Pink Lady', 'Braeburn', 'Jonagold', 'Empire', 'Cortland', 'Mutsu (Crispin)', 'Rome', 'Winesap', 'Jazz', 'Envy', 'Cosmic Crisp', 'Pazazz', 'EverCrisp', 'Macoun', 'Spartan', 'Paula Red', 'Lodi', 'Gravenstein'],
+  'Bananas': ['Cavendish', 'Lady Finger', 'Red Banana', 'Organic Cavendish', 'Baby Banana'],
+  'Mangoes': ['Kent', 'Tommy Atkins', 'Ataulfo (Honey)', 'Keitt', 'Organic Kent', 'Francis'],
+  'Oranges': ['Navel', 'Valencia', 'Blood Orange', 'Cara Cara', 'Seville'],
+  'Pineapples': ['Smooth Cayenne', 'Queen', 'Red Spanish', 'Organic Smooth Cayenne'],
+  'Potatoes': ['Russet', 'Yukon Gold', 'Red', 'Fingerling', 'Organic Russet', 'Purple', 'White'],
+  'Tomatoes': ['Round', 'Cherry', 'Roma', 'Heirloom', 'Organic Roma', 'Beefsteak', 'Plum'],
+  'Onions': ['Yellow', 'Red', 'White', 'Sweet', 'Organic Yellow', 'Shallot'],
+  'Carrots': ['Imperator', 'Nantes', 'Chantenay', 'Organic Imperator', 'Purple', 'Baby'],
+  'Broccoli': ['Green Magic', 'Eastern Crown', 'Organic Green Magic', 'Belstar'],
+  'Corn': ['Yellow Dent', 'White', 'Sweet Yellow', 'Organic Sweet Corn', 'Blue Corn'],
+  'Rice': ['Jasmine', 'Basmati', 'Arborio', 'Calrose', 'Organic Jasmine', 'Brown Rice', 'White Rice'],
+  'Wheat': ['Hard Red Winter', 'Soft Red Winter', 'Hard White', 'Organic Hard Red', 'Spring Wheat'],
+  'Soybeans': ['Non-GMO', 'GMO', 'Organic Non-GMO', 'Edamame'],
+  'Chickpeas': ['Kabuli', 'Desi', 'Organic Kabuli', 'Black Chickpea'],
+  'Lentils': ['Brown', 'Green', 'Red', 'French Green', 'Organic Brown', 'Black Beluga'],
+  'Almonds': ['Nonpareil', 'Carmel', 'Monterey', 'Butte', 'Organic Nonpareil'],
+  'Cashews': ['W240', 'W320', 'W450', 'Organic W320', 'Scorched'],
+  'Peanuts': ['Runner', 'Virginia', 'Spanish', 'Valencia', 'Organic Runner'],
+  'Black Pepper': ['Black', 'White', 'Red', 'Green', 'Organic Black'],
+  'Cinnamon': ['Ceylon', 'Cassia', 'Organic Ceylon', 'Indonesian'],
+  'Turmeric': ['Alleppey', 'Madras', 'Organic Alleppey', 'Rajapore'],
+  'Coffee - Arabica': ['Typica', 'Bourbon', 'Caturra', 'Geisha', 'Organic Typica', 'Catuai'],
+  'Coffee - Robusta': ['Java', 'Conilon', 'Organic Java', 'Nganda'],
+  'Tea - Black': ['Assam', 'Darjeeling', 'Ceylon', 'Organic Assam', 'Keemun', 'Lapsang Souchong'],
+  'Tea - Green': ['Sencha', 'Matcha', 'Gunpowder', 'Organic Sencha', 'Dragonwell', 'Genmaicha'],
+  'Cassava (Yuca)': ['Sweet', 'Bitter', 'Organic Sweet', 'Valencia'],
+  'Sweet Potatoes': ['Beauregard', 'Covington', 'Japanese', 'Organic Beauregard', 'Purple', 'White'],
+  'Yams': ['African', 'Asian', 'Organic African', 'Nagaimo'],
+  'Coconut Oil': ['Virgin', 'Refined', 'Organic Virgin', 'Extra Virgin', 'RBD'],
+  'Olive Oil': ['Extra Virgin', 'Virgin', 'Refined', 'Organic Extra Virgin', 'Pomace'],
+  'Palm Oil': ['Crude', 'RBD', 'Organic Crude', 'Red Palm'],
+  'Sunflower Seed Oil': ['High Oleic', 'Linoleic', 'Organic High Oleic', 'Mid Oleic']
+};
+
+// Commodity prices for ticker (subset for demo)
+let commodityPrices = {
+  Apples: { price: 1.24, change: 2.1, emoji: "🍎" },
+  Bananas: { price: 0.52, change: -0.5, emoji: "🍌" },
+  Potatoes: { price: 0.44, change: 1.2, emoji: "🥔" },
+  Almonds: { price: 6.48, change: 0.3, emoji: "🌰" },
+  Coffee: { price: 4.85, change: 0.9, emoji: "☕" }
+};
+
+let walletBalance = 10000;
+let bots = [
+  { id: '1', name: 'Apple Seller Bot', commodity: 'Apples', varieties: ['McIntosh', 'Honeycrisp'], emoji: '🍎', status: 'active', sales: 47, revenue: 12500, winRate: 72, strategy: 'Aggressive', minPrice: 1.18, volumeLimit: 500 },
+  { id: '2', name: 'Potato Pro', commodity: 'Potatoes', varieties: ['Russet', 'Yukon Gold'], emoji: '🥔', status: 'active', sales: 32, revenue: 8750, winRate: 68, strategy: 'Balanced', minPrice: 0.38, volumeLimit: 800 },
+  { id: '3', name: 'Almond Ace', commodity: 'Almonds', varieties: [], emoji: '🌰', status: 'idle', sales: 18, revenue: 4200, winRate: 65, strategy: 'Conservative', minPrice: 6.20, volumeLimit: 300 }
+];
+
+let activeListings = [
+  { id: 'l1', product: 'Apples', variety: 'McIntosh', quantity: 100, minPrice: 1.18, currentHighestBid: 1.22, topBidder: 'Coconut Imports Ltd', bidderContact: 'James Wong', bidderEmail: 'contact@coconutimports.sg', bidderPhone: '+65 9123 4567', timeLeft: '2:34' },
+  { id: 'l2', product: 'Potatoes', variety: 'Russet', quantity: 200, minPrice: 0.38, currentHighestBid: 0.41, topBidder: 'Pacific Foods', bidderContact: 'Sarah Johnson', bidderEmail: 'procurement@pacificfoods.com', bidderPhone: '+1 (213) 555-0123', timeLeft: '1:45' }
+];
+
+let soldItems = [
+  { id: 's1', product: 'Almonds', variety: 'Nonpareil', quantity: 50, price: 6.55, buyer: 'California Snacks', buyerContact: 'John Davis', buyerEmail: 'buy@casnacks.com', buyerPhone: '+1 (916) 555-8899', date: '2026-04-29' }
+];
+
+let priceInterval = null;
+let currentEditingBot = null;
+
+function updateWalletDisplay() {
+  document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
+}
+
+function renderTicker() {
+  const botCommodities = [...new Set(bots.map(b => b.commodity))];
+  const container = document.getElementById('liveTicker');
+  if (botCommodities.length === 0) {
+    container.innerHTML = '<div style="color:#9ca3af;">Deploy bots to see live prices here</div>';
+    return;
+  }
+  container.innerHTML = botCommodities.map(comm => {
+    const data = commodityPrices[comm];
+    if (!data) return '';
+    return `
+      <div class="ticker-item">
+        <span class="ticker-commodity">${data.emoji} ${comm}</span>
+        <span class="ticker-price">$${data.price.toFixed(2)}</span>
+        <span class="ticker-change ${data.change >= 0 ? 'up' : 'down'}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change).toFixed(1)}%</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function startPriceSimulation() {
+  if (priceInterval) clearInterval(priceInterval);
+  priceInterval = setInterval(() => {
+    Object.keys(commodityPrices).forEach(key => {
+      const volatility = (Math.random() - 0.5) * 3;
+      let newPrice = commodityPrices[key].price * (1 + volatility / 100);
+      newPrice = Math.max(0.20, Math.min(8.00, newPrice));
+      const oldPrice = commodityPrices[key].price;
+      commodityPrices[key].price = parseFloat(newPrice.toFixed(2));
+      commodityPrices[key].change = ((commodityPrices[key].price - oldPrice) / oldPrice) * 100;
+    });
+    renderTicker();
+  }, 5000);
+}
+
+function updateVarietyDropdownForCommodity(commodity) {
+  const varieties = productVarieties[commodity] || [];
+  const select = document.getElementById('inventoryVariety');
+  select.innerHTML = '<option value="">Select variety...</option>';
+  varieties.forEach(variety => {
+    const option = document.createElement('option');
+    option.value = variety;
+    option.textContent = variety;
+    select.appendChild(option);
+  });
+}
+
+function updateBotVarietyCheckboxes() {
+  const commodity = document.getElementById('editBotCommodity').value;
+  const varieties = productVarieties[commodity] || [];
+  const container = document.getElementById('varietyCheckboxes');
+  const currentBot = currentEditingBot;
+  const selectedVarieties = currentBot ? currentBot.varieties : [];
+  container.innerHTML = varieties.map(v => `
+    <label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}">
+      <input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}
+    </label>
+  `).join('');
+}
+
+function renderBots() {
+  const container = document.getElementById('botsGrid');
+  container.innerHTML = bots.map(bot => `
+    <div class="bot-card" data-bot-id="${bot.id}">
+      <div class="bot-emoji">${bot.emoji}</div>
+      <div class="bot-name">${bot.name}</div>
+      <div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div>
+      <div class="bot-target">🎯 ${bot.varieties.length ? bot.varieties.join(', ') : 'All varieties'}</div>
+      <div class="bot-stats"><span>Sales: ${bot.sales}</span><span>Revenue: $${bot.revenue}</span><span>WR: ${bot.winRate}%</span></div>
+    </div>
+  `).join('');
+  const addCard = document.createElement('div');
+  addCard.className = 'add-bot-card';
+  addCard.id = 'addBotCard';
+  addCard.innerHTML = '<div class="add-bot-icon">+</div><div class="add-bot-text">Deploy New Bot</div>';
+  container.appendChild(addCard);
+}
+
+function renderActiveListings() {
+  const container = document.getElementById('activeListingsList');
+  if (!activeListings.length) {
+    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active listings</div>';
+    document.getElementById('activeListingsCount').textContent = '0';
+    return;
+  }
+  document.getElementById('activeListingsCount').textContent = activeListings.length;
+  container.innerHTML = activeListings.map(listing => `
+    <div class="clickable-item" data-listing-id="${listing.id}">
+      <div class="item-title"><span>${listing.product} - ${listing.variety}</span><span class="status-badge pending">⏱️ ${listing.timeLeft}</span></div>
+      <div class="item-details"><span>📦 ${listing.quantity} MT</span><span>💰 Min: $${listing.minPrice}/MT</span><span>🏷️ Highest: $${listing.currentHighestBid}</span></div>
+    </div>
+  `).join('');
+}
+
+function renderSoldItems() {
+  const container = document.getElementById('soldItemsList');
+  if (!soldItems.length) {
+    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No sold items</div>';
+    document.getElementById('soldItemsCount').textContent = '0';
+    return;
+  }
+  document.getElementById('soldItemsCount').textContent = soldItems.length;
+  container.innerHTML = soldItems.map(item => `
+    <div class="clickable-item" data-sold-id="${item.id}">
+      <div class="item-title"><span>${item.product} - ${item.variety}</span><span class="status-badge">✅ Sold</span></div>
+      <div class="item-details"><span>📦 ${item.quantity} MT</span><span>💰 $${item.price}/MT</span><span>🏷️ ${item.buyer}</span></div>
+    </div>
+  `).join('');
+}
+
+function openBotConfig(bot) {
+  currentEditingBot = bot;
+  document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
+  document.getElementById('editBotName').value = bot.name;
+  document.getElementById('editBotCommodity').value = bot.commodity;
+  updateBotVarietyCheckboxes();
+  document.getElementById('editMinPrice').value = bot.minPrice;
+  document.getElementById('editMinPriceDisplay').textContent = `$${bot.minPrice.toFixed(2)}`;
+  document.getElementById('editVolumeLimit').value = bot.volumeLimit;
+  document.getElementById('editVolumeLimitDisplay').textContent = `${bot.volumeLimit} MT`;
+  document.getElementById('editStrategy').value = bot.strategy;
+  document.getElementById('botConfigModal').style.display = 'flex';
+}
+
+function saveBotConfig() {
+  if (!currentEditingBot) return;
+  const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
+  currentEditingBot.name = document.getElementById('editBotName').value;
+  currentEditingBot.commodity = document.getElementById('editBotCommodity').value;
+  currentEditingBot.varieties = selectedVarieties;
+  currentEditingBot.minPrice = parseFloat(document.getElementById('editMinPrice').value);
+  currentEditingBot.volumeLimit = parseInt(document.getElementById('editVolumeLimit').value);
+  currentEditingBot.strategy = document.getElementById('editStrategy').value;
+  currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '📦';
+  saveToStorage();
+  renderBots();
+  renderTicker();
+  showToast(`${currentEditingBot.name} configuration saved`);
+  document.getElementById('botConfigModal').style.display = 'none';
+  currentEditingBot = null;
+}
+
+function showListingBids(listingId) {
+  const listing = activeListings.find(l => l.id === listingId);
+  if (!listing) return;
+  document.getElementById('bidDetailContent').innerHTML = `
+    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${listing.product} - ${listing.variety}</div></div>
+    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${listing.quantity} MT</div></div>
+    <div class="modal-field"><label>Your Minimum</label><div class="tooltip" style="font-size:14px;">$${listing.minPrice}/MT</div></div>
+    <div class="modal-field"><label>Highest Bid</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${listing.currentHighestBid}/MT</div></div>
+    <div class="modal-field"><label>Top Bidder</label><div class="tooltip" style="font-size:14px;">${listing.topBidder}</div></div>
+    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${listing.bidderContact} | ${listing.bidderEmail} | ${listing.bidderPhone}</div></div>
+    <div class="modal-field"><label>Time Remaining</label><div class="tooltip" style="font-size:14px;">${listing.timeLeft}</div></div>
+    <button class="action-btn" style="margin-top:16px;" onclick="showToast('Accept offer feature coming soon')">✓ ACCEPT THIS BID</button>
+  `;
+  document.getElementById('bidDetailModal').style.display = 'flex';
+}
+
+function showSoldDetails(soldId) {
+  const item = soldItems.find(i => i.id === soldId);
+  if (!item) return;
+  document.getElementById('soldDetailContent').innerHTML = `
+    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${item.product} - ${item.variety}</div></div>
+    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${item.quantity} MT</div></div>
+    <div class="modal-field"><label>Sold Price</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${item.price}/MT</div></div>
+    <div class="modal-field"><label>Buyer</label><div class="tooltip" style="font-size:14px;">${item.buyer}</div></div>
+    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${item.buyerContact} | ${item.buyerEmail} | ${item.buyerPhone}</div></div>
+    <div class="modal-field"><label>Date Sold</label><div class="tooltip" style="font-size:14px;">${item.date}</div></div>
+    <div class="tooltip">🚛 Transport auction available for this shipment</div>
+  `;
+  document.getElementById('soldDetailModal').style.display = 'flex';
+}
+
+function postInventory() {
+  const commodity = document.getElementById('inventoryCommodity').value;
+  const variety = document.getElementById('inventoryVariety').value;
+  const quantity = parseInt(document.getElementById('inventoryQuantity').value);
+  const grade = document.getElementById('inventoryGrade').value;
+  const fob = document.getElementById('inventoryFOB').value;
+  const minPrice = parseFloat(document.getElementById('inventoryMinPrice').value);
+  
+  if (!variety) { showToast('Select a variety', true); return; }
+  if (!fob) { showToast('Enter FOB port', true); return; }
+  
+  const newListing = {
+    id: 'l' + Date.now(),
+    product: commodity,
+    variety: variety,
+    quantity: quantity,
+    minPrice: minPrice,
+    currentHighestBid: minPrice,
+    topBidder: 'No bids yet',
+    timeLeft: '3:00'
+  };
+  activeListings.push(newListing);
+  renderActiveListings();
+  showToast(`${quantity}MT ${commodity} (${variety}) listed!`);
+  document.getElementById('postInventoryModal').style.display = 'none';
+}
+
+async function depositFunds() {
+  const amount = parseFloat(document.getElementById('depositAmount').value);
+  if (isNaN(amount) || amount < 100) { showToast('Minimum deposit $100', true); return; }
+  walletBalance += amount;
+  updateWalletDisplay();
+  saveToStorage();
+  showToast(`$${amount} deposited!`);
+  document.getElementById('depositModal').style.display = 'none';
+}
+
+function saveToStorage() {
+  localStorage.setItem('seller_bots', JSON.stringify(bots));
+  localStorage.setItem('seller_wallet', walletBalance.toString());
+  localStorage.setItem('seller_listings', JSON.stringify(activeListings));
+  localStorage.setItem('seller_sold', JSON.stringify(soldItems));
+}
+
+function loadSavedData() {
+  const savedBots = localStorage.getItem('seller_bots');
+  const savedWallet = localStorage.getItem('seller_wallet');
+  const savedListings = localStorage.getItem('seller_listings');
+  const savedSold = localStorage.getItem('seller_sold');
+  if (savedBots) bots = JSON.parse(savedBots);
+  if (savedWallet) walletBalance = parseFloat(savedWallet);
+  if (savedListings) activeListings = JSON.parse(savedListings);
+  if (savedSold) soldItems = JSON.parse(savedSold);
+  if (isNaN(walletBalance)) walletBalance = 10000;
+  if (!Array.isArray(bots)) bots = [];
+  if (!Array.isArray(activeListings)) activeListings = [];
+  if (!Array.isArray(soldItems)) soldItems = [];
+}
+
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = isError ? 'toast error' : 'toast';
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
+document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
+document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
+document.getElementById('confirmDepositBtn').onclick = depositFunds;
+
+document.getElementById('postInventoryBtn').onclick = () => document.getElementById('postInventoryModal').style.display = 'flex';
+document.getElementById('closeInventoryModal').onclick = () => document.getElementById('postInventoryModal').style.display = 'none';
+document.getElementById('cancelInventoryBtn').onclick = () => document.getElementById('postInventoryModal').style.display = 'none';
+document.getElementById('submitInventoryBtn').onclick = postInventory;
+document.getElementById('inventoryCommodity').onchange = function() { updateVarietyDropdownForCommodity(this.value); };
+updateVarietyDropdownForCommodity('Apples');
+
+document.getElementById('editMinPrice').oninput = (e) => document.getElementById('editMinPriceDisplay').textContent = `$${parseFloat(e.target.value).toFixed(2)}`;
+document.getElementById('editVolumeLimit').oninput = (e) => document.getElementById('editVolumeLimitDisplay').textContent = `${parseInt(e.target.value)} MT`;
+document.getElementById('editBotCommodity').onchange = updateBotVarietyCheckboxes;
+
+document.getElementById('closeBotModal').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
+document.getElementById('cancelBotBtn').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
+document.getElementById('saveBotBtn').onclick = saveBotConfig;
+
+document.getElementById('closeBidModal').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
+document.getElementById('cancelBidBtn').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
+document.getElementById('closeSoldModal').onclick = () => document.getElementById('soldDetailModal').style.display = 'none';
+document.getElementById('cancelSoldBtn').onclick = () => document.getElementById('soldDetailModal').style.display = 'none';
+
+document.getElementById('botsGrid').addEventListener('click', (e) => {
+  const card = e.target.closest('.bot-card');
+  if (!card) return;
+  if (card.id === 'addBotCard') {
+    showToast('Deploy new bot modal would open here');
+    return;
+  }
+  const botId = card.getAttribute('data-bot-id');
+  const bot = bots.find(b => b.id === botId);
+  if (bot) openBotConfig(bot);
+});
+
+document.getElementById('activeListingsList').addEventListener('click', (e) => {
+  const item = e.target.closest('[data-listing-id]');
+  if (item) showListingBids(item.getAttribute('data-listing-id'));
+});
+
+document.getElementById('soldItemsList').addEventListener('click', (e) => {
+  const item = e.target.closest('[data-sold-id]');
+  if (item) showSoldDetails(item.getAttribute('data-sold-id'));
+});
+
+loadSavedData();
+updateWalletDisplay();
+renderBots();
+renderActiveListings();
+renderSoldItems();
+startPriceSimulation();
+</script>
+</body>
+</html>

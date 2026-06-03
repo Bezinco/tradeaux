@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TradeAux — Global Surplus Exchange</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Orbitron', sans-serif;
+  overflow-x: hidden;
+}
+
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+.wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(74, 158, 90, 0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+.wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(58, 110, 165, 0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+}
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== TRADEAUX 3D LOGO WITH COLORED LETTERS ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(124,252,0,0.5));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
+
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+  font-size: 160px;
+  font-weight: 900;
+}
+
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 1.0s; }
+.gem-letter:nth-child(7) { animation-delay: 1.2s; }
+.gem-letter:nth-child(8) { animation-delay: 1.4s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+/* T - Blue */
+.gem-letter[data-letter="T"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* R - Green */
+.gem-letter[data-letter="R"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A - Red */
+.gem-letter[data-letter="A"] {
+  background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* D - Blue */
+.gem-letter[data-letter="D"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* E - Green */
+.gem-letter[data-letter="E"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* U - Blue */
+.gem-letter[data-letter="U"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* X - Green */
+.gem-letter[data-letter="X"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 3D EDGE BOXES */
+.gem-letter .edge-top {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-right {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 10%;
+  height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-bottom {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(0deg, rgba(0,50,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gem-letter .edge-left {
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 10%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,50,0,0.2) 0%, transparent 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.light-source {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+  animation: sparkleFlash 4s ease-in-out infinite;
+  opacity: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+.depth-shadow {
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(124,252,0,0.3) 0%, transparent 80%);
+  filter: blur(20px);
+  z-index: -1;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 20px 0 60px;
+}
+
+.nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav a {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 2px solid #4a9e5a;
+  border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px);
+  color: #e5e7eb;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.nav a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  border-color: #fff;
+}
+
+.nav .signup-link {
+  background: rgba(124,252,0,0.15);
+  border-color: #7CFC00;
+  color: #7CFC00;
+}
+
+.nav .signup-link:hover {
+  background: #7CFC00;
+  color: #020617;
+  border-color: #7CFC00;
+}
+
+.user-info { display: none; align-items: center; gap: 10px; color: #e5e7eb; }
+.user-info.show { display: flex; }
+
+.hero {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7CFC00, #FFD966, #3a6ea5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #9ca3af;
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin: 40px 0 60px;
+}
+
+.role-card {
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.85) 0%, rgba(2, 6, 23, 0.98) 100%);
+  backdrop-filter: blur(8px);
+  transition: all 0.4s ease;
+  border-width: 4px;
+  border-style: solid;
+  position: relative;
+  cursor: pointer;
+}
+
+.role-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+}
+
+.card-buyer { border-color: #4a9e5a; }
+.card-seller { border-color: #3a6ea5; }
+.card-carrier { border-color: #9e4a4a; }
+
+.card-wave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 24px;
+  opacity: 0.4;
+  background-size: 200% 200%;
+  animation: waveFlow 6s linear infinite;
+}
+
+.card-buyer .card-wave { background: repeating-linear-gradient(45deg, rgba(74, 158, 90, 0.2) 0px, rgba(74, 158, 90, 0.2) 40px, rgba(0, 255, 0, 0.15) 40px, rgba(0, 255, 0, 0.15) 80px); }
+.card-seller .card-wave { background: repeating-linear-gradient(45deg, rgba(58, 110, 165, 0.2) 0px, rgba(58, 110, 165, 0.2) 40px, rgba(0, 100, 255, 0.15) 40px, rgba(0, 100, 255, 0.15) 80px); }
+.card-carrier .card-wave { background: repeating-linear-gradient(45deg, rgba(158, 74, 74, 0.2) 0px, rgba(158, 74, 74, 0.2) 40px, rgba(255, 0, 0, 0.15) 40px, rgba(255, 0, 0, 0.15) 80px); }
+
+@keyframes waveFlow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+.preview-area {
+  position: relative;
+  width: 100%;
+  padding: 30px 20px 20px;
+  z-index: 1;
+  text-align: center;
+}
+
+.role-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 15px rgba(0,0,0,0.5));
+}
+
+.card-info {
+  padding: 20px 24px 28px;
+  position: relative;
+  z-index: 1;
+  background: rgba(2, 6, 23, 0.6);
+  text-align: center;
+}
+
+.role-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.card-buyer .role-title { color: #4a9e5a; }
+.card-seller .role-title { color: #3a6ea5; }
+.card-carrier .role-title { color: #9e4a4a; }
+
+.role-desc {
+  font-size: 13px;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.cta-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 40px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+.card-buyer .cta-btn:hover { background: #4a9e5a; border-color: #4a9e5a; }
+.card-seller .cta-btn:hover { background: #3a6ea5; border-color: #3a6ea5; }
+.card-carrier .cta-btn:hover { background: #9e4a4a; border-color: #9e4a4a; }
+
+.how-it-works {
+  margin: 60px 0;
+  text-align: center;
+}
+.how-it-works h2 {
+  font-size: 28px;
+  margin-bottom: 40px;
+  color: white;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.step {
+  background: rgba(15, 32, 64, 0.6);
+  border-radius: 16px;
+  padding: 24px 16px;
+  border: 1px solid rgba(124,252,0,0.2);
+}
+.step-number {
+  width: 40px;
+  height: 40px;
+  background: #7CFC00;
+  color: #020617;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  margin: 0 auto 16px;
+}
+.step h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #e5e7eb;
+}
+.step p {
+  font-size: 12px;
+  color: #b0b8d0;
+  line-height: 1.4;
+}
+
+.trust {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.trust-item {
+  padding: 20px;
+  border: 1px solid rgba(74, 158, 90, 0.3);
+  border-radius: 12px;
+  background: rgba(15, 32, 64, 0.5);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+footer {
+  margin-top: 80px;
+  padding: 30px 0 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+footer a {
+  color: #9ca3af;
+  text-decoration: none;
+}
+footer a:hover { color: #4a9e5a; }
+
+@media (max-width: 900px) {
+  .role-cards, .steps { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .trust { grid-template-columns: repeat(2, 1fr); }
+  .gem-logo-corner { transform: scale(0.25); }
+  .hero h1 { font-size: 1.8rem; }
+}
+@media (max-width: 600px) {
+  .trust { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <<nav class="nav">
+  <a href="how-it-works.html">How It Works</a>
+  <a href="auction-floor-buyer.html">Auctions</a>
+  <a href="rules.html">Rules</a>
+  <a href="#" id="login-btn">Sign In</a>
+  <a href="#" id="signup-btn" class="signup-link">Create Account</a>
+  <div class="user-info" id="user-info">
+    <span id="user-email"></span>
+    <a href="#" id="logout-btn">Logout</a>
+  </div>
+</nav>
+  </header>
+
+  <div class="hero">
+    <h1>Trade global surplus.<br>One platform. One fee. Total transparency.</h1>
+    <p>Post a brief. Get bids from the world's best sellers and carriers. Pick the winner. Move product.</p>
+  </div>
+
+  <div class="role-cards">
+    <div class="role-card card-buyer" data-role="buyer">
+      <div class="card-wave"></div>
+      <div class="preview-area"><div class="role-icon">🛒</div></div>
+      <div class="card-info">
+        <div class="role-title">BUYER</div>
+        <div class="role-desc">Post a brief. Get bids from all over the world. See the 5 best offers. You pick.</div>
+        <button class="cta-btn signin-role" data-role="buyer">Sign in as Buyer →</button>
+      </div>
+    </div>
+
+    <div class="role-card card-seller" data-role="seller">
+      <div class="card-wave"></div>
+      <div class="preview-area"><div class="role-icon">🌾</div></div>
+      <div class="card-info">
+        <div class="role-title">SELLER</div>
+        <div class="role-desc">Bid on buyer contracts. Move end-of-season product fast. Clear inventory before next harvest.</div>
+        <button class="cta-btn signin-role" data-role="seller">Sign in as Seller →</button>
+      </div>
+    </div>
+
+    <div class="role-card card-carrier" data-role="carrier">
+      <div class="card-wave"></div>
+      <div class="preview-area"><div class="role-icon">🚚</div></div>
+      <div class="card-info">
+        <div class="role-title">CARRIER</div>
+        <div class="role-desc">Bid on transport contracts. Move commodities globally by ship, train, truck, or plane. Fill your backhauls.</div>
+        <button class="cta-btn signin-role" data-role="carrier">Sign in as Carrier →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step"><div class="step-number">1</div><h3>Post a Brief</h3><p>Tell the market what you need. Specify product, quantity, FOB port, and delivery.</p></div>
+      <div class="step"><div class="step-number">2</div><h3>Get Bids</h3><p>Sellers and carriers from around the world compete for your contract.</p></div>
+      <div class="step"><div class="step-number">3</div><h3>Pick the Winner</h3><p>Review the 5 best offers. Choose the one that works for you.</p></div>
+      <div class="step"><div class="step-number">4</div><h3>Product Moves</h3><p>Seller ships to port. Carrier delivers. Everyone gets paid.</p></div>
+    </div>
+  </div>
+
+  <div class="trust">
+    <div class="trust-item">TradeAux is a neutral marketplace. Buyers, sellers, and carriers trade directly.</div>
+    <div class="trust-item">$25 flat fee per auction paid by the buyer. No hidden costs. No subscription.</div>
+    <div class="trust-item">FOB port required on every listing. Transparency is the product.</div>
+    <div class="trust-item">Governed by Canadian law. Disputes resolved via reputation system.</div>
+  </div>
+
+  <footer>
+    <div>© TradeAux — Global Surplus Exchange</div>
+    <div><a href="#">Legal</a> · <a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Contact</a></div>
+  </footer>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+document.addEventListener('DOMContentLoaded', async function() {
+  const loginBtn = document.getElementById('login-btn');
+  const signupBtn = document.getElementById('signup-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userInfo = document.getElementById('user-info');
+  const userEmail = document.getElementById('user-email');
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) showLoggedIn(session.user);
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) showLoggedIn(session.user);
+    else if (event === 'SIGNED_OUT') showLoggedOut();
+  });
+
+  function showLoggedIn(user) {
+    loginBtn.style.display = 'none';
+    if (signupBtn) signupBtn.style.display = 'none';
+    userInfo.classList.add('show');
+    userEmail.textContent = user.email;
+  }
+
+  function showLoggedOut() {
+    loginBtn.style.display = 'block';
+    if (signupBtn) signupBtn.style.display = 'block';
+    userInfo.classList.remove('show');
+  }
+
+  if (logoutBtn) logoutBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await supabaseClient.auth.signOut();
+    window.location.href = '/';
+  });
+
+  const roleButtons = document.querySelectorAll('.signin-role');
+  roleButtons.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const role = btn.getAttribute('data-role');
+      localStorage.setItem('tradeaux_intended_role', role);
+      await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/dashboard.html' }
+      });
+    });
+  });
+
+  if (loginBtn) {
+    loginBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/dashboard.html' }
+      });
+    });
+  }
+
+  if (signupBtn) {
+    signupBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/dashboard.html' }
+      });
+    });
+  }
+});
+</script>
+</body>
+</html>

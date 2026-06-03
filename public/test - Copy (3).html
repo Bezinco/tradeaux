@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdAux — Constraint-Driven Negotiation Engine</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+ --accent-emerald: #7CFC00;
+ --accent-blue: #00D4FF;
+ --accent-purple: #A855F7;
+ --danger: #ff4d4d;
+ --gold: #FFD700;
+ --urgency: #FF6B35;
+ --bg-dark: #040812;
+ --bg-card: rgba(10, 18, 40, 0.98);
+ --grid-line: rgba(124, 252, 0, 0.05);
+ --terminal-green: #00ff41;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; font-family: 'Inter', system-ui, sans-serif; background: var(--bg-dark); color: #fff; overflow: hidden; }
+
+body {
+ background: 
+   linear-gradient(var(--grid-line) 1px, transparent 1px),
+   linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+   radial-gradient(1400px 700px at 15% 10%, rgba(0, 212, 255, 0.08), transparent 60%),
+   radial-gradient(1200px 900px at 85% 20%, rgba(124, 252, 0, 0.12), transparent 65%),
+   #040812;
+ background-size: 50px 50px, 50px 50px, 100% 100%, 100% 100%;
+}
+
+/* Scanline effect */
+body::before {
+ content: "";
+ position: fixed;
+ top: 0; left: 0; width: 100%; height: 100%;
+ background: linear-gradient(transparent 50%, rgba(0,0,0,0.25) 50%);
+ background-size: 100% 4px;
+ pointer-events: none;
+ z-index: 9999;
+ opacity: 0.3;
+}
+
+/* LAYER 1: BRIEF CARD (Intent Layer) */
+.brief-container {
+ position: fixed;
+ top: 20px;
+ left: 20px;
+ right: 20px;
+ z-index: 2000;
+ background: var(--bg-card);
+ border: 1px solid rgba(124, 252, 0, 0.3);
+ border-radius: 12px;
+ backdrop-filter: blur(20px);
+ box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(124,252,0,0.1);
+ transition: all 0.3s ease;
+}
+
+.brief-container.minimized {
+ width: auto;
+ right: auto;
+ min-width: 300px;
+}
+
+.brief-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 16px 24px;
+ border-bottom: 1px solid rgba(124, 252, 0, 0.2);
+ cursor: pointer;
+}
+
+.brief-title {
+ font-family: 'Orbitron', sans-serif;
+ font-size: 14px;
+ letter-spacing: 3px;
+ color: var(--accent-emerald);
+ display: flex;
+ align-items: center;
+ gap: 8px;
+}
+
+.brief-title::before {
+ content: "◉";
+ animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.brief-toggle {
+ background: none;
+ border: 1px solid rgba(124,252,0,0.3);
+ color: var(--accent-emerald);
+ width: 28px;
+ height: 28px;
+ border-radius: 6px;
+ cursor: pointer;
+ font-family: 'Orbitron';
+ transition: all 0.2s;
+}
+
+.brief-toggle:hover { background: rgba(124,252,0,0.1); }
+
+.brief-content {
+ padding: 24px;
+ display: grid;
+ grid-template-columns: 200px 1fr auto;
+ gap: 32px;
+ align-items: start;
+}
+
+@media (max-width: 1200px) {
+ .brief-content { grid-template-columns: 1fr; gap: 20px; }
+}
+
+.brief-section label {
+ font-family: 'Orbitron';
+ font-size: 10px;
+ letter-spacing: 2px;
+ color: var(--accent-blue);
+ margin-bottom: 8px;
+ display: block;
+ text-transform: uppercase;
+}
+
+.budget-display-large {
+ font-family: 'JetBrains Mono', monospace;
+ font-size: 32px;
+ color: var(--accent-emerald);
+ text-shadow: 0 0 20px rgba(124,252,0,0.4);
+ line-height: 1;
+}
+
+.budget-input {
+ background: transparent;
+ border: 1px solid rgba(124,252,0,0.3);
+ color: var(--accent-emerald);
+ font-family: 'JetBrains Mono';
+ font-size: 24px;
+ padding: 8px 12px;
+ border-radius: 6px;
+ width: 160px;
+ outline: none;
+}
+
+.audience-chips {
+ display: flex;
+ gap: 8px;
+ flex-wrap: wrap;
+}
+
+.chip-editable {
+ padding: 6px 12px;
+ background: rgba(0,212,255,0.1);
+ border: 1px solid rgba(0,212,255,0.3);
+ border-radius: 20px;
+ font-size: 12px;
+ color: var(--accent-blue);
+ cursor: pointer;
+ transition: all 0.2s;
+ font-family: 'JetBrains Mono';
+}
+
+.chip-editable:hover {
+ background: rgba(0,212,255,0.2);
+ box-shadow: 0 0 15px rgba(0,212,255,0.2);
+}
+
+/* Weight Sliders */
+.weights-grid {
+ display: grid;
+ grid-template-columns: repeat(4, 1fr);
+ gap: 24px;
+}
+
+@media (max-width: 900px) { .weights-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.weight-control {
+ position: relative;
+}
+
+.weight-label {
+ display: flex;
+ justify-content: space-between;
+ font-size: 10px;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ color: #9ca3af;
+ margin-bottom: 8px;
+ font-family: 'Orbitron';
+}
+
+.weight-value {
+ color: var(--accent-emerald);
+ font-family: 'JetBrains Mono';
+}
+
+.weight-slider {
+ -webkit-appearance: none;
+ width: 100%;
+ height: 4px;
+ background: rgba(255,255,255,0.1);
+ border-radius: 2px;
+ outline: none;
+}
+
+.weight-slider::-webkit-slider-thumb {
+ -webkit-appearance: none;
+ width: 16px;
+ height: 16px;
+ background: var(--accent-emerald);
+ border-radius: 50%;
+ cursor: pointer;
+ box-shadow: 0 0 10px rgba(124,252,0,0.6);
+ transition: transform 0.1s;
+}
+
+.weight-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+.deploy-btn {
+ background: linear-gradient(135deg, var(--accent-emerald), var(--accent-blue));
+ color: #000;
+ border: none;
+ padding: 16px 32px;
+ border-radius: 8px;
+ font-weight: 800;
+ font-family: 'Orbitron', sans-serif;
+ cursor: pointer;
+ font-size: 13px;
+ letter-spacing: 1px;
+ text-transform: uppercase;
+ transition: all 0.3s;
+ height: fit-content;
+ align-self: center;
+ box-shadow: 0 0 30px rgba(124,252,0,0.3);
+}
+
+.deploy-btn:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 5px 30px rgba(124,252,0,0.5);
+}
+
+.deploy-btn:disabled {
+ opacity: 0.3;
+ cursor: not-allowed;
+ box-shadow: none;
+}
+
+/* LAYER 2 & 3: DEAL ROOM */
+.deal-room {
+ position: fixed;
+ top: 180px;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ display: grid;
+ grid-template-columns: 320px 1fr;
+ gap: 2px;
+ background: rgba(0,0,0,0.5);
+}
+
+@media (max-width: 1024px) {
+ .deal-room { grid-template-columns: 1fr; grid-template-rows: 200px 1fr; }
+}
+
+/* Market Intelligence Feed (Left) */
+.market-feed {
+ background: rgba(5, 10, 20, 0.95);
+ border-right: 1px solid rgba(124, 252, 0, 0.2);
+ overflow: hidden;
+ display: flex;
+ flex-direction: column;
+}
+
+.feed-header {
+ padding: 16px;
+ background: rgba(124, 252, 0, 0.1);
+ border-bottom: 1px solid rgba(124, 252, 0, 0.2);
+ font-family: 'Orbitron';
+ font-size: 11px;
+ letter-spacing: 2px;
+ color: var(--accent-emerald);
+ display: flex;
+ align-items: center;
+ gap: 8px;
+}
+
+.feed-header::before {
+ content: "▶";
+ animation: blink 1s infinite;
+}
+
+.feed-stream {
+ flex: 1;
+ overflow-y: auto;
+ padding: 16px;
+ font-family: 'JetBrains Mono', monospace;
+ font-size: 12px;
+ line-height: 1.6;
+}
+
+.feed-item {
+ margin-bottom: 12px;
+ padding-left: 16px;
+ border-left: 2px solid rgba(124,252,0,0.2);
+ color: #9ca3af;
+ animation: slideIn 0.3s ease;
+}
+
+.feed-item.system { color: var(--accent-blue); border-color: var(--accent-blue); }
+.feed-item.adjustment { color: var(--urgency); border-color: var(--urgency); }
+.feed-item.win { color: var(--accent-emerald); border-color: var(--accent-emerald); }
+
+.feed-time {
+ font-size: 10px;
+ color: #4b5563;
+ margin-right: 8px;
+}
+
+/* Intelligence Cards Grid */
+.cards-container {
+ overflow-y: auto;
+ padding: 24px;
+ position: relative;
+}
+
+.cards-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+ gap: 20px;
+ padding-bottom: 100px;
+}
+
+/* Intelligence Card */
+.intel-card {
+ background: var(--bg-card);
+ border: 1px solid rgba(124, 252, 0, 0.2);
+ border-radius: 16px;
+ overflow: hidden;
+ position: relative;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ cursor: pointer;
+}
+
+.intel-card:hover {
+ transform: translateY(-4px) scale(1.01);
+ border-color: rgba(124, 252, 0, 0.6);
+ box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(124,252,0,0.15);
+}
+
+.intel-card.selected {
+ border-color: var(--accent-emerald);
+ box-shadow: 0 0 60px rgba(124,252,0,0.3);
+}
+
+.intel-card.dimmed {
+ opacity: 0.4;
+ filter: grayscale(0.8);
+}
+
+.competitive-pulse {
+ position: absolute;
+ top: 0; left: 0; right: 0; bottom: 0;
+ border: 2px solid transparent;
+ border-radius: 16px;
+ pointer-events: none;
+}
+
+.intel-card.competing .competitive-pulse {
+ animation: competePulse 2s infinite;
+ border-color: var(--urgency);
+}
+
+@keyframes competePulse {
+ 0% { opacity: 0; transform: scale(1); }
+ 50% { opacity: 1; transform: scale(1.02); }
+ 100% { opacity: 0; transform: scale(1.05); }
+}
+
+.card-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: flex-start;
+ padding: 20px;
+ border-bottom: 1px solid rgba(124, 252, 0, 0.1);
+ background: rgba(0,0,0,0.3);
+}
+
+.creator-id {
+ display: flex;
+ gap: 12px;
+ align-items: center;
+}
+
+.creator-avatar {
+ width: 48px;
+ height: 48px;
+ border-radius: 10px;
+ border: 2px solid rgba(124,252,0,0.3);
+ object-fit: cover;
+}
+
+.creator-meta h3 {
+ font-family: 'Orbitron';
+ font-size: 15px;
+ color: #fff;
+ margin-bottom: 4px;
+ letter-spacing: 0.5px;
+}
+
+.creator-meta .handle {
+ font-size: 12px;
+ color: #6b7280;
+ font-family: 'JetBrains Mono';
+}
+
+.score-badge {
+ text-align: right;
+}
+
+.score-value {
+ font-family: 'Orbitron';
+ font-size: 28px;
+ font-weight: 700;
+ color: var(--accent-emerald);
+ line-height: 1;
+}
+
+.score-label {
+ font-size: 9px;
+ color: #6b7280;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ margin-top: 4px;
+}
+
+.score-bar {
+ width: 60px;
+ height: 3px;
+ background: rgba(255,255,255,0.1);
+ border-radius: 2px;
+ margin-top: 6px;
+ overflow: hidden;
+}
+
+.score-fill {
+ height: 100%;
+ background: linear-gradient(90deg, var(--accent-emerald), var(--accent-blue));
+ transition: width 0.5s ease;
+}
+
+/* Strategy Indicator */
+.strategy-tag {
+ position: absolute;
+ top: 12px;
+ right: 12px;
+ background: rgba(255, 107, 53, 0.15);
+ border: 1px solid var(--urgency);
+ color: var(--urgency);
+ padding: 4px 10px;
+ border-radius: 12px;
+ font-size: 10px;
+ font-weight: 700;
+ font-family: 'Orbitron';
+ letter-spacing: 0.5px;
+ display: none;
+}
+
+.intel-card.competing .strategy-tag {
+ display: block;
+ animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Metrics */
+.card-metrics {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 16px;
+ padding: 20px;
+}
+
+.metric {
+ text-align: center;
+ position: relative;
+}
+
+.metric::after {
+ content: "";
+ position: absolute;
+ right: -8px;
+ top: 50%;
+ transform: translateY(-50%);
+ width: 1px;
+ height: 24px;
+ background: rgba(124,252,0,0.1);
+}
+
+.metric:last-child::after { display: none; }
+
+.metric-number {
+ font-family: 'JetBrains Mono';
+ font-size: 18px;
+ font-weight: 700;
+ color: #fff;
+ margin-bottom: 4px;
+ transition: color 0.3s;
+}
+
+.metric-number.price-drop {
+ color: var(--urgency);
+ animation: flashRed 0.5s ease;
+}
+
+@keyframes flashRed {
+ 0%, 100% { color: var(--urgency); }
+ 50% { color: #fff; }
+}
+
+.metric-label {
+ font-size: 9px;
+ text-transform: uppercase;
+ letter-spacing: 1px;
+ color: #6b7280;
+}
+
+/* Bid Section */
+.bid-zone {
+ background: rgba(0,0,0,0.4);
+ border-top: 1px solid rgba(124,252,0,0.15);
+ padding: 20px;
+ position: relative;
+ overflow: hidden;
+}
+
+.current-bid {
+ display: flex;
+ justify-content: space-between;
+ align-items: baseline;
+ margin-bottom: 8px;
+}
+
+.bid-amount {
+ font-family: 'Orbitron';
+ font-size: 32px;
+ font-weight: 800;
+ color: var(--accent-emerald);
+ text-shadow: 0 0 20px rgba(124,252,0,0.3);
+ display: flex;
+ align-items: center;
+ gap: 12px;
+}
+
+.bid-trend {
+ font-size: 12px;
+ font-family: 'JetBrains Mono';
+ padding: 4px 8px;
+ border-radius: 4px;
+ background: rgba(255,255,255,0.05);
+}
+
+.trend-down {
+ color: var(--urgency);
+ background: rgba(255, 107, 53, 0.1);
+}
+
+.bid-floor {
+ font-size: 11px;
+ color: #4b5563;
+ font-family: 'JetBrains Mono';
+}
+
+.weight-contributors {
+ display: flex;
+ gap: 8px;
+ margin-top: 12px;
+ flex-wrap: wrap;
+}
+
+.contributor {
+ font-size: 10px;
+ padding: 4px 8px;
+ border-radius: 4px;
+ background: rgba(124,252,0,0.05);
+ border: 1px solid rgba(124,252,0,0.1);
+ color: #6b7280;
+ font-family: 'JetBrains Mono';
+}
+
+.contributor strong { color: var(--accent-emerald); font-weight: 400; }
+
+/* Execution Status Bar */
+.status-bar {
+ position: fixed;
+ bottom: 0;
+ left: 0;
+ right: 0;
+ background: rgba(4, 8, 18, 0.98);
+ border-top: 1px solid rgba(124,252,0,0.2);
+ padding: 12px 24px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ font-family: 'JetBrains Mono';
+ font-size: 12px;
+ z-index: 3000;
+}
+
+.status-left {
+ display: flex;
+ gap: 24px;
+ color: #6b7280;
+}
+
+.status-item { display: flex; align-items: center; gap: 8px; }
+.status-value { color: var(--accent-emerald); }
+
+.execution-indicator {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ color: var(--accent-blue);
+}
+
+.pulse-ring {
+ width: 8px;
+ height: 8px;
+ background: var(--accent-blue);
+ border-radius: 50%;
+ position: relative;
+}
+
+.pulse-ring::after {
+ content: '';
+ position: absolute;
+ top: -4px; left: -4px;
+ width: 16px; height: 16px;
+ border: 2px solid var(--accent-blue);
+ border-radius: 50%;
+ animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+ 0% { transform: scale(1); opacity: 1; }
+ 100% { transform: scale(3); opacity: 0; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+::-webkit-scrollbar-thumb { background: rgba(124,252,0,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124,252,0,0.5); }
+
+/* Animations */
+@keyframes slideIn {
+ from { opacity: 0; transform: translateX(-20px); }
+ to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- Intent Layer: Mission Brief -->
+<div class="brief-container" id="briefContainer">
+ <div class="brief-header" onclick="toggleBrief()">
+   <div class="brief-title">AGENT BRIEF // CONSTRAINTS</div>
+   <button class="brief-toggle" id="briefToggle">−</button>
+ </div>
+ 
+ <div class="brief-content" id="briefContent">
+   <div class="brief-section">
+     <label>Budget Ceiling</label>
+     <input type="number" class="budget-input" id="budgetInput" value="8000" min="1000" step="500">
+   </div>
+   
+   <div class="brief-section">
+     <label>Audience Constraints</label>
+     <div class="audience-chips">
+       <div class="chip-editable" onclick="cycleAudience('primary')">US: <span id="primaryGeo">54%</span></div>
+       <div class="chip-editable" onclick="cycleAudience('age')">Age: <span id="ageRange">25-34</span></div>
+       <div class="chip-editable" onclick="cycleAudience('gender')">Balanced</div>
+     </div>
+   </div>
+   
+   <div class="brief-section" style="grid-column: span 2;">
+     <label>Optimization Weights (Priority Distribution)</label>
+     <div class="weights-grid">
+       <div class="weight-control">
+         <div class="weight-label">
+           <span>Reach</span>
+           <span class="weight-value" id="val-reach">25%</span>
+         </div>
+         <input type="range" class="weight-slider" id="weight-reach" min="0" max="100" value="25" oninput="updateWeights()">
+       </div>
+       <div class="weight-control">
+         <div class="weight-label">
+           <span>Quality</span>
+           <span class="weight-value" id="val-quality">25%</span>
+         </div>
+         <input type="range" class="weight-slider" id="weight-quality" min="0" max="100" value="25" oninput="updateWeights()">
+       </div>
+       <div class="weight-control">
+         <div class="weight-label">
+           <span>Speed</span>
+           <span class="weight-value" id="val-speed">25%</span>
+         </div>
+         <input type="range" class="weight-slider" id="weight-speed" min="0" max="100" value="25" oninput="updateWeights()">
+       </div>
+       <div class="weight-control">
+         <div class="weight-label">
+           <span>Cost Eff.</span>
+           <span class="weight-value" id="val-price">25%</span>
+         </div>
+         <input type="range" class="weight-slider" id="weight-price" min="0" max="100" value="25" oninput="updateWeights()">
+       </div>
+     </div>
+   </div>
+   
+   <button class="deploy-btn" id="deployBtn" onclick="deployBrief()">Deploy Brief</button>
+ </div>
+</div>
+
+<!-- Experience Layer: Deal Room -->
+<div class="deal-room" id="dealRoom" style="display: none;">
+ 
+ <!-- Market Intelligence -->
+ <div class="market-feed">
+   <div class="feed-header">Market Intelligence</div>
+   <div class="feed-stream" id="marketFeed">
+     <!-- Feed items injected here -->
+   </div>
+ </div>
+ 
+ <!-- Intelligence Cards -->
+ <div class="cards-container">
+   <div class="cards-grid" id="cardsGrid">
+     <!-- Cards injected here -->
+   </div>
+ </div>
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar" id="statusBar" style="display: none;">
+ <div class="status-left">
+   <div class="status-item">BRIEF: <span class="status-value" id="briefId">UNSET</span></div>
+   <div class="status-item">AGENTS: <span class="status-value" id="agentCount">0</span></div>
+   <div class="status-item">CYCLE: <span class="status-value" id="cycleCount">0</span></div>
+ </div>
+ <div class="execution-indicator">
+   <span>Deterministic Execution Active</span>
+   <div class="pulse-ring"></div>
+ </div>
+</div>
+
+<script>
+// STATE ARCHITECTURE
+const SystemState = {
+ brief: {
+   budget: 8000,
+   audience: {
+     primary: 'US',
+     age: '25-34',
+     gender: 'balanced'
+   },
+   weights: {
+     reach: 0.25,
+     quality: 0.25,
+     speed: 0.25,
+     price: 0.25
+   },
+   deployed: false
+ },
+ agents: [
+   {
+     id: 1,
+     name: "TechReview Pro",
+     handle: "@techreviewpro",
+     avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+     baseStats: { reach: 125000, quality: 6.2, speed: 2, basePrice: 5000 },
+     current: { price: 5000, score: 0 },
+     floorPrice: 3500,
+     strategy: "quality-focused",
+     history: []
+   },
+   {
+     id: 2,
+     name: "Crypto Daily",
+     handle: "@cryptodaily", 
+     avatar: "https://randomuser.me/api/portraits/men/28.jpg",
+     baseStats: { reach: 180000, quality: 7.5, speed: 1, basePrice: 6500 },
+     current: { price: 6500, score: 0 },
+     floorPrice: 4500,
+     strategy: "reach-focused",
+     history: []
+   },
+   {
+     id: 3,
+     name: "Sarah Style",
+     handle: "@sarahstyle",
+     avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+     baseStats: { reach: 210000, quality: 4.5, speed: 4, basePrice: 8000 },
+     current: { price: 8000, score: 0 },
+     floorPrice: 5600,
+     strategy: "balanced",
+     history: []
+   },
+   {
+     id: 4,
+     name: "FitLife Ana",
+     handle: "@fitlifewana",
+     avatar: "https://randomuser.me/api/portraits/women/65.jpg",
+     baseStats: { reach: 85000, quality: 5.8, speed: 3, basePrice: 3500 },
+     current: { price: 3500, score: 0 },
+     floorPrice: 2450,
+     strategy: "speed-focused",
+     history: []
+   },
+   {
+     id: 5,
+     name: "Gaming Central",
+     handle: "@gamingcentral",
+     avatar: "https://randomuser.me/api/portraits/men/28.jpg",
+     baseStats: { reach: 180000, quality: 7.2, speed: 2, basePrice: 4200 },
+     current: { price: 4200, score: 0 },
+     floorPrice: 2940,
+     strategy: "aggressive",
+     history: []
+   },
+   {
+     id: 6,
+     name: "Auto Enthusiast",
+     handle: "@autoenthusiast",
+     avatar: "https://randomuser.me/api/portraits/men/55.jpg",
+     baseStats: { reach: 140000, quality: 6.5, speed: 4, basePrice: 5500 },
+     current: { price: 5500, score: 0 },
+     floorPrice: 3850,
+     strategy: "premium",
+     history: []
+   }
+ ],
+ cycle: 0,
+ selectedAgent: null,
+ executionInterval: null
+};
+
+// DETERMINISTIC SCORING ENGINE
+function calculateWeightedScore(agent) {
+ const w = SystemState.brief.weights;
+ const s = agent.baseStats;
+ const b = SystemState.brief;
+ 
+ // Normalize metrics (0-1 scale)
+ const maxReach = 250000; // ceiling
+ const maxQuality = 10;
+ const maxSpeed = 24; // hours
+ 
+ const normReach = Math.min(s.reach / maxReach, 1);
+ const normQuality = Math.min(s.quality / maxQuality, 1);
+ const normSpeed = 1 - Math.min(s.speed / maxSpeed, 1); // invert: lower hours = higher score
+ const normPrice = 1 - ((agent.current.price / b.budget)); // lower price = higher score, inverted
+ 
+ // Weighted calculation
+ const score = (
+   (normReach * w.reach) +
+   (normQuality * w.quality) +
+   (normSpeed * w.speed) +
+   (normPrice * w.price)
+ );
+ 
+ return {
+   total: score,
+   components: {
+     reach: normReach * w.reach,
+     quality: normQuality * w.quality,
+     speed: normSpeed * w.speed,
+     price: normPrice * w.price
+   }
+ };
+}
+
+// DETERMINISTIC OPTIMIZATION ENGINE
+function executeCompetitionCycle() {
+ SystemState.cycle++;
+ document.getElementById('cycleCount').textContent = SystemState.cycle.toString().padStart(3, '0');
+ 
+ // Calculate all scores
+ const scored = SystemState.agents.map(agent => ({
+   ...agent,
+   scoring: calculateWeightedScore(agent)
+ })).sort((a, b) => b.scoring.total - a.scoring.total);
+ 
+ // Determine market pressure (gap to leader)
+ const leader = scored[0];
+ const updates = [];
+ 
+ scored.forEach((agent, index) => {
+   const gap = leader.scoring.total - agent.scoring.total;
+   const isCompeting = index > 0 && gap > 0.05; // Significant gap
+   
+   // Deterministic price adjustment logic
+   if (isCompeting && agent.current.price > agent.floorPrice) {
+     // Calculate required drop to close gap (deterministic formula)
+     const priceSensitivity = SystemState.brief.weights.price;
+     const gapSeverity = gap / priceSensitivity; 
+     const maxDrop = agent.current.price - agent.floorPrice;
+     const dropAmount = Math.floor(Math.min(maxDrop * 0.1 * gapSeverity, maxDrop * 0.3));
+     
+     if (dropAmount > 50) {
+       const oldPrice = agent.current.price;
+       agent.current.price -= dropAmount;
+       agent.history.push({ cycle: SystemState.cycle, drop: dropAmount, reason: 'gap-closure' });
+       
+       // Generate market intelligence narrative
+       const reason = generateNarrative(agent, gap, dropAmount);
+       updates.push({
+         agent: agent.name,
+         type: 'adjustment',
+         message: `${agent.name} drops bid $${dropAmount} → ${reason}`,
+         impact: dropAmount
+       });
+       
+       // Visual feedback
+       updateCardPrice(agent.id, agent.current.price, oldPrice);
+     }
+   } else if (index === 0) {
+     updates.push({
+       agent: agent.name,
+       type: 'win',
+       message: `${agent.name} maintains lead with optimized match score`,
+       impact: 0
+     });
+   }
+   
+   // Update score in state
+   const idx = SystemState.agents.findIndex(a => a.id === agent.id);
+   SystemState.agents[idx].current.score = agent.scoring.total;
+ });
+ 
+ // Render updates
+ updates.forEach(u => addToFeed(u.message, u.type));
+ 
+ // Re-sort and render cards
+ renderCards();
+ 
+ // Check for convergence (all within 5% of leader)
+ const allScores = scored.map(s => s.scoring.total);
+ const minScore = Math.min(...allScores);
+ if (leader.scoring.total - minScore < 0.05 && SystemState.cycle > 5) {
+   addToFeed("MARKET CONVERGENCE DETECTED: Optimal equilibrium reached", 'system');
+   pauseExecution();
+ }
+}
+
+function generateNarrative(agent, gap, drop) {
+ const weights = SystemState.brief.weights;
+ const maxWeight = Object.entries(weights).sort((a,b) => b[1] - a[1])[0];
+ 
+ const narratives = {
+   reach: `prioritizing reach optimization (${Math.floor(weights.reach*100)}% weight)`,
+   quality: `adjusting for quality alignment (${Math.floor(weights.quality*100)}% weight)`,
+   speed: `accelerating response capacity (${Math.floor(weights.speed*100)}% weight)`,
+   price: `maximizing cost efficiency (${Math.floor(weights.price*100)}% weight)`
+ };
+ 
+ return narratives[maxWeight[0]] || 'competitive repositioning';
+}
+
+// UI FUNCTIONS
+function updateWeights() {
+ const r = parseInt(document.getElementById('weight-reach').value);
+ const q = parseInt(document.getElementById('weight-quality').value);
+ const s = parseInt(document.getElementById('weight-speed').value);
+ const p = parseInt(document.getElementById('weight-price').value);
+ 
+ // Normalize to 100%
+ const total = r + q + s + p;
+ const normalize = (val) => total > 0 ? ((val / total) * 100).toFixed(0) : 25;
+ 
+ document.getElementById('val-reach').textContent = normalize(r) + '%';
+ document.getElementById('val-quality').textContent = normalize(q) + '%';
+ document.getElementById('val-speed').textContent = normalize(s) + '%';
+ document.getElementById('val-price').textContent = normalize(p) + '%';
+ 
+ SystemState.brief.weights = {
+   reach: r / 100,
+   quality: q / 100,
+   speed: s / 100,
+   price: p / 100
+ };
+ 
+ // Real-time recalculation if deployed
+ if (SystemState.brief.deployed && SystemState.cycle === 0) {
+   // Initial calculation only, don't run cycle
+   renderCards();
+ }
+}
+
+function deployBrief() {
+ const budget = parseInt(document.getElementById('budgetInput').value);
+ if (budget < 1000) return;
+ 
+ SystemState.brief.budget = budget;
+ SystemState.brief.deployed = true;
+ SystemState.cycle = 0;
+ 
+ // Reset agents
+ SystemState.agents.forEach(agent => {
+   agent.current.price = agent.baseStats.basePrice;
+   agent.current.score = 0;
+   agent.history = [];
+ });
+ 
+ // UI Transition
+ document.getElementById('briefContainer').classList.add('minimized');
+ document.getElementById('briefContent').style.display = 'none';
+ document.getElementById('briefToggle').textContent = '+';
+ 
+ document.getElementById('dealRoom').style.display = 'grid';
+ document.getElementById('statusBar').style.display = 'flex';
+ document.getElementById('briefId').textContent = 'BRIEF-' + Date.now().toString().slice(-6);
+ document.getElementById('agentCount').textContent = SystemState.agents.length;
+ 
+ document.getElementById('marketFeed').innerHTML = '';
+ addToFeed('BRIEF DEPLOYED: Constraint engine initialized', 'system');
+ addToFeed(`Budget ceiling: $${budget.toLocaleString()} | Optimization weights loaded`, 'system');
+ 
+ // Start deterministic execution
+ if (SystemState.executionInterval) clearInterval(SystemState.executionInterval);
+ 
+ // Initial render
+ renderCards();
+ 
+ // Begin execution loop (deterministic ticks every 3 seconds)
+ SystemState.executionInterval = setInterval(executeCompetitionCycle, 3000);
+ executeCompetitionCycle(); // Immediate first run
+}
+
+function pauseExecution() {
+ if (SystemState.executionInterval) {
+   clearInterval(SystemState.executionInterval);
+   SystemState.executionInterval = null;
+ }
+}
+
+function addToFeed(message, type = 'normal') {
+ const feed = document.getElementById('marketFeed');
+ const item = document.createElement('div');
+ item.className = `feed-item ${type}`;
+ 
+ const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+ item.innerHTML = `<span class="feed-time">${time}</span>${message}`;
+ 
+ feed.insertBefore(item, feed.firstChild);
+ 
+ // Keep only last 20
+ while (feed.children.length > 20) {
+   feed.removeChild(feed.lastChild);
+ }
+}
+
+function renderCards() {
+ const grid = document.getElementById('cardsGrid');
+ const scored = SystemState.agents.map(agent => ({
+   ...agent,
+   scoring: calculateWeightedScore(agent)
+ })).sort((a, b) => b.scoring.total - a.scoring.total);
+ 
+ grid.innerHTML = scored.map((agent, index) => {
+   const isLeading = index === 0;
+   const isSelected = SystemState.selectedAgent === agent.id;
+   const scorePct = Math.round(agent.scoring.total * 100);
+   const priceDrop = agent.history.length > 0 ? agent.history[agent.history.length - 1].drop : 0;
+   
+   return `
+     <div class="intel-card ${isLeading ? 'competing' : ''} $${isSelected ? 'selected' : ''}" 
+          data-id="$${agent.id}" 
+          onclick="selectAgent($${agent.id})"
+          id="card-$${agent.id}">
+       <div class="competitive-pulse"></div>
+       ${!isLeading ? `<div class="strategy-tag">COMPETING</div>` : '<div class="strategy-tag" style="border-color: var(--accent-emerald); color: var(--accent-emerald);">LEADING</div>'}
+       
+       <div class="card-header">
+         <div class="creator-id">
+           <img src="$${agent.avatar}" class="creator-avatar">
+           <div class="creator-meta">
+             <h3>$${agent.name}</h3>
+             <div class="handle">$${agent.handle}</div>
+           </div>
+         </div>
+         <div class="score-badge">
+           <div class="score-value">$${scorePct}</div>
+           <div class="score-label">MATCH SCORE</div>
+           <div class="score-bar">
+             <div class="score-fill" style="width: $${scorePct}%"></div>
+           </div>
+         </div>
+       </div>
+       
+       <div class="card-metrics">
+         <div class="metric">
+           <div class="metric-number">$${formatNumber(agent.baseStats.reach)}</div>
+           <div class="metric-label">Reach</div>
+         </div>
+         <div class="metric">
+           <div class="metric-number">$${agent.baseStats.quality}%</div>
+           <div class="metric-label">Quality</div>
+         </div>
+         <div class="metric">
+           <div class="metric-number">$${agent.baseStats.speed}h</div>
+           <div class="metric-label">Response</div>
+         </div>
+       </div>
+       
+       <div class="bid-zone">
+         <div class="current-bid">
+           <div class="bid-amount">
+             $${agent.current.price.toLocaleString()}
+             ${priceDrop > 0 ? `<span class="bid-trend trend-down">▼ $${priceDrop}</span>` : ''}
+           </div>
+         </div>
+         <div class="bid-floor">Floor: $${agent.floorPrice.toLocaleString()} | Strategy: $${agent.strategy}</div>
+         
+         <div class="weight-contributors">
+           <div class="contributor">R: <strong>$${(agent.scoring.components.reach * 100).toFixed(1)}</strong></div>
+           <div class="contributor">Q: <strong>$${(agent.scoring.components.quality * 100).toFixed(1)}</strong></div>
+           <div class="contributor">S: <strong>$${(agent.scoring.components.speed * 100).toFixed(1)}</strong></div>
+           <div class="contributor">C: <strong>${(agent.scoring.components.price * 100).toFixed(1)}</strong></div>
+         </div>
+       </div>
+     </div>
+   `;
+ }).join('');
+}
+
+function updateCardPrice(id, newPrice, oldPrice) {
+ const card = document.getElementById(`card-${id}`);
+ if (!card) return;
+ 
+ const priceEl = card.querySelector('.bid-amount');
+ const trendEl = card.querySelector('.bid-trend') || document.createElement('span');
+ 
+ trendEl.className = 'bid-trend trend-down';
+ trendEl.textContent = `▼ $${(oldPrice - newPrice).toLocaleString()}`;
+ 
+ priceEl.innerHTML = `$${newPrice.toLocaleString()} `;
+ priceEl.appendChild(trendEl);
+ 
+ // Flash effect
+ card.style.borderColor = 'var(--urgency)';
+ setTimeout(() => {
+   card.style.borderColor = '';
+ }, 500);
+}
+
+function selectAgent(id) {
+ SystemState.selectedAgent = id;
+ document.querySelectorAll('.intel-card').forEach(c => {
+   if (c.dataset.id == id) c.classList.add('selected');
+   else c.classList.remove('selected');
+ });
+ 
+ const agent = SystemState.agents.find(a => a.id === id);
+ addToFeed(`AGENCY SELECTION: ${agent.name} targeted for acquisition`, 'system');
+ 
+ // Pause and show selection state
+ pauseExecution();
+ 
+ // Visual confirmation
+ setTimeout(() => {
+   addToFeed(`CONNECTION ESTABLISHED: Brief transmitted to ${agent.name}`, 'win');
+   alert(`Creator Selected: ${agent.name}\nFinal Bid: $${agent.current.price.toLocaleString()}\nMatch Score: ${Math.round(agent.current.score * 100)}%`);
+ }, 500);
+}
+
+function toggleBrief() {
+ const content = document.getElementById('briefContent');
+ const btn = document.getElementById('briefToggle');
+ const container = document.getElementById('briefContainer');
+ 
+ if (content.style.display === 'none') {
+   content.style.display = 'grid';
+   btn.textContent = '−';
+   container.classList.remove('minimized');
+ } else {
+   content.style.display = 'none';
+   btn.textContent = '+';
+   container.classList.add('minimized');
+ }
+}
+
+function formatNumber(n) {
+ if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+ if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+ return n;
+}
+
+// Input handlers
+document.getElementById('budgetInput').addEventListener('change', (e) => {
+ SystemState.brief.budget = parseInt(e.target.value);
+});
+
+function cycleAudience(type) {
+ // Simplified cycling for demo
+ if (type === 'primary') {
+   const geos = ['US: 54%', 'UK: 23%', 'CA: 15%'];
+   const current = document.getElementById('primaryGeo').textContent;
+   const next = geos[(geos.indexOf(current) + 1) % geos.length];
+   document.getElementById('primaryGeo').textContent = next;
+ }
+}
+
+// Prevent form submission
+document.addEventListener('keypress', (e) => {
+ if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+   e.preventDefault();
+   e.target.blur();
+ }
+});
+</script>
+
+</body>
+</html>

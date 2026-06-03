@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — TradeAux</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #020617; color: #e5e7eb; font-family: 'Inter', sans-serif; padding: 40px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { color: #FFD966; margin-bottom: 20px; }
+.card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+input, select { padding: 10px 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.25); border-radius: 8px; color: #fff; font-size: 14px; margin-right: 8px; }
+button { padding: 10px 20px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 8px; color: #000; font-weight: 700; cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.error { color: #ff6b6b; margin-top: 8px; }
+.success { color: #7CFC00; margin-top: 8px; }
+.user-list { margin-top: 20px; }
+.user-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 8px; }
+.badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.badge-admin { background: rgba(255,217,102,0.2); color: #FFD966; }
+.badge-seller { background: rgba(0,212,255,0.2); color: #00D4FF; }
+.badge-carrier { background: rgba(255,140,66,0.2); color: #FF8C42; }
+.badge-buyer { background: rgba(124,252,0,0.2); color: #7CFC00; }
+
+/* 3D LOGO - TRADEAUX */
+.gem-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+.gem-text {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  gap: 2px;
+}
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 0.10s; }
+.gem-letter:nth-child(7) { animation-delay: 0.30s; }
+.gem-letter:nth-child(8) { animation-delay: 0.50s; }
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
+
+.gem-letter:nth-child(1)::before {
+  content: attr(data-letter);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter:nth-child(2)::before {
+  content: attr(data-letter);
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter:nth-child(3)::before {
+  content: attr(data-letter);
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter:nth-child(4)::before {
+  content: attr(data-letter);
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter:nth-child(5)::before {
+  content: attr(data-letter);
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter:nth-child(6)::before {
+  content: attr(data-letter);
+  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter:nth-child(7)::before {
+  content: attr(data-letter);
+  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter:nth-child(8)::before {
+  content: attr(data-letter);
+  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+  transform: translateZ(2px);
+}
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite;
+  pointer-events: none; mix-blend-mode: overlay;
+}
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+.depth-shadow {
+  position: absolute; bottom: -20px; left: 10%; width: 80%; height: 40px;
+  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+  filter: blur(10px);
+  z-index: -1;
+}
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="container">
+  <div style="text-align: center;">
+    <div class="gem-logo">
+      <div class="gem-text">
+        <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      </div>
+      <div class="light-source"></div>
+      <div class="depth-shadow"></div>
+    </div>
+  </div>
+  <h1>👑 Admin Panel</h1>
+  <div class="card">
+    <h3>Make User Admin</h3>
+    <p style="color:#9ca3af;font-size:13px;">Enter the UID of the user you want to promote to admin.</p>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      <input type="text" id="targetUid" placeholder="User UID" style="flex:1; min-width:200px;">
+      <button id="makeAdminBtn">Make Admin</button>
+    </div>
+    <div id="statusMsg"></div>
+  </div>
+
+  <div class="card">
+    <h3>All Users</h3>
+    <div id="userList" class="user-list"><p style="color:#5c6b8a;">Loading...</p></div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const functions = firebase.functions();
+
+// Auth guard: redirect non-admins
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signin.html'; return; }
+  const token = await user.getIdTokenResult(true);
+  if (token.claims.admin !== true) {
+    window.location.href = 'dashboard-buyer.html';
+    return;
+  }
+  loadUsers();
+});
+
+// Make admin
+document.getElementById('makeAdminBtn').onclick = async () => {
+  const uid = document.getElementById('targetUid').value.trim();
+  const status = document.getElementById('statusMsg');
+  if (!uid) { status.textContent = 'Enter a UID'; status.className = 'error'; return; }
+
+  try {
+    const setAdmin = functions.httpsCallable('setAdmin');
+    const result = await setAdmin({ uid });
+    status.textContent = result.data.message;
+    status.className = 'success';
+    document.getElementById('targetUid').value = '';
+    loadUsers();
+  } catch (err) {
+    status.textContent = err.message;
+    status.className = 'error';
+  }
+};
+
+// Load users
+async function loadUsers() {
+  const list = document.getElementById('userList');
+  try {
+    const snapshot = await db.collection('profiles').orderBy('created_at', 'desc').limit(50).get();
+    if (snapshot.empty) { list.innerHTML = '<p style="color:#5c6b8a;">No users found.</p>'; return; }
+
+    let html = '';
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const role = d.role || 'buyer';
+      let badgeClass = '';
+      if (role === 'admin') badgeClass = 'badge-admin';
+      else if (role === 'seller') badgeClass = 'badge-seller';
+      else if (role === 'carrier') badgeClass = 'badge-carrier';
+      else badgeClass = 'badge-buyer';
+      
+      let roleDisplay = role.toUpperCase();
+      if (role === 'admin') roleDisplay = '👑 ADMIN';
+      else if (role === 'seller') roleDisplay = '🏪 SELLER';
+      else if (role === 'carrier') roleDisplay = '🚛 CARRIER';
+      else roleDisplay = '🛒 BUYER';
+      
+      html += `<div class="user-item">
+        <div>
+          <div style="font-weight:600;">${escapeHtml(d.full_name || 'Unknown')}</div>
+          <div style="font-size:12px;color:#9ca3af;">${escapeHtml(d.email || '')} · UID: ${doc.id}</div>
+        </div>
+        <span class="badge ${badgeClass}">${roleDisplay}</span>
+      </div>`;
+    });
+    list.innerHTML = html;
+  } catch (err) {
+    list.innerHTML = `<p style="color:#ff6b6b;">Error loading users: ${err.message}</p>`;
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+</script>
+</body>
+</html>
