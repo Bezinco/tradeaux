@@ -480,7 +480,7 @@
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" id="cancelDepositBtn">Cancel</button>
-      <button class="create-btn" id="confirmDepositBtn">Continue to Wise →</button>
+      <button class="create-btn" id="confirmDepositBtn">Continue to Stripe →</button>
     </div>
   </div>
 </div>
@@ -903,14 +903,59 @@ async function submitBrief() {
   console.log('Brief filed:', newBrief);
 }
 
+// ============================================
+// STRIPE DEPOSIT FUNCTION - REPLACES LOCAL DEPOSIT
+// ============================================
 async function depositFunds() {
   const amount = parseFloat(document.getElementById('depositAmount').value);
-  if (isNaN(amount) || amount < 100) { showToast('Minimum deposit $100', true); return; }
-  walletBalance += amount;
-  updateWalletDisplay();
-  saveToStorage();
-  showToast(`$${amount} deposited!`);
-  document.getElementById('depositModal').style.display = 'none';
+  
+  // Validation
+  if (isNaN(amount) || amount < 100) {
+    showToast('Minimum deposit is $100 USD', true);
+    return;
+  }
+  
+  // Show loading state
+  const confirmBtn = document.getElementById('confirmDepositBtn');
+  const originalText = confirmBtn.textContent;
+  confirmBtn.textContent = 'Processing...';
+  confirmBtn.disabled = true;
+  
+  try {
+    // Get user info (temporary - replace with your actual auth)
+    // For now, using a temporary user ID
+    const tempUserId = 'user_' + Date.now();
+    const tempUserEmail = 'customer@tradeaux.com';
+    
+    // Call Vercel Stripe checkout function
+    const response = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        amount: amount,
+        userId: tempUserId,
+        userEmail: tempUserEmail
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.url) {
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } else {
+      showToast('Error: ' + (data.error || 'Unable to create checkout session'), true);
+      confirmBtn.textContent = originalText;
+      confirmBtn.disabled = false;
+    }
+  } catch (error) {
+    console.error('Deposit error:', error);
+    showToast('Payment service unavailable. Please try again.', true);
+    confirmBtn.textContent = originalText;
+    confirmBtn.disabled = false;
+  }
 }
 
 function saveToStorage() {
