@@ -402,6 +402,9 @@
       .bots-grid { grid-template-columns: 1fr; }
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -635,6 +638,30 @@
 <div class="toast" id="toast">Action completed</div>
 
 <script>
+
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
+  authDomain: "tradeaux-c72c7.firebaseapp.com",
+  projectId: "tradeaux-c72c7",
+  storageBucket: "tradeaux-c72c7.firebasestorage.app",
+  messagingSenderId: "187412805510",
+  appId: "1:187412805510:web:3e564135565d309b745e07",
+  measurementId: "G-JL4PCGZR16"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// Auth state listener
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loadWalletFromFirestore();
+  } else {
+    window.location.href = 'signin.html';
+  }
+});
+
 // ============================================
 // COMPLETE PRODUCT VARIETIES (ALPHABETICAL)
 // ============================================
@@ -928,7 +955,7 @@ async function depositFunds() {
     const tempUserEmail = 'customer@tradeaux.com';
     
     // Call Vercel Stripe checkout function
-    const response = await fetch('/api/create-checkout', {
+    const response = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -1051,6 +1078,7 @@ document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
 
 // Initialize
 loadSavedData();
+checkStripeReturn(); // Check if returning from Stripe payment
 updateWalletDisplay();
 renderBots();
 renderActiveBids();
