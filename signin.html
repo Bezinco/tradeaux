@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign In — TradeAux</title>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -112,18 +110,11 @@ button {
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
-  authDomain: "tradeaux-c72c7.firebaseapp.com",
-  projectId: "tradeaux-c72c7",
-  storageBucket: "tradeaux-c72c7.firebasestorage.app",
-  messagingSenderId: "187412805510",
-  appId: "1:187412805510:web:3e564135565d309b745e07"
-};
+// SUPABASE CONFIGURATION
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let selectedRole = 'buyer';
 
@@ -134,6 +125,7 @@ function showError(msg) {
   setTimeout(() => el.style.display = 'none', 4000);
 }
 
+// Toggle between signin and signup
 document.getElementById('showSignup').onclick = () => {
   document.getElementById('signinView').style.display = 'none';
   document.getElementById('signupView').style.display = 'block';
@@ -146,31 +138,54 @@ document.getElementById('showSignin').onclick = () => {
   document.getElementById('subtitle').textContent = 'Welcome back';
 };
 
+// Sign In with Supabase
 document.getElementById('signinBtn').onclick = async () => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   
+  if (!email || !password) {
+    showError('Please enter email and password');
+    return;
+  }
+  
   try {
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    const user = userCredential.user;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
     
-    // Get user role from Firestore
-    const profileDoc = await db.collection('profiles').doc(user.uid).get();
-    const role = profileDoc.exists ? profileDoc.data().role : 'buyer';
+    if (error) throw error;
+    
+    const user = data.user;
+    
+    // Get user role from profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    const role = profile?.role || 'buyer';
     
     // Redirect based on role
     if (role === 'admin') window.location.href = 'dashboard-admin.html';
     else if (role === 'seller') window.location.href = 'dashboard-seller.html';
-    else window.location.href = 'dashboard-buyer.html';
+    else window.location.href = 'dash-buyer.html';
   } catch (error) {
     showError(error.message);
   }
 };
 
+// Sign Up with Supabase
 document.getElementById('signupBtn').onclick = async () => {
   const email = document.getElementById('signupEmail').value;
   const password = document.getElementById('signupPassword').value;
   const name = document.getElementById('signupName').value;
+  
+  if (!email || !password) {
+    showError('Please enter email and password');
+    return;
+  }
   
   if (password.length < 6) {
     showError('Password must be at least 6 characters');
@@ -178,20 +193,45 @@ document.getElementById('signupBtn').onclick = async () => {
   }
   
   try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    const user = userCredential.user;
-    
-    await user.updateProfile({ displayName: name || email.split('@')[0] });
-    
-    // Create profile in Firestore
-    await db.collection('profiles').doc(user.uid).set({
-      full_name: name || email.split('@')[0],
+    // Create user in Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
       email: email,
-      role: 'buyer',
-      created_at: firebase.firestore.FieldValue.serverTimestamp()
+      password: password,
+      options: {
+        data: {
+          full_name: name || email.split('@')[0],
+          role: 'buyer'
+        }
+      }
     });
     
-    window.location.href = 'dashboard-buyer.html';
+    if (error) throw error;
+    
+    const user = data.user;
+    
+    // Create profile in Supabase
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: user.id,
+        email: email,
+        full_name: name || email.split('@')[0],
+        role: 'buyer',
+        wallet_balance: 0,
+        created_at: new Date().toISOString()
+      });
+    
+    if (profileError) console.error('Profile creation error:', profileError);
+    
+    // Sign in automatically after signup
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+    
+    if (signInError) throw signInError;
+    
+    window.location.href = 'dash-buyer.html';
   } catch (error) {
     showError(error.message);
   }
