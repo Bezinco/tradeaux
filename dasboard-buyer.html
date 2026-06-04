@@ -402,9 +402,8 @@
       .bots-grid { grid-template-columns: 1fr; }
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+      <base target="_blank">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <base target="_blank">
 </head>
 <body>
@@ -639,29 +638,6 @@
 <div class="toast" id="toast">Action completed</div>
 
 <script>
-
-// ========== FIREBASE CONFIG ==========
-const firebaseConfig = {
-  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
-  authDomain: "tradeaux-c72c7.firebaseapp.com",
-  projectId: "tradeaux-c72c7",
-  storageBucket: "tradeaux-c72c7.firebasestorage.app",
-  messagingSenderId: "187412805510",
-  appId: "1:187412805510:web:3e564135565d309b745e07",
-  measurementId: "G-JL4PCGZR16"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-// Auth state listener
-auth.onAuthStateChanged(user => {
-  if (user) {
-    loadWalletFromFirestore();
-  } else {
-    window.location.href = 'signin.html';
-  }
-});
 
 // ============================================
 // COMPLETE PRODUCT VARIETIES (ALPHABETICAL)
@@ -934,44 +910,93 @@ async function submitBrief() {
 // ============================================
 // STRIPE DEPOSIT FUNCTION - REPLACES LOCAL DEPOSIT
 // ============================================
+// ========== SUPABASE CONFIGURATION ==========
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+
+// Auth state listener
+async function checkAuth() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    window.location.href = 'signin.html';
+    return;
+  }
+  currentUser = session.user;
+
+  // Load wallet from Supabase profiles table
+  const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('wallet_balance, full_name')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (profile && profile.wallet_balance !== null) {
+    walletBalance = parseFloat(profile.wallet_balance);
+    updateWalletDisplay();
+  }
+}
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    window.location.href = 'signin.html';
+  }
+});
+
+// Sign out handler
+document.getElementById('authBtn').onclick = async (e) => {
+  e.preventDefault();
+  await supabaseClient.auth.signOut();
+};
+
+// ============================================
+// STRIPE DEPOSIT VIA SUPABASE EDGE FUNCTION
+// ============================================
 async function depositFunds() {
   const amount = parseFloat(document.getElementById('depositAmount').value);
-  
-  // Validation
+
   if (isNaN(amount) || amount < 100) {
     showToast('Minimum deposit is $100 USD', true);
     return;
   }
-  
-  // Show loading state
+
   const confirmBtn = document.getElementById('confirmDepositBtn');
   const originalText = confirmBtn.textContent;
   confirmBtn.textContent = 'Processing...';
   confirmBtn.disabled = true;
-  
+
   try {
-    // Get user info (temporary - replace with your actual auth)
-    // For now, using a temporary user ID
-    const tempUserId = 'user_' + Date.now();
-    const tempUserEmail = 'customer@tradeaux.com';
-    
-    // Call Vercel Stripe checkout function
-    const response = await fetch('/api/stripe/checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        amount: amount,
-        userId: tempUserId,
-        userEmail: tempUserEmail
-      })
-    });
-    
+    // Get current session for auth
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      showToast('Please sign in first', true);
+      confirmBtn.textContent = originalText;
+      confirmBtn.disabled = false;
+      return;
+    }
+
+    // Call Supabase Edge Function for Stripe checkout
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/stripe-checkout`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          amount: amount,
+          successUrl: window.location.origin + '/dash-buyer.html?deposit=success',
+          cancelUrl: window.location.origin + '/dash-buyer.html?deposit=cancelled'
+        })
+      }
+    );
+
     const data = await response.json();
-    
+
     if (data.url) {
-      // Redirect to Stripe Checkout
       window.location.href = data.url;
     } else {
       showToast('Error: ' + (data.error || 'Unable to create checkout session'), true);
@@ -983,6 +1008,19 @@ async function depositFunds() {
     showToast('Payment service unavailable. Please try again.', true);
     confirmBtn.textContent = originalText;
     confirmBtn.disabled = false;
+  }
+}
+
+// Check if returning from Stripe payment
+function checkStripeReturn() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('deposit') === 'success') {
+    showToast('Deposit successful! Funds added to wallet.');
+    // Remove query param
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } else if (urlParams.get('deposit') === 'cancelled') {
+    showToast('Deposit cancelled.', true);
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 }
 
@@ -1079,8 +1117,9 @@ document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
 
 // Initialize
 loadSavedData();
-checkStripeReturn(); // Check if returning from Stripe payment
+checkStripeReturn();
 updateWalletDisplay();
+checkAuth();
 renderBots();
 renderActiveBids();
 renderWonAuctions();
