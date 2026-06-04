@@ -6,6 +6,7 @@
   <title>TradeAux • Buyer Dashboard | Bot-Powered Trading</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -43,32 +44,172 @@
       100% { transform: translate(-30px,20px) scale(1); }
     }
 
+    /* ===== TRADEAUX 3D LOGO ===== */
+    .gem-logo-corner {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(124,252,0,0.5));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      font-size: 160px;
+      font-weight: 900;
+    }
+
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+
+    .gem-letter[data-letter="T"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gem-letter[data-letter="R"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gem-letter[data-letter="A"] { background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gem-letter[data-letter="D"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gem-letter[data-letter="E"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gem-letter[data-letter="U"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gem-letter[data-letter="X"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    .light-source {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite;
+      pointer-events: none;
+      mix-blend-mode: overlay;
+    }
+
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+      animation: sparkleFlash 4s ease-in-out infinite;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+    .depth-shadow {
+      position: absolute;
+      bottom: -30px;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: radial-gradient(ellipse at center, rgba(124,252,0,0.3) 0%, transparent 80%);
+      filter: blur(20px);
+      z-index: -1;
+    }
+
+    /* BUFFER - Content padding to clear the logo */
     .container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 20px 24px 60px;
+      padding: 100px 24px 60px;
       position: relative;
       z-index: 2;
     }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0 30px;
-      flex-wrap: wrap;
-      gap: 16px;
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
     }
 
-    .logo {
+    .stat-card {
+      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+      border: 1px solid rgba(0, 206, 209, 0.3);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-value {
       font-family: 'Orbitron', sans-serif;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 800;
-      background: linear-gradient(135deg, #0066ff, #00cc44, #d92b2b);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 2px;
+      color: #00ced1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 0 30px;
+      flex-wrap: wrap;
+      gap: 16px;
     }
 
     .nav {
@@ -96,7 +237,7 @@
     .wallet-section {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
       background: rgba(0, 206, 209, 0.1);
       padding: 8px 20px;
       border-radius: 40px;
@@ -106,6 +247,7 @@
     .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
     .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
     .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    
     .deposit-btn {
       background: linear-gradient(135deg, #00ced1, #00ff7f);
       border: none;
@@ -117,6 +259,19 @@
       cursor: pointer;
     }
     .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    
+    .brief-btn {
+      background: linear-gradient(135deg, #FFD966, #FFA500);
+      border: none;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #000;
+    }
+    .brief-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255, 217, 102, 0.5); }
 
     .top-trader {
       text-align: center;
@@ -278,19 +433,6 @@
     .add-bot-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
     .add-bot-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
     .add-bot-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; }
-    .action-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      background: linear-gradient(135deg, #00ced1, #00ff7f);
-      border: none;
-      border-radius: 40px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      color: #000;
-    }
 
     .footer {
       text-align: center;
@@ -349,7 +491,6 @@
       font-family: 'Inter', sans-serif;
       font-size: 14px;
     }
-    .tooltip { font-size: 11px; color: #7CFC00; margin-top: 4px; display: block; }
     .checkbox-group {
       display: flex;
       flex-wrap: wrap;
@@ -395,13 +536,16 @@
     .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
 
     @media (max-width: 1000px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .dashboard-grid { grid-template-columns: 1fr; }
       .bots-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
       .bots-grid { grid-template-columns: 1fr; }
     }
   </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -411,9 +555,54 @@
   <div class="wave-bg wave-3"></div>
 </div>
 
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T</span>
+    <span class="gem-letter" data-letter="R">R</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="D">D</span>
+    <span class="gem-letter" data-letter="E">E</span>
+    <span class="gem-letter" data-letter="A">A</span>
+    <span class="gem-letter" data-letter="U">U</span>
+    <span class="gem-letter" data-letter="X">X</span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
 <div class="container">
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="totalDeposits">$0</div>
+      <div class="stat-label">Total Deposits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="totalBids">0</div>
+      <div class="stat-label">Bids Placed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="winRate">0%</div>
+      <div class="stat-label">Win Rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="activeBots">0</div>
+      <div class="stat-label">Active Bots</div>
+    </div>
+  </div>
+
   <header class="header">
-    <div class="logo">⚡ TRADEAUX</div>
     <div style="display: flex; align-items: center; gap: 16px;">
       <div class="wallet-section">
         <div class="wallet-balance">
@@ -421,14 +610,15 @@
           <span class="wallet-amount" id="walletAmount">$0.00</span>
         </div>
         <button class="deposit-btn" id="depositBtn">+ Deposit</button>
+        <button class="brief-btn" id="fileBriefBtn">📄 File Brief</button>
         <div class="wallet-status">
           <span class="status-dot"></span>
           <span id="bidCount">0 bids available</span>
         </div>
       </div>
       <nav class="nav">
-        <a href="#">Arena</a>
-        <a href="#">Market Intel</a>
+        <a href="auction-floor-buyer.html">Arena</a>
+        <a href="market-intel.html">Market Intel</a>
         <a href="#" id="authBtn">Sign Out</a>
       </nav>
     </div>
@@ -495,6 +685,7 @@
       <select id="briefCommodity">
         <option value="Apples">Apples</option>
         <option value="Bananas">Bananas</option>
+        <option value="Coconuts">Coconuts</option>
         <option value="Mangoes">Mangoes</option>
         <option value="Oranges">Oranges</option>
         <option value="Pineapples">Pineapples</option>
@@ -559,6 +750,7 @@
       <select id="editBotCommodity">
         <option value="Apples">Apples</option>
         <option value="Bananas">Bananas</option>
+        <option value="Coconuts">Coconuts</option>
         <option value="Mangoes">Mangoes</option>
         <option value="Oranges">Oranges</option>
         <option value="Pineapples">Pineapples</option>
@@ -634,56 +826,151 @@
 
 <div class="toast" id="toast">Action completed</div>
 
-<script>
-// ============================================
-// COMPLETE PRODUCT VARIETIES (ALPHABETICAL)
-// ============================================
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.10/+esm';
+
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let walletBalance = 0;
+let totalDeposits = 0;
+let totalBids = 0;
+let winRate = 0;
+let bots = [];
+let activeBids = [];
+let wonAuctions = [];
+let priceInterval = null;
+let currentEditingBot = null;
+
 const productVarieties = {
-  'Apples': ['Braeburn', 'Cortland', 'Cosmic Crisp', 'Empire', 'Envy', 'EverCrisp', 'Fuji', 'Gala', 'Golden Delicious', 'Granny Smith', 'Gravenstein', 'Honeycrisp', 'Jazz', 'Jonagold', 'Lodi', 'Macoun', 'McIntosh', 'Mutsu (Crispin)', 'Paula Red', 'Pazazz', 'Pink Lady', 'Red Delicious', 'Rome', 'Spartan', 'Winesap'],
-  'Bananas': ['Baby Banana', 'Cavendish', 'Lady Finger', 'Organic Cavendish', 'Red Banana'],
-  'Mangoes': ['Ataulfo (Honey)', 'Francis', 'Keitt', 'Kent', 'Organic Kent', 'Tommy Atkins'],
+  'Apples': ['Braeburn', 'Fuji', 'Gala', 'Granny Smith', 'Honeycrisp', 'Pink Lady', 'Red Delicious'],
+  'Bananas': ['Cavendish', 'Lady Finger', 'Red Banana', 'Plantain'],
+  'Coconuts': ['Young Coconut', 'Mature Coconut', 'Organic Coconut', 'King Coconut', 'Dwarf Coconut'],
+  'Mangoes': ['Ataulfo', 'Francis', 'Haden', 'Keitt', 'Kent', 'Tommy Atkins'],
   'Oranges': ['Blood Orange', 'Cara Cara', 'Navel', 'Seville', 'Valencia'],
-  'Pineapples': ['Organic Smooth Cayenne', 'Queen', 'Red Spanish', 'Smooth Cayenne'],
-  'Potatoes': ['Fingerling', 'Organic Russet', 'Purple', 'Red', 'Russet', 'White', 'Yukon Gold'],
-  'Tomatoes': ['Beefsteak', 'Cherry', 'Heirloom', 'Organic Roma', 'Plum', 'Roma', 'Round'],
-  'Onions': ['Organic Yellow', 'Red', 'Shallot', 'Sweet', 'White', 'Yellow'],
-  'Carrots': ['Baby', 'Chantenay', 'Imperator', 'Nantes', 'Organic Imperator', 'Purple'],
-  'Broccoli': ['Belstar', 'Eastern Crown', 'Green Magic', 'Organic Green Magic'],
-  'Corn': ['Blue Corn', 'Organic Sweet Corn', 'Sweet Yellow', 'White', 'Yellow Dent'],
-  'Rice': ['Arborio', 'Basmati', 'Brown Rice', 'Calrose', 'Jasmine', 'Organic Jasmine', 'White Rice'],
-  'Wheat': ['Hard Red Winter', 'Hard White', 'Organic Hard Red', 'Soft Red Winter', 'Spring Wheat'],
-  'Soybeans': ['Edamame', 'GMO', 'Non-GMO', 'Organic Non-GMO']
+  'Pineapples': ['Queen', 'Red Spanish', 'Smooth Cayenne', 'MD2'],
+  'Potatoes': ['Fingerling', 'Red', 'Russet', 'White', 'Yukon Gold'],
+  'Tomatoes': ['Beefsteak', 'Cherry', 'Heirloom', 'Plum', 'Roma'],
+  'Onions': ['Red', 'Shallot', 'Sweet', 'White', 'Yellow'],
+  'Carrots': ['Baby', 'Chantenay', 'Imperator', 'Nantes', 'Purple'],
+  'Broccoli': ['Belstar', 'Eastern Crown', 'Green Magic'],
+  'Corn': ['Sweet Yellow', 'White', 'Yellow Dent'],
+  'Rice': ['Arborio', 'Basmati', 'Jasmine', 'White Rice', 'Brown Rice'],
+  'Wheat': ['Hard Red Winter', 'Soft Red Winter', 'Spring Wheat', 'Durum'],
+  'Soybeans': ['Edamame', 'Non-GMO', 'Organic', 'GMO']
 };
 
-// Commodity prices for ticker
 let commodityPrices = {
   Apples: { price: 1.24, change: 2.1, emoji: "🍎" },
   Bananas: { price: 0.52, change: -0.5, emoji: "🍌" },
+  Coconuts: { price: 0.85, change: 1.5, emoji: "🥥" },
   Potatoes: { price: 0.44, change: 1.2, emoji: "🥔" },
   Almonds: { price: 6.48, change: 0.3, emoji: "🌰" },
   Coffee: { price: 4.85, change: 0.9, emoji: "☕" }
 };
 
-let walletBalance = 5000;
-let bots = [
-  { id: '1', name: 'Apple Hunter', commodity: 'Apples', varieties: ['Honeycrisp', 'McIntosh', 'Gala'], emoji: '🍎', status: 'active', trades: 47, pnl: 1250, winRate: 72, strategy: 'Sniper', maxPrice: 0.48, budget: 500 },
-  { id: '2', name: 'Potato Pro', commodity: 'Potatoes', varieties: ['Russet', 'Yukon Gold'], emoji: '🥔', status: 'active', trades: 32, pnl: 875, winRate: 68, strategy: 'Aggressive', maxPrice: 0.45, budget: 800 },
-  { id: '3', name: 'Banana Bot', commodity: 'Bananas', varieties: [], emoji: '🍌', status: 'idle', trades: 18, pnl: 420, winRate: 65, strategy: 'Conservative', maxPrice: 0.55, budget: 300 }
-];
+function updateStats() {
+  document.getElementById('totalDeposits').textContent = `$${totalDeposits.toLocaleString()}`;
+  document.getElementById('totalBids').textContent = totalBids;
+  document.getElementById('winRate').textContent = `${winRate}%`;
+  document.getElementById('activeBots').textContent = bots.filter(b => b.status === 'active').length;
+}
 
-let activeBids = [
-  { id: 'b1', product: 'Apples', variety: 'Honeycrisp', quantity: 50, price: 1.85, seller: 'Washington Orchards', sellerContact: 'Mike Peterson', sellerEmail: 'sales@waorchards.com', sellerPhone: '+1 (509) 555-0123', timeLeft: '2:34', auctionId: 'auc_001' },
-  { id: 'b2', product: 'Potatoes', variety: 'Russet', quantity: 100, price: 0.41, seller: 'Idaho Farms', sellerContact: 'Sarah Johnson', sellerEmail: 'sales@idahofarms.com', sellerPhone: '+1 (208) 555-0123', timeLeft: '1:45', auctionId: 'auc_002' }
-];
+async function initAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    await loadProfile();
+    await loadBots();
+    await loadBids();
+    await loadWonAuctions();
+    renderAll();
+  }
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      currentUser = session.user;
+      await loadProfile();
+      await loadBots();
+      await loadBids();
+      await loadWonAuctions();
+      renderAll();
+    }
+    if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      walletBalance = 0;
+      renderAll();
+    }
+  });
+}
 
-let wonAuctions = [
-  { id: 'w1', product: 'Apples', variety: 'Gala', quantity: 30, price: 1.18, seller: 'New York Apple Co', sellerContact: 'John Davis', sellerEmail: 'sales@nyapple.com', sellerPhone: '+1 (315) 555-0123', status: 'Transport needed', date: '2026-04-29' },
-  { id: 'w2', product: 'Bananas', variety: 'Cavendish', quantity: 20, price: 0.48, seller: 'Ecuador Farms', sellerContact: 'Maria Santos', sellerEmail: 'sales@ecuadorfarms.ec', sellerPhone: '+593 4 259 8877', status: 'Delivery pending', date: '2026-04-28' }
-];
+async function loadProfile() {
+  if (!currentUser) return;
+  const { data, error } = await supabase.from('profiles').select('wallet_balance').eq('id', currentUser.id).single();
+  if (error) {
+    await supabase.from('profiles').insert({ id: currentUser.id, email: currentUser.email, wallet_balance: 0 });
+    walletBalance = 0;
+  } else {
+    walletBalance = data?.wallet_balance || 0;
+  }
+  updateWalletDisplay();
+}
 
-let filedBriefs = [];
-let priceInterval = null;
-let currentEditingBot = null;
+async function loadBots() {
+  if (!currentUser) return;
+  const { data, error } = await supabase.from('buyer_bots').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  bots = error ? [] : (data || []).map(b => ({
+    id: b.id, name: b.name, commodity: b.commodity, varieties: b.varieties || [],
+    emoji: b.emoji || '🤖', status: b.status || 'idle', trades: b.trades || 0,
+    pnl: b.pnl || 0, winRate: b.win_rate || 0, strategy: b.strategy || 'Balanced',
+    maxPrice: b.max_price || 0.60, budget: b.budget || 500
+  }));
+  renderBots();
+  updateStats();
+}
+
+async function loadBids() {
+  if (!currentUser) return;
+  const { data, error } = await supabase.from('bids').select('*, seller_briefs:brief_id(commodity,variety,quantity_mt,coop_name,origin,seller_email,seller_phone)').eq('buyer_id', currentUser.id).eq('status', 'pending').order('created_at', { ascending: false });
+  activeBids = error ? [] : (data || []).map(b => ({
+    id: b.id, product: b.seller_briefs?.commodity || 'Unknown', variety: b.seller_briefs?.variety || '',
+    quantity: b.quantity_mt || 0, price: b.amount || 0, seller: b.seller_briefs?.coop_name || 'Unknown',
+    sellerContact: b.buyer_name || '', sellerEmail: b.seller_briefs?.seller_email || '',
+    sellerPhone: b.seller_briefs?.seller_phone || '', timeLeft: '2:34', auctionId: b.brief_id
+  }));
+  totalBids = activeBids.length;
+  renderActiveBids();
+  updateStats();
+}
+
+async function loadWonAuctions() {
+  if (!currentUser) return;
+  const { data, error } = await supabase.from('bids').select('*, seller_briefs:brief_id(commodity,variety,quantity_mt,coop_name,origin,seller_email,seller_phone)').eq('buyer_id', currentUser.id).eq('status', 'accepted').order('accepted_at', { ascending: false });
+  wonAuctions = error ? [] : (data || []).map(b => ({
+    id: b.id, product: b.seller_briefs?.commodity || 'Unknown', variety: b.seller_briefs?.variety || '',
+    quantity: b.quantity_mt || 0, price: b.amount || 0, seller: b.seller_briefs?.coop_name || 'Unknown',
+    sellerContact: b.buyer_name || '', sellerEmail: b.seller_briefs?.seller_email || '',
+    sellerPhone: b.seller_briefs?.seller_phone || '', status: 'Delivery pending',
+    date: b.accepted_at ? new Date(b.accepted_at).toISOString().split('T')[0] : '2026-01-01'
+  }));
+  const wonCount = wonAuctions.length;
+  winRate = totalBids + wonCount > 0 ? Math.round((wonCount / (totalBids + wonCount)) * 100) : 0;
+  renderWonAuctions();
+  updateStats();
+}
+
+async function saveBotToSupabase(bot) {
+  if (!currentUser) return;
+  const { error } = await supabase.from('buyer_bots').upsert({
+    id: bot.id, user_id: currentUser.id, name: bot.name, commodity: bot.commodity,
+    varieties: bot.varieties, emoji: bot.emoji, status: bot.status, trades: bot.trades,
+    pnl: bot.pnl, win_rate: bot.winRate, strategy: bot.strategy, max_price: bot.maxPrice,
+    budget: bot.budget, updated_at: new Date().toISOString()
+  });
+  if (error) console.error('Failed to save bot:', error);
+}
 
 function updateWalletDisplay() {
   document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
@@ -694,20 +981,11 @@ function updateWalletDisplay() {
 function renderTicker() {
   const botCommodities = [...new Set(bots.map(b => b.commodity))];
   const container = document.getElementById('liveTicker');
-  if (botCommodities.length === 0) {
-    container.innerHTML = '<div style="color:#9ca3af;">Deploy bots to see live prices here</div>';
-    return;
-  }
+  if (botCommodities.length === 0) { container.innerHTML = '<div style="color:#9ca3af;">Deploy bots to see live prices here</div>'; return; }
   container.innerHTML = botCommodities.map(comm => {
     const data = commodityPrices[comm];
     if (!data) return '';
-    return `
-      <div class="ticker-item">
-        <span class="ticker-commodity">${data.emoji} ${comm}</span>
-        <span class="ticker-price">$${data.price.toFixed(2)}</span>
-        <span class="ticker-change ${data.change >= 0 ? 'up' : 'down'}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change).toFixed(1)}%</span>
-      </div>
-    `;
+    return `<div class="ticker-item"><span class="ticker-commodity">${data.emoji} ${comm}</span><span class="ticker-price">$${data.price.toFixed(2)}</span><span class="ticker-change ${data.change >= 0 ? 'up' : 'down'}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change).toFixed(1)}%</span></div>`;
   }).join('');
 }
 
@@ -726,6 +1004,39 @@ function startPriceSimulation() {
   }, 5000);
 }
 
+function renderBots() {
+  const container = document.getElementById('botsGrid');
+  if (!container) return;
+  container.innerHTML = bots.map(bot => {
+    const selectedCount = bot.varieties.length;
+    const totalVarieties = productVarieties[bot.commodity]?.length || 0;
+    return `<div class="bot-card" data-bot-id="${bot.id}"><div class="bot-emoji">${bot.emoji}</div><div class="bot-name">${bot.name}</div><div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div><div class="bot-target">🎯 ${selectedCount > 0 ? selectedCount + '/' + totalVarieties + ' varieties' : 'All varieties'}</div><div class="bot-stats"><span>Trades: ${bot.trades}</span><span>PnL: $${bot.pnl}</span><span>WR: ${bot.winRate}%</span></div></div>`;
+  }).join('');
+  const addCard = document.createElement('div');
+  addCard.className = 'add-bot-card';
+  addCard.id = 'addBotCard';
+  addCard.innerHTML = '<div class="add-bot-icon">+</div><div class="add-bot-text">Add New Bot</div>';
+  container.appendChild(addCard);
+}
+
+function renderActiveBids() {
+  const container = document.getElementById('activeBidsList');
+  if (!container) return;
+  if (!activeBids.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>'; document.getElementById('activeBidsCount').textContent = '0'; return; }
+  document.getElementById('activeBidsCount').textContent = activeBids.length;
+  container.innerHTML = activeBids.map(bid => `<div class="clickable-item" data-bid-id="${bid.id}"><div class="item-title"><span>${bid.product} - ${bid.variety}</span><span class="status-badge pending">⏱️ ${bid.timeLeft}</span></div><div class="item-details"><span>📦 ${bid.quantity} MT</span><span>💰 $${bid.price}/MT</span><span>🏷️ ${bid.seller}</span></div></div>`).join('');
+}
+
+function renderWonAuctions() {
+  const container = document.getElementById('wonAuctionsList');
+  if (!container) return;
+  if (!wonAuctions.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>'; document.getElementById('wonAuctionsCount').textContent = '0'; return; }
+  document.getElementById('wonAuctionsCount').textContent = wonAuctions.length;
+  container.innerHTML = wonAuctions.map(auction => `<div class="clickable-item" data-won-id="${auction.id}"><div class="item-title"><span>${auction.product} - ${auction.variety}</span><span class="status-badge">${auction.status}</span></div><div class="item-details"><span>📦 ${auction.quantity} MT</span><span>💰 $${auction.price}/MT</span><span>🏷️ ${auction.seller}</span></div></div>`).join('');
+}
+
+function renderAll() { updateWalletDisplay(); renderBots(); renderActiveBids(); renderWonAuctions(); renderTicker(); }
+
 function updateVarietyDropdownForBrief(commodity) {
   const varieties = productVarieties[commodity] || [];
   const select = document.getElementById('briefVariety');
@@ -742,68 +1053,8 @@ function updateBotVarietyCheckboxes() {
   const commodity = document.getElementById('editBotCommodity').value;
   const varieties = productVarieties[commodity] || [];
   const container = document.getElementById('varietyCheckboxes');
-  const currentBot = currentEditingBot;
-  const selectedVarieties = currentBot ? currentBot.varieties : [];
-  
-  container.innerHTML = varieties.map(v => `
-    <label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}">
-      <input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}
-    </label>
-  `).join('');
-}
-
-function renderBots() {
-  const container = document.getElementById('botsGrid');
-  container.innerHTML = bots.map(bot => {
-    const selectedCount = bot.varieties.length;
-    const totalVarieties = productVarieties[bot.commodity]?.length || 0;
-    return `
-      <div class="bot-card" data-bot-id="${bot.id}">
-        <div class="bot-emoji">${bot.emoji}</div>
-        <div class="bot-name">${bot.name}</div>
-        <div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div>
-        <div class="bot-target">🎯 ${selectedCount > 0 ? selectedCount + '/' + totalVarieties + ' varieties' : 'All varieties'}</div>
-        <div class="bot-stats"><span>Trades: ${bot.trades}</span><span>PnL: $${bot.pnl}</span><span>WR: ${bot.winRate}%</span></div>
-      </div>
-    `;
-  }).join('');
-  const addCard = document.createElement('div');
-  addCard.className = 'add-bot-card';
-  addCard.id = 'addBotCard';
-  addCard.innerHTML = '<div class="add-bot-icon">+</div><div class="add-bot-text">Add New Bot</div>';
-  container.appendChild(addCard);
-}
-
-function renderActiveBids() {
-  const container = document.getElementById('activeBidsList');
-  if (!activeBids.length) {
-    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>';
-    document.getElementById('activeBidsCount').textContent = '0';
-    return;
-  }
-  document.getElementById('activeBidsCount').textContent = activeBids.length;
-  container.innerHTML = activeBids.map(bid => `
-    <div class="clickable-item" data-bid-id="${bid.id}">
-      <div class="item-title"><span>${bid.product} - ${bid.variety}</span><span class="status-badge pending">⏱️ ${bid.timeLeft}</span></div>
-      <div class="item-details"><span>📦 ${bid.quantity} MT</span><span>💰 $${bid.price}/MT</span><span>🏷️ ${bid.seller}</span></div>
-    </div>
-  `).join('');
-}
-
-function renderWonAuctions() {
-  const container = document.getElementById('wonAuctionsList');
-  if (!wonAuctions.length) {
-    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>';
-    document.getElementById('wonAuctionsCount').textContent = '0';
-    return;
-  }
-  document.getElementById('wonAuctionsCount').textContent = wonAuctions.length;
-  container.innerHTML = wonAuctions.map(auction => `
-    <div class="clickable-item" data-won-id="${auction.id}">
-      <div class="item-title"><span>${auction.product} - ${auction.variety}</span><span class="status-badge">${auction.status}</span></div>
-      <div class="item-details"><span>📦 ${auction.quantity} MT</span><span>💰 $${auction.price}/MT</span><span>🏷️ ${auction.seller}</span></div>
-    </div>
-  `).join('');
+  const selectedVarieties = currentEditingBot ? currentEditingBot.varieties : [];
+  container.innerHTML = varieties.map(v => `<label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}"><input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}</label>`).join('');
 }
 
 function openBotConfig(bot) {
@@ -811,19 +1062,16 @@ function openBotConfig(bot) {
   document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
   document.getElementById('editBotName').value = bot.name;
   document.getElementById('editBotCommodity').value = bot.commodity;
-  
   updateBotVarietyCheckboxes();
-  
   document.getElementById('editMaxPrice').value = bot.maxPrice;
   document.getElementById('editMaxPriceDisplay').textContent = `$${bot.maxPrice.toFixed(2)}`;
   document.getElementById('editBudget').value = bot.budget;
   document.getElementById('editBudgetDisplay').textContent = `$${bot.budget}`;
   document.getElementById('editStrategy').value = bot.strategy;
-  
   document.getElementById('botConfigModal').style.display = 'flex';
 }
 
-function saveBotConfig() {
+async function saveBotConfig() {
   if (!currentEditingBot) return;
   const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
   currentEditingBot.name = document.getElementById('editBotName').value;
@@ -833,11 +1081,10 @@ function saveBotConfig() {
   currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
   currentEditingBot.strategy = document.getElementById('editStrategy').value;
   currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
-  
-  saveToStorage();
+  await saveBotToSupabase(currentEditingBot);
   renderBots();
   renderTicker();
-  showToast(`${currentEditingBot.name} configuration saved`);
+  showToast(`${currentEditingBot.name} saved`);
   document.getElementById('botConfigModal').style.display = 'none';
   currentEditingBot = null;
 }
@@ -845,34 +1092,19 @@ function saveBotConfig() {
 function showBidDetails(bidId) {
   const bid = activeBids.find(b => b.id === bidId);
   if (!bid) return;
-  document.getElementById('bidDetailContent').innerHTML = `
-    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${bid.product} - ${bid.variety}</div></div>
-    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${bid.quantity} MT</div></div>
-    <div class="modal-field"><label>Your Bid</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${bid.price}/MT</div></div>
-    <div class="modal-field"><label>Seller</label><div class="tooltip" style="font-size:14px;">${bid.seller}</div></div>
-    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${bid.sellerContact} | ${bid.sellerEmail} | ${bid.sellerPhone}</div></div>
-    <div class="modal-field"><label>Time Remaining</label><div class="tooltip" style="font-size:14px;">${bid.timeLeft}</div></div>
-    <div class="modal-field"><label>Auction ID</label><div class="tooltip" style="font-size:12px; color:#9ca3af;">${bid.auctionId}</div></div>
-  `;
+  document.getElementById('bidDetailContent').innerHTML = `<div class="modal-field"><label>Product</label><div style="font-size:14px; color:#fff;">${bid.product} - ${bid.variety}</div></div><div class="modal-field"><label>Quantity</label><div style="font-size:14px;">${bid.quantity} MT</div></div><div class="modal-field"><label>Your Bid</label><div style="font-size:14px; color:#FFD966;">$${bid.price}/MT</div></div><div class="modal-field"><label>Seller</label><div style="font-size:14px;">${bid.seller}</div></div><div class="modal-field"><label>Contact</label><div style="font-size:14px;">${bid.sellerContact} | ${bid.sellerEmail} | ${bid.sellerPhone}</div></div>`;
   document.getElementById('bidDetailModal').style.display = 'flex';
 }
 
 function showWonDetails(wonId) {
   const won = wonAuctions.find(w => w.id === wonId);
   if (!won) return;
-  document.getElementById('wonDetailContent').innerHTML = `
-    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${won.product} - ${won.variety}</div></div>
-    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${won.quantity} MT</div></div>
-    <div class="modal-field"><label>Winning Price</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${won.price}/MT</div></div>
-    <div class="modal-field"><label>Seller</label><div class="tooltip" style="font-size:14px;">${won.seller}</div></div>
-    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${won.sellerContact} | ${won.sellerEmail} | ${won.sellerPhone}</div></div>
-    <div class="modal-field"><label>Status</label><div class="tooltip status-badge" style="display:inline-block;">${won.status}</div></div>
-    <div class="modal-field"><label>Transport</label><div class="tooltip" style="font-size:12px;">Launch transport auction to move this cargo</div></div>
-  `;
+  document.getElementById('wonDetailContent').innerHTML = `<div class="modal-field"><label>Product</label><div style="font-size:14px; color:#fff;">${won.product} - ${won.variety}</div></div><div class="modal-field"><label>Quantity</label><div style="font-size:14px;">${won.quantity} MT</div></div><div class="modal-field"><label>Winning Price</label><div style="font-size:14px; color:#FFD966;">$${won.price}/MT</div></div><div class="modal-field"><label>Seller</label><div style="font-size:14px;">${won.seller}</div></div><div class="modal-field"><label>Contact</label><div style="font-size:14px;">${won.sellerContact} | ${won.sellerEmail} | ${won.sellerPhone}</div></div>`;
   document.getElementById('wonDetailModal').style.display = 'flex';
 }
 
 async function submitBrief() {
+  if (!currentUser) { showToast('Please sign in', true); return; }
   const commodity = document.getElementById('briefCommodity').value;
   const variety = document.getElementById('briefVariety').value;
   const quantity = parseInt(document.getElementById('briefQuantity').value);
@@ -880,104 +1112,76 @@ async function submitBrief() {
   const destination = document.getElementById('briefDestination').value;
   const targetPrice = document.getElementById('briefTargetPrice').value;
   const notes = document.getElementById('briefNotes').value;
-  
   if (!variety) { showToast('Select a variety', true); return; }
-  if (walletBalance < 25) {
-    showToast('Insufficient funds. Minimum $25 required.', true);
-    return;
+  if (walletBalance < 25) { showToast('Insufficient funds. Need $25.', true); return; }
+  walletBalance -= 25; updateWalletDisplay();
+  
+  // Save to Supabase
+  const { error } = await supabase.from('buyer_briefs').insert({
+    user_id: currentUser.id, 
+    commodity, 
+    variety, 
+    quantity, 
+    grade, 
+    destination,
+    target_price: targetPrice ? parseFloat(targetPrice) : null, 
+    notes, 
+    status: 'open'
+  });
+  
+  if (error) { 
+    showToast('Failed to submit brief: ' + error.message, true); 
+    walletBalance += 25; 
+    updateWalletDisplay(); 
+  } else { 
+    showToast(`Brief filed: ${quantity}MT ${commodity} (${variety})`); 
+    document.getElementById('fileBriefModal').style.display = 'none';
+    // Reset form
+    document.getElementById('briefCommodity').value = 'Apples';
+    document.getElementById('briefVariety').innerHTML = '<option value="">Select variety...</option>';
+    document.getElementById('briefQuantity').value = '100';
+    document.getElementById('briefGrade').value = '';
+    document.getElementById('briefDestination').value = '';
+    document.getElementById('briefTargetPrice').value = '';
+    document.getElementById('briefNotes').value = '';
+    updateVarietyDropdownForBrief('Apples');
   }
-  
-  walletBalance -= 25;
-  updateWalletDisplay();
-  
-  const newBrief = {
-    id: 'brief_' + Date.now(),
-    commodity, variety, quantity, grade, destination,
-    targetPrice: targetPrice ? parseFloat(targetPrice) : null,
-    notes, status: 'open',
-    createdAt: new Date().toISOString()
-  };
-  filedBriefs.push(newBrief);
-  showToast(`Brief filed: ${quantity}MT ${commodity} (${variety}) to ${destination}`);
-  document.getElementById('fileBriefModal').style.display = 'none';
-  console.log('Brief filed:', newBrief);
 }
 
-// ============================================
-// STRIPE DEPOSIT FUNCTION - REPLACES LOCAL DEPOSIT
-// ============================================
 async function depositFunds() {
   const amount = parseFloat(document.getElementById('depositAmount').value);
-  
-  // Validation
-  if (isNaN(amount) || amount < 100) {
-    showToast('Minimum deposit is $100 USD', true);
-    return;
-  }
-  
-  // Show loading state
+  if (isNaN(amount) || amount < 100) { showToast('Minimum deposit is $100 USD', true); return; }
+  if (!currentUser) { showToast('Please sign in first', true); return; }
   const confirmBtn = document.getElementById('confirmDepositBtn');
-  const originalText = confirmBtn.textContent;
-  confirmBtn.textContent = 'Processing...';
-  confirmBtn.disabled = true;
-  
+  confirmBtn.textContent = 'Redirecting to Stripe...'; confirmBtn.disabled = true;
   try {
-    // Get user info (temporary - replace with your actual auth)
-    // For now, using a temporary user ID
-    const tempUserId = 'user_' + Date.now();
-    const tempUserEmail = 'customer@tradeaux.com';
-    
-    // Call Vercel Stripe checkout function
     const response = await fetch('/api/stripe/checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        amount: amount,
-        userId: tempUserId,
-        userEmail: tempUserEmail
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amount, userId: currentUser.id, userEmail: currentUser.email || '' })
     });
-    
     const data = await response.json();
-    
-    if (data.url) {
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
-    } else {
-      showToast('Error: ' + (data.error || 'Unable to create checkout session'), true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-    }
+    if (data.url) { window.location.href = data.url; }
+    else { showToast('Error: ' + (data.error || 'Unable to create checkout session'), true); confirmBtn.textContent = 'Continue to Stripe →'; confirmBtn.disabled = false; }
   } catch (error) {
     console.error('Deposit error:', error);
     showToast('Payment service unavailable. Please try again.', true);
-    confirmBtn.textContent = originalText;
-    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Continue to Stripe →'; confirmBtn.disabled = false;
   }
 }
 
-function saveToStorage() {
-  localStorage.setItem('buyer_bots', JSON.stringify(bots));
-  localStorage.setItem('buyer_wallet', walletBalance.toString());
-  localStorage.setItem('buyer_bids', JSON.stringify(activeBids));
-  localStorage.setItem('buyer_won', JSON.stringify(wonAuctions));
-}
-
-function loadSavedData() {
-  const savedBots = localStorage.getItem('buyer_bots');
-  const savedWallet = localStorage.getItem('buyer_wallet');
-  const savedBids = localStorage.getItem('buyer_bids');
-  const savedWon = localStorage.getItem('buyer_won');
-  if (savedBots) bots = JSON.parse(savedBots);
-  if (savedWallet) walletBalance = parseFloat(savedWallet);
-  if (savedBids) activeBids = JSON.parse(savedBids);
-  if (savedWon) wonAuctions = JSON.parse(savedWon);
-  if (isNaN(walletBalance)) walletBalance = 5000;
-  if (!Array.isArray(bots)) bots = [];
-  if (!Array.isArray(activeBids)) activeBids = [];
-  if (!Array.isArray(wonAuctions)) wonAuctions = [];
+function checkStripeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const depositSuccess = params.get('deposit') === 'success';
+  if (depositSuccess && sessionId) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    showToast('✅ Payment received! Refreshing wallet...');
+    setTimeout(() => loadProfile(), 2000);
+  }
+  if (params.get('deposit') === 'cancelled') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    showToast('Deposit cancelled', true);
+  }
 }
 
 function showToast(msg, isError = false) {
@@ -989,72 +1193,44 @@ function showToast(msg, isError = false) {
 }
 
 // Event listeners
-document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
+document.getElementById('depositBtn').onclick = () => { if (!currentUser) { showToast('Please sign in', true); return; } document.getElementById('depositModal').style.display = 'flex'; };
+document.getElementById('fileBriefBtn').onclick = () => { if (!currentUser) { showToast('Please sign in', true); return; } document.getElementById('fileBriefModal').style.display = 'flex'; };
 document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
 document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
 document.getElementById('confirmDepositBtn').onclick = depositFunds;
-
+document.getElementById('closeBriefModal').onclick = () => document.getElementById('fileBriefModal').style.display = 'none';
+document.getElementById('cancelBriefBtn').onclick = () => document.getElementById('fileBriefModal').style.display = 'none';
+document.getElementById('submitBriefBtn').onclick = submitBrief;
 document.getElementById('briefCommodity').onchange = function() { updateVarietyDropdownForBrief(this.value); };
 updateVarietyDropdownForBrief('Apples');
-
 document.getElementById('editMaxPrice').oninput = (e) => document.getElementById('editMaxPriceDisplay').textContent = `$${parseFloat(e.target.value).toFixed(2)}`;
 document.getElementById('editBudget').oninput = (e) => document.getElementById('editBudgetDisplay').textContent = `$${parseInt(e.target.value)}`;
-
 document.getElementById('closeBotModal').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
 document.getElementById('cancelBotBtn').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
 document.getElementById('saveBotBtn').onclick = saveBotConfig;
 document.getElementById('editBotCommodity').onchange = updateBotVarietyCheckboxes;
-
 document.getElementById('closeBidModal').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
 document.getElementById('cancelBidBtn').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
-
 document.getElementById('closeWonModal').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
 document.getElementById('cancelWonBtn').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
+document.getElementById('authBtn').onclick = (e) => { e.preventDefault(); supabase.auth.signOut(); };
 
-document.getElementById('botsGrid').addEventListener('click', (e) => {
+document.getElementById('botsGrid').addEventListener('click', async (e) => {
   const card = e.target.closest('.bot-card');
   if (!card) return;
   if (card.id === 'addBotCard') {
-    const newBot = {
-      id: 'bot_' + Date.now(),
-      name: 'New Buyer Bot',
-      commodity: 'Apples',
-      varieties: [],
-      emoji: '🍎',
-      status: 'active',
-      trades: 0,
-      pnl: 0,
-      winRate: 0,
-      strategy: 'Balanced',
-      maxPrice: 0.60,
-      budget: 500
-    };
-    bots.push(newBot);
-    renderBots();
-    openBotConfig(newBot);
-    return;
+    const newBot = { id: 'bot_' + Date.now(), name: 'New Buyer Bot', commodity: 'Apples', varieties: [], emoji: '🍎', status: 'active', trades: 0, pnl: 0, winRate: 0, strategy: 'Balanced', maxPrice: 0.60, budget: 500 };
+    bots.push(newBot); await saveBotToSupabase(newBot); renderBots(); openBotConfig(newBot); return;
   }
   const botId = card.getAttribute('data-bot-id');
   const bot = bots.find(b => b.id === botId);
   if (bot) openBotConfig(bot);
 });
+document.getElementById('activeBidsList').addEventListener('click', (e) => { const item = e.target.closest('[data-bid-id]'); if (item) showBidDetails(item.getAttribute('data-bid-id')); });
+document.getElementById('wonAuctionsList').addEventListener('click', (e) => { const item = e.target.closest('[data-won-id]'); if (item) showWonDetails(item.getAttribute('data-won-id')); });
 
-document.getElementById('activeBidsList').addEventListener('click', (e) => {
-  const item = e.target.closest('[data-bid-id]');
-  if (item) showBidDetails(item.getAttribute('data-bid-id'));
-});
-
-document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
-  const item = e.target.closest('[data-won-id]');
-  if (item) showWonDetails(item.getAttribute('data-won-id'));
-});
-
-// Initialize
-loadSavedData();
-updateWalletDisplay();
-renderBots();
-renderActiveBids();
-renderWonAuctions();
+checkStripeReturn();
+initAuth();
 startPriceSimulation();
 </script>
 </body>
