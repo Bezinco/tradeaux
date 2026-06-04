@@ -540,6 +540,7 @@ footer a:hover { color: #4a9e5a; }
   .trust { grid-template-columns: 1fr; }
 }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -580,8 +581,8 @@ footer a:hover { color: #4a9e5a; }
       <a href="how-it-works.html">How It Works</a>
       <a href="auction-floor-buyer.html">Auctions</a>
       <a href="rules.html">Rules</a>
-      <a href="#" id="login-btn">Sign In</a>
-      <a href="#" id="signup-btn" class="signup-link">Create Account</a>
+      <a href="signin.html" id="login-btn">Sign In</a>
+      <a href="signin.html" id="signup-btn" class="signup-link">Create Account</a>
       <div class="user-info" id="user-info">
         <span id="user-email"></span>
         <a href="#" id="logout-btn">Logout</a>
@@ -650,7 +651,7 @@ footer a:hover { color: #4a9e5a; }
 </div>
 
 <script>
-// CORRECTED SUPABASE CREDENTIALS
+// SUPABASE CONFIGURATION
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
@@ -664,6 +665,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   const userInfo = document.getElementById('user-info');
   const userEmail = document.getElementById('user-email');
 
+  // Check session on load
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) showLoggedIn(session.user);
 
@@ -673,57 +675,36 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 
   function showLoggedIn(user) {
-    loginBtn.style.display = 'none';
+    if (loginBtn) loginBtn.style.display = 'none';
     if (signupBtn) signupBtn.style.display = 'none';
     userInfo.classList.add('show');
     userEmail.textContent = user.email;
   }
 
   function showLoggedOut() {
-    loginBtn.style.display = 'block';
+    if (loginBtn) loginBtn.style.display = 'block';
     if (signupBtn) signupBtn.style.display = 'block';
     userInfo.classList.remove('show');
   }
 
-  if (logoutBtn) logoutBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    await supabaseClient.auth.signOut();
-    window.location.href = '/';
-  });
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabaseClient.auth.signOut();
+      window.location.href = '/';
+    });
+  }
 
+  // Role cards now redirect to signin.html (email/password auth only)
   const roleButtons = document.querySelectorAll('.signin-role');
   roleButtons.forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', (e) => {
       e.preventDefault();
       const role = btn.getAttribute('data-role');
       localStorage.setItem('tradeaux_intended_role', role);
-      // FIXED: Redirect to dash-buyer.html instead of dashboard.html
-      await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + '/dash-buyer.html' }
-      });
+      window.location.href = 'signin.html';
     });
   });
-
-  if (loginBtn) {
-    loginBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + '/dash-buyer.html' }
-      });
-    });
-  }
-
-  if (signupBtn) {
-    signupBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + '/dash-buyer.html' }
-      });
-    });
-  }
 });
 </script>
 </body>
