@@ -827,7 +827,7 @@ function openBotConfig(bot) {
   document.getElementById('botConfigModal').style.display = 'flex';
 }
 
-function saveBotConfig() {
+async function saveBotConfig() {
   if (!currentEditingBot) return;
   const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
   currentEditingBot.name = document.getElementById('editBotName').value;
@@ -837,8 +837,9 @@ function saveBotConfig() {
   currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
   currentEditingBot.strategy = document.getElementById('editStrategy').value;
   currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
-  
-  saveToStorage();
+
+  await saveBotsToSupabase();
+  saveToStorage(); // fallback
   renderBots();
   renderTicker();
   showToast(`${currentEditingBot.name} configuration saved`);
@@ -884,27 +885,36 @@ async function submitBrief() {
   const destination = document.getElementById('briefDestination').value;
   const targetPrice = document.getElementById('briefTargetPrice').value;
   const notes = document.getElementById('briefNotes').value;
-  
+
   if (!variety) { showToast('Select a variety', true); return; }
   if (walletBalance < 25) {
     showToast('Insufficient funds. Minimum $25 required.', true);
     return;
   }
-  
+
   walletBalance -= 25;
+  await saveWalletToSupabase();
   updateWalletDisplay();
-  
+
   const newBrief = {
     id: 'brief_' + Date.now(),
+    user_id: currentUser.id,
     commodity, variety, quantity, grade, destination,
-    targetPrice: targetPrice ? parseFloat(targetPrice) : null,
+    target_price: targetPrice ? parseFloat(targetPrice) : null,
     notes, status: 'open',
-    createdAt: new Date().toISOString()
+    created_at: new Date().toISOString()
   };
+
+  const { error } = await supabaseClient.from('buyer_briefs').insert(newBrief);
+  if (error) {
+    console.error('Brief save error:', error);
+    showToast('Error saving brief', true);
+    return;
+  }
+
   filedBriefs.push(newBrief);
   showToast(`Brief filed: ${quantity}MT ${commodity} (${variety}) to ${destination}`);
   document.getElementById('fileBriefModal').style.display = 'none';
-  console.log('Brief filed:', newBrief);
 }
 
 // ============================================
@@ -919,19 +929,33 @@ let currentUser = null;
 
 // Auth state listener
 async function checkAuth() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session) {
+  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+  if (sessionError) {
+    console.error('Session error:', sessionError);
     window.location.href = 'signin.html';
     return;
   }
+
+  if (!session) {
+    console.log('No session found, redirecting to signin');
+    window.location.href = 'signin.html';
+    return;
+  }
+
   currentUser = session.user;
+  console.log('Authenticated as:', currentUser.email);
 
   // Load wallet from Supabase profiles table
-  const { data: profile } = await supabaseClient
+  const { data: profile, error: profileError } = await supabaseClient
     .from('profiles')
     .select('wallet_balance, full_name')
     .eq('id', currentUser.id)
     .single();
+
+  if (profileError) {
+    console.error('Profile load error:', profileError);
+  }
 
   if (profile && profile.wallet_balance !== null) {
     walletBalance = parseFloat(profile.wallet_balance);
@@ -968,23 +992,35 @@ async function depositFunds() {
   confirmBtn.disabled = true;
 
   try {
-    // Get current session for auth
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-      showToast('Please sign in first', true);
+    // Get the current session from Supabase
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+    if (sessionError) {
+      console.error('Failed to get session:', sessionError);
+      showToast('Authentication error. Please sign in again.', true);
       confirmBtn.textContent = originalText;
       confirmBtn.disabled = false;
       return;
     }
 
+    if (!session || !session.access_token) {
+      console.error('No session or access_token available');
+      showToast('Please sign in again', true);
+      confirmBtn.textContent = originalText;
+      confirmBtn.disabled = false;
+      return;
+    }
+
+    console.log('Calling Edge Function with auth token...');
+
     // Call Supabase Edge Function for Stripe checkout
     const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/stripe-checkout`,
+      'https://pfutaovwbygefummienf.supabase.co/functions/v1/stripe-checkout',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': 'Bearer ' + session.access_token
         },
         body: JSON.stringify({
           amount: amount,
@@ -994,7 +1030,10 @@ async function depositFunds() {
       }
     );
 
+    console.log('Edge Function response status:', response.status);
+
     const data = await response.json();
+    console.log('Edge Function response:', data);
 
     if (data.url) {
       window.location.href = data.url;
@@ -1016,7 +1055,6 @@ function checkStripeReturn() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('deposit') === 'success') {
     showToast('Deposit successful! Funds added to wallet.');
-    // Remove query param
     window.history.replaceState({}, document.title, window.location.pathname);
   } else if (urlParams.get('deposit') === 'cancelled') {
     showToast('Deposit cancelled.', true);
@@ -1031,7 +1069,134 @@ function saveToStorage() {
   localStorage.setItem('buyer_won', JSON.stringify(wonAuctions));
 }
 
+async function loadFromSupabase() {
+  if (!currentUser) return;
+
+  // Load wallet from profiles
+  const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('wallet_balance')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (profile && profile.wallet_balance !== null) {
+    walletBalance = parseFloat(profile.wallet_balance);
+  }
+
+  // Load bots from buyer_bots table
+  const { data: botData } = await supabaseClient
+    .from('buyer_bots')
+    .select('*')
+    .eq('user_id', currentUser.id);
+
+  if (botData && botData.length > 0) {
+    bots = botData.map(b => ({
+      id: b.id,
+      name: b.name,
+      commodity: b.commodity,
+      varieties: b.varieties || [],
+      emoji: b.emoji || '🤖',
+      status: b.status || 'active',
+      trades: b.trades || 0,
+      pnl: b.pnl || 0,
+      winRate: b.win_rate || 0,
+      strategy: b.strategy || 'Balanced',
+      maxPrice: parseFloat(b.max_price) || 0.60,
+      budget: parseInt(b.budget) || 500
+    }));
+  }
+
+  // Load active bids from buyer_bids
+  const { data: bidData } = await supabaseClient
+    .from('buyer_bids')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('status', 'active');
+
+  if (bidData && bidData.length > 0) {
+    activeBids = bidData.map(b => ({
+      id: b.id,
+      product: b.product,
+      variety: b.variety,
+      quantity: b.quantity,
+      price: parseFloat(b.price),
+      seller: b.seller,
+      sellerContact: b.seller_contact,
+      sellerEmail: b.seller_email,
+      sellerPhone: b.seller_phone,
+      timeLeft: b.time_left,
+      auctionId: b.auction_id
+    }));
+  }
+
+  // Load won auctions from buyer_won_auctions
+  const { data: wonData } = await supabaseClient
+    .from('buyer_won_auctions')
+    .select('*')
+    .eq('user_id', currentUser.id);
+
+  if (wonData && wonData.length > 0) {
+    wonAuctions = wonData.map(w => ({
+      id: w.id,
+      product: w.product,
+      variety: w.variety,
+      quantity: w.quantity,
+      price: parseFloat(w.price),
+      seller: w.seller,
+      sellerContact: w.seller_contact,
+      sellerEmail: w.seller_email,
+      sellerPhone: w.seller_phone,
+      status: w.status,
+      date: w.date
+    }));
+  }
+
+  updateWalletDisplay();
+  renderBots();
+  renderActiveBids();
+  renderWonAuctions();
+}
+
+async function saveBotsToSupabase() {
+  if (!currentUser) return;
+  for (const bot of bots) {
+    await supabaseClient.from('buyer_bots').upsert({
+      id: bot.id,
+      user_id: currentUser.id,
+      name: bot.name,
+      commodity: bot.commodity,
+      varieties: bot.varieties,
+      emoji: bot.emoji,
+      status: bot.status,
+      trades: bot.trades,
+      pnl: bot.pnl,
+      win_rate: bot.winRate,
+      strategy: bot.strategy,
+      max_price: bot.maxPrice,
+      budget: bot.budget,
+      updated_at: new Date().toISOString()
+    });
+  }
+}
+
+async function saveWalletToSupabase() {
+  if (!currentUser) return;
+  await supabaseClient
+    .from('profiles')
+    .update({ wallet_balance: walletBalance })
+    .eq('id', currentUser.id);
+}
+
+// Fallback localStorage for offline mode
+function saveToStorage() {
+  localStorage.setItem('buyer_bots', JSON.stringify(bots));
+  localStorage.setItem('buyer_wallet', walletBalance.toString());
+  localStorage.setItem('buyer_bids', JSON.stringify(activeBids));
+  localStorage.setItem('buyer_won', JSON.stringify(wonAuctions));
+}
+
 function loadSavedData() {
+  // Only use localStorage if Supabase fails or for offline
   const savedBots = localStorage.getItem('buyer_bots');
   const savedWallet = localStorage.getItem('buyer_wallet');
   const savedBids = localStorage.getItem('buyer_bids');
@@ -1115,15 +1280,28 @@ document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
   if (item) showWonDetails(item.getAttribute('data-won-id'));
 });
 
-// Initialize
-loadSavedData();
-checkStripeReturn();
-updateWalletDisplay();
-checkAuth();
-renderBots();
-renderActiveBids();
-renderWonAuctions();
-startPriceSimulation();
+// Initialize - FIXED ORDER
+async function initialize() {
+  // First check auth
+  await checkAuth();
+
+  // Then load from Supabase if logged in, otherwise fallback to localStorage
+  if (currentUser) {
+    await loadFromSupabase();
+  } else {
+    loadSavedData();
+  }
+
+  checkStripeReturn();
+  updateWalletDisplay();
+  renderBots();
+  renderActiveBids();
+  renderWonAuctions();
+  startPriceSimulation();
+}
+
+// Call initialize
+initialize();
 </script>
 </body>
 </html>
