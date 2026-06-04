@@ -576,17 +576,17 @@ footer a:hover { color: #4a9e5a; }
 
 <div class="container">
   <header class="header">
-    <<nav class="nav">
-  <a href="how-it-works.html">How It Works</a>
-  <a href="auction-floor-buyer.html">Auctions</a>
-  <a href="rules.html">Rules</a>
-  <a href="#" id="login-btn">Sign In</a>
-  <a href="#" id="signup-btn" class="signup-link">Create Account</a>
-  <div class="user-info" id="user-info">
-    <span id="user-email"></span>
-    <a href="#" id="logout-btn">Logout</a>
-  </div>
-</nav>
+    <nav class="nav">
+      <a href="how-it-works.html">How It Works</a>
+      <a href="auction-floor-buyer.html">Auctions</a>
+      <a href="rules.html">Rules</a>
+      <a href="#" id="login-btn">Sign In</a>
+      <a href="#" id="signup-btn" class="signup-link">Create Account</a>
+      <div class="user-info" id="user-info">
+        <span id="user-email"></span>
+        <a href="#" id="logout-btn">Logout</a>
+      </div>
+    </nav>
   </header>
 
   <div class="hero">
@@ -650,8 +650,9 @@ footer a:hover { color: #4a9e5a; }
 </div>
 
 <script>
+// CORRECTED SUPABASE CREDENTIALS
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -696,9 +697,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       e.preventDefault();
       const role = btn.getAttribute('data-role');
       localStorage.setItem('tradeaux_intended_role', role);
+      // FIXED: Redirect to dash-buyer.html instead of dashboard.html
       await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/dashboard.html' }
+        options: { redirectTo: window.location.origin + '/dash-buyer.html' }
       });
     });
   });
@@ -708,7 +710,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       e.preventDefault();
       await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/dashboard.html' }
+        options: { redirectTo: window.location.origin + '/dash-buyer.html' }
       });
     });
   }
@@ -718,7 +720,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       e.preventDefault();
       await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/dashboard.html' }
+        options: { redirectTo: window.location.origin + '/dash-buyer.html' }
       });
     });
   }
