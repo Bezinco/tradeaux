@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Sign In — TradeAux</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -38,6 +41,7 @@ body {
   text-align: center;
   color: #9ca3af;
   margin-bottom: 40px;
+  font-size: 14px;
 }
 .auth-card {
   background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
@@ -54,9 +58,15 @@ input, select {
   color: white;
   font-family: inherit;
   margin-bottom: 16px;
+  font-size: 14px;
 }
 select {
   cursor: pointer;
+  appearance: none;
+}
+select option {
+  background: #0a1228;
+  color: #e5e7eb;
 }
 button {
   width: 100%;
@@ -68,6 +78,18 @@ button {
   font-weight: 800;
   cursor: pointer;
   margin-top: 8px;
+  font-size: 14px;
+  color: #000;
+  transition: all 0.3s ease;
+}
+button:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(0,206,209,0.4);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 .error {
   color: #ff6b6b;
@@ -76,211 +98,429 @@ button {
   border-radius: 8px;
   margin-bottom: 16px;
   display: none;
+  font-size: 13px;
+}
+.success {
+  color: #7CFC00;
+  background: rgba(124,252,0,0.1);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+  font-size: 13px;
 }
 .toggle {
   text-align: center;
   margin-top: 20px;
   color: #9ca3af;
+  font-size: 13px;
 }
 .toggle a {
   color: #00ced1;
   cursor: pointer;
+  text-decoration: underline;
 }
+.role-label {
+  font-size: 11px;
+  color: #FFD966;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  display: block;
+}
+.role-picker {
+  margin-bottom: 20px;
+}
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid rgba(0,206,209,0.15);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.role-option:hover {
+  border-color: #00ced1;
+  background: rgba(0,206,209,0.08);
+  transform: translateX(4px);
+}
+.role-option.selected {
+  border-color: #7CFC00;
+  background: rgba(124,252,0,0.1);
+  box-shadow: 0 0 30px rgba(124,252,0,0.08);
+}
+.role-option .emoji {
+  font-size: 28px;
+}
+.role-option .text {
+  font-size: 15px;
+  font-weight: 600;
+}
+.role-option .file {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-left: auto;
+  font-family: monospace;
+}
+.debug-info {
+  font-size: 10px;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 12px;
+  font-family: monospace;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 12px;
+}
+.hidden { display: none !important; }
 </style>
-<base target="_blank">
 </head>
 <body>
 <div class="container">
   <div class="gem-text">TRADEAUX</div>
-  <div class="subtitle" id="subtitle">Welcome back</div>
+  <div class="subtitle" id="subtitle">⚠️ SELECT YOUR ROLE TO CONTINUE</div>
+
   <div class="auth-card">
     <div class="error" id="errorMsg"></div>
-    
-    <div id="signinView">
-      <div style="text-align:center; margin-bottom:16px; padding:8px; background:rgba(0,206,209,0.1); border-radius:8px; border:1px solid rgba(0,206,209,0.2);">
-        <span style="font-size:11px; color:#9ca3af;">Sign in to your TradeAux account</span>
+    <div class="success" id="successMsg"></div>
+
+    <!-- STEP 1: ROLE SELECTOR -->
+    <div id="step1">
+      <label class="role-label">🎯 CHOOSE YOUR DASHBOARD</label>
+      <div class="role-picker">
+        <div class="role-option" data-role="buyer" onclick="pickRole(this)">
+          <span class="emoji">🛒</span>
+          <span class="text">Buyer</span>
+          <span class="file">→ buyer-dash.html</span>
+        </div>
+        <div class="role-option" data-role="seller" onclick="pickRole(this)">
+          <span class="emoji">🏭</span>
+          <span class="text">Seller</span>
+          <span class="file">→ auction-floor-seller.html</span>
+        </div>
+        <div class="role-option" data-role="carrier" onclick="pickRole(this)">
+          <span class="emoji">🚛</span>
+          <span class="text">Carrier</span>
+          <span class="file">→ freight-dash.html</span>
+        </div>
       </div>
-      <input type="email" id="email" placeholder="Email">
-      <input type="password" id="password" placeholder="Password">
-      <button id="signinBtn">Sign In</button>
+      <button id="continueBtn" disabled>🔒 SELECT A ROLE FIRST</button>
+    </div>
+
+    <!-- STEP 2: SIGN IN -->
+    <div id="step2" class="hidden">
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="font-size:13px; color:#9ca3af;">Signing in as</div>
+        <div style="font-size:20px; font-weight:700; color:#7CFC00;" id="roleDisplay">BUYER</div>
+        <a href="#" onclick="goBack(); return false;" style="font-size:12px; color:#FFD966; text-decoration:none;">← Change role</a>
+      </div>
+      <input type="email" id="email" placeholder="Email address" autocomplete="email">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button id="signinBtn">SIGN IN</button>
       <div style="text-align:center; margin-top:12px;">
-        <a href="#" id="forgotPasswordLink" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a>
+        <a href="#" id="forgotLink" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a>
       </div>
       <div class="toggle">No account? <a id="showSignup">Create one</a></div>
     </div>
 
-    <div id="signupView" style="display:none">
-      <div style="text-align:center; margin-bottom:16px; padding:8px; background:rgba(0,206,209,0.1); border-radius:8px; border:1px solid rgba(0,206,209,0.2);">
-        <span style="font-size:11px; color:#9ca3af;">Choose your role — you'll be redirected to your dashboard</span>
+    <!-- STEP 3: SIGN UP -->
+    <div id="step3" class="hidden">
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="font-size:13px; color:#9ca3af;">Creating account as</div>
+        <div style="font-size:20px; font-weight:700; color:#7CFC00;" id="signupRoleDisplay">BUYER</div>
+        <a href="#" onclick="goBack(); return false;" style="font-size:12px; color:#FFD966; text-decoration:none;">← Change role</a>
       </div>
-      <input type="email" id="signupEmail" placeholder="Email">
-      <input type="password" id="signupPassword" placeholder="Password (min 6 chars)">
-      <input type="text" id="signupName" placeholder="Full Name">
-      <select id="signupRole">
-        <option value="buyer">🛒 Buyer</option>
-        <option value="seller">🏭 Seller / Co-op</option>
-        <option value="carrier">🚛 Carrier / Freight</option>
-        <option value="insurer">🛡️ Insurer</option>
-        <option value="banker">🏦 Banker</option>
-        <option value="admin">⚙️ Admin</option>
-      </select>
-      <button id="signupBtn">Create Account</button>
+      <input type="email" id="signupEmail" placeholder="Email address" autocomplete="email">
+      <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <input type="text" id="signupName" placeholder="Company / Organization Name" style="border-color: rgba(124,252,0,0.3);">
+      <button id="signupBtn">CREATE ACCOUNT</button>
       <div class="toggle">Already have an account? <a id="showSignin">Sign in</a></div>
     </div>
+
+    <div class="debug-info" id="debugInfo">v4.0 — User chooses role, company name saved</div>
   </div>
 </div>
 
 <script>
+// =====================================================
+// TRADEAUX SIGNIN v4.0
+// NO DEFAULTS. USER CHOOSES ROLE. COMPANY NAME SAVED.
+// =====================================================
+
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const roleRedirects = {
-  'admin': 'dashboard-admin.html',
-  'seller': 'dashboard-seller.html',
-  'buyer': 'dashboard-buyer.html',
-  'carrier': 'dashboard-carrier.html',
-  'insurer': 'dashboard-insurer.html',
-  'banker': 'auction-floor-banker.html'
+const DASHBOARDS = {
+  'buyer': 'buyer-dash.html',
+  'seller': 'auction-floor-seller.html',
+  'carrier': 'freight-dash.html'
 };
+
+let selectedRole = null;
+
+// =====================================================
+// ROLE PICKER
+// =====================================================
+
+function pickRole(el) {
+  document.querySelectorAll('.role-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  selectedRole = el.dataset.role;
+  
+  const btn = document.getElementById('continueBtn');
+  btn.disabled = false;
+  btn.textContent = '✅ Continue →';
+  
+  document.getElementById('debugInfo').textContent = 'Selected: ' + selectedRole;
+}
+
+function continueToSignIn() {
+  if (!selectedRole) {
+    showError('⚠️ You MUST select a role first!');
+    return;
+  }
+  
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.remove('hidden');
+  document.getElementById('roleDisplay').textContent = selectedRole.toUpperCase();
+  document.getElementById('subtitle').textContent = 'Sign in as ' + selectedRole.toUpperCase();
+}
+
+function goBack() {
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  document.getElementById('subtitle').textContent = '⚠️ SELECT YOUR ROLE TO CONTINUE';
+}
+
+// =====================================================
+// UI HELPERS
+// =====================================================
 
 function showError(msg) {
   const el = document.getElementById('errorMsg');
   el.textContent = msg;
   el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 4000);
+  document.getElementById('successMsg').style.display = 'none';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('errorMsg').style.display = 'none';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
 function redirectToDashboard(role) {
-  const url = roleRedirects[role] || 'dashboard-buyer.html';
-  window.location.href = url;
+  const url = DASHBOARDS[role];
+  if (!url) {
+    showError('Unknown role!');
+    return;
+  }
+  document.getElementById('debugInfo').textContent = '🔄 Redirecting to: ' + url;
+  setTimeout(() => {
+    window.location.href = url;
+  }, 300);
 }
 
+// =====================================================
+// EVENT LISTENERS
+// =====================================================
+
 document.addEventListener('DOMContentLoaded', function() {
-  // NO AUTO-REDIRECT - wait for user action
-
-  // Toggle between signin and signup
-  document.getElementById('showSignup')?.addEventListener('click', () => {
-    document.getElementById('signinView').style.display = 'none';
-    document.getElementById('signupView').style.display = 'block';
-    document.getElementById('subtitle').textContent = 'Create your account';
+  console.log('🚀 TradeAux v4.0 loaded');
+  console.log('⚠️ NO DEFAULT ROLE - user MUST choose');
+  
+  // Continue button
+  document.getElementById('continueBtn').addEventListener('click', continueToSignIn);
+  
+  // Toggle signup
+  document.getElementById('showSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!selectedRole) {
+      showError('⚠️ Select a role first!');
+      return;
+    }
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.remove('hidden');
+    document.getElementById('signupRoleDisplay').textContent = selectedRole.toUpperCase();
+    document.getElementById('subtitle').textContent = 'Create ' + selectedRole.toUpperCase() + ' account';
   });
-
-  document.getElementById('showSignin')?.addEventListener('click', () => {
-    document.getElementById('signupView').style.display = 'none';
-    document.getElementById('signinView').style.display = 'block';
-    document.getElementById('subtitle').textContent = 'Welcome back';
+  
+  // Toggle signin
+  document.getElementById('showSignin').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('subtitle').textContent = 'Sign in as ' + selectedRole.toUpperCase();
   });
-
-  // Sign In
-  document.getElementById('signinBtn')?.addEventListener('click', async () => {
+  
+  // =====================================================
+  // SIGN IN
+  // =====================================================
+  
+  document.getElementById('signinBtn').addEventListener('click', async () => {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-
+    
     if (!email || !password) {
       showError('Please enter email and password');
       return;
     }
-
+    
+    if (!selectedRole) {
+      showError('⚠️ No role selected!');
+      return;
+    }
+    
     try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password
       });
-
+      
       if (error) throw error;
-
-      const { data: profile, error: profileError } = await supabaseClient
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      redirectToDashboard(profile?.role || 'buyer');
+      
+      console.log('✅ Signed in as:', selectedRole);
+      redirectToDashboard(selectedRole);
+      
     } catch (error) {
       showError(error.message);
     }
   });
-
-  // Sign Up
-  document.getElementById('signupBtn')?.addEventListener('click', async () => {
+  
+  // =====================================================
+  // SIGN UP
+  // =====================================================
+  
+  document.getElementById('signupBtn').addEventListener('click', async () => {
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
-    const name = document.getElementById('signupName').value.trim();
-    const role = document.getElementById('signupRole').value;
-
+    const companyName = document.getElementById('signupName').value.trim();
+    
     if (!email || !password) {
       showError('Please enter email and password');
       return;
     }
-
+    
     if (password.length < 6) {
       showError('Password must be at least 6 characters');
       return;
     }
-
+    
+    if (!companyName) {
+      showError('⚠️ Please enter your Company / Organization name');
+      return;
+    }
+    
+    if (!selectedRole) {
+      showError('⚠️ No role selected!');
+      return;
+    }
+    
     try {
-      const { data, error } = await supabaseClient.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
           data: {
-            full_name: name || email.split('@')[0],
-            role: role
+            full_name: companyName,
+            role: selectedRole,
+            company: companyName
           }
         }
       });
-
+      
       if (error) throw error;
-
+      
+      // Create profile with company name
       if (data.user) {
-        await supabaseClient
+        const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: data.user.id,
             email: email,
-            full_name: name || email.split('@')[0],
-            role: role,
+            full_name: companyName,
+            company_name: companyName,
+            role: selectedRole,
             wallet_balance: 0,
             created_at: new Date().toISOString()
           });
+        
+        if (profileError) {
+          console.warn('Profile creation warning:', profileError);
+        }
       }
-
-      // Sign in after signup
-      const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+      
+      // Check email confirmation
+      if (data.user && !data.user.confirmed_at) {
+        showSuccess('✅ Account created! Check your email to confirm.');
+        console.log('📧 Email confirmation required');
+        return;
+      }
+      
+      // Auto sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email,
         password: password
       });
-
+      
       if (signInError) throw signInError;
-
-      redirectToDashboard(role);
+      
+      console.log('✅ Account created and signed in as:', selectedRole);
+      redirectToDashboard(selectedRole);
+      
     } catch (error) {
-      showError(error.message);
+      if (error.message.includes('email not confirmed')) {
+        showSuccess('✅ Account created! Please check your email to confirm.');
+      } else {
+        showError(error.message);
+      }
     }
   });
-
-  // Forgot password
-  document.getElementById('forgotPasswordLink')?.addEventListener('click', async (e) => {
+  
+  // =====================================================
+  // FORGOT PASSWORD
+  // =====================================================
+  
+  document.getElementById('forgotLink').addEventListener('click', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
+    
     if (!email) {
-      showError('Please enter your email first');
+      showError('Enter your email first');
       return;
     }
+    
     try {
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/signin.html'
       });
+      
       if (error) throw error;
-      showError('Password reset email sent! Check your inbox.');
+      showSuccess('Password reset email sent!');
     } catch (err) {
       showError(err.message);
     }
   });
+  
+  // Enter key support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !document.getElementById('step1').classList.contains('hidden')) {
+      continueToSignIn();
+    }
+  });
+  
+  console.log('✅ Ready - user must select role and enter company name');
 });
 </script>
 </body>
