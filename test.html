@@ -1,1322 +1,692 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>TradeAux • Buyer Dashboard | Bot-Powered Trading</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<title>TradeAux — Global Surplus Exchange</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      background: #020617;
-      font-family: 'Inter', sans-serif;
-      color: #e5e7eb;
-      min-height: 100vh;
-    }
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Orbitron', sans-serif;
+  overflow-x: hidden;
+}
 
-    .bg-waves {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
 
-    .wave-bg {
-      position: absolute;
-      width: 200%;
-      height: 200%;
-      filter: blur(100px);
-      opacity: 0.15;
-      animation: waveBgDrift 24s ease-in-out infinite;
-    }
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+  border-radius: 50%;
+}
 
-    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
-    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
-    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+.wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(74, 158, 90, 0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+.wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(58, 110, 165, 0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
 
-    @keyframes waveBgDrift {
-      0% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(40px,-30px) scale(1.05); }
-      100% { transform: translate(-30px,20px) scale(1); }
-    }
+@keyframes waveBgDrift {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+  50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+  100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+}
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px 24px 60px;
-      position: relative;
-      z-index: 2;
-    }
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+  position: relative;
+  z-index: 2;
+}
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0 30px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
+/* ===== TRADEAUX 3D LOGO ===== */
+.gem-logo-corner {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  filter: drop-shadow(0 30px 50px rgba(124,252,0,0.5));
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: scale(0.35);
+  transform-origin: top left;
+  pointer-events: none;
+}
 
-    .logo {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #0066ff, #00cc44, #d92b2b);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 2px;
-    }
+.gem-text {
+  font-size: 160px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: flex;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-family: 'Orbitron', sans-serif;
+  transform-style: preserve-3d;
+  gap: 2px;
+}
 
-    .nav {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+.gem-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: letterFloat 6s ease-in-out infinite;
+  filter: brightness(1.2);
+  font-size: 160px;
+  font-weight: 900;
+}
 
-    .nav a {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 8px 16px;
-      border: 1px solid rgba(0, 206, 209, 0.3);
-      border-radius: 8px;
-      background: rgba(15, 32, 64, 0.7);
-      backdrop-filter: blur(4px);
-      color: #e5e7eb;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
+.gem-letter:nth-child(1) { animation-delay: 0s; }
+.gem-letter:nth-child(2) { animation-delay: 0.2s; }
+.gem-letter:nth-child(3) { animation-delay: 0.4s; }
+.gem-letter:nth-child(4) { animation-delay: 0.6s; }
+.gem-letter:nth-child(5) { animation-delay: 0.8s; }
+.gem-letter:nth-child(6) { animation-delay: 1.0s; }
+.gem-letter:nth-child(7) { animation-delay: 1.2s; }
+.gem-letter:nth-child(8) { animation-delay: 1.4s; }
 
-    .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+}
 
-    .wallet-section {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: rgba(0, 206, 209, 0.1);
-      padding: 8px 20px;
-      border-radius: 40px;
-      border: 1px solid rgba(0, 206, 209, 0.3);
-    }
+.gem-letter[data-letter="T"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gem-letter[data-letter="R"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gem-letter[data-letter="A"] {
+  background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gem-letter[data-letter="D"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gem-letter[data-letter="E"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gem-letter[data-letter="U"] {
+  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gem-letter[data-letter="X"] {
+  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
 
-    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
-    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
-    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
-    .deposit-btn {
-      background: linear-gradient(135deg, #00ced1, #00ff7f);
-      border: none;
-      padding: 6px 16px;
-      border-radius: 30px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+.gem-letter .edge-top {
+  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-right {
+  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+  background: linear-gradient(270deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-bottom {
+  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(0deg, rgba(0,50,0,0.3) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
+.gem-letter .edge-left {
+  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+  background: linear-gradient(90deg, rgba(0,50,0,0.2) 0%, transparent 100%);
+  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+}
 
-    .top-trader {
-      text-align: center;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 12px 24px;
-      border-radius: 40px;
-      display: inline-block;
-      width: auto;
-      margin: 20px auto;
-      border: 1px solid rgba(124, 252, 0, 0.3);
-      backdrop-filter: blur(4px);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-    }
-    .banner-container { text-align: center; }
+.light-source {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
+  animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+}
 
-    .ticker-section {
-      margin: 20px 0 30px;
-      text-align: center;
-    }
-    .ticker-header {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
-      color: #9ca3af;
-      letter-spacing: 2px;
-      margin-bottom: 12px;
-    }
-    .live-ticker {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .ticker-item {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(0, 206, 209, 0.2);
-      border-radius: 40px;
-      padding: 8px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 5px rgba(0,206,209,0.2); }
-      50% { box-shadow: 0 0 20px rgba(0,206,209,0.4); }
-    }
-    .ticker-commodity { font-family: 'Orbitron', sans-serif; font-weight: 600; }
-    .ticker-price { font-family: 'Orbitron', sans-serif; font-weight: 800; color: #00ced1; }
-    .ticker-change.up { color: #7CFC00; }
-    .ticker-change.down { color: #ff3b3b; }
+@keyframes rotateLight {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
 
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      margin: 20px 0;
-    }
-    .dashboard-card {
-      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
-      border: 1px solid rgba(0, 206, 209, 0.3);
-      border-radius: 20px;
-      padding: 20px;
-    }
-    .card-header {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: #00ced1;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(0,206,209,0.2);
-      padding-bottom: 10px;
-    }
-    .badge-count {
-      background: rgba(0,206,209,0.2);
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-    }
-    .clickable-item {
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .clickable-item:hover {
-      background: rgba(0,206,209,0.1);
-      transform: translateX(4px);
-    }
-    .item-title {
-      font-weight: 700;
-      font-size: 14px;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .item-details {
-      font-size: 11px;
-      color: #9ca3af;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .status-badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: rgba(124,252,0,0.2);
-      color: #7CFC00;
-    }
-    .status-badge.warning { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-    .status-badge.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+.sparkle {
+  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
+  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+}
 
-    .bots-section { margin-top: 30px; }
-    .bots-header {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: #00ced1;
-    }
-    .bots-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-    }
-    .bot-card {
-      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
-      border: 1px solid rgba(0, 206, 209, 0.3);
-      border-radius: 20px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .bot-card:hover { transform: translateY(-4px); border-color: #00ced1; }
-    .bot-emoji { font-size: 32px; margin-bottom: 8px; }
-    .bot-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-    .bot-status { font-size: 10px; color: #7CFC00; margin-bottom: 8px; }
-    .bot-target { font-size: 10px; color: #FFD966; margin-bottom: 8px; }
-    .bot-stats { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; margin-top: 8px; }
-    .add-bot-card {
-      background: rgba(15, 32, 64, 0.4);
-      border: 2px dashed rgba(0, 206, 209, 0.3);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 150px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .add-bot-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
-    .add-bot-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
-    .add-bot-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; }
-    .action-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      background: linear-gradient(135deg, #00ced1, #00ff7f);
-      border: none;
-      border-radius: 40px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      color: #000;
-    }
+@keyframes sparkleFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  10% { opacity: 1; transform: scale(1.2); }
+  20% { opacity: 0.6; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1.1); }
+  40% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
 
-    .footer {
-      text-align: center;
-      padding: 40px 20px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      margin-top: 40px;
-      font-size: 12px;
-      color: #9ca3af;
-    }
+.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(12px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: linear-gradient(145deg, #0a1228, #020617);
-      border: 2px solid #00ced1;
-      border-radius: 24px;
-      max-width: 550px;
-      width: 90%;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 28px;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      font-size: 28px;
-      cursor: pointer;
-      color: #9ca3af;
-    }
-    .modal-close:hover { color: #00ced1; }
-    .modal-header {
-      border-bottom: 1px solid rgba(0,206,209,0.3);
-      padding-bottom: 16px;
-      margin-bottom: 20px;
-    }
-    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
-    .modal-field { margin-bottom: 20px; }
-    .modal-field label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-    .modal-field input, .modal-field select, .modal-field textarea {
-      width: 100%;
-      padding: 12px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(0,206,209,0.3);
-      border-radius: 8px;
-      color: white;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-    }
-    .tooltip { font-size: 11px; color: #7CFC00; margin-top: 4px; display: block; }
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0,0,0,0.3);
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(0,206,209,0.2);
-      cursor: pointer;
-    }
-    .checkbox-item:hover { border-color: #00ced1; }
-    .checkbox-item.selected { background: rgba(0,206,209,0.2); border-color: #00ced1; }
-    .slider-row { display: flex; align-items: center; gap: 16px; }
-    .slider-row input { flex: 1; }
-    .slider-value { font-family: 'Orbitron', sans-serif; color: #00ced1; min-width: 60px; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
-    .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
-    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; color: #000; }
+.depth-shadow {
+  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+  background: radial-gradient(ellipse at center, rgba(124,252,0,0.3) 0%, transparent 80%);
+  filter: blur(20px); z-index: -1;
+}
 
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: rgba(15,32,64,0.98);
-      border: 1px solid #00ced1;
-      padding: 12px 24px;
-      border-radius: 40px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-      transition: 0.3s;
-      opacity: 0;
-      z-index: 2000;
-    }
-    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 20px 0 60px;
+}
 
-    @media (max-width: 1000px) {
-      .dashboard-grid { grid-template-columns: 1fr; }
-      .bots-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .bots-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-      <base target="_blank">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<base target="_blank">
+.nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav a {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 2px solid #4a9e5a;
+  border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px);
+  color: #e5e7eb;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.nav a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  border-color: #fff;
+}
+
+.nav .signup-link {
+  background: rgba(124,252,0,0.15);
+  border-color: #7CFC00;
+  color: #7CFC00;
+}
+
+.nav .signup-link:hover {
+  background: #7CFC00;
+  color: #020617;
+  border-color: #7CFC00;
+}
+
+.user-info { display: none; align-items: center; gap: 10px; color: #e5e7eb; }
+.user-info.show { display: flex; }
+
+.hero {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7CFC00, #FFD966, #3a6ea5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #9ca3af;
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ===== MARKET CARDS ===== */
+.market-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin: 40px 0 60px;
+}
+
+.market-card {
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.85) 0%, rgba(2, 6, 23, 0.98) 100%);
+  backdrop-filter: blur(8px);
+  transition: all 0.4s ease;
+  border-width: 4px;
+  border-style: solid;
+  position: relative;
+}
+
+.market-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+}
+
+.card-active { border-color: #4a9e5a; }
+.card-soon { border-color: #FFD966; }
+.card-soon-2 { border-color: #9e4a4a; }
+
+.card-wave {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0; pointer-events: none;
+  border-radius: 24px;
+  opacity: 0.4;
+  background-size: 200% 200%;
+  animation: waveFlow 6s linear infinite;
+}
+
+.card-active .card-wave {
+  background: repeating-linear-gradient(45deg, rgba(74, 158, 90, 0.2) 0px, rgba(74, 158, 90, 0.2) 40px, rgba(0, 255, 0, 0.15) 40px, rgba(0, 255, 0, 0.15) 80px);
+}
+.card-soon .card-wave {
+  background: repeating-linear-gradient(45deg, rgba(255, 217, 102, 0.2) 0px, rgba(255, 217, 102, 0.2) 40px, rgba(255, 200, 0, 0.15) 40px, rgba(255, 200, 0, 0.15) 80px);
+}
+.card-soon-2 .card-wave {
+  background: repeating-linear-gradient(45deg, rgba(158, 74, 74, 0.2) 0px, rgba(158, 74, 74, 0.2) 40px, rgba(255, 0, 0, 0.15) 40px, rgba(255, 0, 0, 0.15) 80px);
+}
+
+@keyframes waveFlow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+.market-image-area {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.market-image-area img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.market-card:hover .market-image-area img {
+  transform: scale(1.05);
+}
+
+.market-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  background: rgba(0,0,0,0.3);
+}
+
+.market-info {
+  padding: 20px 24px 28px;
+  position: relative;
+  z-index: 1;
+  background: rgba(2, 6, 23, 0.6);
+  text-align: center;
+}
+
+.market-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.card-active .market-title { color: #4a9e5a; }
+.card-soon .market-title { color: #FFD966; }
+.card-soon-2 .market-title { color: #9e4a4a; }
+
+.market-products {
+  font-size: 12px;
+  color: #b0b8d0;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  min-height: 60px;
+}
+
+.market-products ul {
+  list-style: none;
+  padding: 0;
+}
+
+.market-products li {
+  padding: 2px 0;
+}
+
+.status-badge {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 40px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.status-active {
+  background: rgba(74, 158, 90, 0.2);
+  border: 1px solid #4a9e5a;
+  color: #4a9e5a;
+}
+
+.status-soon {
+  background: rgba(255, 217, 102, 0.1);
+  border: 1px solid #FFD966;
+  color: #FFD966;
+}
+
+.status-soon-2 {
+  background: rgba(158, 74, 74, 0.2);
+  border: 1px solid #9e4a4a;
+  color: #9e4a4a;
+}
+
+.how-it-works {
+  margin: 60px 0;
+  text-align: center;
+}
+.how-it-works h2 {
+  font-size: 28px;
+  margin-bottom: 40px;
+  color: white;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.step {
+  background: rgba(15, 32, 64, 0.6);
+  border-radius: 16px;
+  padding: 24px 16px;
+  border: 1px solid rgba(124,252,0,0.2);
+}
+.step-number {
+  width: 40px;
+  height: 40px;
+  background: #7CFC00;
+  color: #020617;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  margin: 0 auto 16px;
+}
+.step h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #e5e7eb;
+}
+.step p {
+  font-size: 12px;
+  color: #b0b8d0;
+  line-height: 1.4;
+}
+
+.trust {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.trust-item {
+  padding: 20px;
+  border: 1px solid rgba(74, 158, 90, 0.3);
+  border-radius: 12px;
+  background: rgba(15, 32, 64, 0.5);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+footer {
+  margin-top: 80px;
+  padding: 30px 0 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+footer a {
+  color: #9ca3af;
+  text-decoration: none;
+}
+footer a:hover { color: #4a9e5a; }
+
+@media (max-width: 900px) {
+  .market-cards, .steps { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .trust { grid-template-columns: repeat(2, 1fr); }
+  .gem-logo-corner { transform: scale(0.25); }
+  .hero h1 { font-size: 1.8rem; }
+}
+@media (max-width: 600px) {
+  .trust { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
 
 <div class="bg-waves">
-  <div class="wave-bg wave-1"></div>
-  <div class="wave-bg wave-2"></div>
-  <div class="wave-bg wave-3"></div>
+  <div class="wave-bg wave-emerald-bg"></div>
+  <div class="wave-bg wave-sapphire-bg"></div>
+  <div class="wave-bg wave-ruby-bg"></div>
+</div>
+
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
 </div>
 
 <div class="container">
   <header class="header">
-    <div class="logo">⚡ TRADEAUX</div>
-    <div style="display: flex; align-items: center; gap: 16px;">
-      <div class="wallet-section">
-        <div class="wallet-balance">
-          <span class="wallet-label">WALLET</span>
-          <span class="wallet-amount" id="walletAmount">$0.00</span>
-        </div>
-        <button class="deposit-btn" id="depositBtn">+ Deposit</button>
-        <div class="wallet-status">
-          <span class="status-dot"></span>
-          <span id="bidCount">0 bids available</span>
-        </div>
+    <nav class="nav">
+      <a href="how-it-works.html">How It Works</a>
+      <a href="auction-floor-buyer.html">Auctions</a>
+      <a href="rules.html">Rules</a>
+      <!-- FIXED: NO role parameter - user chooses -->
+      <a href="signin.html" id="login-btn">Sign In</a>
+      <a href="signin.html" id="signup-btn" class="signup-link">Create Account</a>
+      <div class="user-info" id="user-info">
+        <span id="user-email"></span>
+        <a href="#" id="logout-btn">Logout</a>
       </div>
-      <nav class="nav">
-        <a href="#">Arena</a>
-        <a href="#">Market Intel</a>
-        <a href="#" id="authBtn">Sign Out</a>
-      </nav>
-    </div>
+    </nav>
   </header>
 
-  <div class="banner-container">
-    <div class="top-trader" id="topTraderBanner">🏆 TOP BUYER: Coconut Imports Ltd (+$24,500) | 2nd: Pacific Foods (+$18,200) | 3rd: Global Commodities (+$12,800)</div>
+  <div class="hero">
+    <h1>Trade global surplus.<br>One platform. One fee. Total transparency.</h1>
+    <p>Post a brief. Get bids from the world's best sellers and carriers. Pick the winner. Move product.</p>
   </div>
 
-  <div class="ticker-section">
-    <div class="ticker-header">🔴 LIVE MARKET TICKER — YOUR BOT COMMODITIES</div>
-    <div class="live-ticker" id="liveTicker"></div>
-  </div>
+  <!-- ===== MARKET CARDS ===== -->
+  <div class="market-cards">
 
-  <div class="dashboard-grid">
-    <div class="dashboard-card">
-      <div class="card-header">🟢 ACTIVE BIDS <span class="badge-count" id="activeBidsCount">0</span></div>
-      <div id="activeBidsList">
-        <div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>
+    <!-- COCONUTS — ACTIVE -->
+    <div class="market-card card-active">
+      <div class="card-wave"></div>
+      <div class="market-image-area">
+        <div class="market-image-placeholder">🥥</div>
+      </div>
+      <div class="market-info">
+        <div class="market-title">COCONUTS</div>
+        <div class="market-products">
+          <ul>
+            <li>Dessicated</li>
+            <li>Coconut Water</li>
+            <li>Coconut Milk</li>
+            <li>Coconut Cream</li>
+            <li>Coconut Flour</li>
+          </ul>
+        </div>
+        <div class="status-badge status-active">🟢 MARKET ACTIVE</div>
       </div>
     </div>
-    <div class="dashboard-card">
-      <div class="card-header">🏆 WON AUCTIONS <span class="badge-count" id="wonAuctionsCount">0</span></div>
-      <div id="wonAuctionsList">
-        <div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>
+
+    <!-- PEANUTS — COMING SOON -->
+    <div class="market-card card-soon">
+      <div class="card-wave"></div>
+      <div class="market-image-area">
+        <div class="market-image-placeholder">🥜</div>
       </div>
+      <div class="market-info">
+        <div class="market-title">PEANUTS</div>
+        <div class="market-products">
+          <ul>
+            <li>Coming Soon</li>
+          </ul>
+        </div>
+        <div class="status-badge status-soon">🟡 COMING SOON</div>
+      </div>
+    </div>
+
+    <!-- CASHEWS — COMING SOON -->
+    <div class="market-card card-soon-2">
+      <div class="card-wave"></div>
+      <div class="market-image-area">
+        <div class="market-image-placeholder">🌰</div>
+      </div>
+      <div class="market-info">
+        <div class="market-title">CASHEWS</div>
+        <div class="market-products">
+          <ul>
+            <li>Coming Soon</li>
+          </ul>
+        </div>
+        <div class="status-badge status-soon-2">🔴 COMING SOON</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step"><div class="step-number">1</div><h3>Post a Brief</h3><p>Tell the market what you need. Specify product, quantity, FOB port, and delivery.</p></div>
+      <div class="step"><div class="step-number">2</div><h3>Get Bids</h3><p>Sellers and carriers from around the world compete for your contract.</p></div>
+      <div class="step"><div class="step-number">3</div><h3>Pick the Winner</h3><p>Review the 5 best offers. Choose the one that works for you.</p></div>
+      <div class="step"><div class="step-number">4</div><h3>Product Moves</h3><p>Seller ships to port. Carrier delivers. Everyone gets paid.</p></div>
     </div>
   </div>
 
-  <div class="bots-section">
-    <div class="bots-header">🤖 YOUR BOT FLEET</div>
-    <div class="bots-grid" id="botsGrid"></div>
+  <div class="trust">
+    <div class="trust-item">TradeAux is a neutral marketplace. Buyers, sellers, and carriers trade directly.</div>
+    <div class="trust-item">$25 flat fee per auction paid by the buyer. No hidden costs. No subscription.</div>
+    <div class="trust-item">FOB port required on every listing. Transparency is the product.</div>
+    <div class="trust-item">Governed by Canadian law. Disputes resolved via reputation system.</div>
   </div>
 
-  <footer class="footer">
-    <p>TRADEAUX © 2026 • Global Commodity Exchange • All fees in USD</p>
+  <footer>
+    <div>© TradeAux — Global Surplus Exchange</div>
+    <div><a href="#">Legal</a> · <a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Contact</a></div>
   </footer>
 </div>
 
-<!-- Deposit Modal -->
-<div id="depositModal" class="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="closeDepositModal">&times;</span>
-    <div class="modal-header"><h2>💰 Deposit Funds</h2></div>
-    <div class="modal-field">
-      <label>Amount (USD)</label>
-      <input type="number" id="depositAmount" min="100" step="100" value="500">
-      <small style="color:#9ca3af; display:block; margin-top:8px;">Minimum deposit: $100 USD</small>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" id="cancelDepositBtn">Cancel</button>
-      <button class="create-btn" id="confirmDepositBtn">Continue to Stripe →</button>
-    </div>
-  </div>
-</div>
-
-<!-- File Brief Modal -->
-<div id="fileBriefModal" class="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="closeBriefModal">&times;</span>
-    <div class="modal-header"><h2>📝 FILE NEW BRIEF</h2></div>
-    <div class="modal-field">
-      <label>Commodity</label>
-      <select id="briefCommodity">
-        <option value="Apples">Apples</option>
-        <option value="Bananas">Bananas</option>
-        <option value="Mangoes">Mangoes</option>
-        <option value="Oranges">Oranges</option>
-        <option value="Pineapples">Pineapples</option>
-        <option value="Potatoes">Potatoes</option>
-        <option value="Tomatoes">Tomatoes</option>
-        <option value="Onions">Onions</option>
-        <option value="Carrots">Carrots</option>
-        <option value="Broccoli">Broccoli</option>
-        <option value="Corn">Corn</option>
-        <option value="Rice">Rice</option>
-        <option value="Wheat">Wheat</option>
-        <option value="Soybeans">Soybeans</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <label>Variety</label>
-      <select id="briefVariety"><option value="">Select variety...</option></select>
-    </div>
-    <div class="modal-field">
-      <label>Quantity (MT)</label>
-      <input type="number" id="briefQuantity" value="100" min="1" step="10">
-    </div>
-    <div class="modal-field">
-      <label>Grade</label>
-      <select id="briefGrade">
-        <option value="Grade A">Grade A (Premium)</option>
-        <option value="Grade B">Grade B (Standard)</option>
-        <option value="Organic">Organic Certified</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <label>Destination (City/Port)</label>
-      <input type="text" id="briefDestination" placeholder="e.g., Rotterdam, Singapore, Los Angeles">
-    </div>
-    <div class="modal-field">
-      <label>Target Price (USD/MT) - Optional</label>
-      <input type="number" id="briefTargetPrice" placeholder="Leave blank for market rate">
-    </div>
-    <div class="modal-field">
-      <label>Notes</label>
-      <textarea id="briefNotes" rows="3" placeholder="Quality requirements, packaging, special instructions..."></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" id="cancelBriefBtn">Cancel</button>
-      <button class="create-btn" id="submitBriefBtn">Submit Brief ($25) →</button>
-    </div>
-  </div>
-</div>
-
-<!-- Bot Config Modal -->
-<div id="botConfigModal" class="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="closeBotModal">&times;</span>
-    <div class="modal-header"><h2 id="botModalTitle">Bot Configuration</h2></div>
-    <div class="modal-field">
-      <label>Bot Name</label>
-      <input type="text" id="editBotName">
-      <div class="tooltip">💡 Name your bot to identify it in your fleet</div>
-    </div>
-    <div class="modal-field">
-      <label>Commodity</label>
-      <select id="editBotCommodity">
-        <option value="Apples">Apples</option>
-        <option value="Bananas">Bananas</option>
-        <option value="Mangoes">Mangoes</option>
-        <option value="Oranges">Oranges</option>
-        <option value="Pineapples">Pineapples</option>
-        <option value="Potatoes">Potatoes</option>
-        <option value="Tomatoes">Tomatoes</option>
-        <option value="Onions">Onions</option>
-        <option value="Carrots">Carrots</option>
-        <option value="Broccoli">Broccoli</option>
-        <option value="Corn">Corn</option>
-        <option value="Rice">Rice</option>
-        <option value="Wheat">Wheat</option>
-        <option value="Soybeans">Soybeans</option>
-      </select>
-      <div class="tooltip">💡 The bot will only bid on this commodity</div>
-    </div>
-    <div class="modal-field">
-      <label>Target Varieties (select all that apply)</label>
-      <div class="checkbox-group" id="varietyCheckboxes"></div>
-      <div class="tooltip">💡 The bot will only bid on these specific varieties. Leave unchecked to bid on all varieties.</div>
-    </div>
-    <div class="modal-field">
-      <label>Max Price (USD/MT)</label>
-      <div class="slider-row">
-        <input type="range" id="editMaxPrice" min="0.10" max="10.00" step="0.01" value="0.60">
-        <span class="slider-value" id="editMaxPriceDisplay">$0.60</span>
-      </div>
-      <div class="tooltip">💡 Bot will never bid above this price</div>
-    </div>
-    <div class="modal-field">
-      <label>Daily Budget (USD)</label>
-      <div class="slider-row">
-        <input type="range" id="editBudget" min="100" max="5000" step="100" value="500">
-        <span class="slider-value" id="editBudgetDisplay">$500</span>
-      </div>
-      <div class="tooltip">💡 Bot will stop bidding after spending this amount per day</div>
-    </div>
-    <div class="modal-field">
-      <label>Strategy</label>
-      <select id="editStrategy">
-        <option value="Sniper">Sniper (bid at last second)</option>
-        <option value="Aggressive">Aggressive (bid early and often)</option>
-        <option value="Balanced">Balanced (moderate)</option>
-        <option value="Conservative">Conservative (only good deals)</option>
-      </select>
-      <div class="tooltip">💡 Sniper waits for end; Aggressive bids immediately; Balanced is in-between; Conservative only bids on deep discounts</div>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" id="cancelBotBtn">Cancel</button>
-      <button class="create-btn" id="saveBotBtn">Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- Bid Detail Modal -->
-<div id="bidDetailModal" class="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="closeBidModal">&times;</span>
-    <div class="modal-header"><h2>📋 Bid Details</h2></div>
-    <div id="bidDetailContent"></div>
-    <div class="modal-actions"><button class="cancel-btn" id="cancelBidBtn">Close</button></div>
-  </div>
-</div>
-
-<!-- Won Auction Detail Modal -->
-<div id="wonDetailModal" class="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="closeWonModal">&times;</span>
-    <div class="modal-header"><h2>🏆 Won Auction Details</h2></div>
-    <div id="wonDetailContent"></div>
-    <div class="modal-actions"><button class="cancel-btn" id="cancelWonBtn">Close</button></div>
-  </div>
-</div>
-
-<div class="toast" id="toast">Action completed</div>
-
 <script>
-
-// ============================================
-// COMPLETE PRODUCT VARIETIES (ALPHABETICAL)
-// ============================================
-const productVarieties = {
-  'Apples': ['Braeburn', 'Cortland', 'Cosmic Crisp', 'Empire', 'Envy', 'EverCrisp', 'Fuji', 'Gala', 'Golden Delicious', 'Granny Smith', 'Gravenstein', 'Honeycrisp', 'Jazz', 'Jonagold', 'Lodi', 'Macoun', 'McIntosh', 'Mutsu (Crispin)', 'Paula Red', 'Pazazz', 'Pink Lady', 'Red Delicious', 'Rome', 'Spartan', 'Winesap'],
-  'Bananas': ['Baby Banana', 'Cavendish', 'Lady Finger', 'Organic Cavendish', 'Red Banana'],
-  'Mangoes': ['Ataulfo (Honey)', 'Francis', 'Keitt', 'Kent', 'Organic Kent', 'Tommy Atkins'],
-  'Oranges': ['Blood Orange', 'Cara Cara', 'Navel', 'Seville', 'Valencia'],
-  'Pineapples': ['Organic Smooth Cayenne', 'Queen', 'Red Spanish', 'Smooth Cayenne'],
-  'Potatoes': ['Fingerling', 'Organic Russet', 'Purple', 'Red', 'Russet', 'White', 'Yukon Gold'],
-  'Tomatoes': ['Beefsteak', 'Cherry', 'Heirloom', 'Organic Roma', 'Plum', 'Roma', 'Round'],
-  'Onions': ['Organic Yellow', 'Red', 'Shallot', 'Sweet', 'White', 'Yellow'],
-  'Carrots': ['Baby', 'Chantenay', 'Imperator', 'Nantes', 'Organic Imperator', 'Purple'],
-  'Broccoli': ['Belstar', 'Eastern Crown', 'Green Magic', 'Organic Green Magic'],
-  'Corn': ['Blue Corn', 'Organic Sweet Corn', 'Sweet Yellow', 'White', 'Yellow Dent'],
-  'Rice': ['Arborio', 'Basmati', 'Brown Rice', 'Calrose', 'Jasmine', 'Organic Jasmine', 'White Rice'],
-  'Wheat': ['Hard Red Winter', 'Hard White', 'Organic Hard Red', 'Soft Red Winter', 'Spring Wheat'],
-  'Soybeans': ['Edamame', 'GMO', 'Non-GMO', 'Organic Non-GMO']
-};
-
-// Commodity prices for ticker
-let commodityPrices = {
-  Apples: { price: 1.24, change: 2.1, emoji: "🍎" },
-  Bananas: { price: 0.52, change: -0.5, emoji: "🍌" },
-  Potatoes: { price: 0.44, change: 1.2, emoji: "🥔" },
-  Almonds: { price: 6.48, change: 0.3, emoji: "🌰" },
-  Coffee: { price: 4.85, change: 0.9, emoji: "☕" }
-};
-
-let walletBalance = 5000;
-let bots = [
-  { id: '1', name: 'Apple Hunter', commodity: 'Apples', varieties: ['Honeycrisp', 'McIntosh', 'Gala'], emoji: '🍎', status: 'active', trades: 47, pnl: 1250, winRate: 72, strategy: 'Sniper', maxPrice: 0.48, budget: 500 },
-  { id: '2', name: 'Potato Pro', commodity: 'Potatoes', varieties: ['Russet', 'Yukon Gold'], emoji: '🥔', status: 'active', trades: 32, pnl: 875, winRate: 68, strategy: 'Aggressive', maxPrice: 0.45, budget: 800 },
-  { id: '3', name: 'Banana Bot', commodity: 'Bananas', varieties: [], emoji: '🍌', status: 'idle', trades: 18, pnl: 420, winRate: 65, strategy: 'Conservative', maxPrice: 0.55, budget: 300 }
-];
-
-let activeBids = [
-  { id: 'b1', product: 'Apples', variety: 'Honeycrisp', quantity: 50, price: 1.85, seller: 'Washington Orchards', sellerContact: 'Mike Peterson', sellerEmail: 'sales@waorchards.com', sellerPhone: '+1 (509) 555-0123', timeLeft: '2:34', auctionId: 'auc_001' },
-  { id: 'b2', product: 'Potatoes', variety: 'Russet', quantity: 100, price: 0.41, seller: 'Idaho Farms', sellerContact: 'Sarah Johnson', sellerEmail: 'sales@idahofarms.com', sellerPhone: '+1 (208) 555-0123', timeLeft: '1:45', auctionId: 'auc_002' }
-];
-
-let wonAuctions = [
-  { id: 'w1', product: 'Apples', variety: 'Gala', quantity: 30, price: 1.18, seller: 'New York Apple Co', sellerContact: 'John Davis', sellerEmail: 'sales@nyapple.com', sellerPhone: '+1 (315) 555-0123', status: 'Transport needed', date: '2026-04-29' },
-  { id: 'w2', product: 'Bananas', variety: 'Cavendish', quantity: 20, price: 0.48, seller: 'Ecuador Farms', sellerContact: 'Maria Santos', sellerEmail: 'sales@ecuadorfarms.ec', sellerPhone: '+593 4 259 8877', status: 'Delivery pending', date: '2026-04-28' }
-];
-
-let filedBriefs = [];
-let priceInterval = null;
-let currentEditingBot = null;
-
-function updateWalletDisplay() {
-  document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
-  const bidCount = Math.floor(walletBalance / 25);
-  document.getElementById('bidCount').textContent = `${bidCount} bid${bidCount !== 1 ? 's' : ''} available`;
-}
-
-function renderTicker() {
-  const botCommodities = [...new Set(bots.map(b => b.commodity))];
-  const container = document.getElementById('liveTicker');
-  if (botCommodities.length === 0) {
-    container.innerHTML = '<div style="color:#9ca3af;">Deploy bots to see live prices here</div>';
-    return;
-  }
-  container.innerHTML = botCommodities.map(comm => {
-    const data = commodityPrices[comm];
-    if (!data) return '';
-    return `
-      <div class="ticker-item">
-        <span class="ticker-commodity">${data.emoji} ${comm}</span>
-        <span class="ticker-price">$${data.price.toFixed(2)}</span>
-        <span class="ticker-change ${data.change >= 0 ? 'up' : 'down'}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change).toFixed(1)}%</span>
-      </div>
-    `;
-  }).join('');
-}
-
-function startPriceSimulation() {
-  if (priceInterval) clearInterval(priceInterval);
-  priceInterval = setInterval(() => {
-    Object.keys(commodityPrices).forEach(key => {
-      const volatility = (Math.random() - 0.5) * 3;
-      let newPrice = commodityPrices[key].price * (1 + volatility / 100);
-      newPrice = Math.max(0.20, Math.min(8.00, newPrice));
-      const oldPrice = commodityPrices[key].price;
-      commodityPrices[key].price = parseFloat(newPrice.toFixed(2));
-      commodityPrices[key].change = ((commodityPrices[key].price - oldPrice) / oldPrice) * 100;
-    });
-    renderTicker();
-  }, 5000);
-}
-
-function updateVarietyDropdownForBrief(commodity) {
-  const varieties = productVarieties[commodity] || [];
-  const select = document.getElementById('briefVariety');
-  select.innerHTML = '<option value="">Select variety...</option>';
-  varieties.forEach(variety => {
-    const option = document.createElement('option');
-    option.value = variety;
-    option.textContent = variety;
-    select.appendChild(option);
-  });
-}
-
-function updateBotVarietyCheckboxes() {
-  const commodity = document.getElementById('editBotCommodity').value;
-  const varieties = productVarieties[commodity] || [];
-  const container = document.getElementById('varietyCheckboxes');
-  const currentBot = currentEditingBot;
-  const selectedVarieties = currentBot ? currentBot.varieties : [];
-  
-  container.innerHTML = varieties.map(v => `
-    <label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}">
-      <input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}
-    </label>
-  `).join('');
-}
-
-function renderBots() {
-  const container = document.getElementById('botsGrid');
-  container.innerHTML = bots.map(bot => {
-    const selectedCount = bot.varieties.length;
-    const totalVarieties = productVarieties[bot.commodity]?.length || 0;
-    return `
-      <div class="bot-card" data-bot-id="${bot.id}">
-        <div class="bot-emoji">${bot.emoji}</div>
-        <div class="bot-name">${bot.name}</div>
-        <div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div>
-        <div class="bot-target">🎯 ${selectedCount > 0 ? selectedCount + '/' + totalVarieties + ' varieties' : 'All varieties'}</div>
-        <div class="bot-stats"><span>Trades: ${bot.trades}</span><span>PnL: $${bot.pnl}</span><span>WR: ${bot.winRate}%</span></div>
-      </div>
-    `;
-  }).join('');
-  const addCard = document.createElement('div');
-  addCard.className = 'add-bot-card';
-  addCard.id = 'addBotCard';
-  addCard.innerHTML = '<div class="add-bot-icon">+</div><div class="add-bot-text">Add New Bot</div>';
-  container.appendChild(addCard);
-}
-
-function renderActiveBids() {
-  const container = document.getElementById('activeBidsList');
-  if (!activeBids.length) {
-    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>';
-    document.getElementById('activeBidsCount').textContent = '0';
-    return;
-  }
-  document.getElementById('activeBidsCount').textContent = activeBids.length;
-  container.innerHTML = activeBids.map(bid => `
-    <div class="clickable-item" data-bid-id="${bid.id}">
-      <div class="item-title"><span>${bid.product} - ${bid.variety}</span><span class="status-badge pending">⏱️ ${bid.timeLeft}</span></div>
-      <div class="item-details"><span>📦 ${bid.quantity} MT</span><span>💰 $${bid.price}/MT</span><span>🏷️ ${bid.seller}</span></div>
-    </div>
-  `).join('');
-}
-
-function renderWonAuctions() {
-  const container = document.getElementById('wonAuctionsList');
-  if (!wonAuctions.length) {
-    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>';
-    document.getElementById('wonAuctionsCount').textContent = '0';
-    return;
-  }
-  document.getElementById('wonAuctionsCount').textContent = wonAuctions.length;
-  container.innerHTML = wonAuctions.map(auction => `
-    <div class="clickable-item" data-won-id="${auction.id}">
-      <div class="item-title"><span>${auction.product} - ${auction.variety}</span><span class="status-badge">${auction.status}</span></div>
-      <div class="item-details"><span>📦 ${auction.quantity} MT</span><span>💰 $${auction.price}/MT</span><span>🏷️ ${auction.seller}</span></div>
-    </div>
-  `).join('');
-}
-
-function openBotConfig(bot) {
-  currentEditingBot = bot;
-  document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
-  document.getElementById('editBotName').value = bot.name;
-  document.getElementById('editBotCommodity').value = bot.commodity;
-  
-  updateBotVarietyCheckboxes();
-  
-  document.getElementById('editMaxPrice').value = bot.maxPrice;
-  document.getElementById('editMaxPriceDisplay').textContent = `$${bot.maxPrice.toFixed(2)}`;
-  document.getElementById('editBudget').value = bot.budget;
-  document.getElementById('editBudgetDisplay').textContent = `$${bot.budget}`;
-  document.getElementById('editStrategy').value = bot.strategy;
-  
-  document.getElementById('botConfigModal').style.display = 'flex';
-}
-
-async function saveBotConfig() {
-  if (!currentEditingBot) return;
-  const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
-  currentEditingBot.name = document.getElementById('editBotName').value;
-  currentEditingBot.commodity = document.getElementById('editBotCommodity').value;
-  currentEditingBot.varieties = selectedVarieties;
-  currentEditingBot.maxPrice = parseFloat(document.getElementById('editMaxPrice').value);
-  currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
-  currentEditingBot.strategy = document.getElementById('editStrategy').value;
-  currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
-
-  await saveBotsToSupabase();
-  saveToStorage(); // fallback
-  renderBots();
-  renderTicker();
-  showToast(`${currentEditingBot.name} configuration saved`);
-  document.getElementById('botConfigModal').style.display = 'none';
-  currentEditingBot = null;
-}
-
-function showBidDetails(bidId) {
-  const bid = activeBids.find(b => b.id === bidId);
-  if (!bid) return;
-  document.getElementById('bidDetailContent').innerHTML = `
-    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${bid.product} - ${bid.variety}</div></div>
-    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${bid.quantity} MT</div></div>
-    <div class="modal-field"><label>Your Bid</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${bid.price}/MT</div></div>
-    <div class="modal-field"><label>Seller</label><div class="tooltip" style="font-size:14px;">${bid.seller}</div></div>
-    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${bid.sellerContact} | ${bid.sellerEmail} | ${bid.sellerPhone}</div></div>
-    <div class="modal-field"><label>Time Remaining</label><div class="tooltip" style="font-size:14px;">${bid.timeLeft}</div></div>
-    <div class="modal-field"><label>Auction ID</label><div class="tooltip" style="font-size:12px; color:#9ca3af;">${bid.auctionId}</div></div>
-  `;
-  document.getElementById('bidDetailModal').style.display = 'flex';
-}
-
-function showWonDetails(wonId) {
-  const won = wonAuctions.find(w => w.id === wonId);
-  if (!won) return;
-  document.getElementById('wonDetailContent').innerHTML = `
-    <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${won.product} - ${won.variety}</div></div>
-    <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${won.quantity} MT</div></div>
-    <div class="modal-field"><label>Winning Price</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${won.price}/MT</div></div>
-    <div class="modal-field"><label>Seller</label><div class="tooltip" style="font-size:14px;">${won.seller}</div></div>
-    <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${won.sellerContact} | ${won.sellerEmail} | ${won.sellerPhone}</div></div>
-    <div class="modal-field"><label>Status</label><div class="tooltip status-badge" style="display:inline-block;">${won.status}</div></div>
-    <div class="modal-field"><label>Transport</label><div class="tooltip" style="font-size:12px;">Launch transport auction to move this cargo</div></div>
-  `;
-  document.getElementById('wonDetailModal').style.display = 'flex';
-}
-
-async function submitBrief() {
-  const commodity = document.getElementById('briefCommodity').value;
-  const variety = document.getElementById('briefVariety').value;
-  const quantity = parseInt(document.getElementById('briefQuantity').value);
-  const grade = document.getElementById('briefGrade').value;
-  const destination = document.getElementById('briefDestination').value;
-  const targetPrice = document.getElementById('briefTargetPrice').value;
-  const notes = document.getElementById('briefNotes').value;
-
-  if (!variety) { showToast('Select a variety', true); return; }
-  if (walletBalance < 25) {
-    showToast('Insufficient funds. Minimum $25 required.', true);
-    return;
-  }
-
-  walletBalance -= 25;
-  await saveWalletToSupabase();
-  updateWalletDisplay();
-
-  const newBrief = {
-    id: 'brief_' + Date.now(),
-    user_id: currentUser.id,
-    commodity, variety, quantity, grade, destination,
-    target_price: targetPrice ? parseFloat(targetPrice) : null,
-    notes, status: 'open',
-    created_at: new Date().toISOString()
-  };
-
-  const { error } = await supabaseClient.from('buyer_briefs').insert(newBrief);
-  if (error) {
-    console.error('Brief save error:', error);
-    showToast('Error saving brief', true);
-    return;
-  }
-
-  filedBriefs.push(newBrief);
-  showToast(`Brief filed: ${quantity}MT ${commodity} (${variety}) to ${destination}`);
-  document.getElementById('fileBriefModal').style.display = 'none';
-}
-
-// ============================================
-// STRIPE DEPOSIT FUNCTION - REPLACES LOCAL DEPOSIT
-// ============================================
-// ========== SUPABASE CONFIGURATION ==========
+// SUPABASE CONFIGURATION
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let currentUser = null;
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Auth state listener
-async function checkAuth() {
-  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+document.addEventListener('DOMContentLoaded', async function() {
+  const loginBtn = document.getElementById('login-btn');
+  const signupBtn = document.getElementById('signup-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userInfo = document.getElementById('user-info');
+  const userEmail = document.getElementById('user-email');
 
-  if (sessionError) {
-    console.error('Session error:', sessionError);
-    window.location.href = 'signin.html';
-    return;
+  // Check session on load
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) showLoggedIn(session.user);
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) showLoggedIn(session.user);
+    else if (event === 'SIGNED_OUT') showLoggedOut();
+  });
+
+  function showLoggedIn(user) {
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (signupBtn) signupBtn.style.display = 'none';
+    userInfo.classList.add('show');
+    userEmail.textContent = user.email;
   }
 
-  if (!session) {
-    console.log('No session found, redirecting to signin');
-    window.location.href = 'signin.html';
-    return;
+  function showLoggedOut() {
+    if (loginBtn) loginBtn.style.display = 'block';
+    if (signupBtn) signupBtn.style.display = 'block';
+    userInfo.classList.remove('show');
   }
 
-  currentUser = session.user;
-  console.log('Authenticated as:', currentUser.email);
-
-  // Load wallet from Supabase profiles table
-  const { data: profile, error: profileError } = await supabaseClient
-    .from('profiles')
-    .select('wallet_balance, full_name')
-    .eq('id', currentUser.id)
-    .single();
-
-  if (profileError) {
-    console.error('Profile load error:', profileError);
-  }
-
-  if (profile && profile.wallet_balance !== null) {
-    walletBalance = parseFloat(profile.wallet_balance);
-    updateWalletDisplay();
-  }
-}
-
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT') {
-    window.location.href = 'signin.html';
-  }
-});
-
-// Sign out handler
-document.getElementById('authBtn').onclick = async (e) => {
-  e.preventDefault();
-  await supabaseClient.auth.signOut();
-};
-
-// ============================================
-// STRIPE DEPOSIT VIA SUPABASE EDGE FUNCTION
-// ============================================
-async function depositFunds() {
-  const amount = parseFloat(document.getElementById('depositAmount').value);
-
-  if (isNaN(amount) || amount < 100) {
-    showToast('Minimum deposit is $100 USD', true);
-    return;
-  }
-
-  const confirmBtn = document.getElementById('confirmDepositBtn');
-  const originalText = confirmBtn.textContent;
-  confirmBtn.textContent = 'Processing...';
-  confirmBtn.disabled = true;
-
-  try {
-    // Get the current session from Supabase
-    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-
-    if (sessionError) {
-      console.error('Failed to get session:', sessionError);
-      showToast('Authentication error. Please sign in again.', true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-      return;
-    }
-
-    if (!session || !session.access_token) {
-      console.error('No session or access_token available');
-      showToast('Please sign in again', true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-      return;
-    }
-
-    console.log('Calling Edge Function with auth token...');
-    console.log('Token starts with:', session.access_token.substring(0, 20));
-
-    // Call Supabase Edge Function for Stripe checkout
-    const response = await fetch(
-      'https://pfutaovwbygefummienf.supabase.co/functions/v1/stripe-checkout',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + session.access_token
-        },
-        body: JSON.stringify({
-          amount: amount,
-          successUrl: window.location.origin + '/dash-buyer.html?deposit=success',
-          cancelUrl: window.location.origin + '/dash-buyer.html?deposit=cancelled'
-        })
-      }
-    );
-
-    console.log('Edge Function response status:', response.status);
-    console.log('Edge Function content-type:', response.headers.get('content-type'));
-
-    const responseText = await response.text();
-    console.log('Edge Function raw response:', responseText.substring(0, 500));
-
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('JSON parse failed. Raw response was:', responseText.substring(0, 300));
-      showToast('Server returned HTML instead of JSON. Status: ' + response.status, true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-      return;
-    }
-
-    console.log('Edge Function parsed response:', data);
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      showToast('Error: ' + (data.error || 'Unable to create checkout session'), true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-    }
-  } catch (error) {
-    console.error('Deposit error:', error);
-    showToast('Payment service unavailable. Please try again.', true);
-    confirmBtn.textContent = originalText;
-    confirmBtn.disabled = false;
-  }
-}
-
-// Check if returning from Stripe payment
-function checkStripeReturn() {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('deposit') === 'success') {
-    showToast('Deposit successful! Funds added to wallet.');
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } else if (urlParams.get('deposit') === 'cancelled') {
-    showToast('Deposit cancelled.', true);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-}
-
-function saveToStorage() {
-  localStorage.setItem('buyer_bots', JSON.stringify(bots));
-  localStorage.setItem('buyer_wallet', walletBalance.toString());
-  localStorage.setItem('buyer_bids', JSON.stringify(activeBids));
-  localStorage.setItem('buyer_won', JSON.stringify(wonAuctions));
-}
-
-async function loadFromSupabase() {
-  if (!currentUser) return;
-
-  // Load wallet from profiles
-  const { data: profile } = await supabaseClient
-    .from('profiles')
-    .select('wallet_balance')
-    .eq('id', currentUser.id)
-    .single();
-
-  if (profile && profile.wallet_balance !== null) {
-    walletBalance = parseFloat(profile.wallet_balance);
-  }
-
-  // Load bots from buyer_bots table
-  const { data: botData } = await supabaseClient
-    .from('buyer_bots')
-    .select('*')
-    .eq('user_id', currentUser.id);
-
-  if (botData && botData.length > 0) {
-    bots = botData.map(b => ({
-      id: b.id,
-      name: b.name,
-      commodity: b.commodity,
-      varieties: b.varieties || [],
-      emoji: b.emoji || '🤖',
-      status: b.status || 'active',
-      trades: b.trades || 0,
-      pnl: b.pnl || 0,
-      winRate: b.win_rate || 0,
-      strategy: b.strategy || 'Balanced',
-      maxPrice: parseFloat(b.max_price) || 0.60,
-      budget: parseInt(b.budget) || 500
-    }));
-  }
-
-  // Load active bids from buyer_bids
-  const { data: bidData } = await supabaseClient
-    .from('buyer_bids')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .eq('status', 'active');
-
-  if (bidData && bidData.length > 0) {
-    activeBids = bidData.map(b => ({
-      id: b.id,
-      product: b.product,
-      variety: b.variety,
-      quantity: b.quantity,
-      price: parseFloat(b.price),
-      seller: b.seller,
-      sellerContact: b.seller_contact,
-      sellerEmail: b.seller_email,
-      sellerPhone: b.seller_phone,
-      timeLeft: b.time_left,
-      auctionId: b.auction_id
-    }));
-  }
-
-  // Load won auctions from buyer_won_auctions
-  const { data: wonData } = await supabaseClient
-    .from('buyer_won_auctions')
-    .select('*')
-    .eq('user_id', currentUser.id);
-
-  if (wonData && wonData.length > 0) {
-    wonAuctions = wonData.map(w => ({
-      id: w.id,
-      product: w.product,
-      variety: w.variety,
-      quantity: w.quantity,
-      price: parseFloat(w.price),
-      seller: w.seller,
-      sellerContact: w.seller_contact,
-      sellerEmail: w.seller_email,
-      sellerPhone: w.seller_phone,
-      status: w.status,
-      date: w.date
-    }));
-  }
-
-  updateWalletDisplay();
-  renderBots();
-  renderActiveBids();
-  renderWonAuctions();
-}
-
-async function saveBotsToSupabase() {
-  if (!currentUser) return;
-  for (const bot of bots) {
-    await supabaseClient.from('buyer_bots').upsert({
-      id: bot.id,
-      user_id: currentUser.id,
-      name: bot.name,
-      commodity: bot.commodity,
-      varieties: bot.varieties,
-      emoji: bot.emoji,
-      status: bot.status,
-      trades: bot.trades,
-      pnl: bot.pnl,
-      win_rate: bot.winRate,
-      strategy: bot.strategy,
-      max_price: bot.maxPrice,
-      budget: bot.budget,
-      updated_at: new Date().toISOString()
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabaseClient.auth.signOut();
+      window.location.href = '/';
     });
   }
-}
-
-async function saveWalletToSupabase() {
-  if (!currentUser) return;
-  await supabaseClient
-    .from('profiles')
-    .update({ wallet_balance: walletBalance })
-    .eq('id', currentUser.id);
-}
-
-// Fallback localStorage for offline mode
-function saveToStorage() {
-  localStorage.setItem('buyer_bots', JSON.stringify(bots));
-  localStorage.setItem('buyer_wallet', walletBalance.toString());
-  localStorage.setItem('buyer_bids', JSON.stringify(activeBids));
-  localStorage.setItem('buyer_won', JSON.stringify(wonAuctions));
-}
-
-function loadSavedData() {
-  // Only use localStorage if Supabase fails or for offline
-  const savedBots = localStorage.getItem('buyer_bots');
-  const savedWallet = localStorage.getItem('buyer_wallet');
-  const savedBids = localStorage.getItem('buyer_bids');
-  const savedWon = localStorage.getItem('buyer_won');
-  if (savedBots) bots = JSON.parse(savedBots);
-  if (savedWallet) walletBalance = parseFloat(savedWallet);
-  if (savedBids) activeBids = JSON.parse(savedBids);
-  if (savedWon) wonAuctions = JSON.parse(savedWon);
-  if (isNaN(walletBalance)) walletBalance = 5000;
-  if (!Array.isArray(bots)) bots = [];
-  if (!Array.isArray(activeBids)) activeBids = [];
-  if (!Array.isArray(wonAuctions)) wonAuctions = [];
-}
-
-function showToast(msg, isError = false) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = isError ? 'toast error' : 'toast';
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 3000);
-}
-
-// Event listeners
-document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
-document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
-document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
-document.getElementById('confirmDepositBtn').onclick = depositFunds;
-
-document.getElementById('briefCommodity').onchange = function() { updateVarietyDropdownForBrief(this.value); };
-updateVarietyDropdownForBrief('Apples');
-
-document.getElementById('editMaxPrice').oninput = (e) => document.getElementById('editMaxPriceDisplay').textContent = `$${parseFloat(e.target.value).toFixed(2)}`;
-document.getElementById('editBudget').oninput = (e) => document.getElementById('editBudgetDisplay').textContent = `$${parseInt(e.target.value)}`;
-
-document.getElementById('closeBotModal').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
-document.getElementById('cancelBotBtn').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
-document.getElementById('saveBotBtn').onclick = saveBotConfig;
-document.getElementById('editBotCommodity').onchange = updateBotVarietyCheckboxes;
-
-document.getElementById('closeBidModal').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
-document.getElementById('cancelBidBtn').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
-
-document.getElementById('closeWonModal').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
-document.getElementById('cancelWonBtn').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
-
-document.getElementById('botsGrid').addEventListener('click', (e) => {
-  const card = e.target.closest('.bot-card');
-  if (!card) return;
-  if (card.id === 'addBotCard') {
-    const newBot = {
-      id: 'bot_' + Date.now(),
-      name: 'New Buyer Bot',
-      commodity: 'Apples',
-      varieties: [],
-      emoji: '🍎',
-      status: 'active',
-      trades: 0,
-      pnl: 0,
-      winRate: 0,
-      strategy: 'Balanced',
-      maxPrice: 0.60,
-      budget: 500
-    };
-    bots.push(newBot);
-    renderBots();
-    openBotConfig(newBot);
-    return;
-  }
-  const botId = card.getAttribute('data-bot-id');
-  const bot = bots.find(b => b.id === botId);
-  if (bot) openBotConfig(bot);
 });
-
-document.getElementById('activeBidsList').addEventListener('click', (e) => {
-  const item = e.target.closest('[data-bid-id]');
-  if (item) showBidDetails(item.getAttribute('data-bid-id'));
-});
-
-document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
-  const item = e.target.closest('[data-won-id]');
-  if (item) showWonDetails(item.getAttribute('data-won-id'));
-});
-
-// Initialize - FIXED ORDER
-async function initialize() {
-  // First check auth
-  await checkAuth();
-
-  // Then load from Supabase if logged in, otherwise fallback to localStorage
-  if (currentUser) {
-    await loadFromSupabase();
-  } else {
-    loadSavedData();
-  }
-
-  checkStripeReturn();
-  updateWalletDisplay();
-  renderBots();
-  renderActiveBids();
-  renderWonAuctions();
-  startPriceSimulation();
-}
-
-// Call initialize
-initialize();
 </script>
 </body>
 </html>

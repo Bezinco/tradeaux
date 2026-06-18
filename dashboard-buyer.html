@@ -404,6 +404,7 @@
   </style>
       <base target="_blank">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<base target="_blank">
 </head>
 <body>
 
@@ -637,9 +638,45 @@
 <div class="toast" id="toast">Action completed</div>
 
 <script>
+// ============================================
+// SUPABASE CONFIGURATION - MUST BE FIRST
+// ============================================
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
 
 // ============================================
-// COMPLETE PRODUCT VARIETIES (ALPHABETICAL)
+// AUTH STATE LISTENER
+// ============================================
+async function checkAuth() {
+  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+  if (sessionError) {
+    console.error('Session error:', sessionError);
+    window.location.href = 'signin.html';
+    return;
+  }
+
+  if (!session) {
+    console.log('No session found, redirecting to signin');
+    window.location.href = 'signin.html';
+    return;
+  }
+
+  currentUser = session.user;
+  console.log('Authenticated as:', currentUser.email);
+}
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    window.location.href = 'signin.html';
+  }
+});
+
+// ============================================
+// PRODUCT VARIETIES
 // ============================================
 const productVarieties = {
   'Apples': ['Braeburn', 'Cortland', 'Cosmic Crisp', 'Empire', 'Envy', 'EverCrisp', 'Fuji', 'Gala', 'Golden Delicious', 'Granny Smith', 'Gravenstein', 'Honeycrisp', 'Jazz', 'Jonagold', 'Lodi', 'Macoun', 'McIntosh', 'Mutsu (Crispin)', 'Paula Red', 'Pazazz', 'Pink Lady', 'Red Delicious', 'Rome', 'Spartan', 'Winesap'],
@@ -688,6 +725,9 @@ let filedBriefs = [];
 let priceInterval = null;
 let currentEditingBot = null;
 
+// ============================================
+// UI FUNCTIONS
+// ============================================
 function updateWalletDisplay() {
   document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
   const bidCount = Math.floor(walletBalance / 25);
@@ -747,7 +787,7 @@ function updateBotVarietyCheckboxes() {
   const container = document.getElementById('varietyCheckboxes');
   const currentBot = currentEditingBot;
   const selectedVarieties = currentBot ? currentBot.varieties : [];
-  
+
   container.innerHTML = varieties.map(v => `
     <label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}">
       <input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}
@@ -814,19 +854,19 @@ function openBotConfig(bot) {
   document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
   document.getElementById('editBotName').value = bot.name;
   document.getElementById('editBotCommodity').value = bot.commodity;
-  
+
   updateBotVarietyCheckboxes();
-  
+
   document.getElementById('editMaxPrice').value = bot.maxPrice;
   document.getElementById('editMaxPriceDisplay').textContent = `$${bot.maxPrice.toFixed(2)}`;
   document.getElementById('editBudget').value = bot.budget;
   document.getElementById('editBudgetDisplay').textContent = `$${bot.budget}`;
   document.getElementById('editStrategy').value = bot.strategy;
-  
+
   document.getElementById('botConfigModal').style.display = 'flex';
 }
 
-function saveBotConfig() {
+async function saveBotConfig() {
   if (!currentEditingBot) return;
   const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
   currentEditingBot.name = document.getElementById('editBotName').value;
@@ -836,7 +876,8 @@ function saveBotConfig() {
   currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
   currentEditingBot.strategy = document.getElementById('editStrategy').value;
   currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
-  
+
+  await saveBotsToSupabase();
   saveToStorage();
   renderBots();
   renderTicker();
@@ -883,75 +924,126 @@ async function submitBrief() {
   const destination = document.getElementById('briefDestination').value;
   const targetPrice = document.getElementById('briefTargetPrice').value;
   const notes = document.getElementById('briefNotes').value;
-  
+
   if (!variety) { showToast('Select a variety', true); return; }
   if (walletBalance < 25) {
     showToast('Insufficient funds. Minimum $25 required.', true);
     return;
   }
-  
+
   walletBalance -= 25;
+  await saveWalletToSupabase();
   updateWalletDisplay();
-  
+
   const newBrief = {
     id: 'brief_' + Date.now(),
+    user_id: currentUser.id,
     commodity, variety, quantity, grade, destination,
-    targetPrice: targetPrice ? parseFloat(targetPrice) : null,
+    target_price: targetPrice ? parseFloat(targetPrice) : null,
     notes, status: 'open',
-    createdAt: new Date().toISOString()
+    created_at: new Date().toISOString()
   };
+
+  const { error } = await supabaseClient.from('buyer_briefs').insert(newBrief);
+  if (error) {
+    console.error('Brief save error:', error);
+    showToast('Error saving brief', true);
+    return;
+  }
+
   filedBriefs.push(newBrief);
   showToast(`Brief filed: ${quantity}MT ${commodity} (${variety}) to ${destination}`);
   document.getElementById('fileBriefModal').style.display = 'none';
-  console.log('Brief filed:', newBrief);
 }
 
 // ============================================
-// STRIPE DEPOSIT FUNCTION - REPLACES LOCAL DEPOSIT
+// SUPABASE DATA FUNCTIONS
 // ============================================
-// ========== SUPABASE CONFIGURATION ==========
-const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+async function loadFromSupabase() {
+  if (!currentUser) return;
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let currentUser = null;
-
-// Auth state listener
-async function checkAuth() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session) {
-    window.location.href = 'signin.html';
-    return;
-  }
-  currentUser = session.user;
-
-  // Load wallet from Supabase profiles table
   const { data: profile } = await supabaseClient
     .from('profiles')
-    .select('wallet_balance, full_name')
+    .select('wallet_balance')
     .eq('id', currentUser.id)
     .single();
 
   if (profile && profile.wallet_balance !== null) {
     walletBalance = parseFloat(profile.wallet_balance);
-    updateWalletDisplay();
+  }
+
+  const { data: botData } = await supabaseClient
+    .from('buyer_bots')
+    .select('*')
+    .eq('user_id', currentUser.id);
+
+  if (botData && botData.length > 0) {
+    bots = botData.map(b => ({
+      id: b.id, name: b.name, commodity: b.commodity, varieties: b.varieties || [],
+      emoji: b.emoji || '🤖', status: b.status || 'active', trades: b.trades || 0,
+      pnl: b.pnl || 0, winRate: b.win_rate || 0, strategy: b.strategy || 'Balanced',
+      maxPrice: parseFloat(b.max_price) || 0.60, budget: parseInt(b.budget) || 500
+    }));
+  }
+
+  const { data: bidData } = await supabaseClient
+    .from('buyer_bids')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('status', 'active');
+
+  if (bidData && bidData.length > 0) {
+    activeBids = bidData.map(b => ({
+      id: b.id, product: b.product, variety: b.variety, quantity: b.quantity,
+      price: parseFloat(b.price), seller: b.seller, sellerContact: b.seller_contact,
+      sellerEmail: b.seller_email, sellerPhone: b.seller_phone,
+      timeLeft: b.time_left, auctionId: b.auction_id
+    }));
+  }
+
+  const { data: wonData } = await supabaseClient
+    .from('buyer_won_auctions')
+    .select('*')
+    .eq('user_id', currentUser.id);
+
+  if (wonData && wonData.length > 0) {
+    wonAuctions = wonData.map(w => ({
+      id: w.id, product: w.product, variety: w.variety, quantity: w.quantity,
+      price: parseFloat(w.price), seller: w.seller, sellerContact: w.seller_contact,
+      sellerEmail: w.seller_email, sellerPhone: w.seller_phone,
+      status: w.status, date: w.date
+    }));
+  }
+
+  updateWalletDisplay();
+  renderBots();
+  renderActiveBids();
+  renderWonAuctions();
+}
+
+async function saveBotsToSupabase() {
+  if (!currentUser) return;
+  for (const bot of bots) {
+    await supabaseClient.from('buyer_bots').upsert({
+      id: bot.id, user_id: currentUser.id, name: bot.name, commodity: bot.commodity,
+      varieties: bot.varieties, emoji: bot.emoji, status: bot.status, trades: bot.trades,
+      pnl: bot.pnl, win_rate: bot.winRate, strategy: bot.strategy,
+      max_price: bot.maxPrice, budget: bot.budget,
+      updated_at: new Date().toISOString()
+    });
   }
 }
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT') {
-    window.location.href = 'signin.html';
-  }
-});
-
-// Sign out handler
-document.getElementById('authBtn').onclick = async (e) => {
-  e.preventDefault();
-  await supabaseClient.auth.signOut();
-};
+async function saveWalletToSupabase() {
+  if (!currentUser) return;
+  await supabaseClient
+    .from('profiles')
+    .update({ wallet_balance: walletBalance })
+    .eq('id', currentUser.id);
+}
 
 // ============================================
-// STRIPE DEPOSIT VIA SUPABASE EDGE FUNCTION
+// STRIPE DEPOSIT
 // ============================================
 async function depositFunds() {
   const amount = parseFloat(document.getElementById('depositAmount').value);
@@ -967,23 +1059,22 @@ async function depositFunds() {
   confirmBtn.disabled = true;
 
   try {
-    // Get current session for auth
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-      showToast('Please sign in first', true);
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+    if (sessionError || !session || !session.access_token) {
+      showToast('Please sign in again', true);
       confirmBtn.textContent = originalText;
       confirmBtn.disabled = false;
       return;
     }
 
-    // Call Supabase Edge Function for Stripe checkout
     const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/stripe-checkout`,
+      'https://pfutaovwbygefummienf.supabase.co/functions/v1/stripe-checkout',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': 'Bearer ' + session.access_token
         },
         body: JSON.stringify({
           amount: amount,
@@ -993,7 +1084,18 @@ async function depositFunds() {
       }
     );
 
-    const data = await response.json();
+    const responseText = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON parse failed. Raw response:', responseText.substring(0, 300));
+      showToast('Server error. Status: ' + response.status, true);
+      confirmBtn.textContent = originalText;
+      confirmBtn.disabled = false;
+      return;
+    }
 
     if (data.url) {
       window.location.href = data.url;
@@ -1004,25 +1106,15 @@ async function depositFunds() {
     }
   } catch (error) {
     console.error('Deposit error:', error);
-    showToast('Payment service unavailable. Please try again.', true);
+    showToast('Payment service unavailable', true);
     confirmBtn.textContent = originalText;
     confirmBtn.disabled = false;
   }
 }
 
-// Check if returning from Stripe payment
-function checkStripeReturn() {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('deposit') === 'success') {
-    showToast('Deposit successful! Funds added to wallet.');
-    // Remove query param
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } else if (urlParams.get('deposit') === 'cancelled') {
-    showToast('Deposit cancelled.', true);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-}
-
+// ============================================
+// LOCAL STORAGE FALLBACK
+// ============================================
 function saveToStorage() {
   localStorage.setItem('buyer_bots', JSON.stringify(bots));
   localStorage.setItem('buyer_wallet', walletBalance.toString());
@@ -1045,6 +1137,17 @@ function loadSavedData() {
   if (!Array.isArray(wonAuctions)) wonAuctions = [];
 }
 
+function checkStripeReturn() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('deposit') === 'success') {
+    showToast('Deposit successful! Funds added to wallet.');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } else if (urlParams.get('deposit') === 'cancelled') {
+    showToast('Deposit cancelled.', true);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
 function showToast(msg, isError = false) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -1053,7 +1156,9 @@ function showToast(msg, isError = false) {
   setTimeout(() => toast.classList.remove('visible'), 3000);
 }
 
-// Event listeners
+// ============================================
+// EVENT LISTENERS
+// ============================================
 document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
 document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
 document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
@@ -1081,18 +1186,9 @@ document.getElementById('botsGrid').addEventListener('click', (e) => {
   if (!card) return;
   if (card.id === 'addBotCard') {
     const newBot = {
-      id: 'bot_' + Date.now(),
-      name: 'New Buyer Bot',
-      commodity: 'Apples',
-      varieties: [],
-      emoji: '🍎',
-      status: 'active',
-      trades: 0,
-      pnl: 0,
-      winRate: 0,
-      strategy: 'Balanced',
-      maxPrice: 0.60,
-      budget: 500
+      id: 'bot_' + Date.now(), name: 'New Buyer Bot', commodity: 'Apples', varieties: [],
+      emoji: '🍎', status: 'active', trades: 0, pnl: 0, winRate: 0,
+      strategy: 'Balanced', maxPrice: 0.60, budget: 500
     };
     bots.push(newBot);
     renderBots();
@@ -1114,15 +1210,33 @@ document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
   if (item) showWonDetails(item.getAttribute('data-won-id'));
 });
 
-// Initialize
-loadSavedData();
-checkStripeReturn();
-updateWalletDisplay();
-checkAuth();
-renderBots();
-renderActiveBids();
-renderWonAuctions();
-startPriceSimulation();
+// Sign out handler - FIXED: removed target="_blank" behavior
+document.getElementById('authBtn').onclick = async (e) => {
+  e.preventDefault();
+  await supabaseClient.auth.signOut();
+};
+
+// ============================================
+// INITIALIZATION
+// ============================================
+async function initialize() {
+  await checkAuth();
+
+  if (currentUser) {
+    await loadFromSupabase();
+  } else {
+    loadSavedData();
+  }
+
+  checkStripeReturn();
+  updateWalletDisplay();
+  renderBots();
+  renderActiveBids();
+  renderWonAuctions();
+  startPriceSimulation();
+}
+
+initialize();
 </script>
 </body>
 </html>

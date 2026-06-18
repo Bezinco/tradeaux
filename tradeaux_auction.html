@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeAux • Seller Auction</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      background: #020617;
+      color: #F0F3FA;
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+    }
+    button {
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      border: none;
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    .reset {
+      background: linear-gradient(105deg, #ef4444, #f87171);
+      color: white;
+    }
+    pre {
+      background: #0a0a1a;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 12px;
+      margin-top: 20px;
+      border: 1px solid #2a2a4a;
+    }
+    .status {
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: monospace;
+    }
+    .success { background: rgba(16,185,129,0.15); border-left: 3px solid #10b981; }
+    .error { background: rgba(239,68,68,0.15); border-left: 3px solid #ef4444; }
+    .info { background: rgba(0,206,209,0.15); border-left: 3px solid #00ced1; }
+    h1 { font-family: 'Orbitron', monospace; font-size: 24px; }
+    .bot-list { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🌴 TRADEAUX • SELLER AUCTION</h1>
+  
+  <div>
+    <button id="startBtn">▶ START AUCTION</button>
+    <button id="resetBtn" class="reset">⟳ RESET ALL</button>
+    <button id="refreshBtn">🔄 REFRESH STATUS</button>
+  </div>
+  
+  <div id="status"></div>
+  <pre id="output">Ready. Click a button to begin...</pre>
+
+<script>
+// Initialize Supabase (only once)
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const output = document.getElementById('output');
+const statusDiv = document.getElementById('status');
+
+function addLog(msg, type = 'info') {
+  const time = new Date().toLocaleTimeString();
+  const line = `[${time}] ${msg}`;
+  output.textContent += line + '\n';
+  output.scrollTop = output.scrollHeight;
+  console.log(msg);
+  
+  let className = 'info';
+  if (type === 'error') className = 'error';
+  else if (type === 'success') className = 'success';
+  
+  statusDiv.innerHTML = `<div class="status ${className}">${type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️'} ${msg}</div>`;
+  setTimeout(() => {
+    if (statusDiv.innerHTML.includes(msg)) {
+      // Keep last message visible
+    }
+  }, 3000);
+}
+
+async function refreshStatus() {
+  addLog('--- REFRESH STATUS ---', 'info');
+  
+  // Check active auctions
+  const { data: auctions, error: auctionsError } = await _supabase
+    .from('auctions')
+    .select('*')
+    .eq('status', 'active');
+  
+  if (auctionsError) {
+    addLog(`Error: ${auctionsError.message}`, 'error');
+  } else {
+    addLog(`Active auctions: ${auctions?.length || 0}`, 'info');
+    if (auctions && auctions.length > 0) {
+      for (const a of auctions) {
+        addLog(`  📦 ${a.product_name}: ${a.remaining_quantity_kg} kg remaining`, 'info');
+      }
+    }
+  }
+  
+  // Check buyer bots
+  const { data: bots, error: botsError } = await _supabase
+    .from('buyer_bots')
+    .select('bot_name, wallet_balance, is_active')
+    .eq('is_active', true);
+  
+  if (botsError) {
+    addLog(`Error: ${botsError.message}`, 'error');
+  } else {
+    addLog(`Active buyer bots: ${bots?.length || 0}`, 'info');
+    if (bots && bots.length > 0) {
+      for (const b of bots) {
+        addLog(`  🤖 ${b.bot_name}: $${b.wallet_balance}`, 'info');
+      }
+    } else {
+      addLog(`  ⚠️ No active buyer bots! Create one in Supabase.`, 'error');
+    }
+  }
+  
+  // Check bids on active auction
+  if (auctions && auctions.length > 0) {
+    const auctionId = auctions[0].id;
+    const { data: bids, error: bidsError } = await _supabase
+      .from('bids')
+      .select('*')
+      .eq('auction_id', auctionId)
+      .eq('status', 'pending');
+    
+    if (bidsError) {
+      addLog(`Error: ${bidsError.message}`, 'error');
+    } else {
+      addLog(`Pending bids: ${bids?.length || 0}`, 'info');
+      if (bids && bids.length > 0) {
+        bids.sort((a,b) => b.price_per_kg - a.price_per_kg);
+        for (let i = 0; i < bids.length; i++) {
+          const b = bids[i];
+          addLog(`  ${i+1}. ${b.buyer_name}: $${b.price_per_kg}/kg for ${b.quantity_kg} kg`, 'success');
+        }
+      }
+    }
+  }
+}
+
+async function startAuction() {
+  addLog('🚀 STARTING AUCTION...', 'info');
+  
+  try {
+    // End existing active auctions
+    addLog('Ending existing auctions...', 'info');
+    await _supabase
+      .from('auctions')
+      .update({ status: 'ended' })
+      .eq('status', 'active');
+    
+    // Get seller ID
+    const { data: sellers, error: sellerError } = await _supabase
+      .from('sellers')
+      .select('id')
+      .limit(1);
+    
+    if (sellerError) {
+      addLog(`Seller error: ${sellerError.message}`, 'error');
+      return;
+    }
+    
+    if (!sellers || sellers.length === 0) {
+      addLog(`No seller found! Create a seller first.`, 'error');
+      return;
+    }
+    
+    const sellerId = sellers[0].id;
+    const endTime = new Date(Date.now() + 5 * 60000).toISOString();
+    
+    addLog(`Creating auction with seller: ${sellerId}`, 'info');
+    addLog(`Auction ends at: ${new Date(endTime).toLocaleTimeString()}`, 'info');
+    
+    const { data: newAuction, error: createError } = await _supabase
+      .from('auctions')
+      .insert({
+        seller_id: sellerId,
+        product_name: `Coconut Auction ${new Date().toLocaleTimeString()}`,
+        product_category: 'coconuts',
+        total_quantity_kg: 25000,
+        remaining_quantity_kg: 25000,
+        origin_country: 'Sri Lanka',
+        fob_port: 'Colombo',
+        quality_specs: { moisture: 10, oil_content: 67 },
+        certificates: { organic: true },
+        status: 'active',
+        end_time: endTime
+      })
+      .select();
+    
+    if (createError) {
+      addLog(`Create auction failed: ${createError.message}`, 'error');
+      return;
+    }
+    
+    if (newAuction && newAuction[0]) {
+      addLog(`✅ Auction created! ID: ${newAuction[0].id}`, 'success');
+      addLog(`   Quantity: ${newAuction[0].total_quantity_kg} kg`, 'success');
+    }
+    
+    // Trigger buyer-bot edge function
+    addLog('Triggering buyer-bot...', 'info');
+    const response = await fetch('https://pfutaovwbygefummienf.supabase.co/functions/v1/buyer-bot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    const result = await response.json();
+    addLog(`Bot response: ${JSON.stringify(result)}`, result.success ? 'success' : 'error');
+    
+    // Refresh after 3 seconds
+    setTimeout(() => refreshStatus(), 3000);
+    
+  } catch (err) {
+    addLog(`Exception: ${err.message}`, 'error');
+  }
+}
+
+async function resetAll() {
+  addLog('🔄 RESETTING EVERYTHING...', 'info');
+  
+  try {
+    // Delete all bids
+    const { error: bidsError } = await _supabase
+      .from('bids')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (bidsError) addLog(`Bids delete error: ${bidsError.message}`, 'error');
+    else addLog('✅ All bids deleted', 'success');
+    
+    // Delete all active auctions
+    const { error: auctionError } = await _supabase
+      .from('auctions')
+      .delete()
+      .eq('status', 'active');
+    
+    if (auctionError) addLog(`Auctions delete error: ${auctionError.message}`, 'error');
+    else addLog('✅ All active auctions deleted', 'success');
+    
+    // Reset bot wallets
+    const { error: walletError } = await _supabase
+      .from('buyer_bots')
+      .update({ wallet_balance: 500 })
+      .eq('is_active', true);
+    
+    if (walletError) addLog(`Wallet reset error: ${walletError.message}`, 'error');
+    else addLog('✅ Bot wallets reset to $500', 'success');
+    
+    addLog('✅ Reset complete!', 'success');
+    refreshStatus();
+    
+  } catch (err) {
+    addLog(`Exception: ${err.message}`, 'error');
+  }
+}
+
+// Set up event listeners
+document.getElementById('startBtn').addEventListener('click', startAuction);
+document.getElementById('resetBtn').addEventListener('click', resetAll);
+document.getElementById('refreshBtn').addEventListener('click', refreshStatus);
+
+// Initial load
+refreshStatus();
+</script>
+</body>
+</html>

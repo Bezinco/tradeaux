@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Auction Floor | Banker Trade Finance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0,206,209,0.3), transparent 70%); top:-40%; left:-20%; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124,252,0,0.2), transparent 70%); top:-30%; left:-10%; animation-delay:8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,59,59,0.15), transparent 70%); top:-20%; left:0%; animation-delay:16s; }
+    @keyframes waveBgDrift { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(40px,-30px) scale(1.05);} 100%{transform:translate(-30px,20px) scale(1);} }
+    
+    /* ===== 3D LOGO - TRADEAUX ===== */
+    .gem-logo-corner {
+      display: inline-block;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.55);
+      transform-origin: left center;
+      vertical-align: middle;
+    }
+    .gem-text {
+      font-size: 80px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); color: transparent; }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+    .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 18px rgba(0,102,255,0.35); transform: translateZ(2px); }
+    .gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 18px rgba(0,204,68,0.35); transform: translateZ(2px); }
+    .gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 18px rgba(217,43,43,0.35); transform: translateZ(2px); }
+    .gem-letter .edge-top, .gem-letter .edge-right, .gem-letter .edge-bottom, .gem-letter .edge-left { position: absolute; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-top { top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; }
+    .gem-letter .edge-right { top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; }
+    .gem-letter .edge-bottom { bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; }
+    .gem-letter .edge-left { top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; } .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; } .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; } .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; } .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; } .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; } .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; } .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; } .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; } .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+    .logo-area { display: inline-flex; align-items: center; position: relative; }
+
+    .container { max-width: 1600px; margin: 0 auto; padding: 20px 24px 40px; position: relative; z-index: 2; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+    .banker-badge { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; background: rgba(255,217,102,0.2); padding: 4px 12px; border-radius: 20px; margin-left: 15px; letter-spacing: 1px; border: 1px solid rgba(255,217,102,0.5); color: #FFD966; }
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(255,217,102,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(255,217,102,0.3); transition: all 0.3s; }
+    .wallet-section:hover { border-color: #FFD966; background: rgba(255,217,102,0.15); }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #FFD966; }
+    .deposit-btn { background: linear-gradient(135deg, #FFD966, #FFA500); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; color: #000; transition: all 0.2s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,217,102,0.5); }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(255,217,102,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; }
+    .nav a:hover { border-color: #FFD966; transform: translateY(-2px); }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 30px; }
+    .stat-card { background: linear-gradient(145deg,rgba(15,32,64,0.85),rgba(2,6,23,0.95)); border: 1px solid rgba(255,217,102,0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
+    .stat-card:hover { transform: translateY(-4px); border-color: #FFD966; }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+    .stat-value { font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 800; color: #FFD966; }
+    .stat-label { font-size: 10px; color: #9ca3af; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+    
+    .dashboard-card { background: linear-gradient(145deg,rgba(15,32,64,0.8),rgba(2,6,23,0.95)); border: 1px solid rgba(255,217,102,0.3); border-radius: 20px; padding: 20px; margin-bottom: 24px; transition: all 0.3s; }
+    .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #FFD966; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,217,102,0.2); padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+    
+    .auction-item { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #FFD966; transition: all 0.2s; }
+    .auction-item:hover { background: rgba(255,217,102,0.05); transform: translateX(4px); }
+    .auction-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; gap: 10px; }
+    .auction-title { font-weight: 700; font-size: 16px; }
+    .auction-amount { font-size: 18px; font-weight: 800; color: #FFD966; }
+    .auction-timer { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #FFD966; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 20px; }
+    .preview-badge { background: rgba(255,217,102,0.2); color: #FFD966; padding: 2px 8px; border-radius: 20px; font-size: 10px; }
+    .live-badge { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .auction-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 12px; margin-bottom: 12px; }
+    
+    /* Teeny boxes for top bids */
+    .top-bids-section { margin-top: 12px; border-top: 1px solid rgba(255,217,102,0.15); padding-top: 10px; }
+    .top-bids-header { font-size: 10px; color: #9ca3af; cursor: pointer; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; }
+    .top-bids-header:hover { color: #FFD966; }
+    .top-bids-list { display: none; margin-top: 8px; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 8px; }
+    .top-bids-list.show { display: block; }
+    .bid-rank { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .bid-rank:last-child { border-bottom: none; }
+    .rank-1 { color: #FFD966; font-weight: 800; }
+    .rank-2 { color: #C0C0C0; }
+    .rank-3 { color: #CD7F32; }
+    .bid-rank-bank { color: #e5e7eb; }
+    .bid-rank-rate { color: #7CFC00; font-weight: 600; }
+    .bid-rank-net { color: #FFD966; }
+    
+    .bid-section { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-top: 12px; }
+    .bid-input-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 10px 0; }
+    .bid-input-group input { padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,217,102,0.3); border-radius: 8px; color: white; width: 100px; transition: all 0.2s; }
+    .bid-input-group input:focus { outline: none; border-color: #FFD966; }
+    .net-result { background: rgba(255,217,102,0.1); padding: 10px; border-radius: 8px; text-align: center; margin: 10px 0; font-size: 12px; }
+    .preview-note { background: rgba(255,217,102,0.05); padding: 10px; border-radius: 8px; font-size: 11px; color: #9ca3af; text-align: center; margin-top: 8px; }
+    
+    .bots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 10px; }
+    .bot-card { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,217,102,0.2); border-radius: 16px; padding: 16px; transition: all 0.3s; cursor: pointer; }
+    .bot-card:hover { transform: translateY(-4px); border-color: #FFD966; background: rgba(255,217,102,0.05); }
+    .bot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .bot-name { font-weight: 700; font-size: 16px; }
+    .bot-status { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .bot-status.idle { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .bot-detail { font-size: 11px; color: #9ca3af; margin: 6px 0; display: flex; justify-content: space-between; }
+    .add-bot-card { background: rgba(15,32,64,0.4); border: 2px dashed rgba(255,217,102,0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 160px; cursor: pointer; transition: all 0.3s; }
+    .add-bot-card:hover { border-color: #FFD966; background: rgba(255,217,102,0.05); transform: translateY(-4px); }
+    
+    .btn { padding: 8px 20px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-primary { background: linear-gradient(135deg, #FFD966, #FFA500); color: #000; }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 10px rgba(255,217,102,0.5); }
+    .btn-outline { background: transparent; border: 1px solid rgba(255,217,102,0.5); color: #FFD966; }
+    .btn-outline:hover { background: rgba(255,217,102,0.1); transform: translateY(-1px); }
+    .btn-sm { padding: 4px 12px; font-size: 11px; }
+    
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-content { background: linear-gradient(145deg,#0a1228,#020617); border: 2px solid #FFD966; border-radius: 24px; max-width: 550px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; transition: color 0.2s; }
+    .modal-close:hover { color: #FFD966; }
+    .modal-field { margin-bottom: 20px; }
+    .modal-field label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .modal-field input, .modal-field select { width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,217,102,0.3); border-radius: 8px; color: white; transition: all 0.2s; }
+    .modal-field input:focus, .modal-field select:focus { outline: none; border-color: #FFD966; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; max-height: 120px; overflow-y: auto; }
+    .checkbox-item { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 20px; cursor: pointer; border: 1px solid rgba(255,217,102,0.2); font-size: 11px; transition: all 0.2s; }
+    .checkbox-item:hover { border-color: #FFD966; }
+    .checkbox-item.selected { background: rgba(255,217,102,0.2); border-color: #FFD966; }
+    .slider-row { display: flex; align-items: center; gap: 16px; }
+    .slider-row input { flex: 1; cursor: pointer; }
+    .tooltip { font-size: 10px; color: #7CFC00; margin-top: 4px; display: block; }
+    
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #0f1a2e; border: 1px solid #FFD966; padding: 12px 24px; border-radius: 40px; transition: 0.3s; opacity: 0; z-index: 2000; color: #FFD966; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .empty-state { color: #5c6b8a; text-align: center; padding: 40px; }
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+    
+    .loading-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.9); backdrop-filter: blur(4px); z-index: 3000; display: none; justify-content: center; align-items: center; flex-direction: column; gap: 16px; }
+    .loading-overlay.visible { display: flex; }
+    .spinner { width: 48px; height: 48px; border: 3px solid rgba(255,217,102,0.3); border-top-color: #FFD966; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: 'Orbitron', sans-serif; color: #FFD966; font-size: 14px; }
+
+    @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .auction-details { grid-template-columns: repeat(2,1fr); } }
+  </style>
+<base target="_blank">
+</head>
+<body>
+<div class="bg-waves"><div class="wave-bg wave-1"></div><div class="wave-bg wave-2"></div><div class="wave-bg wave-3"></div></div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading auction floor...</div>
+</div>
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div><div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div><div class="sparkle sparkle-9"></div>
+        <div class="sparkle sparkle-10"></div><div class="depth-shadow"></div>
+      </div>
+      <span class="banker-badge">AUCTION FLOOR • TRADE FINANCE</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="wallet-section">
+        <div class="wallet-balance"><span class="wallet-label">WALLET</span><span class="wallet-amount" id="walletAmount">$0.00</span></div>
+        <button class="deposit-btn" id="depositBtn">+ Deposit</button>
+        <div class="wallet-balance"><span class="wallet-label">RESERVE</span><span class="wallet-amount" id="reserveAmount">$0.00</span></div>
+      </div>
+      <nav class="nav"><a href="#" id="authBtn">Sign Out</a></nav>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value" id="pendingCount">0</div><div class="stat-label">Active Auctions</div></div>
+    <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value" id="wonCount">0</div><div class="stat-label">Funded Deals</div></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value" id="totalFinanced">$0</div><div class="stat-label">Total Financed</div></div>
+    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="avgRate">0%</div><div class="stat-label">Avg Discount</div></div>
+    <div class="stat-card"><div class="stat-icon">🤖</div><div class="stat-value" id="botCount">0</div><div class="stat-label">Active Bots</div></div>
+  </div>
+
+  <!-- FINANCING AUCTIONS -->
+  <div class="dashboard-card">
+    <div class="card-header">🚢 FINANCING AUCTIONS <span style="font-size:11px;">2 day preview • 3 minute live auction</span></div>
+    <div id="auctionsList" class="active-auctions-list"></div>
+  </div>
+
+  <!-- YOUR BIDS -->
+  <div class="dashboard-card">
+    <div class="card-header">📝 YOUR ACTIVE BIDS</div>
+    <div id="activeBidsList" class="active-auctions-list"><div class="empty-state">No active bids placed</div></div>
+  </div>
+
+  <!-- BOT FLEET -->
+  <div class="dashboard-card">
+    <div class="card-header" style="justify-content: space-between;">
+      <span>🤖 YOUR BOT FLEET</span>
+      <button id="createBotBtn" style="background: linear-gradient(135deg, #FFD966, #FFA500); border: none; border-radius: 40px; padding: 6px 16px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 11px; cursor: pointer; color: #000; transition: all 0.2s;">+ Create Bot</button>
+    </div>
+    <div class="bots-grid" id="botsGrid"></div>
+  </div>
+
+  <footer class="footer"><p>TRADEAUX AUCTION FLOOR © 2026 • Trade Finance • 读合 Matching Engine • 3 Minute Auctions</p></footer>
+</div>
+
+<!-- Deposit Modal -->
+<div id="depositModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeDepositModal">&times;</span>
+  <h2 style="color:#FFD966;">💰 Deposit Funds</h2>
+  <div class="modal-field"><label>Amount (USD)</label><input type="number" id="depositAmount" min="1000" step="1000" value="10000"></div>
+  <div class="modal-field"><label>Allocate to Reserve</label><input type="number" id="reserveAllocation" min="0" step="1000" value="5000"></div>
+  <div class="modal-actions" style="display:flex; gap:12px; margin-top:20px;"><button class="btn btn-outline" id="cancelDepositBtn">Cancel</button><button class="btn btn-primary" id="confirmDepositBtn">Deposit →</button></div>
+</div></div>
+
+<!-- Bot Config Modal -->
+<div id="botModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeBotModal">&times;</span>
+  <h2 style="color:#FFD966;" id="botModalTitle">🤖 Configure Auction Bot</h2>
+  <div class="modal-field"><label>Bot Name</label><input type="text" id="botName" placeholder="e.g., Asia Sniper Bot"></div>
+  <div class="modal-field"><label>Countries (select all)</label><div class="checkbox-group" id="countryCheckboxes"></div></div>
+  <div class="modal-field"><label>Max Discount Rate (%)</label><div class="slider-row"><input type="range" id="botMaxRate" min="0.5" max="15" step="0.25" value="6"><span id="botMaxRateDisplay">6%</span></div><div class="tooltip">💡 Highest rate bot will offer</div></div>
+  <div class="modal-field"><label>Min Discount Rate (%)</label><div class="slider-row"><input type="range" id="botMinRate" min="0.5" max="15" step="0.25" value="3"><span id="botMinRateDisplay">3%</span></div><div class="tooltip">💡 Lowest rate bot will offer</div></div>
+  <div class="modal-field"><label>Strategy</label><select id="botStrategy">
+    <option value="sniper">🎯 Sniper (bids in last 30 seconds)</option>
+    <option value="aggressive">⚡ Aggressive (bids early, lowest rate)</option>
+    <option value="competitive">📊 Competitive (mid-range rate)</option>
+  </select></div>
+  <div class="modal-field"><label>Daily Budget (USD)</label><div class="slider-row"><input type="range" id="botBudget" min="10000" max="500000" step="10000" value="50000"><span id="botBudgetDisplay">$50,000</span></div></div>
+  <div class="modal-field"><label>Max Contract Value (USD)</label><div class="slider-row"><input type="range" id="botMaxContract" min="10000" max="500000" step="10000" value="250000"><span id="botMaxContractDisplay">$250,000</span></div></div>
+  <div class="modal-actions" style="display:flex; gap:12px; margin-top:20px;"><button class="btn btn-outline" id="cancelBotBtn">Cancel</button><button class="btn btn-primary" id="saveBotBtn">Save Bot</button></div>
+</div></div>
+
+<div class="toast" id="toast">Action completed</div>
+
+<script>
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let walletBalance = 100000;
+let reserveBalance = 50000;
+let bankerBids = [];
+
+const countries = ['Sri Lanka', 'Indonesia', 'Ghana', 'Vietnam', 'Philippines', 'India', 'Kenya', 'Ecuador', 'Colombia', 'Brazil', 'Thailand', 'Malaysia'];
+
+// Financing auctions with preview and live states
+let financingAuctions = [
+  { id: 'fin_001', coopName: 'Coconut Growers Co-op', coopCountry: 'Sri Lanka', coopRating: 4.5, coopContact: 'John Silva', coopAddress: '123 Harbour Road, Colombo', amount: 75000, commodity: 'Coconuts', variety: 'Dehusked', quantity: 50, unitPrice: 1500, buyer: 'Pacific Foods Inc.', buyerAddress: '456 Industrial Ave, Los Angeles, CA', buyerRating: 4.2, buyerContact: 'Sarah Chen', terms: '90 days from bill of lading', cargoStatus: 'On vessel', vesselName: 'MV Pacific Horizon', departureDate: '2026-05-15', departurePort: 'Colombo, Sri Lanka', arrivalPort: 'Long Beach, CA', eta: '2026-06-20', insurer: "Lloyd's of London", insurancePremium: 2.5, recoveryPct: 70, status: 'preview', bids: [], endsAt: new Date(Date.now() + 172800000).toISOString(), liveAt: new Date(Date.now() + 172800000).toISOString() },
+  { id: 'fin_002', coopName: 'Sumatra Coffee Union', coopCountry: 'Indonesia', coopRating: 4.2, coopContact: 'Budi Wibowo', coopAddress: 'Jl. Kopi No. 45, Medan', amount: 120000, commodity: 'Coffee', variety: 'Arabica Mandheling', quantity: 20, unitPrice: 6000, buyer: 'Starbucks Coffee', buyerAddress: '2401 Utah Ave S, Seattle, WA', buyerRating: 4.8, buyerContact: 'James Wong', terms: '60 days from bill of lading', cargoStatus: 'At port - loading', vesselName: 'MV Java Star', departureDate: '2026-05-18', departurePort: 'Belawan, Indonesia', arrivalPort: 'Seattle, WA', eta: '2026-06-25', insurer: 'AIG Marine', insurancePremium: 1.8, recoveryPct: 65, status: 'preview', bids: [], endsAt: new Date(Date.now() + 259200000).toISOString(), liveAt: new Date(Date.now() + 259200000).toISOString() },
+  { id: 'fin_003', coopName: 'Ghana Cocoa Board', coopCountry: 'Ghana', coopRating: 4.8, coopContact: 'Abena Osei', coopAddress: 'Cocoa House, Accra', amount: 200000, commodity: 'Cocoa', variety: 'Forastero', quantity: 50, unitPrice: 4000, buyer: 'Hershey Chocolate Co.', buyerAddress: '100 Crystal A Dr, Hershey, PA', buyerRating: 4.9, buyerContact: 'Robert Miller', terms: '120 days from bill of lading', cargoStatus: 'On vessel', vesselName: 'MV African Trader', departureDate: '2026-05-10', departurePort: 'Tema, Ghana', arrivalPort: 'Philadelphia, PA', eta: '2026-06-10', insurer: 'Chubb Marine', insurancePremium: 3.0, recoveryPct: 75, status: 'live', bids: [], endsAt: new Date(Date.now() + 180000).toISOString(), liveAt: new Date(Date.now() - 3600000).toISOString() }
+];
+
+let bankerBots = [
+  { id: 'bot_1', name: 'Asia Sniper', countries: ['Sri Lanka', 'Indonesia', 'Vietnam'], maxRate: 6, minRate: 3, strategy: 'sniper', budget: 50000, maxContract: 250000, active: true, totalBid: 0, wonCount: 0 },
+  { id: 'bot_2', name: 'Africa Aggressive', countries: ['Ghana', 'Kenya'], maxRate: 8, minRate: 4, strategy: 'aggressive', budget: 75000, maxContract: 200000, active: true, totalBid: 0, wonCount: 0 }
+];
+
+function showLoading(show, text = 'Processing...') {
+  const overlay = document.getElementById('loadingOverlay');
+  const textEl = overlay?.querySelector('.loading-text');
+  if (textEl) textEl.textContent = text;
+  if (show) overlay.classList.add('visible');
+  else overlay.classList.remove('visible');
+}
+
+function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+
+async function checkAuth() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) { window.location.href = 'signin.html'; return false; }
+  currentUser = session.user;
+  const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', currentUser.id).single();
+  if (profile?.role !== 'banker') { showToast('Access denied: Banker role required', true); return false; }
+  return true;
+}
+
+document.getElementById('authBtn').onclick = async () => { await supabaseClient.auth.signOut(); window.location.href = 'signin.html'; };
+function showToast(msg, isError = false) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.className = 'toast'; if (isError) toast.classList.add('error'); toast.classList.add('visible'); setTimeout(() => toast.classList.remove('visible'), 3000); }
+function updateWalletDisplay() { document.getElementById('walletAmount').innerHTML = `$${walletBalance.toLocaleString()}`; document.getElementById('reserveAmount').innerHTML = `$${reserveBalance.toLocaleString()}`; }
+function calculateNetToCoop(amount, discountRate) { const fee = amount * (discountRate / 100); return { net: amount - fee, fee: fee }; }
+
+function getTopBids(auction) {
+  if (!auction.bids || auction.bids.length === 0) return [];
+  return [...auction.bids].sort((a, b) => a.discountRate - b.discountRate).slice(0, 5);
+}
+
+function toggleTopBids(auctionId) {
+  const el = document.getElementById(`top-bids-${auctionId}`);
+  if (el) el.classList.toggle('show');
+}
+
+function renderAuctions() {
+  const container = document.getElementById('auctionsList');
+  const activeAuctions = financingAuctions.filter(a => a.status === 'preview' || a.status === 'live');
+  document.getElementById('pendingCount').innerHTML = activeAuctions.length;
+  
+  if (activeAuctions.length === 0) { container.innerHTML = '<div class="empty-state">No active financing auctions</div>'; return; }
+  
+  container.innerHTML = activeAuctions.map(auction => {
+    const isLive = auction.status === 'live';
+    const isPreview = auction.status === 'preview';
+    const timeToLive = new Date(auction.liveAt) - new Date();
+    const hoursToLive = Math.max(0, Math.floor(timeToLive / 3600000));
+    const timeLeft = new Date(auction.endsAt) - new Date();
+    const minutesLeft = Math.max(0, Math.floor(timeLeft / 60000));
+    const secondsLeft = Math.max(0, Math.floor((timeLeft % 60000) / 1000));
+    const existingBid = auction.bids?.find(b => b.bankerId === currentUser?.id);
+    const currentBidRate = existingBid?.discountRate || '';
+    const topBids = getTopBids(auction);
+    const recoveryValue = auction.amount * (auction.recoveryPct / 100);
+    
+    return `
+      <div class="auction-item">
+        <div class="auction-header">
+          <span class="auction-title">🏦 ${escapeHtml(auction.coopName)} — ${escapeHtml(auction.commodity)} (${escapeHtml(auction.variety)})</span>
+          <span class="auction-amount">$${auction.amount.toLocaleString()}</span>
+          ${isLive ? `<span class="auction-timer live-badge">⏰ ${minutesLeft}:${secondsLeft.toString().padStart(2,'0')} left</span>` : `<span class="preview-badge">🔍 PREVIEW • Goes live in ${hoursToLive}h</span>`}
+        </div>
+        <div class="auction-details">
+          <span>📦 ${auction.quantity} MT @ $${auction.unitPrice}/MT</span><span>🌍 ${escapeHtml(auction.coopCountry)} ⭐ ${auction.coopRating}</span>
+          <span>🏷️ Buyer: ${escapeHtml(auction.buyer)} ⭐ ${auction.buyerRating}</span><span>🚢 Vessel: ${escapeHtml(auction.vesselName)}</span>
+          <span>📅 Terms: ${escapeHtml(auction.terms)}</span><span>🛡️ ${escapeHtml(auction.insurer)} (${auction.insurancePremium}% premium)</span>
+          <span>💰 Recovery: ${auction.recoveryPct}% ($${recoveryValue.toLocaleString()})</span><span>📍 ETA ${escapeHtml(auction.arrivalPort)}: ${escapeHtml(auction.eta)}</span>
+        </div>
+        ${topBids.length > 0 ? `
+        <div class="top-bids-section">
+          <div class="top-bids-header" onclick="toggleTopBids('${auction.id}')">📊 TOP 5 BIDS ▼</div>
+          <div class="top-bids-list" id="top-bids-${auction.id}">
+            ${topBids.map((bid, idx) => `<div class="bid-rank"><span class="${idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : ''}">${idx + 1}. ${escapeHtml(bid.bankerName || 'Bank')}</span><span class="bid-rank-rate">${bid.discountRate}%</span><span class="bid-rank-net">$${bid.netToCoop.toLocaleString()}</span></div>`).join('')}
+          </div>
+        </div>
+        ` : ''}
+        ${isLive ? `
+        <div class="bid-section">
+          <div class="bid-input-group"><span>Your Discount Rate:</span><input type="number" id="rate_${auction.id}" min="0.5" max="15" step="0.25" value="${currentBidRate || 5}" placeholder="%"><span>%</span><button class="btn btn-primary btn-sm" onclick="placeBid('${auction.id}', ${auction.amount})">Place Bid</button></div>
+          <div id="preview_${auction.id}" class="net-result">💰 Co-op receives: <strong>$${(auction.amount * (1 - (currentBidRate || 5)/100)).toLocaleString()}</strong> | Bank fee: $${(auction.amount * ((currentBidRate || 5)/100)).toLocaleString()}</div>
+        </div>
+        ` : `
+        <div class="preview-note">
+          🔍 PREVIEW MODE — ${hoursToLive} hours remaining. Bots analyzing. No bids accepted until auction goes live.
+        </div>
+        `}
+      </div>
+    `;
+  }).join('');
+  
+  financingAuctions.filter(a => a.status === 'live').forEach(auction => {
+    const input = document.getElementById(`rate_${auction.id}`);
+    if (input) input.oninput = function() { const rate = parseFloat(this.value); const net = auction.amount * (1 - rate/100); const preview = document.getElementById(`preview_${auction.id}`); if(preview) preview.innerHTML = `💰 Co-op receives: <strong>$${net.toLocaleString()}</strong> | Bank fee: $${(auction.amount * (rate/100)).toLocaleString()}`; };
+  });
+  
+  // Auto-update timers every second for live auctions
+  setInterval(() => {
+    const liveAuctions = financingAuctions.filter(a => a.status === 'live');
+    let needsRender = false;
+    liveAuctions.forEach(auction => {
+      const timeLeft = new Date(auction.endsAt) - new Date();
+      if (timeLeft <= 0 && auction.status === 'live') {
+        if (auction.bids && auction.bids.length > 0) {
+          const winner = [...auction.bids].sort((a, b) => a.discountRate - b.discountRate)[0];
+          winner.status = 'accepted';
+          auction.status = 'closed';
+          showToast(`🏆 Auction closed! Winner: ${winner.bankerName} at ${winner.discountRate}%`);
+        } else {
+          auction.status = 'closed';
+          showToast(`⏰ Auction closed — no bids placed.`);
+        }
+        needsRender = true;
+      }
+    });
+    if (needsRender) {
+      renderAuctions();
+      renderActiveBids();
+      saveToLocalStorage();
+    }
+  }, 1000);
+}
+
+function placeBid(auctionId, amount) {
+  const rateInput = document.getElementById(`rate_${auctionId}`);
+  const discountRate = parseFloat(rateInput.value);
+  const auction = financingAuctions.find(a => a.id === auctionId);
+  if (!auction) return;
+  if (auction.status !== 'live') { showToast('Auction is not live yet — preview mode', true); return; }
+  if (reserveBalance < amount) { showToast(`Insufficient reserve. Need $${amount.toLocaleString()} to bid`, true); return; }
+  const { net, fee } = calculateNetToCoop(amount, discountRate);
+  const bid = { id: 'bid_' + Date.now(), auctionId, bankerId: currentUser?.id || 'banker_001', bankerName: currentUser?.email?.split('@')[0] || 'Bank', amount, discountRate, fee, netToCoop: net, status: 'pending', createdAt: new Date().toISOString(), auctionDetails: { coopName: auction.coopName, commodity: auction.commodity, vesselName: auction.vesselName } };
+  if (!auction.bids) auction.bids = [];
+  const existingIndex = auction.bids.findIndex(b => b.bankerId === bid.bankerId);
+  if (existingIndex >= 0) auction.bids[existingIndex] = bid; else auction.bids.push(bid);
+  bankerBids.push(bid);
+  showToast(`✅ Bid placed: ${discountRate}% — Co-op nets $${net.toLocaleString()}`);
+  renderAuctions(); renderActiveBids(); saveToLocalStorage();
+}
+
+function renderActiveBids() {
+  const container = document.getElementById('activeBidsList');
+  const myBids = bankerBids.filter(b => b.bankerId === (currentUser?.id || 'banker_001'));
+  if (myBids.length === 0) { container.innerHTML = '<div class="empty-state">No active bids placed</div>'; document.getElementById('wonCount').innerHTML = '0'; document.getElementById('totalFinanced').innerHTML = '$0'; document.getElementById('avgRate').innerHTML = '0%'; return; }
+  const totalFinanced = myBids.reduce((s,b)=>s+b.amount,0);
+  const avgRate = myBids.length ? (myBids.reduce((s,b)=>s+b.discountRate,0)/myBids.length).toFixed(2) : 0;
+  document.getElementById('wonCount').innerHTML = myBids.length;
+  document.getElementById('totalFinanced').innerHTML = `$${totalFinanced.toLocaleString()}`;
+  document.getElementById('avgRate').innerHTML = `${avgRate}%`;
+  container.innerHTML = myBids.map(bid => `<div class="auction-item" style="border-left-color: ${bid.status === 'accepted' ? '#7CFC00' : '#FFD966'}"><div class="auction-header"><span>🏦 ${escapeHtml(bid.auctionDetails?.coopName || 'N/A')} — ${escapeHtml(bid.auctionDetails?.commodity || 'Contract')}</span><span>${bid.discountRate}% discount</span></div><div class="auction-details"><span>💰 $${bid.amount.toLocaleString()}</span><span>🏦 Co-op nets: $${bid.netToCoop.toLocaleString()}</span><span>📈 Bank fee: $${bid.fee.toLocaleString()}</span><span>⏳ ${bid.status === 'accepted' ? '✓ FUNDED' : '⏳ PENDING'}</span></div></div>`).join('');
+}
+
+function evaluateAuctionForBot(bot, auction) {
+  if (auction.status !== 'live') return null;
+  if (bot.totalBid >= bot.budget) return null;
+  if (auction.amount > (bot.maxContract || 999999999)) return null;
+  if (!bot.countries.includes(auction.coopCountry)) return null;
+  const existingBid = auction.bids?.find(b => b.bankerId === currentUser?.id);
+  if (existingBid) return null;
+  let discountRate;
+  const timeLeft = new Date(auction.endsAt) - new Date();
+  const secondsLeft = timeLeft / 1000;
+  if (bot.strategy === 'sniper' && secondsLeft > 30) return null;
+  if (bot.strategy === 'sniper') discountRate = bot.minRate;
+  else if (bot.strategy === 'aggressive') discountRate = bot.minRate;
+  else discountRate = (bot.minRate + bot.maxRate) / 2;
+  discountRate = Math.min(bot.maxRate, Math.max(bot.minRate, discountRate));
+  return { auction, discountRate };
+}
+
+function runAutoBots() {
+  bankerBots.forEach(bot => {
+    if (!bot.active) return;
+    financingAuctions.forEach(auction => {
+      const evaluation = evaluateAuctionForBot(bot, auction);
+      if (evaluation) {
+        const { auction: targetAuction, discountRate } = evaluation;
+        if (bot.totalBid + targetAuction.amount > bot.budget) return;
+        const { net, fee } = calculateNetToCoop(targetAuction.amount, discountRate);
+        const bid = { id: 'bot_bid_' + Date.now() + '_' + Math.random().toString(36).substr(2,5), auctionId: targetAuction.id, bankerId: currentUser?.id || 'banker_001', bankerName: bot.name, amount: targetAuction.amount, discountRate, fee, netToCoop: net, status: 'pending', isBot: true, createdAt: new Date().toISOString(), auctionDetails: { coopName: targetAuction.coopName, commodity: targetAuction.commodity, vesselName: targetAuction.vesselName } };
+        if (!targetAuction.bids) targetAuction.bids = [];
+        targetAuction.bids.push(bid);
+        bankerBids.push(bid);
+        bot.totalBid += targetAuction.amount;
+        bot.wonCount++;
+        showToast(`🤖 ${bot.name} bid ${discountRate}% on ${targetAuction.coopName}`);
+      }
+    });
+  });
+  renderAuctions(); renderActiveBids(); renderBots(); saveToLocalStorage();
+}
+
+function renderBots() {
+  const container = document.getElementById('botsGrid');
+  document.getElementById('botCount').innerHTML = bankerBots.filter(b => b.active).length;
+  container.innerHTML = bankerBots.map(bot => `
+    <div class="bot-card" data-bot-id="${bot.id}">
+      <div class="bot-header"><span class="bot-name">🤖 ${escapeHtml(bot.name)}</span><span class="bot-status ${bot.active ? '' : 'idle'}">${bot.active ? '● ACTIVE' : '○ IDLE'}</span></div>
+      <div class="bot-detail"><span>📍 ${bot.countries.length} countries</span><span>🎯 ${bot.strategy}</span></div>
+      <div class="bot-detail"><span>💰 ${bot.minRate}% - ${bot.maxRate}%</span><span>💵 $${bot.budget.toLocaleString()}</span></div>
+      <div class="bot-detail"><span>🏆 ${bot.wonCount} won</span><span>📊 $${bot.totalBid.toLocaleString()}</span></div>
+      <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn btn-sm ${bot.active ? 'btn-outline' : 'btn-success'}" onclick="event.stopPropagation();toggleBot('${bot.id}')">${bot.active ? '⏸ Pause' : '▶ Activate'}</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteBot('${bot.id}')">🗑 Delete</button></div>
+    </div>
+  `).join('');
+  const addCard = document.createElement('div'); addCard.className = 'add-bot-card'; addCard.id = 'addBotCard'; addCard.innerHTML = '<div style="font-size:48px;">+</div><div style="font-size:14px;">Add Bot</div><div style="font-size:10px; color:#9ca3af;">Sniper • Aggressive • Competitive</div>'; container.appendChild(addCard);
+}
+
+function toggleBot(botId) { const bot = bankerBots.find(b => b.id === botId); if(bot) { bot.active = !bot.active; showToast(`${bot.name} ${bot.active ? 'activated' : 'paused'}`); renderBots(); saveToLocalStorage(); } }
+function deleteBot(botId) { bankerBots = bankerBots.filter(b => b.id !== botId); showToast('Bot deleted'); renderBots(); saveToLocalStorage(); }
+
+let currentEditingBot = null;
+function openBotConfig(bot = null) {
+  currentEditingBot = bot;
+  if (bot) { 
+    document.getElementById('botModalTitle').innerHTML = `🤖 ${escapeHtml(bot.name)}`; 
+    document.getElementById('botName').value = bot.name; 
+    document.getElementById('botMaxRate').value = bot.maxRate; 
+    document.getElementById('botMaxRateDisplay').innerHTML = `${bot.maxRate}%`; 
+    document.getElementById('botMinRate').value = bot.minRate; 
+    document.getElementById('botMinRateDisplay').innerHTML = `${bot.minRate}%`; 
+    document.getElementById('botStrategy').value = bot.strategy; 
+    document.getElementById('botBudget').value = bot.budget; 
+    document.getElementById('botBudgetDisplay').innerHTML = `$${bot.budget.toLocaleString()}`;
+    document.getElementById('botMaxContract').value = bot.maxContract || 250000;
+    document.getElementById('botMaxContractDisplay').innerHTML = `$${(bot.maxContract || 250000).toLocaleString()}`;
+  } else { 
+    document.getElementById('botModalTitle').innerHTML = '🤖 New Auction Bot'; 
+    document.getElementById('botName').value = 'New Bot'; 
+    document.getElementById('botMaxRate').value = 6; 
+    document.getElementById('botMaxRateDisplay').innerHTML = '6%'; 
+    document.getElementById('botMinRate').value = 3; 
+    document.getElementById('botMinRateDisplay').innerHTML = '3%'; 
+    document.getElementById('botStrategy').value = 'competitive'; 
+    document.getElementById('botBudget').value = 50000;
+    document.getElementById('botBudgetDisplay').innerHTML = '$50,000';
+    document.getElementById('botMaxContract').value = 250000;
+    document.getElementById('botMaxContractDisplay').innerHTML = '$250,000';
+  }
+  const countryContainer = document.getElementById('countryCheckboxes'); 
+  const selectedCountries = bot ? bot.countries : []; 
+  countryContainer.innerHTML = countries.map(c => `<label class="checkbox-item ${selectedCountries.includes(c) ? 'selected' : ''}"><input type="checkbox" value="${c}" ${selectedCountries.includes(c) ? 'checked' : ''}> ${c}</label>`).join('');
+  document.getElementById('botModal').style.display = 'flex';
+}
+
+function saveBotConfig() {
+  const selectedCountries = Array.from(document.querySelectorAll('#countryCheckboxes input:checked')).map(cb => cb.value);
+  if (selectedCountries.length === 0) { showToast('Select at least one country', true); return; }
+  const botData = { 
+    id: currentEditingBot?.id || 'bot_' + Date.now(), 
+    name: document.getElementById('botName').value, 
+    countries: selectedCountries, 
+    maxRate: parseFloat(document.getElementById('botMaxRate').value), 
+    minRate: parseFloat(document.getElementById('botMinRate').value), 
+    strategy: document.getElementById('botStrategy').value, 
+    budget: parseInt(document.getElementById('botBudget').value), 
+    maxContract: parseInt(document.getElementById('botMaxContract').value),
+    active: true, 
+    totalBid: currentEditingBot?.totalBid || 0, 
+    wonCount: currentEditingBot?.wonCount || 0 
+  };
+  if (currentEditingBot) { 
+    const index = bankerBots.findIndex(b => b.id === currentEditingBot.id); 
+    if (index >= 0) bankerBots[index] = botData; 
+  } else { 
+    bankerBots.push(botData); 
+  }
+  renderBots(); saveToLocalStorage(); showToast(`${botData.name} ${currentEditingBot ? 'updated' : 'created'}`); document.getElementById('botModal').style.display = 'none';
+}
+
+function depositFunds() {
+  const amount = parseFloat(document.getElementById('depositAmount').value);
+  const reserveAlloc = parseFloat(document.getElementById('reserveAllocation').value);
+  if (isNaN(amount) || amount < 1000) { showToast('Minimum deposit $1000', true); return; }
+  if (reserveAlloc > amount) { showToast('Reserve allocation cannot exceed deposit amount', true); return; }
+  showToast(`Processing $${amount.toLocaleString()} deposit...`);
+  setTimeout(() => { walletBalance += amount; reserveBalance += reserveAlloc; updateWalletDisplay(); showToast(`Deposit successful! Reserve: $${reserveBalance.toLocaleString()}`); document.getElementById('depositModal').style.display = 'none'; saveToLocalStorage(); }, 1000);
+}
+
+function saveToLocalStorage() { localStorage.setItem('banker_financing_auctions', JSON.stringify(financingAuctions)); localStorage.setItem('banker_bids', JSON.stringify(bankerBids)); localStorage.setItem('banker_bots', JSON.stringify(bankerBots)); localStorage.setItem('banker_wallet', walletBalance); localStorage.setItem('banker_reserve', reserveBalance); }
+function loadSavedData() { const savedAuctions = localStorage.getItem('banker_financing_auctions'); const savedBids = localStorage.getItem('banker_bids'); const savedBots = localStorage.getItem('banker_bots'); const savedWallet = localStorage.getItem('banker_wallet'); const savedReserve = localStorage.getItem('banker_reserve'); if (savedAuctions) financingAuctions = JSON.parse(savedAuctions); if (savedBids) bankerBids = JSON.parse(savedBids); if (savedBots) bankerBots = JSON.parse(savedBots); let wb = parseFloat(savedWallet); let rb = parseFloat(savedReserve); walletBalance = isNaN(wb) ? 100000 : wb; reserveBalance = isNaN(rb) ? 50000 : rb; }
+
+document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
+document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
+document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
+document.getElementById('confirmDepositBtn').onclick = depositFunds;
+document.getElementById('closeBotModal').onclick = () => document.getElementById('botModal').style.display = 'none';
+document.getElementById('cancelBotBtn').onclick = () => document.getElementById('botModal').style.display = 'none';
+document.getElementById('saveBotBtn').onclick = saveBotConfig;
+document.getElementById('createBotBtn').onclick = () => openBotConfig(null);
+document.getElementById('botsGrid').addEventListener('click', (e) => { const card = e.target.closest('.bot-card, .add-bot-card'); if (!card) return; if (card.classList.contains('add-bot-card')) { openBotConfig(null); return; } const botId = card.getAttribute('data-bot-id'); const bot = bankerBots.find(b => b.id === botId); if (bot) openBotConfig(bot); });
+document.getElementById('botMaxRate').oninput = (e) => document.getElementById('botMaxRateDisplay').innerHTML = `${e.target.value}%`;
+document.getElementById('botMinRate').oninput = (e) => document.getElementById('botMinRateDisplay').innerHTML = `${e.target.value}%`;
+document.getElementById('botBudget').oninput = (e) => document.getElementById('botBudgetDisplay').innerHTML = `$${parseInt(e.target.value).toLocaleString()}`;
+document.getElementById('botMaxContract').oninput = (e) => document.getElementById('botMaxContractDisplay').innerHTML = `$${parseInt(e.target.value).toLocaleString()}`;
+
+setInterval(runAutoBots, 30000);
+
+let initialized = false;
+async function init() { 
+  if (initialized) return;
+  if (await checkAuth()) { 
+    initialized = true;
+    loadSavedData(); 
+    updateWalletDisplay(); 
+    renderAuctions(); 
+    renderBots(); 
+    renderActiveBids(); 
+    runAutoBots(); 
+  } 
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Insurer Dashboard | Credit Insurance Bidding</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0,206,209,0.3), transparent 70%); top:-40%; left:-20%; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124,252,0,0.2), transparent 70%); top:-30%; left:-10%; animation-delay:8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,59,59,0.15), transparent 70%); top:-20%; left:0%; animation-delay:16s; }
+    @keyframes waveBgDrift { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(40px,-30px) scale(1.05);} 100%{transform:translate(-30px,20px) scale(1);} }
+
+    /* ===== 3D LOGO - TRADEAUX ===== */
+    .gem-logo-corner {
+      display: inline-block;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.55);
+      transform-origin: left center;
+      vertical-align: middle;
+    }
+    .gem-text {
+      font-size: 80px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+      color: transparent;
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 0.1s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.3s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.5s; }
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+    .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
+      transform: translateZ(2px);
+    }
+    .gem-letter .edge-top, .gem-letter .edge-right, .gem-letter .edge-bottom, .gem-letter .edge-left {
+      position: absolute; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-top { top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; }
+    .gem-letter .edge-right { top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; }
+    .gem-letter .edge-bottom { bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; }
+    .gem-letter .edge-left { top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; }
+
+    .light-source {
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite;
+      pointer-events: none; mix-blend-mode: overlay;
+    }
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+
+    .sparkle {
+      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none;
+    }
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+
+    .depth-shadow {
+      position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+      background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+      filter: blur(20px); z-index: -1;
+    }
+
+    .logo-area { display: inline-flex; align-items: center; position: relative; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; }
+    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; }
+    .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+
+    .wallet-section { display: flex; align-items: center; gap: 12px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); transition: all 0.3s; }
+    .wallet-section:hover { border-color: #00ced1; background: rgba(0,206,209,0.15); }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; color: #000; transition: all 0.2s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; text-align: center; transition: all 0.3s; }
+    .stat-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .stat-value { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800; color: #00ced1; }
+    .stat-label { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+    .dashboard-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; margin-bottom: 24px; transition: all 0.3s; }
+    .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; }
+    .badge-count { background: rgba(0,206,209,0.2); padding: 2px 10px; border-radius: 20px; font-size: 12px; }
+    .clickable-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .clickable-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
+    .item-title { font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+    .item-details { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .status-badge.warning { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .status-badge.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .status-badge.active { background: rgba(0,206,209,0.2); color: #00ced1; }
+
+    .bots-section { margin-top: 30px; }
+    .bots-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; }
+    .bots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .bot-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 16px; cursor: pointer; transition: all 0.3s; }
+    .bot-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .bot-emoji { font-size: 32px; margin-bottom: 8px; }
+    .bot-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+    .bot-status { font-size: 10px; color: #7CFC00; margin-bottom: 8px; }
+    .bot-stats { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; margin-top: 8px; flex-wrap: wrap; gap: 4px; }
+    .add-bot-card { background: rgba(15,32,64,0.4); border: 2px dashed rgba(0,206,209,0.3); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 150px; cursor: pointer; transition: all 0.3s; }
+    .add-bot-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
+    .add-bot-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
+    .add-bot-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; transition: color 0.2s; }
+    .modal-close:hover { color: #00ced1; }
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-field { margin-bottom: 20px; }
+    .modal-field label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; color: white; font-family: 'Inter', sans-serif; font-size: 14px; }
+    .slider-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .slider-row input { flex: 1; }
+    .slider-value { font-family: 'Orbitron', sans-serif; color: #00ced1; min-width: 60px; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 8px; }
+    .toggle-switch { display: flex; align-items: center; gap: 12px; }
+    .toggle-switch input { width: 50px; height: 24px; appearance: none; background: rgba(255,255,255,0.2); border-radius: 24px; position: relative; cursor: pointer; }
+    .toggle-switch input:checked { background: #7CFC00; }
+    .toggle-switch input::before { content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: white; top: 2px; left: 3px; transition: 0.2s; }
+    .toggle-switch input:checked::before { transform: translateX(26px); }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .cancel-btn:hover { background: rgba(255,255,255,0.2); }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; color: #000; }
+    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 10px rgba(0,206,209,0.5); }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .tooltip { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+    .info-box { background: rgba(0,206,209,0.1); padding: 12px; border-radius: 12px; margin-top: 16px; }
+    .btn-sm { padding: 4px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+    .btn-outline { background: transparent; border: 1px solid rgba(0,206,209,0.3); color: #00ced1; }
+    .btn-outline:hover { background: rgba(0,206,209,0.1); transform: translateY(-1px); }
+    .btn-success { background: rgba(124,252,0,0.2); border: 1px solid #7CFC00; color: #7CFC00; }
+    .btn-primary { background: linear-gradient(135deg, #00ced1, #0066ff); border: none; color: white; font-weight: 700; transition: all 0.2s; }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 10px rgba(0,206,209,0.5); }
+
+    .loading-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.9); backdrop-filter: blur(4px); z-index: 3000; display: none; justify-content: center; align-items: center; flex-direction: column; gap: 16px; }
+    .loading-overlay.visible { display: flex; }
+    .spinner { width: 48px; height: 48px; border: 3px solid rgba(0,206,209,0.3); border-top-color: #00ced1; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: 'Orbitron', sans-serif; color: #00ced1; font-size: 14px; }
+
+    @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3,1fr); } .bots-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 1000px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .bots-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } .bots-grid { grid-template-columns: 1fr; } }
+  </style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading...</div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="logo-area">
+      <div class="gem-logo-corner">
+        <div class="gem-text">
+          <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+          <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+        </div>
+        <div class="light-source"></div>
+        <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div>
+        <div class="sparkle sparkle-4"></div><div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div>
+        <div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div><div class="sparkle sparkle-9"></div>
+        <div class="sparkle sparkle-10"></div><div class="depth-shadow"></div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="wallet-section">
+        <div class="wallet-balance">
+          <span class="wallet-label">BLOCKED</span>
+          <span class="wallet-amount" id="blockedAmount">$0</span>
+        </div>
+        <button class="deposit-btn" id="depositBtn">+ Deposit</button>
+      </div>
+      <nav class="nav">
+        <a href="#" id="refreshBtn">🔄 Refresh</a>
+        <a href="#" id="signOutBtn">Sign Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="totalAuctions">0</div><div class="stat-label">Upcoming Auctions</div></div>
+    <div class="stat-card"><div class="stat-value" id="activeBidsCount">0</div><div class="stat-label">Active Bids</div></div>
+    <div class="stat-card"><div class="stat-value" id="wonContractsCount">0</div><div class="stat-label">Won Contracts</div></div>
+    <div class="stat-card"><div class="stat-value" id="completedCount">0</div><div class="stat-label">Completed</div></div>
+    <div class="stat-card"><div class="stat-value" id="totalPremium">$0</div><div class="stat-label">Total Premium Earned</div></div>
+  </div>
+
+  <!-- Preview Board -->
+  <div class="dashboard-card">
+    <div class="card-header">📋 INSURANCE PREVIEW BOARD <span class="badge-count" id="previewCount">0</span> <span style="font-size:11px; color:#9ca3af;">Research & configure bots before auction goes live</span></div>
+    <div id="previewBoardList"><div style="color:#9ca3af; text-align:center; padding:20px;">Loading preview board...</div></div>
+  </div>
+
+  <!-- Upcoming Insurance Auctions -->
+  <div class="dashboard-card">
+    <div class="card-header">🏦 UPCOMING INSURANCE AUCTIONS <span class="badge-count" id="upcomingCount">0</span></div>
+    <div id="upcomingAuctionsList"><div style="color:#9ca3af; text-align:center; padding:20px;">Loading upcoming auctions...</div></div>
+  </div>
+
+  <!-- My Active Bids -->
+  <div class="dashboard-card">
+    <div class="card-header">📝 MY ACTIVE BIDS <span class="badge-count" id="activeBidsCountCard">0</span></div>
+    <div id="activeBidsList"><div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div></div>
+  </div>
+
+  <!-- Won Contracts -->
+  <div class="dashboard-card">
+    <div class="card-header">🏆 WON CONTRACTS <span class="badge-count" id="wonContractsCountCard">0</span></div>
+    <div id="wonContractsList"><div style="color:#9ca3af; text-align:center; padding:20px;">No won contracts</div></div>
+  </div>
+
+  <!-- Completed -->
+  <div class="dashboard-card">
+    <div class="card-header">✅ COMPLETED <span class="badge-count" id="completedCountCard">0</span></div>
+    <div id="completedList"><div style="color:#9ca3af; text-align:center; padding:20px;">No completed contracts</div></div>
+  </div>
+
+  <!-- Bot Fleet -->
+  <div class="bots-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div class="bots-header" style="margin-bottom: 0;">🤖 YOUR INSURANCE BOT FLEET</div>
+      <button id="createBotBtn" style="background: linear-gradient(135deg, #00ced1, #0066ff); border: none; border-radius: 40px; padding: 8px 20px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; color: white; transition: all 0.2s;">+ Create Bot</button>
+    </div>
+    <div class="bots-grid" id="botsGrid"></div>
+  </div>
+
+  <footer class="footer">
+    <p>TRADEAUX © 2026 • Credit Insurance Marketplace • $25 blocked per bid, returned if you lose</p>
+    <p style="font-size: 9px; margin-top: 8px;">🏦 Insurance covers buyer default only. Premium earned when bank pays.</p>
+  </footer>
+</div>
+
+<!-- Deposit Modal -->
+<div id="depositModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeDepositModal">&times;</span>
+    <div class="modal-header"><h2>💰 Deposit Funds</h2></div>
+    <div class="modal-field"><label>Amount (USD)</label><input type="number" id="depositAmount" min="100" step="100" value="500"><small style="color:#9ca3af; display:block; margin-top:8px;">Minimum deposit: $100 USD</small></div>
+    <div class="modal-actions"><button class="cancel-btn" id="cancelDepositBtn">Cancel</button><button class="create-btn" id="confirmDepositBtn">Add Funds →</button></div>
+  </div>
+</div>
+
+<!-- Bot Config Modal -->
+<div id="botConfigModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeBotModal">&times;</span>
+    <div class="modal-header"><h2 id="botModalTitle">🏦 Insurance Bot Configuration</h2></div>
+    <div class="modal-field"><label>Bot Name</label><input type="text" id="editBotName" placeholder="e.g., Lloyds Auto"><div class="tooltip">💡 Name your bot to identify it in your fleet</div></div>
+    <div class="modal-field"><label>📊 PREMIUM RATE (%) - Lower rate wins</label><div class="slider-row"><input type="range" id="editPremiumRate" min="0.5" max="5.0" step="0.05" value="2.5"><span class="slider-value" id="editPremiumRateDisplay">2.50%</span></div><div class="toggle-row"><span class="tooltip">💡 Bot will bid at or below this rate</span><label class="toggle-switch"><span>🎯 Sniper Mode</span><input type="checkbox" id="editSniperPremium"></label></div></div>
+    <div class="modal-field"><label>📉 MINIMUM PREMIUM RATE (%) - Won't go below</label><div class="slider-row"><input type="range" id="editMinPremiumRate" min="0.5" max="5.0" step="0.05" value="1.0"><span class="slider-value" id="editMinPremiumRateDisplay">1.00%</span></div><div class="tooltip">💡 Absolute floor - bot will never bid below this rate</div></div>
+    <div class="modal-field"><label>💰 Daily Budget (USD blocked)</label><div class="slider-row"><input type="range" id="editBudget" min="1000" max="50000" step="500" value="10000"><span class="slider-value" id="editBudgetDisplay">$10,000</span></div><div class="tooltip">💡 Bot stops bidding after blocking this amount per day</div></div>
+    <div class="modal-field"><label>📦 Max Contract Value (USD)</label><div class="slider-row"><input type="range" id="editMaxContract" min="10000" max="1000000" step="10000" value="250000"><span class="slider-value" id="editMaxContractDisplay">$250,000</span></div><div class="tooltip">💡 Only bid on contracts below this value</div></div>
+    <div class="modal-field"><label>📦 Min Contract Value (USD)</label><div class="slider-row"><input type="range" id="editMinContract" min="5000" max="100000" step="5000" value="10000"><span class="slider-value" id="editMinContractDisplay">$10,000</span></div><div class="tooltip">💡 Only bid on contracts above this value</div></div>
+    <div class="info-box"><div style="font-size: 11px; color: #7CFC00;">📌 How It Works:</div><div style="font-size: 10px; color: #9ca3af; margin-top: 6px;">• $25 BLOCKED when you bid (held, not deducted)</div><div style="font-size: 10px; color: #9ca3af;">• If you WIN: Platform keeps $25, bank pays your commission + $25 refund</div><div style="font-size: 10px; color: #9ca3af;">• If you LOSE: $25 unblocked (returned to your wallet)</div><div style="font-size: 10px; color: #FFD966;">💰 Premium earned only when bank pays</div></div>
+    <div class="modal-actions"><button class="cancel-btn" id="cancelBotBtn">Cancel</button><button class="create-btn" id="saveBotBtn">Save Bot</button></div>
+  </div>
+</div>
+
+<!-- Bid Details Modal -->
+<div id="bidDetailsModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeBidDetailsModal">&times;</span><div class="modal-header"><h2>📋 Bid Details</h2></div><div id="bidDetailsContent"></div><div class="modal-actions"><button class="cancel-btn" id="closeBidDetailsBtn">Close</button></div></div></div>
+
+<!-- Auction Results Modal -->
+<div id="auctionResultsModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeResultsModal">&times;</span><div class="modal-header"><h2>📊 Auction Results</h2></div><div id="auctionResultsContent"></div><div class="modal-actions"><button class="cancel-btn" id="closeResultsBtn">Close</button></div></div></div>
+
+<!-- Contract Details Modal -->
+<div id="contractModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeContractModal">&times;</span><div class="modal-header"><h2>📄 Insurance Contract</h2></div><div id="contractDetailsContent"></div><div class="modal-actions"><button class="cancel-btn" id="closeContractBtn">Close</button></div></div></div>
+
+<div class="toast" id="toast">Action completed</div>
+
+<script>
+// ========== SUPABASE CONFIG ==========
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let blockedAmount = 0;
+let upcomingAuctions = [];
+let activeBids = [];
+let wonContracts = [];
+let completedContracts = [];
+let insurerBots = [];
+let currentEditingBot = null;
+let totalPremiumEarned = 0;
+let realtimeChannel = null;
+let previewAuctions = [];
+let watchedAuctions = new Set();
+let pendingBotStrategies = {};
+
+function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+function showLoading(text = 'Processing...') { document.getElementById('loadingText').textContent = text; document.getElementById('loadingOverlay').classList.add('visible'); }
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('visible'); }
+function showToast(msg, isError = false) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.className = isError ? 'toast error' : 'toast'; toast.classList.add('visible'); setTimeout(() => toast.classList.remove('visible'), 3000); }
+
+async function checkAuth() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = 'signin.html'; return; }
+    currentUser = session.user;
+    await loadData();
+    setupRealtime();
+  } catch (err) { console.error('Auth error:', err); showToast('Authentication error', true); }
+}
+
+async function signOut() { if (realtimeChannel) await supabase.removeChannel(realtimeChannel); await supabase.auth.signOut(); window.location.href = 'signin.html'; }
+
+function setupRealtime() {
+  if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+  if (!currentUser) return;
+  realtimeChannel = supabase.channel('insurer_updates')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'insurance_bids', filter: `insurer_id=eq.${currentUser.id}` }, () => { loadActiveBids(); loadWonContracts(); loadCompletedContracts(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'insurance_auctions' }, () => { loadUpcomingAuctions(); })
+    .subscribe();
+}
+
+async function loadData() {
+  showLoading('Loading data...');
+  try {
+    loadWallet(); loadPreviewState(); await loadPreviewBoard(); await loadUpcomingAuctions();
+    await loadActiveBids(); await loadWonContracts(); await loadCompletedContracts(); await loadInsurerBots();
+  } catch (err) { console.error('Error loading data:', err); showToast('Error loading data', true); } finally { hideLoading(); }
+}
+
+function loadWallet() { const saved = localStorage.getItem('insurer_blocked'); blockedAmount = saved ? parseFloat(saved) : 0; document.getElementById('blockedAmount').textContent = `$${blockedAmount.toFixed(0)}`; }
+function updateBlockedAmount(amount) { blockedAmount += amount; localStorage.setItem('insurer_blocked', blockedAmount.toString()); document.getElementById('blockedAmount').textContent = `$${blockedAmount.toFixed(0)}`; }
+
+async function loadUpcomingAuctions() {
+  try {
+    const { data, error } = await supabase.from('insurance_auctions').select('*, trade_campaigns(*)').eq('status', 'pending').order('scheduled_at', { ascending: true });
+    if (error) throw error;
+    upcomingAuctions = data || [];
+    if (upcomingAuctions.length === 0) {
+      upcomingAuctions = [
+        { id: 'demo1', status: 'pending', trade_campaigns: { product: 'Coconuts', quantity_mt: 50, origin: 'Colombo, Sri Lanka', destination: 'Rotterdam, Netherlands', contract_value: 75000, payment_terms_days: 60, buyer_country: 'Netherlands', cargo_status: 'On vessel', vessel_name: 'MV Pacific Horizon', eta: '2026-06-20', recovery_pct: 70 }, scheduled_at: new Date(Date.now() + 3600000).toISOString() },
+        { id: 'demo2', status: 'pending', trade_campaigns: { product: 'Coffee', quantity_mt: 20, origin: 'Ho Chi Minh, Vietnam', destination: 'Hamburg, Germany', contract_value: 120000, payment_terms_days: 90, buyer_country: 'Germany', cargo_status: 'At port - loading', vessel_name: 'MV Java Star', eta: '2026-06-25', recovery_pct: 65 }, scheduled_at: new Date(Date.now() + 7200000).toISOString() },
+        { id: 'demo3', status: 'pending', trade_campaigns: { product: 'Spices', quantity_mt: 10, origin: 'Colombo, Sri Lanka', destination: 'New York, USA', contract_value: 45000, payment_terms_days: 45, buyer_country: 'USA', cargo_status: 'On vessel', vessel_name: 'MV Spice Trader', eta: '2026-06-18', recovery_pct: 75 }, scheduled_at: new Date(Date.now() + 10800000).toISOString() }
+      ];
+    }
+    document.getElementById('totalAuctions').textContent = upcomingAuctions.length;
+    document.getElementById('upcomingCount').textContent = upcomingAuctions.length;
+    renderUpcomingAuctions();
+  } catch (err) { console.error('Error loading upcoming auctions:', err); }
+}
+
+async function loadPreviewBoard() {
+  try {
+    const { data, error } = await supabase.from('insurance_auctions').select('*, trade_campaigns(*)').eq('status', 'preview').order('auction_starts_at', { ascending: true });
+    if (error) throw error;
+    previewAuctions = data || [];
+    if (previewAuctions.length === 0) {
+      previewAuctions = [
+        { id: 'prev1', status: 'preview', auction_starts_at: new Date(Date.now() + 86400000).toISOString(), trade_campaigns: { product: 'Coconuts', quantity_mt: 50, origin: 'Colombo, Sri Lanka', destination: 'Rotterdam, Netherlands', contract_value: 75000, payment_terms_days: 60, buyer_country: 'Netherlands', cargo_status: 'On vessel', vessel_name: 'MV Pacific Horizon', eta: '2026-06-20', recovery_pct: 70 } },
+        { id: 'prev2', status: 'preview', auction_starts_at: new Date(Date.now() + 172800000).toISOString(), trade_campaigns: { product: 'Coffee', quantity_mt: 20, origin: 'Ho Chi Minh, Vietnam', destination: 'Hamburg, Germany', contract_value: 120000, payment_terms_days: 90, buyer_country: 'Germany', cargo_status: 'At port - loading', vessel_name: 'MV Java Star', eta: '2026-06-25', recovery_pct: 65 } },
+        { id: 'prev3', status: 'preview', auction_starts_at: new Date(Date.now() + 259200000).toISOString(), trade_campaigns: { product: 'Spices', quantity_mt: 10, origin: 'Colombo, Sri Lanka', destination: 'New York, USA', contract_value: 45000, payment_terms_days: 45, buyer_country: 'USA', cargo_status: 'On vessel', vessel_name: 'MV Spice Trader', eta: '2026-06-18', recovery_pct: 75 } }
+      ];
+    }
+    document.getElementById('previewCount').textContent = previewAuctions.length;
+    renderPreviewBoard();
+  } catch (err) { console.error('Error loading preview board:', err); }
+}
+
+function renderPreviewBoard() {
+  const container = document.getElementById('previewBoardList');
+  if (!previewAuctions.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No auctions in preview</div>'; return; }
+  container.innerHTML = previewAuctions.map(auction => {
+    const campaign = auction.trade_campaigns;
+    const isWatched = watchedAuctions.has(auction.id);
+    const hasStrategy = pendingBotStrategies[auction.id];
+    const timeToLive = new Date(auction.auction_starts_at) - new Date();
+    const hoursLeft = Math.max(0, Math.floor(timeToLive / 3600000));
+    const recoveryValue = (campaign?.contract_value || 0) * (campaign?.recovery_pct || 70) / 100;
+    return `<div class="clickable-item" data-preview-id="${escapeHtml(auction.id)}" style="border-left: 4px solid ${isWatched ? '#7CFC00' : '#00ced1'};"><div class="item-title"><span>🏦 ${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</span><span class="status-badge ${hasStrategy ? 'active' : 'pending'}">${hasStrategy ? '🤖 Bot Ready' : '👁 Preview'}</span></div><div class="item-details"><span>📍 ${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</span><span>💰 $${(campaign?.contract_value || 0).toLocaleString()}</span><span>📅 ${campaign?.payment_terms_days || 0} days</span><span>🛡️ Buyer: ${escapeHtml(campaign?.buyer_country || 'Unknown')}</span></div><div class="item-details" style="margin-top: 8px;"><span>🚢 ${escapeHtml(campaign?.vessel_name || 'N/A')} | ${escapeHtml(campaign?.cargo_status || 'Unknown')}</span><span>📆 ETA: ${escapeHtml(campaign?.eta || 'TBD')}</span><span style="color: #7CFC00;">💰 Est. Recovery: $${recoveryValue.toLocaleString()} (${campaign?.recovery_pct || 70}%)</span></div><div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;"><button class="btn-sm ${isWatched ? 'btn-success' : 'btn-outline'}" onclick="event.stopPropagation();toggleWatch('${escapeHtml(auction.id)}')">${isWatched ? '👁 Watching' : '👁 Watch'}</button><button class="btn-sm btn-primary" onclick="event.stopPropagation();deployPreviewBot('${escapeHtml(auction.id)}')">🤖 Deploy Bot</button><span style="font-size: 11px; color: #FFD966; margin-left: auto; align-self: center;">⏰ Goes live in ${hoursLeft}h</span></div></div>`;
+  }).join('');
+  document.querySelectorAll('[data-preview-id]').forEach(el => { el.onclick = () => showPreviewDetails(el.getAttribute('data-preview-id')); });
+}
+
+function toggleWatch(auctionId) { if (watchedAuctions.has(auctionId)) { watchedAuctions.delete(auctionId); showToast('Removed from watch list'); } else { watchedAuctions.add(auctionId); showToast('Added to watch list'); } renderPreviewBoard(); savePreviewState(); }
+function deployPreviewBot(auctionId) { const auction = previewAuctions.find(a => a.id === auctionId); if (!auction) return; currentEditingBot = null; document.getElementById('botModalTitle').textContent = `🤖 Bot for ${escapeHtml(auction.trade_campaigns?.product || 'Contract')}`; document.getElementById('editBotName').value = `${escapeHtml(auction.trade_campaigns?.product || 'Bot')} Sniper`; document.getElementById('editPremiumRate').value = 2.5; document.getElementById('editPremiumRateDisplay').textContent = '2.50%'; document.getElementById('editSniperPremium').checked = true; document.getElementById('editMinPremiumRate').value = 1.0; document.getElementById('editMinPremiumRateDisplay').textContent = '1.00%'; document.getElementById('editBudget').value = Math.min(10000, auction.trade_campaigns?.contract_value || 10000); document.getElementById('editBudgetDisplay').textContent = `$${Math.min(10000, auction.trade_campaigns?.contract_value || 10000).toLocaleString()}`; document.getElementById('editMaxContract').value = auction.trade_campaigns?.contract_value || 250000; document.getElementById('editMaxContractDisplay').textContent = `$${(auction.trade_campaigns?.contract_value || 250000).toLocaleString()}`; document.getElementById('editMinContract').value = Math.min(10000, auction.trade_campaigns?.contract_value || 10000); document.getElementById('editMinContractDisplay').textContent = `$${Math.min(10000, auction.trade_campaigns?.contract_value || 10000).toLocaleString()}`; pendingBotStrategies[auctionId] = { preConfigured: true }; document.getElementById('botConfigModal').style.display = 'flex'; }
+function showPreviewDetails(auctionId) { const auction = previewAuctions.find(a => a.id === auctionId); if (!auction) return; const campaign = auction.trade_campaigns; const recoveryValue = (campaign?.contract_value || 0) * (campaign?.recovery_pct || 70) / 100; document.getElementById('auctionResultsContent').innerHTML = `<div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</div></div><div class="modal-field"><label>Route</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</div></div><div class="modal-field"><label>Contract Value</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${(campaign?.contract_value || 0).toLocaleString()}</div></div><div class="modal-field"><label>Payment Terms</label><div class="tooltip" style="font-size:14px;">${campaign?.payment_terms_days || 0} days</div></div><div class="modal-field"><label>Buyer Country</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.buyer_country || 'Unknown')}</div></div><div class="modal-field"><label>Cargo</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.vessel_name || 'N/A')} | ${escapeHtml(campaign?.cargo_status || 'Unknown')} | ETA: ${escapeHtml(campaign?.eta || 'TBD')}</div></div><div class="modal-field"><label style="color: #7CFC00;">💰 Recovery Value (if default)</label><div class="tooltip" style="font-size:14px; color: #7CFC00;">$${recoveryValue.toLocaleString()} (${campaign?.recovery_pct || 70}% of contract)</div></div><div class="modal-field"><label>Auction Goes Live</label><div class="tooltip" style="font-size:14px;">${new Date(auction.auction_starts_at).toLocaleString()}</div></div><div class="tooltip">💡 Insurers can research buyer creditworthiness during preview. Bot will auto-bid when auction goes live.</div>`; document.getElementById('auctionResultsModal').style.display = 'flex'; }
+function savePreviewState() { localStorage.setItem('insurer_watched', JSON.stringify([...watchedAuctions])); localStorage.setItem('insurer_strategies', JSON.stringify(pendingBotStrategies)); }
+function loadPreviewState() { const saved = localStorage.getItem('insurer_watched'); if (saved) watchedAuctions = new Set(JSON.parse(saved)); const savedStrat = localStorage.getItem('insurer_strategies'); if (savedStrat) pendingBotStrategies = JSON.parse(savedStrat); }
+
+function renderUpcomingAuctions() {
+  const container = document.getElementById('upcomingAuctionsList');
+  if (!upcomingAuctions.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No upcoming auctions</div>'; return; }
+  container.innerHTML = upcomingAuctions.map(auction => { const campaign = auction.trade_campaigns; return `<div class="clickable-item" data-auction-id="${escapeHtml(auction.id)}"><div class="item-title"><span>🏦 ${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</span><span class="status-badge pending">💰 Contract: $${(campaign?.contract_value || 0).toLocaleString()}</span></div><div class="item-details"><span>📍 ${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</span><span>📅 Payment: ${campaign?.payment_terms_days || 0} days</span><span>⏰ ${new Date(auction.scheduled_at).toLocaleString()}</span></div></div>`; }).join('');
+  document.querySelectorAll('[data-auction-id]').forEach(el => { el.onclick = () => { const auction = upcomingAuctions.find(a => a.id === el.getAttribute('data-auction-id')); if (auction) { const campaign = auction.trade_campaigns; document.getElementById('auctionResultsContent').innerHTML = `<div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</div></div><div class="modal-field"><label>Route</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</div></div><div class="modal-field"><label>Contract Value</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${(campaign?.contract_value || 0).toLocaleString()}</div></div><div class="modal-field"><label>Payment Terms</label><div class="tooltip" style="font-size:14px;">${campaign?.payment_terms_days || 0} days</div></div><div class="modal-field"><label>Scheduled</label><div class="tooltip" style="font-size:14px;">${new Date(auction.scheduled_at).toLocaleString()}</div></div><div class="tooltip">💡 Insurance auction will start automatically at scheduled time</div>`; document.getElementById('auctionResultsModal').style.display = 'flex'; } }; });
+}
+
+async function loadActiveBids() {
+  try { const { data, error } = await supabase.from('insurance_bids').select('*, insurance_auctions(*, trade_campaigns(*))').eq('insurer_id', currentUser.id).eq('status', 'pending').order('created_at', { ascending: false }); if (error) throw error; activeBids = data || []; document.getElementById('activeBidsCount').textContent = activeBids.length; document.getElementById('activeBidsCountCard').textContent = activeBids.length; renderActiveBids(); } catch (err) { console.error('Error loading active bids:', err); }
+}
+function renderActiveBids() { const container = document.getElementById('activeBidsList'); if (!activeBids.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>'; return; } container.innerHTML = activeBids.map(bid => { const auction = bid.insurance_auctions; const campaign = auction?.trade_campaigns; return `<div class="clickable-item" data-bid-id="${escapeHtml(bid.id)}"><div class="item-title"><span>🏦 ${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</span><span class="status-badge pending">📊 ${bid.premium_rate}%</span></div><div class="item-details"><span>💰 $${(campaign?.contract_value || 0).toLocaleString()}</span><span>📍 ${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</span></div></div>`; }).join(''); document.querySelectorAll('[data-bid-id]').forEach(el => { el.onclick = async () => { const bid = activeBids.find(b => b.id === el.getAttribute('data-bid-id')); if (bid) { const auction = bid.insurance_auctions; const campaign = auction?.trade_campaigns; document.getElementById('bidDetailsContent').innerHTML = `<div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</div></div><div class="modal-field"><label>Route</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</div></div><div class="modal-field"><label>Contract Value</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${(campaign?.contract_value || 0).toLocaleString()}</div></div><div class="modal-field"><label>Your Premium Bid</label><div class="tooltip" style="font-size:14px;">${bid.premium_rate}%</div></div><div class="modal-field"><label>Status</label><div class="tooltip" style="font-size:14px;">Pending - Auction active</div></div>`; document.getElementById('bidDetailsModal').style.display = 'flex'; } }; }); }
+
+async function loadWonContracts() {
+  try { const { data, error } = await supabase.from('insurance_bids').select('*, insurance_auctions(*, trade_campaigns(*))').eq('insurer_id', currentUser.id).eq('status', 'won').order('created_at', { ascending: false }); if (error) throw error; wonContracts = data || []; document.getElementById('wonContractsCount').textContent = wonContracts.length; document.getElementById('wonContractsCountCard').textContent = wonContracts.length; renderWonContracts(); } catch (err) { console.error('Error loading won contracts:', err); }
+}
+function renderWonContracts() { const container = document.getElementById('wonContractsList'); if (!wonContracts.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No won contracts</div>'; return; } container.innerHTML = wonContracts.map(contract => { const auction = contract.insurance_auctions; const campaign = auction?.trade_campaigns; return `<div class="clickable-item" data-contract-id="${escapeHtml(contract.id)}"><div class="item-title"><span>🏆 ${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</span><span class="status-badge">WON: ${contract.premium_rate}%</span></div><div class="item-details"><span>💰 $${(campaign?.contract_value || 0).toLocaleString()}</span><span>⏳ Awaiting bank payment</span></div></div>`; }).join(''); document.querySelectorAll('[data-contract-id]').forEach(el => { el.onclick = async () => { const contract = wonContracts.find(c => c.id === el.getAttribute('data-contract-id')); if (contract) { const auction = contract.insurance_auctions; const campaign = auction?.trade_campaigns; document.getElementById('contractDetailsContent').innerHTML = `<div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</div></div><div class="modal-field"><label>Route</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</div></div><div class="modal-field"><label>Contract Value</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${(campaign?.contract_value || 0).toLocaleString()}</div></div><div class="modal-field"><label>Your Premium Rate</label><div class="tooltip" style="font-size:14px;">${contract.premium_rate}%</div></div><div class="modal-field"><label>Status</label><div class="tooltip status-badge" style="display:inline-block;">Won - Awaiting bank payment</div></div><div class="tooltip">💰 When bank wins banking auction, they will pay you: $${((campaign?.contract_value || 0) * (contract.premium_rate / 100)).toLocaleString()} + $25 refund</div>`; document.getElementById('contractModal').style.display = 'flex'; } }; }); }
+
+async function loadCompletedContracts() {
+  try { const { data, error } = await supabase.from('insurance_bids').select('*, insurance_auctions(*, trade_campaigns(*))').eq('insurer_id', currentUser.id).eq('status', 'completed').order('created_at', { ascending: false }); if (error) throw error; completedContracts = data || []; totalPremiumEarned = completedContracts.reduce((sum, c) => { const campaign = c.insurance_auctions?.trade_campaigns; const premium = (campaign?.contract_value || 0) * (c.premium_rate / 100); return sum + premium; }, 0); document.getElementById('completedCount').textContent = completedContracts.length; document.getElementById('completedCountCard').textContent = completedContracts.length; document.getElementById('totalPremium').textContent = `$${totalPremiumEarned.toLocaleString()}`; renderCompletedContracts(); } catch (err) { console.error('Error loading completed contracts:', err); }
+}
+function renderCompletedContracts() { const container = document.getElementById('completedList'); if (!completedContracts.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No completed contracts</div>'; return; } container.innerHTML = completedContracts.map(contract => { const auction = contract.insurance_auctions; const campaign = auction?.trade_campaigns; const premiumEarned = (campaign?.contract_value || 0) * (contract.premium_rate / 100); return `<div class="clickable-item" data-completed-id="${escapeHtml(contract.id)}"><div class="item-title"><span>✅ ${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</span><span class="status-badge">PAID: $${premiumEarned.toLocaleString()}</span></div><div class="item-details"><span>💰 ${contract.premium_rate}% premium</span><span>📅 ${new Date(contract.updated_at).toLocaleDateString()}</span></div></div>`; }).join(''); document.querySelectorAll('[data-completed-id]').forEach(el => { el.onclick = async () => { const contract = completedContracts.find(c => c.id === el.getAttribute('data-completed-id')); if (contract) { const auction = contract.insurance_auctions; const campaign = auction?.trade_campaigns; const premiumEarned = (campaign?.contract_value || 0) * (contract.premium_rate / 100); document.getElementById('contractDetailsContent').innerHTML = `<div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.product || 'Unknown')} - ${campaign?.quantity_mt || 0} MT</div></div><div class="modal-field"><label>Route</label><div class="tooltip" style="font-size:14px;">${escapeHtml(campaign?.origin || 'Unknown')} → ${escapeHtml(campaign?.destination || 'Unknown')}</div></div><div class="modal-field"><label>Contract Value</label><div class="tooltip" style="font-size:14px; color:#FFD966;">$${(campaign?.contract_value || 0).toLocaleString()}</div></div><div class="modal-field"><label>Your Premium Rate</label><div class="tooltip" style="font-size:14px;">${contract.premium_rate}%</div></div><div class="modal-field"><label>Premium Earned</label><div class="tooltip" style="font-size:14px; color:#7CFC00;">$${premiumEarned.toLocaleString()}</div></div><div class="modal-field"><label>Completed</label><div class="tooltip" style="font-size:14px;">${new Date(contract.updated_at).toLocaleString()}</div></div>`; document.getElementById('contractModal').style.display = 'flex'; } }; }); }
+
+async function loadInsurerBots() {
+  try { const { data, error } = await supabase.from('insurer_bots').select('*').eq('insurer_id', currentUser.id); if (error && error.code !== '42P01') console.error('Error loading bots:', error); insurerBots = data || []; renderInsurerBots(); } catch (err) { console.error('Error loading bots:', err); insurerBots = []; renderInsurerBots(); }
+}
+function renderInsurerBots() { const container = document.getElementById('botsGrid'); if (!insurerBots || !insurerBots.length) { container.innerHTML = '<div class="add-bot-card" id="addBotCard"><div class="add-bot-icon">+</div><div class="add-bot-text">Deploy Insurance Bot</div></div>'; attachAddBotHandler(); return; } container.innerHTML = insurerBots.map(bot => `<div class="bot-card" data-bot-id="${escapeHtml(bot.id)}"><div class="bot-emoji">🏦</div><div class="bot-name">${escapeHtml(bot.bot_name)}</div><div class="bot-status">${bot.is_active ? '● ACTIVE' : '○ IDLE'}</div><div class="bot-stats"><span>📊 ${bot.premium_rate}% (min ${bot.min_premium_rate}%)</span><span>💰 $${(bot.max_contract || 250000).toLocaleString()}</span>${bot.sniper_premium ? '<span>🎯 Sniper ON</span>' : ''}</div></div>`).join(''); const addCard = document.createElement('div'); addCard.className = 'add-bot-card'; addCard.id = 'addBotCard'; addCard.innerHTML = '<div class="add-bot-icon">+</div><div class="add-bot-text">Deploy Insurance Bot</div>'; container.appendChild(addCard); attachAddBotHandler(); }
+function attachAddBotHandler() { const addCard = document.getElementById('addBotCard'); if (addCard) addCard.onclick = () => { currentEditingBot = null; document.getElementById('botModalTitle').textContent = '🏦 Insurance Bot Configuration'; document.getElementById('editBotName').value = 'New Insurance Bot'; document.getElementById('editPremiumRate').value = 2.5; document.getElementById('editPremiumRateDisplay').textContent = '2.50%'; document.getElementById('editSniperPremium').checked = false; document.getElementById('editMinPremiumRate').value = 1.0; document.getElementById('editMinPremiumRateDisplay').textContent = '1.00%'; document.getElementById('editBudget').value = 10000; document.getElementById('editBudgetDisplay').textContent = '$10,000'; document.getElementById('editMaxContract').value = 250000; document.getElementById('editMaxContractDisplay').textContent = '$250,000'; document.getElementById('editMinContract').value = 10000; document.getElementById('editMinContractDisplay').textContent = '$10,000'; document.getElementById('botConfigModal').style.display = 'flex'; }; }
+function openBotConfig(bot) { currentEditingBot = bot; document.getElementById('botModalTitle').textContent = `🏦 ${escapeHtml(bot.bot_name)}`; document.getElementById('editBotName').value = bot.bot_name; document.getElementById('editPremiumRate').value = bot.premium_rate || 2.5; document.getElementById('editPremiumRateDisplay').textContent = `${(bot.premium_rate || 2.5).toFixed(2)}%`; document.getElementById('editSniperPremium').checked = bot.sniper_premium || false; document.getElementById('editMinPremiumRate').value = bot.min_premium_rate || 1.0; document.getElementById('editMinPremiumRateDisplay').textContent = `${(bot.min_premium_rate || 1.0).toFixed(2)}%`; document.getElementById('editBudget').value = bot.daily_budget || 10000; document.getElementById('editBudgetDisplay').textContent = `$${(bot.daily_budget || 10000).toLocaleString()}`; document.getElementById('editMaxContract').value = bot.max_contract || 250000; document.getElementById('editMaxContractDisplay').textContent = `$${(bot.max_contract || 250000).toLocaleString()}`; document.getElementById('editMinContract').value = bot.min_contract || 10000; document.getElementById('editMinContractDisplay').textContent = `$${(bot.min_contract || 10000).toLocaleString()}`; document.getElementById('botConfigModal').style.display = 'flex'; }
+async function saveInsurerBot() { const btn = document.getElementById('saveBotBtn'); btn.disabled = true; btn.textContent = 'Saving...'; showLoading('Saving bot...'); try { const premiumRate = parseFloat(document.getElementById('editPremiumRate').value); const minPremiumRate = parseFloat(document.getElementById('editMinPremiumRate').value); const maxContract = parseInt(document.getElementById('editMaxContract').value); const minContract = parseInt(document.getElementById('editMinContract').value); if (minPremiumRate > premiumRate) { showToast('Minimum premium rate cannot exceed maximum premium rate', true); return; } if (minContract > maxContract) { showToast('Minimum contract value cannot exceed maximum contract value', true); return; } const botName = document.getElementById('editBotName').value.trim(); if (!botName) { showToast('Bot name is required', true); return; } const botData = { bot_name: botName, insurer_id: currentUser.id, premium_rate: premiumRate, sniper_premium: document.getElementById('editSniperPremium').checked, min_premium_rate: minPremiumRate, daily_budget: parseFloat(document.getElementById('editBudget').value), max_contract: maxContract, min_contract: minContract, is_active: true, updated_at: new Date().toISOString() }; if (!currentEditingBot) { botData.created_at = new Date().toISOString(); botData.total_bids = 0; botData.total_wins = 0; const { data, error } = await supabase.from('insurer_bots').insert([botData]).select().single(); if (error) throw error; insurerBots.push(data); showToast(`Bot "${escapeHtml(botData.bot_name)}" created!`); } else { const { error } = await supabase.from('insurer_bots').update(botData).eq('id', currentEditingBot.id); if (error) throw error; Object.assign(currentEditingBot, botData); showToast(`Bot "${escapeHtml(botData.bot_name)}" updated!`); } renderInsurerBots(); document.getElementById('botConfigModal').style.display = 'none'; currentEditingBot = null; } catch (err) { showToast('Error saving bot: ' + err.message, true); } finally { btn.disabled = false; btn.textContent = 'Save Bot'; hideLoading(); } }
+async function depositFunds() { const amount = parseFloat(document.getElementById('depositAmount').value); if (isNaN(amount) || amount < 100) { showToast('Minimum deposit $100', true); return; } updateBlockedAmount(amount); showToast(`$${amount} added to wallet!`); document.getElementById('depositModal').style.display = 'none'; }
+async function refreshAll() { showLoading('Refreshing...'); try { await loadData(); showToast('Data refreshed!'); } catch (err) { showToast('Refresh failed', true); } finally { hideLoading(); } }
+
+document.querySelectorAll('.modal').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; }); });
+document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
+document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
+document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
+document.getElementById('confirmDepositBtn').onclick = depositFunds;
+document.getElementById('closeBotModal').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
+document.getElementById('cancelBotBtn').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
+document.getElementById('saveBotBtn').onclick = saveInsurerBot;
+document.getElementById('createBotBtn').onclick = () => { currentEditingBot = null; document.getElementById('botModalTitle').textContent = '🏦 Insurance Bot Configuration'; document.getElementById('editBotName').value = 'New Insurance Bot'; document.getElementById('editPremiumRate').value = 2.5; document.getElementById('editPremiumRateDisplay').textContent = '2.50%'; document.getElementById('editSniperPremium').checked = false; document.getElementById('editMinPremiumRate').value = 1.0; document.getElementById('editMinPremiumRateDisplay').textContent = '1.00%'; document.getElementById('editBudget').value = 10000; document.getElementById('editBudgetDisplay').textContent = '$10,000'; document.getElementById('editMaxContract').value = 250000; document.getElementById('editMaxContractDisplay').textContent = '$250,000'; document.getElementById('editMinContract').value = 10000; document.getElementById('editMinContractDisplay').textContent = '$10,000'; document.getElementById('botConfigModal').style.display = 'flex'; };
+document.getElementById('editPremiumRate').oninput = (e) => document.getElementById('editPremiumRateDisplay').textContent = `${parseFloat(e.target.value).toFixed(2)}%`;
+document.getElementById('editMinPremiumRate').oninput = (e) => document.getElementById('editMinPremiumRateDisplay').textContent = `${parseFloat(e.target.value).toFixed(2)}%`;
+document.getElementById('editBudget').oninput = (e) => document.getElementById('editBudgetDisplay').textContent = `$${parseInt(e.target.value).toLocaleString()}`;
+document.getElementById('editMaxContract').oninput = (e) => document.getElementById('editMaxContractDisplay').textContent = `$${parseInt(e.target.value).toLocaleString()}`;
+document.getElementById('editMinContract').oninput = (e) => document.getElementById('editMinContractDisplay').textContent = `$${parseInt(e.target.value).toLocaleString()}`;
+document.getElementById('refreshBtn').onclick = (e) => { e.preventDefault(); refreshAll(); };
+document.getElementById('signOutBtn').onclick = (e) => { e.preventDefault(); signOut(); };
+document.getElementById('closeBidDetailsModal').onclick = () => document.getElementById('bidDetailsModal').style.display = 'none';
+document.getElementById('closeBidDetailsBtn').onclick = () => document.getElementById('bidDetailsModal').style.display = 'none';
+document.getElementById('closeResultsModal').onclick = () => document.getElementById('auctionResultsModal').style.display = 'none';
+document.getElementById('closeResultsBtn').onclick = () => document.getElementById('auctionResultsModal').style.display = 'none';
+document.getElementById('closeContractModal').onclick = () => document.getElementById('contractModal').style.display = 'none';
+document.getElementById('closeContractBtn').onclick = () => document.getElementById('contractModal').style.display = 'none';
+document.getElementById('botsGrid').addEventListener('click', (e) => { const card = e.target.closest('.bot-card'); if (!card) return; const botId = card.getAttribute('data-bot-id'); const bot = insurerBots.find(b => b.id === botId); if (bot) openBotConfig(bot); });
+window.addEventListener('beforeunload', () => { if (realtimeChannel) supabase.removeChannel(realtimeChannel); });
+
+async function init() { try { await checkAuth(); } catch (err) { console.error('Init failed:', err); showToast('Failed to initialize dashboard', true); } }
+init();
+</script>
+</body>
+</html>

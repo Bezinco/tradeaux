@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Seller Auction | Live Bot Battle</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --neon-green: #7CFC00; --gold: #FFD966; --card-bg: linear-gradient(145deg, #0B1122, #030712); }
+    body { background: #020617; font-family: 'Inter', system-ui, sans-serif; color: #F0F3FA; overflow-x: hidden; }
+    
+    /* Background Waves */
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; border-radius: 50%; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.3), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.3), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+    
+    /* 3D Logo */
+    .gem-logo-corner { position: fixed; top: 20px; left: 20px; z-index: 9999; transform: scale(0.35); transform-origin: top left; pointer-events: none; }
+    .gem-text { display: flex; gap: 2px; font-family: 'Orbitron', sans-serif; font-size: 160px; font-weight: 900; text-transform: uppercase; line-height: 0.9; }
+    .gem-letter { animation: letterFloat 6s ease-in-out infinite; position: relative; }
+    .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; background: linear-gradient(145deg, #001a4a, #0066ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; background: linear-gradient(145deg, #004d1a, #00cc44); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; background: linear-gradient(145deg, #2a0000, #ea4a4a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    @keyframes letterFloat { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+    
+    /* Header */
+    .glass-header { backdrop-filter: blur(14px); background: rgba(3,5,12,0.7); border-bottom: 1px solid rgba(124,252,0,0.35); padding: 12px 28px; display: flex; justify-content: flex-end; align-items: center; position: relative; z-index: 12; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-size: 0.75rem; font-weight: 600; color: #BFC9E0; text-decoration: none; padding: 6px 18px; border-radius: 40px; border: 1px solid rgba(124,252,0,0.3); transition: 0.2s; background: rgba(0,0,0,0.3); }
+    .nav-links a:hover { border-color: var(--neon-green); color: var(--neon-green); }
+    
+    /* Seller Info Bar */
+    .seller-info-bar { max-width: 1100px; margin: 20px auto 10px; padding: 16px 24px; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); border-radius: 60px; border: 1px solid rgba(255,217,102,0.4); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; z-index: 10; position: relative; }
+    .seller-avatar { display: flex; align-items: center; gap: 16px; }
+    .avatar-placeholder { width: 70px; height: 70px; background: linear-gradient(135deg, #1a2a3a, #0a1222); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(124,252,0,0.3); }
+    .crop-image-placeholder { font-size: 32px; }
+    .seller-name h3 { font-size: 1.2rem; letter-spacing: 1px; }
+    .seller-name p { font-size: 0.7rem; color: #9ca6bb; }
+    .fob-line { font-size: 0.7rem; color: #7CFC00; margin-top: 4px; }
+    .inventory-stats { text-align: right; }
+    .remaining-qty { font-size: 1.8rem; font-weight: 800; color: var(--neon-green); }
+    
+    /* Auction Cockpit */
+    .auction-cockpit { max-width: 1100px; margin: 16px auto 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding: 0 24px; position: relative; z-index: 10; }
+    .timer-panel { background: rgba(0,0,0,0.65); backdrop-filter: blur(12px); border-radius: 48px; padding: 8px 28px; text-align: center; border: 1px solid rgba(124,252,0,0.5); }
+    .timer-digits { font-family: monospace; font-size: 2.4rem; font-weight: 800; color: var(--neon-green); text-shadow: 0 0 8px rgba(124,252,0,0.5); }
+    .timer-digits.warning { color: #FF4D4D; animation: pulseRed 0.7s infinite; }
+    @keyframes pulseRed { 0% { opacity: 1; } 100% { opacity: 0.8; } }
+    .stats-group { display: flex; gap: 28px; background: rgba(0,0,0,0.5); padding: 8px 28px; border-radius: 60px; }
+    .stat { text-align: center; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94A3B8; }
+    .stat-value { font-weight: 800; font-size: 1.3rem; color: var(--neon-green); }
+    
+    /* Controls */
+    .controls { display: flex; gap: 16px; margin: 16px 24px 24px; justify-content: center; z-index: 10; position: relative; }
+    .btn { border: none; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.85rem; padding: 10px 32px; border-radius: 48px; cursor: pointer; transition: 0.2s; background: rgba(20,30,50,0.9); color: white; }
+    .btn-primary { background: linear-gradient(105deg, #10b981, #2dd4bf); color: #010101; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,252,0,0.4); }
+    .btn-reset { background: linear-gradient(105deg, #9b2c2c, #e54848); }
+    
+    /* Cards Grid */
+    .cards-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 175px)); gap: 22px; justify-content: center; max-width: 980px; margin: 28px auto; padding: 0 20px; position: relative; z-index: 8; }
+    @media (max-width: 920px) { .cards-grid { grid-template-columns: repeat(4, minmax(0, 175px)); max-width: 740px; } }
+    @media (max-width: 720px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 190px)); gap: 20px; } }
+    @media (max-width: 460px) { .cards-grid { grid-template-columns: repeat(1, 200px); } }
+    
+    /* Flip Card */
+    .market-card { background: linear-gradient(145deg, #0B1122, #030712); border-radius: 24px; border: 1px solid rgba(124,252,0,0.35); padding: 14px 10px; cursor: pointer; transition: all 0.25s cubic-bezier(0.2,0.9,0.4,1.1); position: relative; backdrop-filter: blur(4px); }
+    .market-card:hover { border-color: var(--neon-green); transform: translateY(-5px); box-shadow: 0 25px 30px -14px rgba(124,252,0,0.25); }
+    .market-card.accepted { opacity: 0.4; filter: grayscale(0.3); pointer-events: none; }
+    
+    .rank-flag { position: absolute; top: -8px; left: 12px; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 40px; z-index: 3; backdrop-filter: blur(4px); }
+    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; box-shadow: 0 0 8px gold; }
+    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+    
+    .verified-badge { position: absolute; top: -6px; right: 10px; background: rgba(0,0,0,0.85); border-radius: 30px; padding: 3px 10px; font-size: 0.6rem; font-weight: 700; color: var(--neon-green); border: 1px solid #7CFC00; }
+    .product-emoji { font-size: 2.5rem; text-align: center; margin-bottom: 10px; }
+    .card-title { font-weight: 800; font-size: 0.9rem; text-align: center; }
+    .price-row { display: flex; justify-content: center; gap: 8px; margin: 6px 0; }
+    .current-price { font-weight: 800; font-size: 1.2rem; color: #FFE484; }
+    .bid-quantity { font-size: 0.65rem; color: #a0aec0; text-align: center; }
+    .heat-bar-container { margin: 8px 0; background: #1e293b; border-radius: 12px; height: 4px; overflow: hidden; }
+    .heat-fill { height: 100%; background: linear-gradient(90deg, #7CFC00, #FFD966); border-radius: 12px; }
+    .card-meta { display: flex; justify-content: space-between; font-size: 0.6rem; margin-top: 8px; color: #a0aec0; }
+    
+    .accept-btn { width: 100%; margin-top: 10px; padding: 6px; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; border-radius: 40px; font-weight: 700; font-size: 0.7rem; cursor: pointer; color: #010101; }
+    .accept-btn:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(124,252,0,0.5); }
+    
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.2s; }
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-card { background: #0B1122; max-width: 500px; width: 92%; border-radius: 40px; border: 1px solid #7CFC00; padding: 28px 24px; position: relative; }
+    .modal-close { position: absolute; right: 22px; top: 18px; background: none; border: none; font-size: 28px; color: #ccc; cursor: pointer; }
+    .contact-block { background: #03050C; border-radius: 24px; padding: 14px 18px; margin: 16px 0; font-size: 0.8rem; }
+    .accept-modal-btn { width: 100%; padding: 12px; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; border-radius: 40px; font-weight: 700; cursor: pointer; margin-top: 16px; color: #010101; }
+    
+    .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(70px); background: #0a1424cc; backdrop-filter: blur(12px); padding: 10px 24px; border-radius: 60px; font-size: 0.8rem; border-left: 4px solid #7CFC00; transition: 0.2s; opacity: 0; z-index: 200; white-space: nowrap; }
+    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+    footer { text-align: center; padding: 20px; font-size: 10px; color: #5c6b8a; border-top: 1px solid rgba(124,252,0,0.15); margin-top: 20px; }
+    @media (max-width: 800px) { .gem-logo-corner { transform: scale(0.25); } }
+  </style>
+</head>
+<body>
+<div class="bg-waves"><div class="wave-bg wave-emerald-bg"></div><div class="wave-bg wave-sapphire-bg"></div><div class="wave-bg wave-ruby-bg"></div></div>
+<div class="gem-logo-corner"><div class="gem-text"><span class="gem-letter" data-letter="T">T</span><span class="gem-letter" data-letter="R">R</span><span class="gem-letter" data-letter="A">A</span><span class="gem-letter" data-letter="D">D</span><span class="gem-letter" data-letter="E">E</span><span class="gem-letter" data-letter="A">A</span><span class="gem-letter" data-letter="U">U</span><span class="gem-letter" data-letter="X">X</span></div></div>
+<div class="glass-header"><div class="nav-links"><a href="#">LIVE</a><a href="#">CO-OPS</a><a href="#">LEADERBOARD</a></div></div>
+
+<div class="seller-info-bar">
+  <div class="seller-avatar"><div class="avatar-placeholder"><div class="crop-image-placeholder">🥥</div></div><div class="seller-name"><h3>MATALE COCONUT CO-OP</h3><p>⭐ 4.9 ★ (247 sales)</p><p class="fob-line">📍 FOB: COLOMBO, SRI LANKA</p></div></div>
+  <div class="inventory-stats"><div class="remaining-qty" id="remainingQuantity">0</div><div class="total-qty" id="totalQtyDisplay">kg available</div></div>
+</div>
+
+<div class="auction-cockpit">
+  <div class="timer-panel"><div class="timer-digits" id="timerMain">00:00</div></div>
+  <div class="stats-group"><div class="stat"><div class="stat-label">ACTIVE BIDS</div><div class="stat-value" id="statActive">0</div></div><div class="stat"><div class="stat-label">HIGHEST BID</div><div class="stat-value" id="statHighest">$0.00</div></div><div class="stat"><div class="stat-label">FEES</div><div class="stat-value" id="statFees">$0</div></div></div>
+</div>
+<div class="controls"><button class="btn btn-primary" id="startBtn">▶ START AUCTION (3 min)</button><button class="btn btn-reset" id="resetBtn">⟳ RESET</button></div>
+<div class="cards-grid" id="cardsGrid"></div>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal-card"><button class="modal-close" id="closeModalBtn">✕</button><div class="modal-header"><div class="modal-emoji" id="modalEmoji">🏢</div><div class="modal-title-xl" id="modalName">Buyer</div></div><div style="text-align:center; margin-bottom:12px;"><span style="font-size:2rem; font-weight:800; color:#FFD966;" id="modalPrice">$0.00</span><span style="font-size:0.8rem;" id="modalQty">0 kg</span></div><div class="contact-block"><div class="contact-row">👤 <strong>Contact:</strong> <span id="modalContact"></span></div><div class="contact-row">📧 <span id="modalEmail"></span></div><div class="contact-row">📱 <span id="modalPhone"></span></div></div><button class="accept-modal-btn" id="acceptFromModalBtn">✓ ACCEPT OFFER</button></div></div>
+<div class="toast-msg" id="toastMsg"></div>
+<footer>⚡ Highest bid wins • 3 minute auction • Bots bid automatically every 10 seconds</footer>
+
+<script>
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let activeBids = [], timerInterval = null, feesCollected = 0, remainingQty = 0, totalQty = 0, currentAuctionId = null, currentModalBid = null, refreshInterval = null;
+let auctionEndTime = null;
+
+async function loadActiveAuction() {
+  const { data: auctions, error } = await supabase.from('auctions').select('*').eq('status', 'active').order('created_at', { ascending: false }).limit(1);
+  if (error) { console.error(error); return; }
+  if (!auctions || auctions.length === 0) {
+    document.getElementById('cardsGrid').innerHTML = '<div style="color:#9ca3af;text-align:center;padding:40px;">No active auction. Click START AUCTION to begin a 3-minute bot battle.</div>';
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('startBtn').innerText = '▶ START AUCTION (3 min)';
+    document.getElementById('remainingQuantity').innerText = '0';
+    document.getElementById('timerMain').innerText = '00:00';
+    if (timerInterval) clearInterval(timerInterval);
+    return;
+  }
+  const auction = auctions[0];
+  currentAuctionId = auction.id;
+  totalQty = auction.total_quantity_kg;
+  remainingQty = auction.remaining_quantity_kg;
+  document.getElementById('remainingQuantity').innerText = remainingQty.toLocaleString();
+  document.getElementById('totalQtyDisplay').innerText = `${totalQty.toLocaleString()} kg available`;
+  
+  auctionEndTime = new Date(auction.end_time);
+  updateTimerDisplay();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (new Date() >= auctionEndTime) {
+      clearInterval(timerInterval);
+      document.getElementById('timerMain').innerText = '00:00';
+      document.getElementById('timerMain').classList.add('warning');
+    } else {
+      updateTimerDisplay();
+    }
+  }, 1000);
+  
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('startBtn').innerText = '⚡ AUCTION LIVE';
+}
+
+function updateTimerDisplay() {
+  if (!auctionEndTime) return;
+  const diff = Math.max(0, Math.floor((auctionEndTime - new Date()) / 1000));
+  const mins = Math.floor(diff / 60);
+  const secs = diff % 60;
+  document.getElementById('timerMain').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  if (diff <= 10) document.getElementById('timerMain').classList.add('warning');
+  else document.getElementById('timerMain').classList.remove('warning');
+}
+
+async function loadBids() {
+  if (!currentAuctionId) return;
+  const { data: bids, error } = await supabase.from('bids').select('*').eq('auction_id', currentAuctionId).eq('status', 'pending').order('price_per_kg', { ascending: false });
+  if (error) { console.error(error); return; }
+  activeBids = (bids || []).map(bid => ({
+    id: bid.id, buyerName: bid.buyer_name, contactPerson: bid.buyer_name,
+    email: bid.buyer_contact_email || 'bot@tradeaux.com', phone: bid.buyer_contact_phone || '+1 (555) 000-0000',
+    price: bid.price_per_kg, quantity: bid.quantity_kg, totalValue: bid.price_per_kg * bid.quantity_kg,
+    accepted: false, heat: 30 + Math.random() * 60
+  }));
+  renderCards();
+  updateStats();
+}
+
+function renderCards() {
+  const container = document.getElementById('cardsGrid');
+  container.innerHTML = '';
+  activeBids.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = `market-card ${card.accepted ? 'accepted' : ''}`;
+    div.setAttribute('data-id', card.id);
+    const rankVal = idx + 1;
+    const rankHtml = rankVal <= 3 ? `<div class="rank-flag ${rankVal===1?'rank-1':rankVal===2?'rank-2':'rank-3'}">#${rankVal}</div>` : `<div class="rank-flag" style="background:#1e293b;">#${rankVal}</div>`;
+    const heatPercent = Math.min(100, Math.max(8, card.heat));
+    div.innerHTML = `${rankHtml}<div class="verified-badge">🤖 Bot Bid</div><div class="product-emoji">🤖</div><div class="card-title">${card.buyerName}</div><div class="price-row"><span class="current-price">$${card.price.toFixed(2)}</span></div><div class="bid-quantity">📦 ${card.quantity.toLocaleString()} kg · $${card.totalValue.toLocaleString()}</div><div class="heat-bar-container"><div class="heat-fill" style="width: ${heatPercent}%;"></div></div><div class="card-meta"><span>🔥 ${Math.round(card.heat)}°</span></div>${!card.accepted ? `<button class="accept-btn" onclick="event.stopPropagation(); acceptOffer('${card.id}')">✓ ACCEPT OFFER</button>` : '<button class="accept-btn" disabled>✓ ACCEPTED</button>'}`;
+    div.onclick = (e) => { if(!e.target.classList.contains('accept-btn')) openModal(card, idx+1); };
+    container.appendChild(div);
+  });
+  if (activeBids.length === 0 && currentAuctionId) container.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:40px;">🤖 Bots are preparing bids... Watch this space!</div>';
+  else if (activeBids.length === 0) container.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:40px;">Click START AUCTION to begin the 3-minute bot battle!</div>';
+}
+
+function updateStats() {
+  const activeCount = activeBids.filter(c => !c.accepted).length;
+  const highestBid = activeBids.filter(c => !c.accepted).sort((a,b) => b.price - a.price)[0]?.price || 0;
+  document.getElementById('statActive').innerText = activeCount;
+  document.getElementById('statHighest').innerText = `$${highestBid.toFixed(2)}`;
+  document.getElementById('statFees').innerText = `$${feesCollected}`;
+  document.getElementById('remainingQuantity').innerText = remainingQty.toLocaleString();
+}
+
+async function acceptOffer(bidId) {
+  const bid = activeBids.find(c => c.id === bidId);
+  if(!bid || bid.accepted) return;
+  if(bid.quantity > remainingQty) { showToast(`Only ${remainingQty} kg remaining`, true); return; }
+  const { error } = await supabase.from('bids').update({ status: 'accepted' }).eq('id', bidId);
+  if (error) { showToast(error.message, true); return; }
+  bid.accepted = true;
+  remainingQty -= bid.quantity;
+  feesCollected += 25;
+  showToast(`✓ Accepted ${bid.buyerName}: ${bid.quantity} kg @ $${bid.price}/kg`);
+  renderCards();
+  updateStats();
+  if(remainingQty <= 0) { showToast("🎉 INVENTORY SOLD OUT!"); if(timerInterval) clearInterval(timerInterval); }
+}
+
+function openModal(card, rank) {
+  document.getElementById('modalEmoji').innerHTML = "🤖";
+  document.getElementById('modalName').innerHTML = card.buyerName;
+  document.getElementById('modalPrice').innerHTML = `$${card.price.toFixed(2)}`;
+  document.getElementById('modalQty').innerHTML = `${card.quantity.toLocaleString()} kg · Total: $${card.totalValue.toLocaleString()}`;
+  document.getElementById('modalContact').innerHTML = card.contactPerson;
+  document.getElementById('modalEmail').innerHTML = card.email;
+  document.getElementById('modalPhone').innerHTML = card.phone;
+  document.getElementById('modalOverlay').classList.add('active');
+  currentModalBid = card;
+}
+function acceptFromModal() { if(currentModalBid) acceptOffer(currentModalBid.id); document.getElementById('modalOverlay').classList.remove('active'); }
+function closeModalFn() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+async function startAuction() {
+  showToast("🚀 Creating 3-minute auction...");
+  await supabase.from('auctions').update({ status: 'ended' }).eq('status', 'active');
+  const { data: sellers } = await supabase.from('sellers').select('id').limit(1);
+  if (!sellers || sellers.length === 0) { showToast("No seller found!", true); return; }
+  const endTime = new Date(Date.now() + 3 * 60000).toISOString();
+  const { data: newAuction, error } = await supabase.from('auctions').insert({
+    seller_id: sellers[0].id, product_name: `Bot Battle ${new Date().toLocaleTimeString()}`,
+    product_category: 'coconuts', total_quantity_kg: 25000, remaining_quantity_kg: 25000,
+    origin_country: 'Sri Lanka', fob_port: 'Colombo', quality_specs: { moisture: 10, oil_content: 67 },
+    certificates: { organic: true }, status: 'active', end_time: endTime
+  }).select();
+  if (error) { showToast(error.message, true); return; }
+  currentAuctionId = newAuction[0].id;
+  totalQty = 25000; remainingQty = 25000;
+  auctionEndTime = new Date(endTime);
+  showToast("✅ Auction created! Bots will bid every 10 seconds for 3 minutes.");
+  setTimeout(() => { loadActiveAuction(); loadBids(); }, 1000);
+  setTimeout(() => fetch('https://pfutaovwbygefummienf.supabase.co/functions/v1/buyer-bot', { method: 'POST' }), 2000);
+}
+
+async function resetAuction() {
+  showToast("🔄 Resetting...");
+  if (currentAuctionId) await supabase.from('bids').delete().eq('auction_id', currentAuctionId);
+  await supabase.from('auctions').delete().eq('status', 'active');
+  await supabase.from('buyer_bots').update({ wallet_balance: 500 }).eq('is_active', true);
+  currentAuctionId = null; activeBids = []; remainingQty = 0; totalQty = 0; feesCollected = 0;
+  if (timerInterval) clearInterval(timerInterval);
+  renderCards(); updateStats();
+  document.getElementById('remainingQuantity').innerText = '0';
+  document.getElementById('timerMain').innerText = '00:00';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('startBtn').innerText = '▶ START AUCTION (3 min)';
+  showToast("✅ Reset complete!");
+  loadActiveAuction();
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toastMsg');
+  t.innerText = msg;
+  t.style.borderLeftColor = isError ? '#FF5E5E' : '#7CFC00';
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 4000);
+}
+
+function startRefreshLoop() { if (refreshInterval) clearInterval(refreshInterval); refreshInterval = setInterval(() => { loadActiveAuction(); loadBids(); }, 3000); }
+
+document.getElementById('startBtn').addEventListener('click', startAuction);
+document.getElementById('resetBtn').addEventListener('click', resetAuction);
+document.getElementById('closeModalBtn').addEventListener('click', closeModalFn);
+document.getElementById('acceptFromModalBtn').addEventListener('click', acceptFromModal);
+document.getElementById('modalOverlay').addEventListener('click', (e) => { if(e.target === document.getElementById('modalOverlay')) closeModalFn(); });
+
+loadActiveAuction(); loadBids(); startRefreshLoop();
+</script>
+</body>
+</html>

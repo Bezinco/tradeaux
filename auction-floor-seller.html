@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://*.googleapis.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://firestore.googleapis.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://*.googleapis.com https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://pfutaovwbygefummienf.supabase.co;">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>TradeAux • Seller Auction | Highest Bid Wins</title>
+  <title>TradeAux • Seller Auction | DUHE + Bot Bids</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -642,8 +640,6 @@
       .gem-logo-corner { transform: scale(0.25); }
     }
   </style>
-<base target="_blank">
-<base target="_blank">
 </head>
 <body>
 
@@ -726,20 +722,10 @@
 <footer>⚡ Highest bid wins • Click any card for buyer contact • Accept offer captures $25 fee</footer>
 
 <script>
-// ========== FIREBASE CONFIG ==========
-const firebaseConfig = {
-  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
-  authDomain: "tradeaux-c72c7.firebaseapp.com",
-  projectId: "tradeaux-c72c7",
-  storageBucket: "tradeaux-c72c7.firebasestorage.app",
-  messagingSenderId: "187412805510",
-  appId: "1:187412805510:web:3e564135565d309b745e07",
-  measurementId: "G-JL4PCGZR16"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+// ========== SUPABASE CONFIG ==========
+const SUPABASE_URL = "https://pfutaovwbygefummienf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ========== STATE ==========
 let currentUser = null;
@@ -753,96 +739,247 @@ let feesCollected = 0;
 let remainingQty = 0;
 let totalQty = 0;
 let currentModalBid = null;
-let bidsUnsub = null;
+let bidsChannel = null;
 let duheSolution = null;
+let currentAuctionId = null;
+let authSubscription = null;
 
 // ========== AUTH GUARD ==========
-auth.onAuthStateChanged(async user => {
-  if (!user) { window.location.href = 'signin.html'; return; }
-  currentUser = user;
+async function initAuth() {
+  // Check for existing session
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) {
+    console.error("Auth session error:", error);
+    redirectToSignin();
+    return;
+  }
+  if (!session) {
+    redirectToSignin();
+    return;
+  }
+  currentUser = session.user;
+  console.log("✅ Authenticated:", currentUser.email);
+  await onAuthReady();
+
+  // Listen for auth changes
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Auth event:", event);
+    if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      redirectToSignin();
+    } else if (session) {
+      currentUser = session.user;
+    }
+  });
+  authSubscription = subscription;
+}
+
+function redirectToSignin() {
+  window.location.href = 'signin.html';
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  if (authSubscription) authSubscription.unsubscribe();
+  redirectToSignin();
+}
+
+// ========== INIT AFTER AUTH ==========
+async function onAuthReady() {
   await loadSellerProfile();
   await loadBriefAndBids();
-});
+  await subscribeToSupabaseBids();
+}
 
 // ========== LOAD SELLER PROFILE ==========
 async function loadSellerProfile() {
-  const profileDoc = await db.collection('profiles').doc(currentUser.uid).get();
-  if (!profileDoc.exists || profileDoc.data().role !== 'seller') {
-    showToast('Seller profile not found', true);
-    return;
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (error || !profile) {
+      console.warn("Profile not found, trying sellers table...");
+      // Fallback to sellers table
+      const { data: seller, error: sellerErr } = await supabase
+        .from('sellers')
+        .select('*')
+        .limit(1)
+        .single();
+      if (sellerErr || !seller) {
+        showToast('Seller profile not found', true);
+        return;
+      }
+      currentSeller = seller;
+    } else {
+      currentSeller = profile;
+    }
+
+    document.getElementById('sellerNameDisplay').innerText = 
+      (currentSeller.coop_name || currentSeller.business_name || currentSeller.full_name || currentSeller.name || 'Unknown Co-op').toUpperCase();
+    document.getElementById('sellerMetaDisplay').innerHTML = 
+      `⭐ ${currentSeller.rating || '4.5'} ★ (${currentSeller.sales_count || currentSeller.sales || 0} sales) • Member since ${currentSeller.member_since || '2023'}`;
+    document.getElementById('sellerFobDisplay').innerText = 
+      `📍 FOB: ${currentSeller.fob_port || currentSeller.location || 'Colombo, Sri Lanka'}`;
+  } catch (err) {
+    console.error("Error loading seller profile:", err);
+    showToast('Error loading profile', true);
   }
-  currentSeller = { id: profileDoc.id, ...profileDoc.data() };
-  document.getElementById('sellerNameDisplay').innerText = currentSeller.coop_name || currentSeller.full_name || 'Unknown Co-op';
-  document.getElementById('sellerMetaDisplay').innerHTML = `⭐ ${currentSeller.rating || '4.5'} ★ (${currentSeller.sales_count || 0} sales) • Member since ${currentSeller.member_since || '2023'}`;
-  document.getElementById('sellerFobDisplay').innerText = `📍 FOB: ${currentSeller.fob_port || 'Colombo, Sri Lanka'}`;
 }
 
 // ========== LOAD BRIEF & BIDS ==========
 async function loadBriefAndBids() {
-  const briefSnapshot = await db.collection('seller_briefs')
-    .where('sellerId', '==', currentUser.uid)
-    .where('status', 'in', ['active', 'auctioning'])
-    .orderBy('createdAt', 'desc')
-    .limit(1)
-    .get();
+  try {
+    // Get the most recent active brief for this seller
+    const { data: briefs, error } = await supabase
+      .from('seller_briefs')
+      .select('*')
+      .eq('seller_id', currentUser.id)
+      .in('status', ['active', 'auctioning'])
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-  if (briefSnapshot.empty) {
-    showToast('No active brief found. Create one in the dashboard.', true);
-    document.getElementById('cardsGrid').innerHTML = '<div style="color:#9ca3af;text-align:center;padding:40px;">No active seller brief. Go to dashboard to create one.</div>';
+    if (error) throw error;
+
+    if (!briefs || briefs.length === 0) {
+      showToast('No active brief found. Create one in the dashboard.', true);
+      document.getElementById('cardsGrid').innerHTML = 
+        '<div style="color:#9ca3af;text-align:center;padding:40px;">No active seller brief. Go to dashboard to create one.</div>';
+      return;
+    }
+
+    currentBrief = briefs[0];
+    totalQty = currentBrief.quantity_mt || 500;
+    remainingQty = currentBrief.remaining_mt || totalQty;
+    feesCollected = currentBrief.fees_collected || 0;
+
+    // Restore auction state if it was running
+    if (currentBrief.status === 'auctioning' && currentBrief.started_at) {
+      const startedAt = new Date(currentBrief.started_at);
+      const elapsed = Math.floor((Date.now() - startedAt.getTime()) / 1000);
+      timerSeconds = Math.max(0, 180 - elapsed);
+      if (timerSeconds > 0) {
+        auctionActive = true;
+        startTimerLoop();
+        document.getElementById('startBtn').innerText = '⏳ AUCTION RUNNING';
+        document.getElementById('startBtn').disabled = true;
+      } else {
+        onAuctionEnd();
+      }
+    }
+
+    document.getElementById('remainingQuantity').innerText = remainingQty;
+    document.getElementById('totalQtyDisplay').innerText = `MT remaining of ${totalQty} MT total`;
+
+    // Load existing bids for this brief
+    await loadBidsForBrief(currentBrief.id);
+  } catch (err) {
+    console.error("Error loading brief:", err);
+    showToast('Error loading brief', true);
+  }
+}
+
+// ========== LOAD BIDS FOR BRIEF ==========
+async function loadBidsForBrief(briefId) {
+  try {
+    const { data: bids, error } = await supabase
+      .from('bids')
+      .select('*')
+      .eq('brief_id', briefId)
+      .eq('status', 'pending')
+      .order('amount', { ascending: false });
+
+    if (error) throw error;
+
+    activeBids = (bids || []).map(bid => ({
+      id: bid.id,
+      buyerName: bid.buyer_name || 'Unknown Buyer',
+      contactPerson: bid.buyer_contact || 'Unknown',
+      email: bid.buyer_email || 'buyer@example.com',
+      phone: bid.buyer_phone || '+1 (555) 123-4567',
+      whatsapp: bid.buyer_whatsapp || bid.buyer_phone,
+      price: bid.amount || 0,
+      quantity: bid.quantity_mt || 20,
+      totalValue: (bid.amount || 0) * (bid.quantity_mt || 20),
+      accepted: bid.status === 'accepted',
+      change: ((bid.amount || 0) - (bid.previous_amount || 0)) / (bid.previous_amount || 1) * 100,
+      heat: Math.min(100, (bid.bid_count || 1) * 15 + 30),
+      fromSupabase: true
+    }));
+
+    renderCardsWithJostle();
+    updateStats();
+  } catch (err) {
+    console.error("Error loading bids:", err);
+  }
+}
+
+// ========== SUBSCRIBE TO REALTIME BIDS ==========
+async function subscribeToSupabaseBids() {
+  if (bidsChannel) {
+    await supabase.removeChannel(bidsChannel);
+  }
+
+  // Find the auction for this seller's current brief
+  if (!currentBrief) return;
+
+  const { data: auctions, error } = await supabase
+    .from('auctions')
+    .select('id')
+    .eq('seller_id', currentUser.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error('Error fetching auction:', error);
     return;
   }
 
-  const briefDoc = briefSnapshot.docs[0];
-  currentBrief = { id: briefDoc.id, ...briefDoc.data() };
-  totalQty = currentBrief.quantity_mt || 500;
-  remainingQty = currentBrief.remaining_mt || totalQty;
-  feesCollected = currentBrief.fees_collected || 0;
-
-  // Restore auction state from Firestore if it was running
-  if (currentBrief.status === 'auctioning' && currentBrief.startedAt) {
-    const startedAt = currentBrief.startedAt.toDate ? currentBrief.startedAt.toDate() : new Date(currentBrief.startedAt);
-    const elapsed = Math.floor((Date.now() - startedAt.getTime()) / 1000);
-    timerSeconds = Math.max(0, 180 - elapsed);
-    if (timerSeconds > 0) {
-      auctionActive = true;
-      startTimerLoop();
-      document.getElementById('startBtn').innerText = '⏳ AUCTION RUNNING';
-      document.getElementById('startBtn').disabled = true;
-    } else {
-      // Auction expired while page was away
-      onAuctionEnd();
-    }
+  if (!auctions || auctions.length === 0) {
+    console.log('No active auction found');
+    return;
   }
 
-  document.getElementById('remainingQuantity').innerText = remainingQty;
-  document.getElementById('totalQtyDisplay').innerText = `MT remaining of ${totalQty} MT total`;
+  currentAuctionId = auctions[0].id;
+  console.log('Subscribing to bids for auction:', currentAuctionId);
 
-  // Real-time bid listener
-  if (bidsUnsub) bidsUnsub();
-  bidsUnsub = db.collection('bids')
-    .where('brief_id', '==', currentBrief.id)
-    .where('status', '==', 'pending')
-    .orderBy('amount', 'desc')
-    .onSnapshot(snapshot => {
-      activeBids = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          buyerName: data.buyer_name || 'Unknown Buyer',
-          contactPerson: data.buyer_contact || 'Unknown',
-          email: data.buyer_email || 'buyer@example.com',
-          phone: data.buyer_phone || '+1 (555) 123-4567',
-          whatsapp: data.buyer_whatsapp || data.buyer_phone,
-          price: data.amount || 0,
-          quantity: data.quantity_mt || 20,
-          totalValue: (data.amount || 0) * (data.quantity_mt || 20),
-          accepted: data.status === 'accepted',
-          change: ((data.amount || 0) - (data.previous_amount || 0)) / (data.previous_amount || 1) * 100,
-          heat: Math.min(100, (data.bid_count || 1) * 15 + 30)
-        };
-      });
-      renderCardsWithJostle();
-      updateStats();
+  bidsChannel = supabase
+    .channel('bids-channel')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'bids',
+      filter: `auction_id=eq.${currentAuctionId}`
+    }, (payload) => {
+      console.log('New bid from Supabase:', payload.new);
+      const newBid = {
+        id: payload.new.id,
+        buyerName: payload.new.buyer_name || 'Buyer Bot',
+        contactPerson: payload.new.buyer_name || 'Bot',
+        email: payload.new.buyer_contact_email || 'bot@tradeaux.com',
+        phone: payload.new.buyer_contact_phone || '+1 (555) 000-0000',
+        whatsapp: payload.new.buyer_contact_phone || '+1 (555) 000-0000',
+        price: payload.new.price_per_kg || payload.new.amount || 0,
+        quantity: payload.new.quantity_kg || payload.new.quantity_mt || 20,
+        totalValue: (payload.new.price_per_kg || payload.new.amount || 0) * (payload.new.quantity_kg || payload.new.quantity_mt || 20),
+        accepted: false,
+        change: 0,
+        heat: 50 + Math.random() * 40,
+        fromSupabase: true
+      };
+
+      if (!activeBids.some(b => b.id === newBid.id)) {
+        activeBids.push(newBid);
+        activeBids.sort((a, b) => b.price - a.price);
+        renderCardsWithJostle();
+        updateStats();
+        showToast(`🤖 New bid from ${newBid.buyerName}: $${newBid.price}/kg for ${newBid.quantity} MT`, false);
+      }
+    })
+    .subscribe((status) => {
+      console.log('Realtime subscription status:', status);
     });
 }
 
@@ -863,7 +1000,6 @@ function renderCardsWithJostle() {
     const changeClass = changePct >= 0 ? 'up' : 'down';
     const heatPercent = Math.min(100, Math.max(8, card.heat));
 
-    // DUHE FLOW: Disable accept buttons during auction
     let actionButton;
     if (auctionActive) {
       actionButton = `<button class="accept-btn" disabled style="opacity:0.3;cursor:not-allowed;">⏳ DUHE PENDING</button>`;
@@ -875,7 +1011,7 @@ function renderCardsWithJostle() {
 
     div.innerHTML = `
       ${rankHtml}
-      <div class="verified-badge">✓ Buyer Verified</div>
+      <div class="verified-badge">✓ ${card.fromSupabase ? 'Bot Bid' : 'Buyer Verified'}</div>
       <div class="product-visual"><div class="product-emoji">🏢</div></div>
       <div class="card-title">${card.buyerName}</div>
       <div class="contact-name">📞 ${card.contactPerson}</div>
@@ -905,16 +1041,10 @@ function updateStats() {
 
 // ========== DUHE SOLVER ==========
 function runDUHESolver(bids, inventory) {
-  // Filter only pending bids (not already accepted)
   const pendingBids = bids.filter(b => !b.accepted);
-
-  // Sort by price descending
   const sortedBids = [...pendingBids].sort((a, b) => b.price - a.price);
-
   let selectedBids = [];
   let remaining = inventory;
-
-  // Greedy knapsack: take highest price bids that fit
   for (const bid of sortedBids) {
     if (bid.quantity <= remaining) {
       selectedBids.push(bid);
@@ -922,11 +1052,9 @@ function runDUHESolver(bids, inventory) {
     }
     if (remaining <= 0) break;
   }
-
   const solved = (remaining === 0);
   const fillPercent = ((inventory - remaining) / inventory) * 100;
   const nearSolve = (remaining > 0 && remaining <= inventory * 0.05);
-
   return {
     solved,
     nearSolve,
@@ -943,8 +1071,6 @@ function runDUHESolver(bids, inventory) {
 // ========== DUHE PROPOSAL MODAL ==========
 function showDUHEProposalModal(solution) {
   duheSolution = solution;
-
-  // Remove any existing DUHE modal
   const existing = document.getElementById('duheModal');
   if (existing) existing.remove();
 
@@ -962,7 +1088,6 @@ function showDUHEProposalModal(solution) {
             : `<span style="color:#FFD966;">⚠️ ${solution.fillPercent.toFixed(1)}% cleared (${solution.remaining} MT remaining)</span>`
           }
         </p>
-
         <div style="margin: 20px 0; max-height: 280px; overflow-y: auto;">
           <h3 style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 12px;">WINNING BUYERS (${solution.winners.length})</h3>
           ${solution.winners.map((w, i) => `
@@ -981,7 +1106,6 @@ function showDUHEProposalModal(solution) {
           `).join('')}
           ${solution.winners.length === 0 ? '<div style="color:#FF5E5E; text-align:center; padding:20px;">No winning bids found.</div>' : ''}
         </div>
-
         <div style="background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2);">
           <div style="display:flex; justify-content:space-between; margin: 6px 0; font-size: 0.85rem;">
             <span style="color:#94A3B8;">Total Value:</span>
@@ -1000,7 +1124,6 @@ function showDUHEProposalModal(solution) {
             <span style="color:#7CFC00; font-weight:800;">$${solution.netToCoop.toLocaleString()}</span>
           </div>
         </div>
-
         ${solution.nearSolve ? `
           <div style="background: rgba(255,217,102,0.1); border: 1px solid #FFD966; padding: 14px; border-radius: 20px; margin: 16px 0;">
             <div style="color:#FFD966; font-weight:700; margin-bottom: 8px;">⚡ NEAR-SOLVE OPPORTUNITY</div>
@@ -1015,44 +1138,30 @@ function showDUHEProposalModal(solution) {
             </button>
           </div>
         ` : ''}
-
         <div style="display: flex; gap: 12px; margin-top: 24px;">
-          <button id="acceptDuheBtn" style="flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem; transition: 0.2s;">
+          <button id="acceptDuheBtn" style="flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem;">
             ✅ ACCEPT DUHE SOLUTION
           </button>
-          <button id="rejectDuheBtn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem; transition: 0.2s;">
+          <button id="rejectDuheBtn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem;">
             ❌ REJECT & RELIST
           </button>
         </div>
       </div>
     </div>
   `;
-
   document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-  document.getElementById('acceptDuheBtn').onclick = async () => {
-    await acceptDUHESolution(solution);
-  };
-
+  document.getElementById('acceptDuheBtn').onclick = async () => { await acceptDUHESolution(solution); };
   document.getElementById('rejectDuheBtn').onclick = async () => {
     document.getElementById('duheModal').remove();
     showToast("❌ DUHE solution rejected. You can relist the inventory.", true);
-
-    // Update brief status back to active
-    await db.collection('seller_briefs').doc(currentBrief.id).update({
-      status: 'active',
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Reset UI
+    await supabase.from('seller_briefs').update({ 
+      status: 'active', 
+      updated_at: new Date().toISOString() 
+    }).eq('id', currentBrief.id);
     document.getElementById('startBtn').innerText = '▶ START AUCTION';
     document.getElementById('startBtn').disabled = false;
   };
-
-  document.getElementById('closeDuheModal').onclick = () => {
-    document.getElementById('duheModal').remove();
-  };
-
+  document.getElementById('closeDuheModal').onclick = () => { document.getElementById('duheModal').remove(); };
   if (document.getElementById('nearSolveBtn')) {
     document.getElementById('nearSolveBtn').onclick = () => {
       document.getElementById('duheModal').remove();
@@ -1061,14 +1170,11 @@ function showDUHEProposalModal(solution) {
   }
 }
 
-// ========== ACCEPT DUHE SOLUTION (batch accept) ==========
 async function acceptDUHESolution(solution) {
   const btn = document.getElementById('acceptDuheBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
-
   try {
     let acceptedCount = 0;
-
     for (const winner of solution.winners) {
       try {
         const result = await acceptBidTransaction(winner.id, currentBrief.id);
@@ -1077,16 +1183,11 @@ async function acceptDUHESolution(solution) {
           remainingQty = result.remaining_mt;
           feesCollected = result.fees_collected;
         }
-      } catch (err) {
-        console.error(`Failed to accept bid ${winner.id}:`, err);
-      }
+      } catch (err) { console.error(`Failed to accept bid ${winner.id}:`, err); }
     }
-
     document.getElementById('duheModal').remove();
-
     if (acceptedCount > 0) {
       showToast(`✅ DUHE solution accepted! ${acceptedCount} buyers notified.`);
-
       if (solution.solved || remainingQty <= 0) {
         showToast("🎉 Full inventory cleared! Auction complete.");
         document.getElementById('startBtn').innerText = 'AUCTION COMPLETE';
@@ -1096,7 +1197,6 @@ async function acceptDUHESolution(solution) {
         document.getElementById('startBtn').innerText = '▶ START NEW AUCTION';
         document.getElementById('startBtn').disabled = false;
       }
-
       renderCardsWithJostle();
       updateStats();
     } else {
@@ -1108,11 +1208,9 @@ async function acceptDUHESolution(solution) {
   }
 }
 
-// ========== CO-OP NEGOTIATION MODAL ==========
 function showCoopNegotiation(extraNeeded, pricePerMT) {
   const existing = document.getElementById('negotiateModal');
   if (existing) existing.remove();
-
   const modalHtml = `
     <div class="modal-overlay active" id="negotiateModal">
       <div class="modal-card" style="max-width: 480px;">
@@ -1140,74 +1238,53 @@ function showCoopNegotiation(extraNeeded, pricePerMT) {
       </div>
     </div>
   `;
-
   document.body.insertAdjacentHTML('beforeend', modalHtml);
-
   document.getElementById('foundSupplyBtn').onclick = async () => {
-    // Expand inventory
     totalQty += extraNeeded;
     remainingQty += extraNeeded;
-
-    await db.collection('seller_briefs').doc(currentBrief.id).update({
+    await supabase.from('seller_briefs').update({
       quantity_mt: totalQty,
       remaining_mt: remainingQty,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
+      updated_at: new Date().toISOString()
+    }).eq('id', currentBrief.id);
     document.getElementById('negotiateModal').remove();
     showToast(`📦 Inventory expanded by ${extraNeeded} MT. Re-running DUHE...`);
-
-    // Re-run DUHE with expanded inventory
     const newSolution = runDUHESolver(activeBids, remainingQty);
     showDUHEProposalModal(newSolution);
   };
-
   document.getElementById('noSupplyBtn').onclick = () => {
     document.getElementById('negotiateModal').remove();
     showToast("Sale will complete with partial fill.", true);
-    // Show the previous DUHE modal again
     if (duheSolution) showDUHEProposalModal(duheSolution);
   };
-
   document.getElementById('closeNegotiateModal').onclick = () => {
     document.getElementById('negotiateModal').remove();
     if (duheSolution) showDUHEProposalModal(duheSolution);
   };
 }
 
-// ========== AUCTION END HANDLER ==========
 async function onAuctionEnd() {
   auctionActive = false;
   stopAllIntervals();
-
-  // Update brief status
-  await db.collection('seller_briefs').doc(currentBrief.id).update({
+  await supabase.from('seller_briefs').update({
     status: 'ended',
-    endedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
+    ended_at: new Date().toISOString()
+  }).eq('id', currentBrief.id);
   document.getElementById('startBtn').innerText = '⏳ DUHE SOLVING...';
   document.getElementById('startBtn').disabled = true;
-
   showToast("⏰ TIME'S UP! Running DUHE solver...");
-
-  // Run DUHE solver
   const solution = runDUHESolver(activeBids, remainingQty);
-
   setTimeout(() => {
     if (!solution || solution.winners.length === 0) {
       showToast("DUHE could not find a solution. No bids accepted.", true);
       document.getElementById('startBtn').innerText = 'NO SOLUTION FOUND';
       return;
     }
-
-    // Show proposal modal to seller
     showDUHEProposalModal(solution);
     document.getElementById('startBtn').innerText = 'DUHE PROPOSAL READY';
-  }, 1500); // Small delay for UX
+  }, 1500);
 }
 
-// ========== TIMER ==========
 function stopAllIntervals() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 }
@@ -1234,6 +1311,27 @@ async function startAuction() {
   if (auctionActive) { showToast("Auction already running!"); return; }
   if (!currentBrief) { showToast("No brief loaded", true); return; }
 
+  // Create auction in Supabase
+  const { data: auction, error: auctionErr } = await supabase.from('auctions').insert({
+    seller_id: currentUser.id,
+    brief_id: currentBrief.id,
+    product: currentBrief.product || 'Coconut',
+    total_qty: totalQty,
+    remaining_qty: remainingQty,
+    status: 'active',
+    duration_seconds: 180,
+    remaining_seconds: 180,
+    fees_collected: 0,
+    created_at: new Date().toISOString()
+  }).select().single();
+
+  if (auctionErr) {
+    console.error("Failed to create auction:", auctionErr);
+    showToast("Failed to start auction", true);
+    return;
+  }
+
+  currentAuctionId = auction.id;
   auctionActive = true;
   timerSeconds = 180;
   document.getElementById('timerMain').innerText = "03:00";
@@ -1241,17 +1339,19 @@ async function startAuction() {
   document.getElementById('startBtn').innerText = '⏳ AUCTION RUNNING';
   document.getElementById('startBtn').disabled = true;
 
-  await db.collection('seller_briefs').doc(currentBrief.id).update({
+  await supabase.from('seller_briefs').update({
     status: 'auctioning',
-    startedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+    started_at: new Date().toISOString()
+  }).eq('id', currentBrief.id);
 
   startTimerLoop();
-  renderCardsWithJostle(); // Re-render to disable accept buttons
-  showToast("🎬 Seller auction STARTED — highest bid wins! No accepts during auction.");
+  renderCardsWithJostle();
+  showToast("🎬 Seller auction STARTED — highest bid wins! Bot bids will appear automatically.");
+
+  // Subscribe to realtime bids for this auction
+  await subscribeToSupabaseBids();
 }
 
-// ========== SINGLE ACCEPT (for post-auction manual override) ==========
 async function acceptOffer(bidId) {
   const bid = activeBids.find(c => c.id === bidId);
   if (!bid || bid.accepted) return;
@@ -1263,20 +1363,16 @@ async function acceptOffer(bidId) {
     showToast(`Cannot accept ${bid.quantity} MT — only ${remainingQty} MT remaining`, true);
     return;
   }
-
   const btn = document.querySelector(`[data-bid-id="${bidId}"]`);
   if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
-
   try {
     const result = await acceptBidTransaction(bid.id, currentBrief.id);
-
     if (result.success) {
       bid.accepted = true;
       remainingQty = result.remaining_mt;
       feesCollected = result.fees_collected;
       showToast(`✓ Accepted ${bid.buyerName}: ${bid.quantity} MT @ $${bid.price}/MT — $25 fee captured`);
       renderCardsWithJostle();
-
       if (remainingQty <= 0) {
         showToast("🎉 INVENTORY SOLD OUT! Auction complete.");
         document.getElementById('startBtn').innerText = 'AUCTION COMPLETE';
@@ -1292,7 +1388,6 @@ async function acceptOffer(bidId) {
   }
 }
 
-// ========== MODALS ==========
 function openModal(card, rank) {
   document.getElementById('modalEmoji').innerHTML = "🏢";
   document.getElementById('modalName').innerHTML = card.buyerName;
@@ -1307,19 +1402,73 @@ function openModal(card, rank) {
   currentModalBid = card;
 }
 
-function acceptFromModal() {
-  if (currentModalBid) acceptOffer(currentModalBid.id);
-  document.getElementById('modalOverlay').classList.remove('active');
-}
-
+function acceptFromModal() { if (currentModalBid) acceptOffer(currentModalBid.id); document.getElementById('modalOverlay').classList.remove('active'); }
 function closeModalFn() { document.getElementById('modalOverlay').classList.remove('active'); }
-
 function showToast(msg, isError = false) {
   let t = document.getElementById('toastMsg');
   t.innerText = msg;
   t.style.borderLeftColor = isError ? '#FF4D4D' : '#7CFC00';
   t.classList.add('visible');
-  setTimeout(() => { t.classList.remove('visible'); }, 4000);
+  setTimeout(() => t.classList.remove('visible'), 4000);
+}
+
+// ========== ACCEPT BID TRANSACTION (Supabase RPC or direct update) ==========
+async function acceptBidTransaction(bidId, briefId) {
+  const uid = currentUser?.id;
+  if (!uid) throw new Error("Not authenticated");
+
+  // Get bid and brief
+  const { data: bid, error: bidErr } = await supabase
+    .from('bids')
+    .select('*')
+    .eq('id', bidId)
+    .single();
+  if (bidErr || !bid) throw new Error("Bid not found");
+
+  const { data: brief, error: briefErr } = await supabase
+    .from('seller_briefs')
+    .select('*')
+    .eq('id', briefId)
+    .single();
+  if (briefErr || !brief) throw new Error("Brief not found");
+  if (brief.seller_id !== uid) throw new Error("Brief does not belong to you");
+  if (bid.status !== "pending") throw new Error("Bid is no longer pending");
+
+  const qty = bid.quantity_mt || 20;
+  const remaining = brief.remaining_mt || 0;
+  if (qty > remaining) throw new Error(`Only ${remaining} MT remaining`);
+
+  const nextRemaining = remaining - qty;
+  const nextFees = (brief.fees_collected || 0) + 25;
+
+  // Update bid
+  await supabase.from('bids').update({
+    status: "accepted",
+    accepted_at: new Date().toISOString()
+  }).eq('id', bidId);
+
+  // Update brief
+  const briefUpdate = {
+    remaining_mt: nextRemaining,
+    fees_collected: nextFees,
+    updated_at: new Date().toISOString()
+  };
+  if (nextRemaining <= 0) {
+    briefUpdate.status = "completed";
+    briefUpdate.ended_at = new Date().toISOString();
+  }
+  await supabase.from('seller_briefs').update(briefUpdate).eq('id', briefId);
+
+  // Record fee
+  await supabase.from('fees').insert({
+    auction_id: currentAuctionId,
+    bid_id: bidId,
+    amount: 25,
+    type: 'acceptance_fee',
+    created_at: new Date().toISOString()
+  });
+
+  return { success: true, remaining_mt: nextRemaining, fees_collected: nextFees, soldOut: nextRemaining <= 0 };
 }
 
 // ========== EVENT LISTENERS ==========
@@ -1329,7 +1478,6 @@ document.getElementById('cardsGrid').addEventListener('click', e => {
   const bidId = card.getAttribute('data-id');
   const bid = activeBids.find(b => b.id === bidId);
   if (!bid) return;
-
   if (e.target.matches('[data-action="accept"]')) {
     e.stopPropagation();
     acceptOffer(bidId);
@@ -1338,84 +1486,22 @@ document.getElementById('cardsGrid').addEventListener('click', e => {
     openModal(bid, rank);
   }
 });
-
 document.getElementById('startBtn').addEventListener('click', startAuction);
 document.getElementById('closeModalBtn').addEventListener('click', closeModalFn);
 document.getElementById('acceptFromModalBtn').addEventListener('click', acceptFromModal);
-document.getElementById('modalOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modalOverlay')) closeModalFn();
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === document.getElementById('modalOverlay')) closeModalFn(); });
+document.addEventListener('keydown', e => { 
+  if (e.key === 'Escape') { 
+    closeModalFn(); 
+    const duheModal = document.getElementById('duheModal'); 
+    if (duheModal) duheModal.remove(); 
+    const negModal = document.getElementById('negotiateModal'); 
+    if (negModal) negModal.remove(); 
+  } 
 });
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeModalFn();
-    const duheModal = document.getElementById('duheModal');
-    if (duheModal) duheModal.remove();
-    const negModal = document.getElementById('negotiateModal');
-    if (negModal) negModal.remove();
-  }
-});
-
-// ========== FIRESTORE TRANSACTION (acceptBid) ==========
-async function acceptBidTransaction(bidId, briefId) {
-  const uid = firebase.auth().currentUser?.uid;
-  if (!uid) throw new Error("Not authenticated");
-
-  const bidRef = db.collection("bids").doc(bidId);
-  const briefRef = db.collection("seller_briefs").doc(briefId);
-
-  const result = await db.runTransaction(async (t) => {
-    const bidSnap = await t.get(bidRef);
-    const briefSnap = await t.get(briefRef);
-
-    if (!bidSnap.exists) throw new Error("Bid not found");
-    if (!briefSnap.exists) throw new Error("Brief not found");
-
-    const bid = bidSnap.data();
-    const brief = briefSnap.data();
-
-    if (brief.sellerId !== uid) {
-      throw new Error("Brief does not belong to you");
-    }
-    if (bid.status !== "pending") {
-      throw new Error("Bid is no longer pending");
-    }
-
-    const qty = bid.quantity_mt || 20;
-    const remaining = brief.remaining_mt || 0;
-    if (qty > remaining) {
-      throw new Error(`Only ${remaining} MT remaining`);
-    }
-
-    const nextRemaining = remaining - qty;
-    const nextFees = (brief.fees_collected || 0) + 25;
-
-    t.update(bidRef, {
-      status: "accepted",
-      acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    const briefUpdate = {
-      remaining_mt: nextRemaining,
-      fees_collected: nextFees,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    if (nextRemaining <= 0) {
-      briefUpdate.status = "completed";
-      briefUpdate.endedAt = firebase.firestore.FieldValue.serverTimestamp();
-    }
-    t.update(briefRef, briefUpdate);
-
-    return {
-      success: true,
-      remaining_mt: nextRemaining,
-      fees_collected: nextFees,
-      soldOut: nextRemaining <= 0
-    };
-  });
-
-  return result;
-}
+// ========== INIT ==========
+initAuth();
 </script>
 </body>
 </html>
