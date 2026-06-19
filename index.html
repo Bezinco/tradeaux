@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>TradeAux — Global Surplus Exchange</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -657,9 +660,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   const userInfo = document.getElementById('user-info');
   const userEmail = document.getElementById('user-email');
 
-  // Check session on load
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) showLoggedIn(session.user);
+  // Check session on load with error handling
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) showLoggedIn(session.user);
+  } catch (err) {
+    console.error('Session check failed:', err);
+  }
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) showLoggedIn(session.user);
@@ -684,17 +691,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       e.preventDefault();
       try {
         await supabaseClient.auth.signOut();
-        // Clear local storage token
-        localStorage.removeItem('supabase.auth.token');
-        // Force reload to show logged out state
-        showLoggedOut();
-        window.location.reload();
+        window.location.href = 'signin.html?logout=1';
       } catch (error) {
         console.error('Sign out error:', error);
-        // Force clear anyway
-        localStorage.removeItem('supabase.auth.token');
-        showLoggedOut();
-        window.location.reload();
+        window.location.href = 'signin.html?logout=1';
       }
     });
   }
