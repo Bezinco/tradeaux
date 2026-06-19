@@ -219,12 +219,14 @@ button:disabled {
 
 <script>
 // =====================================================
-// SUPABASE CONFIGURATION
+// SUPABASE CONFIGURATION - FIXED WITH DESTRUCTURING
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ✅ CRITICAL FIX: Use destructuring - this works reliably with UMD builds
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =====================================================
 // DASHBOARD MAPPING
@@ -291,24 +293,24 @@ function showRolePicker(user) {
 // PAGE LOAD
 // =====================================================
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 TradeAux Signin v5.1 - Fixed email confirmation check');
+  console.log('🚀 TradeAux Signin v5.3 - FIXED destructuring');
   
   // === IF LOGOUT FLAG, STAY ON SIGNIN PAGE ===
   if (isLogout) {
     console.log('🔓 Logout detected - staying on signin page');
     showSuccess('You have been signed out.');
     localStorage.removeItem('supabase.auth.token');
-    supabase.auth.signOut().catch(() => {});
+    supabaseClient.auth.signOut().catch(() => {});
     return;
   }
 
   // === CHECK IF ALREADY LOGGED IN ===
-  supabase.auth.getSession().then(function(result) {
+  supabaseClient.auth.getSession().then(function(result) {
     if (result.data.session) {
       showRolePicker(result.data.session.user);
     }
   }).catch(function(err) {
-    console.log('No session found');
+    console.log('No session found:', err);
   });
 
   // =====================================================
@@ -341,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ 
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ 
         email: email, 
         password: password 
       });
@@ -357,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // =====================================================
-  // SIGN UP - STEP 2 (FIXED)
+  // SIGN UP - STEP 2
   // =====================================================
   document.getElementById('signupBtn').addEventListener('click', async function() {
     const email = document.getElementById('signupEmail').value.trim();
@@ -380,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
         email: email,
         password: password,
         options: {
@@ -394,7 +396,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (error) throw error;
       
-      // === CORRECT FIX: Check if session exists ===
       // If session is null, email confirmation is required
       if (data.user && !data.session) {
         showSuccess('✅ Account created! Check your email to confirm.');
@@ -406,8 +407,8 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Email confirmation is disabled — auto sign-in
       if (data.user && data.session) {
-        // Create profile with error handling (non-blocking)
-        const { error: profileError } = await supabase.from('profiles').insert({
+        // Create profile
+        const { error: profileError } = await supabaseClient.from('profiles').insert({
           id: data.user.id,
           email: email,
           full_name: companyName,
@@ -419,7 +420,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (profileError) {
           console.error('Profile creation failed:', profileError);
-          // Don't block the user — they can update profile later
         }
         
         showSuccess('✅ Account created successfully!');
@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Save the role to the user's profile
     if (currentUser) {
-      supabase
+      supabaseClient
         .from('profiles')
         .update({ role: selectedRole })
         .eq('id', currentUser.id)
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
     e.preventDefault();
     try {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       localStorage.removeItem('supabase.auth.token');
       window.location.href = 'signin.html?logout=1';
     } catch (error) {
@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/signin.html'
       });
       if (error) throw error;
@@ -529,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  console.log('✅ Ready - signin v5.1');
+  console.log('✅ Ready - signin v5.3 with destructuring');
 });
 </script>
 </body>
