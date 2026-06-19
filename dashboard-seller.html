@@ -589,6 +589,23 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =====================================================
+// AUTH CHECK - REDIRECT TO SIGNIN IF NOT LOGGED IN
+// =====================================================
+async function checkAuth() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'signin.html';
+      return false;
+    }
+    return true;
+  } catch (error) {
+    window.location.href = 'signin.html';
+    return false;
+  }
+}
+
+// =====================================================
 // PRODUCT TYPES
 // =====================================================
 const PRODUCT_TYPES = [
@@ -1369,7 +1386,12 @@ setInterval(updateTickerPrices, 8000);
 // =====================================================
 // INIT
 // =====================================================
-loadFromStorage();
+(async function init() {
+  const authenticated = await checkAuth();
+  if (authenticated) {
+    loadFromStorage();
+  }
+})();
 </script>
 </body>
 </html>
