@@ -147,12 +147,16 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   content: ''; position: absolute; right: -20px; top: 0; bottom: 0; width: 20px;
   background: linear-gradient(90deg, rgba(2,6,23,0.9), transparent);
 }
-.container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 80px; position: relative; z-index: 2; }
+
+/* FIX: Push content right to avoid logo overlap */
+.container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 80px 140px; position: relative; z-index: 2; }
+
 .glass-header {
   backdrop-filter: blur(14px); background: rgba(3,5,12,0.7);
   border-bottom: 1px solid rgba(124,252,0,0.3);
   padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
   position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 12px;
+  margin-left: 20px;
 }
 .unit-toggle {
   display: flex; gap: 6px; align-items: center;
@@ -300,29 +304,66 @@ input:checked + .slider:before { transform: translateX(16px); }
 .size-chip { background: rgba(0,206,209,0.15); border: 1px solid rgba(0,206,209,0.3); border-radius: 12px; padding: 2px 10px; font-size: 10px; color: #00ced1; display: flex; align-items: center; gap: 4px; }
 .size-chip .remove-size { cursor: pointer; color: #FF4D4D; font-weight: bold; }
 
-/* AUCTION PRODUCT CARD */
-.auction-product-card {
-  background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px 16px;
-  display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
-  border-left: 3px solid #7CFC00;
+/* AUCTION CARD */
+.auction-card {
+  background: rgba(0,0,0,0.4); border-radius: 16px; padding: 20px;
+  border: 1px solid rgba(124,252,0,0.2);
 }
-.auction-product-card .ap-image { width: 50px; height: 50px; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.3); flex-shrink: 0; }
-.auction-product-card .ap-image img { width: 100%; height: 100%; object-fit: cover; }
-.auction-product-card .ap-image .ap-placeholder { font-size: 20px; display: flex; align-items: center; justify-content: center; height: 100%; }
-.auction-product-card .ap-info { flex: 1; }
-.auction-product-card .ap-info .ap-name { font-weight: 600; color: #e5e7eb; font-size: 13px; }
-.auction-product-card .ap-info .ap-sizes { font-size: 11px; color: #9ca3af; }
-.auction-product-card .ap-info .ap-total { font-size: 12px; color: #7CFC00; font-weight: 600; }
+.auction-header {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
+}
+.auction-header .auction-logo {
+  width: 60px; height: 60px; border-radius: 12px; overflow: hidden;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(124,252,0,0.3);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.auction-header .auction-logo img { width: 100%; height: 100%; object-fit: cover; }
+.auction-header .auction-logo .placeholder { font-size: 24px; }
+.auction-header .auction-company { flex: 1; }
+.auction-header .auction-company .company-name { font-size: 16px; font-weight: 700; color: #e5e7eb; }
+.auction-header .auction-company .company-detail { font-size: 12px; color: #9ca3af; }
 
-.hidden { display: none !important; }
+.auction-product-display {
+  display: flex; gap: 16px; background: rgba(0,0,0,0.3); border-radius: 12px;
+  padding: 16px; margin-bottom: 16px; align-items: center;
+}
+.auction-product-display .ap-image {
+  width: 70px; height: 70px; border-radius: 10px; overflow: hidden;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(124,252,0,0.3);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.auction-product-display .ap-image img { width: 100%; height: 100%; object-fit: cover; }
+.auction-product-display .ap-image .placeholder { font-size: 24px; }
+.auction-product-display .ap-info { flex: 1; }
+.auction-product-display .ap-info .ap-product-name { font-size: 15px; font-weight: 600; color: #e5e7eb; }
+.auction-product-display .ap-info .ap-details { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+.auction-product-display .ap-info .ap-total { font-size: 14px; font-weight: 700; color: #7CFC00; margin-top: 4px; }
+
+.auction-bids-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.auction-bids-table th { color: #FFD966; text-transform: uppercase; font-size: 10px; padding: 8px 6px; text-align: left; border-bottom: 1px solid rgba(124,252,0,0.15); }
+.auction-bids-table td { padding: 8px 6px; border-bottom: 1px solid rgba(124,252,0,0.08); color: #E0E0FF; }
+.auction-bids-table .rank-1 { background: rgba(255,215,0,0.12); }
+.auction-bids-table .rank-2 { background: rgba(192,192,192,0.08); }
+.auction-bids-table .rank-3 { background: rgba(205,127,50,0.08); }
+.btn-accept { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 11px; cursor: pointer; color: #010101; }
+
+.auction-timer { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 800; color: #7CFC00; text-align: center; margin: 12px 0; text-shadow: 0 0 10px rgba(124,252,0,0.5); }
+
 @media (max-width: 768px) {
-  .container { padding: 16px 16px 80px; }
-  .gem-logo-corner { transform: scale(0.25); }
+  .container { padding: 16px 16px 80px 16px; }
+  .gem-logo-corner { transform: scale(0.2); }
   .cert-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-  .glass-header { flex-direction: column; align-items: stretch; gap: 8px; }
+  .glass-header { flex-direction: column; align-items: stretch; gap: 8px; margin-left: 0; }
   .unit-toggle { justify-content: center; }
   .product-row { flex-direction: column; }
   .product-row .product-image { width: 60px; height: 60px; }
+  .auction-product-display { flex-direction: column; align-items: stretch; }
+  .auction-header { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .container { padding: 12px 12px 80px 12px; }
+  .gem-logo-corner { transform: scale(0.15); }
+  .section-card { padding: 16px; }
 }
 </style>
 </head>
@@ -413,7 +454,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     <button class="btn-primary" id="saveProfileBtn" style="margin-top:20px;">💾 SAVE PROFILE</button>
   </div>
 
-  <!-- CERTIFICATIONS - SQUARE CARDS -->
+  <!-- CERTIFICATIONS -->
   <div class="section-card">
     <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
     <div style="color:#ff6b6b; font-size:12px; margin-bottom:12px;">
@@ -451,36 +492,60 @@ input:checked + .slider:before { transform: translateX(16px); }
     <button class="btn-primary" id="addBotBtn" style="background:rgba(0,206,209,0.2); color:#00ced1; margin-top:16px;">+ ADD NEW BOT</button>
   </div>
 
-  <!-- AUCTION -->
+  <!-- AUCTION - SINGLE PRODUCT, MANUAL ENTRY -->
   <div class="section-card">
-    <div class="section-header">⚡ ACTIVE AUCTION <span class="badge" id="briefBadge">No active auction</span></div>
-    <div class="form-grid" style="margin-bottom:16px;">
-      <div class="form-field">
-        <label class="form-label">QUALITY GRADE</label>
-        <select class="form-select" id="gradeSelect">
-          <option>Grade A (Premium)</option>
-          <option>Grade B (Standard)</option>
-          <option>Organic Certified</option>
-        </select>
+    <div class="section-header">⚡ AUCTION <span class="badge" id="briefBadge">No active auction</span></div>
+    
+    <!-- Create Auction Form -->
+    <div id="createAuctionForm">
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-field">
+          <label class="form-label">PRODUCT NAME</label>
+          <input class="form-input" id="auctionProductName" placeholder="e.g., Desiccated Coconut Regular">
+        </div>
+        <div class="form-field">
+          <label class="form-label">TOTAL QUANTITY (kg)</label>
+          <input type="number" class="form-input" id="auctionQuantity" placeholder="1000" step="100">
+        </div>
+        <div class="form-field">
+          <label class="form-label">PACKAGING / SIZES</label>
+          <input class="form-input" id="auctionSizes" placeholder="e.g., 25kg, 50kg, 100kg bags">
+        </div>
+        <div class="form-field">
+          <label class="form-label">PRODUCT IMAGE</label>
+          <div id="auctionImageBtn" style="width:80px;height:80px;border-radius:12px;border:2px dashed rgba(124,252,0,0.4);background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;">
+            <div id="auctionImagePlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;">ADD<br>PHOTO</div>
+            <img id="auctionImagePreview" style="display:none;width:100%;height:100%;object-fit:cover;">
+            <input type="file" id="auctionImageInput" accept="image/*" style="display:none;">
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">QUALITY GRADE</label>
+          <select class="form-select" id="gradeSelect">
+            <option>Grade A (Premium)</option>
+            <option>Grade B (Standard)</option>
+            <option>Organic Certified</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">MOISTURE CONTENT (%)</label>
+          <input type="number" class="form-input" id="moistureContent" value="12" step="0.5" min="0" max="30">
+        </div>
+        <div class="form-field">
+          <label class="form-label">OIL CONTENT (%)</label>
+          <input type="number" class="form-input" id="oilContent" value="65" step="1" min="40" max="80">
+        </div>
+        <div class="form-field">
+          <label class="form-label">AUCTION DURATION (minutes)</label>
+          <input type="number" class="form-input" id="auctionDuration" value="3" min="1" max="10">
+        </div>
       </div>
-      <div class="form-field">
-        <label class="form-label">MOISTURE CONTENT (%)</label>
-        <input type="number" class="form-input" id="moistureContent" value="12" step="0.5" min="0" max="30">
-      </div>
-      <div class="form-field">
-        <label class="form-label">OIL CONTENT (%)</label>
-        <input type="number" class="form-input" id="oilContent" value="65" step="1" min="40" max="80">
-      </div>
-      <div class="form-field">
-        <label class="form-label">AUCTION DURATION (minutes)</label>
-        <input type="number" class="form-input" id="auctionDuration" value="3" min="1" max="10">
-      </div>
+      <button class="btn-primary" id="launchAuctionBtn">🚀 LAUNCH AUCTION</button>
     </div>
-    <!-- Auction Inventory Preview -->
-    <div id="auctionInventoryPreview" style="background:rgba(0,0,0,0.3);border-radius:16px;padding:16px;margin-bottom:16px;"></div>
-    <button class="btn-primary" id="launchAuctionBtn">🚀 LAUNCH AUCTION</button>
+    
+    <!-- Active Auction Display -->
     <div id="auctionContent" style="margin-top:24px;">
-      <div class="empty-state">No active auction. Launch one above.</div>
+      <div class="empty-state">No active auction. Create one above.</div>
     </div>
   </div>
 
@@ -497,22 +562,6 @@ input:checked + .slider:before { transform: translateX(16px); }
 <div class="commodity-ticker-bar">
   <div class="ticker-label">📈 LIVE</div>
   <div class="ticker-track" id="commodityTicker">
-    <div class="ticker-commodity"><span class="ticker-name">🥥 Coconut Oil</span><span class="ticker-price">$1,247/t</span><span class="ticker-change up">▲ 2.4%</span></div>
-    <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">🌴 Palm Oil</span><span class="ticker-price">$982/t</span><span class="ticker-change down">▼ 0.8%</span></div>
-    <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">☕ Coffee Arabica</span><span class="ticker-price">$3.42/lb</span><span class="ticker-change up">▲ 1.2%</span></div>
-    <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">🍫 Cocoa</span><span class="ticker-price">$4,088/t</span><span class="ticker-change up">▲ 5.7%</span></div>
-    <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">🍬 Sugar</span><span class="ticker-price">$0.42/lb</span><span class="ticker-change flat">— 0.0%</span></div>
-    <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">🌾 Wheat</span><span class="ticker-price">$5.89/bu</span><span class="ticker-change down">▼ 1.1%</span></div>
-    <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">🌽 Corn</span><span class="ticker-price">$4.12/bu</span><span class="ticker-change up">▲ 0.3%</span></div>
-    <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">🫘 Soybeans</span><span class="ticker-price">$11.10/bu</span><span class="ticker-change down">▼ 0.4%</span></div>
-    <div class="ticker-separator">|</div>
     <div class="ticker-commodity"><span class="ticker-name">🥥 Coconut Oil</span><span class="ticker-price">$1,247/t</span><span class="ticker-change up">▲ 2.4%</span></div>
     <div class="ticker-separator">|</div>
     <div class="ticker-commodity"><span class="ticker-name">🌴 Palm Oil</span><span class="ticker-price">$982/t</span><span class="ticker-change down">▼ 0.8%</span></div>
@@ -574,6 +623,7 @@ let activeBids = [];
 let currentAuction = null;
 let auctionTimer = null;
 let timerSeconds = 180;
+let auctionProductImage = null;
 
 // =====================================================
 // UNIT CONVERSION
@@ -590,7 +640,6 @@ function setUnit(pref) {
   document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.remove('active'));
   document.getElementById('unit' + pref.charAt(0).toUpperCase() + pref.slice(1)).classList.add('active');
   saveAll();
-  renderAuctionInventoryPreview();
   renderAuctionDisplay();
 }
 
@@ -628,16 +677,23 @@ function loadFromStorage() {
   if (savedAuction) currentAuction = JSON.parse(savedAuction);
   const savedBids = localStorage.getItem('tradeaux_bids');
   if (savedBids) activeBids = JSON.parse(savedBids);
+  const savedAuctionImage = localStorage.getItem('tradeaux_auction_image');
+  if (savedAuctionImage) auctionProductImage = savedAuctionImage;
 
   renderCompanyProfile();
   renderCertificates();
   renderProducts();
   renderBots();
-  renderAuctionInventoryPreview();
   renderAuctionDisplay();
   // Set unit toggle
   document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.remove('active'));
   document.getElementById('unit' + unitPreference.charAt(0).toUpperCase() + unitPreference.slice(1)).classList.add('active');
+  // Restore auction image preview
+  if (auctionProductImage) {
+    document.getElementById('auctionImagePreview').src = auctionProductImage;
+    document.getElementById('auctionImagePreview').style.display = 'block';
+    document.getElementById('auctionImagePlaceholder').style.display = 'none';
+  }
 }
 
 function saveAll() {
@@ -648,6 +704,7 @@ function saveAll() {
   localStorage.setItem('tradeaux_product_lines', JSON.stringify(productLines));
   localStorage.setItem('tradeaux_bots', JSON.stringify(bots));
   localStorage.setItem('tradeaux_unit_preference', unitPreference);
+  if (auctionProductImage) localStorage.setItem('tradeaux_auction_image', auctionProductImage);
   if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction));
   else localStorage.removeItem('tradeaux_auction');
   localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids));
@@ -675,22 +732,19 @@ function renderCompanyProfile() {
 }
 
 // =====================================================
-// RENDER: CERTIFICATES (SQUARE CARDS)
+// RENDER: CERTIFICATES
 // =====================================================
 function renderCertificates() {
   const grid = document.getElementById('certGrid');
   grid.innerHTML = '';
   
-  // Always show incorporation first (mandatory)
   const certTypes = ['incorporation'];
-  // Add other certs alphabetically
   const otherTypes = Object.keys(certToggles).filter(k => k !== 'incorporation').sort();
   certTypes.push(...otherTypes);
   
   certTypes.forEach(type => {
     const info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '' };
     const isRequired = type === 'incorporation';
-    const hasImages = certImages[type] || (certStacks[type] && certStacks[type].length > 0);
     const isVerified = certToggles[type] || false;
     
     const div = document.createElement('div');
@@ -749,7 +803,6 @@ function addToStack(type) {
     reader.onload = function(ev) {
       if (!certStacks[type]) certStacks[type] = [];
       certStacks[type].push(ev.target.result);
-      // Also keep single image for backward compat
       if (!certImages[type]) certImages[type] = ev.target.result;
       saveAll();
       renderCertificates();
@@ -761,7 +814,7 @@ function addToStack(type) {
 }
 
 // =====================================================
-// RENDER: PRODUCTS (with images)
+// RENDER: PRODUCTS
 // =====================================================
 function renderProducts() {
   const container = document.getElementById('productsContainer');
@@ -801,7 +854,6 @@ function renderProducts() {
       const idx = parseInt(this.dataset.idx);
       productLines[idx].type = this.value;
       saveAll();
-      renderAuctionInventoryPreview();
     });
   });
 }
@@ -814,7 +866,6 @@ function uploadProductImage(idx, input) {
     productLines[idx].image = ev.target.result;
     saveAll();
     renderProducts();
-    renderAuctionInventoryPreview();
   };
   reader.readAsDataURL(file);
 }
@@ -825,7 +876,6 @@ function addSize(idx) {
   productLines[idx].sizes.push(newSize);
   saveAll();
   renderProducts();
-  renderAuctionInventoryPreview();
 }
 
 function removeSize(idx, si) {
@@ -833,43 +883,12 @@ function removeSize(idx, si) {
   productLines[idx].sizes.splice(si, 1);
   saveAll();
   renderProducts();
-  renderAuctionInventoryPreview();
 }
 
 function deleteProduct(idx) {
   productLines.splice(idx, 1);
   saveAll();
   renderProducts();
-  renderAuctionInventoryPreview();
-}
-
-// =====================================================
-// RENDER: AUCTION INVENTORY PREVIEW
-// =====================================================
-function renderAuctionInventoryPreview() {
-  const container = document.getElementById('auctionInventoryPreview');
-  if (!productLines.length) {
-    container.innerHTML = '<div style="color:#9ca3af;font-size:13px;">No products added yet. Add products above.</div>';
-    return;
-  }
-  let totalKg = 0;
-  let html = '<div style="font-size:11px;color:#FFD966;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📦 AUCTION INVENTORY</div>';
-  productLines.forEach(p => {
-    const pTotal = p.sizes.reduce((a, b) => a + b, 0);
-    totalKg += pTotal;
-    html += `<div class="auction-product-card">
-      <div class="ap-image">${p.image ? `<img src="${p.image}">` : '<div class="ap-placeholder">📷</div>'}</div>
-      <div class="ap-info">
-        <div class="ap-name">${p.type}</div>
-        <div class="ap-sizes">Sizes: ${p.sizes.map(s => s + 'kg').join(', ')}</div>
-        <div class="ap-total">Total: ${formatWeight(pTotal)}</div>
-      </div>
-    </div>`;
-  });
-  html += `<div style="text-align:right;font-size:14px;font-weight:700;color:#7CFC00;padding-top:8px;border-top:1px solid rgba(124,252,0,0.2);">
-    GRAND TOTAL: ${formatWeight(totalKg)}
-  </div>`;
-  container.innerHTML = html;
 }
 
 // =====================================================
@@ -925,55 +944,63 @@ function renderAuctionDisplay() {
   const container = document.getElementById('auctionContent');
   if (!currentAuction) {
     document.getElementById('briefBadge').innerHTML = 'No active auction';
-    container.innerHTML = '<div class="empty-state">No active auction. Launch one above.</div>';
+    container.innerHTML = '<div class="empty-state">No active auction. Create one above.</div>';
     return;
   }
   const isLive = currentAuction.status === 'live';
   document.getElementById('briefBadge').innerHTML = isLive ? '🔥 LIVE' : 'READY';
   
-  let productsHtml = currentAuction.products.map(p => `
-    <div class="auction-product-card">
-      <div class="ap-image">${p.image ? `<img src="${p.image}">` : '<div class="ap-placeholder">📷</div>'}</div>
-      <div class="ap-info">
-        <div class="ap-name">${p.type}</div>
-        <div class="ap-sizes">Sizes: ${p.sizes.map(s => s + 'kg').join(', ')}</div>
-        <div class="ap-total">Total: ${formatWeight(p.sizes.reduce((a,b) => a + b, 0))}</div>
-      </div>
-    </div>
-  `).join('');
+  const timerHtml = isLive ? `<div class="auction-timer" id="auctionTimer">${Math.floor(timerSeconds/60)}:${(timerSeconds%60).toString().padStart(2,'0')}</div>` : '';
   
-  const timerHtml = isLive ? `<div style="font-family:'Orbitron',sans-serif;font-size:36px;font-weight:800;color:#7CFC00;text-align:center;margin:16px 0;text-shadow:0 0 10px rgba(124,252,0,0.5);" id="auctionTimer">${Math.floor(timerSeconds/60)}:${(timerSeconds%60).toString().padStart(2,'0')}</div>` : '';
-  
-  const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:16px;">▶ START AUCTION</button>' : 
-    '<button class="btn-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171);margin-top:16px;">⏹ END AUCTION</button>';
-  
+  const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:12px;">▶ START AUCTION</button>' : 
+    '<button class="btn-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171);margin-top:12px;">⏹ END AUCTION</button>';
+
   const pendingBids = activeBids.filter(b => b.status === 'pending').sort((a,b) => b.pricePerKilo - a.pricePerKilo);
-  let bidsHtml = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="color:#FFD966;text-transform:uppercase;font-size:10px;"><th style="padding:10px 8px;text-align:left;">#</th><th style="padding:10px 8px;text-align:left;">Bot</th><th style="padding:10px 8px;text-align:left;">Price</th><th style="padding:10px 8px;text-align:left;">Kilos</th><th style="padding:10px 8px;text-align:left;">Payment</th><th style="padding:10px 8px;text-align:left;"></th></tr></thead><tbody>';
+  let bidsHtml = '<table class="auction-bids-table"><thead><tr><th>#</th><th>Bot</th><th>Price/kg ($)</th><th>Kilos</th><th>Payment</th><th>Strategy</th><th></th></tr></thead><tbody>';
   pendingBids.forEach((bid, idx) => {
-    const bg = idx === 0 ? 'rgba(255,215,0,0.15)' : idx === 1 ? 'rgba(192,192,192,0.1)' : idx === 2 ? 'rgba(205,127,50,0.1)' : 'transparent';
-    bidsHtml += `<tr style="background:${bg};"><td style="padding:8px;color:#E0E0FF;">#${idx+1}</td>
-      <td style="padding:8px;color:#E0E0FF;"><strong>${bid.botName}</strong></td>
-      <td style="padding:8px;color:#FFD966;">$${bid.pricePerKilo.toFixed(3)}</td>
-      <td style="padding:8px;color:#E0E0FF;">${formatWeight(bid.kilos)}</td>
-      <td style="padding:8px;color:#E0E0FF;">${bid.paymentDays}d</td>
-      <td style="padding:8px;"><button onclick="acceptBid('${bid.id}')" style="background:linear-gradient(105deg,#10b981,#2dd4bf);border:none;padding:4px 14px;border-radius:20px;font-weight:700;font-size:11px;cursor:pointer;color:#010101;">✓ Accept</button></td></tr>`;
+    const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
+    bidsHtml += `<tr class="${rankClass}"><td>#${idx+1}</td>
+      <td><strong>${bid.botName}</strong></td>
+      <td style="color:#FFD966;">$${bid.pricePerKilo.toFixed(3)}</td>
+      <td>${formatWeight(bid.kilos)}</td>
+      <td>${bid.paymentDays}d</td>
+      <td style="font-size:10px;">${bid.strategyUsed}</td>
+      <td><button class="btn-accept" onclick="acceptBid('${bid.id}')">✓ Accept</button></td></tr>`;
   });
   bidsHtml += '</tbody></table>';
   if (pendingBids.length === 0) bidsHtml = '<div class="empty-state">No bids yet.</div>';
-  
+
   container.innerHTML = `
-    <div style="background:rgba(0,0,0,0.3);border-radius:16px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:11px;color:#FFD966;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📦 Auction Inventory</div>
-      ${productsHtml}
-      <div style="text-align:right;font-size:14px;font-weight:700;color:#7CFC00;padding-top:8px;border-top:1px solid rgba(124,252,0,0.2);">
-        GRAND TOTAL: ${formatWeight(currentAuction.totalRemainingKilos)}
+    <div class="auction-card">
+      <div class="auction-header">
+        <div class="auction-logo">
+          ${companyProfile.logo ? `<img src="${companyProfile.logo}">` : '<span class="placeholder">🏢</span>'}
+        </div>
+        <div class="auction-company">
+          <div class="company-name">${currentAuction.companyName || companyProfile.name || 'Company'}</div>
+          <div class="company-detail">${currentAuction.fobPort || companyProfile.fobPort || 'FOB Port'}</div>
+        </div>
       </div>
-    </div>
-    ${timerHtml}
-    ${actionBtn}
-    <div style="margin-top:16px;">
-      <div style="font-family:Orbitron;font-size:12px;margin-bottom:8px;color:#FFD966;">📊 BIDS</div>
-      ${bidsHtml}
+      
+      <div class="auction-product-display">
+        <div class="ap-image">
+          ${currentAuction.productImage ? `<img src="${currentAuction.productImage}">` : '<span class="placeholder">📷</span>'}
+        </div>
+        <div class="ap-info">
+          <div class="ap-product-name">${currentAuction.productName}</div>
+          <div class="ap-details">Grade: ${currentAuction.grade} | Moisture: ${currentAuction.moisture}% | Oil: ${currentAuction.oilContent}%</div>
+          <div class="ap-details">Packaging: ${currentAuction.sizes || 'Various sizes'}</div>
+          <div class="ap-total">Total: ${formatWeight(currentAuction.totalRemainingKilos)}</div>
+        </div>
+      </div>
+      
+      ${timerHtml}
+      ${actionBtn}
+      
+      <div style="margin-top:16px;">
+        <div style="font-family:Orbitron;font-size:12px;margin-bottom:8px;color:#FFD966;">📊 BIDS</div>
+        ${bidsHtml}
+      </div>
     </div>
   `;
   
@@ -988,23 +1015,30 @@ document.getElementById('launchAuctionBtn').addEventListener('click', function()
   if (!companyProfile.name) { showToast('Save your company profile first!', true); return; }
   if (!certImages.incorporation) { showToast('⚠️ Incorporation Certificate is MANDATORY!', true); return; }
   
-  let totalKilos = 0;
-  productLines.forEach(p => p.sizes.forEach(s => totalKilos += s));
-  if (totalKilos === 0) { showToast('Add product inventory first!', true); return; }
-
-  currentAuction = {
+  const productName = document.getElementById('auctionProductName').value.trim();
+  const quantity = parseFloat(document.getElementById('auctionQuantity').value);
+  const sizes = document.getElementById('auctionSizes').value.trim();
+  
+  if (!productName) { showToast('Enter the product name!', true); return; }
+  if (!quantity || quantity <= 0) { showToast('Enter total quantity in kg!', true); return; }
+  
+  const currentAuctionData = {
     id: 'auc_' + Date.now(),
     companyName: companyProfile.name,
     companyLogo: companyProfile.logo,
     fobPort: companyProfile.fobPort || document.getElementById('fobPort').value,
+    productName: productName,
+    totalRemainingKilos: quantity,
+    sizes: sizes || 'Various sizes',
+    productImage: auctionProductImage || null,
     grade: document.getElementById('gradeSelect').value,
     moisture: parseFloat(document.getElementById('moistureContent').value) || 12,
     oilContent: parseFloat(document.getElementById('oilContent').value) || 65,
-    products: productLines.map(p => ({ type: p.type, sizes: [...p.sizes], image: p.image })),
     status: 'active',
-    durationMinutes: parseInt(document.getElementById('auctionDuration').value) || 3,
-    totalRemainingKilos: totalKilos
+    durationMinutes: parseInt(document.getElementById('auctionDuration').value) || 3
   };
+  
+  currentAuction = currentAuctionData;
   activeBids = [];
   saveAll();
   renderAuctionDisplay();
@@ -1107,6 +1141,27 @@ window.acceptBid = function(bidId) {
 };
 
 // =====================================================
+// AUCTION IMAGE UPLOAD
+// =====================================================
+document.getElementById('auctionImageBtn').addEventListener('click', function() {
+  document.getElementById('auctionImageInput').click();
+});
+document.getElementById('auctionImageInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    auctionProductImage = ev.target.result;
+    document.getElementById('auctionImagePreview').src = auctionProductImage;
+    document.getElementById('auctionImagePreview').style.display = 'block';
+    document.getElementById('auctionImagePlaceholder').style.display = 'none';
+    saveAll();
+    showToast('Auction product image uploaded!', false);
+  };
+  reader.readAsDataURL(file);
+});
+
+// =====================================================
 // COMPANY PROFILE
 // =====================================================
 document.getElementById('saveProfileBtn').addEventListener('click', function() {
@@ -1153,7 +1208,6 @@ document.getElementById('addProductBtn').addEventListener('click', function() {
   productLines.push({ type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null });
   saveAll();
   renderProducts();
-  renderAuctionInventoryPreview();
 });
 
 // =====================================================
