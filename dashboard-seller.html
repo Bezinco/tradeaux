@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>TradeAux &bull; Seller Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -147,10 +148,7 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   content: ''; position: absolute; right: -20px; top: 0; bottom: 0; width: 20px;
   background: linear-gradient(90deg, rgba(2,6,23,0.9), transparent);
 }
-
-/* FIX: Push content right to avoid logo overlap */
 .container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 80px 140px; position: relative; z-index: 2; }
-
 .glass-header {
   backdrop-filter: blur(14px); background: rgba(3,5,12,0.7);
   border-bottom: 1px solid rgba(124,252,0,0.3);
@@ -492,7 +490,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     <button class="btn-primary" id="addBotBtn" style="background:rgba(0,206,209,0.2); color:#00ced1; margin-top:16px;">+ ADD NEW BOT</button>
   </div>
 
-  <!-- AUCTION - SINGLE PRODUCT, MANUAL ENTRY -->
+  <!-- AUCTION -->
   <div class="section-card">
     <div class="section-header">⚡ AUCTION <span class="badge" id="briefBadge">No active auction</span></div>
     
@@ -500,8 +498,10 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div id="createAuctionForm">
       <div class="form-grid" style="margin-bottom:16px;">
         <div class="form-field">
-          <label class="form-label">PRODUCT NAME</label>
-          <input class="form-input" id="auctionProductName" placeholder="e.g., Desiccated Coconut Regular">
+          <label class="form-label">SELECT PRODUCT</label>
+          <select class="form-select" id="auctionProductSelect">
+            <option value="">-- Select a product from your list --</option>
+          </select>
         </div>
         <div class="form-field">
           <label class="form-label">TOTAL QUANTITY (kg)</label>
@@ -581,6 +581,13 @@ input:checked + .slider:before { transform: translateX(16px); }
 </div>
 
 <script>
+// =====================================================
+// SUPABASE CONFIGURATION
+// =====================================================
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // =====================================================
 // PRODUCT TYPES
 // =====================================================
@@ -685,6 +692,7 @@ function loadFromStorage() {
   renderProducts();
   renderBots();
   renderAuctionDisplay();
+  populateAuctionProductDropdown();
   // Set unit toggle
   document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.remove('active'));
   document.getElementById('unit' + unitPreference.charAt(0).toUpperCase() + unitPreference.slice(1)).classList.add('active');
@@ -708,6 +716,24 @@ function saveAll() {
   if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction));
   else localStorage.removeItem('tradeaux_auction');
   localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids));
+}
+
+// =====================================================
+// POPULATE AUCTION PRODUCT DROPDOWN
+// =====================================================
+function populateAuctionProductDropdown() {
+  const select = document.getElementById('auctionProductSelect');
+  const currentValue = select.value;
+  select.innerHTML = '<option value="">-- Select a product from your list --</option>';
+  productLines.forEach((product, idx) => {
+    const option = document.createElement('option');
+    option.value = idx;
+    option.textContent = product.type + ' (' + product.sizes.join(', ') + 'kg)';
+    select.appendChild(option);
+  });
+  if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+    select.value = currentValue;
+  }
 }
 
 // =====================================================
@@ -854,6 +880,7 @@ function renderProducts() {
       const idx = parseInt(this.dataset.idx);
       productLines[idx].type = this.value;
       saveAll();
+      populateAuctionProductDropdown();
     });
   });
 }
@@ -876,6 +903,7 @@ function addSize(idx) {
   productLines[idx].sizes.push(newSize);
   saveAll();
   renderProducts();
+  populateAuctionProductDropdown();
 }
 
 function removeSize(idx, si) {
@@ -883,12 +911,14 @@ function removeSize(idx, si) {
   productLines[idx].sizes.splice(si, 1);
   saveAll();
   renderProducts();
+  populateAuctionProductDropdown();
 }
 
 function deleteProduct(idx) {
   productLines.splice(idx, 1);
   saveAll();
   renderProducts();
+  populateAuctionProductDropdown();
 }
 
 // =====================================================
@@ -970,6 +1000,10 @@ function renderAuctionDisplay() {
   bidsHtml += '</tbody></table>';
   if (pendingBids.length === 0) bidsHtml = '<div class="empty-state">No bids yet.</div>';
 
+  // Find the selected product name
+  let productName = currentAuction.productName || 'Unknown Product';
+  let productSizes = currentAuction.sizes || 'Various sizes';
+  
   container.innerHTML = `
     <div class="auction-card">
       <div class="auction-header">
@@ -987,9 +1021,9 @@ function renderAuctionDisplay() {
           ${currentAuction.productImage ? `<img src="${currentAuction.productImage}">` : '<span class="placeholder">📷</span>'}
         </div>
         <div class="ap-info">
-          <div class="ap-product-name">${currentAuction.productName}</div>
+          <div class="ap-product-name">${productName}</div>
           <div class="ap-details">Grade: ${currentAuction.grade} | Moisture: ${currentAuction.moisture}% | Oil: ${currentAuction.oilContent}%</div>
-          <div class="ap-details">Packaging: ${currentAuction.sizes || 'Various sizes'}</div>
+          <div class="ap-details">Packaging: ${productSizes}</div>
           <div class="ap-total">Total: ${formatWeight(currentAuction.totalRemainingKilos)}</div>
         </div>
       </div>
@@ -1015,22 +1049,31 @@ document.getElementById('launchAuctionBtn').addEventListener('click', function()
   if (!companyProfile.name) { showToast('Save your company profile first!', true); return; }
   if (!certImages.incorporation) { showToast('⚠️ Incorporation Certificate is MANDATORY!', true); return; }
   
-  const productName = document.getElementById('auctionProductName').value.trim();
+  const productIdx = parseInt(document.getElementById('auctionProductSelect').value);
+  if (isNaN(productIdx) || productIdx < 0 || productIdx >= productLines.length) {
+    showToast('Please select a product from the dropdown!', true);
+    return;
+  }
+  
+  const selectedProduct = productLines[productIdx];
   const quantity = parseFloat(document.getElementById('auctionQuantity').value);
   const sizes = document.getElementById('auctionSizes').value.trim();
   
-  if (!productName) { showToast('Enter the product name!', true); return; }
-  if (!quantity || quantity <= 0) { showToast('Enter total quantity in kg!', true); return; }
+  if (!quantity || quantity <= 0) {
+    showToast('Enter total quantity in kg!', true);
+    return;
+  }
   
   const currentAuctionData = {
     id: 'auc_' + Date.now(),
     companyName: companyProfile.name,
     companyLogo: companyProfile.logo,
     fobPort: companyProfile.fobPort || document.getElementById('fobPort').value,
-    productName: productName,
+    productName: selectedProduct.type,
+    productSizes: selectedProduct.sizes,
     totalRemainingKilos: quantity,
-    sizes: sizes || 'Various sizes',
-    productImage: auctionProductImage || null,
+    sizes: sizes || selectedProduct.sizes.join(', ') + 'kg',
+    productImage: selectedProduct.image || auctionProductImage || null,
     grade: document.getElementById('gradeSelect').value,
     moisture: parseFloat(document.getElementById('moistureContent').value) || 12,
     oilContent: parseFloat(document.getElementById('oilContent').value) || 65,
@@ -1042,7 +1085,7 @@ document.getElementById('launchAuctionBtn').addEventListener('click', function()
   activeBids = [];
   saveAll();
   renderAuctionDisplay();
-  showToast('Auction created! Click START to begin.', false);
+  showToast('Auction created for ' + selectedProduct.type + '! Click START to begin.', false);
 });
 
 function startAuction() {
@@ -1208,6 +1251,7 @@ document.getElementById('addProductBtn').addEventListener('click', function() {
   productLines.push({ type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null });
   saveAll();
   renderProducts();
+  populateAuctionProductDropdown();
 });
 
 // =====================================================
@@ -1248,10 +1292,19 @@ document.getElementById('addBotBtn').addEventListener('click', function() {
 });
 
 // =====================================================
-// SIGN OUT
+// SIGN OUT - FIXED WITH SUPABASE
 // =====================================================
-document.getElementById('signOutBtn').addEventListener('click', function() {
-  if (confirm('Sign out?')) window.location.href = 'signin.html';
+document.getElementById('signOutBtn').addEventListener('click', async function() {
+  if (confirm('Sign out?')) {
+    try {
+      await supabase.auth.signOut();
+      window.location.href = 'signin.html?logout=1';
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Force redirect even if Supabase fails
+      window.location.href = 'signin.html?logout=1';
+    }
+  }
 });
 
 // =====================================================
