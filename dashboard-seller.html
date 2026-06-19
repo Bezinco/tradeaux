@@ -364,6 +364,7 @@ input:checked + .slider:before { transform: translateX(16px); }
   .section-card { padding: 16px; }
 }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -586,14 +587,14 @@ input:checked + .slider:before { transform: translateX(16px); }
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =====================================================
 // AUTH CHECK - REDIRECT TO SIGNIN IF NOT LOGGED IN
 // =====================================================
 async function checkAuth() {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
       window.location.href = 'signin.html';
       return false;
@@ -1314,7 +1315,7 @@ document.getElementById('addBotBtn').addEventListener('click', function() {
 document.getElementById('signOutBtn').addEventListener('click', async function() {
   if (confirm('Sign out?')) {
     try {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       window.location.href = 'signin.html?logout=1';
     } catch (error) {
       console.error('Sign out error:', error);
