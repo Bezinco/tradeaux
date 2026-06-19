@@ -291,13 +291,13 @@ function showRolePicker(user) {
 // PAGE LOAD
 // =====================================================
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 TradeAux Signin v5.0 - Sign in FIRST, then choose role');
+  console.log('🚀 TradeAux Signin v5.1 - Fixed email confirmation check');
   
   // === IF LOGOUT FLAG, STAY ON SIGNIN PAGE ===
   if (isLogout) {
     console.log('🔓 Logout detected - staying on signin page');
     showSuccess('You have been signed out.');
-    // Clear session just in case
+    localStorage.removeItem('supabase.auth.token');
     supabase.auth.signOut().catch(() => {});
     return;
   }
@@ -305,7 +305,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // === CHECK IF ALREADY LOGGED IN ===
   supabase.auth.getSession().then(function(result) {
     if (result.data.session) {
-      // Already logged in - show role picker
       showRolePicker(result.data.session.user);
     }
   }).catch(function(err) {
@@ -342,15 +341,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      const result = await supabase.auth.signInWithPassword({ 
+      const { data, error } = await supabase.auth.signInWithPassword({ 
         email: email, 
         password: password 
       });
       
-      if (result.error) throw result.error;
+      if (error) throw error;
       
       showSuccess('✅ Signed in successfully!');
-      showRolePicker(result.data.user);
+      showRolePicker(data.user);
       
     } catch (error) {
       showError(error.message);
@@ -358,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // =====================================================
-  // SIGN UP - STEP 2
+  // SIGN UP - STEP 2 (FIXED)
   // =====================================================
   document.getElementById('signupBtn').addEventListener('click', async function() {
     const email = document.getElementById('signupEmail').value.trim();
@@ -381,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      const result = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
@@ -393,9 +392,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
       
-      if (result.error) throw result.error;
+      if (error) throw error;
       
-      if (result.data.user && !result.data.user.confirmed_at) {
+      // === CORRECT FIX: Check if session exists ===
+      // If session is null, email confirmation is required
+      if (data.user && !data.session) {
         showSuccess('✅ Account created! Check your email to confirm.');
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step1').classList.remove('hidden');
@@ -403,11 +404,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // If email confirmation is disabled, sign in automatically
-      if (result.data.user) {
-        // Create profile
-        await supabase.from('profiles').insert({
-          id: result.data.user.id,
+      // Email confirmation is disabled — auto sign-in
+      if (data.user && data.session) {
+        // Create profile with error handling (non-blocking)
+        const { error: profileError } = await supabase.from('profiles').insert({
+          id: data.user.id,
           email: email,
           full_name: companyName,
           company_name: companyName,
@@ -416,16 +417,17 @@ document.addEventListener('DOMContentLoaded', function() {
           created_at: new Date().toISOString()
         });
         
+        if (profileError) {
+          console.error('Profile creation failed:', profileError);
+          // Don't block the user — they can update profile later
+        }
+        
         showSuccess('✅ Account created successfully!');
-        showRolePicker(result.data.user);
+        showRolePicker(data.user);
       }
       
     } catch (error) {
-      if (error.message && error.message.includes('email not confirmed')) {
-        showSuccess('✅ Account created! Please check your email to confirm.');
-      } else {
-        showError(error.message);
-      }
+      showError(error.message);
     }
   });
 
@@ -477,8 +479,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // =====================================================
   document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
     e.preventDefault();
-    await supabase.auth.signOut();
-    window.location.href = 'signin.html?logout=1';
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem('supabase.auth.token');
+      window.location.href = 'signin.html?logout=1';
+    } catch (error) {
+      localStorage.removeItem('supabase.auth.token');
+      window.location.href = 'signin.html?logout=1';
+    }
   });
 
   // =====================================================
@@ -494,10 +502,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      const result = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/signin.html'
       });
-      if (result.error) throw result.error;
+      if (error) throw error;
       showSuccess('Password reset email sent!');
     } catch (err) {
       showError(err.message);
@@ -521,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  console.log('✅ Ready - Sign in first, then choose role');
+  console.log('✅ Ready - signin v5.1');
 });
 </script>
 </body>
