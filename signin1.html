@@ -3,671 +3,533 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Sign In — TradeAux</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
   background: #020617;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
   color: #e5e7eb;
-  overflow-x: hidden;
 }
-
-.bg-waves {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.wave-bg {
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  filter: blur(100px);
-  opacity: 0.15;
-  animation: waveBgDrift 24s ease-in-out infinite;
-}
-
-.wave-sapphire-bg { 
-  background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
-  top: -30%; left: -10%; 
-}
-
-@keyframes waveBgDrift {
-  0% { transform: translate(0px, 0px) scale(1); }
-  50% { transform: translate(40px, -30px) scale(1.05); }
-  100% { transform: translate(-30px, 20px) scale(1); }
-}
-
-.gem-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
-  transform-style: preserve-3d;
-  perspective: 1000px;
-}
-
-.gem-text {
-  font-size: 64px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  display: flex;
-  text-transform: uppercase;
-  line-height: 0.9;
-  font-family: 'Orbitron', sans-serif;
-  gap: 2px;
-}
-
-.gem-letter {
-  display: inline-block;
-  position: relative;
-  transform-style: preserve-3d;
-  animation: letterFloat 6s ease-in-out infinite;
-  filter: brightness(1.2);
-}
-
-.gem-letter:nth-child(1) { animation-delay: 0s; }
-.gem-letter:nth-child(2) { animation-delay: 0.2s; }
-.gem-letter:nth-child(3) { animation-delay: 0.4s; }
-.gem-letter:nth-child(4) { animation-delay: 0.6s; }
-.gem-letter:nth-child(5) { animation-delay: 0.8s; }
-.gem-letter:nth-child(6) { animation-delay: 0.10s; }
-.gem-letter:nth-child(7) { animation-delay: 0.30s; }
-.gem-letter:nth-child(8) { animation-delay: 0.50s; }
-
-@keyframes letterFloat {
-  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
-  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
-}
-
-.gem-letter:nth-child(1)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter:nth-child(2)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter:nth-child(3)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter:nth-child(4)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter:nth-child(5)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter:nth-child(6)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(217, 43, 43, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter:nth-child(7)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(0, 102, 255, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter:nth-child(8)::before {
-  content: attr(data-letter);
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 18px rgba(0, 204, 68, 0.35);
-  transform: translateZ(2px);
-}
-
-.gem-letter .edge-top {
-  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
-  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
-}
-.gem-letter .edge-right {
-  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
-  background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
-  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
-}
-.gem-letter .edge-bottom {
-  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
-  background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
-  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
-}
-.gem-letter .edge-left {
-  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
-  background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
-  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
-}
-
-.light-source {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
-  animation: rotateLight 15s linear infinite;
-  pointer-events: none;
-  z-index: 10;
-  mix-blend-mode: overlay;
-}
-
-@keyframes rotateLight {
-  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
-  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
-  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
-}
-
-.depth-shadow {
-  position: absolute;
-  bottom: -30px;
-  left: 0;
-  width: 100%;
-  height: 60px;
-  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
-  filter: blur(20px);
-  z-index: -1;
-}
-
 .container {
   max-width: 450px;
   margin: 0 auto;
   padding: 40px 24px;
-  position: relative;
-  z-index: 2;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-
+.gem-text {
+  font-size: 64px;
+  font-weight: 900;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(135deg, #00ced1, #7CFC00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+}
 .subtitle {
   text-align: center;
   color: #9ca3af;
   margin-bottom: 40px;
   font-size: 14px;
 }
-
 .auth-card {
-  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%);
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
   border: 1px solid rgba(0, 206, 209, 0.3);
   border-radius: 20px;
   padding: 40px;
-  backdrop-filter: blur(20px);
 }
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #9ca3af;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.form-group input {
+input {
   width: 100%;
-  padding: 14px 16px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(0, 206, 209, 0.25);
-  border-radius: 10px;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-group input:focus {
-  border-color: #00ced1;
-  box-shadow: 0 0 12px rgba(0, 206, 209, 0.2);
-}
-
-.form-group input::placeholder {
-  color: #5c6b8a;
-}
-
-.role-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.role-option {
   padding: 14px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(0, 206, 209, 0.2);
-  border-radius: 12px;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,206,209,0.3);
+  border-radius: 10px;
+  color: white;
+  font-family: inherit;
+  margin-bottom: 16px;
+  font-size: 14px;
 }
-
-.role-option:hover {
-  border-color: rgba(0, 206, 209, 0.5);
-}
-
-.role-option.selected {
-  border-color: #00ced1;
-  background: rgba(0, 206, 209, 0.1);
-}
-
-.role-option .role-emoji {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.role-option .role-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #e5e7eb;
-}
-
-.role-option .role-desc {
-  font-size: 10px;
-  color: #5c6b8a;
-  margin-top: 2px;
-}
-
-.auth-btn {
+button {
   width: 100%;
-  padding: 16px;
+  padding: 14px;
   background: linear-gradient(135deg, #00ced1, #00ff7f);
-  color: #000;
   border: none;
   border-radius: 10px;
   font-family: 'Orbitron', sans-serif;
   font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 2px;
   cursor: pointer;
-  text-transform: uppercase;
-  transition: all 0.3s;
-  margin-bottom: 12px;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #000;
+  transition: all 0.3s ease;
 }
-
-.auth-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 206, 209, 0.3);
+button:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(0,206,209,0.4);
 }
-
-.auth-btn:disabled {
-  opacity: 0.5;
+button:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
 }
-
-.toggle-link {
-  text-align: center;
-  font-size: 13px;
-  color: #9ca3af;
-  margin-top: 16px;
-}
-
-.toggle-link a {
-  color: #00ced1;
-  text-decoration: none;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.toggle-link a:hover {
-  text-decoration: underline;
-}
-
-.error-msg {
-  background: rgba(217, 43, 43, 0.2);
-  border: 1px solid rgba(217, 43, 43, 0.5);
+.error {
   color: #ff6b6b;
+  background: rgba(217,43,43,0.2);
   padding: 12px;
   border-radius: 8px;
-  font-size: 13px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: none;
+  font-size: 13px;
 }
-
-.error-msg.visible {
+.success {
+  color: #7CFC00;
+  background: rgba(124,252,0,0.1);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+  font-size: 13px;
+}
+.toggle {
+  text-align: center;
+  margin-top: 20px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+.toggle a {
+  color: #00ced1;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.role-label {
+  font-size: 11px;
+  color: #FFD966;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
   display: block;
 }
+.role-picker {
+  margin-bottom: 20px;
+}
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid rgba(0,206,209,0.15);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.role-option:hover {
+  border-color: #00ced1;
+  background: rgba(0,206,209,0.08);
+  transform: translateX(4px);
+}
+.role-option.selected {
+  border-color: #7CFC00;
+  background: rgba(124,252,0,0.1);
+  box-shadow: 0 0 30px rgba(124,252,0,0.08);
+}
+.role-option .emoji {
+  font-size: 28px;
+}
+.role-option .text {
+  font-size: 16px;
+  font-weight: 600;
+}
+.debug-info {
+  font-size: 10px;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 12px;
+  font-family: monospace;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 12px;
+}
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
-
-<div class="bg-waves">
-  <div class="wave-bg wave-sapphire-bg"></div>
-</div>
-
 <div class="container">
-  <div class="gem-logo">
-    <div class="gem-text">
-      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    </div>
-    <div class="light-source"></div>
-    <div class="depth-shadow"></div>
-  </div>
-  <div class="subtitle" id="subtitleText">Welcome back</div>
-
+  <div class="gem-text">TRADEAUX</div>
+  <div class="subtitle" id="subtitle">Sign in to your account</div>
   <div class="auth-card">
-    <div class="error-msg" id="errorMsg"></div>
+    <div class="error" id="errorMsg"></div>
+    <div class="success" id="successMsg"></div>
 
-    <!-- Sign-in view -->
-    <div id="signinView">
-      <div class="form-group">
-        <label for="emailInput">Email</label>
-        <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+    <!-- STEP 1: SIGN IN FORM -->
+    <div id="step1">
+      <input type="email" id="email" placeholder="Email address" autocomplete="email">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button id="signinBtn">Sign In</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" id="forgotLink" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a>
       </div>
-      <div class="form-group">
-        <label for="passwordInput">Password</label>
-        <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password">
+      <div class="toggle">No account? <a id="showSignup">Create one</a></div>
+    </div>
+
+    <!-- STEP 2: SIGN UP FORM -->
+    <div id="step2" class="hidden">
+      <input type="email" id="signupEmail" placeholder="Email address" autocomplete="email">
+      <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <input type="text" id="signupName" placeholder="Company / Organization Name">
+      <button id="signupBtn">Create Account</button>
+      <div class="toggle">Already have an account? <a id="showSignin">Sign in</a></div>
+    </div>
+
+    <!-- STEP 3: ROLE SELECTOR (SHOWS AFTER LOGIN) -->
+    <div id="step3" class="hidden">
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="font-size:13px; color:#9ca3af;">Welcome!</div>
+        <div style="font-size:16px; color:#7CFC00; margin-bottom:8px;" id="userEmailDisplay">user@example.com</div>
+        <div style="font-size:13px; color:#9ca3af;">Select your dashboard to continue</div>
       </div>
-      <button id="signinBtn" class="auth-btn">Sign In</button>
-      <div class="toggle-link">
-        No account? <a id="showSignup">Create one</a>
+      <label class="role-label">Choose Your Dashboard</label>
+      <div class="role-picker">
+        <div class="role-option" data-role="buyer"><span class="emoji">🛒</span><span class="text">Buyer</span></div>
+        <div class="role-option" data-role="seller"><span class="emoji">🏭</span><span class="text">Seller</span></div>
+        <div class="role-option" data-role="carrier"><span class="emoji">🚛</span><span class="text">Carrier</span></div>
+        <div class="role-option" data-role="insurer"><span class="emoji">🛡️</span><span class="text">Insurer</span></div>
+        <div class="role-option" data-role="banker"><span class="emoji">🏦</span><span class="text">Banker</span></div>
+      </div>
+      <button id="roleContinueBtn" disabled>Select a role first</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" id="logoutAfterLogin" style="font-size:12px; color:#ff6b6b; text-decoration:none;">← Sign out</a>
       </div>
     </div>
 
-    <!-- Sign-up view -->
-    <div id="signupView" style="display:none;">
-      <div style="font-size:12px;color:#9ca3af;margin-bottom:16px;text-align:center;">I am a...</div>
-      <div class="role-grid" id="roleGrid">
-        <div class="role-option selected" data-role="buyer">
-          <div class="role-emoji">🛒</div>
-          <div class="role-name">Buyer</div>
-          <div class="role-desc">Purchase commodities</div>
-        </div>
-        <div class="role-option" data-role="seller">
-          <div class="role-emoji">🏪</div>
-          <div class="role-name">Seller</div>
-          <div class="role-desc">List & sell products</div>
-        </div>
-        <div class="role-option" data-role="carrier">
-          <div class="role-emoji">🚛</div>
-          <div class="role-name">Carrier</div>
-          <div class="role-desc">Freight & logistics</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="signupEmail">Email</label>
-        <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label for="signupPassword">Password</label>
-        <input type="password" id="signupPassword" placeholder="Min 6 characters" autocomplete="new-password">
-      </div>
-      <div class="form-group">
-        <label for="signupName">Full Name / Company</label>
-        <input type="text" id="signupName" placeholder="Your name or company">
-      </div>
-      <button id="signupBtn" class="auth-btn">Create Account</button>
-      <div class="toggle-link">
-        Already have an account? <a id="showSignin">Sign in</a>
-      </div>
-    </div>
+    <div class="debug-info" id="debugInfo">Sign in first, then choose your role</div>
   </div>
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBgG8EQlNZFkK2G5WCldvFogGSZqUwm1U0",
-  authDomain: "tradeaux-c72c7.firebaseapp.com",
-  projectId: "tradeaux-c72c7",
-  storageBucket: "tradeaux-c72c7.firebasestorage.app",
-  messagingSenderId: "187412805510",
-  appId: "1:187412805510:web:3e564135565d309b745e07",
-  measurementId: "G-JL4PCGZR16"
+// =====================================================
+// SUPABASE CONFIGURATION - FIXED: supabaseClient NOT supabase
+// =====================================================
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+
+// ✅ CRITICAL FIX: Use supabaseClient (NOT supabase) to avoid variable conflict
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// =====================================================
+// DASHBOARD MAPPING
+// =====================================================
+const DASHBOARDS = {
+  'buyer': 'dashboard-buyer.html',
+  'seller': 'dashboard-seller.html',
+  'carrier': 'dashboard-transport.html',
+  'insurer': 'dashboard-insurer.html',
+  'banker': 'dashboard-banker.html',
+  'admin': 'dashboard-admin.html'
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+// =====================================================
+// CHECK FOR LOGOUT FLAG
+// =====================================================
+const urlParams = new URLSearchParams(window.location.search);
+const isLogout = urlParams.get('logout') === '1';
 
-let selectedRole = 'buyer';
+let selectedRole = null;
+let currentUser = null;
 
+// =====================================================
+// UI HELPERS
+// =====================================================
 function showError(msg) {
   const el = document.getElementById('errorMsg');
   el.textContent = msg;
-  el.classList.add('visible');
-  setTimeout(() => el.classList.remove('visible'), 5000);
+  el.style.display = 'block';
+  document.getElementById('successMsg').style.display = 'none';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
-function clearError() {
-  document.getElementById('errorMsg').classList.remove('visible');
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('errorMsg').style.display = 'none';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
-// Role selector
-document.querySelectorAll('.role-option').forEach(el => {
-  el.onclick = () => {
-    document.querySelectorAll('.role-option').forEach(r => r.classList.remove('selected'));
-    el.classList.add('selected');
-    selectedRole = el.dataset.role;
-  };
-});
+function redirectToDashboard(role) {
+  const url = DASHBOARDS[role];
+  if (!url) {
+    showError('Unknown role. Redirecting to buyer.');
+    setTimeout(() => { window.location.href = 'dashboard-buyer.html'; }, 2000);
+    return;
+  }
+  document.getElementById('debugInfo').textContent = 'Redirecting to: ' + url;
+  setTimeout(() => { window.location.href = url; }, 300);
+}
 
-// Toggle views
-document.getElementById('showSignup').onclick = () => {
-  document.getElementById('signinView').style.display = 'none';
-  document.getElementById('signupView').style.display = 'block';
-  document.getElementById('subtitleText').textContent = 'Create your account';
-  clearError();
-};
+function showRolePicker(user) {
+  currentUser = user;
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.remove('hidden');
+  document.getElementById('userEmailDisplay').textContent = user.email;
+  document.getElementById('subtitle').textContent = 'Choose your dashboard';
+  document.getElementById('debugInfo').textContent = 'Logged in as: ' + user.email;
+}
 
-document.getElementById('showSignin').onclick = () => {
-  document.getElementById('signupView').style.display = 'none';
-  document.getElementById('signinView').style.display = 'block';
-  document.getElementById('subtitleText').textContent = 'Welcome back';
-  clearError();
-};
-
-// Email Sign In → immediate redirect to correct dashboard
-document.getElementById('signinBtn').onclick = async () => {
-  clearError();
-  const email = document.getElementById('emailInput').value.trim();
-  const password = document.getElementById('passwordInput').value;
-
-  if (!email || !password) {
-    showError('Please enter both email and password.');
+// =====================================================
+// PAGE LOAD
+// =====================================================
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 TradeAux Signin v5.2 - FIXED supabaseClient');
+  
+  // === IF LOGOUT FLAG, STAY ON SIGNIN PAGE ===
+  if (isLogout) {
+    console.log('🔓 Logout detected - staying on signin page');
+    showSuccess('You have been signed out.');
+    localStorage.removeItem('supabase.auth.token');
+    supabaseClient.auth.signOut().catch(() => {});
     return;
   }
 
-  const btn = document.getElementById('signinBtn');
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
+  // === CHECK IF ALREADY LOGGED IN ===
+  supabaseClient.auth.getSession().then(function(result) {
+    if (result.data.session) {
+      showRolePicker(result.data.session.user);
+    }
+  }).catch(function(err) {
+    console.log('No session found:', err);
+  });
 
-  try {
-    const result = await auth.signInWithEmailAndPassword(email, password);
-    const user = result.user;
+  // =====================================================
+  // TOGGLE SIGNUP / SIGNIN
+  // =====================================================
+  document.getElementById('showSignup').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('subtitle').textContent = 'Create your account';
+  });
+  
+  document.getElementById('showSignin').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+    document.getElementById('subtitle').textContent = 'Sign in to your account';
+  });
 
-    // Fetch role from Firestore
-    const profileDoc = await db.collection('profiles').doc(user.uid).get();
-    const profile = profileDoc.exists ? profileDoc.data() : {};
-    const tokenResult = await user.getIdTokenResult(true);
-    const isAdmin = tokenResult.claims.admin === true;
-    const role = isAdmin ? 'admin' : (profile.role || 'buyer');
-
-    const dashboardMap = {
-      admin: 'dashboard-admin.html',
-      seller: 'seller-auction.html',
-      buyer: 'dashboard-buyer.html',
-      carrier: 'dashboard-transport.html'
-    };
-
-    // Hard redirect — no intermediate page, no timer, no questions
-    window.location.href = dashboardMap[role] || 'dashboard-buyer.html';
-  } catch (error) {
-    btn.disabled = false;
-    btn.textContent = 'Sign In';
-    if (error.code === 'auth/user-not-found') {
-      showError('No account found with this email.');
-    } else if (error.code === 'auth/wrong-password') {
-      showError('Incorrect password.');
-    } else if (error.code === 'auth/invalid-email') {
-      showError('Please enter a valid email address.');
-    } else if (error.code === 'auth/too-many-requests') {
-      showError('Too many failed attempts. Please try again later.');
-    } else {
+  // =====================================================
+  // SIGN IN - STEP 1
+  // =====================================================
+  document.getElementById('signinBtn').addEventListener('click', async function() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) {
+      showError('Please enter email and password');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+        email: email, 
+        password: password 
+      });
+      
+      if (error) throw error;
+      
+      showSuccess('✅ Signed in successfully!');
+      showRolePicker(data.user);
+      
+    } catch (error) {
       showError(error.message);
     }
-  }
-};
+  });
 
-// Sign Up → immediate redirect to correct dashboard
-document.getElementById('signupBtn').onclick = async () => {
-  clearError();
-  const email = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const name = document.getElementById('signupName').value.trim();
-
-  if (!email || !password) {
-    showError('Please enter email and password.');
-    return;
-  }
-  if (password.length < 6) {
-    showError('Password must be at least 6 characters.');
-    return;
-  }
-
-  const btn = document.getElementById('signupBtn');
-  btn.disabled = true;
-  btn.textContent = 'Creating account...';
-
-  try {
-    const result = await auth.createUserWithEmailAndPassword(email, password);
-    const user = result.user;
-
-    await user.updateProfile({ displayName: name || email.split('@')[0] });
-
-    await db.collection('profiles').doc(user.uid).set({
-      full_name: name || email.split('@')[0],
-      email: email,
-      photoURL: '',
-      provider: 'email',
-      role: selectedRole,
-      country: '',
-      phone: '',
-      total_spent: 0,
-      total_revenue: 0,
-      total_trades: 0,
-      win_rate: 0,
-      rating: 0,
-      created_at: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    await db.collection('wallets').doc(user.uid).set({
-      userId: user.uid,
-      balance: 0,
-      held_amount: 0,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    await db.collection('users').doc(user.uid).set({
-      name: name || email.split('@')[0],
-      email: email,
-      provider: 'email',
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-
-    const dashboardMap = {
-      admin: 'dashboard-admin.html',
-      seller: 'seller-auction.html',
-      buyer: 'dashboard-buyer.html',
-      carrier: 'dashboard-transport.html'
-    };
-
-    // Hard redirect immediately after account creation
-    window.location.href = dashboardMap[selectedRole] || 'dashboard-buyer.html';
-  } catch (error) {
-    btn.disabled = false;
-    btn.textContent = 'Create Account';
-    if (error.code === 'auth/email-already-in-use') {
-      showError('An account with this email already exists.');
-    } else if (error.code === 'auth/invalid-email') {
-      showError('Please enter a valid email address.');
-    } else if (error.code === 'auth/weak-password') {
-      showError('Password is too weak.');
-    } else {
+  // =====================================================
+  // SIGN UP - STEP 2
+  // =====================================================
+  document.getElementById('signupBtn').addEventListener('click', async function() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const companyName = document.getElementById('signupName').value.trim();
+    
+    if (!email || !password) {
+      showError('Please enter email and password');
+      return;
+    }
+    
+    if (password.length < 6) {
+      showError('Password must be at least 6 characters');
+      return;
+    }
+    
+    if (!companyName) {
+      showError('Please enter your Company / Organization name');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: companyName,
+            company: companyName,
+            role: 'buyer'
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      // If session is null, email confirmation is required
+      if (data.user && !data.session) {
+        showSuccess('✅ Account created! Check your email to confirm.');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('subtitle').textContent = 'Sign in to your account';
+        return;
+      }
+      
+      // Email confirmation is disabled — auto sign-in
+      if (data.user && data.session) {
+        // Create profile
+        const { error: profileError } = await supabaseClient.from('profiles').insert({
+          id: data.user.id,
+          email: email,
+          full_name: companyName,
+          company_name: companyName,
+          role: 'buyer',
+          wallet_balance: 0,
+          created_at: new Date().toISOString()
+        });
+        
+        if (profileError) {
+          console.error('Profile creation failed:', profileError);
+          // Don't block the user — they can update profile later
+        }
+        
+        showSuccess('✅ Account created successfully!');
+        showRolePicker(data.user);
+      }
+      
+    } catch (error) {
       showError(error.message);
     }
-  }
-};
+  });
 
-// Enter key support
-document.getElementById('passwordInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('signinBtn').click();
-});
-document.getElementById('signupPassword').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('signupBtn').click();
+  // =====================================================
+  // ROLE SELECTOR - STEP 3
+  // =====================================================
+  document.querySelectorAll('.role-option').forEach(function(option) {
+    option.addEventListener('click', function() {
+      document.querySelectorAll('.role-option').forEach(function(opt) { 
+        opt.classList.remove('selected'); 
+      });
+      this.classList.add('selected');
+      selectedRole = this.dataset.role;
+      
+      const btn = document.getElementById('roleContinueBtn');
+      btn.disabled = false;
+      btn.textContent = 'Go to Dashboard →';
+      
+      document.getElementById('debugInfo').textContent = 'Selected: ' + selectedRole;
+    });
+  });
+
+  document.getElementById('roleContinueBtn').addEventListener('click', function() {
+    if (!selectedRole) {
+      showError('Please select a role first');
+      return;
+    }
+    
+    // Save the role to the user's profile
+    if (currentUser) {
+      supabaseClient
+        .from('profiles')
+        .update({ role: selectedRole })
+        .eq('id', currentUser.id)
+        .then(function(result) {
+          if (result.error) {
+            console.warn('Could not save role:', result.error);
+          } else {
+            console.log('✅ Role saved:', selectedRole);
+          }
+        });
+    }
+    
+    redirectToDashboard(selectedRole);
+  });
+
+  // =====================================================
+  // LOGOUT (from role picker)
+  // =====================================================
+  document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
+    e.preventDefault();
+    try {
+      await supabaseClient.auth.signOut();
+      localStorage.removeItem('supabase.auth.token');
+      window.location.href = 'signin.html?logout=1';
+    } catch (error) {
+      localStorage.removeItem('supabase.auth.token');
+      window.location.href = 'signin.html?logout=1';
+    }
+  });
+
+  // =====================================================
+  // FORGOT PASSWORD
+  // =====================================================
+  document.getElementById('forgotLink').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    
+    if (!email) {
+      showError('Enter your email first');
+      return;
+    }
+    
+    try {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/signin.html'
+      });
+      if (error) throw error;
+      showSuccess('Password reset email sent!');
+    } catch (err) {
+      showError(err.message);
+    }
+  });
+
+  // =====================================================
+  // KEYBOARD SUPPORT
+  // =====================================================
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      if (!document.getElementById('step1').classList.contains('hidden')) {
+        document.getElementById('signinBtn').click();
+      } else if (!document.getElementById('step2').classList.contains('hidden')) {
+        document.getElementById('signupBtn').click();
+      } else if (!document.getElementById('step3').classList.contains('hidden')) {
+        if (!document.getElementById('roleContinueBtn').disabled) {
+          document.getElementById('roleContinueBtn').click();
+        }
+      }
+    }
+  });
+  
+  console.log('✅ Ready - signin v5.2');
 });
 </script>
 </body>
