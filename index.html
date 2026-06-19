@@ -47,7 +47,7 @@ body {
 .container {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 20px 24px 80px;
+  padding: 20px 24px 80px 140px;
   position: relative;
   z-index: 2;
 }
@@ -499,6 +499,7 @@ footer a:hover { color: #4a9e5a; }
   .trust { grid-template-columns: repeat(2, 1fr); }
   .gem-logo-corner { transform: scale(0.25); }
   .hero h1 { font-size: 1.8rem; }
+  .container { padding: 16px 16px 80px 16px; }
 }
 @media (max-width: 600px) {
   .trust { grid-template-columns: 1fr; }
@@ -681,8 +682,20 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      await supabaseClient.auth.signOut();
-      window.location.href = '/';
+      try {
+        await supabaseClient.auth.signOut();
+        // Clear local storage token
+        localStorage.removeItem('supabase.auth.token');
+        // Force reload to show logged out state
+        showLoggedOut();
+        window.location.reload();
+      } catch (error) {
+        console.error('Sign out error:', error);
+        // Force clear anyway
+        localStorage.removeItem('supabase.auth.token');
+        showLoggedOut();
+        window.location.reload();
+      }
     });
   }
 });
