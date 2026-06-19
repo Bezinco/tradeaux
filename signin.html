@@ -3,330 +3,525 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Sign In — TradeAux</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #020617; min-height: 100vh; font-family: 'Inter', sans-serif; color: #e5e7eb; }
-.container { max-width: 450px; margin: 0 auto; padding: 40px 24px; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-.gem-text { font-size: 64px; font-weight: 900; text-align: center; font-family: 'Orbitron', sans-serif; background: linear-gradient(135deg, #00ced1, #7CFC00); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 20px; }
-.subtitle { text-align: center; color: #9ca3af; margin-bottom: 40px; font-size: 14px; }
-.auth-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 40px; }
-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 10px; color: white; font-family: inherit; margin-bottom: 16px; font-size: 14px; }
-input:focus { outline: none; border-color: #7CFC00; box-shadow: 0 0 0 3px rgba(124,252,0,0.15); }
-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-weight: 800; cursor: pointer; margin-top: 8px; font-size: 14px; color: #000; transition: all 0.3s ease; }
-button:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.4); }
-button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.error { color: #ff6b6b; background: rgba(217,43,43,0.2); padding: 12px; border-radius: 8px; margin-bottom: 16px; display: none; font-size: 13px; }
-.success { color: #7CFC00; background: rgba(124,252,0,0.1); padding: 12px; border-radius: 8px; margin-bottom: 16px; display: none; font-size: 13px; }
-.toggle { text-align: center; margin-top: 20px; color: #9ca3af; font-size: 13px; }
-.toggle a { color: #00ced1; cursor: pointer; text-decoration: underline; }
-.role-label { font-size: 11px; color: #FFD966; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
-.role-picker { margin-bottom: 20px; }
-.role-option { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: rgba(0,0,0,0.3); border: 2px solid rgba(0,206,209,0.15); border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s ease; }
-.role-option:hover { border-color: #00ced1; background: rgba(0,206,209,0.08); transform: translateX(4px); }
-.role-option.selected { border-color: #7CFC00; background: rgba(124,252,0,0.1); box-shadow: 0 0 30px rgba(124,252,0,0.08); }
-.role-option .emoji { font-size: 28px; }
-.role-option .text { font-size: 16px; font-weight: 600; }
-.debug-info { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 12px; font-family: monospace; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
+body {
+  background: #020617;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+}
+.container {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.gem-text {
+  font-size: 64px;
+  font-weight: 900;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(135deg, #00ced1, #7CFC00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+}
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+.auth-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,206,209,0.3);
+  border-radius: 10px;
+  color: white;
+  font-family: inherit;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #000;
+  transition: all 0.3s ease;
+}
+button:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(0,206,209,0.4);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+.error {
+  color: #ff6b6b;
+  background: rgba(217,43,43,0.2);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+  font-size: 13px;
+}
+.success {
+  color: #7CFC00;
+  background: rgba(124,252,0,0.1);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+  font-size: 13px;
+}
+.toggle {
+  text-align: center;
+  margin-top: 20px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+.toggle a {
+  color: #00ced1;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.role-label {
+  font-size: 11px;
+  color: #FFD966;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  display: block;
+}
+.role-picker {
+  margin-bottom: 20px;
+}
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid rgba(0,206,209,0.15);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.role-option:hover {
+  border-color: #00ced1;
+  background: rgba(0,206,209,0.08);
+  transform: translateX(4px);
+}
+.role-option.selected {
+  border-color: #7CFC00;
+  background: rgba(124,252,0,0.1);
+  box-shadow: 0 0 30px rgba(124,252,0,0.08);
+}
+.role-option .emoji {
+  font-size: 28px;
+}
+.role-option .text {
+  font-size: 16px;
+  font-weight: 600;
+}
+.debug-info {
+  font-size: 10px;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 12px;
+  font-family: monospace;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 12px;
+}
 .hidden { display: none !important; }
-.divider { text-align: center; margin: 16px 0; color: #9ca3af; font-size: 12px; position: relative; }
-.divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(255,255,255,0.1); }
-.divider::before { left: 0; }
-.divider::after { right: 0; }
 </style>
-<base target="_blank">
 </head>
 <body>
 <div class="container">
   <div class="gem-text">TRADEAUX</div>
-  <div class="subtitle" id="subtitle">Sign in to your TradeAux account</div>
+  <div class="subtitle" id="subtitle">Sign in to your account</div>
   <div class="auth-card">
     <div class="error" id="errorMsg"></div>
     <div class="success" id="successMsg"></div>
 
-    <!-- STEP 1: Sign In / Sign Up -->
-    <div id="authStep">
+    <!-- STEP 1: SIGN IN FORM -->
+    <div id="step1">
       <input type="email" id="email" placeholder="Email address" autocomplete="email">
       <input type="password" id="password" placeholder="Password" autocomplete="current-password">
       <button id="signinBtn">Sign In</button>
-      <div class="divider">or</div>
-      <button id="showSignupBtn" style="background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.4);">Create Account</button>
-      <div style="text-align:center; margin-top:12px;"><a href="#" id="forgotLink" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a></div>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" id="forgotLink" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a>
+      </div>
+      <div class="toggle">No account? <a id="showSignup">Create one</a></div>
     </div>
 
-    <!-- STEP 2: Sign Up Form -->
-    <div id="signupStep" class="hidden">
-      <div style="text-align:center; margin-bottom:16px;">
-        <div style="font-size:13px; color:#9ca3af;">Create your account</div>
-      </div>
+    <!-- STEP 2: SIGN UP FORM -->
+    <div id="step2" class="hidden">
       <input type="email" id="signupEmail" placeholder="Email address" autocomplete="email">
       <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
       <input type="text" id="signupName" placeholder="Company / Organization Name">
       <button id="signupBtn">Create Account</button>
-      <div class="toggle">Already have an account? <a id="showSigninBtn">Sign in</a></div>
+      <div class="toggle">Already have an account? <a id="showSignin">Sign in</a></div>
     </div>
 
-    <!-- STEP 3: Role Selection (after sign up OR if no role set) -->
-    <div id="roleStep" class="hidden">
+    <!-- STEP 3: ROLE SELECTOR (SHOWS AFTER LOGIN) -->
+    <div id="step3" class="hidden">
       <div style="text-align:center; margin-bottom:16px;">
-        <div style="font-size:13px; color:#9ca3af;">Welcome! Choose your dashboard</div>
+        <div style="font-size:13px; color:#9ca3af;">Welcome!</div>
+        <div style="font-size:16px; color:#7CFC00; margin-bottom:8px;" id="userEmailDisplay">user@example.com</div>
+        <div style="font-size:13px; color:#9ca3af;">Select your dashboard to continue</div>
       </div>
-      <label class="role-label">Select Your Role</label>
+      <label class="role-label">Choose Your Dashboard</label>
       <div class="role-picker">
-        <div class="role-option" data-role="buyer"><span class="emoji">&#128722;</span><span class="text">Buyer</span></div>
-        <div class="role-option" data-role="seller"><span class="emoji">&#127981;</span><span class="text">Seller</span></div>
-        <div class="role-option" data-role="carrier"><span class="emoji">&#128667;</span><span class="text">Carrier</span></div>
-        <div class="role-option" data-role="insurer"><span class="emoji">&#128737;</span><span class="text">Insurer</span></div>
-        <div class="role-option" data-role="banker"><span class="emoji">&#127974;</span><span class="text">Banker</span></div>
+        <div class="role-option" data-role="buyer"><span class="emoji">🛒</span><span class="text">Buyer</span></div>
+        <div class="role-option" data-role="seller"><span class="emoji">🏭</span><span class="text">Seller</span></div>
+        <div class="role-option" data-role="carrier"><span class="emoji">🚛</span><span class="text">Carrier</span></div>
+        <div class="role-option" data-role="insurer"><span class="emoji">🛡️</span><span class="text">Insurer</span></div>
+        <div class="role-option" data-role="banker"><span class="emoji">🏦</span><span class="text">Banker</span></div>
       </div>
-      <button id="continueBtn" disabled>Select a role first</button>
+      <button id="roleContinueBtn" disabled>Select a role first</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" id="logoutAfterLogin" style="font-size:12px; color:#ff6b6b; text-decoration:none;">← Sign out</a>
+      </div>
     </div>
 
-    <div class="debug-info" id="debugInfo">Enter credentials to sign in</div>
+    <div class="debug-info" id="debugInfo">Sign in first, then choose your role</div>
   </div>
 </div>
 
 <script>
+// =====================================================
+// SUPABASE CONFIGURATION
+// =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// =====================================================
+// DASHBOARD MAPPING
+// =====================================================
 const DASHBOARDS = {
   'buyer': 'dashboard-buyer.html',
   'seller': 'dashboard-seller.html',
   'carrier': 'dashboard-transport.html',
   'insurer': 'dashboard-insurer.html',
-  'banker': 'dashboard-banker.html'
+  'banker': 'dashboard-banker.html',
+  'admin': 'dashboard-admin.html'
 };
+
+// =====================================================
+// CHECK FOR LOGOUT FLAG
+// =====================================================
+const urlParams = new URLSearchParams(window.location.search);
+const isLogout = urlParams.get('logout') === '1';
 
 let selectedRole = null;
 let currentUser = null;
 
-// Check if already signed in on load
-// If URL has ?logout=1, sign out first then stay on page
-var urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('logout') === '1') {
-  supabaseClient.auth.signOut().then(function() {
-    currentUser = null;
-    updateDebug('Signed out successfully');
-    // Clean URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-  });
-} else {
-  supabaseClient.auth.getSession().then(function(result) {
-    if (result.data && result.data.session) {
-      currentUser = result.data.session.user;
-      checkUserRole(currentUser);
-    }
-  });
-}
-
-function showStep(stepId) {
-  document.getElementById('authStep').classList.add('hidden');
-  document.getElementById('signupStep').classList.add('hidden');
-  document.getElementById('roleStep').classList.add('hidden');
-  document.getElementById(stepId).classList.remove('hidden');
-}
-
+// =====================================================
+// UI HELPERS
+// =====================================================
 function showError(msg) {
-  var el = document.getElementById('errorMsg');
+  const el = document.getElementById('errorMsg');
   el.textContent = msg;
   el.style.display = 'block';
   document.getElementById('successMsg').style.display = 'none';
-  setTimeout(function() { el.style.display = 'none'; }, 5000);
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
 function showSuccess(msg) {
-  var el = document.getElementById('successMsg');
+  const el = document.getElementById('successMsg');
   el.textContent = msg;
   el.style.display = 'block';
   document.getElementById('errorMsg').style.display = 'none';
-  setTimeout(function() { el.style.display = 'none'; }, 5000);
-}
-
-function updateDebug(msg) {
-  document.getElementById('debugInfo').textContent = msg;
-}
-
-// Check user's role and redirect accordingly
-async function checkUserRole(user) {
-  if (!user) return;
-  try {
-    var result = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
-    if (result.data && result.data.role) {
-      updateDebug('Role found: ' + result.data.role + ' — redirecting...');
-      redirectToDashboard(result.data.role);
-    } else {
-      updateDebug('No role set — showing role picker');
-      showStep('roleStep');
-    }
-  } catch (err) {
-    updateDebug('Error checking role: ' + err.message);
-    showStep('roleStep');
-  }
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
 function redirectToDashboard(role) {
-  var url = DASHBOARDS[role];
+  const url = DASHBOARDS[role];
   if (!url) {
     showError('Unknown role. Redirecting to buyer.');
-    setTimeout(function() { window.location.href = 'dashboard-buyer.html'; }, 2000);
+    setTimeout(() => { window.location.href = 'dashboard-buyer.html'; }, 2000);
     return;
   }
-  updateDebug('Redirecting to: ' + url);
-  setTimeout(function() { window.location.href = url; }, 300);
+  document.getElementById('debugInfo').textContent = 'Redirecting to: ' + url;
+  setTimeout(() => { window.location.href = url; }, 300);
 }
 
-// Role selection
-var roleOptions = document.querySelectorAll('.role-option');
-roleOptions.forEach(function(option) {
-  option.addEventListener('click', function() {
-    roleOptions.forEach(function(opt) { opt.classList.remove('selected'); });
-    this.classList.add('selected');
-    selectedRole = this.dataset.role;
-    var btn = document.getElementById('continueBtn');
-    btn.disabled = false;
-    btn.textContent = 'Continue →';
-    updateDebug('Selected role: ' + selectedRole);
-  });
-});
+function showRolePicker(user) {
+  currentUser = user;
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.remove('hidden');
+  document.getElementById('userEmailDisplay').textContent = user.email;
+  document.getElementById('subtitle').textContent = 'Choose your dashboard';
+  document.getElementById('debugInfo').textContent = 'Logged in as: ' + user.email;
+}
 
-// Continue after role selection
-document.getElementById('continueBtn').addEventListener('click', async function() {
-  if (!selectedRole) { showError('Please select a role first'); return; }
-  if (!currentUser) { showError('Not signed in'); return; }
-
-  try {
-    updateDebug('Saving role: ' + selectedRole);
-    // Use update (not upsert) since profile row already exists from signup
-    var result = await supabaseClient.from('profiles')
-      .update({ role: selectedRole, updated_at: new Date().toISOString() })
-      .eq('id', currentUser.id);
-    if (result.error) throw result.error;
-    redirectToDashboard(selectedRole);
-  } catch (err) {
-    showError('Error saving role: ' + err.message);
-    updateDebug('RLS error — trying RPC fallback...');
-    // Fallback: try to update via RPC if direct update fails
-    try {
-      var rpcResult = await supabaseClient.rpc('set_user_role', {
-        user_role: selectedRole
-      });
-      if (rpcResult.error) throw rpcResult.error;
-      redirectToDashboard(selectedRole);
-    } catch (rpcErr) {
-      showError('Could not save role. Please contact support.');
-      updateDebug('RPC also failed: ' + rpcErr.message);
-    }
+// =====================================================
+// PAGE LOAD
+// =====================================================
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 TradeAux Signin v5.0 - Sign in FIRST, then choose role');
+  
+  // === IF LOGOUT FLAG, STAY ON SIGNIN PAGE ===
+  if (isLogout) {
+    console.log('🔓 Logout detected - staying on signin page');
+    showSuccess('You have been signed out.');
+    // Clear session just in case
+    supabase.auth.signOut().catch(() => {});
+    return;
   }
-});
 
-// Show sign up form
-document.getElementById('showSignupBtn').addEventListener('click', function() {
-  showStep('signupStep');
-  updateDebug('Creating new account');
-});
-
-// Show sign in form
-document.getElementById('showSigninBtn').addEventListener('click', function() {
-  showStep('authStep');
-  updateDebug('Sign in to existing account');
-});
-
-// Sign In
-document.getElementById('signinBtn').addEventListener('click', async function() {
-  var email = document.getElementById('email').value.trim();
-  var password = document.getElementById('password').value;
-  if (!email || !password) { showError('Please enter email and password'); return; }
-
-  updateDebug('Signing in...');
-  try {
-    var result = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
-    if (result.error) throw result.error;
-    currentUser = result.data.user;
-    updateDebug('Signed in! Checking role...');
-    await checkUserRole(currentUser);
-  } catch (error) { showError(error.message); updateDebug('Sign in failed: ' + error.message); }
-});
-
-// Sign Up
-document.getElementById('signupBtn').addEventListener('click', async function() {
-  var email = document.getElementById('signupEmail').value.trim();
-  var password = document.getElementById('signupPassword').value;
-  var companyName = document.getElementById('signupName').value.trim();
-
-  if (!email || !password) { showError('Please enter email and password'); return; }
-  if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
-  if (!companyName) { showError('Please enter your Company / Organization name'); return; }
-
-  updateDebug('Creating account...');
-  try {
-    var result = await supabaseClient.auth.signUp({
-      email: email,
-      password: password,
-      options: { data: { full_name: companyName, company: companyName } }
-    });
-    if (result.error) throw result.error;
-
-    if (result.data && result.data.user) {
-      currentUser = result.data.user;
-      // Insert profile (role will be set later)
-      await supabaseClient.from('profiles').insert({
-        id: result.data.user.id,
-        email: email,
-        full_name: companyName,
-        company_name: companyName,
-        wallet_balance: 0,
-        created_at: new Date().toISOString()
-      });
-
-      // If email confirmation is required
-      if (result.data.user.identities && result.data.user.identities.length === 0) {
-        showSuccess('Account created! Check your email to confirm.');
-        updateDebug('Waiting for email confirmation');
-        return;
-      }
-
-      updateDebug('Account created! Pick your role...');
-      showStep('roleStep');
+  // === CHECK IF ALREADY LOGGED IN ===
+  supabase.auth.getSession().then(function(result) {
+    if (result.data.session) {
+      // Already logged in - show role picker
+      showRolePicker(result.data.session.user);
     }
-  } catch (error) {
-    if (error.message && error.message.includes('already registered')) {
-      showError('Email already registered. Please sign in.');
-    } else {
+  }).catch(function(err) {
+    console.log('No session found');
+  });
+
+  // =====================================================
+  // TOGGLE SIGNUP / SIGNIN
+  // =====================================================
+  document.getElementById('showSignup').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('subtitle').textContent = 'Create your account';
+  });
+  
+  document.getElementById('showSignin').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+    document.getElementById('subtitle').textContent = 'Sign in to your account';
+  });
+
+  // =====================================================
+  // SIGN IN - STEP 1
+  // =====================================================
+  document.getElementById('signinBtn').addEventListener('click', async function() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) {
+      showError('Please enter email and password');
+      return;
+    }
+    
+    try {
+      const result = await supabase.auth.signInWithPassword({ 
+        email: email, 
+        password: password 
+      });
+      
+      if (result.error) throw result.error;
+      
+      showSuccess('✅ Signed in successfully!');
+      showRolePicker(result.data.user);
+      
+    } catch (error) {
       showError(error.message);
     }
-    updateDebug('Sign up failed: ' + error.message);
-  }
-});
+  });
 
-// Forgot password
-document.getElementById('forgotLink').addEventListener('click', async function(e) {
-  e.preventDefault();
-  var email = document.getElementById('email').value.trim();
-  if (!email) { showError('Enter your email first'); return; }
-  try {
-    var result = await supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/index.html'
-    });
-    if (result.error) throw result.error;
-    showSuccess('Password reset email sent!');
-  } catch (err) { showError(err.message); }
-});
-
-// Enter key support
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    if (!document.getElementById('authStep').classList.contains('hidden')) {
-      document.getElementById('signinBtn').click();
-    } else if (!document.getElementById('signupStep').classList.contains('hidden')) {
-      document.getElementById('signupBtn').click();
-    } else if (!document.getElementById('roleStep').classList.contains('hidden')) {
-      document.getElementById('continueBtn').click();
+  // =====================================================
+  // SIGN UP - STEP 2
+  // =====================================================
+  document.getElementById('signupBtn').addEventListener('click', async function() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const companyName = document.getElementById('signupName').value.trim();
+    
+    if (!email || !password) {
+      showError('Please enter email and password');
+      return;
     }
-  }
+    
+    if (password.length < 6) {
+      showError('Password must be at least 6 characters');
+      return;
+    }
+    
+    if (!companyName) {
+      showError('Please enter your Company / Organization name');
+      return;
+    }
+    
+    try {
+      const result = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: companyName,
+            company: companyName,
+            role: 'buyer'
+          }
+        }
+      });
+      
+      if (result.error) throw result.error;
+      
+      if (result.data.user && !result.data.user.confirmed_at) {
+        showSuccess('✅ Account created! Check your email to confirm.');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('subtitle').textContent = 'Sign in to your account';
+        return;
+      }
+      
+      // If email confirmation is disabled, sign in automatically
+      if (result.data.user) {
+        // Create profile
+        await supabase.from('profiles').insert({
+          id: result.data.user.id,
+          email: email,
+          full_name: companyName,
+          company_name: companyName,
+          role: 'buyer',
+          wallet_balance: 0,
+          created_at: new Date().toISOString()
+        });
+        
+        showSuccess('✅ Account created successfully!');
+        showRolePicker(result.data.user);
+      }
+      
+    } catch (error) {
+      if (error.message && error.message.includes('email not confirmed')) {
+        showSuccess('✅ Account created! Please check your email to confirm.');
+      } else {
+        showError(error.message);
+      }
+    }
+  });
+
+  // =====================================================
+  // ROLE SELECTOR - STEP 3
+  // =====================================================
+  document.querySelectorAll('.role-option').forEach(function(option) {
+    option.addEventListener('click', function() {
+      document.querySelectorAll('.role-option').forEach(function(opt) { 
+        opt.classList.remove('selected'); 
+      });
+      this.classList.add('selected');
+      selectedRole = this.dataset.role;
+      
+      const btn = document.getElementById('roleContinueBtn');
+      btn.disabled = false;
+      btn.textContent = 'Go to Dashboard →';
+      
+      document.getElementById('debugInfo').textContent = 'Selected: ' + selectedRole;
+    });
+  });
+
+  document.getElementById('roleContinueBtn').addEventListener('click', function() {
+    if (!selectedRole) {
+      showError('Please select a role first');
+      return;
+    }
+    
+    // Save the role to the user's profile
+    if (currentUser) {
+      supabase
+        .from('profiles')
+        .update({ role: selectedRole })
+        .eq('id', currentUser.id)
+        .then(function(result) {
+          if (result.error) {
+            console.warn('Could not save role:', result.error);
+          } else {
+            console.log('✅ Role saved:', selectedRole);
+          }
+        });
+    }
+    
+    redirectToDashboard(selectedRole);
+  });
+
+  // =====================================================
+  // LOGOUT (from role picker)
+  // =====================================================
+  document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
+    e.preventDefault();
+    await supabase.auth.signOut();
+    window.location.href = 'signin.html?logout=1';
+  });
+
+  // =====================================================
+  // FORGOT PASSWORD
+  // =====================================================
+  document.getElementById('forgotLink').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    
+    if (!email) {
+      showError('Enter your email first');
+      return;
+    }
+    
+    try {
+      const result = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/signin.html'
+      });
+      if (result.error) throw result.error;
+      showSuccess('Password reset email sent!');
+    } catch (err) {
+      showError(err.message);
+    }
+  });
+
+  // =====================================================
+  // KEYBOARD SUPPORT
+  // =====================================================
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      if (!document.getElementById('step1').classList.contains('hidden')) {
+        document.getElementById('signinBtn').click();
+      } else if (!document.getElementById('step2').classList.contains('hidden')) {
+        document.getElementById('signupBtn').click();
+      } else if (!document.getElementById('step3').classList.contains('hidden')) {
+        if (!document.getElementById('roleContinueBtn').disabled) {
+          document.getElementById('roleContinueBtn').click();
+        }
+      }
+    }
+  });
+  
+  console.log('✅ Ready - Sign in first, then choose role');
 });
 </script>
 </body>
