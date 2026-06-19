@@ -105,12 +105,23 @@ let selectedRole = null;
 let currentUser = null;
 
 // Check if already signed in on load
-supabaseClient.auth.getSession().then(function(result) {
-  if (result.data && result.data.session) {
-    currentUser = result.data.session.user;
-    checkUserRole(currentUser);
-  }
-});
+// If URL has ?logout=1, sign out first then stay on page
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('logout') === '1') {
+  supabaseClient.auth.signOut().then(function() {
+    currentUser = null;
+    updateDebug('Signed out successfully');
+    // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  });
+} else {
+  supabaseClient.auth.getSession().then(function(result) {
+    if (result.data && result.data.session) {
+      currentUser = result.data.session.user;
+      checkUserRole(currentUser);
+    }
+  });
+}
 
 function showStep(stepId) {
   document.getElementById('authStep').classList.add('hidden');
