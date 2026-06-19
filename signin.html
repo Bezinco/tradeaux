@@ -219,14 +219,13 @@ button:disabled {
 
 <script>
 // =====================================================
-// SUPABASE CONFIGURATION - FIXED WITH DESTRUCTURING
+// SUPABASE CONFIGURATION - FIXED: NO RE-DECLARATION
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-// ✅ CRITICAL FIX: Use destructuring - this works reliably with UMD builds
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ✅ CRITICAL FIX: Use window.supabase (global from CDN) - NO const redeclaration!
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =====================================================
 // DASHBOARD MAPPING
@@ -293,7 +292,7 @@ function showRolePicker(user) {
 // PAGE LOAD
 // =====================================================
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 TradeAux Signin v5.3 - FIXED destructuring');
+  console.log('🚀 TradeAux Signin v5.4 - FIXED window.supabase');
   
   // === IF LOGOUT FLAG, STAY ON SIGNIN PAGE ===
   if (isLogout) {
@@ -529,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  console.log('✅ Ready - signin v5.3 with destructuring');
+  console.log('✅ Ready - signin v5.4 with window.supabase');
 });
 </script>
 </body>
