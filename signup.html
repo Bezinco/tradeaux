@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Sign In — TradeAux</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -54,6 +57,7 @@ input {
   color: white;
   font-family: inherit;
   margin-bottom: 16px;
+  font-size: 14px;
 }
 button {
   width: 100%;
@@ -65,10 +69,20 @@ button {
   font-weight: 800;
   cursor: pointer;
   margin-top: 8px;
+  font-size: 14px;
+  color: #000;
 }
 .error {
   color: #ff6b6b;
   background: rgba(217,43,43,0.2);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+}
+.success {
+  color: #7CFC00;
+  background: rgba(124,252,0,0.1);
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -82,9 +96,9 @@ button {
 .toggle a {
   color: #00ced1;
   cursor: pointer;
+  text-decoration: underline;
 }
 </style>
-<base target="_blank">
 </head>
 <body>
 <div class="container">
@@ -92,6 +106,7 @@ button {
   <div class="subtitle" id="subtitle">Welcome back</div>
   <div class="auth-card">
     <div class="error" id="errorMsg"></div>
+    <div class="success" id="successMsg"></div>
     
     <div id="signinView">
       <input type="email" id="email" placeholder="Email">
@@ -103,7 +118,7 @@ button {
     <div id="signupView" style="display:none">
       <input type="email" id="signupEmail" placeholder="Email">
       <input type="password" id="signupPassword" placeholder="Password (min 6 chars)">
-      <input type="text" id="signupName" placeholder="Full Name">
+      <input type="text" id="signupName" placeholder="Company / Organization Name">
       <button id="signupBtn">Create Account</button>
       <div class="toggle">Already have an account? <a id="showSignin">Sign in</a></div>
     </div>
@@ -111,146 +126,211 @@ button {
 </div>
 
 <script>
+// =====================================================
 // SUPABASE CONFIGURATION
+// =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
 // Create Supabase client correctly from the global supabase object
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// =====================================================
+// CHECK FOR LOGOUT FLAG
+// =====================================================
+const urlParams = new URLSearchParams(window.location.search);
+const isLogout = urlParams.get('logout') === '1';
+
+// =====================================================
+// UI HELPERS
+// =====================================================
 function showError(msg) {
   const el = document.getElementById('errorMsg');
   el.textContent = msg;
   el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 4000);
+  document.getElementById('successMsg').style.display = 'none';
+  setTimeout(() => el.style.display = 'none', 5000);
 }
 
-// Wait for DOM to be ready before attaching handlers
-document.addEventListener('DOMContentLoaded', function() {
-  // Toggle between signin and signup
-  const showSignup = document.getElementById('showSignup');
-  const showSignin = document.getElementById('showSignin');
-  const signinBtn = document.getElementById('signinBtn');
-  const signupBtn = document.getElementById('signupBtn');
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('errorMsg').style.display = 'none';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
 
-  if (showSignup) {
-    showSignup.onclick = () => {
-      document.getElementById('signinView').style.display = 'none';
-      document.getElementById('signupView').style.display = 'block';
-      document.getElementById('subtitle').textContent = 'Create your account';
-    };
+// =====================================================
+// PAGE LOAD - CHECK SESSION
+// =====================================================
+document.addEventListener('DOMContentLoaded', async function() {
+  console.log('🚀 Signin page loaded');
+  
+  // If this is a logout redirect, stay on signin page
+  if (isLogout) {
+    console.log('🔓 Logged out successfully');
+    showSuccess('You have been signed out.');
+    // Force clear any lingering session
+    try {
+      await supabaseClient.auth.signOut();
+    } catch(e) { /* ignore */ }
+    return;
   }
 
-  if (showSignin) {
-    showSignin.onclick = () => {
-      document.getElementById('signupView').style.display = 'none';
-      document.getElementById('signinView').style.display = 'block';
-      document.getElementById('subtitle').textContent = 'Welcome back';
-    };
-  }
+  // Check if user is already logged in
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      // User is already logged in - redirect to their dashboard
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      
+      const role = profile?.role || 'buyer';
+      console.log('🔐 Already logged in as:', role);
+      
+      if (role === 'admin') window.location.href = 'dashboard-admin.html';
+      else if (role === 'seller') window.location.href = 'dashboard-seller.html';
+      else if (role === 'carrier') window.location.href = 'dashboard-transport.html';
+      else if (role === 'insurer') window.location.href = 'dashboard-insurer.html';
+      else if (role === 'banker') window.location.href = 'dashboard-banker.html';
+      else window.location.href = 'dashboard-buyer.html';
+      return;
+    }
+  } catch(e) { /* ignore */ }
 
-  // Sign In with Supabase
-  if (signinBtn) {
-    signinBtn.onclick = async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+  console.log('📝 User not logged in, showing signin form');
 
-      if (!email || !password) {
-        showError('Please enter email and password');
-        return;
-      }
+  // =====================================================
+  // TOGGLE SIGNIN / SIGNUP
+  // =====================================================
+  document.getElementById('showSignup').onclick = () => {
+    document.getElementById('signinView').style.display = 'none';
+    document.getElementById('signupView').style.display = 'block';
+    document.getElementById('subtitle').textContent = 'Create your account';
+  };
 
-      try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
+  document.getElementById('showSignin').onclick = () => {
+    document.getElementById('signupView').style.display = 'none';
+    document.getElementById('signinView').style.display = 'block';
+    document.getElementById('subtitle').textContent = 'Welcome back';
+  };
 
-        if (error) throw error;
+  // =====================================================
+  // SIGN IN
+  // =====================================================
+  document.getElementById('signinBtn').onclick = async () => {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
 
-        const user = data.user;
+    if (!email || !password) {
+      showError('Please enter email and password');
+      return;
+    }
 
-        // Get user role from profiles table
-        const { data: profile, error: profileError } = await supabaseClient
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
-        const role = profile?.role || 'buyer';
+      if (error) throw error;
 
-        // Redirect based on role
-        if (role === 'admin') window.location.href = 'dashboard-admin.html';
-        else if (role === 'seller') window.location.href = 'dashboard-seller.html';
-        else window.location.href = 'dash-buyer.html';
-      } catch (error) {
-        showError(error.message);
-      }
-    };
-  }
+      const user = data.user;
 
-  // Sign Up with Supabase
-  if (signupBtn) {
-    signupBtn.onclick = async () => {
-      const email = document.getElementById('signupEmail').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      const name = document.getElementById('signupName').value.trim();
+      // Get user role from profiles table
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
 
-      if (!email || !password) {
-        showError('Please enter email and password');
-        return;
-      }
+      const role = profile?.role || 'buyer';
 
-      if (password.length < 6) {
-        showError('Password must be at least 6 characters');
-        return;
-      }
+      // Redirect based on role
+      if (role === 'admin') window.location.href = 'dashboard-admin.html';
+      else if (role === 'seller') window.location.href = 'dashboard-seller.html';
+      else if (role === 'carrier') window.location.href = 'dashboard-transport.html';
+      else if (role === 'insurer') window.location.href = 'dashboard-insurer.html';
+      else if (role === 'banker') window.location.href = 'dashboard-banker.html';
+      else window.location.href = 'dashboard-buyer.html';
+    } catch (error) {
+      showError(error.message);
+    }
+  };
 
-      try {
-        // Create user in Supabase Auth
-        const { data, error } = await supabaseClient.auth.signUp({
-          email: email,
-          password: password,
-          options: {
-            data: {
-              full_name: name || email.split('@')[0],
-              role: 'buyer'
-            }
+  // =====================================================
+  // SIGN UP
+  // =====================================================
+  document.getElementById('signupBtn').onclick = async () => {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const name = document.getElementById('signupName').value.trim();
+
+    if (!email || !password) {
+      showError('Please enter email and password');
+      return;
+    }
+
+    if (password.length < 6) {
+      showError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (!name) {
+      showError('Please enter your Company / Organization name');
+      return;
+    }
+
+    try {
+      // Create user in Supabase Auth
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: name,
+            role: 'buyer'
           }
-        });
+        }
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const user = data.user;
+      const user = data.user;
 
-        // Create profile in Supabase
-        const { error: profileError } = await supabaseClient
-          .from('profiles')
-          .insert({
-            id: user.id,
-            email: email,
-            full_name: name || email.split('@')[0],
-            role: 'buyer',
-            wallet_balance: 0,
-            created_at: new Date().toISOString()
-          });
-
-        if (profileError) console.error('Profile creation error:', profileError);
-
-        // Sign in automatically after signup
-        const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+      // Create profile in Supabase
+      await supabaseClient
+        .from('profiles')
+        .insert({
+          id: user.id,
           email: email,
-          password: password
+          full_name: name,
+          company_name: name,
+          role: 'buyer',
+          wallet_balance: 0,
+          created_at: new Date().toISOString()
         });
 
-        if (signInError) throw signInError;
+      // Auto sign in
+      const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
-        window.location.href = 'dash-buyer.html';
-      } catch (error) {
+      if (signInError) throw signInError;
+
+      window.location.href = 'dashboard-buyer.html';
+    } catch (error) {
+      if (error.message && error.message.includes('email not confirmed')) {
+        showSuccess('Account created! Please check your email to confirm.');
+      } else {
         showError(error.message);
       }
-    };
-  }
+    }
+  };
 });
 </script>
 </body>
