@@ -583,26 +583,57 @@ input:checked + .slider:before { transform: translateX(16px); }
 
 <script>
 // =====================================================
+// DEBUG & ERROR BOUNDARIES
+// =====================================================
+function safe(fn, fallback) {
+  try { return fn(); } catch (e) { console.error('[TradeAux Error]', e); return fallback; }
+}
+function safeAsync(fn) {
+  return async function(...args) {
+    try { return await fn.apply(this, args); } catch (e) { console.error('[TradeAux Error]', e); }
+  };
+}
+
+// =====================================================
 // SUPABASE CONFIGURATION
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let supabaseClient = null;
+try {
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('[TradeAux] Supabase client initialized');
+  } else {
+    console.warn('[TradeAux] Supabase library not loaded — running in offline mode');
+  }
+} catch (e) {
+  console.error('[TradeAux] Supabase init failed:', e);
+}
 
 // =====================================================
-// AUTH CHECK - REDIRECT TO SIGNIN IF NOT LOGGED IN
+// AUTH CHECK — NON-BLOCKING WITH FALLBACK
 // =====================================================
 async function checkAuth() {
+  if (!supabaseClient) {
+    console.warn('[TradeAux] No Supabase client — skipping auth check');
+    return true; // allow offline usage
+  }
   try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
     if (!session) {
-      window.location.href = 'signin.html';
+      console.log('[TradeAux] No session — redirecting to signin');
+      window.location.replace('signin.html');
       return false;
     }
+    console.log('[TradeAux] Session valid for', session.user?.email);
     return true;
-  } catch (error) {
-    window.location.href = 'signin.html';
-    return false;
+  } catch (e) {
+    console.error('[TradeAux] Auth check failed:', e);
+    // Don't trap the user on a broken page — let them use localStorage mode
+    return true;
   }
 }
 
@@ -663,47 +694,42 @@ function formatWeight(kg) {
 function setUnit(pref) {
   unitPreference = pref;
   document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.remove('active'));
-  document.getElementById('unit' + pref.charAt(0).toUpperCase() + pref.slice(1)).classList.add('active');
+  const btn = document.getElementById('unit' + pref.charAt(0).toUpperCase() + pref.slice(1));
+  if (btn) btn.classList.add('active');
   saveAll();
   renderAuctionDisplay();
 }
 
 // =====================================================
-// LOAD / SAVE
+// LOAD / SAVE — WITH ERROR BOUNDARIES
 // =====================================================
 function loadFromStorage() {
-  const saved = localStorage.getItem('tradeaux_company_profile');
-  if (saved) companyProfile = JSON.parse(saved);
-  const savedCerts = localStorage.getItem('tradeaux_cert_images');
-  if (savedCerts) certImages = JSON.parse(savedCerts);
-  const savedStacks = localStorage.getItem('tradeaux_cert_stacks');
-  if (savedStacks) certStacks = JSON.parse(savedStacks);
-  const savedToggles = localStorage.getItem('tradeaux_cert_toggles');
-  if (savedToggles) certToggles = JSON.parse(savedToggles);
-  const savedProducts = localStorage.getItem('tradeaux_product_lines');
-  if (savedProducts) productLines = JSON.parse(savedProducts);
-  else {
+  console.log('[TradeAux] Loading from localStorage...');
+  companyProfile = safe(() => JSON.parse(localStorage.getItem('tradeaux_company_profile')), companyProfile);
+  certImages = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_images')), certImages);
+  certStacks = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_stacks')), certStacks);
+  certToggles = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_toggles')), certToggles);
+  productLines = safe(() => JSON.parse(localStorage.getItem('tradeaux_product_lines')), null);
+  bots = safe(() => JSON.parse(localStorage.getItem('tradeaux_bots')), null);
+  const savedUnit = safe(() => localStorage.getItem('tradeaux_unit_preference'), null);
+  currentAuction = safe(() => JSON.parse(localStorage.getItem('tradeaux_auction')), null);
+  activeBids = safe(() => JSON.parse(localStorage.getItem('tradeaux_bids')), []);
+  auctionProductImage = safe(() => localStorage.getItem('tradeaux_auction_image'), null);
+
+  if (!productLines) {
     productLines = [
       { type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null },
       { type: 'Coconut Oil', sizes: [1, 5, 20], image: null }
     ];
   }
-  const savedBots = localStorage.getItem('tradeaux_bots');
-  if (savedBots) bots = JSON.parse(savedBots);
-  else {
+  if (!bots) {
     bots = [
       { id: 'bot1', name: 'Alpha Trader', strategy: 'aggressive', priceFloor: 0.45, priceCeiling: 0.65, priceIncrement: 0.005, maxDumpKilos: 2000, dumpRate: 100, sniperReserve: 0.05, minPaymentDays: 30, maxPaymentDays: 180 },
       { id: 'bot2', name: 'Sigma Bot', strategy: 'conservative', priceFloor: 0.47, priceCeiling: 0.60, priceIncrement: 0.005, maxDumpKilos: 1500, dumpRate: 75, sniperReserve: 0.03, minPaymentDays: 60, maxPaymentDays: 120 }
     ];
   }
-  const savedUnit = localStorage.getItem('tradeaux_unit_preference');
   if (savedUnit) unitPreference = savedUnit;
-  const savedAuction = localStorage.getItem('tradeaux_auction');
-  if (savedAuction) currentAuction = JSON.parse(savedAuction);
-  const savedBids = localStorage.getItem('tradeaux_bids');
-  if (savedBids) activeBids = JSON.parse(savedBids);
-  const savedAuctionImage = localStorage.getItem('tradeaux_auction_image');
-  if (savedAuctionImage) auctionProductImage = savedAuctionImage;
+  if (!activeBids) activeBids = [];
 
   renderCompanyProfile();
   renderCertificates();
@@ -711,29 +737,33 @@ function loadFromStorage() {
   renderBots();
   renderAuctionDisplay();
   populateAuctionProductDropdown();
-  // Set unit toggle
+
   document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.remove('active'));
-  document.getElementById('unit' + unitPreference.charAt(0).toUpperCase() + unitPreference.slice(1)).classList.add('active');
-  // Restore auction image preview
+  const unitBtn = document.getElementById('unit' + unitPreference.charAt(0).toUpperCase() + unitPreference.slice(1));
+  if (unitBtn) unitBtn.classList.add('active');
+
   if (auctionProductImage) {
-    document.getElementById('auctionImagePreview').src = auctionProductImage;
-    document.getElementById('auctionImagePreview').style.display = 'block';
-    document.getElementById('auctionImagePlaceholder').style.display = 'none';
+    const preview = document.getElementById('auctionImagePreview');
+    const placeholder = document.getElementById('auctionImagePlaceholder');
+    if (preview) { preview.src = auctionProductImage; preview.style.display = 'block'; }
+    if (placeholder) placeholder.style.display = 'none';
   }
+  console.log('[TradeAux] Loaded. Profile name:', companyProfile.name || '(empty)');
 }
 
 function saveAll() {
-  localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile));
-  localStorage.setItem('tradeaux_cert_images', JSON.stringify(certImages));
-  localStorage.setItem('tradeaux_cert_stacks', JSON.stringify(certStacks));
-  localStorage.setItem('tradeaux_cert_toggles', JSON.stringify(certToggles));
-  localStorage.setItem('tradeaux_product_lines', JSON.stringify(productLines));
-  localStorage.setItem('tradeaux_bots', JSON.stringify(bots));
-  localStorage.setItem('tradeaux_unit_preference', unitPreference);
-  if (auctionProductImage) localStorage.setItem('tradeaux_auction_image', auctionProductImage);
-  if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction));
-  else localStorage.removeItem('tradeaux_auction');
-  localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids));
+  console.log('[TradeAux] Saving to localStorage...');
+  safe(() => localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile)));
+  safe(() => localStorage.setItem('tradeaux_cert_images', JSON.stringify(certImages)));
+  safe(() => localStorage.setItem('tradeaux_cert_stacks', JSON.stringify(certStacks)));
+  safe(() => localStorage.setItem('tradeaux_cert_toggles', JSON.stringify(certToggles)));
+  safe(() => localStorage.setItem('tradeaux_product_lines', JSON.stringify(productLines)));
+  safe(() => localStorage.setItem('tradeaux_bots', JSON.stringify(bots)));
+  safe(() => localStorage.setItem('tradeaux_unit_preference', unitPreference));
+  safe(() => { if (auctionProductImage) localStorage.setItem('tradeaux_auction_image', auctionProductImage); });
+  safe(() => { if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction)); else localStorage.removeItem('tradeaux_auction'); });
+  safe(() => localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids)));
+  console.log('[TradeAux] Saved.');
 }
 
 // =====================================================
@@ -741,6 +771,7 @@ function saveAll() {
 // =====================================================
 function populateAuctionProductDropdown() {
   const select = document.getElementById('auctionProductSelect');
+  if (!select) return;
   const currentValue = select.value;
   select.innerHTML = '<option value="">-- Select a product from your list --</option>';
   productLines.forEach((product, idx) => {
@@ -758,20 +789,22 @@ function populateAuctionProductDropdown() {
 // RENDER: COMPANY PROFILE
 // =====================================================
 function renderCompanyProfile() {
-  document.getElementById('companyName').value = companyProfile.name || '';
-  document.getElementById('contactEmail').value = companyProfile.email || '';
-  document.getElementById('contactPhone').value = companyProfile.phone || '';
-  document.getElementById('originCountry').value = companyProfile.origin || '';
-  if (companyProfile.origin === 'Other' && companyProfile.otherCountry) {
-    document.getElementById('otherCountryInput').value = companyProfile.otherCountry;
-    document.getElementById('otherCountryInput').style.display = 'block';
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  setVal('companyName', companyProfile.name);
+  setVal('contactEmail', companyProfile.email);
+  setVal('contactPhone', companyProfile.phone);
+  setVal('originCountry', companyProfile.origin);
+  if (companyProfile.origin === 'Other') {
+    const otherInput = document.getElementById('otherCountryInput');
+    if (otherInput) { otherInput.value = companyProfile.otherCountry || ''; otherInput.style.display = 'block'; }
   }
-  document.getElementById('fobPort').value = companyProfile.fobPort || '';
-  document.getElementById('companyDescription').value = companyProfile.description || '';
+  setVal('fobPort', companyProfile.fobPort);
+  setVal('companyDescription', companyProfile.description);
   if (companyProfile.logo) {
-    document.getElementById('companyLogoPreview').src = companyProfile.logo;
-    document.getElementById('companyLogoPreview').style.display = 'block';
-    document.getElementById('companyLogoPlaceholder').style.display = 'none';
+    const preview = document.getElementById('companyLogoPreview');
+    const placeholder = document.getElementById('companyLogoPlaceholder');
+    if (preview) { preview.src = companyProfile.logo; preview.style.display = 'block'; }
+    if (placeholder) placeholder.style.display = 'none';
   }
 }
 
@@ -780,35 +813,26 @@ function renderCompanyProfile() {
 // =====================================================
 function renderCertificates() {
   const grid = document.getElementById('certGrid');
+  if (!grid) return;
   grid.innerHTML = '';
-  
-  const certTypes = ['incorporation'];
-  const otherTypes = Object.keys(certToggles).filter(k => k !== 'incorporation').sort();
-  certTypes.push(...otherTypes);
-  
+  const certTypes = ['incorporation', ...Object.keys(certToggles).filter(k => k !== 'incorporation').sort()];
   certTypes.forEach(type => {
     const info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '' };
     const isRequired = type === 'incorporation';
     const isVerified = certToggles[type] || false;
-    
     const div = document.createElement('div');
     div.className = 'cert-square';
     div.style.borderColor = isRequired ? 'rgba(124,252,0,0.5)' : 'rgba(0,206,209,0.2)';
-    
     let stackHtml = '';
     if (certStacks[type] && certStacks[type].length > 0) {
-      stackHtml = '<div class="cert-stack">';
-      certStacks[type].forEach((img, idx) => {
-        stackHtml += `<div class="stack-item" onclick="openMedia('${img}', 'image')"><img src="${img}"></div>`;
-      });
-      stackHtml += `<div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div>`;
-      stackHtml += '</div>';
+      stackHtml = '<div class="cert-stack">' +
+        certStacks[type].map(img => `<div class="stack-item" onclick="openMedia('${img}', 'image')"><img src="${img}"></div>`).join('') +
+        `<div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div></div>`;
     } else if (certImages[type]) {
       stackHtml = `<div class="cert-stack"><div class="stack-item" onclick="openMedia('${certImages[type]}', 'image')"><img src="${certImages[type]}"></div><div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div></div>`;
     } else {
       stackHtml = `<div class="cert-preview" onclick="addToStack('${type}')"><span class="placeholder">📤 Add Image</span></div>`;
     }
-    
     div.innerHTML = `
       <div class="cert-icon">${info.icon}</div>
       <div class="cert-name">${info.label}</div>
@@ -821,10 +845,8 @@ function renderCertificates() {
           <input type="checkbox" id="cert_${type}" ${isVerified ? 'checked' : ''} ${isRequired ? 'disabled' : ''}>
           <span class="slider"></span>
         </label>
-      </div>
-    `;
+      </div>`;
     grid.appendChild(div);
-    
     const toggle = div.querySelector('input[type="checkbox"]');
     if (toggle && !isRequired) {
       toggle.addEventListener('change', function(e) {
@@ -862,6 +884,7 @@ function addToStack(type) {
 // =====================================================
 function renderProducts() {
   const container = document.getElementById('productsContainer');
+  if (!container) return;
   container.innerHTML = '';
   productLines.forEach((product, idx) => {
     const div = document.createElement('div');
@@ -888,11 +911,9 @@ function renderProducts() {
       </div>
       <div class="product-actions">
         <button class="btn-danger" onclick="deleteProduct(${idx})">🗑</button>
-      </div>
-    `;
+      </div>`;
     container.appendChild(div);
   });
-
   document.querySelectorAll('.product-select').forEach(sel => {
     sel.addEventListener('change', function(e) {
       const idx = parseInt(this.dataset.idx);
@@ -944,6 +965,7 @@ function deleteProduct(idx) {
 // =====================================================
 function renderBots() {
   const container = document.getElementById('botsContainer');
+  if (!container) return;
   container.innerHTML = '';
   bots.forEach((bot, idx) => {
     const card = document.createElement('div');
@@ -963,11 +985,9 @@ function renderBots() {
         <div><span style="font-size:10px;color:#FFD966;">Sniper Reserve</span><input type="number" step="0.01" class="param-input" value="${bot.sniperReserve}" data-idx="${idx}" data-field="sniperReserve" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
         <div><span style="font-size:10px;color:#FFD966;">Payment (days)</span><input type="number" step="15" class="param-input" value="${bot.minPaymentDays}" data-idx="${idx}" data-field="minPaymentDays" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
       </div>
-      <button class="delete-bot" data-idx="${idx}" style="background:rgba(255,77,77,0.2);border:1px solid #FF4D4D;border-radius:30px;padding:6px 12px;cursor:pointer;color:#FFFFFF;font-weight:700;width:100%;margin-top:12px;">🗑 DELETE</button>
-    `;
+      <button class="delete-bot" data-idx="${idx}" style="background:rgba(255,77,77,0.2);border:1px solid #FF4D4D;border-radius:30px;padding:6px 12px;cursor:pointer;color:#FFFFFF;font-weight:700;width:100%;margin-top:12px;">🗑 DELETE</button>`;
     container.appendChild(card);
   });
-
   document.querySelectorAll('.bot-name-input, .param-input, .bot-strategy-select').forEach(inp => {
     inp.addEventListener('change', function(e) {
       const field = this.dataset.field;
@@ -990,19 +1010,19 @@ function renderBots() {
 // =====================================================
 function renderAuctionDisplay() {
   const container = document.getElementById('auctionContent');
+  if (!container) return;
   if (!currentAuction) {
-    document.getElementById('briefBadge').innerHTML = 'No active auction';
+    const badge = document.getElementById('briefBadge');
+    if (badge) badge.innerHTML = 'No active auction';
     container.innerHTML = '<div class="empty-state">No active auction. Create one above.</div>';
     return;
   }
   const isLive = currentAuction.status === 'live';
-  document.getElementById('briefBadge').innerHTML = isLive ? '🔥 LIVE' : 'READY';
-  
+  const badge = document.getElementById('briefBadge');
+  if (badge) badge.innerHTML = isLive ? '🔥 LIVE' : 'READY';
   const timerHtml = isLive ? `<div class="auction-timer" id="auctionTimer">${Math.floor(timerSeconds/60)}:${(timerSeconds%60).toString().padStart(2,'0')}</div>` : '';
-  
   const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:12px;">▶ START AUCTION</button>' : 
     '<button class="btn-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171);margin-top:12px;">⏹ END AUCTION</button>';
-
   const pendingBids = activeBids.filter(b => b.status === 'pending').sort((a,b) => b.pricePerKilo - a.pricePerKilo);
   let bidsHtml = '<table class="auction-bids-table"><thead><tr><th>#</th><th>Bot</th><th>Price/kg ($)</th><th>Kilos</th><th>Payment</th><th>Strategy</th><th></th></tr></thead><tbody>';
   pendingBids.forEach((bid, idx) => {
@@ -1017,11 +1037,8 @@ function renderAuctionDisplay() {
   });
   bidsHtml += '</tbody></table>';
   if (pendingBids.length === 0) bidsHtml = '<div class="empty-state">No bids yet.</div>';
-
-  // Find the selected product name
   let productName = currentAuction.productName || 'Unknown Product';
   let productSizes = currentAuction.sizes || 'Various sizes';
-  
   container.innerHTML = `
     <div class="auction-card">
       <div class="auction-header">
@@ -1033,7 +1050,6 @@ function renderAuctionDisplay() {
           <div class="company-detail">${currentAuction.fobPort || companyProfile.fobPort || 'FOB Port'}</div>
         </div>
       </div>
-      
       <div class="auction-product-display">
         <div class="ap-image">
           ${currentAuction.productImage ? `<img src="${currentAuction.productImage}">` : '<span class="placeholder">📷</span>'}
@@ -1045,44 +1061,37 @@ function renderAuctionDisplay() {
           <div class="ap-total">Total: ${formatWeight(currentAuction.totalRemainingKilos)}</div>
         </div>
       </div>
-      
       ${timerHtml}
       ${actionBtn}
-      
       <div style="margin-top:16px;">
         <div style="font-family:Orbitron;font-size:12px;margin-bottom:8px;color:#FFD966;">📊 BIDS</div>
         ${bidsHtml}
       </div>
-    </div>
-  `;
-  
-  if (!isLive) document.getElementById('startAuctionBtn')?.addEventListener('click', startAuction);
-  else document.getElementById('endAuctionBtn')?.addEventListener('click', endAuction);
+    </div>`;
+  if (!isLive) {
+    const startBtn = document.getElementById('startAuctionBtn');
+    if (startBtn) startBtn.addEventListener('click', startAuction);
+  } else {
+    const endBtn = document.getElementById('endAuctionBtn');
+    if (endBtn) endBtn.addEventListener('click', endAuction);
+  }
 }
 
 // =====================================================
 // AUCTION FUNCTIONS
 // =====================================================
-document.getElementById('launchAuctionBtn').addEventListener('click', function() {
+function launchAuction() {
   if (!companyProfile.name) { showToast('Save your company profile first!', true); return; }
   if (!certImages.incorporation) { showToast('⚠️ Incorporation Certificate is MANDATORY!', true); return; }
-  
   const productIdx = parseInt(document.getElementById('auctionProductSelect').value);
   if (isNaN(productIdx) || productIdx < 0 || productIdx >= productLines.length) {
-    showToast('Please select a product from the dropdown!', true);
-    return;
+    showToast('Please select a product from the dropdown!', true); return;
   }
-  
   const selectedProduct = productLines[productIdx];
   const quantity = parseFloat(document.getElementById('auctionQuantity').value);
   const sizes = document.getElementById('auctionSizes').value.trim();
-  
-  if (!quantity || quantity <= 0) {
-    showToast('Enter total quantity in kg!', true);
-    return;
-  }
-  
-  const currentAuctionData = {
+  if (!quantity || quantity <= 0) { showToast('Enter total quantity in kg!', true); return; }
+  currentAuction = {
     id: 'auc_' + Date.now(),
     companyName: companyProfile.name,
     companyLogo: companyProfile.logo,
@@ -1098,13 +1107,11 @@ document.getElementById('launchAuctionBtn').addEventListener('click', function()
     status: 'active',
     durationMinutes: parseInt(document.getElementById('auctionDuration').value) || 3
   };
-  
-  currentAuction = currentAuctionData;
   activeBids = [];
   saveAll();
   renderAuctionDisplay();
   showToast('Auction created for ' + selectedProduct.type + '! Click START to begin.', false);
-});
+}
 
 function startAuction() {
   if (!currentAuction) return;
@@ -1204,132 +1211,179 @@ window.acceptBid = function(bidId) {
 // =====================================================
 // AUCTION IMAGE UPLOAD
 // =====================================================
-document.getElementById('auctionImageBtn').addEventListener('click', function() {
-  document.getElementById('auctionImageInput').click();
-});
-document.getElementById('auctionImageInput').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    auctionProductImage = ev.target.result;
-    document.getElementById('auctionImagePreview').src = auctionProductImage;
-    document.getElementById('auctionImagePreview').style.display = 'block';
-    document.getElementById('auctionImagePlaceholder').style.display = 'none';
-    saveAll();
-    showToast('Auction product image uploaded!', false);
-  };
-  reader.readAsDataURL(file);
-});
+function setupAuctionImageUpload() {
+  const btn = document.getElementById('auctionImageBtn');
+  const input = document.getElementById('auctionImageInput');
+  if (!btn || !input) return;
+  btn.addEventListener('click', () => input.click());
+  input.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      auctionProductImage = ev.target.result;
+      const preview = document.getElementById('auctionImagePreview');
+      const placeholder = document.getElementById('auctionImagePlaceholder');
+      if (preview) { preview.src = auctionProductImage; preview.style.display = 'block'; }
+      if (placeholder) placeholder.style.display = 'none';
+      saveAll();
+      showToast('Auction product image uploaded!', false);
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 // =====================================================
 // COMPANY PROFILE
 // =====================================================
-document.getElementById('saveProfileBtn').addEventListener('click', function() {
-  const origin = document.getElementById('originCountry').value;
-  companyProfile = {
-    logo: companyProfile.logo,
-    name: document.getElementById('companyName').value,
-    email: document.getElementById('contactEmail').value,
-    phone: document.getElementById('contactPhone').value,
-    origin: origin,
-    otherCountry: (origin === 'Other') ? document.getElementById('otherCountryInput').value : '',
-    fobPort: document.getElementById('fobPort').value,
-    description: document.getElementById('companyDescription').value
-  };
-  saveAll();
-  showToast('Profile saved!', false);
-});
+function setupCompanyProfile() {
+  const saveBtn = document.getElementById('saveProfileBtn');
+  const logoBtn = document.getElementById('companyLogoBtn');
+  const logoInput = document.getElementById('companyLogoInput');
+  const originSelect = document.getElementById('originCountry');
 
-document.getElementById('companyLogoBtn').addEventListener('click', function() {
-  document.getElementById('companyLogoInput').click();
-});
-document.getElementById('companyLogoInput').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    companyProfile.logo = ev.target.result;
-    document.getElementById('companyLogoPreview').src = companyProfile.logo;
-    document.getElementById('companyLogoPreview').style.display = 'block';
-    document.getElementById('companyLogoPlaceholder').style.display = 'none';
-    saveAll();
-  };
-  reader.readAsDataURL(file);
-});
+  if (saveBtn) {
+    saveBtn.addEventListener('click', function() {
+      console.log('[TradeAux] Save Profile clicked');
+      const origin = document.getElementById('originCountry').value;
+      companyProfile = {
+        logo: companyProfile.logo,
+        name: document.getElementById('companyName').value,
+        email: document.getElementById('contactEmail').value,
+        phone: document.getElementById('contactPhone').value,
+        origin: origin,
+        otherCountry: (origin === 'Other') ? document.getElementById('otherCountryInput').value : '',
+        fobPort: document.getElementById('fobPort').value,
+        description: document.getElementById('companyDescription').value
+      };
+      saveAll();
+      showToast('Profile saved!', false);
+      console.log('[TradeAux] Profile saved:', companyProfile);
+    });
+  }
 
-document.getElementById('originCountry').addEventListener('change', function() {
-  document.getElementById('otherCountryInput').style.display = (this.value === 'Other') ? 'block' : 'none';
-});
+  if (logoBtn && logoInput) {
+    logoBtn.addEventListener('click', () => logoInput.click());
+    logoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        companyProfile.logo = ev.target.result;
+        const preview = document.getElementById('companyLogoPreview');
+        const placeholder = document.getElementById('companyLogoPlaceholder');
+        if (preview) { preview.src = companyProfile.logo; preview.style.display = 'block'; }
+        if (placeholder) placeholder.style.display = 'none';
+        saveAll();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (originSelect) {
+    originSelect.addEventListener('change', function() {
+      const otherInput = document.getElementById('otherCountryInput');
+      if (otherInput) otherInput.style.display = (this.value === 'Other') ? 'block' : 'none';
+    });
+  }
+}
 
 // =====================================================
 // ADD PRODUCT
 // =====================================================
-document.getElementById('addProductBtn').addEventListener('click', function() {
-  productLines.push({ type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null });
-  saveAll();
-  renderProducts();
-  populateAuctionProductDropdown();
-});
+function setupProducts() {
+  const btn = document.getElementById('addProductBtn');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      productLines.push({ type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null });
+      saveAll();
+      renderProducts();
+      populateAuctionProductDropdown();
+    });
+  }
+}
 
 // =====================================================
 // ADD CERTIFICATE
 // =====================================================
-document.getElementById('addCertBtn').addEventListener('click', function() {
-  const type = document.getElementById('certDropdown').value;
-  if (!type) { showToast('Select a certificate type first', true); return; }
-  if (certToggles[type] !== undefined) { showToast('Certificate already added', true); return; }
-  certToggles[type] = false;
-  certImages[type] = null;
-  certStacks[type] = [];
-  saveAll();
-  renderCertificates();
-  document.getElementById('certDropdown').value = '';
-  showToast('Certificate added! Upload images and verify.', false);
-});
+function setupCertificates() {
+  const btn = document.getElementById('addCertBtn');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      const type = document.getElementById('certDropdown').value;
+      if (!type) { showToast('Select a certificate type first', true); return; }
+      if (certToggles[type] !== undefined) { showToast('Certificate already added', true); return; }
+      certToggles[type] = false;
+      certImages[type] = null;
+      certStacks[type] = [];
+      saveAll();
+      renderCertificates();
+      document.getElementById('certDropdown').value = '';
+      showToast('Certificate added! Upload images and verify.', false);
+    });
+  }
+}
 
 // =====================================================
 // ADD BOT
 // =====================================================
-document.getElementById('addBotBtn').addEventListener('click', function() {
-  bots.push({
-    id: 'bot_' + Date.now(),
-    name: 'New Bot',
-    strategy: 'aggressive',
-    priceFloor: 0.45,
-    priceCeiling: 0.65,
-    priceIncrement: 0.005,
-    maxDumpKilos: 2000,
-    dumpRate: 100,
-    sniperReserve: 0.05,
-    minPaymentDays: 30,
-    maxPaymentDays: 180
-  });
-  saveAll();
-  renderBots();
-});
+function setupBots() {
+  const btn = document.getElementById('addBotBtn');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      bots.push({
+        id: 'bot_' + Date.now(),
+        name: 'New Bot',
+        strategy: 'aggressive',
+        priceFloor: 0.45,
+        priceCeiling: 0.65,
+        priceIncrement: 0.005,
+        maxDumpKilos: 2000,
+        dumpRate: 100,
+        sniperReserve: 0.05,
+        minPaymentDays: 30,
+        maxPaymentDays: 180
+      });
+      saveAll();
+      renderBots();
+    });
+  }
+}
 
 // =====================================================
-// SIGN OUT - FIXED WITH SUPABASE
+// SIGN OUT — BULLETPROOF
 // =====================================================
-document.getElementById('signOutBtn').addEventListener('click', async function() {
-  if (confirm('Sign out?')) {
-    try {
-      await supabaseClient.auth.signOut();
-      window.location.href = 'signin.html?logout=1';
-    } catch (error) {
-      console.error('Sign out error:', error);
-      // Force redirect even if Supabase fails
-      window.location.href = 'signin.html?logout=1';
+function setupSignOut() {
+  const btn = document.getElementById('signOutBtn');
+  if (!btn) { console.warn('[TradeAux] Sign Out button not found'); return; }
+  btn.addEventListener('click', async function() {
+    console.log('[TradeAux] Sign Out clicked');
+    if (!confirm('Sign out?')) return;
+    // Always clear local data first so even if Supabase fails, user is signed out locally
+    safe(() => localStorage.removeItem('tradeaux_company_profile'));
+    safe(() => localStorage.removeItem('tradeaux_cert_images'));
+    safe(() => localStorage.removeItem('tradeaux_cert_stacks'));
+    safe(() => localStorage.removeItem('tradeaux_cert_toggles'));
+    safe(() => localStorage.removeItem('tradeaux_product_lines'));
+    safe(() => localStorage.removeItem('tradeaux_bots'));
+    safe(() => localStorage.removeItem('tradeaux_unit_preference'));
+    safe(() => localStorage.removeItem('tradeaux_auction'));
+    safe(() => localStorage.removeItem('tradeaux_bids'));
+    safe(() => localStorage.removeItem('tradeaux_auction_image'));
+    if (supabaseClient) {
+      try { await supabaseClient.auth.signOut(); } catch (e) { console.error('[TradeAux] Supabase signOut error:', e); }
     }
-  }
-});
+    console.log('[TradeAux] Redirecting to signin...');
+    window.location.replace('signin.html?logout=1');
+  });
+}
 
 // =====================================================
 // TOAST / MODAL
 // =====================================================
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
   t.className = isError ? 'toast error' : 'toast';
   t.classList.add('visible');
@@ -1340,11 +1394,11 @@ window.openMedia = function(src, type) {
   const modal = document.getElementById('mediaModal');
   const img = document.getElementById('modalImage');
   const video = document.getElementById('modalVideo');
-  img.style.display = 'none';
-  video.style.display = 'none';
-  if (type === 'image') { img.src = src; img.style.display = 'block'; }
-  else { video.src = src; video.style.display = 'block'; video.play(); }
-  modal.style.display = 'flex';
+  if (img) img.style.display = 'none';
+  if (video) video.style.display = 'none';
+  if (type === 'image' && img) { img.src = src; img.style.display = 'block'; }
+  else if (video) { video.src = src; video.style.display = 'block'; video.play(); }
+  if (modal) modal.style.display = 'flex';
 };
 
 // =====================================================
@@ -1385,14 +1439,41 @@ function updateTickerPrices() {
 setInterval(updateTickerPrices, 8000);
 
 // =====================================================
-// INIT
+// INIT — DOM READY + ERROR BOUNDARIES
 // =====================================================
-(async function init() {
-  const authenticated = await checkAuth();
-  if (authenticated) {
+function initApp() {
+  console.log('[TradeAux] DOM ready. Initializing...');
+  setupCompanyProfile();
+  setupAuctionImageUpload();
+  setupProducts();
+  setupCertificates();
+  setupBots();
+  setupSignOut();
+  const launchBtn = document.getElementById('launchAuctionBtn');
+  if (launchBtn) launchBtn.addEventListener('click', launchAuction);
+  console.log('[TradeAux] Event listeners attached.');
+
+  checkAuth().then(authenticated => {
+    if (authenticated) {
+      console.log('[TradeAux] Auth OK — loading data');
+      loadFromStorage();
+      showToast('Dashboard ready', false);
+    } else {
+      console.log('[TradeAux] Auth failed — should have redirected');
+    }
+  }).catch(err => {
+    console.error('[TradeAux] Init error:', err);
+    // Still load data so user isn't stuck on a blank page
     loadFromStorage();
-  }
-})();
+    showToast('Loaded in offline mode', true);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 </script>
 </body>
 </html>
