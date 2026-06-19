@@ -7,46 +7,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 html, body { width: 100%; min-height: 100%; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-
 body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
-
 .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-
 .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
-
 .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
 .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
 .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
-
 @keyframes waveBgDrift {
   0% { transform: translate(0px,0px) scale(1); opacity: 0.15; }
   50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; }
   100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; }
 }
-
 .gem-logo-corner {
   position: fixed; top: 20px; left: 20px; z-index: 9999;
   filter: drop-shadow(0 30px 50px rgba(0,206,209,0.4));
   transform-style: preserve-3d; perspective: 1000px;
   transform: scale(0.35); transform-origin: top left; pointer-events: none;
 }
-
-.gem-text {
-  font-size: 160px; font-weight: 900; letter-spacing: -0.02em;
-  position: relative; display: flex; text-transform: uppercase;
-  line-height: 0.9; font-family: 'Orbitron', sans-serif;
-  transform-style: preserve-3d; gap: 2px;
-}
-
-.gem-letter {
-  display: inline-block; position: relative;
-  transform-style: preserve-3d;
-  animation: letterFloat 6s ease-in-out infinite;
-  filter: brightness(1.2);
-}
-
+.gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
+.gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
 .gem-letter:nth-child(1) { animation-delay: 0s; }
 .gem-letter:nth-child(2) { animation-delay: 0.2s; }
 .gem-letter:nth-child(3) { animation-delay: 0.4s; }
@@ -55,12 +35,10 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
 .gem-letter:nth-child(6) { animation-delay: 0.10s; }
 .gem-letter:nth-child(7) { animation-delay: 0.30s; }
 .gem-letter:nth-child(8) { animation-delay: 0.50s; }
-
 @keyframes letterFloat {
   0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
   50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
 }
-
 .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before {
   content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
@@ -85,7 +63,6 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   text-shadow: 0 0 18px rgba(217,43,43,0.35), 2px 2px 4px rgba(0,0,0,0.3);
   transform: translateZ(2px);
 }
-
 .gem-letter .edge-top, .gem-letter .edge-right, .gem-letter .edge-bottom, .gem-letter .edge-left {
   position: absolute; pointer-events: none; z-index: 5;
 }
@@ -93,7 +70,6 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
 .gem-letter .edge-right { top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; }
 .gem-letter .edge-bottom { bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; }
 .gem-letter .edge-left { top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; }
-
 .light-source {
   position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
   background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
@@ -133,7 +109,6 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
   filter: blur(20px); z-index: -1;
 }
-
 .commodity-ticker-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
   background: linear-gradient(145deg, rgba(15, 32, 64, 0.95), rgba(2, 6, 23, 0.98));
@@ -172,9 +147,7 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   content: ''; position: absolute; right: -20px; top: 0; bottom: 0; width: 20px;
   background: linear-gradient(90deg, rgba(2,6,23,0.9), transparent);
 }
-
 .container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 80px; position: relative; z-index: 2; }
-
 .glass-header {
   backdrop-filter: blur(14px); background: rgba(3,5,12,0.7);
   border-bottom: 1px solid rgba(124,252,0,0.3);
@@ -190,7 +163,6 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
 }
 .btn-outline:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0,206,209,0.5); }
-
 .section-card {
   background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95));
   border-radius: 24px; padding: 28px; margin-bottom: 28px;
@@ -211,14 +183,12 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
 .section-header {
   font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700;
   color: #7CFC00; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
   border-left: 3px solid #7CFC00; padding-left: 16px;
 }
 .section-header .badge { background: rgba(0,206,209,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; color: #00ced1; }
-
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
 .form-field { display: flex; flex-direction: column; gap: 8px; }
 .form-label { font-size: 11px; color: #FFD966; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
@@ -228,9 +198,40 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   outline: none; font-weight: 500;
 }
 .form-input:focus, .form-select:focus { border-color: #7CFC00; box-shadow: 0 0 0 3px rgba(124,252,0,0.15); }
-
-.cert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px 0; }
-.cert-card { background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.3); border-radius: 16px; padding: 16px; }
+.btn-primary {
+  background: linear-gradient(105deg, #10b981, #2dd4bf); border: none;
+  padding: 14px 28px; border-radius: 40px; font-family: 'Orbitron', sans-serif;
+  font-weight: 700; font-size: 14px; color: #010101; cursor: pointer; transition: 0.2s; width: 100%;
+}
+.btn-secondary {
+  background: rgba(0,206,209,0.2); border: 1px solid #00ced1;
+  padding: 8px 20px; border-radius: 30px; cursor: pointer; color: #00ced1; font-weight: 700;
+}
+.empty-state { text-align: center; padding: 40px; color: #9ca3af; }
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); padding: 12px 24px;
+  border-radius: 40px; border-left: 4px solid #7CFC00; transition: 0.3s; opacity: 0;
+  z-index: 2000; color: white; font-weight: 500;
+}
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { border-left-color: #FF4D4D; }
+.media-modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center;
+}
+.media-modal img, .media-modal video { max-width: 90%; max-height: 90%; border-radius: 16px; border: 3px solid #FFD966; }
+.modal-close { position: absolute; top: 20px; right: 40px; font-size: 48px; color: white; cursor: pointer; }
+.variant-row {
+  display: flex; gap: 20px; flex-wrap: wrap; background: rgba(0,0,0,0.3);
+  padding: 16px; border-radius: 16px; margin-bottom: 16px; align-items: flex-end;
+}
+.variant-input { flex: 1; min-width: 150px; }
+.variant-input .form-input, .variant-input .form-select { width: 100%; }
+.cert-card {
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.3);
+  border-radius: 16px; padding: 16px; margin-bottom: 12px;
+}
 .cert-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
 .cert-title { font-weight: 700; font-size: 13px; color: #FFD966; }
 .cert-desc { font-size: 10px; color: #9ca3af; margin-bottom: 12px; }
@@ -248,76 +249,21 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
 .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
 input:checked + .slider { background-color: #7CFC00; }
 input:checked + .slider:before { transform: translateX(24px); }
-
-.lab-reports-list { margin-top: 12px; }
-.lab-report-item {
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.3);
-  border-radius: 12px; padding: 12px; margin-bottom: 12px;
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+.product-size-row {
+  display: flex; gap: 6px; margin-bottom: 4px; align-items: center;
 }
-.lab-report-preview { max-height: 60px; max-width: 100px; border-radius: 8px; cursor: pointer; }
-.lab-report-info { flex: 1; font-size: 12px; color: #E0E0FF; }
-.lab-report-actions { display: flex; gap: 8px; align-items: center; }
-.delete-lab { background: rgba(255,77,77,0.2); border: 1px solid #FF4D4D; border-radius: 30px; padding: 4px 12px; cursor: pointer; color: #FFFFFF; }
-
-.lab-notes-list { margin-top: 12px; }
-.lab-note-item { background: rgba(0,0,0,0.3); border-left: 3px solid #7CFC00; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.lab-note-text { flex: 1; font-size: 13px; color: #E0E0FF; line-height: 1.4; }
-.delete-note { background: rgba(255,77,77,0.2); border: none; border-radius: 20px; padding: 4px 10px; cursor: pointer; color: #FF4D4D; font-size: 11px; }
-
-.media-gallery { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-.media-item { position: relative; width: 140px; height: 140px; border-radius: 12px; border: 2px solid rgba(124,252,0,0.5); overflow: hidden; cursor: pointer; transition: transform 0.2s; }
-.media-item:hover { transform: scale(1.05); border-color: #FFD966; }
-.media-item img, .media-item video { width: 100%; height: 100%; object-fit: cover; }
-.media-item .remove-media { position: absolute; top: 4px; right: 4px; background: rgba(255,77,77,0.9); border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; color: white; font-weight: bold; }
-
-.variant-row { display: flex; gap: 20px; flex-wrap: wrap; background: rgba(0,0,0,0.3); padding: 16px; border-radius: 16px; margin-bottom: 16px; align-items: flex-end; }
-.variant-input { flex: 1; min-width: 150px; }
-.variant-input .form-input, .variant-input .form-select { width: 100%; }
-.variant-slider { width: 100%; margin-top: 8px; accent-color: #7CFC00; }
-.slider-value { display: inline-block; margin-left: 10px; color: #00ced1; font-weight: 600; }
-
-.coop-logo-box { width: 100px; height: 100px; border-radius: 16px; border: 2px dashed #FFD966; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; }
-.coop-logo-box img { width: 100%; height: 100%; object-fit: cover; }
-.coop-logo-placeholder { font-size: 10px; color: #9ca3af; text-align: center; }
-
-.bots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-top: 16px; }
-.bot-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; }
-.bot-name-input { background: rgba(0,0,0,0.6); border: 1px solid #FFD966; border-radius: 30px; padding: 8px 16px; color: white; font-family: 'Orbitron', monospace; font-weight: 700; font-size: 16px; width: 100%; margin-bottom: 16px; }
-.bot-strategy-select { background: rgba(0,0,0,0.6); border: 1px solid #7CFC00; border-radius: 30px; padding: 8px 16px; color: white; width: 100%; margin-bottom: 16px; }
-.bot-param-row { display: flex; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; align-items: center; }
-.param-label-sm { font-size: 11px; color: #FFD966; font-weight: 500; }
-.param-input-sm { background: rgba(0,0,0,0.6); border: 1px solid rgba(124,252,0,0.4); border-radius: 8px; padding: 6px 10px; color: white; width: 100px; text-align: center; }
-.delete-bot { background: rgba(255,77,77,0.2); border: 1px solid #FF4D4D; border-radius: 30px; padding: 8px 16px; cursor: pointer; color: #FFFFFF; font-weight: 700; width: 100%; margin-top: 12px; }
-
-.bids-table { width: 100%; border-collapse: collapse; }
-.bids-table th, .bids-table td { padding: 14px 12px; text-align: left; border-bottom: 1px solid rgba(124,252,0,0.15); color: #E0E0FF; }
-.bids-table th { color: #FFD966; font-size: 11px; text-transform: uppercase; }
-.rank-1 { background: rgba(255,215,0,0.15); }
-.rank-2 { background: rgba(192,192,192,0.1); }
-.rank-3 { background: rgba(205,127,50,0.1); }
-.btn-accept { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 11px; cursor: pointer; color: #010101; }
-.btn-primary { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px 28px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; color: #010101; cursor: pointer; transition: 0.2s; width: 100%; }
-.btn-secondary { background: rgba(0,206,209,0.2); border: 1px solid #00ced1; padding: 8px 20px; border-radius: 30px; cursor: pointer; color: #00ced1; font-weight: 700; }
-.timer-display { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 800; color: #7CFC00; text-align: center; margin: 16px 0; text-shadow: 0 0 10px rgba(124,252,0,0.5); }
-.empty-state { text-align: center; padding: 40px; color: #9ca3af; }
-.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); padding: 12px 24px; border-radius: 40px; border-left: 4px solid #7CFC00; transition: 0.3s; opacity: 0; z-index: 2000; color: white; font-weight: 500; }
-.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.error { border-left-color: #FF4D4D; }
-.media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center; }
-.media-modal img, .media-modal video { max-width: 90%; max-height: 90%; border-radius: 16px; border: 3px solid #FFD966; }
-.modal-close { position: absolute; top: 20px; right: 40px; font-size: 48px; color: white; cursor: pointer; }
-
-.brief-stat { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; text-align: center; }
-.brief-stat-label { font-size: 11px; color: #FFD966; text-transform: uppercase; margin-bottom: 6px; }
-.brief-stat-value { font-size: 20px; font-weight: 800; color: #7CFC00; }
-.brief-stat-value.small { font-size: 14px; color: #E0E0FF; }
-
+.product-size-row input { flex: 1; padding: 6px 10px; font-size: 12px; }
+.remove-size {
+  background: rgba(255,77,77,0.3); border: none; border-radius: 6px;
+  padding: 4px 8px; color: #fff; cursor: pointer;
+}
+.delete-product {
+  background: rgba(255,77,77,0.3); border: 1px solid #FF4D4D;
+  border-radius: 30px; padding: 6px 16px; cursor: pointer; color: #fff;
+}
 @media (max-width: 768px) {
   .container { padding: 16px 16px 80px; }
-  .bots-grid { grid-template-columns: 1fr; }
   .gem-logo-corner { transform: scale(0.25); }
-  .cert-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -353,24 +299,25 @@ input:checked + .slider:before { transform: translateX(24px); }
 
 <div class="container">
 
+  <!-- COMPANY PROFILE -->
   <div class="section-card">
-    <div class="section-header">&#127970; CO-OP PROFILE &amp; CERTIFICATIONS <span class="badge">Buyer bots check these</span></div>
+    <div class="section-header">🏢 COMPANY PROFILE</div>
     <div class="form-grid">
       <div class="form-field">
-        <label class="form-label">CO-OP LOGO</label>
-        <div class="coop-logo-box" id="coopLogoBtn">
-          <div class="coop-logo-placeholder" id="coopLogoPlaceholder">UPLOAD</div>
-          <img id="coopLogoPreview" style="display:none;">
-          <input type="file" id="coopLogoInput" accept="image/*" style="display:none;">
+        <label class="form-label">COMPANY LOGO</label>
+        <div class="coop-logo-box" id="companyLogoBtn" style="width:100px;height:100px;border-radius:16px;border:2px dashed #FFD966;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;">
+          <div class="coop-logo-placeholder" id="companyLogoPlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;">UPLOAD</div>
+          <img id="companyLogoPreview" style="display:none;width:100%;height:100%;object-fit:cover;">
+          <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
         </div>
       </div>
       <div class="form-field">
-        <label class="form-label">CO-OP NAME</label>
-        <input class="form-input" id="coopName" placeholder="Green Valley Coconut Co-op">
+        <label class="form-label">COMPANY NAME</label>
+        <input class="form-input" id="companyName" placeholder="ABC Exporters Ltd">
       </div>
       <div class="form-field">
         <label class="form-label">CONTACT EMAIL</label>
-        <input class="form-input" id="contactEmail" placeholder="sales@coop.com">
+        <input class="form-input" id="contactEmail" placeholder="info@company.com">
       </div>
       <div class="form-field">
         <label class="form-label">PHONE / WHATSAPP</label>
@@ -380,101 +327,76 @@ input:checked + .slider:before { transform: translateX(24px); }
         <label class="form-label">COUNTRY OF ORIGIN</label>
         <select class="form-select" id="originCountry">
           <option value="">Select country...</option>
-          <option value="Brazil">Brazil</option>
-          <option value="Fiji">Fiji</option>
-          <option value="Ghana">Ghana</option>
-          <option value="India">India</option>
-          <option value="Indonesia">Indonesia</option>
-          <option value="Jamaica">Jamaica</option>
-          <option value="Mexico">Mexico</option>
-          <option value="Papua New Guinea">Papua New Guinea</option>
-          <option value="Philippines">Philippines</option>
-          <option value="Sri Lanka">Sri Lanka</option>
-          <option value="Thailand">Thailand</option>
-          <option value="Vietnam">Vietnam</option>
+          <option value="Brazil">Brazil</option><option value="Fiji">Fiji</option>
+          <option value="Ghana">Ghana</option><option value="India">India</option>
+          <option value="Indonesia">Indonesia</option><option value="Jamaica">Jamaica</option>
+          <option value="Mexico">Mexico</option><option value="Papua New Guinea">Papua New Guinea</option>
+          <option value="Philippines">Philippines</option><option value="Sri Lanka">Sri Lanka</option>
+          <option value="Thailand">Thailand</option><option value="Vietnam">Vietnam</option>
           <option value="Other">Other (please specify)</option>
         </select>
-        <input type="text" class="form-input" id="otherCountryInput" placeholder="Please specify country" style="display:none; margin-top:8px;">
+        <input type="text" class="form-input" id="otherCountryInput" placeholder="Please specify country" style="display:none;margin-top:8px;">
       </div>
       <div class="form-field">
         <label class="form-label">FOB PORT</label>
         <input class="form-input" id="fobPort" placeholder="e.g., Colombo, Sri Lanka">
       </div>
       <div class="form-field" style="grid-column:1/-1">
-        <label class="form-label">ABOUT THE CO-OP</label>
-        <textarea class="form-textarea" id="coopDescription" rows="2" placeholder="Tell buyers about your co-op..."></textarea>
+        <label class="form-label">ABOUT THE COMPANY</label>
+        <textarea class="form-textarea" id="companyDescription" rows="2" placeholder="Tell buyers about your company..."></textarea>
       </div>
     </div>
-
-    <div style="margin-top:24px;">
-      <label class="form-label">&#128220; OFFICIAL CERTIFICATES</label>
-      <div class="cert-grid" id="certGrid">
-        <div class="cert-card">
-          <div class="cert-header"><span class="cert-title">&#127963; Official Registry Certificate</span></div>
-          <div class="cert-desc">Legal co-op registration / business license</div>
-          <div class="cert-image-area" data-cert="registry">&#128228; Upload Certificate Image<input type="file" accept="image/*" style="display:none;" onchange="uploadCertImage(this, 'registry')"><img class="cert-image-preview" id="registryPreview"></div>
-          <div class="cert-toggle-row"><span style="font-size:12px;">&#10003; Verified</span><label class="toggle-switch"><input type="checkbox" id="certRegistry"><span class="slider"></span></label></div>
-        </div>
-        <div class="cert-card">
-          <div class="cert-header"><span class="cert-title">&#128230; Export License</span></div>
-          <div class="cert-desc">Government export capacity certification</div>
-          <div class="cert-image-area" data-cert="export">&#128228; Upload Certificate Image<input type="file" accept="image/*" style="display:none;" onchange="uploadCertImage(this, 'export')"><img class="cert-image-preview" id="exportPreview"></div>
-          <div class="cert-toggle-row"><span style="font-size:12px;">&#10003; Verified</span><label class="toggle-switch"><input type="checkbox" id="certExport"><span class="slider"></span></label></div>
-        </div>
-        <div class="cert-card">
-          <div class="cert-header"><span class="cert-title">&#127793; Organic Certificate</span></div>
-          <div class="cert-desc">Organic farming / production certification</div>
-          <div class="cert-image-area" data-cert="organic">&#128228; Upload Certificate Image<input type="file" accept="image/*" style="display:none;" onchange="uploadCertImage(this, 'organic')"><img class="cert-image-preview" id="organicPreview"></div>
-          <div class="cert-toggle-row"><span style="font-size:12px;">&#10003; Verified</span><label class="toggle-switch"><input type="checkbox" id="certOrganic"><span class="slider"></span></label></div>
-        </div>
-        <div class="cert-card">
-          <div class="cert-header"><span class="cert-title">&#127757; Origin Certificate</span></div>
-          <div class="cert-desc">Government-issued proof of product origin</div>
-          <div class="cert-image-area" data-cert="origin">&#128228; Upload Certificate Image<input type="file" accept="image/*" style="display:none;" onchange="uploadCertImage(this, 'origin')"><img class="cert-image-preview" id="originPreview"></div>
-          <div class="cert-toggle-row"><span style="font-size:12px;">&#10003; Verified</span><label class="toggle-switch"><input type="checkbox" id="certOrigin"><span class="slider"></span></label></div>
-        </div>
-      </div>
-      <small style="display:block; margin-top:12px; color:#00ced1;">&#10024; Buyer bots actively check these certificates. Missing certificates may lower your auction ranking!</small>
-    </div>
-
-    <div style="margin-top:24px;">
-      <label class="form-label">&#128248; PRODUCT GALLERY (Final Ad - Buyers see these)</label>
-      <div class="media-gallery" id="mediaGallery"></div>
-      <button class="btn-secondary" id="addImageBtn" style="margin-top:12px; margin-right:10px;">&#128247; ADD IMAGE</button>
-      <button class="btn-secondary" id="addVideoBtn" style="margin-top:12px;">&#127909; ADD VIDEO</button>
-    </div>
-
-    <button class="btn-primary" id="saveProfileBtn" style="margin-top:20px;">&#128190; SAVE PROFILE</button>
+    <button class="btn-primary" id="saveProfileBtn" style="margin-top:20px;">💾 SAVE PROFILE</button>
   </div>
 
+  <!-- CERTIFICATIONS -->
   <div class="section-card">
-    <div class="section-header">&#129381; PRODUCT &amp; INVENTORY <span class="badge">Husked / Dehusked options</span></div>
-    <div id="variantsContainer"></div>
-
-    <div style="margin-top:24px;">
-      <label class="form-label">&#128300; LAB REPORTS</label>
-      <div id="labReportsList" class="lab-reports-list"></div>
-      <button class="btn-secondary" id="addLabReportBtn" style="margin-top:8px;">+ ADD LAB REPORT</button>
+    <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
+    <div style="color:#ff6b6b; font-size:12px; margin-bottom:16px;">
+      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> - No bidding without it!
     </div>
-
-    <div style="margin-top:20px;">
-      <label class="form-label">&#128221; LAB NOTES / COMMENTS</label>
-      <div id="labNotesList" class="lab-notes-list"></div>
-      <div style="display:flex; gap:10px; margin-top:8px;">
-        <input type="text" id="newLabNoteInput" class="form-input" placeholder="Add a lab note comment..." style="flex:1;">
-        <button class="btn-secondary" id="addLabNoteBtn" style="width:auto; padding:8px 20px;">+ ADD</button>
+    <div id="certContainer">
+      <div class="cert-card" id="incorporationCert" style="border-color:#7CFC00;">
+        <div class="cert-header"><span class="cert-title">🏢 Incorporation Certificate</span><span style="color:#7CFC00;font-size:12px;">★ REQUIRED</span></div>
+        <div class="cert-desc">Official company registration / business license</div>
+        <div class="cert-image-area" data-cert="incorporation">📤 Upload Certificate<input type="file" accept="image/*" style="display:none;" onchange="uploadCertImage(this, 'incorporation')"><img class="cert-image-preview" id="incorporationPreview"></div>
+        <div class="cert-toggle-row"><span style="font-size:12px;">✓ Verified</span><label class="toggle-switch"><input type="checkbox" id="certIncorporation" checked disabled><span class="slider"></span></label></div>
       </div>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+      <select id="certDropdown" class="form-select" style="flex:1; min-width:200px;">
+        <option value="">Add Certificate...</option>
+        <option value="export">Export License</option>
+        <option value="organic">Organic Certification</option>
+        <option value="fairtrade">Fairly Traded</option>
+        <option value="kosher">Kosher</option>
+        <option value="halal">Halal</option>
+        <option value="brcgs">BRCGS</option>
+        <option value="origin">Origin Certificate</option>
+        <option value="iso">ISO Certification</option>
+        <option value="foodsafety">General Food Safety</option>
+      </select>
+      <button class="btn-secondary" id="addCertBtn" style="width:auto; padding:8px 20px;">+ ADD</button>
     </div>
   </div>
 
+  <!-- PRODUCTS -->
   <div class="section-card">
-    <div class="section-header">&#129302; BOT FLEET <span class="badge">Create &amp; configure bidding bots</span></div>
-    <div id="botsContainer" class="bots-grid"></div>
+    <div class="section-header">📦 PRODUCTS <span class="badge">Add your product lines</span></div>
+    <div id="productsContainer"></div>
+    <button class="btn-primary" id="addProductBtn" style="background:rgba(0,206,209,0.2); color:#00ced1; margin-top:16px;">+ ADD PRODUCT</button>
+  </div>
+
+  <!-- BOT FLEET -->
+  <div class="section-card">
+    <div class="section-header">🤖 BOT FLEET <span class="badge">Configure bidding bots</span></div>
+    <div id="botsContainer" class="bots-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;margin-top:16px;"></div>
     <button class="btn-primary" id="addBotBtn" style="background:rgba(0,206,209,0.2); color:#00ced1; margin-top:16px;">+ ADD NEW BOT</button>
   </div>
 
+  <!-- AUCTION -->
   <div class="section-card">
-    <div class="section-header">&#9889; ACTIVE AUCTION <span class="badge" id="briefBadge">No active auction</span></div>
+    <div class="section-header">⚡ ACTIVE AUCTION <span class="badge" id="briefBadge">No active auction</span></div>
     <div class="form-grid" style="margin-bottom:20px;">
       <div class="form-field">
         <label class="form-label">QUALITY GRADE</label>
@@ -485,11 +407,19 @@ input:checked + .slider:before { transform: translateX(24px); }
         </select>
       </div>
       <div class="form-field">
+        <label class="form-label">MOISTURE CONTENT (%)</label>
+        <input type="number" class="form-input" id="moistureContent" value="12" step="0.5" min="0" max="30">
+      </div>
+      <div class="form-field">
+        <label class="form-label">OIL CONTENT (%)</label>
+        <input type="number" class="form-input" id="oilContent" value="65" step="1" min="40" max="80">
+      </div>
+      <div class="form-field">
         <label class="form-label">AUCTION DURATION (minutes)</label>
         <input type="number" class="form-input" id="auctionDuration" value="3" min="1" max="10">
       </div>
     </div>
-    <button class="btn-primary" id="launchAuctionBtn">&#128640; LAUNCH AUCTION</button>
+    <button class="btn-primary" id="launchAuctionBtn">🚀 LAUNCH AUCTION</button>
     <div id="auctionContent" style="margin-top:24px;">
       <div class="empty-state">No active auction. Launch one above.</div>
     </div>
@@ -506,737 +436,768 @@ input:checked + .slider:before { transform: translateX(24px); }
 <div class="toast" id="toast"></div>
 
 <div class="commodity-ticker-bar">
-  <div class="ticker-label">&#128200; LIVE</div>
+  <div class="ticker-label">📈 LIVE</div>
   <div class="ticker-track" id="commodityTicker">
-    <div class="ticker-commodity"><span class="ticker-name">&#129381; Coconut Oil</span><span class="ticker-price">$1,247/t</span><span class="ticker-change up">&#9650; 2.4%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🥥 Coconut Oil</span><span class="ticker-price">$1,247/t</span><span class="ticker-change up">▲ 2.4%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127796; Palm Oil</span><span class="ticker-price">$982/t</span><span class="ticker-change down">&#9660; 0.8%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🌴 Palm Oil</span><span class="ticker-price">$982/t</span><span class="ticker-change down">▼ 0.8%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#9749; Coffee Arabica</span><span class="ticker-price">$3.42/lb</span><span class="ticker-change up">&#9650; 1.2%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">☕ Coffee Arabica</span><span class="ticker-price">$3.42/lb</span><span class="ticker-change up">▲ 1.2%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127851; Cocoa</span><span class="ticker-price">$4,088/t</span><span class="ticker-change up">&#9650; 5.7%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🍫 Cocoa</span><span class="ticker-price">$4,088/t</span><span class="ticker-change up">▲ 5.7%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127852; Sugar</span><span class="ticker-price">$0.42/lb</span><span class="ticker-change flat">&#8212; 0.0%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🍬 Sugar</span><span class="ticker-price">$0.42/lb</span><span class="ticker-change flat">— 0.0%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127806; Wheat</span><span class="ticker-price">$5.89/bu</span><span class="ticker-change down">&#9660; 1.1%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🌾 Wheat</span><span class="ticker-price">$5.89/bu</span><span class="ticker-change down">▼ 1.1%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127805; Corn</span><span class="ticker-price">$4.12/bu</span><span class="ticker-change up">&#9650; 0.3%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🌽 Corn</span><span class="ticker-price">$4.12/bu</span><span class="ticker-change up">▲ 0.3%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#129385; Soybeans</span><span class="ticker-price">$11.10/bu</span><span class="ticker-change down">&#9660; 0.4%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🫘 Soybeans</span><span class="ticker-price">$11.10/bu</span><span class="ticker-change down">▼ 0.4%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#129381; Coconut Oil</span><span class="ticker-price">$1,247/t</span><span class="ticker-change up">&#9650; 2.4%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🥥 Coconut Oil</span><span class="ticker-price">$1,247/t</span><span class="ticker-change up">▲ 2.4%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127796; Palm Oil</span><span class="ticker-price">$982/t</span><span class="ticker-change down">&#9660; 0.8%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🌴 Palm Oil</span><span class="ticker-price">$982/t</span><span class="ticker-change down">▼ 0.8%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#9749; Coffee Arabica</span><span class="ticker-price">$3.42/lb</span><span class="ticker-change up">&#9650; 1.2%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">☕ Coffee Arabica</span><span class="ticker-price">$3.42/lb</span><span class="ticker-change up">▲ 1.2%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127851; Cocoa</span><span class="ticker-price">$4,088/t</span><span class="ticker-change up">&#9650; 5.7%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🍫 Cocoa</span><span class="ticker-price">$4,088/t</span><span class="ticker-change up">▲ 5.7%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127852; Sugar</span><span class="ticker-price">$0.42/lb</span><span class="ticker-change flat">&#8212; 0.0%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🍬 Sugar</span><span class="ticker-price">$0.42/lb</span><span class="ticker-change flat">— 0.0%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127806; Wheat</span><span class="ticker-price">$5.89/bu</span><span class="ticker-change down">&#9660; 1.1%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🌾 Wheat</span><span class="ticker-price">$5.89/bu</span><span class="ticker-change down">▼ 1.1%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#127805; Corn</span><span class="ticker-price">$4.12/bu</span><span class="ticker-change up">&#9650; 0.3%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🌽 Corn</span><span class="ticker-price">$4.12/bu</span><span class="ticker-change up">▲ 0.3%</span></div>
     <div class="ticker-separator">|</div>
-    <div class="ticker-commodity"><span class="ticker-name">&#129385; Soybeans</span><span class="ticker-price">$11.10/bu</span><span class="ticker-change down">&#9660; 0.4%</span></div>
+    <div class="ticker-commodity"><span class="ticker-name">🫘 Soybeans</span><span class="ticker-price">$11.10/bu</span><span class="ticker-change down">▼ 0.4%</span></div>
   </div>
 </div>
 
 <script>
+// =====================================================
+// PRODUCT TYPES
+// =====================================================
+const PRODUCT_TYPES = [
+  'Desiccated Coconut Regular',
+  'Desiccated Coconut Sweet',
+  'Desiccated Coconut Toasted',
+  'Coconut Oil',
+  'Virgin Coconut Oil',
+  'Coconut Flour',
+  'Coconut Water',
+  'Coconut Cream',
+  'Coconut Milk'
+];
 
-  let certImages = { registry: null, export: null, organic: null, origin: null };
-  let certToggles = { registry: false, export: false, organic: false, origin: false };
-  let labReports = [];
-  let labNotesList = [];
-  let coopProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
-  let productVariants = [
-    { type: 'Husked', quantity: 5000, moisture: 12, oilContent: 65, defectRate: 2 },
-    { type: 'Dehusked', quantity: 8000, moisture: 10, oilContent: 68, defectRate: 1 }
-  ];
-  let mediaFiles = [];
-  let bots = [];
-  let currentAuction = null;
-  let activeBids = [];
-  let auctionTimer = null;
-  let timerSeconds = 180;
+// =====================================================
+// STATE
+// =====================================================
+let companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
+let certImages = { incorporation: null };
+let certToggles = { incorporation: true };
+let productLines = [];
+let bots = [];
+let activeBids = [];
+let currentAuction = null;
+let auctionTimer = null;
+let timerSeconds = 180;
 
-  window.uploadCertImage = (input, certType) => {
-    const file = input.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      certImages[certType] = ev.target.result;
-      const preview = document.getElementById(certType + 'Preview');
-      preview.src = certImages[certType];
-      preview.style.display = 'block';
-      saveAll();
-    };
-    reader.readAsDataURL(file);
+// =====================================================
+// LOAD FROM STORAGE
+// =====================================================
+function loadFromStorage() {
+  const saved = localStorage.getItem('tradeaux_company_profile');
+  if (saved) companyProfile = JSON.parse(saved);
+  const savedCerts = localStorage.getItem('tradeaux_cert_images');
+  if (savedCerts) certImages = JSON.parse(savedCerts);
+  const savedToggles = localStorage.getItem('tradeaux_cert_toggles');
+  if (savedToggles) certToggles = JSON.parse(savedToggles);
+  const savedProducts = localStorage.getItem('tradeaux_product_lines');
+  if (savedProducts) productLines = JSON.parse(savedProducts);
+  else {
+    productLines = [
+      { type: 'Desiccated Coconut Regular', sizes: [1, 5, 25] },
+      { type: 'Coconut Oil', sizes: [1, 5, 20] }
+    ];
+  }
+  const savedBots = localStorage.getItem('tradeaux_bots');
+  if (savedBots) bots = JSON.parse(savedBots);
+  else {
+    bots = [
+      { id: 'bot1', name: 'Alpha Trader', strategy: 'aggressive', priceFloor: 0.45, priceCeiling: 0.65, priceIncrement: 0.005, maxDumpKilos: 2000, dumpRate: 100, sniperReserve: 0.05, minPaymentDays: 30, maxPaymentDays: 180 },
+      { id: 'bot2', name: 'Sigma Bot', strategy: 'conservative', priceFloor: 0.47, priceCeiling: 0.60, priceIncrement: 0.005, maxDumpKilos: 1500, dumpRate: 75, sniperReserve: 0.03, minPaymentDays: 60, maxPaymentDays: 120 }
+    ];
+  }
+  const savedAuction = localStorage.getItem('tradeaux_auction');
+  if (savedAuction) currentAuction = JSON.parse(savedAuction);
+  const savedBids = localStorage.getItem('tradeaux_bids');
+  if (savedBids) activeBids = JSON.parse(savedBids);
+
+  renderCompanyProfile();
+  renderCertificates();
+  renderProducts();
+  renderBots();
+  renderAuctionDisplay();
+}
+
+function saveAll() {
+  localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile));
+  localStorage.setItem('tradeaux_cert_images', JSON.stringify(certImages));
+  localStorage.setItem('tradeaux_cert_toggles', JSON.stringify(certToggles));
+  localStorage.setItem('tradeaux_product_lines', JSON.stringify(productLines));
+  localStorage.setItem('tradeaux_bots', JSON.stringify(bots));
+  if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction));
+  else localStorage.removeItem('tradeaux_auction');
+  localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids));
+}
+
+// =====================================================
+// RENDER FUNCTIONS
+// =====================================================
+function renderCompanyProfile() {
+  document.getElementById('companyName').value = companyProfile.name || '';
+  document.getElementById('contactEmail').value = companyProfile.email || '';
+  document.getElementById('contactPhone').value = companyProfile.phone || '';
+  document.getElementById('originCountry').value = companyProfile.origin || '';
+  if (companyProfile.origin === 'Other' && companyProfile.otherCountry) {
+    document.getElementById('otherCountryInput').value = companyProfile.otherCountry;
+    document.getElementById('otherCountryInput').style.display = 'block';
+  }
+  document.getElementById('fobPort').value = companyProfile.fobPort || '';
+  document.getElementById('companyDescription').value = companyProfile.description || '';
+  if (companyProfile.logo) {
+    document.getElementById('companyLogoPreview').src = companyProfile.logo;
+    document.getElementById('companyLogoPreview').style.display = 'block';
+    document.getElementById('companyLogoPlaceholder').style.display = 'none';
+  }
+}
+
+function renderCertificates() {
+  const container = document.getElementById('certContainer');
+  // Keep incorporation cert, then add others
+  const existing = container.querySelectorAll('.cert-card:not(#incorporationCert)');
+  existing.forEach(el => el.remove());
+  
+  const certTypes = ['export', 'organic', 'fairtrade', 'kosher', 'halal', 'brcgs', 'origin', 'iso', 'foodsafety'];
+  const certLabels = {
+    'export': '📄 Export License',
+    'organic': '🌱 Organic Certification',
+    'fairtrade': '🤝 Fairly Traded',
+    'kosher': '✡️ Kosher',
+    'halal': '☪️ Halal',
+    'brcgs': '🔒 BRCGS',
+    'origin': '🌍 Origin Certificate',
+    'iso': '⚙️ ISO Certification',
+    'foodsafety': '🍽️ General Food Safety'
   };
-
-  function renderLabReports() {
-    const container = document.getElementById('labReportsList');
-    container.innerHTML = '';
-    labReports.forEach((report, idx) => {
+  const certDescs = {
+    'export': 'Government export capacity certification',
+    'organic': 'Organic farming / production certification',
+    'fairtrade': 'Fair Trade certified',
+    'kosher': 'Kosher certified',
+    'halal': 'Halal certified',
+    'brcgs': 'BRC Global Standards certified',
+    'origin': 'Government-issued proof of product origin',
+    'iso': 'ISO quality management certified',
+    'foodsafety': 'General food safety certification'
+  };
+  
+  certTypes.forEach(type => {
+    if (certToggles[type] !== undefined) {
       const div = document.createElement('div');
-      div.className = 'lab-report-item';
-      div.innerHTML = '<img src="' + report.image + '" class="lab-report-preview" onclick="openMedia('' + report.image + '', 'image')">' +
-        '<div class="lab-report-info">Lab Report #' + (idx + 1) + '</div>' +
-        '<div class="lab-report-actions">' +
-        '<label class="toggle-switch"><input type="checkbox" class="lab-toggle" data-idx="' + idx + '"' + (report.verified ? ' checked' : '') + '><span class="slider"></span></label>' +
-        '<button class="delete-lab" data-idx="' + idx + '">&#10005;</button></div>';
+      div.className = 'cert-card';
+      div.id = 'cert_' + type;
+      div.innerHTML = `
+        <div class="cert-header"><span class="cert-title">${certLabels[type] || type}</span></div>
+        <div class="cert-desc">${certDescs[type] || ''}</div>
+        <div class="cert-image-area" data-cert="${type}">📤 Upload Certificate<input type="file" accept="image/*" style="display:none;" onchange="uploadCertImage(this, '${type}')"><img class="cert-image-preview" id="${type}Preview"></div>
+        <div class="cert-toggle-row"><span style="font-size:12px;">✓ Verified</span><label class="toggle-switch"><input type="checkbox" id="cert${type.charAt(0).toUpperCase() + type.slice(1)}" ${certToggles[type] ? 'checked' : ''}><span class="slider"></span></label></div>
+      `;
       container.appendChild(div);
-    });
-
-    document.querySelectorAll('.lab-toggle').forEach(toggle => {
-      toggle.addEventListener('change', (e) => {
-        labReports[parseInt(e.target.dataset.idx)].verified = e.target.checked;
-        saveAll();
-      });
-    });
-    document.querySelectorAll('.delete-lab').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        labReports.splice(parseInt(e.target.dataset.idx), 1);
-        saveAll();
-        renderLabReports();
-      });
-    });
-  }
-
-  function renderLabNotes() {
-    const container = document.getElementById('labNotesList');
-    container.innerHTML = '';
-    labNotesList.forEach((note, idx) => {
-      const div = document.createElement('div');
-      div.className = 'lab-note-item';
-      div.innerHTML = '<div class="lab-note-text">' + escapeHtml(note) + '</div>' +
-        '<button class="delete-note" data-idx="' + idx + '">&#10005; Delete</button>';
-      container.appendChild(div);
-    });
-
-    document.querySelectorAll('.delete-note').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        labNotesList.splice(parseInt(e.target.dataset.idx), 1);
-        saveAll();
-        renderLabNotes();
-      });
-    });
-  }
-
-  function escapeHtml(str) {
-    if(!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if(m === '&') return '&amp;';
-      if(m === '<') return '&lt;';
-      if(m === '>') return '&gt;';
-      return m;
-    });
-  }
-
-  document.getElementById('originCountry').addEventListener('change', function() {
-    const otherInput = document.getElementById('otherCountryInput');
-    otherInput.style.display = (this.value === 'Other') ? 'block' : 'none';
-  });
-
-  function loadFromStorage() {
-    const saved = localStorage.getItem('tradeaux_coop_profile');
-    if(saved) coopProfile = JSON.parse(saved);
-    const savedVariants = localStorage.getItem('tradeaux_product_variants');
-    if(savedVariants) productVariants = JSON.parse(savedVariants);
-    const savedMedia = localStorage.getItem('tradeaux_media');
-    if(savedMedia) mediaFiles = JSON.parse(savedMedia);
-    const savedLabReports = localStorage.getItem('tradeaux_lab_reports');
-    if(savedLabReports) labReports = JSON.parse(savedLabReports);
-    const savedLabNotesList = localStorage.getItem('tradeaux_lab_notes_list');
-    if(savedLabNotesList) labNotesList = JSON.parse(savedLabNotesList);
-    const savedBots = localStorage.getItem('tradeaux_bots');
-    if(savedBots) bots = JSON.parse(savedBots);
-    else {
-      bots = [
-        { id: 'bot1', name: 'Alpha Trader', strategy: 'aggressive', priceFloor: 0.45, priceCeiling: 0.65, priceIncrement: 0.005, maxDumpKilos: 2000, dumpRate: 100, sniperReserve: 0.05, minPaymentDays: 30, maxPaymentDays: 180 },
-        { id: 'bot2', name: 'Sigma Bot', strategy: 'conservative', priceFloor: 0.47, priceCeiling: 0.60, priceIncrement: 0.005, maxDumpKilos: 1500, dumpRate: 75, sniperReserve: 0.03, minPaymentDays: 60, maxPaymentDays: 120 },
-        { id: 'bot3', name: 'Sniper X', strategy: 'sniper', priceFloor: 0.50, priceCeiling: 0.70, priceIncrement: 0.005, maxDumpKilos: 3000, dumpRate: 150, sniperReserve: 0.10, minPaymentDays: 30, maxPaymentDays: 90 }
-      ];
-    }
-    const savedCerts = localStorage.getItem('tradeaux_cert_images');
-    if(savedCerts) certImages = JSON.parse(savedCerts);
-    const savedToggles = localStorage.getItem('tradeaux_cert_toggles');
-    if(savedToggles) certToggles = JSON.parse(savedToggles);
-
-    const savedAuction = localStorage.getItem('tradeaux_auction');
-    if(savedAuction) currentAuction = JSON.parse(savedAuction);
-    const savedBids = localStorage.getItem('tradeaux_bids');
-    if(savedBids) activeBids = JSON.parse(savedBids);
-
-    renderProfileForm();
-    renderVariants();
-    renderMediaGallery();
-    renderLabReports();
-    renderLabNotes();
-    document.getElementById('certRegistry').checked = certToggles.registry;
-    document.getElementById('certExport').checked = certToggles.export;
-    document.getElementById('certOrganic').checked = certToggles.organic;
-    document.getElementById('certOrigin').checked = certToggles.origin;
-    Object.keys(certImages).forEach(key => {
-      if(certImages[key]) {
-        const preview = document.getElementById(key + 'Preview');
-        preview.src = certImages[key];
-        preview.style.display = 'block';
+      
+      if (certImages[type]) {
+        const preview = document.getElementById(type + 'Preview');
+        if (preview) { preview.src = certImages[type]; preview.style.display = 'block'; }
       }
-    });
-    renderBots();
-    renderAuctionDisplay();
-  }
-
-  function saveAll() {
-    localStorage.setItem('tradeaux_coop_profile', JSON.stringify(coopProfile));
-    localStorage.setItem('tradeaux_product_variants', JSON.stringify(productVariants));
-    localStorage.setItem('tradeaux_media', JSON.stringify(mediaFiles));
-    localStorage.setItem('tradeaux_lab_reports', JSON.stringify(labReports));
-    localStorage.setItem('tradeaux_lab_notes_list', JSON.stringify(labNotesList));
-    localStorage.setItem('tradeaux_bots', JSON.stringify(bots));
-    localStorage.setItem('tradeaux_cert_images', JSON.stringify(certImages));
-    localStorage.setItem('tradeaux_cert_toggles', JSON.stringify(certToggles));
-    if(currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction));
-    else localStorage.removeItem('tradeaux_auction');
-    localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids));
-  }
-
-  function renderProfileForm() {
-    document.getElementById('coopName').value = coopProfile.name || '';
-    document.getElementById('contactEmail').value = coopProfile.email || '';
-    document.getElementById('contactPhone').value = coopProfile.phone || '';
-    document.getElementById('originCountry').value = coopProfile.origin || '';
-    if(coopProfile.origin === 'Other' && coopProfile.otherCountry) {
-      document.getElementById('otherCountryInput').value = coopProfile.otherCountry;
-      document.getElementById('otherCountryInput').style.display = 'block';
-    }
-    document.getElementById('fobPort').value = coopProfile.fobPort || '';
-    document.getElementById('coopDescription').value = coopProfile.description || '';
-    if(coopProfile.logo) {
-      document.getElementById('coopLogoPreview').src = coopProfile.logo;
-      document.getElementById('coopLogoPreview').style.display = 'block';
-      document.getElementById('coopLogoPlaceholder').style.display = 'none';
-    }
-  }
-
-  function renderVariants() {
-    const container = document.getElementById('variantsContainer');
-    container.innerHTML = '';
-    productVariants.forEach((variant, idx) => {
-      const div = document.createElement('div');
-      div.className = 'variant-row';
-      div.innerHTML = '<div class="variant-input"><label class="form-label">VARIETY</label>' +
-        '<select class="form-select variant-type" data-idx="' + idx + '">' +
-        '<option value="Husked"' + (variant.type === 'Husked' ? ' selected' : '') + '>Husked Coconut</option>' +
-        '<option value="Dehusked"' + (variant.type === 'Dehusked' ? ' selected' : '') + '>Dehusked Coconut</option></select></div>' +
-        '<div class="variant-input"><label class="form-label">AVAILABLE (kilos)</label>' +
-        '<input type="number" class="form-input variant-qty" data-idx="' + idx + '" value="' + variant.quantity + '" step="500"></div>' +
-        '<div class="variant-input"><label class="form-label">MOISTURE (%)</label>' +
-        '<input type="range" class="variant-slider" data-idx="' + idx + '" data-field="moisture" min="0" max="30" step="0.5" value="' + variant.moisture + '">' +
-        '<span class="slider-value" id="moistureVal' + idx + '">' + variant.moisture + '%</span></div>' +
-        '<div class="variant-input"><label class="form-label">OIL CONTENT (%)</label>' +
-        '<input type="range" class="variant-slider" data-idx="' + idx + '" data-field="oilContent" min="40" max="80" step="1" value="' + (variant.oilContent || 65) + '">' +
-        '<span class="slider-value" id="oilVal' + idx + '">' + (variant.oilContent || 65) + '%</span></div>' +
-        '<div class="variant-input"><label class="form-label">DEFECT RATE (%)</label>' +
-        '<input type="range" class="variant-slider" data-idx="' + idx + '" data-field="defectRate" min="0" max="20" step="0.5" value="' + (variant.defectRate || 2) + '">' +
-        '<span class="slider-value" id="defectVal' + idx + '">' + (variant.defectRate || 2) + '%</span></div>';
-      container.appendChild(div);
-    });
-
-    document.querySelectorAll('.variant-slider').forEach(slider => {
-      slider.addEventListener('input', function() {
-        const idx = parseInt(this.dataset.idx);
-        const field = this.dataset.field;
-        const val = parseFloat(this.value);
-        productVariants[idx][field] = val;
-        document.getElementById(field + 'Val' + idx).innerText = val + '%';
-        saveAll();
-      });
-    });
-    document.querySelectorAll('.variant-type').forEach(sel => {
-      sel.addEventListener('change', (e) => { productVariants[e.target.dataset.idx].type = e.target.value; saveAll(); });
-    });
-    document.querySelectorAll('.variant-qty').forEach(inp => {
-      inp.addEventListener('change', (e) => { productVariants[e.target.dataset.idx].quantity = parseInt(e.target.value); saveAll(); });
-    });
-  }
-
-  function renderMediaGallery() {
-    const gallery = document.getElementById('mediaGallery');
-    gallery.innerHTML = '';
-    mediaFiles.forEach((media, idx) => {
-      const div = document.createElement('div');
-      div.className = 'media-item';
-      if(media.type === 'image') {
-        div.innerHTML = '<img src="' + media.data + '" onclick="openMedia('' + media.data + '', 'image')"><button class="remove-media" data-idx="' + idx + '">&times;</button>';
-      } else {
-        div.innerHTML = '<video src="' + media.data + '" onclick="openMedia('' + media.data + '', 'video')"></video><button class="remove-media" data-idx="' + idx + '">&times;</button>';
+      
+      const toggle = div.querySelector('input[type="checkbox"]');
+      if (toggle) {
+        toggle.addEventListener('change', function(e) {
+          certToggles[type] = e.target.checked;
+          saveAll();
+        });
       }
-      gallery.appendChild(div);
-    });
-    document.querySelectorAll('.remove-media').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); mediaFiles.splice(parseInt(e.target.dataset.idx), 1); saveAll(); renderMediaGallery(); });
-    });
-  }
-
-  window.openMedia = (src, type) => {
-    const modal = document.getElementById('mediaModal');
-    const img = document.getElementById('modalImage');
-    const video = document.getElementById('modalVideo');
-    img.style.display = 'none';
-    video.style.display = 'none';
-    if(type === 'image') {
-      img.src = src;
-      img.style.display = 'block';
-    } else {
-      video.src = src;
-      video.style.display = 'block';
-      video.play();
-    }
-    modal.style.display = 'flex';
-  };
-  window.closeModal = () => { document.getElementById('mediaModal').style.display = 'none'; };
-
-  function renderBots() {
-    const container = document.getElementById('botsContainer');
-    container.innerHTML = '';
-    bots.forEach((bot, idx) => {
-      const card = document.createElement('div');
-      card.className = 'bot-card';
-      card.innerHTML = '<input type="text" class="bot-name-input" value="' + bot.name + '" data-idx="' + idx + '" data-field="name">' +
-        '<select class="bot-strategy-select" data-idx="' + idx + '" data-field="strategy">' +
-        '<option value="aggressive"' + (bot.strategy === 'aggressive' ? ' selected' : '') + '>&#9889; Aggressive</option>' +
-        '<option value="conservative"' + (bot.strategy === 'conservative' ? ' selected' : '') + '>&#128034; Conservative</option>' +
-        '<option value="sniper"' + (bot.strategy === 'sniper' ? ' selected' : '') + '>&#127919; Sniper</option></select>' +
-        '<div class="bot-param-row"><span class="param-label-sm">&#128176; Floor ($/kg)</span>' +
-        '<input type="number" step="0.01" class="param-input-sm" value="' + bot.priceFloor + '" data-idx="' + idx + '" data-field="priceFloor">' +
-        '<span class="param-label-sm">&#128200; Ceiling ($/kg)</span>' +
-        '<input type="number" step="0.01" class="param-input-sm" value="' + bot.priceCeiling + '" data-idx="' + idx + '" data-field="priceCeiling">' +
-        '<span class="param-label-sm">&#9889; Inc ($)</span>' +
-        '<input type="number" step="0.005" class="param-input-sm" value="' + bot.priceIncrement + '" data-idx="' + idx + '" data-field="priceIncrement"></div>' +
-        '<div class="bot-param-row"><span class="param-label-sm">&#128230; Max Dump (kg)</span>' +
-        '<input type="number" step="100" class="param-input-sm" value="' + bot.maxDumpKilos + '" data-idx="' + idx + '" data-field="maxDumpKilos">' +
-        '<span class="param-label-sm">&#128202; Dump Rate (kg)</span>' +
-        '<input type="number" step="25" class="param-input-sm" value="' + bot.dumpRate + '" data-idx="' + idx + '" data-field="dumpRate">' +
-        '<span class="param-label-sm">&#128299; Sniper Reserve ($)</span>' +
-        '<input type="number" step="0.01" class="param-input-sm" value="' + bot.sniperReserve + '" data-idx="' + idx + '" data-field="sniperReserve"></div>' +
-        '<div class="bot-param-row"><span class="param-label-sm">&#128179; Min Payment (days)</span>' +
-        '<input type="number" step="15" class="param-input-sm" value="' + bot.minPaymentDays + '" data-idx="' + idx + '" data-field="minPaymentDays">' +
-        '<span class="param-label-sm">&#128179; Max Payment (days)</span>' +
-        '<input type="number" step="15" class="param-input-sm" value="' + bot.maxPaymentDays + '" data-idx="' + idx + '" data-field="maxPaymentDays"></div>' +
-        '<button class="delete-bot" data-idx="' + idx + '">&#128465; DELETE BOT</button>';
-      container.appendChild(card);
-    });
-
-    document.querySelectorAll('.bot-name-input, .param-input-sm, .bot-strategy-select').forEach(inp => {
-      inp.addEventListener('change', (e) => {
-        bots[e.target.dataset.idx][e.target.dataset.field] = (inp.type === 'number') ? parseFloat(inp.value) : inp.value;
-        saveAll();
-      });
-    });
-    document.querySelectorAll('.delete-bot').forEach(btn => {
-      btn.addEventListener('click', (e) => { bots.splice(parseInt(e.target.dataset.idx), 1); saveAll(); renderBots(); });
-    });
-  }
-
-  document.getElementById('certRegistry').onchange = (e) => { certToggles.registry = e.target.checked; saveAll(); };
-  document.getElementById('certExport').onchange = (e) => { certToggles.export = e.target.checked; saveAll(); };
-  document.getElementById('certOrganic').onchange = (e) => { certToggles.organic = e.target.checked; saveAll(); };
-  document.getElementById('certOrigin').onchange = (e) => { certToggles.origin = e.target.checked; saveAll(); };
-
-  document.getElementById('addLabReportBtn').onclick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        labReports.push({ id: Date.now() + '_' + Math.random(), image: ev.target.result, verified: false });
-        saveAll();
-        renderLabReports();
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  };
-
-  document.getElementById('addLabNoteBtn').onclick = () => {
-    const input = document.getElementById('newLabNoteInput');
-    const note = input.value.trim();
-    if(note) {
-      labNotesList.push(note);
-      saveAll();
-      renderLabNotes();
-      input.value = '';
-    } else {
-      showToast('Please enter a note first', true);
-    }
-  };
-
-  document.querySelectorAll('.cert-image-area').forEach(area => {
-    area.onclick = () => {
-      const input = area.querySelector('input');
-      if(input) input.click();
-    };
-  });
-
-  document.getElementById('launchAuctionBtn').onclick = () => {
-    if(!coopProfile.name) { showToast('Save your co-op profile first!', true); return; }
-    const totalInventory = productVariants.reduce((sum, v) => sum + v.quantity, 0);
-    if(totalInventory === 0) { showToast('Add product inventory first!', true); return; }
-
-    const duration = parseInt(document.getElementById('auctionDuration').value);
-    currentAuction = {
-      id: 'auc_' + Date.now(),
-      coopName: coopProfile.name,
-      coopLogo: coopProfile.logo,
-      fobPort: coopProfile.fobPort || document.getElementById('fobPort').value,
-      grade: document.getElementById('gradeSelect').value,
-      variants: productVariants.map(v => ({ ...v })),
-      mediaFiles: mediaFiles,
-      labReports: labReports,
-      labNotesList: labNotesList,
-      certificates: { registry: certToggles.registry, export: certToggles.export, organic: certToggles.organic, origin: certToggles.origin, images: certImages },
-      status: 'active',
-      startTime: new Date().toISOString(),
-      durationMinutes: duration,
-      totalRemainingKilos: totalInventory
-    };
-    activeBids = [];
-    saveAll();
-    renderAuctionDisplay();
-    showToast('Auction created! Click START to begin bidding', false);
-  };
-
-  function renderAuctionDisplay() {
-    const container = document.getElementById('auctionContent');
-    if(!currentAuction) {
-      document.getElementById('briefBadge').innerHTML = 'No active auction';
-      container.innerHTML = '<div class="empty-state">No active auction. Launch one above.</div>';
-      return;
-    }
-
-    const isLive = currentAuction.status === 'live';
-    document.getElementById('briefBadge').innerHTML = isLive ? '&#128293; LIVE' : 'READY';
-
-    const variantsHtml = currentAuction.variants.map(v => '<div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:8px;"><strong>' + v.type + '</strong>: ' + v.quantity.toLocaleString() + ' kg | Moisture: ' + v.moisture + '% | Oil: ' + (v.oilContent || 65) + '% | Defects: ' + (v.defectRate || 2) + '%</div>').join('');
-
-    const timerHtml = isLive ? '<div class="timer-display" id="auctionTimer">' + Math.floor(timerSeconds/60) + ':' + (timerSeconds%60).toString().padStart(2,'0') + '</div>' : '';
-
-    const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:16px;">&#9654; START AUCTION</button>' : 
-                     '<button class="btn-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171); margin-top:16px;">&#9209; END AUCTION</button>';
-
-    const pendingBids = activeBids.filter(b => b.status === 'pending').sort((a,b) => b.pricePerKilo - a.pricePerKilo);
-    let bidsHtml = '<table class="bids-table"><thead><th>Rank</th><th>Bot</th><th>Price/kg ($)</th><th>Kilos</th><th>Payment Terms</th><th>Strategy</th><th></th></thead><tbody>';
-    pendingBids.forEach((bid, idx) => {
-      const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
-      bidsHtml += '<tr class="' + rankClass + '"><td>#' + (idx+1) + '</td><td><strong>' + bid.botName + '</strong></td>' +
-        '<td style="color:#FFD966;">$' + bid.pricePerKilo.toFixed(3) + '</td>' +
-        '<td>' + bid.kilos.toLocaleString() + ' kg</td>' +
-        '<td>' + bid.paymentDays + ' days</td>' +
-        '<td><span style="font-size:11px;">' + bid.strategyUsed + '</span></td>' +
-        '<td><button class="btn-accept" onclick="acceptBid('' + bid.id + '')">&#10003; Accept</button></td></tr>';
-    });
-    bidsHtml += '</tbody></table>';
-    if(pendingBids.length === 0) bidsHtml = '<div class="empty-state">No bids yet. Start auction to receive offers.</div>';
-
-    container.innerHTML = '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:20px;">' +
-      '<div class="brief-stat"><div class="brief-stat-label">FOB Port</div><div class="brief-stat-value small">' + currentAuction.fobPort + '</div></div>' +
-      '<div class="brief-stat"><div class="brief-stat-label">Grade</div><div class="brief-stat-value small">' + currentAuction.grade + '</div></div>' +
-      '<div class="brief-stat"><div class="brief-stat-label">Total Kilos</div><div class="brief-stat-value">' + currentAuction.totalRemainingKilos.toLocaleString() + ' kg</div></div></div>' +
-      '<div style="background:rgba(0,0,0,0.3); border-radius:16px; padding:16px; margin-bottom:20px;">' +
-      '<div class="form-label">&#128230; Inventory by Variant</div>' +
-      '<div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px;">' + variantsHtml + '</div></div>' +
-      '<div style="background:rgba(0,0,0,0.3); border-radius:16px; padding:16px; margin-bottom:20px;">' +
-      '<div class="form-label">&#128300; Lab Reports &amp; Notes</div>' +
-      '<div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">' +
-      currentAuction.labReports.map(r => '<img src="' + r.image + '" style="max-height:80px; border-radius:8px; border:1px solid #7CFC00; cursor:pointer;" onclick="openMedia('' + r.image + '', 'image')">').join('') + '</div>' +
-      '<div style="margin-top:12px;">' +
-      currentAuction.labNotesList.map(n => '<div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:8px; margin-bottom:8px; border-left:3px solid #7CFC00;">' + escapeHtml(n) + '</div>').join('') + '</div></div>' +
-      timerHtml + actionBtn +
-      '<div style="margin-top:24px;"><div style="font-family:Orbitron; font-size:14px; margin-bottom:12px; color:#FFD966;">&#128202; CURRENT BIDS</div>' + bidsHtml + '</div>';
-
-    if(!isLive) document.getElementById('startAuctionBtn')?.addEventListener('click', startAuction);
-    else document.getElementById('endAuctionBtn')?.addEventListener('click', endAuction);
-  }
-
-  function startAuction() {
-    if(!currentAuction) return;
-    currentAuction.status = 'live';
-    timerSeconds = currentAuction.durationMinutes * 60;
-    saveAll();
-    startTimer();
-    bots.forEach((bot, i) => setTimeout(() => botBid(bot), i * 2000));
-    renderAuctionDisplay();
-    showToast('Auction LIVE! Bots are bidding...', false);
-  }
-
-  function endAuction() {
-    if(auctionTimer) clearInterval(auctionTimer);
-    if(currentAuction) {
-      currentAuction.status = 'ended';
-      saveAll();
-      renderAuctionDisplay();
-      showToast('Auction ended', false);
-    }
-  }
-
-  function startTimer() {
-    if(auctionTimer) clearInterval(auctionTimer);
-    auctionTimer = setInterval(() => {
-      timerSeconds--;
-      if(timerSeconds <= 0) {
-        clearInterval(auctionTimer);
-        endAuction();
-      } else {
-        const el = document.getElementById('auctionTimer');
-        if(el) el.innerText = Math.floor(timerSeconds/60) + ':' + (timerSeconds%60).toString().padStart(2,'0');
-        if(currentAuction && currentAuction.status === 'live') {
-          if(timerSeconds % 10 === 0) bots.forEach(bot => botBid(bot));
-          if(timerSeconds <= 30) bots.filter(b => b.strategy === 'sniper').forEach(bot => botBid(bot, true));
-        }
-      }
-    }, 1000);
-  }
-
-  function botBid(bot, isSniper) {
-    isSniper = isSniper || false;
-    if(!currentAuction || currentAuction.status !== 'live' || currentAuction.totalRemainingKilos <= 0) return;
-
-    const currentBids = activeBids.filter(b => b.status === 'pending');
-    const topPrice = currentBids.length > 0 ? Math.max(...currentBids.map(b => b.pricePerKilo)) : bot.priceFloor;
-
-    let bidPrice = bot.priceFloor;
-    let strategyUsed = '';
-
-    if(bot.strategy === 'aggressive') {
-      bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement);
-      if(isSniper) bidPrice = Math.min(bot.priceCeiling, bidPrice + bot.sniperReserve);
-      strategyUsed = '&#9889; Aggressive';
-    } else if(bot.strategy === 'conservative') {
-      bidPrice = Math.min(bot.priceCeiling, topPrice + (bot.priceIncrement * 0.5));
-      strategyUsed = '&#128034; Conservative';
-    } else if(bot.strategy === 'sniper') {
-      if(isSniper || timerSeconds <= 30) {
-        bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement + (bot.sniperReserve * (timerSeconds / 10)));
-        strategyUsed = '&#127919; Sniper!';
-      } else return;
-    }
-
-    bidPrice = Math.max(bidPrice, bot.priceFloor);
-    const dumpAmount = Math.min(bot.maxDumpKilos, currentAuction.totalRemainingKilos, Math.floor(Math.random() * bot.dumpRate) + bot.dumpRate/2);
-    const paymentDays = Math.max(bot.minPaymentDays, Math.floor(Math.random() * (bot.maxPaymentDays - bot.minPaymentDays) + bot.minPaymentDays));
-
-    const newBid = {
-      id: 'bid_' + Date.now() + '_' + Math.random(),
-      botName: bot.name,
-      pricePerKilo: bidPrice,
-      kilos: dumpAmount,
-      paymentDays: paymentDays,
-      strategyUsed: strategyUsed,
-      status: 'pending',
-      timestamp: new Date().toISOString()
-    };
-
-    activeBids.push(newBid);
-    activeBids.sort((a,b) => b.pricePerKilo - a.pricePerKilo);
-    if(activeBids.length > 20) activeBids = activeBids.slice(0,20);
-    saveAll();
-    renderAuctionDisplay();
-    showToast('&#129302; ' + bot.name + ' bid $' + bidPrice.toFixed(3) + '/kg for ' + dumpAmount + ' kg (' + strategyUsed + ')', false);
-  }
-
-  window.acceptBid = (bidId) => {
-    const bid = activeBids.find(b => b.id === bidId);
-    if(!bid || bid.status !== 'pending') return;
-    if(bid.kilos > currentAuction.totalRemainingKilos) {
-      showToast('Only ' + currentAuction.totalRemainingKilos + ' kg remaining!', true);
-      return;
-    }
-    bid.status = 'accepted';
-    currentAuction.totalRemainingKilos -= bid.kilos;
-    let remainingKilos = bid.kilos;
-    for(let v of currentAuction.variants) {
-      if(v.quantity > 0 && remainingKilos > 0) {
-        const deduct = Math.min(v.quantity, remainingKilos);
-        v.quantity -= deduct;
-        remainingKilos -= deduct;
-      }
-    }
-    if(currentAuction.totalRemainingKilos <= 0) {
-      currentAuction.status = 'ended';
-      if(auctionTimer) clearInterval(auctionTimer);
-      showToast('&#127881; SOLD OUT to ' + bid.botName + '!', false);
-    } else {
-      showToast('&#9989; Accepted ' + bid.kilos.toLocaleString() + ' kg @ $' + bid.pricePerKilo.toFixed(3) + '/kg from ' + bid.botName, false);
-    }
-    saveAll();
-    renderAuctionDisplay();
-  };
-
-  document.getElementById('saveProfileBtn').onclick = () => {
-    const originValue = document.getElementById('originCountry').value;
-    const otherCountry = document.getElementById('otherCountryInput').value;
-    coopProfile = {
-      logo: coopProfile.logo,
-      name: document.getElementById('coopName').value,
-      email: document.getElementById('contactEmail').value,
-      phone: document.getElementById('contactPhone').value,
-      origin: originValue,
-      otherCountry: (originValue === 'Other') ? otherCountry : '',
-      fobPort: document.getElementById('fobPort').value,
-      description: document.getElementById('coopDescription').value
-    };
-    saveAll();
-    showToast('Profile saved!', false);
-  };
-
-  document.getElementById('coopLogoBtn').onclick = () => document.getElementById('coopLogoInput').click();
-  document.getElementById('coopLogoInput').onchange = (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      coopProfile.logo = ev.target.result;
-      document.getElementById('coopLogoPreview').src = coopProfile.logo;
-      document.getElementById('coopLogoPreview').style.display = 'block';
-      document.getElementById('coopLogoPlaceholder').style.display = 'none';
-      saveAll();
-    };
-    reader.readAsDataURL(file);
-  };
-
-  document.getElementById('addImageBtn').onclick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        mediaFiles.push({ type: 'image', data: ev.target.result });
-        saveAll();
-        renderMediaGallery();
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  };
-
-  document.getElementById('addVideoBtn').onclick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'video/*';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        mediaFiles.push({ type: 'video', data: ev.target.result });
-        saveAll();
-        renderMediaGallery();
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  };
-
-  document.getElementById('addBotBtn').onclick = () => {
-    bots.push({
-      id: 'bot_' + Date.now(),
-      name: 'New Bot',
-      strategy: 'aggressive',
-      priceFloor: 0.45,
-      priceCeiling: 0.65,
-      priceIncrement: 0.005,
-      maxDumpKilos: 2000,
-      dumpRate: 100,
-      sniperReserve: 0.05,
-      minPaymentDays: 30,
-      maxPaymentDays: 180
-    });
-    saveAll();
-    renderBots();
-  };
-
-  // ✅ FIXED SIGN OUT - works properly
-  document.getElementById('signOutBtn').addEventListener('click', function() {
-    if(confirm('Sign out?')) {
-      // Sign out of Supabase (if you have auth)
-      // You can add supabase auth sign out here later
-      window.location.href = 'signin.html';
     }
   });
+  
+  // Show incorporation preview
+  if (certImages.incorporation) {
+    const preview = document.getElementById('incorporationPreview');
+    if (preview) { preview.src = certImages.incorporation; preview.style.display = 'block'; }
+  }
+}
 
-  function showToast(msg, isError) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = isError ? 'toast error' : 'toast';
-    t.classList.add('visible');
-    setTimeout(() => t.classList.remove('visible'), 4000);
+function renderProducts() {
+  const container = document.getElementById('productsContainer');
+  container.innerHTML = '';
+  productLines.forEach((product, idx) => {
+    const div = document.createElement('div');
+    div.className = 'variant-row';
+    div.innerHTML = `
+      <div class="variant-input" style="flex:2; min-width:200px;">
+        <label class="form-label">PRODUCT</label>
+        <select class="form-select product-select" data-idx="${idx}">
+          ${PRODUCT_TYPES.map(p => `<option value="${p}" ${p === product.type ? 'selected' : ''}>${p}</option>`).join('')}
+        </select>
+      </div>
+      <div class="variant-input" style="flex:2; min-width:150px;">
+        <label class="form-label">SIZES (kg)</label>
+        <div id="sizesContainer${idx}">
+          ${product.sizes.map((size, si) => `
+            <div class="product-size-row">
+              <input type="number" class="form-input size-input" value="${size}" style="flex:1; padding:6px 10px; font-size:12px;" placeholder="kg" data-idx="${idx}" data-si="${si}">
+              <button class="remove-size" data-idx="${idx}" data-si="${si}">✕</button>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn-secondary add-size-btn" data-idx="${idx}" style="padding:4px 12px; font-size:11px; margin-top:4px;">+ Add Size</button>
+      </div>
+      <div style="display:flex; align-items:flex-end; padding-bottom:6px;">
+        <button class="delete-product" data-idx="${idx}">🗑 Delete</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Event listeners
+  document.querySelectorAll('.product-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      productLines[e.target.dataset.idx].type = e.target.value;
+      saveAll();
+    });
+  });
+
+  document.querySelectorAll('.add-size-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      productLines[idx].sizes.push(1);
+      saveAll();
+      renderProducts();
+    });
+  });
+
+  document.querySelectorAll('.remove-size').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      const si = parseInt(e.target.dataset.si);
+      productLines[idx].sizes.splice(si, 1);
+      saveAll();
+      renderProducts();
+    });
+  });
+
+  document.querySelectorAll('.delete-product').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      productLines.splice(parseInt(e.target.dataset.idx), 1);
+      saveAll();
+      renderProducts();
+    });
+  });
+
+  document.querySelectorAll('.size-input').forEach(inp => {
+    inp.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      const si = parseInt(e.target.dataset.si);
+      productLines[idx].sizes[si] = parseFloat(e.target.value) || 0;
+      saveAll();
+    });
+  });
+}
+
+function renderBots() {
+  const container = document.getElementById('botsContainer');
+  container.innerHTML = '';
+  bots.forEach((bot, idx) => {
+    const card = document.createElement('div');
+    card.className = 'bot-card';
+    card.style.cssText = 'background:rgba(0,0,0,0.5);border:1px solid rgba(0,206,209,0.3);border-radius:20px;padding:20px;';
+    card.innerHTML = `
+      <input type="text" class="bot-name-input" value="${bot.name}" data-idx="${idx}" data-field="name" style="background:rgba(0,0,0,0.6);border:1px solid #FFD966;border-radius:30px;padding:8px 16px;color:white;font-family:'Orbitron',monospace;font-weight:700;font-size:16px;width:100%;margin-bottom:16px;">
+      <select class="bot-strategy-select" data-idx="${idx}" data-field="strategy" style="background:rgba(0,0,0,0.6);border:1px solid #7CFC00;border-radius:30px;padding:8px 16px;color:white;width:100%;margin-bottom:16px;">
+        <option value="aggressive" ${bot.strategy === 'aggressive' ? 'selected' : ''}>⚡ Aggressive</option>
+        <option value="conservative" ${bot.strategy === 'conservative' ? 'selected' : ''}>🐢 Conservative</option>
+        <option value="sniper" ${bot.strategy === 'sniper' ? 'selected' : ''}>🎯 Sniper</option>
+      </select>
+      <div class="bot-param-row" style="display:flex;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;align-items:center;">
+        <span class="param-label-sm" style="font-size:11px;color:#FFD966;font-weight:500;">💰 Floor ($/kg)</span>
+        <input type="number" step="0.01" class="param-input-sm" value="${bot.priceFloor}" data-idx="${idx}" data-field="priceFloor" style="background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.4);border-radius:8px;padding:6px 10px;color:white;width:80px;text-align:center;">
+        <span class="param-label-sm" style="font-size:11px;color:#FFD966;font-weight:500;">📈 Ceiling ($/kg)</span>
+        <input type="number" step="0.01" class="param-input-sm" value="${bot.priceCeiling}" data-idx="${idx}" data-field="priceCeiling" style="background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.4);border-radius:8px;padding:6px 10px;color:white;width:80px;text-align:center;">
+      </div>
+      <div class="bot-param-row" style="display:flex;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;align-items:center;">
+        <span class="param-label-sm" style="font-size:11px;color:#FFD966;font-weight:500;">📦 Max Dump (kg)</span>
+        <input type="number" step="100" class="param-input-sm" value="${bot.maxDumpKilos}" data-idx="${idx}" data-field="maxDumpKilos" style="background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.4);border-radius:8px;padding:6px 10px;color:white;width:80px;text-align:center;">
+        <span class="param-label-sm" style="font-size:11px;color:#FFD966;font-weight:500;">📊 Dump Rate (kg)</span>
+        <input type="number" step="25" class="param-input-sm" value="${bot.dumpRate}" data-idx="${idx}" data-field="dumpRate" style="background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.4);border-radius:8px;padding:6px 10px;color:white;width:80px;text-align:center;">
+      </div>
+      <div class="bot-param-row" style="display:flex;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;align-items:center;">
+        <span class="param-label-sm" style="font-size:11px;color:#FFD966;font-weight:500;">🎯 Sniper Reserve ($)</span>
+        <input type="number" step="0.01" class="param-input-sm" value="${bot.sniperReserve}" data-idx="${idx}" data-field="sniperReserve" style="background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.4);border-radius:8px;padding:6px 10px;color:white;width:80px;text-align:center;">
+        <span class="param-label-sm" style="font-size:11px;color:#FFD966;font-weight:500;">💳 Payment (days)</span>
+        <input type="number" step="15" class="param-input-sm" value="${bot.minPaymentDays}" data-idx="${idx}" data-field="minPaymentDays" style="background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.4);border-radius:8px;padding:6px 10px;color:white;width:60px;text-align:center;">
+        <span style="font-size:10px;color:#9ca3af;">-</span>
+        <input type="number" step="15" class="param-input-sm" value="${bot.maxPaymentDays}" data-idx="${idx}" data-field="maxPaymentDays" style="background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.4);border-radius:8px;padding:6px 10px;color:white;width:60px;text-align:center;">
+      </div>
+      <button class="delete-bot" data-idx="${idx}" style="background:rgba(255,77,77,0.2);border:1px solid #FF4D4D;border-radius:30px;padding:8px 16px;cursor:pointer;color:#FFFFFF;font-weight:700;width:100%;margin-top:12px;">🗑 DELETE BOT</button>
+    `;
+    container.appendChild(card);
+  });
+
+  document.querySelectorAll('.bot-name-input, .param-input-sm, .bot-strategy-select').forEach(inp => {
+    inp.addEventListener('change', (e) => {
+      const field = e.target.dataset.field;
+      const idx = parseInt(e.target.dataset.idx);
+      bots[idx][field] = (inp.type === 'number') ? parseFloat(inp.value) : inp.value;
+      saveAll();
+    });
+  });
+  document.querySelectorAll('.delete-bot').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      bots.splice(parseInt(e.target.dataset.idx), 1);
+      saveAll();
+      renderBots();
+    });
+  });
+}
+
+function renderAuctionDisplay() {
+  const container = document.getElementById('auctionContent');
+  if (!currentAuction) {
+    document.getElementById('briefBadge').innerHTML = 'No active auction';
+    container.innerHTML = '<div class="empty-state">No active auction. Launch one above.</div>';
+    return;
+  }
+  const isLive = currentAuction.status === 'live';
+  document.getElementById('briefBadge').innerHTML = isLive ? '🔥 LIVE' : 'READY';
+  
+  let productsHtml = currentAuction.products.map(p => `
+    <div style="background:rgba(0,0,0,0.3);padding:12px;border-radius:8px;margin-bottom:8px;">
+      <strong>${p.type}</strong>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;font-size:12px;">
+        ${p.sizes.map(s => `<span style="background:rgba(0,206,209,0.2);padding:2px 10px;border-radius:12px;">${s}kg</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  
+  const timerHtml = isLive ? `<div class="timer-display" style="font-family:'Orbitron',sans-serif;font-size:36px;font-weight:800;color:#7CFC00;text-align:center;margin:16px 0;text-shadow:0 0 10px rgba(124,252,0,0.5);" id="auctionTimer">${Math.floor(timerSeconds/60)}:${(timerSeconds%60).toString().padStart(2,'0')}</div>` : '';
+  
+  const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:16px;">▶ START AUCTION</button>' : 
+    '<button class="btn-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171);margin-top:16px;">⏹ END AUCTION</button>';
+  
+  const pendingBids = activeBids.filter(b => b.status === 'pending').sort((a,b) => b.pricePerKilo - a.pricePerKilo);
+  let bidsHtml = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="color:#FFD966;font-size:11px;text-transform:uppercase;"><th style="padding:14px 12px;text-align:left;border-bottom:1px solid rgba(124,252,0,0.15);">Rank</th><th style="padding:14px 12px;text-align:left;border-bottom:1px solid rgba(124,252,0,0.15);">Bot</th><th style="padding:14px 12px;text-align:left;border-bottom:1px solid rgba(124,252,0,0.15);">Price/kg ($)</th><th style="padding:14px 12px;text-align:left;border-bottom:1px solid rgba(124,252,0,0.15);">Kilos</th><th style="padding:14px 12px;text-align:left;border-bottom:1px solid rgba(124,252,0,0.15);">Payment</th><th style="padding:14px 12px;text-align:left;border-bottom:1px solid rgba(124,252,0,0.15);">Strategy</th><th style="padding:14px 12px;text-align:left;border-bottom:1px solid rgba(124,252,0,0.15);"></th></tr></thead><tbody>';
+  pendingBids.forEach((bid, idx) => {
+    const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
+    const bgColor = idx === 0 ? 'rgba(255,215,0,0.15)' : idx === 1 ? 'rgba(192,192,192,0.1)' : idx === 2 ? 'rgba(205,127,50,0.1)' : 'transparent';
+    bidsHtml += `<tr style="background:${bgColor};"><td style="padding:14px 12px;border-bottom:1px solid rgba(124,252,0,0.15);color:#E0E0FF;">#${idx+1}</td>
+      <td style="padding:14px 12px;border-bottom:1px solid rgba(124,252,0,0.15);color:#E0E0FF;"><strong>${bid.botName}</strong></td>
+      <td style="padding:14px 12px;border-bottom:1px solid rgba(124,252,0,0.15);color:#FFD966;">$${bid.pricePerKilo.toFixed(3)}</td>
+      <td style="padding:14px 12px;border-bottom:1px solid rgba(124,252,0,0.15);color:#E0E0FF;">${bid.kilos.toLocaleString()} kg</td>
+      <td style="padding:14px 12px;border-bottom:1px solid rgba(124,252,0,0.15);color:#E0E0FF;">${bid.paymentDays} days</td>
+      <td style="padding:14px 12px;border-bottom:1px solid rgba(124,252,0,0.15);color:#E0E0FF;font-size:11px;">${bid.strategyUsed}</td>
+      <td style="padding:14px 12px;border-bottom:1px solid rgba(124,252,0,0.15);color:#E0E0FF;"><button class="btn-accept" onclick="acceptBid('${bid.id}')" style="background:linear-gradient(105deg,#10b981,#2dd4bf);border:none;padding:6px 16px;border-radius:20px;font-weight:700;font-size:11px;cursor:pointer;color:#010101;">✓ Accept</button></td></tr>`;
+  });
+  bidsHtml += '</tbody></table>';
+  if (pendingBids.length === 0) bidsHtml = '<div class="empty-state">No bids yet. Start auction to receive offers.</div>';
+  
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px;">
+      <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:11px;color:#FFD966;text-transform:uppercase;margin-bottom:6px;">FOB Port</div>
+        <div style="font-size:14px;color:#E0E0FF;">${currentAuction.fobPort}</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:11px;color:#FFD966;text-transform:uppercase;margin-bottom:6px;">Grade</div>
+        <div style="font-size:14px;color:#E0E0FF;">${currentAuction.grade}</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:11px;color:#FFD966;text-transform:uppercase;margin-bottom:6px;">Moisture</div>
+        <div style="font-size:14px;color:#E0E0FF;">${currentAuction.moisture}%</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:11px;color:#FFD966;text-transform:uppercase;margin-bottom:6px;">Oil Content</div>
+        <div style="font-size:14px;color:#E0E0FF;">${currentAuction.oilContent}%</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:11px;color:#FFD966;text-transform:uppercase;margin-bottom:6px;">Total Kilos</div>
+        <div style="font-size:20px;font-weight:800;color:#7CFC00;">${currentAuction.totalRemainingKilos.toLocaleString()} kg</div>
+      </div>
+    </div>
+    <div style="background:rgba(0,0,0,0.3);border-radius:16px;padding:16px;margin-bottom:20px;">
+      <div style="font-size:11px;color:#FFD966;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:12px;">📦 Products</div>
+      ${productsHtml}
+    </div>
+    ${timerHtml}
+    ${actionBtn}
+    <div style="margin-top:24px;">
+      <div style="font-family:Orbitron;font-size:14px;margin-bottom:12px;color:#FFD966;">📊 CURRENT BIDS</div>
+      ${bidsHtml}
+    </div>
+  `;
+  
+  if (!isLive) document.getElementById('startAuctionBtn')?.addEventListener('click', startAuction);
+  else document.getElementById('endAuctionBtn')?.addEventListener('click', endAuction);
+}
+
+// =====================================================
+// CERTIFICATE FUNCTIONS
+// =====================================================
+window.uploadCertImage = function(input, certType) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    certImages[certType] = ev.target.result;
+    const preview = document.getElementById(certType + 'Preview');
+    if (preview) { preview.src = certImages[certType]; preview.style.display = 'block'; }
+    saveAll();
+  };
+  reader.readAsDataURL(file);
+};
+
+document.getElementById('addCertBtn').addEventListener('click', function() {
+  const dropdown = document.getElementById('certDropdown');
+  const type = dropdown.value;
+  if (!type) { showToast('Select a certificate type first', true); return; }
+  if (certToggles[type] !== undefined) { showToast('Certificate already added', true); return; }
+  certToggles[type] = false;
+  certImages[type] = null;
+  saveAll();
+  renderCertificates();
+  dropdown.value = '';
+  showToast('Certificate added! Upload the image and verify.', false);
+});
+
+// =====================================================
+// PRODUCT FUNCTIONS
+// =====================================================
+document.getElementById('addProductBtn').addEventListener('click', function() {
+  productLines.push({ type: 'Desiccated Coconut Regular', sizes: [1, 5, 25] });
+  saveAll();
+  renderProducts();
+});
+
+// =====================================================
+// BOT FUNCTIONS
+// =====================================================
+document.getElementById('addBotBtn').addEventListener('click', function() {
+  bots.push({
+    id: 'bot_' + Date.now(),
+    name: 'New Bot',
+    strategy: 'aggressive',
+    priceFloor: 0.45,
+    priceCeiling: 0.65,
+    priceIncrement: 0.005,
+    maxDumpKilos: 2000,
+    dumpRate: 100,
+    sniperReserve: 0.05,
+    minPaymentDays: 30,
+    maxPaymentDays: 180
+  });
+  saveAll();
+  renderBots();
+});
+
+// =====================================================
+// AUCTION FUNCTIONS
+// =====================================================
+document.getElementById('launchAuctionBtn').addEventListener('click', function() {
+  if (!companyProfile.name) { showToast('Save your company profile first!', true); return; }
+  
+  // Check if incorporation cert is uploaded
+  if (!certImages.incorporation) {
+    showToast('⚠️ Incorporation Certificate is MANDATORY! Upload it first.', true);
+    return;
+  }
+  
+  let totalKilos = 0;
+  productLines.forEach(p => {
+    p.sizes.forEach(s => totalKilos += s);
+  });
+  if (totalKilos === 0) { showToast('Add product inventory first!', true); return; }
+
+  const duration = parseInt(document.getElementById('auctionDuration').value) || 3;
+  const moisture = parseFloat(document.getElementById('moistureContent').value) || 12;
+  const oilContent = parseFloat(document.getElementById('oilContent').value) || 65;
+  
+  currentAuction = {
+    id: 'auc_' + Date.now(),
+    companyName: companyProfile.name,
+    companyLogo: companyProfile.logo,
+    fobPort: companyProfile.fobPort || document.getElementById('fobPort').value,
+    grade: document.getElementById('gradeSelect').value,
+    moisture: moisture,
+    oilContent: oilContent,
+    products: productLines.map(p => ({ type: p.type, sizes: [...p.sizes] })),
+    certificates: certToggles,
+    status: 'active',
+    startTime: new Date().toISOString(),
+    durationMinutes: duration,
+    totalRemainingKilos: totalKilos
+  };
+  activeBids = [];
+  saveAll();
+  renderAuctionDisplay();
+  showToast('Auction created! Click START to begin bidding', false);
+});
+
+function startAuction() {
+  if (!currentAuction) return;
+  currentAuction.status = 'live';
+  timerSeconds = currentAuction.durationMinutes * 60;
+  saveAll();
+  startTimer();
+  bots.forEach((bot, i) => setTimeout(() => botBid(bot), i * 2000));
+  renderAuctionDisplay();
+  showToast('Auction LIVE! Bots are bidding...', false);
+}
+
+function endAuction() {
+  if (auctionTimer) clearInterval(auctionTimer);
+  if (currentAuction) {
+    currentAuction.status = 'ended';
+    saveAll();
+    renderAuctionDisplay();
+    showToast('Auction ended', false);
+  }
+}
+
+function startTimer() {
+  if (auctionTimer) clearInterval(auctionTimer);
+  auctionTimer = setInterval(function() {
+    timerSeconds--;
+    if (timerSeconds <= 0) {
+      clearInterval(auctionTimer);
+      endAuction();
+    } else {
+      const el = document.getElementById('auctionTimer');
+      if (el) el.innerText = Math.floor(timerSeconds/60) + ':' + (timerSeconds%60).toString().padStart(2,'0');
+      if (currentAuction && currentAuction.status === 'live') {
+        if (timerSeconds % 10 === 0) bots.forEach(bot => botBid(bot));
+        if (timerSeconds <= 30) bots.filter(b => b.strategy === 'sniper').forEach(bot => botBid(bot, true));
+      }
+    }
+  }, 1000);
+}
+
+function botBid(bot, isSniper) {
+  isSniper = isSniper || false;
+  if (!currentAuction || currentAuction.status !== 'live' || currentAuction.totalRemainingKilos <= 0) return;
+
+  const currentBids = activeBids.filter(b => b.status === 'pending');
+  const topPrice = currentBids.length > 0 ? Math.max(...currentBids.map(b => b.pricePerKilo)) : bot.priceFloor;
+
+  let bidPrice = bot.priceFloor;
+  let strategyUsed = '';
+
+  if (bot.strategy === 'aggressive') {
+    bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement);
+    if (isSniper) bidPrice = Math.min(bot.priceCeiling, bidPrice + bot.sniperReserve);
+    strategyUsed = '⚡ Aggressive';
+  } else if (bot.strategy === 'conservative') {
+    bidPrice = Math.min(bot.priceCeiling, topPrice + (bot.priceIncrement * 0.5));
+    strategyUsed = '🐢 Conservative';
+  } else if (bot.strategy === 'sniper') {
+    if (isSniper || timerSeconds <= 30) {
+      bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement + (bot.sniperReserve * (timerSeconds / 10)));
+      strategyUsed = '🎯 Sniper!';
+    } else return;
   }
 
-  loadFromStorage();
+  bidPrice = Math.max(bidPrice, bot.priceFloor);
+  const dumpAmount = Math.min(bot.maxDumpKilos, currentAuction.totalRemainingKilos, Math.floor(Math.random() * bot.dumpRate) + bot.dumpRate/2);
+  const paymentDays = Math.max(bot.minPaymentDays, Math.floor(Math.random() * (bot.maxPaymentDays - bot.minPaymentDays) + bot.minPaymentDays));
 
-  const commodityPrices = {
-    'Coconut Oil': { base: 1247, unit: '/t', volatility: 15 },
-    'Palm Oil': { base: 982, unit: '/t', volatility: 12 },
-    'Coffee Arabica': { base: 3.42, unit: '/lb', volatility: 0.04 },
-    'Cocoa': { base: 4088, unit: '/t', volatility: 80 },
-    'Sugar': { base: 0.42, unit: '/lb', volatility: 0.01 },
-    'Wheat': { base: 5.89, unit: '/bu', volatility: 0.08 },
-    'Corn': { base: 4.12, unit: '/bu', volatility: 0.06 },
-    'Soybeans': { base: 11.10, unit: '/bu', volatility: 0.12 }
+  const newBid = {
+    id: 'bid_' + Date.now() + '_' + Math.random(),
+    botName: bot.name,
+    pricePerKilo: bidPrice,
+    kilos: dumpAmount,
+    paymentDays: paymentDays,
+    strategyUsed: strategyUsed,
+    status: 'pending',
+    timestamp: new Date().toISOString()
   };
 
-  function updateTickerPrices() {
-    const ticker = document.getElementById('commodityTicker');
-    if (!ticker) return;
-    const items = ticker.querySelectorAll('.ticker-commodity');
-    items.forEach(item => {
-      const nameEl = item.querySelector('.ticker-name');
-      const priceEl = item.querySelector('.ticker-price');
-      const changeEl = item.querySelector('.ticker-change');
-      if (!nameEl || !priceEl || !changeEl) return;
-      const name = nameEl.textContent.replace(/^[^a-zA-Z]+/, '').trim();
-      const commodity = Object.keys(commodityPrices).find(k => name.includes(k));
-      if (!commodity) return;
-      const data = commodityPrices[commodity];
-      const change = (Math.random() - 0.5) * data.volatility * 2;
-      const newPrice = Math.max(data.base * 0.5, data.base + change);
-      const pctChange = ((newPrice - data.base) / data.base * 100).toFixed(1);
-      let priceStr;
-      if (data.base >= 100) {
-        priceStr = '$' + Math.round(newPrice).toLocaleString() + data.unit;
-      } else {
-        priceStr = '$' + newPrice.toFixed(2) + data.unit;
-      }
-      priceEl.textContent = priceStr;
-      if (pctChange > 0.1) {
-        changeEl.textContent = '▲ ' + pctChange + '%';
-        changeEl.className = 'ticker-change up';
-      } else if (pctChange < -0.1) {
-        changeEl.textContent = '▼ ' + Math.abs(pctChange) + '%';
-        changeEl.className = 'ticker-change down';
-      } else {
-        changeEl.textContent = '— ' + Math.abs(pctChange) + '%';
-        changeEl.className = 'ticker-change flat';
-      }
-    });
-  }
+  activeBids.push(newBid);
+  activeBids.sort((a,b) => b.pricePerKilo - a.pricePerKilo);
+  if (activeBids.length > 20) activeBids = activeBids.slice(0,20);
+  saveAll();
+  renderAuctionDisplay();
+  showToast('🤖 ' + bot.name + ' bid $' + bidPrice.toFixed(3) + '/kg for ' + dumpAmount + ' kg (' + strategyUsed + ')', false);
+}
 
-  setInterval(updateTickerPrices, 8000);
+window.acceptBid = function(bidId) {
+  const bid = activeBids.find(b => b.id === bidId);
+  if (!bid || bid.status !== 'pending') return;
+  if (bid.kilos > currentAuction.totalRemainingKilos) {
+    showToast('Only ' + currentAuction.totalRemainingKilos + ' kg remaining!', true);
+    return;
+  }
+  bid.status = 'accepted';
+  currentAuction.totalRemainingKilos -= bid.kilos;
+  if (currentAuction.totalRemainingKilos <= 0) {
+    currentAuction.status = 'ended';
+    if (auctionTimer) clearInterval(auctionTimer);
+    showToast('🎉 SOLD OUT to ' + bid.botName + '!', false);
+  } else {
+    showToast('✅ Accepted ' + bid.kilos.toLocaleString() + ' kg @ $' + bid.pricePerKilo.toFixed(3) + '/kg from ' + bid.botName, false);
+  }
+  saveAll();
+  renderAuctionDisplay();
+};
+
+// =====================================================
+// COMPANY PROFILE SAVE
+// =====================================================
+document.getElementById('saveProfileBtn').addEventListener('click', function() {
+  const originValue = document.getElementById('originCountry').value;
+  companyProfile = {
+    logo: companyProfile.logo,
+    name: document.getElementById('companyName').value,
+    email: document.getElementById('contactEmail').value,
+    phone: document.getElementById('contactPhone').value,
+    origin: originValue,
+    otherCountry: (originValue === 'Other') ? document.getElementById('otherCountryInput').value : '',
+    fobPort: document.getElementById('fobPort').value,
+    description: document.getElementById('companyDescription').value
+  };
+  saveAll();
+  showToast('Profile saved!', false);
+});
+
+// =====================================================
+// COMPANY LOGO UPLOAD
+// =====================================================
+document.getElementById('companyLogoBtn').addEventListener('click', function() {
+  document.getElementById('companyLogoInput').click();
+});
+document.getElementById('companyLogoInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    companyProfile.logo = ev.target.result;
+    document.getElementById('companyLogoPreview').src = companyProfile.logo;
+    document.getElementById('companyLogoPreview').style.display = 'block';
+    document.getElementById('companyLogoPlaceholder').style.display = 'none';
+    saveAll();
+  };
+  reader.readAsDataURL(file);
+});
+
+// =====================================================
+// ORIGIN COUNTRY TOGGLE
+// =====================================================
+document.getElementById('originCountry').addEventListener('change', function() {
+  const otherInput = document.getElementById('otherCountryInput');
+  otherInput.style.display = (this.value === 'Other') ? 'block' : 'none';
+});
+
+// =====================================================
+// SIGN OUT - FIXED
+// =====================================================
+document.getElementById('signOutBtn').addEventListener('click', function() {
+  if (confirm('Sign out?')) {
+    window.location.href = 'signin.html';
+  }
+});
+
+// =====================================================
+// TOAST / MODAL
+// =====================================================
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'toast error' : 'toast';
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 4000);
+}
+
+window.closeModal = function() {
+  document.getElementById('mediaModal').style.display = 'none';
+};
+window.openMedia = function(src, type) {
+  const modal = document.getElementById('mediaModal');
+  const img = document.getElementById('modalImage');
+  const video = document.getElementById('modalVideo');
+  img.style.display = 'none';
+  video.style.display = 'none';
+  if (type === 'image') {
+    img.src = src;
+    img.style.display = 'block';
+  } else {
+    video.src = src;
+    video.style.display = 'block';
+    video.play();
+  }
+  modal.style.display = 'flex';
+};
+
+// =====================================================
+// TICKER UPDATES
+// =====================================================
+const commodityPrices = {
+  'Coconut Oil': { base: 1247, unit: '/t', volatility: 15 },
+  'Palm Oil': { base: 982, unit: '/t', volatility: 12 },
+  'Coffee Arabica': { base: 3.42, unit: '/lb', volatility: 0.04 },
+  'Cocoa': { base: 4088, unit: '/t', volatility: 80 },
+  'Sugar': { base: 0.42, unit: '/lb', volatility: 0.01 },
+  'Wheat': { base: 5.89, unit: '/bu', volatility: 0.08 },
+  'Corn': { base: 4.12, unit: '/bu', volatility: 0.06 },
+  'Soybeans': { base: 11.10, unit: '/bu', volatility: 0.12 }
+};
+
+function updateTickerPrices() {
+  const ticker = document.getElementById('commodityTicker');
+  if (!ticker) return;
+  const items = ticker.querySelectorAll('.ticker-commodity');
+  items.forEach(item => {
+    const nameEl = item.querySelector('.ticker-name');
+    const priceEl = item.querySelector('.ticker-price');
+    const changeEl = item.querySelector('.ticker-change');
+    if (!nameEl || !priceEl || !changeEl) return;
+    const name = nameEl.textContent.replace(/^[^a-zA-Z]+/, '').trim();
+    const commodity = Object.keys(commodityPrices).find(k => name.includes(k));
+    if (!commodity) return;
+    const data = commodityPrices[commodity];
+    const change = (Math.random() - 0.5) * data.volatility * 2;
+    const newPrice = Math.max(data.base * 0.5, data.base + change);
+    const pctChange = ((newPrice - data.base) / data.base * 100).toFixed(1);
+    let priceStr;
+    if (data.base >= 100) {
+      priceStr = '$' + Math.round(newPrice).toLocaleString() + data.unit;
+    } else {
+      priceStr = '$' + newPrice.toFixed(2) + data.unit;
+    }
+    priceEl.textContent = priceStr;
+    if (pctChange > 0.1) {
+      changeEl.textContent = '▲ ' + pctChange + '%';
+      changeEl.className = 'ticker-change up';
+    } else if (pctChange < -0.1) {
+      changeEl.textContent = '▼ ' + Math.abs(pctChange) + '%';
+      changeEl.className = 'ticker-change down';
+    } else {
+      changeEl.textContent = '— ' + Math.abs(pctChange) + '%';
+      changeEl.className = 'ticker-change flat';
+    }
+  });
+}
+setInterval(updateTickerPrices, 8000);
+
+// =====================================================
+// INIT
+// =====================================================
+loadFromStorage();
 </script>
 </body>
 </html>
-"@ | Out-File -FilePath dashboard-seller.html -Encoding utf8
-
-git add dashboard-seller.html
-git commit -m "Fix: Removed base target tag, fixed sign out button on seller dashboard"
-git push origin main
-
-Write-Host "Done! Seller dashboard fixed and deployed." -ForegroundColor Green
