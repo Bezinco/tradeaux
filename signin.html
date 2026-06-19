@@ -189,15 +189,26 @@ document.getElementById('continueBtn').addEventListener('click', async function(
 
   try {
     updateDebug('Saving role: ' + selectedRole);
-    var result = await supabaseClient.from('profiles').upsert({
-      id: currentUser.id,
-      role: selectedRole,
-      updated_at: new Date().toISOString()
-    });
+    // Use update (not upsert) since profile row already exists from signup
+    var result = await supabaseClient.from('profiles')
+      .update({ role: selectedRole, updated_at: new Date().toISOString() })
+      .eq('id', currentUser.id);
     if (result.error) throw result.error;
     redirectToDashboard(selectedRole);
   } catch (err) {
     showError('Error saving role: ' + err.message);
+    updateDebug('RLS error — trying RPC fallback...');
+    // Fallback: try to update via RPC if direct update fails
+    try {
+      var rpcResult = await supabaseClient.rpc('set_user_role', {
+        user_role: selectedRole
+      });
+      if (rpcResult.error) throw rpcResult.error;
+      redirectToDashboard(selectedRole);
+    } catch (rpcErr) {
+      showError('Could not save role. Please contact support.');
+      updateDebug('RPC also failed: ' + rpcErr.message);
+    }
   }
 });
 
