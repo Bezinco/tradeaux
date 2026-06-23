@@ -421,6 +421,12 @@ input:checked + .slider:before { transform: translateX(16px); }
 .stack-item {
   position: relative;
 }
+.field-label {
+  font-size: 9px;
+  color: #FFD966;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
 </style>
 <base target="_blank">
 </head>
@@ -466,27 +472,27 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div class="section-header">🏢 COMPANY PROFILE</div>
     <div class="form-grid">
       <div class="form-field">
-        <label class="form-label">COMPANY LOGO</label>
+        <div class="form-label">COMPANY LOGO</label>
         <label for="companyLogoInput" id="companyLogoBtn" style="width:180px;height:100px;border-radius:16px;border:2px dashed #FFD966;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;">
           <div id="companyLogoPlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">UPLOAD</div>
           <img id="companyLogoPreview" style="display:none;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;pointer-events:none;">
-        </label>
+        </div>
         <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
       </div>
       <div class="form-field">
-        <label class="form-label">COMPANY NAME</label>
+        <div class="form-label">COMPANY NAME</div>
         <input class="form-input" id="companyName" placeholder="ABC Exporters Ltd">
       </div>
       <div class="form-field">
-        <label class="form-label">CONTACT EMAIL</label>
+        <div class="form-label">CONTACT EMAIL</div>
         <input class="form-input" id="contactEmail" placeholder="info@company.com">
       </div>
       <div class="form-field">
-        <label class="form-label">PHONE / WHATSAPP</label>
+        <div class="form-label">PHONE / WHATSAPP</div>
         <input class="form-input" id="contactPhone" placeholder="+94 77 123 4567">
       </div>
       <div class="form-field">
-        <label class="form-label">COUNTRY OF ORIGIN</label>
+        <div class="form-label">COUNTRY OF ORIGIN</div>
         <select class="form-select" id="originCountry">
           <option value="">Select country...</option>
           <option value="Brazil">Brazil</option><option value="Fiji">Fiji</option>
@@ -500,11 +506,11 @@ input:checked + .slider:before { transform: translateX(16px); }
         <input type="text" class="form-input" id="otherCountryInput" placeholder="Please specify" style="display:none;margin-top:8px;">
       </div>
       <div class="form-field">
-        <label class="form-label">FOB PORT</label>
+        <div class="form-label">FOB PORT</div>
         <input class="form-input" id="fobPort" placeholder="e.g., Colombo, Sri Lanka">
       </div>
       <div class="form-field" style="grid-column:1/-1">
-        <label class="form-label">ABOUT THE COMPANY</label>
+        <div class="form-label">ABOUT THE COMPANY</div>
         <textarea class="form-textarea" id="companyDescription" rows="2" placeholder="Tell buyers about your company..."></textarea>
       </div>
     </div>
@@ -528,7 +534,6 @@ input:checked + .slider:before { transform: translateX(16px); }
         <option value="halal">☪️ Halal</option>
         <option value="brcgs">🔒 BRCGS</option>
         <option value="origin">🌍 Origin</option>
-        <option value="haccp">🔬  HACCP</option>
         <option value="iso">⚙️ ISO</option>
         <option value="foodsafety">🍽️ Food Safety</option>
         <option value="other">📎 Other</option>
@@ -559,21 +564,21 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div id="createAuctionForm">
       <div class="form-grid" style="margin-bottom:16px;">
         <div class="form-field">
-          <label class="form-label">SELECT PRODUCT</label>
+          <div class="form-label">SELECT PRODUCT</label>
           <select class="form-select" id="auctionProductSelect">
             <option value="">-- Select a product from your list --</option>
           </select>
         </div>
         <div class="form-field">
-          <label class="form-label">TOTAL QUANTITY (kg)</label>
+          <div class="form-label">TOTAL QUANTITY (kg)</label>
           <input type="number" class="form-input" id="auctionQuantity" placeholder="1000" step="100">
         </div>
         <div class="form-field">
-          <label class="form-label">PACKAGING / SIZES</label>
+          <div class="form-label">PACKAGING / SIZES</label>
           <input class="form-input" id="auctionSizes" placeholder="e.g., 25kg, 50kg, 100kg bags">
         </div>
         <div class="form-field">
-          <label class="form-label">PRODUCT IMAGE</label>
+          <div class="form-label">PRODUCT IMAGE</label>
           <label for="auctionImageInput" id="auctionImageBtn" style="width:80px;height:80px;border-radius:12px;border:2px dashed rgba(124,252,0,0.4);background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;">
             <div id="auctionImagePlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">ADD<br>PHOTO</div>
             <img id="auctionImagePreview" style="display:none;width:100%;height:100%;object-fit:cover;pointer-events:none;">
@@ -581,7 +586,7 @@ input:checked + .slider:before { transform: translateX(16px); }
           <input type="file" id="auctionImageInput" accept="image/*" style="display:none;">
         </div>
         <div class="form-field">
-          <label class="form-label">QUALITY GRADE</label>
+          <div class="form-label">QUALITY GRADE</label>
           <select class="form-select" id="gradeSelect">
             <option>Grade A (Premium)</option>
             <option>Grade B (Standard)</option>
@@ -589,15 +594,15 @@ input:checked + .slider:before { transform: translateX(16px); }
           </select>
         </div>
         <div class="form-field">
-          <label class="form-label">MOISTURE CONTENT (%)</label>
+          <div class="form-label">MOISTURE CONTENT (%)</label>
           <input type="number" class="form-input" id="moistureContent" value="12" step="0.5" min="0" max="30">
         </div>
         <div class="form-field">
-          <label class="form-label">OIL CONTENT (%)</label>
+          <div class="form-label">OIL CONTENT (%)</label>
           <input type="number" class="form-input" id="oilContent" value="65" step="1" min="40" max="80">
         </div>
         <div class="form-field">
-          <label class="form-label">AUCTION DURATION (minutes)</label>
+          <div class="form-label">AUCTION DURATION (minutes)</label>
           <input type="number" class="form-input" id="auctionDuration" value="3" min="1" max="10">
         </div>
       </div>
@@ -721,7 +726,6 @@ const CERT_LABELS = {
   'brcgs': { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
   'origin': { icon: '🌍', label: 'Origin', desc: 'Government-issued origin' },
   'iso': { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
-  'haccp': { icon: '🔬', label: 'HACCP', desc: 'Hazard Analysis Critical Control Point' },
   'foodsafety': { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' },
   'other': { icon: '📎', label: 'Other', desc: 'Additional certification' }
 };
@@ -766,6 +770,17 @@ function setUnit(pref) {
 // =====================================================
 function loadFromStorage() {
   console.log('[TradeAux] Loading from localStorage...');
+
+  // Check if localStorage is available
+  try {
+    const test = localStorage.getItem('__test__');
+    localStorage.setItem('__test__', '1');
+    localStorage.removeItem('__test__');
+    console.log('[TradeAux] localStorage is available');
+  } catch (e) {
+    console.error('[TradeAux] localStorage NOT available:', e.message);
+    showToast('⚠️ localStorage blocked — data will not persist', true);
+  }
 
   const parsedProfile = safe(() => JSON.parse(localStorage.getItem('tradeaux_company_profile')), null);
   if (parsedProfile && typeof parsedProfile === 'object' && !Array.isArray(parsedProfile)) {
@@ -831,17 +846,22 @@ function loadFromStorage() {
 
 function saveAll() {
   console.log('[TradeAux] Saving to localStorage...');
-  safe(() => localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile)));
-  safe(() => localStorage.setItem('tradeaux_cert_images', JSON.stringify(certImages)));
-  safe(() => localStorage.setItem('tradeaux_cert_stacks', JSON.stringify(certStacks)));
-  safe(() => localStorage.setItem('tradeaux_cert_toggles', JSON.stringify(certToggles)));
-  safe(() => localStorage.setItem('tradeaux_product_lines', JSON.stringify(productLines)));
-  safe(() => localStorage.setItem('tradeaux_bots', JSON.stringify(bots)));
-  safe(() => localStorage.setItem('tradeaux_unit_preference', unitPreference));
-  safe(() => { if (auctionProductImage) localStorage.setItem('tradeaux_auction_image', auctionProductImage); });
-  safe(() => { if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction)); else localStorage.removeItem('tradeaux_auction'); });
-  safe(() => localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids)));
-  console.log('[TradeAux] Saved.');
+  try {
+    localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile));
+    localStorage.setItem('tradeaux_cert_images', JSON.stringify(certImages));
+    localStorage.setItem('tradeaux_cert_stacks', JSON.stringify(certStacks));
+    localStorage.setItem('tradeaux_cert_toggles', JSON.stringify(certToggles));
+    localStorage.setItem('tradeaux_product_lines', JSON.stringify(productLines));
+    localStorage.setItem('tradeaux_bots', JSON.stringify(bots));
+    localStorage.setItem('tradeaux_unit_preference', unitPreference);
+    if (auctionProductImage) localStorage.setItem('tradeaux_auction_image', auctionProductImage);
+    if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction)); else localStorage.removeItem('tradeaux_auction');
+    localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids));
+    console.log('[TradeAux] Saved successfully.');
+  } catch (e) {
+    console.error('[TradeAux] SAVE FAILED:', e.name, e.message);
+    showToast('⚠️ Save failed: ' + e.message, true);
+  }
 }
 
 // =====================================================
@@ -949,7 +969,7 @@ function renderCertificates() {
       ${stackHtml}
       <div class="cert-toggle-row">
         <span>${isVerified ? '✅ Verified' : '⏳ Pending'}</span>
-        <label class="toggle-switch">
+        <label class="toggle-switch" for="cert_${type}">
           <input type="checkbox" id="cert_${type}" ${isVerified ? 'checked' : ''} ${isRequired ? 'disabled' : ''}>
           <span class="slider"></span>
         </label>
@@ -1053,13 +1073,13 @@ function renderProducts() {
       </div>
       <div class="product-fields">
         <div class="field-group">
-          <label>PRODUCT</label>
+          <div class="field-label">PRODUCT</div>
           <select class="product-select" data-idx="${idx}">
             ${PRODUCT_TYPES.map(p => `<option value="${p}" ${p === product.type ? 'selected' : ''}>${p}</option>`).join('')}
           </select>
         </div>
         <div class="field-group" style="flex:2;">
-          <label>SIZES (kg) - click to remove</label>
+          <div class="field-label">SIZES (kg) - click to remove</div>
           <div class="size-chips">
             ${product.sizes.map((s, si) => `<span class="size-chip" onclick="removeSize(${idx}, ${si})">${s}kg <span class="remove-size">×</span></span>`).join('')}
             <span class="size-chip" onclick="addSize(${idx})" style="border-color:#7CFC00; cursor:pointer;">+ Add</span>
@@ -1403,17 +1423,17 @@ function setupCompanyProfile() {
       const origin = document.getElementById('originCountry').value;
       companyProfile = {
         logo: companyProfile.logo,
-        name: document.getElementById('companyName').value,
-        email: document.getElementById('contactEmail').value,
-        phone: document.getElementById('contactPhone').value,
-        origin: origin,
-        otherCountry: (origin === 'Other') ? document.getElementById('otherCountryInput').value : '',
-        fobPort: document.getElementById('fobPort').value,
-        description: document.getElementById('companyDescription').value
+        name: document.getElementById('companyName').value || '',
+        email: document.getElementById('contactEmail').value || '',
+        phone: document.getElementById('contactPhone').value || '',
+        origin: origin || '',
+        otherCountry: (origin === 'Other') ? (document.getElementById('otherCountryInput').value || '') : '',
+        fobPort: document.getElementById('fobPort').value || '',
+        description: document.getElementById('companyDescription').value || ''
       };
+      console.log('[TradeAux] Profile object built:', JSON.stringify(companyProfile));
       saveAll();
       showToast('Profile saved!', false);
-      console.log('[TradeAux] Profile saved:', companyProfile);
     });
   }
 
