@@ -310,9 +310,25 @@ document.addEventListener('DOMContentLoaded', function() {
   // === CHECK IF ALREADY LOGGED IN ===
   // But NOT if we just came from a logout
   if (!isLogout) {
-    supabaseClient.auth.getSession().then(function(result) {
+    supabaseClient.auth.getSession().then(async function(result) {
       if (result.data && result.data.session) {
-        showRolePicker(result.data.session.user);
+        const user = result.data.session.user;
+        // Check if user already has a saved role
+        const { data: profile, error } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profile && profile.role && DASHBOARDS[profile.role]) {
+          // Already has a role — go straight to dashboard
+          console.log('✅ Saved role found:', profile.role, '→ redirecting');
+          redirectToDashboard(profile.role);
+        } else {
+          // No saved role — show role picker (first time)
+          console.log('ℹ️ No saved role — showing role picker');
+          showRolePicker(user);
+        }
       }
     }).catch(function(err) {
       console.log('No session found:', err);
