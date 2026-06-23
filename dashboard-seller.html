@@ -363,7 +363,11 @@ input:checked + .slider:before { transform: translateX(16px); }
   .gem-logo-corner { transform: scale(0.15); }
   .section-card { padding: 16px; }
 }
+/* Logo upload fix */
+#companyLogoPreview { pointer-events: none; }
+#auctionImagePreview { pointer-events: none; }
 </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -581,7 +585,6 @@ input:checked + .slider:before { transform: translateX(16px); }
   </div>
 </div>
 
-<script>
 // =====================================================
 // DEBUG & ERROR BOUNDARIES
 // =====================================================
@@ -618,7 +621,7 @@ try {
 async function checkAuth() {
   if (!supabaseClient) {
     console.warn('[TradeAux] No Supabase client — skipping auth check');
-    return true; // allow offline usage
+    return true;
   }
   try {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
@@ -632,7 +635,6 @@ async function checkAuth() {
     return true;
   } catch (e) {
     console.error('[TradeAux] Auth check failed:', e);
-    // Don't trap the user on a broken page — let them use localStorage mode
     return true;
   }
 }
@@ -666,7 +668,7 @@ const CERT_LABELS = {
 };
 
 // =====================================================
-// STATE
+// STATE — GUARANTEED NON-NULL DEFAULTS
 // =====================================================
 let unitPreference = 'metric';
 let companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
@@ -701,35 +703,52 @@ function setUnit(pref) {
 }
 
 // =====================================================
-// LOAD / SAVE — WITH ERROR BOUNDARIES
+// LOAD / SAVE — WITH ERROR BOUNDARIES & NULL GUARDS
 // =====================================================
 function loadFromStorage() {
   console.log('[TradeAux] Loading from localStorage...');
-  companyProfile = safe(() => JSON.parse(localStorage.getItem('tradeaux_company_profile')), companyProfile);
-  certImages = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_images')), certImages);
-  certStacks = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_stacks')), certStacks);
-  certToggles = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_toggles')), certToggles);
+
+  const parsedProfile = safe(() => JSON.parse(localStorage.getItem('tradeaux_company_profile')), null);
+  if (parsedProfile && typeof parsedProfile === 'object' && !Array.isArray(parsedProfile)) {
+    companyProfile = { ...companyProfile, ...parsedProfile };
+  } else {
+    console.log('[TradeAux] No valid profile found, using defaults');
+    companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
+  }
+
+  const parsedCertImages = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_images')), null);
+  certImages = (parsedCertImages && typeof parsedCertImages === 'object' && !Array.isArray(parsedCertImages)) 
+    ? parsedCertImages : { incorporation: null };
+
+  const parsedCertStacks = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_stacks')), null);
+  certStacks = (parsedCertStacks && typeof parsedCertStacks === 'object' && !Array.isArray(parsedCertStacks)) 
+    ? parsedCertStacks : {};
+
+  const parsedCertToggles = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_toggles')), null);
+  certToggles = (parsedCertToggles && typeof parsedCertToggles === 'object' && !Array.isArray(parsedCertToggles)) 
+    ? parsedCertToggles : { incorporation: true };
+
   productLines = safe(() => JSON.parse(localStorage.getItem('tradeaux_product_lines')), null);
   bots = safe(() => JSON.parse(localStorage.getItem('tradeaux_bots')), null);
   const savedUnit = safe(() => localStorage.getItem('tradeaux_unit_preference'), null);
   currentAuction = safe(() => JSON.parse(localStorage.getItem('tradeaux_auction')), null);
-  activeBids = safe(() => JSON.parse(localStorage.getItem('tradeaux_bids')), []);
+  activeBids = safe(() => JSON.parse(localStorage.getItem('tradeaux_bids')), null);
   auctionProductImage = safe(() => localStorage.getItem('tradeaux_auction_image'), null);
 
-  if (!productLines) {
+  if (!productLines || !Array.isArray(productLines)) {
     productLines = [
       { type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null },
       { type: 'Coconut Oil', sizes: [1, 5, 20], image: null }
     ];
   }
-  if (!bots) {
+  if (!bots || !Array.isArray(bots)) {
     bots = [
       { id: 'bot1', name: 'Alpha Trader', strategy: 'aggressive', priceFloor: 0.45, priceCeiling: 0.65, priceIncrement: 0.005, maxDumpKilos: 2000, dumpRate: 100, sniperReserve: 0.05, minPaymentDays: 30, maxPaymentDays: 180 },
       { id: 'bot2', name: 'Sigma Bot', strategy: 'conservative', priceFloor: 0.47, priceCeiling: 0.60, priceIncrement: 0.005, maxDumpKilos: 1500, dumpRate: 75, sniperReserve: 0.03, minPaymentDays: 60, maxPaymentDays: 120 }
     ];
   }
   if (savedUnit) unitPreference = savedUnit;
-  if (!activeBids) activeBids = [];
+  if (!activeBids || !Array.isArray(activeBids)) activeBids = [];
 
   renderCompanyProfile();
   renderCertificates();
@@ -789,6 +808,10 @@ function populateAuctionProductDropdown() {
 // RENDER: COMPANY PROFILE
 // =====================================================
 function renderCompanyProfile() {
+  if (!companyProfile || typeof companyProfile !== 'object') {
+    console.warn('[TradeAux] companyProfile invalid, reinitializing');
+    companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
+  }
   const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   setVal('companyName', companyProfile.name);
   setVal('contactEmail', companyProfile.email);
@@ -1043,11 +1066,11 @@ function renderAuctionDisplay() {
     <div class="auction-card">
       <div class="auction-header">
         <div class="auction-logo">
-          ${companyProfile.logo ? `<img src="${companyProfile.logo}">` : '<span class="placeholder">🏢</span>'}
+          ${companyProfile && companyProfile.logo ? `<img src="${companyProfile.logo}">` : '<span class="placeholder">🏢</span>'}
         </div>
         <div class="auction-company">
-          <div class="company-name">${currentAuction.companyName || companyProfile.name || 'Company'}</div>
-          <div class="company-detail">${currentAuction.fobPort || companyProfile.fobPort || 'FOB Port'}</div>
+          <div class="company-name">${currentAuction.companyName || (companyProfile && companyProfile.name) || 'Company'}</div>
+          <div class="company-detail">${currentAuction.fobPort || (companyProfile && companyProfile.fobPort) || 'FOB Port'}</div>
         </div>
       </div>
       <div class="auction-product-display">
@@ -1081,8 +1104,8 @@ function renderAuctionDisplay() {
 // AUCTION FUNCTIONS
 // =====================================================
 function launchAuction() {
-  if (!companyProfile.name) { showToast('Save your company profile first!', true); return; }
-  if (!certImages.incorporation) { showToast('⚠️ Incorporation Certificate is MANDATORY!', true); return; }
+  if (!companyProfile || !companyProfile.name) { showToast('Save your company profile first!', true); return; }
+  if (!certImages || !certImages.incorporation) { showToast('⚠️ Incorporation Certificate is MANDATORY!', true); return; }
   const productIdx = parseInt(document.getElementById('auctionProductSelect').value);
   if (isNaN(productIdx) || productIdx < 0 || productIdx >= productLines.length) {
     showToast('Please select a product from the dropdown!', true); return;
@@ -1263,18 +1286,38 @@ function setupCompanyProfile() {
   }
 
   if (logoBtn && logoInput) {
-    logoBtn.addEventListener('click', () => logoInput.click());
+    logoBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      logoInput.click();
+    });
     logoInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
-      if (!file) return;
+      if (!file) {
+        console.log('[TradeAux] No file selected');
+        return;
+      }
+      console.log('[TradeAux] File selected:', file.name, file.size);
       const reader = new FileReader();
       reader.onload = function(ev) {
+        if (!companyProfile || typeof companyProfile !== 'object') {
+          console.warn('[TradeAux] Profile was null, reinitializing');
+          companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
+        }
         companyProfile.logo = ev.target.result;
         const preview = document.getElementById('companyLogoPreview');
         const placeholder = document.getElementById('companyLogoPlaceholder');
-        if (preview) { preview.src = companyProfile.logo; preview.style.display = 'block'; }
+        if (preview) { 
+          preview.src = companyProfile.logo; 
+          preview.style.display = 'block'; 
+        }
         if (placeholder) placeholder.style.display = 'none';
         saveAll();
+        showToast('Logo uploaded!', false);
+        console.log('[TradeAux] Logo loaded, size:', companyProfile.logo.length);
+      };
+      reader.onerror = function(err) {
+        console.error('[TradeAux] FileReader error:', err);
+        showToast('Error reading image', true);
       };
       reader.readAsDataURL(file);
     });
@@ -1359,7 +1402,6 @@ function setupSignOut() {
   btn.addEventListener('click', async function() {
     console.log('[TradeAux] Sign Out clicked');
     if (!confirm('Sign out?')) return;
-    // Always clear local data first so even if Supabase fails, user is signed out locally
     safe(() => localStorage.removeItem('tradeaux_company_profile'));
     safe(() => localStorage.removeItem('tradeaux_cert_images'));
     safe(() => localStorage.removeItem('tradeaux_cert_stacks'));
@@ -1463,7 +1505,6 @@ function initApp() {
     }
   }).catch(err => {
     console.error('[TradeAux] Init error:', err);
-    // Still load data so user isn't stuck on a blank page
     loadFromStorage();
     showToast('Loaded in offline mode', true);
   });
