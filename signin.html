@@ -163,6 +163,7 @@ button:disabled {
 }
 .hidden { display: none !important; }
 </style>
+<base target="_blank">
 </head>
 <body>
 <div class="container">
@@ -294,23 +295,29 @@ function showRolePicker(user) {
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 TradeAux Signin v5.4 - FIXED window.supabase');
   
-  // === IF LOGOUT FLAG, STAY ON SIGNIN PAGE ===
+  // === IF LOGOUT FLAG, FULLY CLEAR SESSION ===
   if (isLogout) {
-    console.log('🔓 Logout detected - staying on signin page');
+    console.log('🔓 Logout detected - clearing session');
     showSuccess('You have been signed out.');
-    localStorage.removeItem('supabase.auth.token');
-    supabaseClient.auth.signOut().catch(() => {});
+    // Clear all storage to prevent stale session
+    localStorage.clear();
+    sessionStorage.clear();
+    // Also tell Supabase to clear its internal state
+    supabaseClient.auth.signOut({ scope: 'global' }).catch(() => {});
     return;
   }
 
   // === CHECK IF ALREADY LOGGED IN ===
-  supabaseClient.auth.getSession().then(function(result) {
-    if (result.data.session) {
-      showRolePicker(result.data.session.user);
-    }
-  }).catch(function(err) {
-    console.log('No session found:', err);
-  });
+  // But NOT if we just came from a logout
+  if (!isLogout) {
+    supabaseClient.auth.getSession().then(function(result) {
+      if (result.data && result.data.session) {
+        showRolePicker(result.data.session.user);
+      }
+    }).catch(function(err) {
+      console.log('No session found:', err);
+    });
+  }
 
   // =====================================================
   // TOGGLE SIGNUP / SIGNIN
@@ -327,6 +334,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('step2').classList.add('hidden');
     document.getElementById('step1').classList.remove('hidden');
     document.getElementById('subtitle').textContent = 'Sign in to your account';
+    // Clear any error messages
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'none';
   });
 
   // =====================================================
@@ -479,13 +489,13 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
     e.preventDefault();
     try {
-      await supabaseClient.auth.signOut();
-      localStorage.removeItem('supabase.auth.token');
-      window.location.href = 'signin.html?logout=1';
+      await supabaseClient.auth.signOut({ scope: 'global' });
     } catch (error) {
-      localStorage.removeItem('supabase.auth.token');
-      window.location.href = 'signin.html?logout=1';
+      console.log('Signout error:', error);
     }
+    // Always clear local storage and reload
+    localStorage.clear();
+    window.location.href = 'signin.html?logout=1';
   });
 
   // =====================================================
