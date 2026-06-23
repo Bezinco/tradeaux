@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>TradeAux &bull; Seller Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -428,7 +431,6 @@ input:checked + .slider:before { transform: translateX(16px); }
   letter-spacing: 1px;
 }
 </style>
-<base target="_blank">
 </head>
 <body>
 
@@ -559,7 +561,7 @@ input:checked + .slider:before { transform: translateX(16px); }
   <!-- AUCTION -->
   <div class="section-card">
     <div class="section-header">⚡ AUCTION <span class="badge" id="briefBadge">No active auction</span></div>
-    
+
     <!-- Create Auction Form -->
     <div id="createAuctionForm">
       <div class="form-grid" style="margin-bottom:16px;">
@@ -608,7 +610,7 @@ input:checked + .slider:before { transform: translateX(16px); }
       </div>
       <button class="btn-primary" id="launchAuctionBtn">🚀 LAUNCH AUCTION</button>
     </div>
-    
+
     <!-- Active Auction Display -->
     <div id="auctionContent" style="margin-top:24px;">
       <div class="empty-state">No active auction. Create one above.</div>
@@ -660,46 +662,126 @@ function safeAsync(fn) {
 }
 
 // =====================================================
-// SUPABASE CONFIGURATION
+// SUPABASE CONFIGURATION — FIXED: use window.supabase
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
 let supabaseClient = null;
+let currentUser = null;
+
 try {
-  if (typeof supabase !== 'undefined' && supabase.createClient) {
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('[TradeAux] Supabase client initialized');
+  if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('[TradeAux] Supabase client initialized via window.supabase');
   } else {
-    console.warn('[TradeAux] Supabase library not loaded — running in offline mode');
+    console.warn('[TradeAux] window.supabase not available — running in offline mode');
   }
 } catch (e) {
   console.error('[TradeAux] Supabase init failed:', e);
 }
 
 // =====================================================
-// AUTH CHECK — NON-BLOCKING WITH FALLBACK
+// AUTH CHECK — WITH TIMEOUT, EXPIRY, AND REDIRECT
 // =====================================================
 async function checkAuth() {
   if (!supabaseClient) {
     console.warn('[TradeAux] No Supabase client — skipping auth check');
     return true;
   }
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Auth check timed out')), 5000);
+  });
+
   try {
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    if (error) throw error;
-    if (!session) {
-      console.log('[TradeAux] No session — redirecting to signin');
-      window.location.replace('signin.html');
+    const authPromise = supabaseClient.auth.getSession();
+    const result = await Promise.race([authPromise, timeoutPromise]);
+    const { data, error } = result;
+
+    if (error) {
+      console.log('[TradeAux] getSession error:', error.message);
+      window.location.replace('signin.html?_t=' + Date.now());
       return false;
     }
-    console.log('[TradeAux] Session valid for', session.user?.email);
+
+    if (!data || !data.session) {
+      console.log('[TradeAux] No session found — redirecting to signin');
+      window.location.replace('signin.html?_t=' + Date.now());
+      return false;
+    }
+
+    const session = data.session;
+    if (session.expires_at) {
+      const now = Math.floor(Date.now() / 1000);
+      if (session.expires_at <= now) {
+        console.log('[TradeAux] Session expired — clearing and redirecting');
+        await bulletproofSignOut();
+        window.location.replace('signin.html?_t=' + Date.now());
+        return false;
+      }
+    }
+
+    currentUser = session.user;
+    console.log('[TradeAux] Session valid for', currentUser?.email);
     return true;
-  } catch (e) {
-    console.error('[TradeAux] Auth check failed:', e);
-    return true;
+
+  } catch (err) {
+    console.error('[TradeAux] Auth check failed:', err.message);
+    if (err.message === 'Auth check timed out') {
+      showToast('Auth check timed out. Working offline.', true);
+      return true;
+    }
+    window.location.replace('signin.html?_t=' + Date.now());
+    return false;
   }
 }
+
+// =====================================================
+// BULLETPROOF SIGN OUT
+// =====================================================
+async function bulletproofSignOut() {
+  console.log('[TradeAux] Bulletproof sign out starting...');
+
+  if (supabaseClient) {
+    try {
+      await supabaseClient.auth.signOut({ scope: 'global' });
+      console.log('[TradeAux] Supabase signOut completed');
+    } catch (e) {
+      console.log('[TradeAux] Supabase signOut error (ignoring):', e.message);
+    }
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  const lsKeys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    lsKeys.push(localStorage.key(i));
+  }
+  lsKeys.forEach(key => {
+    if (key && (key.includes('supabase') || key.startsWith('sb-'))) {
+      localStorage.removeItem(key);
+      console.log('[TradeAux] Removed localStorage key:', key);
+    }
+  });
+
+  sessionStorage.clear();
+  console.log('[TradeAux] sessionStorage cleared');
+
+  safe(() => localStorage.removeItem('tradeaux_company_profile'));
+  safe(() => localStorage.removeItem('tradeaux_cert_images'));
+  safe(() => localStorage.removeItem('tradeaux_cert_stacks'));
+  safe(() => localStorage.removeItem('tradeaux_cert_toggles'));
+  safe(() => localStorage.removeItem('tradeaux_product_lines'));
+  safe(() => localStorage.removeItem('tradeaux_bots'));
+  safe(() => localStorage.removeItem('tradeaux_unit_preference'));
+  safe(() => localStorage.removeItem('tradeaux_auction'));
+  safe(() => localStorage.removeItem('tradeaux_bids'));
+  safe(() => localStorage.removeItem('tradeaux_auction_image'));
+  safe(() => localStorage.removeItem('tradeaux_role'));
+
+  console.log('[TradeAux] Bulletproof sign out complete');
+}
+
 
 // =====================================================
 // PRODUCT TYPES
@@ -723,6 +805,7 @@ const CERT_LABELS = {
   'fairtrade': { icon: '🤝', label: 'Fairly Traded', desc: 'Fair Trade certified' },
   'kosher': { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
   'halal': { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
+  'haccp': { icon: '🛡️', label: 'HACCP', desc: 'Hazard Analysis Critical Control Point' },
   'brcgs': { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
   'origin': { icon: '🌍', label: 'Origin', desc: 'Government-issued origin' },
   'iso': { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
@@ -766,40 +849,65 @@ function setUnit(pref) {
 }
 
 // =====================================================
-// LOAD / SAVE — WITH ERROR BOUNDARIES & NULL GUARDS
+// LOAD / SAVE — WITH SUPABASE SYNC
 // =====================================================
-function loadFromStorage() {
-  console.log('[TradeAux] Loading from localStorage...');
+async function loadFromStorage() {
+  console.log('[TradeAux] Loading data...');
 
-  // Check if localStorage is available
-  try {
-    const test = localStorage.getItem('__test__');
-    localStorage.setItem('__test__', '1');
-    localStorage.removeItem('__test__');
-    console.log('[TradeAux] localStorage is available');
-  } catch (e) {
-    console.error('[TradeAux] localStorage NOT available:', e.message);
-    showToast('⚠️ localStorage blocked — data will not persist', true);
+  // First, try to load profile from Supabase (source of truth)
+  if (supabaseClient && currentUser) {
+    try {
+      console.log('[TradeAux] Fetching profile from Supabase for user:', currentUser.id);
+      const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (error) {
+        console.log('[TradeAux] Profile fetch error:', error.message);
+      }
+
+      if (profile) {
+        console.log('[TradeAux] Profile loaded from Supabase:', profile.full_name || profile.email);
+        companyProfile = {
+          logo: profile.logo_url || null,
+          name: profile.full_name || profile.company_name || '',
+          email: profile.email || currentUser.email || '',
+          phone: profile.phone || '',
+          origin: profile.origin_country || '',
+          otherCountry: profile.other_country || '',
+          fobPort: profile.fob_port || '',
+          description: profile.description || ''
+        };
+        safe(() => localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile)));
+        console.log('[TradeAux] Profile synced from Supabase to local state');
+      } else {
+        console.log('[TradeAux] No profile row in Supabase yet');
+      }
+    } catch (e) {
+      console.error('[TradeAux] Error loading profile from Supabase:', e);
+    }
   }
 
+  // Then load localStorage data (for non-profile stuff)
   const parsedProfile = safe(() => JSON.parse(localStorage.getItem('tradeaux_company_profile')), null);
   if (parsedProfile && typeof parsedProfile === 'object' && !Array.isArray(parsedProfile)) {
-    companyProfile = { ...companyProfile, ...parsedProfile };
-  } else {
-    console.log('[TradeAux] No valid profile found, using defaults');
-    companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
+    if (!companyProfile.name && !companyProfile.email) {
+      companyProfile = { ...companyProfile, ...parsedProfile };
+    }
   }
 
   const parsedCertImages = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_images')), null);
-  certImages = (parsedCertImages && typeof parsedCertImages === 'object' && !Array.isArray(parsedCertImages)) 
+  certImages = (parsedCertImages && typeof parsedCertImages === 'object' && !Array.isArray(parsedCertImages))
     ? parsedCertImages : { incorporation: null };
 
   const parsedCertStacks = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_stacks')), null);
-  certStacks = (parsedCertStacks && typeof parsedCertStacks === 'object' && !Array.isArray(parsedCertStacks)) 
+  certStacks = (parsedCertStacks && typeof parsedCertStacks === 'object' && !Array.isArray(parsedCertStacks))
     ? parsedCertStacks : {};
 
   const parsedCertToggles = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_toggles')), null);
-  certToggles = (parsedCertToggles && typeof parsedCertToggles === 'object' && !Array.isArray(parsedCertToggles)) 
+  certToggles = (parsedCertToggles && typeof parsedCertToggles === 'object' && !Array.isArray(parsedCertToggles))
     ? parsedCertToggles : { incorporation: true };
 
   productLines = safe(() => JSON.parse(localStorage.getItem('tradeaux_product_lines')), null);
@@ -860,7 +968,53 @@ function saveAll() {
     console.log('[TradeAux] Saved successfully.');
   } catch (e) {
     console.error('[TradeAux] SAVE FAILED:', e.name, e.message);
-    showToast('⚠️ Save failed: ' + e.message, true);
+    showToast('Save failed: ' + e.message, true);
+  }
+}
+
+// =====================================================
+// SAVE PROFILE TO SUPABASE — THE CRITICAL FIX
+// =====================================================
+async function saveProfileToSupabase() {
+  if (!supabaseClient || !currentUser) {
+    console.warn('[TradeAux] Cannot save to Supabase: no client or no user');
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  const profileData = {
+    id: currentUser.id,
+    email: currentUser.email,
+    full_name: companyProfile.name || null,
+    company_name: companyProfile.name || null,
+    phone: companyProfile.phone || null,
+    origin_country: companyProfile.origin || null,
+    other_country: companyProfile.otherCountry || null,
+    fob_port: companyProfile.fobPort || null,
+    description: companyProfile.description || null,
+    logo_url: companyProfile.logo || null,
+    role: 'seller',
+    updated_at: new Date().toISOString()
+  };
+
+  console.log('[TradeAux] Saving profile to Supabase:', profileData);
+
+  try {
+    // Try upsert (insert or update)
+    const { data, error } = await supabaseClient
+      .from('profiles')
+      .upsert(profileData, { onConflict: 'id' });
+
+    if (error) {
+      console.error('[TradeAux] Supabase save error:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    console.log('[TradeAux] Profile saved to Supabase successfully');
+    return { success: true, data: data };
+
+  } catch (e) {
+    console.error('[TradeAux] Exception saving to Supabase:', e);
+    return { success: false, error: e.message };
   }
 }
 
@@ -878,7 +1032,7 @@ function populateAuctionProductDropdown() {
     option.textContent = product.type + ' (' + product.sizes.join(', ') + 'kg)';
     select.appendChild(option);
   });
-  if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+  if (currentValue && select.querySelector('option[value="' + currentValue + '"]')) {
     select.value = currentValue;
   }
 }
@@ -911,14 +1065,13 @@ function renderCompanyProfile() {
 }
 
 // =====================================================
-// RENDER: CERTIFICATES — FIXED CARD LAYOUT
+// RENDER: CERTIFICATES
 // =====================================================
 function renderCertificates() {
   const grid = document.getElementById('certGrid');
   if (!grid) return;
   grid.innerHTML = '';
 
-  // Incorporation first, then others alphabetically
   const certTypes = ['incorporation', ...Object.keys(certToggles).filter(k => k !== 'incorporation').sort()];
 
   certTypes.forEach(type => {
@@ -930,10 +1083,8 @@ function renderCertificates() {
     div.className = 'cert-square';
     div.style.borderColor = isRequired ? 'rgba(124,252,0,0.5)' : 'rgba(0,206,209,0.2)';
 
-    // Build image stack with delete buttons
     let stackHtml = '';
     const stackImages = certStacks[type] || [];
-    const hasImages = stackImages.length > 0 || certImages[type];
 
     if (stackImages.length > 0) {
       stackHtml = '<div class="cert-stack">' +
@@ -942,7 +1093,7 @@ function renderCertificates() {
             <img src="${img}" onclick="openMedia('${img}', 'image')" style="cursor:pointer;">
             <button class="stack-delete" onclick="event.stopPropagation();deleteFromStack('${type}',${idx})" title="Remove this image">×</button>
           </div>`).join('') +
-        `<div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div></div>`;
+        '<div class="stack-item" onclick="addToStack('' + type + '')"><div class="add-stack">+</div></div></div>';
     } else if (certImages[type]) {
       stackHtml = `
         <div class="cert-stack">
@@ -953,10 +1104,9 @@ function renderCertificates() {
           <div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div>
         </div>`;
     } else {
-      stackHtml = `<div class="cert-preview" onclick="addToStack('${type}')"><span class="placeholder">📤 Add Image</span></div>`;
+      stackHtml = '<div class="cert-preview" onclick="addToStack('' + type + '')"><span class="placeholder">📤 Add Image</span></div>';
     }
 
-    // Remove cert button (not for required incorporation)
     const removeBtnHtml = !isRequired ? `
       <button class="btn-remove-cert" onclick="removeCert('${type}')" title="Remove this certificate">🗑 Remove Certificate</button>
     ` : '';
@@ -978,7 +1128,6 @@ function renderCertificates() {
     `;
     grid.appendChild(div);
 
-    // Toggle handler
     const toggle = div.querySelector('input[type="checkbox"]');
     if (toggle && !isRequired) {
       toggle.addEventListener('change', function(e) {
@@ -1012,49 +1161,39 @@ function addToStack(type) {
   input.click();
 }
 
-// Delete a single image from a certificate stack
 window.deleteFromStack = function(type, index) {
   if (!confirm('Delete this image?')) return;
-
   const stackImages = certStacks[type] || [];
-
   if (stackImages.length > 0 && index >= 0 && index < stackImages.length) {
-    // Remove from stack array
     stackImages.splice(index, 1);
     certStacks[type] = stackImages;
-
-    // Update certImages to point to remaining image or null
     if (stackImages.length > 0) {
       certImages[type] = stackImages[0];
     } else {
       certImages[type] = null;
     }
   } else if (certImages[type]) {
-    // Fallback: delete the single certImages entry
     certImages[type] = null;
   }
-
   saveAll();
   renderCertificates();
   showToast('Image deleted', false);
 };
 
-// Remove an entire certificate type (not incorporation)
 window.removeCert = function(type) {
   if (type === 'incorporation') {
     showToast('Incorporation certificate cannot be removed', true);
     return;
   }
   if (!confirm('Remove "' + (CERT_LABELS[type]?.label || type) + '" certificate and all its images?')) return;
-
   delete certToggles[type];
   delete certImages[type];
   delete certStacks[type];
-
   saveAll();
   renderCertificates();
   showToast('Certificate removed', false);
 };
+
 
 // =====================================================
 // RENDER: PRODUCTS
@@ -1068,20 +1207,20 @@ function renderProducts() {
     div.className = 'product-row';
     div.innerHTML = `
       <div class="product-image" onclick="document.getElementById('productImg_${idx}').click()">
-        ${product.image ? `<img src="${product.image}">` : '<span class="placeholder">📷</span>'}
+        ${product.image ? '<img src="' + product.image + '">' : '<span class="placeholder">📷</span>'}
         <input type="file" id="productImg_${idx}" accept="image/*" style="display:none;" onchange="uploadProductImage(${idx}, this)">
       </div>
       <div class="product-fields">
         <div class="field-group">
           <div class="field-label">PRODUCT</div>
           <select class="product-select" data-idx="${idx}">
-            ${PRODUCT_TYPES.map(p => `<option value="${p}" ${p === product.type ? 'selected' : ''}>${p}</option>`).join('')}
+            ${PRODUCT_TYPES.map(p => '<option value="' + p + '" ' + (p === product.type ? 'selected' : '') + '>' + p + '</option>').join('')}
           </select>
         </div>
         <div class="field-group" style="flex:2;">
           <div class="field-label">SIZES (kg) - click to remove</div>
           <div class="size-chips">
-            ${product.sizes.map((s, si) => `<span class="size-chip" onclick="removeSize(${idx}, ${si})">${s}kg <span class="remove-size">×</span></span>`).join('')}
+            ${product.sizes.map((s, si) => '<span class="size-chip" onclick="removeSize(' + idx + ', ' + si + ')">' + s + 'kg <span class="remove-size">×</span></span>').join('')}
             <span class="size-chip" onclick="addSize(${idx})" style="border-color:#7CFC00; cursor:pointer;">+ Add</span>
           </div>
         </div>
@@ -1148,7 +1287,7 @@ function renderBots() {
     const card = document.createElement('div');
     card.style.cssText = 'background:rgba(0,0,0,0.5);border:1px solid rgba(0,206,209,0.3);border-radius:20px;padding:16px;';
     card.innerHTML = `
-      <input type="text" class="bot-name-input" value="${bot.name}" data-idx="${idx}" data-field="name" style="background:rgba(0,0,0,0.6);border:1px solid #FFD966;border-radius:30px;padding:6px 14px;color:white;font-family:'Orbitron',monospace;font-weight:700;font-size:14px;width:100%;margin-bottom:12px;">
+      <input type="text" class="bot-name-input" value="${bot.name}" data-idx="${idx}" data-field="name" style="background:rgba(0,0,0,0.6);border:1px solid #FFD966;border-radius:30px;padding:6px 14px;color:white;font-family:"Orbitron",monospace;font-weight:700;font-size:14px;width:100%;margin-bottom:12px;">
       <select class="bot-strategy-select" data-idx="${idx}" data-field="strategy" style="background:rgba(0,0,0,0.6);border:1px solid #7CFC00;border-radius:30px;padding:6px 14px;color:white;width:100%;margin-bottom:12px;">
         <option value="aggressive" ${bot.strategy === 'aggressive' ? 'selected' : ''}>⚡ Aggressive</option>
         <option value="conservative" ${bot.strategy === 'conservative' ? 'selected' : ''}>🐢 Conservative</option>
@@ -1197,20 +1336,20 @@ function renderAuctionDisplay() {
   const isLive = currentAuction.status === 'live';
   const badge = document.getElementById('briefBadge');
   if (badge) badge.innerHTML = isLive ? '🔥 LIVE' : 'READY';
-  const timerHtml = isLive ? `<div class="auction-timer" id="auctionTimer">${Math.floor(timerSeconds/60)}:${(timerSeconds%60).toString().padStart(2,'0')}</div>` : '';
-  const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:12px;">▶ START AUCTION</button>' : 
+  const timerHtml = isLive ? '<div class="auction-timer" id="auctionTimer">' + Math.floor(timerSeconds/60) + ':' + (timerSeconds%60).toString().padStart(2,'0') + '</div>' : '';
+  const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:12px;">▶ START AUCTION</button>' :
     '<button class="btn-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171);margin-top:12px;">⏹ END AUCTION</button>';
   const pendingBids = activeBids.filter(b => b.status === 'pending').sort((a,b) => b.pricePerKilo - a.pricePerKilo);
   let bidsHtml = '<table class="auction-bids-table"><thead><tr><th>#</th><th>Bot</th><th>Price/kg ($)</th><th>Kilos</th><th>Payment</th><th>Strategy</th><th></th></tr></thead><tbody>';
   pendingBids.forEach((bid, idx) => {
     const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
-    bidsHtml += `<tr class="${rankClass}"><td>#${idx+1}</td>
-      <td><strong>${bid.botName}</strong></td>
-      <td style="color:#FFD966;">$${bid.pricePerKilo.toFixed(3)}</td>
-      <td>${formatWeight(bid.kilos)}</td>
-      <td>${bid.paymentDays}d</td>
-      <td style="font-size:10px;">${bid.strategyUsed}</td>
-      <td><button class="btn-accept" onclick="acceptBid('${bid.id}')">✓ Accept</button></td></tr>`;
+    bidsHtml += '<tr class="' + rankClass + '"><td>#' + (idx+1) + '</td>' +
+      '<td><strong>' + bid.botName + '</strong></td>' +
+      '<td style="color:#FFD966;">$' + bid.pricePerKilo.toFixed(3) + '</td>' +
+      '<td>' + formatWeight(bid.kilos) + '</td>' +
+      '<td>' + bid.paymentDays + 'd</td>' +
+      '<td style="font-size:10px;">' + bid.strategyUsed + '</td>' +
+      '<td><button class="btn-accept" onclick="acceptBid('' + bid.id + '')">✓ Accept</button></td></tr>';
   });
   bidsHtml += '</tbody></table>';
   if (pendingBids.length === 0) bidsHtml = '<div class="empty-state">No bids yet.</div>';
@@ -1220,7 +1359,7 @@ function renderAuctionDisplay() {
     <div class="auction-card">
       <div class="auction-header">
         <div class="auction-logo">
-          ${companyProfile && companyProfile.logo ? `<img src="${companyProfile.logo}">` : '<span class="placeholder">🏢</span>'}
+          ${companyProfile && companyProfile.logo ? '<img src="' + companyProfile.logo + '">' : '<span class="placeholder">🏢</span>'}
         </div>
         <div class="auction-company">
           <div class="company-name">${currentAuction.companyName || (companyProfile && companyProfile.name) || 'Company'}</div>
@@ -1229,7 +1368,7 @@ function renderAuctionDisplay() {
       </div>
       <div class="auction-product-display">
         <div class="ap-image">
-          ${currentAuction.productImage ? `<img src="${currentAuction.productImage}">` : '<span class="placeholder">📷</span>'}
+          ${currentAuction.productImage ? '<img src="' + currentAuction.productImage + '">' : '<span class="placeholder">📷</span>'}
         </div>
         <div class="ap-info">
           <div class="ap-product-name">${productName}</div>
@@ -1408,8 +1547,9 @@ function setupAuctionImageUpload() {
   });
 }
 
+
 // =====================================================
-// COMPANY PROFILE
+// COMPANY PROFILE — FIXED TO SAVE TO SUPABASE
 // =====================================================
 function setupCompanyProfile() {
   const saveBtn = document.getElementById('saveProfileBtn');
@@ -1418,7 +1558,7 @@ function setupCompanyProfile() {
   const originSelect = document.getElementById('originCountry');
 
   if (saveBtn) {
-    saveBtn.addEventListener('click', function() {
+    saveBtn.addEventListener('click', async function() {
       console.log('[TradeAux] Save Profile clicked');
       const origin = document.getElementById('originCountry').value;
       companyProfile = {
@@ -1432,8 +1572,26 @@ function setupCompanyProfile() {
         description: document.getElementById('companyDescription').value || ''
       };
       console.log('[TradeAux] Profile object built:', JSON.stringify(companyProfile));
+
+      // Save to localStorage first (always works)
       saveAll();
-      showToast('Profile saved!', false);
+
+      // Then save to Supabase (source of truth)
+      const btn = document.getElementById('saveProfileBtn');
+      const originalText = btn.textContent;
+      btn.textContent = '💾 Saving...';
+      btn.disabled = true;
+
+      const result = await saveProfileToSupabase();
+
+      btn.textContent = originalText;
+      btn.disabled = false;
+
+      if (result.success) {
+        showToast('✅ Profile saved to cloud!', false);
+      } else {
+        showToast('⚠️ Saved locally. Cloud sync failed: ' + result.error, true);
+      }
     });
   }
 
@@ -1454,9 +1612,9 @@ function setupCompanyProfile() {
         companyProfile.logo = ev.target.result;
         const preview = document.getElementById('companyLogoPreview');
         const placeholder = document.getElementById('companyLogoPlaceholder');
-        if (preview) { 
-          preview.src = companyProfile.logo; 
-          preview.style.display = 'block'; 
+        if (preview) {
+          preview.src = companyProfile.logo;
+          preview.style.display = 'block';
         }
         if (placeholder) placeholder.style.display = 'none';
         saveAll();
@@ -1542,7 +1700,7 @@ function setupBots() {
 }
 
 // =====================================================
-// SIGN OUT — BULLETPROOF
+// SIGN OUT — BULLETPROOF WITH CACHE BUST
 // =====================================================
 function setupSignOut() {
   const btn = document.getElementById('signOutBtn');
@@ -1550,21 +1708,9 @@ function setupSignOut() {
   btn.addEventListener('click', async function() {
     console.log('[TradeAux] Sign Out clicked');
     if (!confirm('Sign out?')) return;
-    safe(() => localStorage.removeItem('tradeaux_company_profile'));
-    safe(() => localStorage.removeItem('tradeaux_cert_images'));
-    safe(() => localStorage.removeItem('tradeaux_cert_stacks'));
-    safe(() => localStorage.removeItem('tradeaux_cert_toggles'));
-    safe(() => localStorage.removeItem('tradeaux_product_lines'));
-    safe(() => localStorage.removeItem('tradeaux_bots'));
-    safe(() => localStorage.removeItem('tradeaux_unit_preference'));
-    safe(() => localStorage.removeItem('tradeaux_auction'));
-    safe(() => localStorage.removeItem('tradeaux_bids'));
-    safe(() => localStorage.removeItem('tradeaux_auction_image'));
-    if (supabaseClient) {
-      try { await supabaseClient.auth.signOut(); } catch (e) { console.error('[TradeAux] Supabase signOut error:', e); }
-    }
-    console.log('[TradeAux] Redirecting to signin...');
-    window.location.replace('signin.html?logout=1');
+    await bulletproofSignOut();
+    console.log('[TradeAux] Redirecting to signin with cache bust...');
+    window.location.replace('signin.html?logout=1&_t=' + Date.now());
   });
 }
 
@@ -1631,8 +1777,8 @@ setInterval(updateTickerPrices, 8000);
 // =====================================================
 // INIT — DOM READY + ERROR BOUNDARIES
 // =====================================================
-function initApp() {
-  console.log('[TradeAux] DOM ready. Initializing...');
+async function initApp() {
+  console.log('[TradeAux] DOM ready. Initializing v6.0...');
   setupCompanyProfile();
   setupAuctionImageUpload();
   setupProducts();
@@ -1643,19 +1789,14 @@ function initApp() {
   if (launchBtn) launchBtn.addEventListener('click', launchAuction);
   console.log('[TradeAux] Event listeners attached.');
 
-  checkAuth().then(authenticated => {
-    if (authenticated) {
-      console.log('[TradeAux] Auth OK — loading data');
-      loadFromStorage();
-      showToast('Dashboard ready', false);
-    } else {
-      console.log('[TradeAux] Auth failed — should have redirected');
-    }
-  }).catch(err => {
-    console.error('[TradeAux] Init error:', err);
-    loadFromStorage();
-    showToast('Loaded in offline mode', true);
-  });
+  const authenticated = await checkAuth();
+  if (authenticated) {
+    console.log('[TradeAux] Auth OK — loading data');
+    await loadFromStorage();
+    showToast('Dashboard ready', false);
+  } else {
+    console.log('[TradeAux] Auth failed — should have redirected');
+  }
 }
 
 if (document.readyState === 'loading') {
