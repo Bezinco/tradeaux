@@ -163,7 +163,6 @@ button:disabled {
 }
 .hidden { display: none !important; }
 </style>
-<base target="_blank">
 </head>
 <body>
 <div class="container">
@@ -220,12 +219,11 @@ button:disabled {
 
 <script>
 // =====================================================
-// SUPABASE CONFIGURATION - FIXED: NO RE-DECLARATION
+// SUPABASE CONFIGURATION
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-// ✅ CRITICAL FIX: Use window.supabase (global from CDN) - NO const redeclaration!
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =====================================================
@@ -241,13 +239,54 @@ const DASHBOARDS = {
 };
 
 // =====================================================
-// CHECK FOR LOGOUT FLAG
+// URL PARAMS & STATE
 // =====================================================
 const urlParams = new URLSearchParams(window.location.search);
 const isLogout = urlParams.get('logout') === '1';
 
 let selectedRole = null;
 let currentUser = null;
+let authCheckComplete = false;
+
+// =====================================================
+// BULLETPROOF LOGOUT - CLEARS EVERYTHING
+// =====================================================
+async function bulletproofSignOut() {
+  console.log('🔒 Starting bulletproof sign out...');
+
+  // 1. Tell Supabase to sign out (global = all devices/tabs)
+  try {
+    await supabaseClient.auth.signOut({ scope: 'global' });
+    console.log('✅ Supabase signOut completed');
+  } catch (e) {
+    console.log('⚠️ Supabase signOut error (ignoring):', e.message);
+  }
+
+  // 2. Wait a moment for Supabase to clean up its internal state
+  await new Promise(r => setTimeout(r, 300));
+
+  // 3. Remove ALL Supabase-related keys from localStorage
+  const lsKeys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    lsKeys.push(localStorage.key(i));
+  }
+  lsKeys.forEach(key => {
+    if (key && (key.includes('supabase') || key.startsWith('sb-'))) {
+      localStorage.removeItem(key);
+      console.log('🗑️ Removed localStorage key:', key);
+    }
+  });
+
+  // 4. Clear sessionStorage entirely
+  sessionStorage.clear();
+  console.log('🗑️ sessionStorage cleared');
+
+  // 5. Also clear any non-Supabase keys that might cache auth state
+  localStorage.removeItem('tradeaux_user');
+  localStorage.removeItem('tradeaux_role');
+
+  console.log('🔒 Bulletproof sign out complete');
+}
 
 // =====================================================
 // UI HELPERS
@@ -287,7 +326,7 @@ async function showRolePicker(user) {
   document.getElementById('subtitle').textContent = 'Choose your dashboard';
 
   // Fetch display name from profile
-  let displayName = user.email; // fallback
+  let displayName = user.email;
   try {
     const { data: profile } = await supabaseClient
       .from('profiles')
@@ -306,62 +345,109 @@ async function showRolePicker(user) {
 }
 
 // =====================================================
-// PAGE LOAD
+// VALIDATE SESSION (check expiry)
 // =====================================================
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 TradeAux Signin v5.4 - FIXED window.supabase');
-  
-  // === IF LOGOUT FLAG, FULLY CLEAR SESSION ===
+function isSessionValid(session) {
+  if (!session) return false;
+  if (!session.expires_at) return true; // no expiry = assume valid
+  const now = Math.floor(Date.now() / 1000);
+  const valid = session.expires_at > now;
+  if (!valid) {
+    console.log('⏰ Session expired at', session.expires_at, ', now is', now);
+  }
+  return valid;
+}
+
+// =====================================================
+// MAIN AUTH CHECK
+// =====================================================
+async function checkAuth() {
+  if (authCheckComplete) return;
+  authCheckComplete = true;
+
+  console.log('🚀 TradeAux Signin v6.0 - Auth check starting');
+
+  // === CASE 1: LOGOUT FLAG ===
   if (isLogout) {
-    console.log('🔓 Logout detected - clearing session');
+    console.log('🔓 Logout detected - performing full cleanup');
+    await bulletproofSignOut();
     showSuccess('You have been signed out.');
-    // Clear all storage to prevent stale session
-    localStorage.clear();
-    sessionStorage.clear();
-    // Also tell Supabase to clear its internal state
-    supabaseClient.auth.signOut({ scope: 'global' }).catch(() => {});
+    document.getElementById('debugInfo').textContent = 'Signed out. You can sign in again.';
+    // Remove logout flag from URL without reloading
+    const newUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
     return;
   }
 
-  // === CHECK IF ALREADY LOGGED IN ===
-  // But NOT if we just came from a logout
-  if (!isLogout) {
-    supabaseClient.auth.getSession().then(async function(result) {
-      if (result.data && result.data.session) {
-        const user = result.data.session.user;
-        try {
-          // Check if user already has a saved role
-          const { data: profile, error } = await supabaseClient
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+  // === CASE 2: CHECK EXISTING SESSION ===
+  console.log('🔍 Checking for existing session...');
 
-          if (error) {
-            console.log('Profile query error (may not exist yet):', error.message);
-            // No profile row yet — show role picker
-            showRolePicker(user);
-            return;
-          }
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
 
-          if (profile && profile.role && DASHBOARDS[profile.role]) {
-            // Already has a role — go straight to dashboard
-            console.log('✅ Saved role found:', profile.role, '→ redirecting');
-            redirectToDashboard(profile.role);
-          } else {
-            // No saved role — show role picker (first time)
-            console.log('ℹ️ No saved role — showing role picker');
-            showRolePicker(user);
-          }
-        } catch (e) {
-          console.error('Error checking saved role:', e);
-          showRolePicker(user);
-        }
+    if (error) {
+      console.log('⚠️ getSession error:', error.message);
+      return; // Stay on sign-in form
+    }
+
+    if (!data || !data.session) {
+      console.log('ℹ️ No session found - showing sign-in form');
+      return; // Stay on sign-in form
+    }
+
+    // Validate session expiry
+    if (!isSessionValid(data.session)) {
+      console.log('⏰ Session expired - clearing and staying on form');
+      await bulletproofSignOut();
+      showError('Your session expired. Please sign in again.');
+      return;
+    }
+
+    const user = data.session.user;
+    console.log('✅ Valid session found for:', user.email);
+
+    // Check if user already has a saved role
+    let role = null;
+    try {
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.log('Profile query error:', profileError.message);
       }
-    }).catch(function(err) {
-      console.log('No session found:', err);
-    });
+
+      if (profile && profile.role && DASHBOARDS[profile.role]) {
+        role = profile.role;
+      }
+    } catch (e) {
+      console.error('Error checking saved role:', e);
+    }
+
+    if (role) {
+      // User has a saved role - redirect immediately, NO role picker
+      console.log('✅ Saved role found:', role, '→ redirecting immediately');
+      document.getElementById('debugInfo').textContent = 'Redirecting to ' + DASHBOARDS[role] + '...';
+      redirectToDashboard(role);
+    } else {
+      // No saved role - show role picker (first time only)
+      console.log('ℹ️ No saved role — showing role picker (first time)');
+      showRolePicker(user);
+    }
+
+  } catch (err) {
+    console.error('❌ Auth check failed:', err);
+    showError('Authentication check failed. Please try again.');
   }
+}
+
+// =====================================================
+// PAGE LOAD
+// =====================================================
+document.addEventListener('DOMContentLoaded', function() {
+  checkAuth();
 
   // =====================================================
   // TOGGLE SIGNUP / SIGNIN
@@ -372,13 +458,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('step2').classList.remove('hidden');
     document.getElementById('subtitle').textContent = 'Create your account';
   });
-  
+
   document.getElementById('showSignin').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('step2').classList.add('hidden');
     document.getElementById('step1').classList.remove('hidden');
     document.getElementById('subtitle').textContent = 'Sign in to your account';
-    // Clear any error messages
     document.getElementById('errorMsg').style.display = 'none';
     document.getElementById('successMsg').style.display = 'none';
   });
@@ -389,25 +474,51 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('signinBtn').addEventListener('click', async function() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    
+
     if (!email || !password) {
       showError('Please enter email and password');
       return;
     }
-    
+
+    const btn = document.getElementById('signinBtn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
     try {
       const { data, error } = await supabaseClient.auth.signInWithPassword({ 
         email: email, 
         password: password 
       });
-      
+
       if (error) throw error;
-      
+
       showSuccess('✅ Signed in successfully!');
-      showRolePicker(data.user);
-      
+
+      // Check for saved role and redirect or show picker
+      let role = null;
+      try {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+        if (profile && profile.role && DASHBOARDS[profile.role]) {
+          role = profile.role;
+        }
+      } catch (e) {
+        console.log('Could not fetch role after signin:', e);
+      }
+
+      if (role) {
+        redirectToDashboard(role);
+      } else {
+        showRolePicker(data.user);
+      }
+
     } catch (error) {
       showError(error.message);
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
     }
   });
 
@@ -418,22 +529,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     const companyName = document.getElementById('signupName').value.trim();
-    
+
     if (!email || !password) {
       showError('Please enter email and password');
       return;
     }
-    
+
     if (password.length < 6) {
       showError('Password must be at least 6 characters');
       return;
     }
-    
+
     if (!companyName) {
       showError('Please enter your Company / Organization name');
       return;
     }
-    
+
+    const btn = document.getElementById('signupBtn');
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
     try {
       const { data, error } = await supabaseClient.auth.signUp({
         email: email,
@@ -446,18 +561,20 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
       });
-      
+
       if (error) throw error;
-      
+
       // If session is null, email confirmation is required
       if (data.user && !data.session) {
         showSuccess('✅ Account created! Check your email to confirm.');
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step1').classList.remove('hidden');
         document.getElementById('subtitle').textContent = 'Sign in to your account';
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
         return;
       }
-      
+
       // Email confirmation is disabled — auto sign-in
       if (data.user && data.session) {
         // Create profile
@@ -470,17 +587,19 @@ document.addEventListener('DOMContentLoaded', function() {
           wallet_balance: 0,
           created_at: new Date().toISOString()
         });
-        
+
         if (profileError) {
           console.error('Profile creation failed:', profileError);
         }
-        
+
         showSuccess('✅ Account created successfully!');
         showRolePicker(data.user);
       }
-      
+
     } catch (error) {
       showError(error.message);
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
     }
   });
 
@@ -494,36 +613,46 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       this.classList.add('selected');
       selectedRole = this.dataset.role;
-      
+
       const btn = document.getElementById('roleContinueBtn');
       btn.disabled = false;
       btn.textContent = 'Go to Dashboard →';
-      
+
       document.getElementById('debugInfo').textContent = 'Selected: ' + selectedRole;
     });
   });
 
-  document.getElementById('roleContinueBtn').addEventListener('click', function() {
+  document.getElementById('roleContinueBtn').addEventListener('click', async function() {
     if (!selectedRole) {
       showError('Please select a role first');
       return;
     }
-    
+
+    const btn = document.getElementById('roleContinueBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
     // Save the role to the user's profile
     if (currentUser) {
-      supabaseClient
-        .from('profiles')
-        .update({ role: selectedRole })
-        .eq('id', currentUser.id)
-        .then(function(result) {
-          if (result.error) {
-            console.warn('Could not save role:', result.error);
-          } else {
-            console.log('✅ Role saved:', selectedRole);
-          }
-        });
+      try {
+        const { error } = await supabaseClient
+          .from('profiles')
+          .update({ role: selectedRole })
+          .eq('id', currentUser.id);
+
+        if (error) {
+          console.warn('Could not save role:', error);
+          showError('Could not save role. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Go to Dashboard →';
+          return;
+        }
+        console.log('✅ Role saved:', selectedRole);
+      } catch (e) {
+        console.error('Error saving role:', e);
+      }
     }
-    
+
     redirectToDashboard(selectedRole);
   });
 
@@ -532,14 +661,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // =====================================================
   document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
     e.preventDefault();
-    try {
-      await supabaseClient.auth.signOut({ scope: 'global' });
-    } catch (error) {
-      console.log('Signout error:', error);
-    }
-    // Always clear local storage and reload
-    localStorage.clear();
-    window.location.href = 'signin.html?logout=1';
+    await bulletproofSignOut();
+    window.location.href = 'signin.html?logout=1&_t=' + Date.now();
   });
 
   // =====================================================
@@ -548,12 +671,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('forgotLink').addEventListener('click', async function(e) {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
-    
+
     if (!email) {
       showError('Enter your email first');
       return;
     }
-    
+
     try {
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/signin.html'
@@ -581,8 +704,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
-  
-  console.log('✅ Ready - signin v5.4 with window.supabase');
+
+  console.log('✅ Ready - signin v6.0 with bulletproof auth');
 });
 </script>
 </body>
