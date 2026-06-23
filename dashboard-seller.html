@@ -202,7 +202,7 @@ body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
   border-left: 3px solid #7CFC00; padding-left: 16px; flex-wrap: wrap;
 }
 .section-header .badge { background: rgba(0,206,209,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; color: #00ced1; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
 .form-field { display: flex; flex-direction: column; gap: 8px; }
 .form-label { font-size: 11px; color: #FFD966; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 .form-input, .form-select, .form-textarea {
@@ -467,9 +467,9 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div class="form-grid">
       <div class="form-field">
         <label class="form-label">COMPANY LOGO</label>
-        <label for="companyLogoInput" id="companyLogoBtn" style="width:100px;height:100px;border-radius:16px;border:2px dashed #FFD966;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;">
+        <label for="companyLogoInput" id="companyLogoBtn" style="width:180px;height:100px;border-radius:16px;border:2px dashed #FFD966;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;">
           <div id="companyLogoPlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">UPLOAD</div>
-          <img id="companyLogoPreview" style="display:none;width:100%;height:100%;object-fit:cover;pointer-events:none;">
+          <img id="companyLogoPreview" style="display:none;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;pointer-events:none;">
         </label>
         <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
       </div>
