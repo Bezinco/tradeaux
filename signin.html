@@ -279,14 +279,30 @@ function redirectToDashboard(role) {
   setTimeout(() => { window.location.href = url; }, 300);
 }
 
-function showRolePicker(user) {
+async function showRolePicker(user) {
   currentUser = user;
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.add('hidden');
   document.getElementById('step3').classList.remove('hidden');
-  document.getElementById('userEmailDisplay').textContent = user.email;
   document.getElementById('subtitle').textContent = 'Choose your dashboard';
-  document.getElementById('debugInfo').textContent = 'Logged in as: ' + user.email;
+
+  // Fetch display name from profile
+  let displayName = user.email; // fallback
+  try {
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('full_name, company_name')
+      .eq('id', user.id)
+      .single();
+    if (profile) {
+      displayName = profile.full_name || profile.company_name || user.email;
+    }
+  } catch (e) {
+    console.log('Could not fetch profile for display name:', e);
+  }
+
+  document.getElementById('userEmailDisplay').textContent = 'Welcome, ' + displayName;
+  document.getElementById('debugInfo').textContent = 'Logged in as: ' + displayName;
 }
 
 // =====================================================
@@ -313,20 +329,32 @@ document.addEventListener('DOMContentLoaded', function() {
     supabaseClient.auth.getSession().then(async function(result) {
       if (result.data && result.data.session) {
         const user = result.data.session.user;
-        // Check if user already has a saved role
-        const { data: profile, error } = await supabaseClient
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+        try {
+          // Check if user already has a saved role
+          const { data: profile, error } = await supabaseClient
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-        if (profile && profile.role && DASHBOARDS[profile.role]) {
-          // Already has a role — go straight to dashboard
-          console.log('✅ Saved role found:', profile.role, '→ redirecting');
-          redirectToDashboard(profile.role);
-        } else {
-          // No saved role — show role picker (first time)
-          console.log('ℹ️ No saved role — showing role picker');
+          if (error) {
+            console.log('Profile query error (may not exist yet):', error.message);
+            // No profile row yet — show role picker
+            showRolePicker(user);
+            return;
+          }
+
+          if (profile && profile.role && DASHBOARDS[profile.role]) {
+            // Already has a role — go straight to dashboard
+            console.log('✅ Saved role found:', profile.role, '→ redirecting');
+            redirectToDashboard(profile.role);
+          } else {
+            // No saved role — show role picker (first time)
+            console.log('ℹ️ No saved role — showing role picker');
+            showRolePicker(user);
+          }
+        } catch (e) {
+          console.error('Error checking saved role:', e);
           showRolePicker(user);
         }
       }
