@@ -366,7 +366,63 @@ input:checked + .slider:before { transform: translateX(16px); }
 /* Logo upload fix */
 #companyLogoPreview { pointer-events: none; }
 #auctionImagePreview { pointer-events: none; }
+
+/* Certificate stack delete button */
+.stack-delete {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #FF4D4D;
+  color: white;
+  border: none;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+.stack-item:hover .stack-delete {
+  opacity: 1;
+}
+.stack-delete:hover {
+  background: #ff1a1a;
+  transform: scale(1.1);
+}
+
+/* Remove certificate button */
+.btn-remove-cert {
+  background: rgba(255,77,77,0.15);
+  border: 1px solid rgba(255,77,77,0.4);
+  color: #FF4D4D;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.btn-remove-cert:hover {
+  background: rgba(255,77,77,0.3);
+  border-color: #FF4D4D;
+}
+
+/* Stack item positioning for delete overlay */
+.stack-item {
+  position: relative;
+}
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -411,11 +467,11 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div class="form-grid">
       <div class="form-field">
         <label class="form-label">COMPANY LOGO</label>
-        <div id="companyLogoBtn" style="width:100px;height:100px;border-radius:16px;border:2px dashed #FFD966;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;">
-          <div id="companyLogoPlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;">UPLOAD</div>
-          <img id="companyLogoPreview" style="display:none;width:100%;height:100%;object-fit:cover;">
-          <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
-        </div>
+        <label for="companyLogoInput" id="companyLogoBtn" style="width:100px;height:100px;border-radius:16px;border:2px dashed #FFD966;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;">
+          <div id="companyLogoPlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">UPLOAD</div>
+          <img id="companyLogoPreview" style="display:none;width:100%;height:100%;object-fit:cover;pointer-events:none;">
+        </label>
+        <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
       </div>
       <div class="form-field">
         <label class="form-label">COMPANY NAME</label>
@@ -517,11 +573,11 @@ input:checked + .slider:before { transform: translateX(16px); }
         </div>
         <div class="form-field">
           <label class="form-label">PRODUCT IMAGE</label>
-          <div id="auctionImageBtn" style="width:80px;height:80px;border-radius:12px;border:2px dashed rgba(124,252,0,0.4);background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;">
-            <div id="auctionImagePlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;">ADD<br>PHOTO</div>
-            <img id="auctionImagePreview" style="display:none;width:100%;height:100%;object-fit:cover;">
-            <input type="file" id="auctionImageInput" accept="image/*" style="display:none;">
-          </div>
+          <label for="auctionImageInput" id="auctionImageBtn" style="width:80px;height:80px;border-radius:12px;border:2px dashed rgba(124,252,0,0.4);background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;">
+            <div id="auctionImagePlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">ADD<br>PHOTO</div>
+            <img id="auctionImagePreview" style="display:none;width:100%;height:100%;object-fit:cover;pointer-events:none;">
+          </label>
+          <input type="file" id="auctionImageInput" accept="image/*" style="display:none;">
         </div>
         <div class="form-field">
           <label class="form-label">QUALITY GRADE</label>
@@ -852,18 +908,36 @@ function renderCertificates() {
     div.className = 'cert-square';
     div.style.borderColor = isRequired ? 'rgba(124,252,0,0.5)' : 'rgba(0,206,209,0.2)';
 
-    // Build image stack
+    // Build image stack with delete buttons
     let stackHtml = '';
     const stackImages = certStacks[type] || [];
+    const hasImages = stackImages.length > 0 || certImages[type];
+
     if (stackImages.length > 0) {
       stackHtml = '<div class="cert-stack">' +
-        stackImages.map(img => `<div class="stack-item" onclick="openMedia('${img}', 'image')"><img src="${img}"></div>`).join('') +
+        stackImages.map((img, idx) => `
+          <div class="stack-item" style="position:relative;">
+            <img src="${img}" onclick="openMedia('${img}', 'image')" style="cursor:pointer;">
+            <button class="stack-delete" onclick="event.stopPropagation();deleteFromStack('${type}',${idx})" title="Remove this image">×</button>
+          </div>`).join('') +
         `<div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div></div>`;
     } else if (certImages[type]) {
-      stackHtml = `<div class="cert-stack"><div class="stack-item" onclick="openMedia('${certImages[type]}', 'image')"><img src="${certImages[type]}"></div><div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div></div>`;
+      stackHtml = `
+        <div class="cert-stack">
+          <div class="stack-item" style="position:relative;">
+            <img src="${certImages[type]}" onclick="openMedia('${certImages[type]}', 'image')" style="cursor:pointer;">
+            <button class="stack-delete" onclick="event.stopPropagation();deleteFromStack('${type}',0)" title="Remove this image">×</button>
+          </div>
+          <div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div>
+        </div>`;
     } else {
       stackHtml = `<div class="cert-preview" onclick="addToStack('${type}')"><span class="placeholder">📤 Add Image</span></div>`;
     }
+
+    // Remove cert button (not for required incorporation)
+    const removeBtnHtml = !isRequired ? `
+      <button class="btn-remove-cert" onclick="removeCert('${type}')" title="Remove this certificate">🗑 Remove Certificate</button>
+    ` : '';
 
     div.innerHTML = `
       <div class="cert-icon">${info.icon}</div>
@@ -878,6 +952,7 @@ function renderCertificates() {
           <span class="slider"></span>
         </label>
       </div>
+      ${removeBtnHtml}
     `;
     grid.appendChild(div);
 
@@ -914,6 +989,50 @@ function addToStack(type) {
   };
   input.click();
 }
+
+// Delete a single image from a certificate stack
+window.deleteFromStack = function(type, index) {
+  if (!confirm('Delete this image?')) return;
+
+  const stackImages = certStacks[type] || [];
+
+  if (stackImages.length > 0 && index >= 0 && index < stackImages.length) {
+    // Remove from stack array
+    stackImages.splice(index, 1);
+    certStacks[type] = stackImages;
+
+    // Update certImages to point to remaining image or null
+    if (stackImages.length > 0) {
+      certImages[type] = stackImages[0];
+    } else {
+      certImages[type] = null;
+    }
+  } else if (certImages[type]) {
+    // Fallback: delete the single certImages entry
+    certImages[type] = null;
+  }
+
+  saveAll();
+  renderCertificates();
+  showToast('Image deleted', false);
+};
+
+// Remove an entire certificate type (not incorporation)
+window.removeCert = function(type) {
+  if (type === 'incorporation') {
+    showToast('Incorporation certificate cannot be removed', true);
+    return;
+  }
+  if (!confirm('Remove "' + (CERT_LABELS[type]?.label || type) + '" certificate and all its images?')) return;
+
+  delete certToggles[type];
+  delete certImages[type];
+  delete certStacks[type];
+
+  saveAll();
+  renderCertificates();
+  showToast('Certificate removed', false);
+};
 
 // =====================================================
 // RENDER: PRODUCTS
@@ -1248,10 +1367,8 @@ window.acceptBid = function(bidId) {
 // AUCTION IMAGE UPLOAD
 // =====================================================
 function setupAuctionImageUpload() {
-  const btn = document.getElementById('auctionImageBtn');
   const input = document.getElementById('auctionImageInput');
-  if (!btn || !input) return;
-  btn.addEventListener('click', () => input.click());
+  if (!input) return;
   input.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -1298,11 +1415,7 @@ function setupCompanyProfile() {
     });
   }
 
-  if (logoBtn && logoInput) {
-    logoBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      logoInput.click();
-    });
+  if (logoInput) {
     logoInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) {
