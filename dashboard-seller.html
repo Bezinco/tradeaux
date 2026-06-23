@@ -367,8 +367,6 @@ input:checked + .slider:before { transform: translateX(16px); }
 #companyLogoPreview { pointer-events: none; }
 #auctionImagePreview { pointer-events: none; }
 </style>
-<base target="_blank">
-<base target="_blank">
 </head>
 <body>
 
@@ -461,7 +459,7 @@ input:checked + .slider:before { transform: translateX(16px); }
   <div class="section-card">
     <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
     <div style="color:#ff6b6b; font-size:12px; margin-bottom:12px;">
-      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> - No bidding without it!
+      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No bidding without it!
     </div>
     <div class="cert-grid" id="certGrid"></div>
     <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
@@ -476,6 +474,7 @@ input:checked + .slider:before { transform: translateX(16px); }
         <option value="origin">🌍 Origin</option>
         <option value="iso">⚙️ ISO</option>
         <option value="foodsafety">🍽️ Food Safety</option>
+        <option value="other">📎 Other</option>
       </select>
       <button class="btn-secondary" id="addCertBtn">+ ADD</button>
     </div>
@@ -585,6 +584,7 @@ input:checked + .slider:before { transform: translateX(16px); }
   </div>
 </div>
 
+<script>
 // =====================================================
 // DEBUG & ERROR BOUNDARIES
 // =====================================================
@@ -664,7 +664,8 @@ const CERT_LABELS = {
   'brcgs': { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
   'origin': { icon: '🌍', label: 'Origin', desc: 'Government-issued origin' },
   'iso': { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
-  'foodsafety': { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' }
+  'foodsafety': { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' },
+  'other': { icon: '📎', label: 'Other', desc: 'Additional certification' }
 };
 
 // =====================================================
@@ -832,30 +833,38 @@ function renderCompanyProfile() {
 }
 
 // =====================================================
-// RENDER: CERTIFICATES
+// RENDER: CERTIFICATES — FIXED CARD LAYOUT
 // =====================================================
 function renderCertificates() {
   const grid = document.getElementById('certGrid');
   if (!grid) return;
   grid.innerHTML = '';
+
+  // Incorporation first, then others alphabetically
   const certTypes = ['incorporation', ...Object.keys(certToggles).filter(k => k !== 'incorporation').sort()];
+
   certTypes.forEach(type => {
     const info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '' };
     const isRequired = type === 'incorporation';
     const isVerified = certToggles[type] || false;
+
     const div = document.createElement('div');
     div.className = 'cert-square';
     div.style.borderColor = isRequired ? 'rgba(124,252,0,0.5)' : 'rgba(0,206,209,0.2)';
+
+    // Build image stack
     let stackHtml = '';
-    if (certStacks[type] && certStacks[type].length > 0) {
+    const stackImages = certStacks[type] || [];
+    if (stackImages.length > 0) {
       stackHtml = '<div class="cert-stack">' +
-        certStacks[type].map(img => `<div class="stack-item" onclick="openMedia('${img}', 'image')"><img src="${img}"></div>`).join('') +
+        stackImages.map(img => `<div class="stack-item" onclick="openMedia('${img}', 'image')"><img src="${img}"></div>`).join('') +
         `<div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div></div>`;
     } else if (certImages[type]) {
       stackHtml = `<div class="cert-stack"><div class="stack-item" onclick="openMedia('${certImages[type]}', 'image')"><img src="${certImages[type]}"></div><div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div></div>`;
     } else {
       stackHtml = `<div class="cert-preview" onclick="addToStack('${type}')"><span class="placeholder">📤 Add Image</span></div>`;
     }
+
     div.innerHTML = `
       <div class="cert-icon">${info.icon}</div>
       <div class="cert-name">${info.label}</div>
@@ -868,14 +877,18 @@ function renderCertificates() {
           <input type="checkbox" id="cert_${type}" ${isVerified ? 'checked' : ''} ${isRequired ? 'disabled' : ''}>
           <span class="slider"></span>
         </label>
-      </div>`;
+      </div>
+    `;
     grid.appendChild(div);
+
+    // Toggle handler
     const toggle = div.querySelector('input[type="checkbox"]');
     if (toggle && !isRequired) {
       toggle.addEventListener('change', function(e) {
         certToggles[type] = e.target.checked;
         saveAll();
-        renderCertificates();
+        const statusSpan = div.querySelector('.cert-toggle-row span');
+        if (statusSpan) statusSpan.textContent = e.target.checked ? '✅ Verified' : '⏳ Pending';
       });
     }
   });
@@ -1313,7 +1326,7 @@ function setupCompanyProfile() {
         if (placeholder) placeholder.style.display = 'none';
         saveAll();
         showToast('Logo uploaded!', false);
-        console.log('[TradeAux] Logo loaded, size:', companyProfile.logo.length);
+        console.log('[TradeAux] Logo loaded, size:', companyProfile.logo ? companyProfile.logo.length : 0);
       };
       reader.onerror = function(err) {
         console.error('[TradeAux] FileReader error:', err);
