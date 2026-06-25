@@ -8,364 +8,127 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: #020617;
-      font-family: 'Inter', sans-serif;
-      color: #e5e7eb;
-      min-height: 100vh;
-    }
-
-    .bg-waves {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .wave-bg {
-      position: absolute;
-      width: 200%;
-      height: 200%;
-      filter: blur(100px);
-      opacity: 0.15;
-      animation: waveBgDrift 24s ease-in-out infinite;
-    }
-
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
     .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
     .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
     .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
-
-    @keyframes waveBgDrift {
-      0% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(40px,-30px) scale(1.05); }
-      100% { transform: translate(-30px,20px) scale(1); }
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px 24px 60px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0 30px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .logo {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #0066ff, #00cc44, #d92b2b);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 2px;
-    }
-
-    .nav {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .nav a {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 8px 16px;
-      border: 1px solid rgba(0, 206, 209, 0.3);
-      border-radius: 8px;
-      background: rgba(15, 32, 64, 0.7);
-      backdrop-filter: blur(4px);
-      color: #e5e7eb;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } 100% { transform: translate(-30px,20px) scale(1); } }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+    .logo { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #0066ff, #00cc44, #d92b2b); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 2px; }
+    .nav { display: flex; gap: 12px; align-items: center; }
+    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px; background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; }
     .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
-
-    .wallet-section {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: rgba(0, 206, 209, 0.1);
-      padding: 8px 20px;
-      border-radius: 40px;
-      border: 1px solid rgba(0, 206, 209, 0.3);
-    }
-
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0, 206, 209, 0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0, 206, 209, 0.3); }
     .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
     .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
     .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
-    .deposit-btn {
-      background: linear-gradient(135deg, #00ced1, #00ff7f);
-      border: none;
-      padding: 6px 16px;
-      border-radius: 30px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
     .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
-
-    .top-trader {
-      text-align: center;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 12px 24px;
-      border-radius: 40px;
-      display: inline-block;
-      width: auto;
-      margin: 20px auto;
-      border: 1px solid rgba(124, 252, 0, 0.3);
-      backdrop-filter: blur(4px);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-    }
+    .brief-btn { background: linear-gradient(135deg, #FFD966, #ff9500); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; color: #000; margin-left: 8px; }
+    .brief-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,217,102,0.5); }
+    .top-trader { text-align: center; background: rgba(0, 0, 0, 0.5); padding: 12px 24px; border-radius: 40px; display: inline-block; width: auto; margin: 20px auto; border: 1px solid rgba(124, 252, 0, 0.3); backdrop-filter: blur(4px); font-family: 'Orbitron', sans-serif; font-size: 14px; }
     .banner-container { text-align: center; }
-
-    .ticker-section {
-      margin: 20px 0 30px;
-      text-align: center;
-    }
-    .ticker-header {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
-      color: #9ca3af;
-      letter-spacing: 2px;
-      margin-bottom: 12px;
-    }
-    .live-ticker {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .ticker-item {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(0, 206, 209, 0.2);
-      border-radius: 40px;
-      padding: 8px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 5px rgba(0,206,209,0.2); }
-      50% { box-shadow: 0 0 20px rgba(0,206,209,0.4); }
-    }
+    .ticker-section { margin: 20px 0 30px; text-align: center; }
+    .ticker-header { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #9ca3af; letter-spacing: 2px; margin-bottom: 12px; }
+    .live-ticker { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .ticker-item { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 206, 209, 0.2); border-radius: 40px; padding: 8px 20px; display: flex; align-items: center; gap: 16px; animation: pulse 4s infinite; }
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 5px rgba(0,206,209,0.2); } 50% { box-shadow: 0 0 20px rgba(0,206,209,0.4); } }
     .ticker-commodity { font-family: 'Orbitron', sans-serif; font-weight: 600; }
     .ticker-price { font-family: 'Orbitron', sans-serif; font-weight: 800; color: #00ced1; }
     .ticker-change.up { color: #7CFC00; }
     .ticker-change.down { color: #ff3b3b; }
-
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      margin: 20px 0;
-    }
-    .dashboard-card {
-      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
-      border: 1px solid rgba(0, 206, 209, 0.3);
-      border-radius: 20px;
-      padding: 20px;
-    }
-    .card-header {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: #00ced1;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(0,206,209,0.2);
-      padding-bottom: 10px;
-    }
-    .badge-count {
-      background: rgba(0,206,209,0.2);
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-    }
-    .clickable-item {
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .clickable-item:hover {
-      background: rgba(0,206,209,0.1);
-      transform: translateX(4px);
-    }
-    .item-title {
-      font-weight: 700;
-      font-size: 14px;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .item-details {
-      font-size: 11px;
-      color: #9ca3af;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .status-badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: rgba(124,252,0,0.2);
-      color: #7CFC00;
-    }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin: 20px 0; }
+    .dashboard-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; }
+    .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; }
+    .badge-count { background: rgba(0,206,209,0.2); padding: 2px 10px; border-radius: 20px; font-size: 12px; }
+    .clickable-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .clickable-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
+    .item-title { font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .item-details { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(124,252,0,0.2); color: #7CFC00; }
     .status-badge.warning { background: rgba(255,59,59,0.2); color: #ff3b3b; }
     .status-badge.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
-
+    .status-badge.shipped { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .status-badge.bol-pending { background: rgba(255,217,102,0.2); color: #FFD966; }
     .bots-section { margin-top: 30px; }
-    .bots-header {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: #00ced1;
-    }
-    .bots-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-    }
-    .bot-card {
-      background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
-      border: 1px solid rgba(0, 206, 209, 0.3);
-      border-radius: 20px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
+    .bots-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; }
+    .bots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .bot-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 16px; cursor: pointer; transition: all 0.3s; }
     .bot-card:hover { transform: translateY(-4px); border-color: #00ced1; }
     .bot-emoji { font-size: 32px; margin-bottom: 8px; }
     .bot-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
     .bot-status { font-size: 10px; color: #7CFC00; margin-bottom: 8px; }
     .bot-target { font-size: 10px; color: #FFD966; margin-bottom: 8px; }
     .bot-stats { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; margin-top: 8px; }
-    .add-bot-card {
-      background: rgba(15, 32, 64, 0.4);
-      border: 2px dashed rgba(0, 206, 209, 0.3);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 150px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
+    .add-bot-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 150px; cursor: pointer; transition: all 0.3s; }
     .add-bot-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
     .add-bot-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
     .add-bot-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; }
-    .action-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      background: linear-gradient(135deg, #00ced1, #00ff7f);
-      border: none;
-      border-radius: 40px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      color: #000;
-    }
+    .action-btn { width: 100%; margin-top: 20px; padding: 12px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; color: #000; }
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
 
-    .footer {
-      text-align: center;
-      padding: 40px 20px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      margin-top: 40px;
-      font-size: 12px;
-      color: #9ca3af;
-    }
+    /* FEATURE 2: MY CONTAINER */
+    .container-section { margin-top: 30px; }
+    .container-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .container-dashboard { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 24px; margin-bottom: 24px; }
+    .container-progress-wrap { margin-bottom: 20px; }
+    .container-progress-label { display: flex; justify-content: space-between; font-family: 'Orbitron', sans-serif; font-size: 14px; margin-bottom: 8px; }
+    .container-progress-label .fill-text { color: #00ced1; }
+    .container-progress-label .capacity-text { color: #9ca3af; }
+    .container-progress-bar { width: 100%; height: 24px; background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,206,209,0.2); }
+    .container-progress-fill { height: 100%; background: linear-gradient(90deg, #00ced1, #00ff7f); border-radius: 12px; transition: width 0.6s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-family: 'Orbitron', sans-serif; font-size: 10px; color: #000; font-weight: 700; }
+    .container-progress-fill.warning { background: linear-gradient(90deg, #FFD966, #ff3b3b); }
+    .container-products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .container-product-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.2); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+    .container-product-emoji { font-size: 24px; }
+    .container-product-info { flex: 1; }
+    .container-product-name { font-weight: 600; font-size: 13px; }
+    .container-product-weight { font-size: 11px; color: #9ca3af; }
+    .container-empty-space { background: rgba(0,206,209,0.1); border: 1px dashed rgba(0,206,209,0.4); border-radius: 12px; padding: 16px; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 14px; color: #00ced1; }
+    .container-empty-space .empty-label { font-size: 11px; color: #9ca3af; display: block; margin-bottom: 4px; }
+    .zuhe-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #FFD966, #ff3b3b); color: #000; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; animation: pulse 1.5s infinite; }
+    .sample-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #00ced1, #0066ff); color: #fff; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-left: 8px; }
+    .limited-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #ff3b3b, #ff9500); color: #fff; font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-left: 6px; animation: pulse 2s infinite; }
+    .suggested-auctions { margin-top: 20px; }
+    .suggested-header { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #FFD966; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .suggested-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .suggested-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,217,102,0.2); border-radius: 16px; padding: 16px; transition: all 0.2s; cursor: pointer; }
+    .suggested-card:hover { border-color: #FFD966; transform: translateY(-2px); }
+    .suggested-card .suggested-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .suggested-card .suggested-details { font-size: 12px; color: #9ca3af; margin-bottom: 8px; }
+    .suggested-card .suggested-competition { background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.2); border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #ff3b3b; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .suggested-card .suggested-competition .compete-count { font-weight: 700; font-family: 'Orbitron', sans-serif; }
+    .suggested-card .add-to-container-btn { width: 100%; padding: 8px; background: linear-gradient(135deg, #FFD966, #ff9500); border: none; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #000; cursor: pointer; transition: all 0.2s; }
+    .suggested-card .add-to-container-btn:hover { transform: scale(1.02); box-shadow: 0 0 10px rgba(255,217,102,0.3); }
+    .suggested-card .add-to-container-btn:disabled { background: rgba(255,255,255,0.1); color: #666; cursor: not-allowed; }
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(12px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: linear-gradient(145deg, #0a1228, #020617);
-      border: 2px solid #00ced1;
-      border-radius: 24px;
-      max-width: 550px;
-      width: 90%;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 28px;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      font-size: 28px;
-      cursor: pointer;
-      color: #9ca3af;
-    }
+    /* SHIPMENT TRACKER */
+    .shipment-info { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,206,209,0.15); }
+    .shipment-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; }
+    .shipment-label { color: #9ca3af; }
+    .shipment-value { font-family: 'Orbitron', sans-serif; color: #00ced1; }
+    .track-shipment-btn { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #0066ff, #00cc44); border: none; padding: 8px 16px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #fff; text-decoration: none; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+    .track-shipment-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,102,255,0.4); }
+    .track-shipment-btn.disabled { background: rgba(255,255,255,0.1); color: #666; cursor: not-allowed; pointer-events: none; }
+    .bol-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-top: 6px; }
+    .bol-status.uploaded { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .bol-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 550px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; }
     .modal-close:hover { color: #00ced1; }
-    .modal-header {
-      border-bottom: 1px solid rgba(0,206,209,0.3);
-      padding-bottom: 16px;
-      margin-bottom: 20px;
-    }
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
     .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
     .modal-field { margin-bottom: 20px; }
     .modal-field label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-    .modal-field input, .modal-field select, .modal-field textarea {
-      width: 100%;
-      padding: 12px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(0,206,209,0.3);
-      border-radius: 8px;
-      color: white;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-    }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; color: white; font-family: 'Inter', sans-serif; font-size: 14px; }
     .tooltip { font-size: 11px; color: #7CFC00; margin-top: 4px; display: block; }
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0,0,0,0.3);
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(0,206,209,0.2);
-      cursor: pointer;
-    }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+    .checkbox-item { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(0,206,209,0.2); cursor: pointer; }
     .checkbox-item:hover { border-color: #00ced1; }
     .checkbox-item.selected { background: rgba(0,206,209,0.2); border-color: #00ced1; }
     .slider-row { display: flex; align-items: center; gap: 16px; }
@@ -375,34 +138,16 @@
     .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
     .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
     .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; color: #000; }
-
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: rgba(15,32,64,0.98);
-      border: 1px solid #00ced1;
-      padding: 12px 24px;
-      border-radius: 40px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-      transition: 0.3s;
-      opacity: 0;
-      z-index: 2000;
-    }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; }
     .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .qty-selector { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .qty-selector button { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(0,206,209,0.3); background: rgba(0,0,0,0.3); color: #00ced1; font-size: 16px; cursor: pointer; }
+    .qty-selector input { width: 60px; text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.3); border-radius: 6px; color: #fff; padding: 4px; font-family: 'Orbitron', sans-serif; }
 
-    @media (max-width: 1000px) {
-      .dashboard-grid { grid-template-columns: 1fr; }
-      .bots-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .bots-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 1000px) { .dashboard-grid { grid-template-columns: 1fr; } .bots-grid { grid-template-columns: repeat(2, 1fr); } .suggested-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .bots-grid { grid-template-columns: 1fr; } .container-products-list { grid-template-columns: 1fr; } }
   </style>
-      <base target="_blank">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <base target="_blank">
 </head>
@@ -424,6 +169,7 @@
           <span class="wallet-amount" id="walletAmount">$0.00</span>
         </div>
         <button class="deposit-btn" id="depositBtn">+ Deposit</button>
+        <button class="brief-btn" id="fileBriefBtn">📝 File Brief</button>
         <div class="wallet-status">
           <span class="status-dot"></span>
           <span id="bidCount">0 bids available</span>
@@ -438,7 +184,7 @@
   </header>
 
   <div class="banner-container">
-    <div class="top-trader" id="topTraderBanner">🏆 TOP BUYER: Coconut Imports Ltd (+$24,500) | 2nd: Pacific Foods (+$18,200) | 3rd: Global Commodities (+$12,800)</div>
+    <div class="top-trader" id="topTraderBanner">🏆 Loading top traders...</div>
   </div>
 
   <div class="ticker-section">
@@ -457,6 +203,35 @@
       <div class="card-header">🏆 WON AUCTIONS <span class="badge-count" id="wonAuctionsCount">0</span></div>
       <div id="wonAuctionsList">
         <div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE 2: MY CONTAINER SECTION -->
+  <div class="container-section" id="containerSection" style="display:none;">
+    <div class="container-header">
+      <span>📦 MY CONTAINER</span>
+      <span id="zuheBadge" style="display:none;"></span>
+    </div>
+    <div class="container-dashboard">
+      <div class="container-progress-wrap">
+        <div class="container-progress-label">
+          <span class="fill-text" id="containerFillText">0 MT Filled</span>
+          <span class="capacity-text" id="containerCapacityText">Capacity: 25 MT</span>
+        </div>
+        <div class="container-progress-bar">
+          <div class="container-progress-fill" id="containerProgressFill" style="width: 0%;">0%</div>
+        </div>
+      </div>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #FFD966; margin-bottom: 12px;">🎯 Assigned Products</div>
+      <div class="container-products-list" id="containerProductsList"></div>
+      <div class="container-empty-space" id="containerEmptySpace">
+        <span class="empty-label">EMPTY SPACE AVAILABLE</span>
+        <span id="emptySpaceValue">25 MT</span>
+      </div>
+      <div class="suggested-auctions" id="suggestedAuctionsSection">
+        <div class="suggested-header">🔍 Suggested Fillers — Same Region</div>
+        <div class="suggested-grid" id="suggestedAuctionsGrid"></div>
       </div>
     </div>
   </div>
@@ -635,11 +410,23 @@
   </div>
 </div>
 
-<div class="toast" id="toast">Action completed</div>
+<!-- Add to Container Modal -->
+<div id="addToContainerModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeAddContainerModal">&times;</span>
+    <div class="modal-header"><h2>📦 Add to Container</h2></div>
+    <div id="addContainerContent"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelAddContainerBtn">Cancel</button>
+      <button class="create-btn" id="confirmAddContainerBtn">Add to Container</button>
+    </div>
+  </div>
+</div>
 
+<div class="toast" id="toast">Action completed</div>
 <script>
 // ============================================
-// SUPABASE CONFIGURATION - MUST BE FIRST
+// SUPABASE CONFIGURATION
 // ============================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
@@ -648,30 +435,27 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 
 // ============================================
-// AUTH STATE LISTENER
+// AUTH STATE LISTENER - FIXED FOR LOOP ISSUE
 // ============================================
 async function checkAuth() {
-  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-
-  if (sessionError) {
-    console.error('Session error:', sessionError);
-    window.location.href = 'signin.html';
-    return;
+  try {
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) { console.error('Session error:', sessionError); window.location.replace('signin.html'); return false; }
+    if (!session) { console.log('No session found, redirecting to signin'); window.location.replace('signin.html'); return false; }
+    currentUser = session.user;
+    console.log('Authenticated as:', currentUser.email);
+    return true;
+  } catch (err) {
+    console.error('Auth check failed:', err);
+    window.location.replace('signin.html');
+    return false;
   }
-
-  if (!session) {
-    console.log('No session found, redirecting to signin');
-    window.location.href = 'signin.html';
-    return;
-  }
-
-  currentUser = session.user;
-  console.log('Authenticated as:', currentUser.email);
 }
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_OUT') {
-    window.location.href = 'signin.html';
+    currentUser = null;
+    window.location.replace('signin.html');
   }
 });
 
@@ -679,23 +463,22 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 // PRODUCT VARIETIES
 // ============================================
 const productVarieties = {
-  'Apples': ['Braeburn', 'Cortland', 'Cosmic Crisp', 'Empire', 'Envy', 'EverCrisp', 'Fuji', 'Gala', 'Golden Delicious', 'Granny Smith', 'Gravenstein', 'Honeycrisp', 'Jazz', 'Jonagold', 'Lodi', 'Macoun', 'McIntosh', 'Mutsu (Crispin)', 'Paula Red', 'Pazazz', 'Pink Lady', 'Red Delicious', 'Rome', 'Spartan', 'Winesap'],
-  'Bananas': ['Baby Banana', 'Cavendish', 'Lady Finger', 'Organic Cavendish', 'Red Banana'],
-  'Mangoes': ['Ataulfo (Honey)', 'Francis', 'Keitt', 'Kent', 'Organic Kent', 'Tommy Atkins'],
-  'Oranges': ['Blood Orange', 'Cara Cara', 'Navel', 'Seville', 'Valencia'],
-  'Pineapples': ['Organic Smooth Cayenne', 'Queen', 'Red Spanish', 'Smooth Cayenne'],
-  'Potatoes': ['Fingerling', 'Organic Russet', 'Purple', 'Red', 'Russet', 'White', 'Yukon Gold'],
-  'Tomatoes': ['Beefsteak', 'Cherry', 'Heirloom', 'Organic Roma', 'Plum', 'Roma', 'Round'],
-  'Onions': ['Organic Yellow', 'Red', 'Shallot', 'Sweet', 'White', 'Yellow'],
-  'Carrots': ['Baby', 'Chantenay', 'Imperator', 'Nantes', 'Organic Imperator', 'Purple'],
-  'Broccoli': ['Belstar', 'Eastern Crown', 'Green Magic', 'Organic Green Magic'],
-  'Corn': ['Blue Corn', 'Organic Sweet Corn', 'Sweet Yellow', 'White', 'Yellow Dent'],
-  'Rice': ['Arborio', 'Basmati', 'Brown Rice', 'Calrose', 'Jasmine', 'Organic Jasmine', 'White Rice'],
-  'Wheat': ['Hard Red Winter', 'Hard White', 'Organic Hard Red', 'Soft Red Winter', 'Spring Wheat'],
-  'Soybeans': ['Edamame', 'GMO', 'Non-GMO', 'Organic Non-GMO']
+  'Apples': ['Braeburn','Cortland','Cosmic Crisp','Empire','Envy','EverCrisp','Fuji','Gala','Golden Delicious','Granny Smith','Gravenstein','Honeycrisp','Jazz','Jonagold','Lodi','Macoun','McIntosh','Mutsu (Crispin)','Paula Red','Pazazz','Pink Lady','Red Delicious','Rome','Spartan','Winesap'],
+  'Bananas': ['Baby Banana','Cavendish','Lady Finger','Organic Cavendish','Red Banana'],
+  'Mangoes': ['Ataulfo (Honey)','Francis','Keitt','Kent','Organic Kent','Tommy Atkins'],
+  'Oranges': ['Blood Orange','Cara Cara','Navel','Seville','Valencia'],
+  'Pineapples': ['Organic Smooth Cayenne','Queen','Red Spanish','Smooth Cayenne'],
+  'Potatoes': ['Fingerling','Organic Russet','Purple','Red','Russet','White','Yukon Gold'],
+  'Tomatoes': ['Beefsteak','Cherry','Heirloom','Organic Roma','Plum','Roma','Round'],
+  'Onions': ['Organic Yellow','Red','Shallot','Sweet','White','Yellow'],
+  'Carrots': ['Baby','Chantenay','Imperator','Nantes','Organic Imperator','Purple'],
+  'Broccoli': ['Belstar','Eastern Crown','Green Magic','Organic Green Magic'],
+  'Corn': ['Blue Corn','Organic Sweet Corn','Sweet Yellow','White','Yellow Dent'],
+  'Rice': ['Arborio','Basmati','Brown Rice','Calrose','Jasmine','Organic Jasmine','White Rice'],
+  'Wheat': ['Hard Red Winter','Hard White','Organic Hard Red','Soft Red Winter','Spring Wheat'],
+  'Soybeans': ['Edamame','GMO','Non-GMO','Organic Non-GMO']
 };
 
-// Commodity prices for ticker
 let commodityPrices = {
   Apples: { price: 1.24, change: 2.1, emoji: "🍎" },
   Bananas: { price: 0.52, change: -0.5, emoji: "🍌" },
@@ -706,8 +489,8 @@ let commodityPrices = {
 
 let walletBalance = 5000;
 let bots = [
-  { id: '1', name: 'Apple Hunter', commodity: 'Apples', varieties: ['Honeycrisp', 'McIntosh', 'Gala'], emoji: '🍎', status: 'active', trades: 47, pnl: 1250, winRate: 72, strategy: 'Sniper', maxPrice: 0.48, budget: 500 },
-  { id: '2', name: 'Potato Pro', commodity: 'Potatoes', varieties: ['Russet', 'Yukon Gold'], emoji: '🥔', status: 'active', trades: 32, pnl: 875, winRate: 68, strategy: 'Aggressive', maxPrice: 0.45, budget: 800 },
+  { id: '1', name: 'Apple Hunter', commodity: 'Apples', varieties: ['Honeycrisp','McIntosh','Gala'], emoji: '🍎', status: 'active', trades: 47, pnl: 1250, winRate: 72, strategy: 'Sniper', maxPrice: 0.48, budget: 500 },
+  { id: '2', name: 'Potato Pro', commodity: 'Potatoes', varieties: ['Russet','Yukon Gold'], emoji: '🥔', status: 'active', trades: 32, pnl: 875, winRate: 68, strategy: 'Aggressive', maxPrice: 0.45, budget: 800 },
   { id: '3', name: 'Banana Bot', commodity: 'Bananas', varieties: [], emoji: '🍌', status: 'idle', trades: 18, pnl: 420, winRate: 65, strategy: 'Conservative', maxPrice: 0.55, budget: 300 }
 ];
 
@@ -716,14 +499,30 @@ let activeBids = [
   { id: 'b2', product: 'Potatoes', variety: 'Russet', quantity: 100, price: 0.41, seller: 'Idaho Farms', sellerContact: 'Sarah Johnson', sellerEmail: 'sales@idahofarms.com', sellerPhone: '+1 (208) 555-0123', timeLeft: '1:45', auctionId: 'auc_002' }
 ];
 
+// ========== FEATURE 1: WON AUCTIONS WITH SHIPMENT DATA ==========
 let wonAuctions = [
-  { id: 'w1', product: 'Apples', variety: 'Gala', quantity: 30, price: 1.18, seller: 'New York Apple Co', sellerContact: 'John Davis', sellerEmail: 'sales@nyapple.com', sellerPhone: '+1 (315) 555-0123', status: 'Transport needed', date: '2026-04-29' },
-  { id: 'w2', product: 'Bananas', variety: 'Cavendish', quantity: 20, price: 0.48, seller: 'Ecuador Farms', sellerContact: 'Maria Santos', sellerEmail: 'sales@ecuadorfarms.ec', sellerPhone: '+593 4 259 8877', status: 'Delivery pending', date: '2026-04-28' }
+  { id: 'w1', product: 'Apples', variety: 'Gala', quantity: 30, price: 1.18, seller: 'New York Apple Co', sellerContact: 'John Davis', sellerEmail: 'sales@nyapple.com', sellerPhone: '+1 (315) 555-0123', status: 'Transport needed', date: '2026-04-29', imo: '9816763', bolUploaded: true, bolUrl: '#', shipmentStatus: 'In Transit', region: 'New York' },
+  { id: 'w2', product: 'Bananas', variety: 'Cavendish', quantity: 20, price: 0.48, seller: 'Ecuador Farms', sellerContact: 'Maria Santos', sellerEmail: 'sales@ecuadorfarms.ec', sellerPhone: '+593 4 259 8877', status: 'Delivery pending', date: '2026-04-28', imo: null, bolUploaded: false, bolUrl: null, shipmentStatus: 'Pending BOL', region: 'Davao' },
+  { id: 'w3', product: 'Mangoes', variety: 'Kent', quantity: 15, price: 2.10, seller: 'Davao Exports', sellerContact: 'Carlos Reyes', sellerEmail: 'export@davao.ph', sellerPhone: '+63 82 555 0123', status: 'Contract signed', date: '2026-06-20', imo: null, bolUploaded: false, bolUrl: null, shipmentStatus: 'Awaiting BOL', region: 'Davao' }
+];
+
+// ========== FEATURE 2: CONTAINER DATA ==========
+const CONTAINER_CAPACITY = 25;
+let containerProducts = [];
+let containerRegion = 'Davao';
+
+let suggestedAuctions = [
+  { id: 's1', product: 'Coconut Flour', variety: 'Premium', quantity: 8, price: 1.20, seller: 'Davao Coconut Mills', region: 'Davao', competingBuyers: 3, currentBid: 1.15, emoji: '🥥' },
+  { id: 's2', product: 'Dried Mango', variety: 'Organic', quantity: 5, price: 3.50, seller: 'Cebu Fruit Co', region: 'Davao', competingBuyers: 1, currentBid: 3.20, emoji: '🥭' },
+  { id: 's3', product: 'Pineapple Juice', variety: 'Concentrate', quantity: 12, price: 0.85, seller: 'Mindanao Fresh', region: 'Davao', competingBuyers: 5, currentBid: 0.82, emoji: '🍍' },
+  { id: 's4', product: 'Banana Chips', variety: 'Sweet', quantity: 4, price: 2.10, seller: 'Davao Snacks', region: 'Davao', competingBuyers: 2, currentBid: 1.95, emoji: '🍌' },
+  { id: 's5', product: 'Cacao Nibs', variety: 'Raw', quantity: 6, price: 4.20, seller: 'Davao Cacao Farm', region: 'Davao', competingBuyers: 0, currentBid: 4.00, emoji: '🍫', isSample: true, samplePrice: 2.50 }
 ];
 
 let filedBriefs = [];
 let priceInterval = null;
 let currentEditingBot = null;
+let currentSuggestedAuction = null;
 
 // ============================================
 // UI FUNCTIONS
@@ -737,20 +536,11 @@ function updateWalletDisplay() {
 function renderTicker() {
   const botCommodities = [...new Set(bots.map(b => b.commodity))];
   const container = document.getElementById('liveTicker');
-  if (botCommodities.length === 0) {
-    container.innerHTML = '<div style="color:#9ca3af;">Deploy bots to see live prices here</div>';
-    return;
-  }
+  if (botCommodities.length === 0) { container.innerHTML = '<div style="color:#9ca3af;">Deploy bots to see live prices here</div>'; return; }
   container.innerHTML = botCommodities.map(comm => {
     const data = commodityPrices[comm];
     if (!data) return '';
-    return `
-      <div class="ticker-item">
-        <span class="ticker-commodity">${data.emoji} ${comm}</span>
-        <span class="ticker-price">$${data.price.toFixed(2)}</span>
-        <span class="ticker-change ${data.change >= 0 ? 'up' : 'down'}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change).toFixed(1)}%</span>
-      </div>
-    `;
+    return `<div class="ticker-item"><span class="ticker-commodity">${data.emoji} ${comm}</span><span class="ticker-price">$${data.price.toFixed(2)}</span><span class="ticker-change ${data.change >= 0 ? 'up' : 'down'}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change).toFixed(1)}%</span></div>`;
   }).join('');
 }
 
@@ -773,12 +563,7 @@ function updateVarietyDropdownForBrief(commodity) {
   const varieties = productVarieties[commodity] || [];
   const select = document.getElementById('briefVariety');
   select.innerHTML = '<option value="">Select variety...</option>';
-  varieties.forEach(variety => {
-    const option = document.createElement('option');
-    option.value = variety;
-    option.textContent = variety;
-    select.appendChild(option);
-  });
+  varieties.forEach(variety => { const option = document.createElement('option'); option.value = variety; option.textContent = variety; select.appendChild(option); });
 }
 
 function updateBotVarietyCheckboxes() {
@@ -787,12 +572,7 @@ function updateBotVarietyCheckboxes() {
   const container = document.getElementById('varietyCheckboxes');
   const currentBot = currentEditingBot;
   const selectedVarieties = currentBot ? currentBot.varieties : [];
-
-  container.innerHTML = varieties.map(v => `
-    <label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}">
-      <input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}
-    </label>
-  `).join('');
+  container.innerHTML = varieties.map(v => `<label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}"><input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}</label>`).join('');
 }
 
 function renderBots() {
@@ -800,15 +580,7 @@ function renderBots() {
   container.innerHTML = bots.map(bot => {
     const selectedCount = bot.varieties.length;
     const totalVarieties = productVarieties[bot.commodity]?.length || 0;
-    return `
-      <div class="bot-card" data-bot-id="${bot.id}">
-        <div class="bot-emoji">${bot.emoji}</div>
-        <div class="bot-name">${bot.name}</div>
-        <div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div>
-        <div class="bot-target">🎯 ${selectedCount > 0 ? selectedCount + '/' + totalVarieties + ' varieties' : 'All varieties'}</div>
-        <div class="bot-stats"><span>Trades: ${bot.trades}</span><span>PnL: $${bot.pnl}</span><span>WR: ${bot.winRate}%</span></div>
-      </div>
-    `;
+    return `<div class="bot-card" data-bot-id="${bot.id}"><div class="bot-emoji">${bot.emoji}</div><div class="bot-name">${bot.name}</div><div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div><div class="bot-target">🎯 ${selectedCount > 0 ? selectedCount + '/' + totalVarieties + ' varieties' : 'All varieties'}</div><div class="bot-stats"><span>Trades: ${bot.trades}</span><span>PnL: $${bot.pnl}</span><span>WR: ${bot.winRate}%</span></div></div>`;
   }).join('');
   const addCard = document.createElement('div');
   addCard.className = 'add-bot-card';
@@ -819,34 +591,28 @@ function renderBots() {
 
 function renderActiveBids() {
   const container = document.getElementById('activeBidsList');
-  if (!activeBids.length) {
-    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>';
-    document.getElementById('activeBidsCount').textContent = '0';
-    return;
-  }
+  if (!activeBids.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>'; document.getElementById('activeBidsCount').textContent = '0'; return; }
   document.getElementById('activeBidsCount').textContent = activeBids.length;
-  container.innerHTML = activeBids.map(bid => `
-    <div class="clickable-item" data-bid-id="${bid.id}">
-      <div class="item-title"><span>${bid.product} - ${bid.variety}</span><span class="status-badge pending">⏱️ ${bid.timeLeft}</span></div>
-      <div class="item-details"><span>📦 ${bid.quantity} MT</span><span>💰 $${bid.price}/MT</span><span>🏷️ ${bid.seller}</span></div>
-    </div>
-  `).join('');
+  container.innerHTML = activeBids.map(bid => `<div class="clickable-item" data-bid-id="${bid.id}"><div class="item-title"><span>${bid.product} - ${bid.variety}</span><span class="status-badge pending">⏱️ ${bid.timeLeft}</span></div><div class="item-details"><span>📦 ${bid.quantity} MT</span><span>💰 $${bid.price}/MT</span><span>🏷️ ${bid.seller}</span></div></div>`).join('');
 }
 
+// ========== FEATURE 1: RENDER WON AUCTIONS WITH SHIPMENT TRACKER ==========
 function renderWonAuctions() {
   const container = document.getElementById('wonAuctionsList');
-  if (!wonAuctions.length) {
-    container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>';
-    document.getElementById('wonAuctionsCount').textContent = '0';
-    return;
-  }
+  if (!wonAuctions.length) { container.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>'; document.getElementById('wonAuctionsCount').textContent = '0'; return; }
   document.getElementById('wonAuctionsCount').textContent = wonAuctions.length;
-  container.innerHTML = wonAuctions.map(auction => `
-    <div class="clickable-item" data-won-id="${auction.id}">
-      <div class="item-title"><span>${auction.product} - ${auction.variety}</span><span class="status-badge">${auction.status}</span></div>
-      <div class="item-details"><span>📦 ${auction.quantity} MT</span><span>💰 $${auction.price}/MT</span><span>🏷️ ${auction.seller}</span></div>
-    </div>
-  `).join('');
+  container.innerHTML = wonAuctions.map(auction => {
+    let statusClass = '';
+    if (auction.shipmentStatus === 'In Transit') statusClass = 'shipped';
+    else if (auction.shipmentStatus === 'Pending BOL' || auction.shipmentStatus === 'Awaiting BOL') statusClass = 'bol-pending';
+    let shipmentHtml = '';
+    if (auction.bolUploaded && auction.imo) {
+      shipmentHtml = `<div class="shipment-info"><div class="shipment-row"><span class="shipment-label">🚢 IMO Number</span><span class="shipment-value">${auction.imo}</span></div><div class="shipment-row"><span class="shipment-label">📄 BOL Status</span><span class="bol-status uploaded">✅ Uploaded</span></div><a href="https://www.marinetraffic.com/en/ais/details/ships/imo:${auction.imo}" target="_blank" rel="noopener noreferrer" class="track-shipment-btn">🚢 Track Shipment</a></div>`;
+    } else {
+      shipmentHtml = `<div class="shipment-info"><div class="shipment-row"><span class="shipment-label">📄 BOL Status</span><span class="bol-status pending">⏳ Pending Upload</span></div><div class="shipment-row"><span class="shipment-label">🚢 Tracking</span><span style="font-size:11px; color:#666;">Available after BOL upload</span></div><button class="track-shipment-btn disabled" disabled>🚢 Track Shipment</button></div>`;
+    }
+    return `<div class="clickable-item" data-won-id="${auction.id}"><div class="item-title"><span>${auction.product} - ${auction.variety}</span><span class="status-badge ${statusClass}">${auction.shipmentStatus}</span></div><div class="item-details"><span>📦 ${auction.quantity} MT</span><span>💰 $${auction.price}/MT</span><span>🏷️ ${auction.seller}</span></div>${shipmentHtml}</div>`;
+  }).join('');
 }
 
 function openBotConfig(bot) {
@@ -854,15 +620,12 @@ function openBotConfig(bot) {
   document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
   document.getElementById('editBotName').value = bot.name;
   document.getElementById('editBotCommodity').value = bot.commodity;
-
   updateBotVarietyCheckboxes();
-
   document.getElementById('editMaxPrice').value = bot.maxPrice;
   document.getElementById('editMaxPriceDisplay').textContent = `$${bot.maxPrice.toFixed(2)}`;
   document.getElementById('editBudget').value = bot.budget;
   document.getElementById('editBudgetDisplay').textContent = `$${bot.budget}`;
   document.getElementById('editStrategy').value = bot.strategy;
-
   document.getElementById('botConfigModal').style.display = 'flex';
 }
 
@@ -876,7 +639,6 @@ async function saveBotConfig() {
   currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
   currentEditingBot.strategy = document.getElementById('editStrategy').value;
   currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
-
   await saveBotsToSupabase();
   saveToStorage();
   renderBots();
@@ -896,14 +658,20 @@ function showBidDetails(bidId) {
     <div class="modal-field"><label>Seller</label><div class="tooltip" style="font-size:14px;">${bid.seller}</div></div>
     <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${bid.sellerContact} | ${bid.sellerEmail} | ${bid.sellerPhone}</div></div>
     <div class="modal-field"><label>Time Remaining</label><div class="tooltip" style="font-size:14px;">${bid.timeLeft}</div></div>
-    <div class="modal-field"><label>Auction ID</label><div class="tooltip" style="font-size:12px; color:#9ca3af;">${bid.auctionId}</div></div>
-  `;
+    <div class="modal-field"><label>Auction ID</label><div class="tooltip" style="font-size:12px; color:#9ca3af;">${bid.auctionId}</div></div>`;
   document.getElementById('bidDetailModal').style.display = 'flex';
 }
 
+// ========== FEATURE 1: WON AUCTION DETAIL WITH SHIPMENT INFO ==========
 function showWonDetails(wonId) {
   const won = wonAuctions.find(w => w.id === wonId);
   if (!won) return;
+  let shipmentSection = '';
+  if (won.bolUploaded && won.imo) {
+    shipmentSection = `<div class="modal-field"><label>🚢 Shipment Tracking</label><div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:12px;"><div style="margin-bottom:8px; font-size:13px;"><span style="color:#9ca3af;">IMO Number:</span> <span style="font-family:'Orbitron'; color:#00ced1;">${won.imo}</span></div><div style="margin-bottom:8px; font-size:13px;"><span style="color:#9ca3af;">BOL Status:</span> <span style="color:#7CFC00;">✅ Uploaded</span></div><div style="margin-bottom:8px; font-size:13px;"><span style="color:#9ca3af;">Shipment Status:</span> <span style="color:#00ced1;">${won.shipmentStatus}</span></div><a href="https://www.marinetraffic.com/en/ais/details/ships/imo:${won.imo}" target="_blank" rel="noopener noreferrer" class="track-shipment-btn" style="margin-top:4px; display:inline-flex;">🚢 Track on MarineTraffic</a></div></div>`;
+  } else {
+    shipmentSection = `<div class="modal-field"><label>🚢 Shipment Tracking</label><div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:12px;"><div style="margin-bottom:8px; font-size:13px;"><span style="color:#9ca3af;">BOL Status:</span> <span style="color:#FFD966;">⏳ Pending Upload by Seller</span></div><div style="margin-bottom:8px; font-size:13px;"><span style="color:#9ca3af;">IMO Number:</span> <span style="color:#666;">Not assigned yet</span></div><div style="font-size:12px; color:#9ca3af;">The seller must upload the Bill of Lading before tracking becomes available.</div></div></div>`;
+  }
   document.getElementById('wonDetailContent').innerHTML = `
     <div class="modal-field"><label>Product</label><div class="tooltip" style="font-size:14px; color:#fff;">${won.product} - ${won.variety}</div></div>
     <div class="modal-field"><label>Quantity</label><div class="tooltip" style="font-size:14px;">${won.quantity} MT</div></div>
@@ -911,8 +679,8 @@ function showWonDetails(wonId) {
     <div class="modal-field"><label>Seller</label><div class="tooltip" style="font-size:14px;">${won.seller}</div></div>
     <div class="modal-field"><label>Contact</label><div class="tooltip" style="font-size:14px;">${won.sellerContact} | ${won.sellerEmail} | ${won.sellerPhone}</div></div>
     <div class="modal-field"><label>Status</label><div class="tooltip status-badge" style="display:inline-block;">${won.status}</div></div>
-    <div class="modal-field"><label>Transport</label><div class="tooltip" style="font-size:12px;">Launch transport auction to move this cargo</div></div>
-  `;
+    ${shipmentSection}
+    <div class="modal-field"><label>Transport</label><div class="tooltip" style="font-size:12px;">Launch transport auction to move this cargo</div></div>`;
   document.getElementById('wonDetailModal').style.display = 'flex';
 }
 
@@ -924,36 +692,146 @@ async function submitBrief() {
   const destination = document.getElementById('briefDestination').value;
   const targetPrice = document.getElementById('briefTargetPrice').value;
   const notes = document.getElementById('briefNotes').value;
-
   if (!variety) { showToast('Select a variety', true); return; }
-  if (walletBalance < 25) {
-    showToast('Insufficient funds. Minimum $25 required.', true);
-    return;
-  }
-
+  if (walletBalance < 25) { showToast('Insufficient funds. Minimum $25 required.', true); return; }
   walletBalance -= 25;
   await saveWalletToSupabase();
   updateWalletDisplay();
-
-  const newBrief = {
-    id: 'brief_' + Date.now(),
-    user_id: currentUser.id,
-    commodity, variety, quantity, grade, destination,
-    target_price: targetPrice ? parseFloat(targetPrice) : null,
-    notes, status: 'open',
-    created_at: new Date().toISOString()
-  };
-
+  const newBrief = { id: 'brief_' + Date.now(), user_id: currentUser.id, commodity, variety, quantity, grade, destination, target_price: targetPrice ? parseFloat(targetPrice) : null, notes, status: 'open', created_at: new Date().toISOString() };
   const { error } = await supabaseClient.from('buyer_briefs').insert(newBrief);
-  if (error) {
-    console.error('Brief save error:', error);
-    showToast('Error saving brief', true);
-    return;
-  }
-
+  if (error) { console.error('Brief save error:', error); showToast('Error saving brief', true); return; }
   filedBriefs.push(newBrief);
   showToast(`Brief filed: ${quantity}MT ${commodity} (${variety}) to ${destination}`);
   document.getElementById('fileBriefModal').style.display = 'none';
+}
+
+// ============================================
+// FEATURE 2: CONTAINER ARBITRAGE FUNCTIONS
+// ============================================
+function getTotalContainerWeight() {
+  return containerProducts.reduce((sum, p) => sum + p.quantity, 0);
+}
+
+function getEmptySpace() {
+  return Math.max(0, CONTAINER_CAPACITY - getTotalContainerWeight());
+}
+
+function renderContainerSection() {
+  const totalWeight = getTotalContainerWeight();
+  const emptySpace = getEmptySpace();
+  const fillPercent = Math.min(100, (totalWeight / CONTAINER_CAPACITY) * 100);
+  const hasWonAuctions = wonAuctions.length > 0;
+  document.getElementById('containerSection').style.display = hasWonAuctions ? 'block' : 'none';
+  if (!hasWonAuctions) return;
+
+  // Zuhe badge: show when container is 70%+ full
+  const zuheBadge = document.getElementById('zuheBadge');
+  if (fillPercent >= 70 && fillPercent < 100) {
+    zuheBadge.style.display = 'inline-flex';
+    zuheBadge.className = 'zuhe-badge';
+    zuheBadge.innerHTML = `🔥 ZUHE: ${Math.round(fillPercent)}% FULL`;
+  } else if (fillPercent >= 100) {
+    zuheBadge.style.display = 'inline-flex';
+    zuheBadge.className = 'zuhe-badge';
+    zuheBadge.innerHTML = `✅ CONTAINER FULL — READY TO SHIP`;
+  } else {
+    zuheBadge.style.display = 'none';
+  }
+
+  document.getElementById('containerFillText').textContent = `${totalWeight.toFixed(1)} MT Filled`;
+  document.getElementById('containerCapacityText').textContent = `Capacity: ${CONTAINER_CAPACITY} MT`;
+  const fillEl = document.getElementById('containerProgressFill');
+  fillEl.style.width = `${fillPercent}%`;
+  fillEl.textContent = fillPercent > 15 ? `${Math.round(fillPercent)}%` : '';
+  if (fillPercent > 90) fillEl.classList.add('warning'); else fillEl.classList.remove('warning');
+
+  const productsList = document.getElementById('containerProductsList');
+  if (containerProducts.length === 0) {
+    productsList.innerHTML = `<div style="color:#9ca3af; font-size:13px; grid-column:1/-1; text-align:center; padding:20px; background:rgba(0,0,0,0.2); border-radius:12px; border:1px dashed rgba(0,206,209,0.2);">
+      <div style="font-size:24px; margin-bottom:8px;">📦</div>
+      <div style="font-weight:600; color:#e5e7eb; margin-bottom:4px;">Your container is empty</div>
+      <div>Start by adding products from suggested auctions below.</div>
+      <div style="margin-top:8px; font-size:11px; color:#00ced1;">Capacity: ${CONTAINER_CAPACITY} MT | Region: ${containerRegion}</div>
+    </div>`;
+  } else {
+    productsList.innerHTML = containerProducts.map(p => {
+      const emoji = commodityPrices[p.product]?.emoji || '📦';
+      const sampleTag = p.isSample ? '<span class="sample-badge" style="margin-left:0; margin-top:4px;">SAMPLE</span>' : '';
+      return `<div class="container-product-item"><div class="container-product-emoji">${emoji}</div><div class="container-product-info"><div class="container-product-name">${p.product} — ${p.variety}</div><div class="container-product-weight">${p.quantity} MT @ $${p.price}/MT</div>${sampleTag}</div></div>`;
+    }).join('');
+  }
+
+  document.getElementById('emptySpaceValue').textContent = `${emptySpace.toFixed(1)} MT Available`;
+  renderSuggestedAuctions();
+}
+
+function renderSuggestedAuctions() {
+  const emptySpace = getEmptySpace();
+  const grid = document.getElementById('suggestedAuctionsGrid');
+  const filtered = suggestedAuctions.filter(a => a.quantity <= emptySpace);
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="color:#9ca3af; font-size:12px; grid-column:1/-1; text-align:center;">No suitable auctions found for remaining space. Check back later!</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(auction => {
+    const isAdded = containerProducts.some(p => p.suggestedId === auction.id);
+    const competeText = auction.competingBuyers > 0
+      ? `🔥 ${auction.competingBuyers} buyer${auction.competingBuyers > 1 ? 's' : ''} competing — current bid: $${auction.currentBid}/MT`
+      : '✨ No competing buyers yet';
+    const sampleBadge = auction.isSample ? `<span class="sample-badge">🎁 SAMPLE: $${auction.samplePrice}/MT</span><span class="limited-badge">⏰ LIMITED</span>` : '';
+    const priceDisplay = auction.isSample ? `<span style="text-decoration:line-through; color:#666;">$${auction.price}</span> <span style="color:#00ced1; font-weight:700;">$${auction.samplePrice}</span>` : `$${auction.price}`;
+    return `<div class="suggested-card" data-suggested-id="${auction.id}"><div class="suggested-title"><span>${auction.emoji} ${auction.product} ${sampleBadge}</span><span style="font-size:11px; color:#9ca3af;">${auction.region}</span></div><div class="suggested-details"><div>Variety: ${auction.variety}</div><div>Lot Size: ${auction.quantity} MT @ ${priceDisplay}/MT</div><div>Seller: ${auction.seller}</div></div><div class="suggested-competition"><span class="compete-count">${competeText}</span></div><button class="add-to-container-btn" data-suggested-id="${auction.id}" ${isAdded ? 'disabled' : ''}>${isAdded ? '✅ Added to Container' : '➕ Add to Container'}</button></div>`;
+  }).join('');
+}
+
+function openAddToContainerModal(auctionId) {
+  const auction = suggestedAuctions.find(a => a.id === auctionId);
+  if (!auction) return;
+  const emptySpace = getEmptySpace();
+  const maxQty = Math.min(auction.quantity, emptySpace);
+  currentSuggestedAuction = auction;
+  const isSample = auction.isSample || false;
+  const modalPrice = isSample ? auction.samplePrice : auction.price;
+  const priceLabel = isSample ? 'Sample Price (40% OFF)' : 'Price';
+  document.getElementById('addContainerContent').innerHTML = `
+    <div class="modal-field"><label>Product</label><div style="font-size:16px; color:#fff; font-weight:600;">${auction.emoji} ${auction.product} ${isSample ? '<span class="sample-badge">SAMPLE</span>' : ''} — ${auction.variety}</div></div>
+    <div class="modal-field"><label>Seller</label><div style="font-size:13px; color:#9ca3af;">${auction.seller} | ${auction.region}</div></div>
+    <div class="modal-field"><label>${priceLabel}</label><div style="font-size:14px; color:#FFD966; font-family:'Orbitron';">${isSample ? `<span style="text-decoration:line-through; color:#666; font-size:12px;">$${auction.price}</span> ` : ''}$${modalPrice}/MT</div></div>
+    <div class="modal-field"><label>Select Quantity (MT)</label><div class="qty-selector"><button type="button" onclick="adjustQty(-1)">−</button><input type="number" id="containerQtyInput" value="${maxQty}" min="1" max="${maxQty}" step="0.5"><button type="button" onclick="adjustQty(1)">+</button></div><div class="tooltip">Max available: ${maxQty} MT | Empty space: ${emptySpace.toFixed(1)} MT</div></div>
+    <div class="modal-field"><label>Competition</label><div style="font-size:12px; color:#ff3b3b;">${auction.competingBuyers > 0 ? `🔥 ${auction.competingBuyers} other buyer${auction.competingBuyers > 1 ? 's' : ''} watching this lot` : '✨ No competition on this lot yet'}</div></div>`;
+  document.getElementById('addToContainerModal').style.display = 'flex';
+}
+
+function adjustQty(delta) {
+  const input = document.getElementById('containerQtyInput');
+  if (!input) return;
+  let val = parseFloat(input.value) || 0;
+  const max = parseFloat(input.max) || 0;
+  val = Math.max(0.5, Math.min(max, val + delta));
+  input.value = val.toFixed(1);
+}
+
+function confirmAddToContainer() {
+  if (!currentSuggestedAuction) return;
+  const qtyInput = document.getElementById('containerQtyInput');
+  const qty = parseFloat(qtyInput?.value) || currentSuggestedAuction.quantity;
+  const emptySpace = getEmptySpace();
+  if (qty > emptySpace) { showToast(`Not enough space. Only ${emptySpace.toFixed(1)} MT remaining.`, true); return; }
+  const finalPrice = currentSuggestedAuction.isSample ? currentSuggestedAuction.samplePrice : currentSuggestedAuction.price;
+  containerProducts.push({
+    suggestedId: currentSuggestedAuction.id,
+    product: currentSuggestedAuction.product,
+    variety: currentSuggestedAuction.variety,
+    quantity: qty,
+    price: finalPrice,
+    seller: currentSuggestedAuction.seller,
+    isSample: currentSuggestedAuction.isSample || false
+  });
+  showToast(`Added ${qty} MT of ${currentSuggestedAuction.product} to container`);
+  document.getElementById('addToContainerModal').style.display = 'none';
+  currentSuggestedAuction = null;
+  renderContainerSection();
+  saveToStorage();
 }
 
 // ============================================
@@ -961,85 +839,57 @@ async function submitBrief() {
 // ============================================
 async function loadFromSupabase() {
   if (!currentUser) return;
-
-  const { data: profile } = await supabaseClient
-    .from('profiles')
-    .select('wallet_balance')
-    .eq('id', currentUser.id)
-    .single();
-
-  if (profile && profile.wallet_balance !== null) {
-    walletBalance = parseFloat(profile.wallet_balance);
-  }
-
-  const { data: botData } = await supabaseClient
-    .from('buyer_bots')
-    .select('*')
-    .eq('user_id', currentUser.id);
-
+  const { data: profile } = await supabaseClient.from('profiles').select('wallet_balance').eq('id', currentUser.id).single();
+  if (profile && profile.wallet_balance !== null) { walletBalance = parseFloat(profile.wallet_balance); }
+  const { data: botData } = await supabaseClient.from('buyer_bots').select('*').eq('user_id', currentUser.id);
   if (botData && botData.length > 0) {
-    bots = botData.map(b => ({
-      id: b.id, name: b.name, commodity: b.commodity, varieties: b.varieties || [],
-      emoji: b.emoji || '🤖', status: b.status || 'active', trades: b.trades || 0,
-      pnl: b.pnl || 0, winRate: b.win_rate || 0, strategy: b.strategy || 'Balanced',
-      maxPrice: parseFloat(b.max_price) || 0.60, budget: parseInt(b.budget) || 500
-    }));
+    bots = botData.map(b => ({ id: b.id, name: b.name, commodity: b.commodity, varieties: b.varieties || [], emoji: b.emoji || '🤖', status: b.status || 'active', trades: b.trades || 0, pnl: b.pnl || 0, winRate: b.win_rate || 0, strategy: b.strategy || 'Balanced', maxPrice: parseFloat(b.max_price) || 0.60, budget: parseInt(b.budget) || 500 }));
   }
-
-  const { data: bidData } = await supabaseClient
-    .from('buyer_bids')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .eq('status', 'active');
-
+  const { data: bidData } = await supabaseClient.from('buyer_bids').select('*').eq('user_id', currentUser.id).eq('status', 'active');
   if (bidData && bidData.length > 0) {
-    activeBids = bidData.map(b => ({
-      id: b.id, product: b.product, variety: b.variety, quantity: b.quantity,
-      price: parseFloat(b.price), seller: b.seller, sellerContact: b.seller_contact,
-      sellerEmail: b.seller_email, sellerPhone: b.seller_phone,
-      timeLeft: b.time_left, auctionId: b.auction_id
-    }));
+    activeBids = bidData.map(b => ({ id: b.id, product: b.product, variety: b.variety, quantity: b.quantity, price: parseFloat(b.price), seller: b.seller, sellerContact: b.seller_contact, sellerEmail: b.seller_email, sellerPhone: b.seller_phone, timeLeft: b.time_left, auctionId: b.auction_id }));
   }
-
-  const { data: wonData } = await supabaseClient
-    .from('buyer_won_auctions')
-    .select('*')
-    .eq('user_id', currentUser.id);
-
+  const { data: wonData } = await supabaseClient.from('buyer_won_auctions').select('*').eq('user_id', currentUser.id);
   if (wonData && wonData.length > 0) {
-    wonAuctions = wonData.map(w => ({
-      id: w.id, product: w.product, variety: w.variety, quantity: w.quantity,
-      price: parseFloat(w.price), seller: w.seller, sellerContact: w.seller_contact,
-      sellerEmail: w.seller_email, sellerPhone: w.seller_phone,
-      status: w.status, date: w.date
-    }));
+    wonAuctions = wonData.map(w => ({ id: w.id, product: w.product, variety: w.variety, quantity: w.quantity, price: parseFloat(w.price), seller: w.seller, sellerContact: w.seller_contact, sellerEmail: w.seller_email, sellerPhone: w.seller_phone, status: w.status, date: w.date, imo: w.imo, bolUploaded: w.bol_uploaded, bolUrl: w.bol_url, shipmentStatus: w.shipment_status || 'Pending', region: w.region || 'Unknown' }));
   }
-
+  const { data: containerData } = await supabaseClient.from('buyer_container').select('*').eq('user_id', currentUser.id);
+  if (containerData && containerData.length > 0) {
+    containerProducts = containerData.map(c => ({ suggestedId: c.suggested_id, product: c.product, variety: c.variety, quantity: parseFloat(c.quantity), price: parseFloat(c.price), seller: c.seller, isSample: c.is_sample || false }));
+  }
+  // Load top traders from Supabase
+  try {
+    const { data: topTraders } = await supabaseClient.from('top_traders').select('*').limit(3).order('pnl', { ascending: false });
+    if (topTraders && topTraders.length > 0) {
+      const bannerText = topTraders.map((t, i) => `${i === 0 ? '🏆 TOP BUYER' : i === 1 ? '2nd' : '3rd'}: ${t.name} (+$${t.pnl.toLocaleString()})`).join(' | ');
+      document.getElementById('topTraderBanner').textContent = bannerText;
+    }
+  } catch (e) { /* fallback to static */ }
   updateWalletDisplay();
   renderBots();
   renderActiveBids();
   renderWonAuctions();
+  renderContainerSection();
 }
 
 async function saveBotsToSupabase() {
   if (!currentUser) return;
   for (const bot of bots) {
-    await supabaseClient.from('buyer_bots').upsert({
-      id: bot.id, user_id: currentUser.id, name: bot.name, commodity: bot.commodity,
-      varieties: bot.varieties, emoji: bot.emoji, status: bot.status, trades: bot.trades,
-      pnl: bot.pnl, win_rate: bot.winRate, strategy: bot.strategy,
-      max_price: bot.maxPrice, budget: bot.budget,
-      updated_at: new Date().toISOString()
-    });
+    await supabaseClient.from('buyer_bots').upsert({ id: bot.id, user_id: currentUser.id, name: bot.name, commodity: bot.commodity, varieties: bot.varieties, emoji: bot.emoji, status: bot.status, trades: bot.trades, pnl: bot.pnl, win_rate: bot.winRate, strategy: bot.strategy, max_price: bot.maxPrice, budget: bot.budget, updated_at: new Date().toISOString() });
   }
 }
 
 async function saveWalletToSupabase() {
   if (!currentUser) return;
-  await supabaseClient
-    .from('profiles')
-    .update({ wallet_balance: walletBalance })
-    .eq('id', currentUser.id);
+  await supabaseClient.from('profiles').update({ wallet_balance: walletBalance }).eq('id', currentUser.id);
+}
+
+async function saveContainerToSupabase() {
+  if (!currentUser) return;
+  await supabaseClient.from('buyer_container').delete().eq('user_id', currentUser.id);
+  for (const p of containerProducts) {
+    await supabaseClient.from('buyer_container').insert({ user_id: currentUser.id, suggested_id: p.suggestedId, product: p.product, variety: p.variety, quantity: p.quantity, price: p.price, seller: p.seller, is_sample: p.isSample || false, created_at: new Date().toISOString() });
+  }
 }
 
 // ============================================
@@ -1047,69 +897,20 @@ async function saveWalletToSupabase() {
 // ============================================
 async function depositFunds() {
   const amount = parseFloat(document.getElementById('depositAmount').value);
-
-  if (isNaN(amount) || amount < 100) {
-    showToast('Minimum deposit is $100 USD', true);
-    return;
-  }
-
+  if (isNaN(amount) || amount < 100) { showToast('Minimum deposit is $100 USD', true); return; }
   const confirmBtn = document.getElementById('confirmDepositBtn');
   const originalText = confirmBtn.textContent;
   confirmBtn.textContent = 'Processing...';
   confirmBtn.disabled = true;
-
   try {
     const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-
-    if (sessionError || !session || !session.access_token) {
-      showToast('Please sign in again', true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-      return;
-    }
-
-    const response = await fetch(
-      'https://pfutaovwbygefummienf.supabase.co/functions/v1/stripe-checkout',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + session.access_token
-        },
-        body: JSON.stringify({
-          amount: amount,
-          successUrl: window.location.origin + '/dash-buyer.html?deposit=success',
-          cancelUrl: window.location.origin + '/dash-buyer.html?deposit=cancelled'
-        })
-      }
-    );
-
+    if (sessionError || !session || !session.access_token) { showToast('Please sign in again', true); confirmBtn.textContent = originalText; confirmBtn.disabled = false; return; }
+    const response = await fetch('https://pfutaovwbygefummienf.supabase.co/functions/v1/stripe-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token }, body: JSON.stringify({ amount: amount, successUrl: window.location.origin + '/dash-buyer.html?deposit=success', cancelUrl: window.location.origin + '/dash-buyer.html?deposit=cancelled' }) });
     const responseText = await response.text();
-
     let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('JSON parse failed. Raw response:', responseText.substring(0, 300));
-      showToast('Server error. Status: ' + response.status, true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-      return;
-    }
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      showToast('Error: ' + (data.error || 'Unable to create checkout session'), true);
-      confirmBtn.textContent = originalText;
-      confirmBtn.disabled = false;
-    }
-  } catch (error) {
-    console.error('Deposit error:', error);
-    showToast('Payment service unavailable', true);
-    confirmBtn.textContent = originalText;
-    confirmBtn.disabled = false;
-  }
+    try { data = JSON.parse(responseText); } catch (parseError) { console.error('JSON parse failed. Raw response:', responseText.substring(0, 300)); showToast('Server error. Status: ' + response.status, true); confirmBtn.textContent = originalText; confirmBtn.disabled = false; return; }
+    if (data.url) { window.location.href = data.url; } else { showToast('Error: ' + (data.error || 'Unable to create checkout session'), true); confirmBtn.textContent = originalText; confirmBtn.disabled = false; }
+  } catch (error) { console.error('Deposit error:', error); showToast('Payment service unavailable', true); confirmBtn.textContent = originalText; confirmBtn.disabled = false; }
 }
 
 // ============================================
@@ -1120,6 +921,7 @@ function saveToStorage() {
   localStorage.setItem('buyer_wallet', walletBalance.toString());
   localStorage.setItem('buyer_bids', JSON.stringify(activeBids));
   localStorage.setItem('buyer_won', JSON.stringify(wonAuctions));
+  localStorage.setItem('buyer_container', JSON.stringify(containerProducts));
 }
 
 function loadSavedData() {
@@ -1127,25 +929,23 @@ function loadSavedData() {
   const savedWallet = localStorage.getItem('buyer_wallet');
   const savedBids = localStorage.getItem('buyer_bids');
   const savedWon = localStorage.getItem('buyer_won');
+  const savedContainer = localStorage.getItem('buyer_container');
   if (savedBots) bots = JSON.parse(savedBots);
   if (savedWallet) walletBalance = parseFloat(savedWallet);
   if (savedBids) activeBids = JSON.parse(savedBids);
   if (savedWon) wonAuctions = JSON.parse(savedWon);
+  if (savedContainer) containerProducts = JSON.parse(savedContainer);
   if (isNaN(walletBalance)) walletBalance = 5000;
   if (!Array.isArray(bots)) bots = [];
   if (!Array.isArray(activeBids)) activeBids = [];
   if (!Array.isArray(wonAuctions)) wonAuctions = [];
+  if (!Array.isArray(containerProducts)) containerProducts = [];
 }
 
 function checkStripeReturn() {
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('deposit') === 'success') {
-    showToast('Deposit successful! Funds added to wallet.');
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } else if (urlParams.get('deposit') === 'cancelled') {
-    showToast('Deposit cancelled.', true);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
+  if (urlParams.get('deposit') === 'success') { showToast('Deposit successful! Funds added to wallet.'); window.history.replaceState({}, document.title, window.location.pathname); }
+  else if (urlParams.get('deposit') === 'cancelled') { showToast('Deposit cancelled.', true); window.history.replaceState({}, document.title, window.location.pathname); }
 }
 
 function showToast(msg, isError = false) {
@@ -1160,6 +960,7 @@ function showToast(msg, isError = false) {
 // EVENT LISTENERS
 // ============================================
 document.getElementById('depositBtn').onclick = () => document.getElementById('depositModal').style.display = 'flex';
+document.getElementById('fileBriefBtn').onclick = () => document.getElementById('fileBriefModal').style.display = 'flex';
 document.getElementById('closeDepositModal').onclick = () => document.getElementById('depositModal').style.display = 'none';
 document.getElementById('cancelDepositBtn').onclick = () => document.getElementById('depositModal').style.display = 'none';
 document.getElementById('confirmDepositBtn').onclick = depositFunds;
@@ -1181,19 +982,16 @@ document.getElementById('cancelBidBtn').onclick = () => document.getElementById(
 document.getElementById('closeWonModal').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
 document.getElementById('cancelWonBtn').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
 
+document.getElementById('closeAddContainerModal').onclick = () => document.getElementById('addToContainerModal').style.display = 'none';
+document.getElementById('cancelAddContainerBtn').onclick = () => document.getElementById('addToContainerModal').style.display = 'none';
+document.getElementById('confirmAddContainerBtn').onclick = confirmAddToContainer;
+
 document.getElementById('botsGrid').addEventListener('click', (e) => {
   const card = e.target.closest('.bot-card');
   if (!card) return;
   if (card.id === 'addBotCard') {
-    const newBot = {
-      id: 'bot_' + Date.now(), name: 'New Buyer Bot', commodity: 'Apples', varieties: [],
-      emoji: '🍎', status: 'active', trades: 0, pnl: 0, winRate: 0,
-      strategy: 'Balanced', maxPrice: 0.60, budget: 500
-    };
-    bots.push(newBot);
-    renderBots();
-    openBotConfig(newBot);
-    return;
+    const newBot = { id: 'bot_' + Date.now(), name: 'New Buyer Bot', commodity: 'Apples', varieties: [], emoji: '🍎', status: 'active', trades: 0, pnl: 0, winRate: 0, strategy: 'Balanced', maxPrice: 0.60, budget: 500 };
+    bots.push(newBot); renderBots(); openBotConfig(newBot); return;
   }
   const botId = card.getAttribute('data-bot-id');
   const bot = bots.find(b => b.id === botId);
@@ -1210,30 +1008,49 @@ document.getElementById('wonAuctionsList').addEventListener('click', (e) => {
   if (item) showWonDetails(item.getAttribute('data-won-id'));
 });
 
-// Sign out handler - FIXED: removed target="_blank" behavior
+document.getElementById('suggestedAuctionsGrid').addEventListener('click', (e) => {
+  const btn = e.target.closest('.add-to-container-btn');
+  if (btn && !btn.disabled) { const auctionId = btn.getAttribute('data-suggested-id'); openAddToContainerModal(auctionId); return; }
+});
+
+// Sign out handler - FIXED: use replace() to prevent back-button loop
 document.getElementById('authBtn').onclick = async (e) => {
   e.preventDefault();
+  e.stopPropagation();
   await supabaseClient.auth.signOut();
+  currentUser = null;
+  window.location.replace('signin.html');
 };
 
 // ============================================
 // INITIALIZATION
 // ============================================
+// Simulate BOL upload notification (for demo - remove in production)
+function simulateBOLUpload() {
+  setTimeout(() => {
+    const pendingAuction = wonAuctions.find(w => !w.bolUploaded);
+    if (pendingAuction) {
+      pendingAuction.bolUploaded = true;
+      pendingAuction.imo = '9632174';
+      pendingAuction.shipmentStatus = 'In Transit';
+      renderWonAuctions();
+      showToast(`📄 BOL uploaded for ${pendingAuction.product}! Track your shipment now.`);
+    }
+  }, 15000); // 15 seconds after load
+}
+
 async function initialize() {
-  await checkAuth();
-
-  if (currentUser) {
-    await loadFromSupabase();
-  } else {
-    loadSavedData();
-  }
-
+  const isAuth = await checkAuth();
+  if (!isAuth) return;
+  if (currentUser) { await loadFromSupabase(); } else { loadSavedData(); }
   checkStripeReturn();
   updateWalletDisplay();
   renderBots();
   renderActiveBids();
   renderWonAuctions();
+  renderContainerSection();
   startPriceSimulation();
+  simulateBOLUpload(); // Demo only
 }
 
 initialize();
