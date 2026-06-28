@@ -1,436 +1,514 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>TradeAux &bull; Seller Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { width: 100%; min-height: 100%; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
-.bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
-.wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
-.wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
-.wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
-@keyframes waveBgDrift {
-  0% { transform: translate(0px,0px) scale(1); opacity: 0.15; }
-  50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; }
-  100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; }
-}
-.gem-logo-corner {
-  position: fixed; top: 20px; left: 20px; z-index: 9999;
-  filter: drop-shadow(0 30px 50px rgba(0,206,209,0.4));
-  transform-style: preserve-3d; perspective: 1000px;
-  transform: scale(0.35); transform-origin: top left; pointer-events: none;
-}
-.gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
-.gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
-.gem-letter:nth-child(1) { animation-delay: 0s; }
-.gem-letter:nth-child(2) { animation-delay: 0.2s; }
-.gem-letter:nth-child(3) { animation-delay: 0.4s; }
-.gem-letter:nth-child(4) { animation-delay: 0.6s; }
-.gem-letter:nth-child(5) { animation-delay: 0.8s; }
-.gem-letter:nth-child(6) { animation-delay: 0.10s; }
-.gem-letter:nth-child(7) { animation-delay: 0.30s; }
-.gem-letter:nth-child(8) { animation-delay: 0.50s; }
-@keyframes letterFloat {
-  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
-  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
-}
-.gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before {
-  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 18px rgba(0,102,255,0.35), 2px 2px 4px rgba(0,0,0,0.3);
-  transform: translateZ(2px);
-}
-.gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before {
-  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 18px rgba(0,204,68,0.35), 2px 2px 4px rgba(0,0,0,0.3);
-  transform: translateZ(2px);
-}
-.gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before {
-  content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 18px rgba(217,43,43,0.35), 2px 2px 4px rgba(0,0,0,0.3);
-  transform: translateZ(2px);
-}
-.gem-letter .edge-top, .gem-letter .edge-right, .gem-letter .edge-bottom, .gem-letter .edge-left {
-  position: absolute; pointer-events: none; z-index: 5;
-}
-.gem-letter .edge-top { top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; }
-.gem-letter .edge-right { top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; }
-.gem-letter .edge-bottom { bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; }
-.gem-letter .edge-left { top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; }
-.light-source {
-  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
-  animation: rotateLight 15s linear infinite;
-  pointer-events: none; z-index: 10; mix-blend-mode: overlay;
-}
-@keyframes rotateLight {
-  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
-  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
-  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
-}
-.sparkle {
-  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
-  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
-  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
-}
-@keyframes sparkleFlash {
-  0% { opacity: 0; transform: scale(0.5); }
-  10% { opacity: 1; transform: scale(1.2); }
-  20% { opacity: 0.6; transform: scale(0.9); }
-  30% { opacity: 1; transform: scale(1.1); }
-  40% { opacity: 0; transform: scale(0.5); }
-  100% { opacity: 0; transform: scale(0.5); }
-}
-.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
-.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
-.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
-.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
-.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
-.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
-.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
-.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
-.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
-.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
-.depth-shadow {
-  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
-  background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
-  filter: blur(20px); z-index: -1;
-}
-.commodity-ticker-bar {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
-  background: linear-gradient(145deg, rgba(15, 32, 64, 0.95), rgba(2, 6, 23, 0.98));
-  border-top: 2px solid rgba(124, 252, 0, 0.4);
-  backdrop-filter: blur(12px);
-  padding: 8px 0; overflow: hidden;
-}
-.ticker-track {
-  display: flex; gap: 40px;
-  animation: tickerScroll 30s linear infinite;
-  white-space: nowrap;
-}
-@keyframes tickerScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.ticker-commodity {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 600;
-  color: #e5e7eb; flex-shrink: 0;
-}
-.ticker-commodity .ticker-name { color: #FFD966; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-.ticker-commodity .ticker-price { color: #00ced1; font-weight: 800; }
-.ticker-commodity .ticker-change.up { color: #7CFC00; font-size: 10px; }
-.ticker-commodity .ticker-change.down { color: #ff3b3b; font-size: 10px; }
-.ticker-commodity .ticker-change.flat { color: #9ca3af; font-size: 10px; }
-.ticker-separator { color: rgba(0, 206, 209, 0.3); font-size: 10px; }
-.ticker-label {
-  position: absolute; left: 0; top: 0; bottom: 0;
-  background: linear-gradient(90deg, rgba(2,6,23,0.98) 0%, rgba(2,6,23,0.9) 60%, transparent 100%);
-  padding: 0 16px; display: flex; align-items: center; z-index: 2;
-  font-family: 'Orbitron', sans-serif; font-size: 10px; color: #7CFC00;
-  letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
-}
-.ticker-label::after {
-  content: ''; position: absolute; right: -20px; top: 0; bottom: 0; width: 20px;
-  background: linear-gradient(90deg, rgba(2,6,23,0.9), transparent);
-}
-.container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 80px 140px; position: relative; z-index: 2; }
-.glass-header {
-  backdrop-filter: blur(14px); background: rgba(3,5,12,0.7);
-  border-bottom: 1px solid rgba(124,252,0,0.3);
-  padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
-  position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 12px;
-  margin-left: 20px;
-}
-.unit-toggle {
-  display: flex; gap: 6px; align-items: center;
-}
-.unit-toggle button {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
-  color: #9ca3af; padding: 6px 16px; border-radius: 30px; cursor: pointer;
-  font-size: 11px; font-weight: 600; transition: 0.2s; font-family: 'Orbitron', sans-serif;
-}
-.unit-toggle button.active {
-  background: rgba(124,252,0,0.2); border-color: #7CFC00; color: #7CFC00;
-}
-.btn-outline {
-  background: transparent; border: 3px solid transparent;
-  background-image: linear-gradient(#020617, #020617), linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00);
-  background-origin: border-box; background-clip: padding-box, border-box;
-  color: #FFFFFF; padding: 8px 28px; border-radius: 40px;
-  font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
-  font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
-}
-.btn-outline:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0,206,209,0.5); }
-.section-card {
-  background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95));
-  border-radius: 24px; padding: 28px; margin-bottom: 28px;
-  backdrop-filter: blur(8px); position: relative; border: 2px solid transparent;
-  background-clip: padding-box;
-}
-.section-card::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 26px; padding: 2px;
-  background: linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00);
-  background-size: 300% 300%;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  pointer-events: none; animation: borderFlow 4s ease infinite;
-}
-@keyframes borderFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.section-header {
-  font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700;
-  color: #7CFC00; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
-  border-left: 3px solid #7CFC00; padding-left: 16px; flex-wrap: wrap;
-}
-.section-header .badge { background: rgba(0,206,209,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; color: #00ced1; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.form-field { display: flex; flex-direction: column; gap: 8px; }
-.form-label { font-size: 11px; color: #FFD966; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-.form-input, .form-select, .form-textarea {
-  background: rgba(0,0,0,0.6); border: 1px solid rgba(124,252,0,0.4);
-  border-radius: 12px; padding: 12px 16px; color: #FFFFFF; font-size: 14px;
-  outline: none; font-weight: 500;
-}
-.form-input:focus, .form-select:focus { border-color: #7CFC00; box-shadow: 0 0 0 3px rgba(124,252,0,0.15); }
-.btn-primary {
-  background: linear-gradient(105deg, #10b981, #2dd4bf); border: none;
-  padding: 14px 28px; border-radius: 40px; font-family: 'Orbitron', sans-serif;
-  font-weight: 700; font-size: 14px; color: #010101; cursor: pointer; transition: 0.2s; width: 100%;
-}
-.btn-secondary {
-  background: rgba(0,206,209,0.2); border: 1px solid #00ced1;
-  padding: 8px 20px; border-radius: 30px; cursor: pointer; color: #00ced1; font-weight: 700;
-  font-size: 12px; transition: 0.2s;
-}
-.btn-secondary:hover { background: rgba(0,206,209,0.3); }
-.btn-danger { background: rgba(255,77,77,0.2); border: 1px solid #FF4D4D; padding: 6px 14px; border-radius: 30px; cursor: pointer; color: #FF4D4D; font-weight: 600; font-size: 11px; }
-.empty-state { text-align: center; padding: 40px; color: #9ca3af; }
-.toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-  background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); padding: 12px 24px;
-  border-radius: 40px; border-left: 4px solid #7CFC00; transition: 0.3s; opacity: 0;
-  z-index: 2000; color: white; font-weight: 500; max-width: 90%;
-}
-.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.error { border-left-color: #FF4D4D; }
-.media-modal {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.95); z-index: 3000; align-items: center; justify-content: center;
-}
-.media-modal img, .media-modal video { max-width: 90%; max-height: 90%; border-radius: 16px; border: 3px solid #FFD966; }
-.modal-close { position: absolute; top: 20px; right: 40px; font-size: 48px; color: white; cursor: pointer; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>TradeAux • Seller Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100%; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    body { background: #020617; min-height: 100vh; position: relative; z-index: 0; }
 
-/* CERTIFICATE SQUARE CARDS */
-.cert-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px; margin-top: 16px;
-}
-.cert-square {
-  background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.2);
-  border-radius: 16px; padding: 14px; text-align: center;
-  transition: 0.3s; display: flex; flex-direction: column; align-items: center;
-}
-.cert-square:hover { border-color: #00ced1; transform: translateY(-2px); }
-.cert-square .cert-icon { font-size: 28px; margin-bottom: 6px; }
-.cert-square .cert-name { font-size: 11px; font-weight: 600; color: #e5e7eb; margin-bottom: 4px; }
-.cert-square .cert-desc { font-size: 9px; color: #9ca3af; margin-bottom: 8px; }
-.cert-square .cert-preview {
-  width: 100%; height: 60px; border-radius: 8px; border: 1px dashed rgba(124,252,0,0.3);
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-  background: rgba(0,0,0,0.3); overflow: hidden; position: relative;
-  margin-bottom: 8px;
-}
-.cert-square .cert-preview img { width: 100%; height: 100%; object-fit: cover; }
-.cert-square .cert-preview .placeholder { font-size: 10px; color: #9ca3af; }
-.cert-square .cert-toggle-row { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; margin-top: 4px; }
-.cert-square .cert-toggle-row span { font-size: 9px; color: #9ca3af; }
-.cert-square .cert-required { color: #FFD966; font-size: 8px; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,217,102,0.1); padding: 2px 8px; border-radius: 10px; margin-bottom: 4px; }
-.cert-stack {
-  display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 4px;
-}
-.cert-stack .stack-item {
-  width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(124,252,0,0.3);
-  cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3);
-}
-.cert-stack .stack-item img { width: 100%; height: 100%; object-fit: cover; }
-.cert-stack .stack-item .add-stack { font-size: 16px; color: #9ca3af; display: flex; align-items: center; justify-content: center; height: 100%; }
-.toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: 0.3s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
-input:checked + .slider { background-color: #7CFC00; }
-input:checked + .slider:before { transform: translateX(16px); }
+    /* ===== BACKGROUND WAVES ===== */
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift {
+      0% { transform: translate(0px,0px) scale(1); opacity: 0.15; }
+      50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; }
+      100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; }
+    }
 
-/* PRODUCT ROW */
-.product-row {
-  display: flex; gap: 16px; flex-wrap: wrap; background: rgba(0,0,0,0.3);
-  padding: 16px; border-radius: 16px; margin-bottom: 16px; align-items: flex-end;
-}
-.product-row .product-image {
-  width: 70px; height: 70px; border-radius: 12px; border: 2px solid rgba(124,252,0,0.3);
-  cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.product-row .product-image img { width: 100%; height: 100%; object-fit: cover; }
-.product-row .product-image .placeholder { font-size: 24px; }
-.product-row .product-fields { flex: 1; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; min-width: 200px; }
-.product-row .product-fields .field-group { flex: 1; min-width: 120px; }
-.product-row .product-fields .field-group label { font-size: 9px; color: #FFD966; text-transform: uppercase; letter-spacing: 1px; }
-.product-row .product-fields .field-group input,
-.product-row .product-fields .field-group select { width: 100%; padding: 6px 10px; background: rgba(0,0,0,0.6); border: 1px solid rgba(124,252,0,0.3); border-radius: 8px; color: white; font-size: 12px; }
-.product-row .product-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-.size-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
-.size-chip { background: rgba(0,206,209,0.15); border: 1px solid rgba(0,206,209,0.3); border-radius: 12px; padding: 2px 10px; font-size: 10px; color: #00ced1; display: flex; align-items: center; gap: 4px; }
-.size-chip .remove-size { cursor: pointer; color: #FF4D4D; font-weight: bold; }
+    /* ===== 3D LOGO ===== */
+    .gem-logo-corner {
+      position: fixed; top: 20px; left: 20px; z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(0,206,209,0.4));
+      transform-style: preserve-3d; perspective: 1000px;
+      transform: scale(0.35); transform-origin: top left; pointer-events: none;
+    }
+    .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
+    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+    .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before {
+      content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(0,102,255,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before {
+      content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(0,204,68,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before {
+      content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(217,43,43,0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
 
-/* AUCTION CARD */
-.auction-card {
-  background: rgba(0,0,0,0.4); border-radius: 16px; padding: 20px;
-  border: 1px solid rgba(124,252,0,0.2);
-}
-.auction-header {
-  display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
-}
-.auction-header .auction-logo {
-  width: 60px; height: 60px; border-radius: 12px; overflow: hidden;
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(124,252,0,0.3);
-  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-}
-.auction-header .auction-logo img { width: 100%; height: 100%; object-fit: cover; }
-.auction-header .auction-logo .placeholder { font-size: 24px; }
-.auction-header .auction-company { flex: 1; }
-.auction-header .auction-company .company-name { font-size: 16px; font-weight: 700; color: #e5e7eb; }
-.auction-header .auction-company .company-detail { font-size: 12px; color: #9ca3af; }
+    /* ===== COMMODITY TICKER ===== */
+    .commodity-ticker-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: linear-gradient(145deg, rgba(15, 32, 64, 0.95), rgba(2, 6, 23, 0.98));
+      border-top: 2px solid rgba(124, 252, 0, 0.4);
+      backdrop-filter: blur(12px);
+      padding: 8px 0; overflow: hidden;
+    }
+    .ticker-track { display: flex; gap: 40px; animation: tickerScroll 30s linear infinite; white-space: nowrap; }
+    @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .ticker-commodity { display: inline-flex; align-items: center; gap: 8px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 600; color: #e5e7eb; flex-shrink: 0; }
+    .ticker-commodity .ticker-name { color: #FFD966; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .ticker-commodity .ticker-price { color: #00ced1; font-weight: 800; }
+    .ticker-commodity .ticker-change.up { color: #7CFC00; font-size: 10px; }
+    .ticker-commodity .ticker-change.down { color: #ff3b3b; font-size: 10px; }
+    .ticker-commodity .ticker-change.flat { color: #9ca3af; font-size: 10px; }
+    .ticker-separator { color: rgba(0, 206, 209, 0.3); font-size: 10px; }
+    .ticker-label {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: linear-gradient(90deg, rgba(2,6,23,0.98) 0%, rgba(2,6,23,0.9) 60%, transparent 100%);
+      padding: 0 16px; display: flex; align-items: center; z-index: 2;
+      font-family: 'Orbitron', sans-serif; font-size: 10px; color: #7CFC00;
+      letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+    }
+    .ticker-label::after { content: ''; position: absolute; right: -20px; top: 0; bottom: 0; width: 20px; background: linear-gradient(90deg, rgba(2,6,23,0.9), transparent); }
 
-.auction-product-display {
-  display: flex; gap: 16px; background: rgba(0,0,0,0.3); border-radius: 12px;
-  padding: 16px; margin-bottom: 16px; align-items: center;
-}
-.auction-product-display .ap-image {
-  width: 70px; height: 70px; border-radius: 10px; overflow: hidden;
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(124,252,0,0.3);
-  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-}
-.auction-product-display .ap-image img { width: 100%; height: 100%; object-fit: cover; }
-.auction-product-display .ap-image .placeholder { font-size: 24px; }
-.auction-product-display .ap-info { flex: 1; }
-.auction-product-display .ap-info .ap-product-name { font-size: 15px; font-weight: 600; color: #e5e7eb; }
-.auction-product-display .ap-info .ap-details { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-.auction-product-display .ap-info .ap-total { font-size: 14px; font-weight: 700; color: #7CFC00; margin-top: 4px; }
+    /* ===== CONTAINER ===== */
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 80px 140px; position: relative; z-index: 2; }
 
-.auction-bids-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.auction-bids-table th { color: #FFD966; text-transform: uppercase; font-size: 10px; padding: 8px 6px; text-align: left; border-bottom: 1px solid rgba(124,252,0,0.15); }
-.auction-bids-table td { padding: 8px 6px; border-bottom: 1px solid rgba(124,252,0,0.08); color: #E0E0FF; }
-.auction-bids-table .rank-1 { background: rgba(255,215,0,0.12); }
-.auction-bids-table .rank-2 { background: rgba(192,192,192,0.08); }
-.auction-bids-table .rank-3 { background: rgba(205,127,50,0.08); }
-.btn-accept { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 11px; cursor: pointer; color: #010101; }
+    /* ===== HEADER ===== */
+    .glass-header {
+      backdrop-filter: blur(14px); background: rgba(3,5,12,0.7);
+      border-bottom: 1px solid rgba(124,252,0,0.3);
+      padding: 12px 24px;
+      display: flex; justify-content: center; align-items: center;
+      position: sticky; top: 0; z-index: 100; gap: 20px;
+      margin-left: 140px;
+      flex-wrap: wrap;
+    }
+    .glass-header .left-spacer { flex: 1; min-width: 60px; }
+    .glass-header .center-section { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .glass-header .center-section .company-name-header { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #7CFC00; letter-spacing: 1px; }
+    .glass-header .center-section .company-port-header { font-size: 11px; color: #9ca3af; }
+    .glass-header .right-section { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .unit-toggle { display: flex; gap: 4px; align-items: center; }
+    .unit-toggle button { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #9ca3af; padding: 4px 12px; border-radius: 30px; cursor: pointer; font-size: 10px; font-weight: 600; transition: 0.2s; font-family: 'Orbitron', sans-serif; }
+    .unit-toggle button.active { background: rgba(124,252,0,0.2); border-color: #7CFC00; color: #7CFC00; }
+    .btn-outline {
+      background: transparent; border: 3px solid transparent;
+      background-image: linear-gradient(#020617, #020617), linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00);
+      background-origin: border-box; background-clip: padding-box, border-box;
+      color: #FFFFFF; padding: 6px 20px; border-radius: 40px;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+      font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+    }
+    .btn-outline:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0,206,209,0.5); }
 
-.auction-timer { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 800; color: #7CFC00; text-align: center; margin: 12px 0; text-shadow: 0 0 10px rgba(124,252,0,0.5); }
+    /* ===== SECTION CARDS ===== */
+    .section-card {
+      background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95));
+      border-radius: 24px; padding: 24px; margin-bottom: 24px;
+      backdrop-filter: blur(8px); position: relative; border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    .section-card::before {
+      content: ''; position: absolute; inset: -2px; border-radius: 26px; padding: 2px;
+      background: linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00);
+      background-size: 300% 300%;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      pointer-events: none; animation: borderFlow 4s ease infinite;
+    }
+    @keyframes borderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .section-header {
+      font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700;
+      color: #7CFC00; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+      border-left: 3px solid #7CFC00; padding-left: 14px; flex-wrap: wrap;
+    }
+    .section-header .badge { background: rgba(0,206,209,0.2); padding: 3px 10px; border-radius: 20px; font-size: 10px; color: #00ced1; }
 
-@media (max-width: 768px) {
-  .container { padding: 16px 16px 80px 16px; }
-  .gem-logo-corner { transform: scale(0.2); }
-  .cert-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-  .glass-header { flex-direction: column; align-items: stretch; gap: 8px; margin-left: 0; }
-  .unit-toggle { justify-content: center; }
-  .product-row { flex-direction: column; }
-  .product-row .product-image { width: 60px; height: 60px; }
-  .auction-product-display { flex-direction: column; align-items: stretch; }
-  .auction-header { flex-wrap: wrap; }
-}
-@media (max-width: 480px) {
-  .container { padding: 12px 12px 80px 12px; }
-  .gem-logo-corner { transform: scale(0.15); }
-  .section-card { padding: 16px; }
-}
-/* Logo upload fix */
-#companyLogoPreview { pointer-events: none; }
-#auctionImagePreview { pointer-events: none; }
+    /* ===== BLOCK MODE ===== */
+    .block-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .block-card {
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(124,252,0,0.15);
+      border-radius: 16px; padding: 14px; display: flex; flex-direction: column;
+      gap: 6px; transition: 0.3s;
+    }
+    .block-card:hover { border-color: rgba(124,252,0,0.3); transform: translateY(-2px); }
+    .block-card .block-label { font-size: 9px; color: #FFD966; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .block-card .block-input, .block-card .block-select {
+      background: #0a1228; border: 1px solid rgba(124,252,0,0.3);
+      border-radius: 10px; padding: 8px 12px; color: #FFFFFF; font-size: 13px;
+      outline: none; width: 100%;
+    }
+    .block-card .block-input:focus, .block-card .block-select:focus { border-color: #7CFC00; box-shadow: 0 0 0 3px rgba(124,252,0,0.1); }
+    .block-card .block-btn {
+      background: #0a1228; border: 1px solid rgba(124,252,0,0.3);
+      border-radius: 10px; padding: 8px 16px; color: #7CFC00; cursor: pointer;
+      font-size: 12px; font-weight: 600; transition: 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .block-card .block-btn:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; }
+    .block-card .block-danger {
+      background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.3);
+      color: #FF4D4D;
+    }
+    .block-card .block-danger:hover { background: rgba(255,77,77,0.25); border-color: #FF4D4D; }
 
-/* Certificate stack delete button */
-.stack-delete {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #FF4D4D;
-  color: white;
-  border: none;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  padding: 0;
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 10;
-}
-.stack-item:hover .stack-delete {
-  opacity: 1;
-}
-.stack-delete:hover {
-  background: #ff1a1a;
-  transform: scale(1.1);
-}
+    /* ===== COMPANY PROFILE ===== */
+    .profile-grid {
+      display: grid; grid-template-columns: 160px 1fr 1fr; gap: 14px;
+    }
+    .profile-grid .logo-block { grid-row: 1 / span 3; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .profile-grid .logo-block .logo-upload {
+      width: 140px; height: 100px; border-radius: 16px; border: 2px dashed rgba(124,252,0,0.3);
+      background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; overflow: hidden;
+    }
+    .profile-grid .logo-block .logo-upload img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .profile-grid .logo-block .logo-upload .placeholder { font-size: 10px; color: #9ca3af; text-align: center; }
 
-/* Remove certificate button */
-.btn-remove-cert {
-  background: rgba(255,77,77,0.15);
-  border: 1px solid rgba(255,77,77,0.4);
-  color: #FF4D4D;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: all 0.2s;
-  font-family: 'Inter', sans-serif;
-}
-.btn-remove-cert:hover {
-  background: rgba(255,77,77,0.3);
-  border-color: #FF4D4D;
-}
+    /* ===== CERTIFICATION BLOCKS (Auction Card Style) ===== */
+    .cert-block-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+    }
+    .cert-block {
+      background: linear-gradient(145deg, #0B1122, #030712);
+      border: 1px solid rgba(124,252,0,0.35);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: 0.3s;
+    }
+    .cert-block:hover { border-color: #7CFC00; transform: translateY(-2px); box-shadow: 0 25px 30px -14px rgba(124,252,0,0.15); }
+    .cert-block .cert-icon { font-size: 26px; }
+    .cert-block .cert-name { font-size: 12px; font-weight: 700; color: #e5e7eb; text-align: center; }
+    .cert-block .cert-desc { font-size: 8px; color: #9ca3af; text-align: center; }
+    .cert-block .cert-required { font-size: 7px; color: #FFD966; background: rgba(255,217,102,0.1); padding: 2px 8px; border-radius: 10px; }
+    .cert-block .cert-preview {
+      width: 100%; height: 40px; border-radius: 8px; border: 1px dashed rgba(124,252,0,0.3);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      background: rgba(0,0,0,0.3); overflow: hidden;
+    }
+    .cert-block .cert-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .cert-block .cert-preview .placeholder { font-size: 8px; color: #9ca3af; }
+    .cert-block .cert-toggle-row { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; margin-top: 4px; }
+    .cert-block .cert-toggle-row span { font-size: 9px; color: #9ca3af; }
+    .cert-stack { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+    .cert-stack .stack-item {
+      position: relative; width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(124,252,0,0.3);
+      cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3);
+    }
+    .cert-stack .stack-item img { width: 100%; height: 100%; object-fit: cover; }
+    .cert-stack .stack-item .add-stack { font-size: 16px; color: #9ca3af; display: flex; align-items: center; justify-content: center; height: 100%; }
+    .stack-delete {
+      position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; border-radius: 50%;
+      background: #FF4D4D; color: white; border: none; font-size: 10px; font-weight: bold;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0;
+      opacity: 0; transition: opacity 0.2s; z-index: 10;
+    }
+    .stack-item:hover .stack-delete { opacity: 1; }
+    .stack-delete:hover { background: #ff1a1a; transform: scale(1.1); }
 
-/* Stack item positioning for delete overlay */
-.stack-item {
-  position: relative;
-}
-.field-label {
-  font-size: 9px;
-  color: #FFD966;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-</style>
+    .btn-remove-cert {
+      background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.4);
+      color: #FF4D4D; padding: 2px 12px; border-radius: 10px; font-size: 9px;
+      font-weight: 600; cursor: pointer; margin-top: 4px; transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-remove-cert:hover { background: rgba(255,77,77,0.3); border-color: #FF4D4D; }
+
+    .toggle-switch {
+      position: relative; display: inline-block; width: 30px; height: 18px; flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255,255,255,0.2); transition: 0.3s; border-radius: 34px;
+    }
+    .toggle-switch .slider:before {
+      position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px;
+      background-color: white; transition: 0.3s; border-radius: 50%;
+    }
+    .toggle-switch input:checked + .slider { background-color: #7CFC00; }
+    .toggle-switch input:checked + .slider:before { transform: translateX(12px); }
+
+    /* ===== PRODUCTS ===== */
+    .product-block {
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(124,252,0,0.15);
+      border-radius: 16px; padding: 14px; display: flex; flex-direction: column;
+      gap: 6px;
+    }
+    .product-block:hover { border-color: rgba(124,252,0,0.3); }
+    .product-block .product-header { display: flex; gap: 10px; align-items: center; }
+    .product-block .product-header .product-img {
+      width: 50px; height: 50px; border-radius: 10px; border: 2px solid rgba(124,252,0,0.3);
+      cursor: pointer; overflow: hidden; background: rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .product-block .product-header .product-img img { width: 100%; height: 100%; object-fit: cover; }
+    .product-block .product-header .product-img .placeholder { font-size: 20px; }
+    .size-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+    .size-chip {
+      background: rgba(0,206,209,0.15); border: 1px solid rgba(0,206,209,0.3);
+      border-radius: 12px; padding: 2px 8px; font-size: 10px; color: #00ced1;
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+    }
+    .size-chip .remove-size { cursor: pointer; color: #FF4D4D; font-weight: bold; }
+
+    /* ===== BOTS ===== */
+    .bot-block {
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(124,252,0,0.15);
+      border-radius: 16px; padding: 14px; display: flex; flex-direction: column;
+      gap: 6px;
+    }
+    .bot-block:hover { border-color: rgba(124,252,0,0.3); }
+    .bot-block .bot-name-input {
+      background: rgba(0,0,0,0.6); border: 1px solid #FFD966; border-radius: 30px;
+      padding: 4px 12px; color: white; font-family: 'Orbitron', monospace;
+      font-weight: 700; font-size: 13px; width: 100%;
+    }
+    .bot-block .bot-strategy-select {
+      background: #0a1228; border: 1px solid #7CFC00; border-radius: 30px;
+      padding: 4px 12px; color: #7CFC00; width: 100%; font-size: 12px;
+    }
+    .bot-param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .bot-param-grid .param-label { font-size: 8px; color: #FFD966; display: block; }
+    .bot-param-grid .param-input {
+      width: 100%; padding: 3px 6px; background: #0a1228;
+      border: 1px solid rgba(124,252,0,0.3); border-radius: 6px; color: white; font-size: 11px;
+    }
+
+    /* ===== TAR ===== */
+    .tar-recommendation-box {
+      background: rgba(124,252,0,0.08); border: 1px solid rgba(124,252,0,0.3);
+      border-radius: 16px; padding: 20px; margin: 12px 0;
+    }
+    .tar-recommendation-box .rec-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    .tar-recommendation-box .rec-text { font-size: 18px; font-weight: 700; color: #7CFC00; }
+    .tar-recommendation-box .rec-detail { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .tar-recommendation-box .rec-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ===== AUCTION ===== */
+    .auction-card {
+      background: rgba(0,0,0,0.4); border-radius: 16px; padding: 20px;
+      border: 1px solid rgba(124,252,0,0.2);
+    }
+    .auction-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .auction-header .auction-logo {
+      width: 60px; height: 60px; border-radius: 12px; overflow: hidden;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(124,252,0,0.3);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .auction-header .auction-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .auction-header .auction-logo .placeholder { font-size: 24px; }
+    .auction-header .auction-company { flex: 1; }
+    .auction-header .auction-company .company-name { font-size: 16px; font-weight: 700; color: #e5e7eb; }
+    .auction-header .auction-company .company-detail { font-size: 12px; color: #9ca3af; }
+    .auction-product-display {
+      display: flex; gap: 16px; background: rgba(0,0,0,0.3); border-radius: 12px;
+      padding: 16px; margin-bottom: 16px; align-items: center;
+    }
+    .auction-product-display .ap-image {
+      width: 70px; height: 70px; border-radius: 10px; overflow: hidden;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(124,252,0,0.3);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .auction-product-display .ap-image img { width: 100%; height: 100%; object-fit: cover; }
+    .auction-product-display .ap-image .placeholder { font-size: 24px; }
+    .auction-product-display .ap-info { flex: 1; }
+    .auction-product-display .ap-info .ap-product-name { font-size: 15px; font-weight: 600; color: #e5e7eb; }
+    .auction-product-display .ap-info .ap-details { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .auction-product-display .ap-info .ap-total { font-size: 14px; font-weight: 700; color: #7CFC00; margin-top: 4px; }
+    .auction-timer { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 800; color: #7CFC00; text-align: center; margin: 12px 0; text-shadow: 0 0 10px rgba(124,252,0,0.5); }
+    .auction-bids-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .auction-bids-table th { color: #FFD966; text-transform: uppercase; font-size: 10px; padding: 8px 6px; text-align: left; border-bottom: 1px solid rgba(124,252,0,0.15); }
+    .auction-bids-table td { padding: 8px 6px; border-bottom: 1px solid rgba(124,252,0,0.08); color: #E0E0FF; }
+    .auction-bids-table .rank-1 { background: rgba(255,215,0,0.12); }
+    .auction-bids-table .rank-2 { background: rgba(192,192,192,0.08); }
+    .auction-bids-table .rank-3 { background: rgba(205,127,50,0.08); }
+    .btn-accept { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 11px; cursor: pointer; color: #010101; }
+    .btn-accept:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(124,252,0,0.5); }
+
+    /* ===== BUTTONS - BLACK BG, NEON LETTERING ===== */
+    .btn-neon {
+      background: #0a1228;
+      border: 1px solid rgba(124,252,0,0.3);
+      border-radius: 10px;
+      padding: 10px 32px;
+      color: #7CFC00;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-neon:hover {
+      background: rgba(124,252,0,0.08);
+      border-color: #7CFC00;
+      box-shadow: 0 0 20px rgba(124,252,0,0.15);
+    }
+    .btn-neon-primary {
+      background: linear-gradient(105deg, #10b981, #2dd4bf);
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: #010101;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-neon-primary:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(16,185,129,0.4); }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); padding: 12px 24px;
+      border-radius: 40px; border-left: 4px solid #7CFC00; transition: 0.3s; opacity: 0;
+      z-index: 2000; color: white; font-weight: 500; max-width: 90%;
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-left-color: #FF4D4D; }
+
+    .empty-state { text-align: center; padding: 30px; color: #9ca3af; font-size: 13px; }
+
+    /* ===== TAR DROPDOWN FIX ===== */
+    .tar-select-dark {
+      background: #0a1228 !important;
+      border: 1px solid rgba(124,252,0,0.3);
+      border-radius: 10px;
+      color: #7CFC00;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 12px;
+      outline: none;
+      width: 100%;
+      text-align: center;
+    }
+    .tar-select-dark option {
+      background: #0a1228;
+      color: #7CFC00;
+    }
+
+    /* ===== MEDIA MODAL ===== */
+    #mediaModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(12px);
+      align-items: center;
+      justify-content: center;
+    }
+    #mediaModal img, #mediaModal video {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+      border: 2px solid #7CFC00;
+      box-shadow: 0 0 60px rgba(124,252,0,0.2);
+    }
+    #mediaModal .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #FF4D4D;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+      z-index: 10001;
+    }
+    #mediaModal .modal-close-btn:hover {
+      transform: scale(1.1);
+      background: #ff1a1a;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .container { padding: 16px 16px 80px 120px; }
+      .glass-header { margin-left: 120px; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .profile-grid .logo-block { grid-row: auto; }
+    }
+    @media (max-width: 768px) {
+      .container { padding: 12px 12px 80px 12px; }
+      .gem-logo-corner { transform: scale(0.2); }
+      .glass-header { flex-direction: column; align-items: center; margin-left: 0; padding: 12px; gap: 8px; }
+      .glass-header .left-spacer { display: none; }
+      .block-grid { grid-template-columns: 1fr 1fr; }
+      .cert-block-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .container { padding: 10px 10px 80px 10px; }
+      .gem-logo-corner { transform: scale(0.15); }
+      .block-grid { grid-template-columns: 1fr; }
+      .cert-block-grid { grid-template-columns: 1fr; }
+      .glass-header .center-section .company-name-header { font-size: 11px; }
+    }
+  </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -459,44 +537,51 @@ input:checked + .slider:before { transform: translateX(16px); }
 </div>
 
 <div class="glass-header">
-  <div class="unit-toggle">
-    <button id="unitMetric" class="active" onclick="setUnit('metric')">📏 Metric</button>
-    <button id="unitImperial" onclick="setUnit('imperial')">📐 Imperial</button>
-    <button id="unitBoth" onclick="setUnit('both')">🌍 Both</button>
+  <div class="left-spacer"></div>
+  <div class="center-section">
+    <div class="company-name-header" id="headerCompanyName">COMPANY NAME</div>
+    <div class="company-port-header" id="headerCompanyPort">FOB Port: Not set</div>
   </div>
-  <button class="btn-outline" id="signOutBtn">SIGN OUT</button>
+  <div class="right-section">
+    <div class="unit-toggle">
+      <button id="unitMetric" class="active" onclick="setUnit('metric')">📏</button>
+      <button id="unitImperial" onclick="setUnit('imperial')">📐</button>
+      <button id="unitBoth" onclick="setUnit('both')">🌍</button>
+    </div>
+    <button class="btn-outline" id="syncCloudBtn" style="font-size:10px;padding:6px 14px;">☁️ SYNC</button><button class="btn-outline" id="signOutBtn">SIGN OUT</button>
+  </div>
 </div>
 
 <div class="container">
 
-  <!-- COMPANY PROFILE -->
+  <!-- ===== COMPANY PROFILE ===== -->
   <div class="section-card">
     <div class="section-header">🏢 COMPANY PROFILE</div>
-    <div class="form-grid">
-      <div class="form-field">
-        <div class="form-label">COMPANY LOGO</label>
-        <label for="companyLogoInput" id="companyLogoBtn" style="width:180px;height:100px;border-radius:16px;border:2px dashed #FFD966;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;">
-          <div id="companyLogoPlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">UPLOAD</div>
-          <img id="companyLogoPreview" style="display:none;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;pointer-events:none;">
+    <div class="profile-grid">
+      <div class="logo-block">
+        <div class="logo-upload" id="companyLogoBtn">
+          <div id="companyLogoPlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;">UPLOAD<br>LOGO</div>
+          <img id="companyLogoPreview" style="display:none;max-width:100%;max-height:100%;object-fit:contain;">
         </div>
         <input type="file" id="companyLogoInput" accept="image/*" style="display:none;">
+        <span style="font-size:9px;color:#9ca3af;">Click to upload</span>
       </div>
-      <div class="form-field">
-        <div class="form-label">COMPANY NAME</div>
-        <input class="form-input" id="companyName" placeholder="ABC Exporters Ltd">
+      <div class="block-card">
+        <div class="block-label">Company Name</div>
+        <input class="block-input" id="companyName" placeholder="ABC Exporters Ltd">
       </div>
-      <div class="form-field">
-        <div class="form-label">CONTACT EMAIL</div>
-        <input class="form-input" id="contactEmail" placeholder="info@company.com">
+      <div class="block-card">
+        <div class="block-label">Contact Email</div>
+        <input class="block-input" id="contactEmail" placeholder="info@company.com">
       </div>
-      <div class="form-field">
-        <div class="form-label">PHONE / WHATSAPP</div>
-        <input class="form-input" id="contactPhone" placeholder="+94 77 123 4567">
+      <div class="block-card">
+        <div class="block-label">Phone / WhatsApp</div>
+        <input class="block-input" id="contactPhone" placeholder="+94 77 123 4567">
       </div>
-      <div class="form-field">
-        <div class="form-label">COUNTRY OF ORIGIN</div>
-        <select class="form-select" id="originCountry">
-          <option value="">Select country...</option>
+      <div class="block-card">
+        <div class="block-label">Country of Origin</div>
+        <select class="block-select" id="originCountry">
+          <option value="">Select...</option>
           <option value="Brazil">Brazil</option><option value="Fiji">Fiji</option>
           <option value="Ghana">Ghana</option><option value="India">India</option>
           <option value="Indonesia">Indonesia</option><option value="Jamaica">Jamaica</option>
@@ -505,128 +590,191 @@ input:checked + .slider:before { transform: translateX(16px); }
           <option value="Thailand">Thailand</option><option value="Vietnam">Vietnam</option>
           <option value="Other">Other</option>
         </select>
-        <input type="text" class="form-input" id="otherCountryInput" placeholder="Please specify" style="display:none;margin-top:8px;">
+        <input class="block-input" id="otherCountryInput" placeholder="Please specify" style="display:none;margin-top:6px;">
       </div>
-      <div class="form-field">
-        <div class="form-label">FOB PORT</div>
-        <input class="form-input" id="fobPort" placeholder="e.g., Colombo, Sri Lanka">
+      <div class="block-card">
+        <div class="block-label">FOB Ports</div>
+        <div id="fobPortsContainer" style="display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;gap:6px;">
+            <input class="block-input" id="fobPortInput" placeholder="e.g., Colombo, Sri Lanka" style="flex:1;">
+            <button class="block-btn" id="addFobPortBtn" style="padding:8px 14px;">+</button>
+          </div>
+          <div id="fobPortsList" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;"></div>
+        </div>
       </div>
-      <div class="form-field" style="grid-column:1/-1">
-        <div class="form-label">ABOUT THE COMPANY</div>
-        <textarea class="form-textarea" id="companyDescription" rows="2" placeholder="Tell buyers about your company..."></textarea>
+      <div class="block-card" style="grid-column: 2 / -1;">
+        <div class="block-label">About the Company</div>
+        <textarea class="block-input" id="companyDescription" rows="2" placeholder="Tell buyers about your company..." style="resize:vertical;min-height:50px;"></textarea>
       </div>
     </div>
-    <button class="btn-primary" id="saveProfileBtn" style="margin-top:20px;">💾 SAVE PROFILE</button>
+    <button class="btn-neon" id="saveProfileBtn" style="margin-top:16px;">💾 SAVE PROFILE</button>
   </div>
 
-  <!-- CERTIFICATIONS -->
+  <!-- ===== CERTIFICATIONS ===== -->
   <div class="section-card">
     <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
     <div style="color:#ff6b6b; font-size:12px; margin-bottom:12px;">
       ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No bidding without it!
     </div>
-    <div class="cert-grid" id="certGrid"></div>
-    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
-      <select id="certDropdown" class="form-select" style="flex:1; min-width:180px;">
-        <option value="">Add Certificate...</option>
-        <option value="export">📄 Export License</option>
-        <option value="organic">🌱 Organic</option>
-        <option value="fairtrade">🤝 Fairly Traded</option>
-        <option value="kosher">✡️ Kosher</option>
-        <option value="halal">☪️ Halal</option>
-        <option value="brcgs">🔒 BRCGS</option>
-        <option value="origin">🌍 Origin</option>
-        <option value="iso">⚙️ ISO</option>
-        <option value="foodsafety">🍽️ Food Safety</option>
-        <option value="other">📎 Other</option>
+    <div class="cert-block-grid" id="certGrid"></div>
+    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;">
+      <select id="certDropdown" class="block-select" style="flex:1; min-width:160px; background:#0a1228; border:1px solid rgba(124,252,0,0.3); border-radius:10px; color:#7CFC00; padding:10px;">
+        <option value="" style="background:#0a1228; color:#9ca3af;">Add Certificate Type...</option>
+        <option value="export" style="background:#0a1228; color:#7CFC00;">Export License</option>
+        <option value="organic" style="background:#0a1228; color:#7CFC00;">Organic</option>
+        <option value="fairtrade" style="background:#0a1228; color:#7CFC00;">Fairly Traded</option>
+        <option value="kosher" style="background:#0a1228; color:#7CFC00;">Kosher</option>
+        <option value="halal" style="background:#0a1228; color:#7CFC00;">Halal</option>
+        <option value="brcgs" style="background:#0a1228; color:#7CFC00;">BRCGS</option>
+        <option value="origin" style="background:#0a1228; color:#7CFC00;">Origin</option>
+        <option value="iso" style="background:#0a1228; color:#7CFC00;">ISO</option>
+        <option value="foodsafety" style="background:#0a1228; color:#7CFC00;">Food Safety</option>
+        <option value="other" style="background:#0a1228; color:#7CFC00;">Other</option>
       </select>
-      <button class="btn-secondary" id="addCertBtn">+ ADD</button>
+      <button class="btn-neon" id="addCertBtn" style="padding:10px 20px;">+ ADD TYPE</button>
     </div>
   </div>
 
-  <!-- PRODUCTS -->
+  <!-- ===== PRODUCTS ===== -->
   <div class="section-card">
-    <div class="section-header">📦 PRODUCTS <span class="badge">Add product lines with images</span></div>
-    <div id="productsContainer"></div>
-    <button class="btn-primary" id="addProductBtn" style="background:rgba(0,206,209,0.2); color:#00ced1; margin-top:16px;">+ ADD PRODUCT</button>
+    <div class="section-header">📦 PRODUCTS <span class="badge">Add product lines</span></div>
+    <div id="productsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+    <button class="btn-neon" id="addProductBtn" style="margin-top:16px;padding:10px 24px;">+ ADD PRODUCT</button>
   </div>
 
-  <!-- BOT FLEET -->
+  <!-- ===== BOT FLEET ===== -->
   <div class="section-card">
     <div class="section-header">🤖 BOT FLEET <span class="badge">Configure bidding bots</span></div>
-    <div id="botsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;margin-top:16px;"></div>
-    <button class="btn-primary" id="addBotBtn" style="background:rgba(0,206,209,0.2); color:#00ced1; margin-top:16px;">+ ADD NEW BOT</button>
+    <div id="botsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+    <button class="btn-neon" id="addBotBtn" style="margin-top:16px;padding:10px 24px;">+ ADD NEW BOT</button>
   </div>
 
-  <!-- AUCTION -->
+  <!-- ===== TAR ===== -->
+  <div class="section-card">
+    <div class="section-header">
+      🤖 TAR — Trade Action Robot
+      <span class="badge" id="tarStatus">● Monitoring</span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px;">
+      <div class="block-card" style="text-align:center;">
+        <div class="block-label">Region</div>
+        <select id="tarRegion" class="tar-select-dark">
+          <option value="Santos">Santos</option>
+          <option value="Mombasa">Mombasa</option>
+          <option value="Jakarta">Jakarta</option>
+          <option value="Davao">Davao</option>
+          <option value="Guayaquil">Guayaquil</option>
+        </select>
+      </div>
+      <div class="block-card" style="text-align:center;">
+        <div class="block-label">Empty Space</div>
+        <div style="font-size:24px; font-weight:700; color:#00ced1; font-family:'Orbitron',sans-serif;" id="tarEmptySpace">—</div>
+      </div>
+      <div class="block-card" style="text-align:center;">
+        <div class="block-label">Demand (MT)</div>
+        <div style="font-size:24px; font-weight:700; color:#FFD966; font-family:'Orbitron',sans-serif;" id="tarDemand">—</div>
+      </div>
+    </div>
+
+    <div class="tar-recommendation-box" id="tarRecommendation">
+      <div class="rec-header">
+        <div>
+          <div style="font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px;">TAR RECOMMENDS</div>
+          <div class="rec-text" id="tarRecText">Loading market data...</div>
+          <div class="rec-detail" id="tarRecDetail">Scanning containers in your region</div>
+        </div>
+        <div class="rec-actions">
+          <button class="btn-neon" id="tarAcceptBtn" style="background:#7CFC00; color:#010101; border:none; padding:8px 24px; border-radius:10px;">Accept</button>
+          <button class="btn-neon" id="tarDismissBtn" style="background:rgba(255,255,255,0.05); border-color:#9ca3af; color:#9ca3af; border-radius:10px;">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-size:11px; color:#FFD966; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">📊 Other Snack Companies in Region</div>
+      <div id="tarCompetitors" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+    </div>
+
+    <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.05);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px;">📜 TAR Activity Log</div>
+        <button class="btn-neon" id="clearTarLogBtn" style="padding:4px 12px; font-size:10px; background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#7CFC00; border-radius:8px;">Clear</button>
+      </div>
+      <div id="tarLog" style="max-height:120px; overflow-y:auto; margin-top:8px; font-size:12px; color:#9ca3af;"></div>
+    </div>
+  </div>
+
+  <!-- ===== AUCTION ===== -->
   <div class="section-card">
     <div class="section-header">⚡ AUCTION <span class="badge" id="briefBadge">No active auction</span></div>
 
-    <!-- Create Auction Form -->
     <div id="createAuctionForm">
-      <div class="form-grid" style="margin-bottom:16px;">
-        <div class="form-field">
-          <div class="form-label">SELECT PRODUCT</label>
-          <select class="form-select" id="auctionProductSelect">
-            <option value="">-- Select a product from your list --</option>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:16px;">
+        <div class="block-card">
+          <div class="block-label">Select Product</div>
+          <select class="block-select" id="auctionProductSelect" style="background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#7CFC00;">
+            <option value="" style="background:#0a1228; color:#9ca3af;">-- Select --</option>
           </select>
         </div>
-        <div class="form-field">
-          <div class="form-label">TOTAL QUANTITY (kg)</label>
-          <input type="number" class="form-input" id="auctionQuantity" placeholder="1000" step="100">
+        <div class="block-card">
+          <div class="block-label">Total Quantity (kg)</div>
+          <input type="number" class="block-input" id="auctionQuantity" placeholder="1000" step="100" style="background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#fff;">
         </div>
-        <div class="form-field">
-          <div class="form-label">PACKAGING / SIZES</label>
-          <input class="form-input" id="auctionSizes" placeholder="e.g., 25kg, 50kg, 100kg bags">
+        <div class="block-card">
+          <div class="block-label">Packaging / Sizes</div>
+          <input class="block-input" id="auctionSizes" placeholder="e.g., 25kg, 50kg bags" style="background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#fff;">
         </div>
-        <div class="form-field">
-          <div class="form-label">PRODUCT IMAGE</label>
-          <label for="auctionImageInput" id="auctionImageBtn" style="width:80px;height:80px;border-radius:12px;border:2px dashed rgba(124,252,0,0.4);background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;">
-            <div id="auctionImagePlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">ADD<br>PHOTO</div>
+        <div class="block-card">
+          <div class="block-label">Product Image</div>
+          <label for="auctionImageInput" id="auctionImageBtn" style="width:100%;height:60px;border-radius:12px;border:2px dashed rgba(124,252,0,0.4);background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;">
+            <div id="auctionImagePlaceholder" style="font-size:10px;color:#9ca3af;text-align:center;pointer-events:none;">ADD PHOTO</div>
             <img id="auctionImagePreview" style="display:none;width:100%;height:100%;object-fit:cover;pointer-events:none;">
           </label>
           <input type="file" id="auctionImageInput" accept="image/*" style="display:none;">
         </div>
-        <div class="form-field">
-          <div class="form-label">QUALITY GRADE</label>
-          <select class="form-select" id="gradeSelect">
-            <option>Grade A (Premium)</option>
-            <option>Grade B (Standard)</option>
-            <option>Organic Certified</option>
+        <div class="block-card">
+          <div class="block-label">Quality Grade</div>
+          <select class="block-select" id="gradeSelect" style="background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#7CFC00;">
+            <option style="background:#0a1228; color:#7CFC00;">Grade A (Premium)</option>
+            <option style="background:#0a1228; color:#7CFC00;">Grade B (Standard)</option>
+            <option style="background:#0a1228; color:#7CFC00;">Organic Certified</option>
           </select>
         </div>
-        <div class="form-field">
-          <div class="form-label">MOISTURE CONTENT (%)</label>
-          <input type="number" class="form-input" id="moistureContent" value="12" step="0.5" min="0" max="30">
+        <div class="block-card">
+          <div class="block-label">Moisture Content (%)</div>
+          <input type="number" class="block-input" id="moistureContent" value="12" step="0.5" min="0" max="30" style="background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#fff;">
         </div>
-        <div class="form-field">
-          <div class="form-label">OIL CONTENT (%)</label>
-          <input type="number" class="form-input" id="oilContent" value="65" step="1" min="40" max="80">
+        <div class="block-card">
+          <div class="block-label">Oil Content (%)</div>
+          <input type="number" class="block-input" id="oilContent" value="65" step="1" min="40" max="80" style="background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#fff;">
         </div>
-        <div class="form-field">
-          <div class="form-label">AUCTION DURATION (minutes)</label>
-          <input type="number" class="form-input" id="auctionDuration" value="3" min="1" max="10">
+        <div class="block-card">
+          <div class="block-label">Auction Duration (min)</div>
+          <input type="number" class="block-input" id="auctionDuration" value="3" min="1" max="10" style="background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#fff;">
         </div>
       </div>
-      <button class="btn-primary" id="launchAuctionBtn">🚀 LAUNCH AUCTION</button>
+      <button class="btn-neon-primary" id="launchAuctionBtn" style="padding:10px 24px;width:auto;font-size:13px;">🚀 LAUNCH AUCTION</button>
     </div>
 
-    <!-- Active Auction Display -->
-    <div id="auctionContent" style="margin-top:24px;">
+    <div id="auctionContent" style="margin-top:20px;">
       <div class="empty-state">No active auction. Create one above.</div>
     </div>
   </div>
 
 </div>
 
-<div id="mediaModal" class="media-modal" onclick="closeModal()">
-  <span class="modal-close">&times;</span>
+<!-- ===== MEDIA MODAL ===== -->
+<div id="mediaModal">
   <img id="modalImage" style="display:none;">
-  <video id="modalVideo" controls style="display:none;"></video>
+  <video id="modalVideo" style="display:none;" controls></video>
+  <button class="modal-close-btn" onclick="document.getElementById('mediaModal').style.display='none';document.getElementById('modalVideo').pause();">✕</button>
 </div>
 
+<!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
+<!-- ===== COMMODITY TICKER ===== -->
 <div class="commodity-ticker-bar">
   <div class="ticker-label">📈 LIVE</div>
   <div class="ticker-track" id="commodityTicker">
@@ -650,19 +798,18 @@ input:checked + .slider:before { transform: translateX(16px); }
 
 <script>
 // =====================================================
+// COMPLETE JAVASCRIPT — WITH NEW CERTIFICATE SYSTEM
+// =====================================================
+
+// =====================================================
 // DEBUG & ERROR BOUNDARIES
 // =====================================================
 function safe(fn, fallback) {
   try { return fn(); } catch (e) { console.error('[TradeAux Error]', e); return fallback; }
 }
-function safeAsync(fn) {
-  return async function(...args) {
-    try { return await fn.apply(this, args); } catch (e) { console.error('[TradeAux Error]', e); }
-  };
-}
 
 // =====================================================
-// SUPABASE CONFIGURATION — FIXED: use window.supabase
+// SUPABASE CONFIGURATION
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
@@ -673,7 +820,7 @@ let currentUser = null;
 try {
   if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('[TradeAux] Supabase client initialized via window.supabase');
+    console.log('[TradeAux] Supabase client initialized');
   } else {
     console.warn('[TradeAux] window.supabase not available — running in offline mode');
   }
@@ -682,106 +829,66 @@ try {
 }
 
 // =====================================================
-// AUTH CHECK — WITH TIMEOUT, EXPIRY, AND REDIRECT
+// AUTH CHECK
 // =====================================================
 async function checkAuth() {
+  // Guard against redirect loops: if already on signin page, stay there
+  if (window.location.pathname.toLowerCase().includes('signin')) {
+    return false;
+  }
   if (!supabaseClient) {
-    console.warn('[TradeAux] No Supabase client — skipping auth check');
+    console.warn('[TradeAux] No Supabase client — running in offline mode');
+    // Allow dashboard to load for static/offline hosting, but flag it
+    currentUser = null;
     return true;
   }
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Auth check timed out')), 5000);
-  });
-
   try {
-    const authPromise = supabaseClient.auth.getSession();
-    const result = await Promise.race([authPromise, timeoutPromise]);
-    const { data, error } = result;
-
+    const { data, error } = await supabaseClient.auth.getSession();
     if (error) {
       console.log('[TradeAux] getSession error:', error.message);
       window.location.replace('signin.html?_t=' + Date.now());
       return false;
     }
-
     if (!data || !data.session) {
       console.log('[TradeAux] No session found — redirecting to signin');
       window.location.replace('signin.html?_t=' + Date.now());
       return false;
     }
-
-    const session = data.session;
-    if (session.expires_at) {
-      const now = Math.floor(Date.now() / 1000);
-      if (session.expires_at <= now) {
-        console.log('[TradeAux] Session expired — clearing and redirecting');
-        await bulletproofSignOut();
-        window.location.replace('signin.html?_t=' + Date.now());
-        return false;
-      }
-    }
-
-    currentUser = session.user;
+    currentUser = data.session.user;
     console.log('[TradeAux] Session valid for', currentUser?.email);
     return true;
-
   } catch (err) {
     console.error('[TradeAux] Auth check failed:', err.message);
-    if (err.message === 'Auth check timed out') {
-      showToast('Auth check timed out. Working offline.', true);
-      return true;
-    }
-    window.location.replace('signin.html?_t=' + Date.now());
-    return false;
+    // On auth error, don't hard-redirect immediately; let user see dashboard in offline mode
+    showToast('Auth unavailable — working offline', true);
+    currentUser = null;
+    return true;
   }
 }
 
-// =====================================================
-// BULLETPROOF SIGN OUT
-// =====================================================
 async function bulletproofSignOut() {
-  console.log('[TradeAux] Bulletproof sign out starting...');
-
+  console.log('[TradeAux] Sign out starting...');
   if (supabaseClient) {
-    try {
-      await supabaseClient.auth.signOut({ scope: 'global' });
-      console.log('[TradeAux] Supabase signOut completed');
-    } catch (e) {
-      console.log('[TradeAux] Supabase signOut error (ignoring):', e.message);
-    }
-    await new Promise(r => setTimeout(r, 300));
+    try { await supabaseClient.auth.signOut({ scope: 'global' }); } catch(e) {}
   }
-
-  const lsKeys = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    lsKeys.push(localStorage.key(i));
-  }
-  lsKeys.forEach(key => {
-    if (key && (key.includes('supabase') || key.startsWith('sb-'))) {
+  // Clear ALL Supabase-related keys including PKCE code verifier
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+  keys.forEach(key => {
+    if (key && (key.includes('supabase') || key.startsWith('sb-') || key.startsWith('tradeaux_'))) {
       localStorage.removeItem(key);
-      console.log('[TradeAux] Removed localStorage key:', key);
     }
   });
-
+  // Also clear any cookies by setting expired date (best-effort for static hosting)
+  document.cookie.split(';').forEach(function(c) {
+    const [name] = c.split('=');
+    if (name.trim().startsWith('sb-')) {
+      document.cookie = name.trim() + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+    }
+  });
   sessionStorage.clear();
-  console.log('[TradeAux] sessionStorage cleared');
-
-  safe(() => localStorage.removeItem('tradeaux_company_profile'));
-  safe(() => localStorage.removeItem('tradeaux_cert_images'));
-  safe(() => localStorage.removeItem('tradeaux_cert_stacks'));
-  safe(() => localStorage.removeItem('tradeaux_cert_toggles'));
-  safe(() => localStorage.removeItem('tradeaux_product_lines'));
-  safe(() => localStorage.removeItem('tradeaux_bots'));
-  safe(() => localStorage.removeItem('tradeaux_unit_preference'));
-  safe(() => localStorage.removeItem('tradeaux_auction'));
-  safe(() => localStorage.removeItem('tradeaux_bids'));
-  safe(() => localStorage.removeItem('tradeaux_auction_image'));
-  safe(() => localStorage.removeItem('tradeaux_role'));
-
-  console.log('[TradeAux] Bulletproof sign out complete');
+  console.log('[TradeAux] Sign out complete');
 }
-
 
 // =====================================================
 // PRODUCT TYPES
@@ -798,26 +905,33 @@ const PRODUCT_TYPES = [
   'Coconut Milk'
 ];
 
-const CERT_LABELS = {
-  'incorporation': { icon: '🏢', label: 'Incorporation', desc: 'Required - No bidding without this' },
-  'export': { icon: '📄', label: 'Export License', desc: 'Government export capacity' },
-  'organic': { icon: '🌱', label: 'Organic', desc: 'Organic certification' },
-  'fairtrade': { icon: '🤝', label: 'Fairly Traded', desc: 'Fair Trade certified' },
-  'kosher': { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
-  'halal': { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
-  'haccp': { icon: '🛡️', label: 'HACCP', desc: 'Hazard Analysis Critical Control Point' },
-  'brcgs': { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
-  'origin': { icon: '🌍', label: 'Origin', desc: 'Government-issued origin' },
-  'iso': { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
-  'foodsafety': { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' },
-  'other': { icon: '📎', label: 'Other', desc: 'Additional certification' }
-};
+const PACKAGING_TYPES = ['Carton', 'Bottle', 'Drum', 'Bag', 'Box', 'Can', 'Pail', 'Tote', 'Other'];
 
 // =====================================================
-// STATE — GUARANTEED NON-NULL DEFAULTS
+// CERTIFICATE LABELS & APPROVAL BODIES (NEW)
+// =====================================================
+const CERT_LABELS = {
+  'incorporation': { icon: '🏢', label: 'Incorporation', desc: 'Required - No bidding without this', approvals: [] },
+  'export': { icon: '📄', label: 'Export License', desc: 'Government export capacity', approvals: ['Ministry of Trade', 'Customs Authority'] },
+  'organic': { icon: '🌱', label: 'Organic', desc: 'Organic certification', approvals: ['USDA Organic', 'EU Organic', 'JAS Organic', 'Soil Association', 'Other'] },
+  'fairtrade': { icon: '🤝', label: 'Fairly Traded', desc: 'Fair Trade certified', approvals: ['FLO-CERT', 'WFTO', 'Fair Trade USA', 'Other'] },
+  'kosher': { icon: '✡️', label: 'Kosher', desc: 'Kosher certified', approvals: ['OU Kosher', 'OK Kosher', 'Star-K', 'KOF-K', 'Other'] },
+  'halal': { icon: '☪️', label: 'Halal', desc: 'Halal certified', approvals: ['Halal Authority', 'MUI Indonesia', 'JAKIM', 'Other'] },
+  'brcgs': { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards', approvals: ['BRCGS Certified', 'Other'] },
+  'origin': { icon: '🌍', label: 'Origin', desc: 'Government-issued origin', approvals: ['Chamber of Commerce', 'Ministry of Agriculture', 'Other'] },
+  'iso': { icon: '⚙️', label: 'ISO', desc: 'ISO quality management', approvals: ['ISO 9001', 'ISO 22000', 'ISO 14001', 'Other'] },
+  'foodsafety': { icon: '🍽️', label: 'Food Safety', desc: 'General food safety', approvals: ['HACCP', 'GMP', 'SQF', 'FSSC 22000', 'Other'] },
+  'other': { icon: '📎', label: 'Other', desc: 'Additional certification', approvals: ['Custom Authority', 'Other'] }
+};
+
+// Approval body images per certificate type
+let certApprovalImages = {}; // { certType: { approvalBody: [base64, ...] } }
+
+// =====================================================
+// STATE
 // =====================================================
 let unitPreference = 'metric';
-let companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
+let companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPorts: [], description: '' };
 let certImages = { incorporation: null };
 let certStacks = {};
 let certToggles = { incorporation: true };
@@ -828,6 +942,7 @@ let currentAuction = null;
 let auctionTimer = null;
 let timerSeconds = 180;
 let auctionProductImage = null;
+let tarState = { region: 'Santos', emptySpace: { mt: 0, cbm: 0 }, demand: 0, floorRecommendation: 0, competitors: [], log: [] };
 
 // =====================================================
 // UNIT CONVERSION
@@ -849,27 +964,152 @@ function setUnit(pref) {
 }
 
 // =====================================================
-// LOAD / SAVE — WITH SUPABASE SYNC
+// TAR FUNCTIONS
+// =====================================================
+function tarLog(message) {
+  const timestamp = new Date().toLocaleTimeString();
+  tarState.log.unshift({ time: timestamp, message: message });
+  if (tarState.log.length > 50) tarState.log.pop();
+  renderTarLog();
+}
+
+function renderTarLog() {
+  const container = document.getElementById('tarLog');
+  if (!container) return;
+  if (tarState.log.length === 0) {
+    container.innerHTML = '<div style="color:#666; font-style:italic;">No activity yet. TAR is monitoring...</div>';
+    return;
+  }
+  container.innerHTML = tarState.log.slice(0, 20).map(entry => 
+    `<div style="display:flex; gap:12px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+      <span style="color:#666; font-size:10px; min-width:60px;">${entry.time}</span>
+      <span>${entry.message}</span>
+    </div>`
+  ).join('');
+}
+
+function scanBuyerMarket() {
+  tarLog('Scanning buyer market in ' + tarState.region + '...');
+  const containers = Math.floor(Math.random() * 20) + 10;
+  const avgEmpty = (Math.random() * 20) + 15;
+  const capacity = 25;
+  const totalEmptyMT = (containers * capacity * avgEmpty / 100);
+  const cbmPerMT = 1.2;
+  const totalEmptyCBM = totalEmptyMT * cbmPerMT;
+  tarState.emptySpace = { mt: totalEmptyMT, cbm: totalEmptyCBM };
+  tarState.demand = Math.round(totalEmptyMT * 0.85);
+  const competitors = Math.floor(Math.random() * 4) + 1;
+  const productDensity = 0.85;
+  const availableCBM = totalEmptyCBM;
+  const recommendedMT = Math.round((availableCBM / productDensity) / competitors);
+  tarState.floorRecommendation = Math.max(1, Math.min(10, recommendedMT));
+  tarState.competitors = [];
+  const snackCompanies = ['Davao Snacks', 'Viet Chips', 'Java Wafers', 'Banana Co', 'Coconut Delights', 'Tropical Treats', 'Island Snacks', 'Pacific Chips'];
+  for (let i = 0; i < competitors; i++) {
+    const company = snackCompanies[Math.floor(Math.random() * snackCompanies.length)];
+    const volume = Math.floor(Math.random() * 5) + 1;
+    tarState.competitors.push({ name: company, floor: volume });
+  }
+  tarLog('Found ' + containers + ' containers with ' + Math.round(totalEmptyMT) + ' MT empty space');
+  tarLog('Estimated demand: ' + tarState.demand + ' MT of lightweight products');
+  tarLog('Recommended floor: ' + tarState.floorRecommendation + ' MT');
+  updateTarUI();
+}
+
+function updateTarUI() {
+  const emptyEl = document.getElementById('tarEmptySpace');
+  const demandEl = document.getElementById('tarDemand');
+  const recText = document.getElementById('tarRecText');
+  const recDetail = document.getElementById('tarRecDetail');
+  const competitorsEl = document.getElementById('tarCompetitors');
+  if (emptyEl) emptyEl.textContent = Math.round(tarState.emptySpace.mt) + ' MT';
+  if (demandEl) demandEl.textContent = Math.round(tarState.demand) + ' MT';
+  if (recText) recText.textContent = 'Put ' + tarState.floorRecommendation + ' MT on the floor';
+  if (recDetail) {
+    const count = tarState.competitors.length;
+    recDetail.textContent = count + ' other snack compan' + (count !== 1 ? 'ies' : 'y') + ' in the region';
+  }
+  if (competitorsEl) {
+    competitorsEl.innerHTML = tarState.competitors.map(c => 
+      `<span style="background:rgba(0,206,209,0.1); border:1px solid rgba(0,206,209,0.2); border-radius:20px; padding:4px 14px; font-size:12px; color:#00ced1;">
+        ${c.name}: ${c.floor} MT
+      </span>`
+    ).join('');
+    if (tarState.competitors.length === 0) {
+      competitorsEl.innerHTML = '<span style="color:#666; font-size:12px;">No competitors detected in this region</span>';
+    }
+  }
+}
+
+function setupTAR() {
+  const regionSelect = document.getElementById('tarRegion');
+  if (regionSelect) {
+    regionSelect.addEventListener('change', function() {
+      tarState.region = this.value;
+      scanBuyerMarket();
+    });
+  }
+  const acceptBtn = document.getElementById('tarAcceptBtn');
+  if (acceptBtn) {
+    acceptBtn.addEventListener('click', function() {
+      const productSelect = document.getElementById('auctionProductSelect');
+      const qtyField = document.getElementById('auctionQuantity');
+      if (productSelect && qtyField) {
+        const firstOption = productSelect.querySelector('option:not([value=""])');
+        if (firstOption) {
+          productSelect.value = firstOption.value;
+          qtyField.value = tarState.floorRecommendation * 1000;
+          showToast('📋 Draft auction created for ' + tarState.floorRecommendation + ' MT', false);
+          tarLog('Created draft auction for ' + tarState.floorRecommendation + ' MT');
+          const sizesField = document.getElementById('auctionSizes');
+          if (sizesField) sizesField.value = '25kg, 50kg bags';
+          document.querySelector('#createAuctionForm').scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        showToast('Please add a product first', true);
+      }
+    });
+  }
+  const dismissBtn = document.getElementById('tarDismissBtn');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function() {
+      tarLog('Recommendation dismissed by user');
+      const recBox = document.getElementById('tarRecommendation');
+      if (recBox) recBox.style.opacity = '0.5';
+    });
+  }
+  const clearLogBtn = document.getElementById('clearTarLogBtn');
+  if (clearLogBtn) {
+    clearLogBtn.addEventListener('click', function() {
+      tarState.log = [];
+      renderTarLog();
+    });
+  }
+  setTimeout(() => {
+    scanBuyerMarket();
+    setInterval(scanBuyerMarket, 60000);
+  }, 1000);
+}
+
+// =====================================================
+// LOAD / SAVE
 // =====================================================
 async function loadFromStorage() {
   console.log('[TradeAux] Loading data...');
 
-  // First, try to load profile from Supabase (source of truth)
+  // Try Supabase first if available
+  let supabaseProfileLoaded = false;
   if (supabaseClient && currentUser) {
     try {
-      console.log('[TradeAux] Fetching profile from Supabase for user:', currentUser.id);
       const { data: profile, error } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', currentUser.id)
         .single();
-
       if (error) {
         console.log('[TradeAux] Profile fetch error:', error.message);
       }
-
       if (profile) {
-        console.log('[TradeAux] Profile loaded from Supabase:', profile.full_name || profile.email);
         companyProfile = {
           logo: profile.logo_url || null,
           name: profile.full_name || profile.company_name || '',
@@ -877,38 +1117,55 @@ async function loadFromStorage() {
           phone: profile.phone || '',
           origin: profile.origin_country || '',
           otherCountry: profile.other_country || '',
-          fobPort: profile.fob_port || '',
+          fobPorts: Array.isArray(profile.fob_ports) ? profile.fob_ports : [],
           description: profile.description || ''
         };
-        safe(() => localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile)));
-        console.log('[TradeAux] Profile synced from Supabase to local state');
-      } else {
-        console.log('[TradeAux] No profile row in Supabase yet');
+        supabaseProfileLoaded = true;
+        showToast('Profile loaded from cloud', false);
       }
     } catch (e) {
       console.error('[TradeAux] Error loading profile from Supabase:', e);
     }
   }
 
-  // Then load localStorage data (for non-profile stuff)
+  // Fallback / merge with localStorage — fill any empty fields Supabase missed
   const parsedProfile = safe(() => JSON.parse(localStorage.getItem('tradeaux_company_profile')), null);
   if (parsedProfile && typeof parsedProfile === 'object' && !Array.isArray(parsedProfile)) {
-    if (!companyProfile.name && !companyProfile.email) {
-      companyProfile = { ...companyProfile, ...parsedProfile };
+    // Merge: localStorage fills gaps, but Supabase data takes precedence where present
+    if (!companyProfile.name && parsedProfile.name) companyProfile.name = parsedProfile.name;
+    if (!companyProfile.phone && parsedProfile.phone) companyProfile.phone = parsedProfile.phone;
+    if (!companyProfile.origin && parsedProfile.origin) companyProfile.origin = parsedProfile.origin;
+    if (!companyProfile.otherCountry && parsedProfile.otherCountry) companyProfile.otherCountry = parsedProfile.otherCountry;
+    if (!companyProfile.description && parsedProfile.description) companyProfile.description = parsedProfile.description;
+    if (!companyProfile.logo && parsedProfile.logo) companyProfile.logo = parsedProfile.logo;
+    if ((!companyProfile.fobPorts || companyProfile.fobPorts.length === 0) && Array.isArray(parsedProfile.fobPorts)) {
+      companyProfile.fobPorts = parsedProfile.fobPorts;
     }
+    // Always keep localStorage in sync
+    safe(() => localStorage.setItem('tradeaux_company_profile', JSON.stringify(companyProfile)));
   }
-
   const parsedCertImages = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_images')), null);
-  certImages = (parsedCertImages && typeof parsedCertImages === 'object' && !Array.isArray(parsedCertImages))
-    ? parsedCertImages : { incorporation: null };
-
+  certImages = (parsedCertImages && typeof parsedCertImages === 'object' && !Array.isArray(parsedCertImages)) ? parsedCertImages : { incorporation: null };
   const parsedCertStacks = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_stacks')), null);
-  certStacks = (parsedCertStacks && typeof parsedCertStacks === 'object' && !Array.isArray(parsedCertStacks))
-    ? parsedCertStacks : {};
-
+  certStacks = (parsedCertStacks && typeof parsedCertStacks === 'object' && !Array.isArray(parsedCertStacks)) ? parsedCertStacks : {};
   const parsedCertToggles = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_toggles')), null);
-  certToggles = (parsedCertToggles && typeof parsedCertToggles === 'object' && !Array.isArray(parsedCertToggles))
-    ? parsedCertToggles : { incorporation: true };
+  certToggles = { incorporation: true, ...(parsedCertToggles || {}) };
+  
+  // NEW: Load cert approvals
+  const parsedCertApprovals = safe(() => JSON.parse(localStorage.getItem('tradeaux_cert_approvals')), null);
+  certApprovalImages = (parsedCertApprovals && typeof parsedCertApprovals === 'object' && !Array.isArray(parsedCertApprovals)) ? parsedCertApprovals : {};
+
+  // Restore custom approval bodies
+  const customApprovals = safe(() => JSON.parse(localStorage.getItem('tradeaux_custom_approvals')), null);
+  if (customApprovals && typeof customApprovals === 'object') {
+    Object.keys(customApprovals).forEach(certType => {
+      if (CERT_LABELS[certType]) {
+        customApprovals[certType].forEach(app => {
+          if (!CERT_LABELS[certType].approvals.includes(app)) CERT_LABELS[certType].approvals.push(app);
+        });
+      }
+    });
+  }
 
   productLines = safe(() => JSON.parse(localStorage.getItem('tradeaux_product_lines')), null);
   bots = safe(() => JSON.parse(localStorage.getItem('tradeaux_bots')), null);
@@ -916,11 +1173,14 @@ async function loadFromStorage() {
   currentAuction = safe(() => JSON.parse(localStorage.getItem('tradeaux_auction')), null);
   activeBids = safe(() => JSON.parse(localStorage.getItem('tradeaux_bids')), null);
   auctionProductImage = safe(() => localStorage.getItem('tradeaux_auction_image'), null);
-
+  const savedFobPorts = safe(() => JSON.parse(localStorage.getItem('tradeaux_fob_ports')), null);
+  if (savedFobPorts && Array.isArray(savedFobPorts) && savedFobPorts.length > 0) {
+    companyProfile.fobPorts = savedFobPorts;
+  }
   if (!productLines || !Array.isArray(productLines)) {
     productLines = [
-      { type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null },
-      { type: 'Coconut Oil', sizes: [1, 5, 20], image: null }
+      { type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], packaging: 'Bag', image: null, moisture: 12, oil: 65, grade: 'Grade A (Premium)' },
+      { type: 'Coconut Oil', sizes: [1, 5, 20], packaging: 'Drum', image: null, moisture: 12, oil: 65, grade: 'Grade A (Premium)' }
     ];
   }
   if (!bots || !Array.isArray(bots)) {
@@ -931,24 +1191,23 @@ async function loadFromStorage() {
   }
   if (savedUnit) unitPreference = savedUnit;
   if (!activeBids || !Array.isArray(activeBids)) activeBids = [];
-
   renderCompanyProfile();
   renderCertificates();
   renderProducts();
   renderBots();
   renderAuctionDisplay();
   populateAuctionProductDropdown();
-
+  renderFobPorts();
   document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.remove('active'));
   const unitBtn = document.getElementById('unit' + unitPreference.charAt(0).toUpperCase() + unitPreference.slice(1));
   if (unitBtn) unitBtn.classList.add('active');
-
   if (auctionProductImage) {
     const preview = document.getElementById('auctionImagePreview');
     const placeholder = document.getElementById('auctionImagePlaceholder');
     if (preview) { preview.src = auctionProductImage; preview.style.display = 'block'; }
     if (placeholder) placeholder.style.display = 'none';
   }
+  updateHeader();
   console.log('[TradeAux] Loaded. Profile name:', companyProfile.name || '(empty)');
 }
 
@@ -959,9 +1218,26 @@ function saveAll() {
     localStorage.setItem('tradeaux_cert_images', JSON.stringify(certImages));
     localStorage.setItem('tradeaux_cert_stacks', JSON.stringify(certStacks));
     localStorage.setItem('tradeaux_cert_toggles', JSON.stringify(certToggles));
+    localStorage.setItem('tradeaux_cert_approvals', JSON.stringify(certApprovalImages));
+    localStorage.setItem('tradeaux_custom_approvals', JSON.stringify(safe(() => {
+      const ca = {};
+      Object.keys(CERT_LABELS).forEach(k => {
+        const defaults = {
+          'incorporation': [], 'export': ['Ministry of Trade','Customs Authority'], 'organic': ['USDA Organic','EU Organic','JAS Organic','Soil Association','Other'],
+          'fairtrade': ['FLO-CERT','WFTO','Fair Trade USA','Other'], 'kosher': ['OU Kosher','OK Kosher','Star-K','KOF-K','Other'],
+          'halal': ['Halal Authority','MUI Indonesia','JAKIM','Other'], 'brcgs': ['BRCGS Certified','Other'],
+          'origin': ['Chamber of Commerce','Ministry of Agriculture','Other'], 'iso': ['ISO 9001','ISO 22000','ISO 14001','Other'],
+          'foodsafety': ['HACCP','GMP','SQF','FSSC 22000','Other'], 'other': ['Custom Authority','Other']
+        }[k] || [];
+        const extras = CERT_LABELS[k].approvals.filter(a => !defaults.includes(a));
+        if (extras.length) ca[k] = extras;
+      });
+      return ca;
+    }, {})));
     localStorage.setItem('tradeaux_product_lines', JSON.stringify(productLines));
     localStorage.setItem('tradeaux_bots', JSON.stringify(bots));
     localStorage.setItem('tradeaux_unit_preference', unitPreference);
+    localStorage.setItem('tradeaux_fob_ports', JSON.stringify(companyProfile.fobPorts));
     if (auctionProductImage) localStorage.setItem('tradeaux_auction_image', auctionProductImage);
     if (currentAuction) localStorage.setItem('tradeaux_auction', JSON.stringify(currentAuction)); else localStorage.removeItem('tradeaux_auction');
     localStorage.setItem('tradeaux_bids', JSON.stringify(activeBids));
@@ -972,15 +1248,10 @@ function saveAll() {
   }
 }
 
-// =====================================================
-// SAVE PROFILE TO SUPABASE — THE CRITICAL FIX
-// =====================================================
 async function saveProfileToSupabase() {
   if (!supabaseClient || !currentUser) {
-    console.warn('[TradeAux] Cannot save to Supabase: no client or no user');
     return { success: false, error: 'Not authenticated' };
   }
-
   const profileData = {
     id: currentUser.id,
     email: currentUser.email,
@@ -989,32 +1260,85 @@ async function saveProfileToSupabase() {
     phone: companyProfile.phone || null,
     origin_country: companyProfile.origin || null,
     other_country: companyProfile.otherCountry || null,
-    fob_port: companyProfile.fobPort || null,
+    fob_ports: companyProfile.fobPorts || [],
     description: companyProfile.description || null,
     logo_url: companyProfile.logo || null,
     role: 'seller',
     updated_at: new Date().toISOString()
   };
-
-  console.log('[TradeAux] Saving profile to Supabase:', profileData);
-
   try {
-    // Try upsert (insert or update)
-    const { data, error } = await supabaseClient
-      .from('profiles')
-      .upsert(profileData, { onConflict: 'id' });
-
-    if (error) {
-      console.error('[TradeAux] Supabase save error:', error.message);
-      return { success: false, error: error.message };
-    }
-
-    console.log('[TradeAux] Profile saved to Supabase successfully');
+    const { data, error } = await supabaseClient.from('profiles').upsert(profileData, { onConflict: 'id' });
+    if (error) return { success: false, error: error.message };
     return { success: true, data: data };
-
   } catch (e) {
-    console.error('[TradeAux] Exception saving to Supabase:', e);
     return { success: false, error: e.message };
+  }
+}
+
+// =====================================================
+// UPDATE HEADER
+// =====================================================
+function updateHeader() {
+  const nameEl = document.getElementById('headerCompanyName');
+  const portEl = document.getElementById('headerCompanyPort');
+  if (nameEl) nameEl.textContent = companyProfile.name || 'COMPANY NAME';
+  if (portEl) {
+    const ports = companyProfile.fobPorts || [];
+    if (ports.length === 0) {
+      portEl.textContent = 'FOB Port: Not set';
+    } else {
+      portEl.textContent = 'FOB Port' + (ports.length > 1 ? 's' : '') + ': ' + ports.join(', ');
+    }
+  }
+}
+
+// =====================================================
+// FOB PORTS
+// =====================================================
+function renderFobPorts() {
+  const container = document.getElementById('fobPortsList');
+  if (!container) return;
+  const ports = companyProfile.fobPorts || [];
+  if (ports.length === 0) {
+    container.innerHTML = '<span style="font-size:11px;color:#666;">No ports added</span>';
+    return;
+  }
+  container.innerHTML = ports.map((p, i) => 
+    `<span style="background:rgba(0,206,209,0.15); border:1px solid rgba(0,206,209,0.3); border-radius:20px; padding:4px 14px; font-size:12px; color:#00ced1; display:inline-flex; align-items:center; gap:6px;">
+      ${p}
+      <span onclick="window.removeFobPort(${i})" style="cursor:pointer;color:#FF4D4D;font-weight:bold;">×</span>
+    </span>`
+  ).join('');
+}
+
+window.removeFobPort = function(index) {
+  if (!companyProfile.fobPorts) companyProfile.fobPorts = [];
+  companyProfile.fobPorts.splice(index, 1);
+  saveAll();
+  renderFobPorts();
+  updateHeader();
+  showToast('Port removed', false);
+};
+
+function setupFobPorts() {
+  const addBtn = document.getElementById('addFobPortBtn');
+  const input = document.getElementById('fobPortInput');
+  if (addBtn && input) {
+    addBtn.addEventListener('click', function() {
+      const val = input.value.trim();
+      if (!val) { showToast('Enter a port name', true); return; }
+      if (!companyProfile.fobPorts) companyProfile.fobPorts = [];
+      if (companyProfile.fobPorts.includes(val)) { showToast('Port already added', true); return; }
+      companyProfile.fobPorts.push(val);
+      input.value = '';
+      saveAll();
+      renderFobPorts();
+      updateHeader();
+      showToast('Port added: ' + val, false);
+    });
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addBtn.click();
+    });
   }
 }
 
@@ -1025,11 +1349,12 @@ function populateAuctionProductDropdown() {
   const select = document.getElementById('auctionProductSelect');
   if (!select) return;
   const currentValue = select.value;
-  select.innerHTML = '<option value="">-- Select a product from your list --</option>';
+  select.innerHTML = '<option value="" style="background:#0a1228; color:#9ca3af;">-- Select a product --</option>';
   productLines.forEach((product, idx) => {
     const option = document.createElement('option');
     option.value = idx;
     option.textContent = product.type + ' (' + product.sizes.join(', ') + 'kg)';
+    option.style.cssText = 'background:#0a1228; color:#7CFC00;';
     select.appendChild(option);
   });
   if (currentValue && select.querySelector('option[value="' + currentValue + '"]')) {
@@ -1042,19 +1367,22 @@ function populateAuctionProductDropdown() {
 // =====================================================
 function renderCompanyProfile() {
   if (!companyProfile || typeof companyProfile !== 'object') {
-    console.warn('[TradeAux] companyProfile invalid, reinitializing');
-    companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
+    companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPorts: [], description: '' };
   }
   const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   setVal('companyName', companyProfile.name);
   setVal('contactEmail', companyProfile.email);
   setVal('contactPhone', companyProfile.phone);
   setVal('originCountry', companyProfile.origin);
-  if (companyProfile.origin === 'Other') {
-    const otherInput = document.getElementById('otherCountryInput');
-    if (otherInput) { otherInput.value = companyProfile.otherCountry || ''; otherInput.style.display = 'block'; }
+  const otherInput = document.getElementById('otherCountryInput');
+  if (otherInput) {
+    if (companyProfile.origin === 'Other') {
+      otherInput.value = companyProfile.otherCountry || '';
+      otherInput.style.display = 'block';
+    } else {
+      otherInput.style.display = 'none';
+    }
   }
-  setVal('fobPort', companyProfile.fobPort);
   setVal('companyDescription', companyProfile.description);
   if (companyProfile.logo) {
     const preview = document.getElementById('companyLogoPreview');
@@ -1062,10 +1390,12 @@ function renderCompanyProfile() {
     if (preview) { preview.src = companyProfile.logo; preview.style.display = 'block'; }
     if (placeholder) placeholder.style.display = 'none';
   }
+  updateHeader();
+  renderFobPorts();
 }
 
 // =====================================================
-// RENDER: CERTIFICATES
+// RENDER: CERTIFICATES (NEW BLOCK STACK SYSTEM)
 // =====================================================
 function renderCertificates() {
   const grid = document.getElementById('certGrid');
@@ -1075,72 +1405,111 @@ function renderCertificates() {
   const certTypes = ['incorporation', ...Object.keys(certToggles).filter(k => k !== 'incorporation').sort()];
 
   certTypes.forEach(type => {
-    const info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '' };
+    const info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '', approvals: [] };
     const isRequired = type === 'incorporation';
     const isVerified = certToggles[type] || false;
+    const approvals = certApprovalImages[type] || {};
 
     const div = document.createElement('div');
-    div.className = 'cert-square';
-    div.style.borderColor = isRequired ? 'rgba(124,252,0,0.5)' : 'rgba(0,206,209,0.2)';
+    div.className = 'cert-block';
+    div.style.borderColor = isRequired ? 'rgba(124,252,0,0.6)' : 'rgba(0,206,209,0.2)';
 
-    let stackHtml = '';
-    const stackImages = certStacks[type] || [];
-
-    if (stackImages.length > 0) {
-      stackHtml = '<div class="cert-stack">' +
-        stackImages.map((img, idx) => `
-          <div class="stack-item" style="position:relative;">
-            <img src="${img}" onclick="openMedia('${img}', 'image')" style="cursor:pointer;">
-            <button class="stack-delete" onclick="event.stopPropagation();deleteFromStack('${type}',${idx})" title="Remove this image">×</button>
-          </div>`).join('') +
-        '<div class="stack-item" onclick="addToStack('' + type + '')"><div class="add-stack">+</div></div></div>';
-    } else if (certImages[type]) {
-      stackHtml = `
-        <div class="cert-stack">
-          <div class="stack-item" style="position:relative;">
-            <img src="${certImages[type]}" onclick="openMedia('${certImages[type]}', 'image')" style="cursor:pointer;">
-            <button class="stack-delete" onclick="event.stopPropagation();deleteFromStack('${type}',0)" title="Remove this image">×</button>
+    // Build approval body stacks
+    let approvalsHtml = '';
+    if (isRequired) {
+      // Incorporation: single image, no approval bodies
+      const img = certImages[type];
+      approvalsHtml = img ? 
+        `<div class="cert-stack">
+          <div class="stack-item" style="position:relative;width:40px;height:40px;">
+            <img src="${img}" style="cursor:pointer;" onclick="window.openMedia('${img}','image')">
+            <button class="stack-delete" onclick="event.stopPropagation();window.deleteCertImage('${type}')" title="Remove">×</button>
           </div>
-          <div class="stack-item" onclick="addToStack('${type}')"><div class="add-stack">+</div></div>
-        </div>`;
+          <div class="stack-item" style="width:40px;height:40px;" onclick="window.uploadCertImage('${type}')"><div class="add-stack">+</div></div>
+        </div>` :
+        `<div class="cert-preview" onclick="window.uploadCertImage('${type}')" style="height:50px;"><span class="placeholder">📤 Upload Certificate</span></div>`;
     } else {
-      stackHtml = '<div class="cert-preview" onclick="addToStack('' + type + '')"><span class="placeholder">📤 Add Image</span></div>';
+      // Other certs: approval body stacks
+      const approvalList = info.approvals || ['Other'];
+      approvalsHtml = '<div style="width:100%;display:flex;flex-direction:column;gap:6px;">';
+      
+      approvalList.forEach(approval => {
+        const approvalKey = approval.toLowerCase().replace(/\s+/g, '_');
+        const images = (approvals[approvalKey] || []);
+        const hasImages = images.length > 0;
+        
+        approvalsHtml += `<div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:9px;color:#FFD966;min-width:60px;">${approval}</span>`;
+        
+        if (hasImages) {
+          approvalsHtml += `<div class="cert-stack" style="flex:1;">`;
+          images.forEach((img, idx) => {
+            approvalsHtml += `<div class="stack-item" style="position:relative;width:32px;height:32px;">
+              <img src="${img}" style="cursor:pointer;" onclick="window.openMedia('${img}','image')">
+              <button class="stack-delete" onclick="event.stopPropagation();window.deleteApprovalImage('${type}','${approvalKey}',${idx})" title="Remove">×</button>
+            </div>`;
+          });
+          approvalsHtml += `<div class="stack-item" style="width:32px;height:32px;" onclick="window.uploadApprovalImage('${type}','${approvalKey}')"><div class="add-stack" style="font-size:12px;">+</div></div>`;
+          approvalsHtml += `</div>`;
+        } else {
+          approvalsHtml += `<div class="cert-preview" onclick="window.uploadApprovalImage('${type}','${approvalKey}')" style="width:80px;height:28px;"><span class="placeholder" style="font-size:8px;">+ Doc</span></div>`;
+        }
+        approvalsHtml += `</div>`;
+      });
+      
+      // Custom approval input
+      approvalsHtml += `<div style="display:flex;gap:4px;margin-top:4px;">
+        <input type="text" id="customApproval_${type}" placeholder="Add approval body..." 
+          style="flex:1;background:#0a1228;border:1px solid rgba(124,252,0,0.2);border-radius:6px;padding:4px 8px;color:#7CFC00;font-size:10px;outline:none;">
+        <button class="block-btn" onclick="window.addCustomApproval('${type}')" style="padding:4px 10px;font-size:10px;">+</button>
+      </div>`;
+      
+      approvalsHtml += '</div>';
     }
 
-    const removeBtnHtml = !isRequired ? `
-      <button class="btn-remove-cert" onclick="removeCert('${type}')" title="Remove this certificate">🗑 Remove Certificate</button>
-    ` : '';
+    const removeBtnHtml = !isRequired ? 
+      `<button class="btn-remove-cert" onclick="window.removeCert('${type}')" title="Remove this certificate">🗑 Remove Type</button>` : '';
+
+    // Toggle for non-required certs
+    const toggleHtml = isRequired ? 
+      '<div style="display:flex;align-items:center;gap:6px;margin-top:6px;"><span style="font-size:10px;color:#7CFC00;">🔒 Admin Verified</span><span style="font-size:8px;color:#666;">(Contact admin to update)</span></div>' :
+      `<div class="cert-toggle-row" style="margin-top:6px;">
+        <span style="font-size:10px;">${isVerified ? '✅ Verified' : '⏳ Pending'}</span>
+        <label class="toggle-switch" for="cert_${type}">
+          <input type="checkbox" id="cert_${type}" ${isVerified ? 'checked' : ''}>
+          <span class="slider"></span>
+        </label>
+      </div>`;
 
     div.innerHTML = `
       <div class="cert-icon">${info.icon}</div>
       <div class="cert-name">${info.label}</div>
       <div class="cert-desc">${info.desc}</div>
       ${isRequired ? '<div class="cert-required">★ REQUIRED</div>' : ''}
-      ${stackHtml}
-      <div class="cert-toggle-row">
-        <span>${isVerified ? '✅ Verified' : '⏳ Pending'}</span>
-        <label class="toggle-switch" for="cert_${type}">
-          <input type="checkbox" id="cert_${type}" ${isVerified ? 'checked' : ''} ${isRequired ? 'disabled' : ''}>
-          <span class="slider"></span>
-        </label>
-      </div>
+      <div style="width:100%;margin-top:4px;">${approvalsHtml}</div>
+      ${toggleHtml}
       ${removeBtnHtml}
     `;
     grid.appendChild(div);
 
-    const toggle = div.querySelector('input[type="checkbox"]');
-    if (toggle && !isRequired) {
-      toggle.addEventListener('change', function(e) {
-        certToggles[type] = e.target.checked;
-        saveAll();
-        const statusSpan = div.querySelector('.cert-toggle-row span');
-        if (statusSpan) statusSpan.textContent = e.target.checked ? '✅ Verified' : '⏳ Pending';
-      });
+    if (!isRequired) {
+      const toggle = div.querySelector('input[type="checkbox"]');
+      if (toggle) {
+        toggle.addEventListener('change', function(e) {
+          certToggles[type] = e.target.checked;
+          saveAll();
+          renderCertificates();
+          showToast((certToggles[type] ? 'Verified: ' : 'Unverified: ') + info.label, false);
+        });
+      }
     }
   });
 }
 
-function addToStack(type) {
+// =====================================================
+// CERTIFICATE IMAGE UPLOADS
+// =====================================================
+window.uploadCertImage = function(type) {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
@@ -1149,35 +1518,71 @@ function addToStack(type) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(ev) {
-      if (!certStacks[type]) certStacks[type] = [];
-      certStacks[type].push(ev.target.result);
-      if (!certImages[type]) certImages[type] = ev.target.result;
+      certImages[type] = ev.target.result;
       saveAll();
       renderCertificates();
-      showToast('Image added to ' + type + ' certificate!', false);
+      showToast('Certificate image uploaded!', false);
     };
     reader.readAsDataURL(file);
   };
   input.click();
-}
+};
 
-window.deleteFromStack = function(type, index) {
-  if (!confirm('Delete this image?')) return;
-  const stackImages = certStacks[type] || [];
-  if (stackImages.length > 0 && index >= 0 && index < stackImages.length) {
-    stackImages.splice(index, 1);
-    certStacks[type] = stackImages;
-    if (stackImages.length > 0) {
-      certImages[type] = stackImages[0];
-    } else {
-      certImages[type] = null;
-    }
-  } else if (certImages[type]) {
-    certImages[type] = null;
-  }
+window.deleteCertImage = function(type) {
+  if (!confirm('Delete this certificate image?')) return;
+  certImages[type] = null;
   saveAll();
   renderCertificates();
   showToast('Image deleted', false);
+};
+
+window.uploadApprovalImage = function(certType, approvalKey) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      if (!certApprovalImages[certType]) certApprovalImages[certType] = {};
+      if (!certApprovalImages[certType][approvalKey]) certApprovalImages[certType][approvalKey] = [];
+      certApprovalImages[certType][approvalKey].push(ev.target.result);
+      saveAll();
+      renderCertificates();
+      showToast('Approval document added!', false);
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+};
+
+window.deleteApprovalImage = function(certType, approvalKey, index) {
+  if (!confirm('Delete this approval document?')) return;
+  if (certApprovalImages[certType] && certApprovalImages[certType][approvalKey]) {
+    certApprovalImages[certType][approvalKey].splice(index, 1);
+    if (certApprovalImages[certType][approvalKey].length === 0) {
+      delete certApprovalImages[certType][approvalKey];
+    }
+  }
+  saveAll();
+  renderCertificates();
+  showToast('Document deleted', false);
+};
+
+window.addCustomApproval = function(certType) {
+  const input = document.getElementById('customApproval_' + certType);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) { showToast('Enter an approval body name', true); return; }
+  
+  if (!CERT_LABELS[certType]) return;
+  if (!CERT_LABELS[certType].approvals.includes(val)) {
+    CERT_LABELS[certType].approvals.push(val);
+  }
+  input.value = '';
+  renderCertificates();
+  showToast('Approval body added: ' + val, false);
 };
 
 window.removeCert = function(type) {
@@ -1185,15 +1590,15 @@ window.removeCert = function(type) {
     showToast('Incorporation certificate cannot be removed', true);
     return;
   }
-  if (!confirm('Remove "' + (CERT_LABELS[type]?.label || type) + '" certificate and all its images?')) return;
+  if (!confirm('Remove "' + (CERT_LABELS[type]?.label || type) + '" certificate and all its documents?')) return;
   delete certToggles[type];
   delete certImages[type];
   delete certStacks[type];
+  delete certApprovalImages[type];
   saveAll();
   renderCertificates();
   showToast('Certificate removed', false);
 };
-
 
 // =====================================================
 // RENDER: PRODUCTS
@@ -1204,43 +1609,101 @@ function renderProducts() {
   container.innerHTML = '';
   productLines.forEach((product, idx) => {
     const div = document.createElement('div');
-    div.className = 'product-row';
+    div.className = 'product-block';
     div.innerHTML = `
-      <div class="product-image" onclick="document.getElementById('productImg_${idx}').click()">
-        ${product.image ? '<img src="' + product.image + '">' : '<span class="placeholder">📷</span>'}
-        <input type="file" id="productImg_${idx}" accept="image/*" style="display:none;" onchange="uploadProductImage(${idx}, this)">
-      </div>
-      <div class="product-fields">
-        <div class="field-group">
-          <div class="field-label">PRODUCT</div>
-          <select class="product-select" data-idx="${idx}">
+      <div class="product-header">
+        <div class="product-img" onclick="document.getElementById('productImg_${idx}').click()">
+          ${product.image ? '<img src="' + product.image + '">' : '<span class="placeholder">📷</span>'}
+        </div>
+        <input type="file" id="productImg_${idx}" accept="image/*" style="display:none;" onchange="window.uploadProductImage(${idx}, this)">
+        <div style="flex:1;min-width:0;">
+          <select class="block-select product-select" data-idx="${idx}" style="font-size:12px;padding:6px 10px; background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#7CFC00;">
             ${PRODUCT_TYPES.map(p => '<option value="' + p + '" ' + (p === product.type ? 'selected' : '') + '>' + p + '</option>').join('')}
           </select>
         </div>
-        <div class="field-group" style="flex:2;">
-          <div class="field-label">SIZES (kg) - click to remove</div>
+        <button class="block-btn block-danger" onclick="window.deleteProduct(${idx})" style="padding:4px 10px;font-size:12px;">🗑</button>
+      </div>
+      <div class="block-row" style="display:flex;flex-wrap:wrap;gap:6px;">
+        <div style="flex:1;min-width:60px;">
+          <div style="font-size:8px;color:#FFD966;text-transform:uppercase;letter-spacing:0.5px;">Sizes (kg)</div>
           <div class="size-chips">
-            ${product.sizes.map((s, si) => '<span class="size-chip" onclick="removeSize(' + idx + ', ' + si + ')">' + s + 'kg <span class="remove-size">×</span></span>').join('')}
-            <span class="size-chip" onclick="addSize(${idx})" style="border-color:#7CFC00; cursor:pointer;">+ Add</span>
+            ${product.sizes.map((s, si) => '<span class="size-chip" onclick="window.removeSize(' + idx + ', ' + si + ')">' + s + 'kg <span class="remove-size">×</span></span>').join('')}
+            <span class="size-chip" onclick="window.addSize(${idx})" style="border-color:#7CFC00;cursor:pointer;color:#7CFC00;">+ Add</span>
           </div>
         </div>
+        <div style="flex:1;min-width:60px;">
+          <div style="font-size:8px;color:#FFD966;text-transform:uppercase;letter-spacing:0.5px;">Packaging</div>
+          <select class="block-select packaging-select" data-idx="${idx}" style="font-size:11px;padding:4px 8px;background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#7CFC00;">
+            ${PACKAGING_TYPES.map(p => '<option value="' + p + '" ' + (p === product.packaging ? 'selected' : '') + '>' + p + '</option>').join('')}
+          </select>
+        </div>
       </div>
-      <div class="product-actions">
-        <button class="btn-danger" onclick="deleteProduct(${idx})">🗑</button>
-      </div>`;
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:50px;">
+          <div style="font-size:8px;color:#FFD966;text-transform:uppercase;letter-spacing:0.5px;">Moisture %</div>
+          <input type="number" class="block-input product-moisture" data-idx="${idx}" value="${product.moisture || 12}" step="0.5" min="0" max="30" style="padding:4px 8px;font-size:11px;background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#fff;">
+        </div>
+        <div style="flex:1;min-width:50px;">
+          <div style="font-size:8px;color:#FFD966;text-transform:uppercase;letter-spacing:0.5px;">Oil %</div>
+          <input type="number" class="block-input product-oil" data-idx="${idx}" value="${product.oil || 65}" step="1" min="40" max="80" style="padding:4px 8px;font-size:11px;background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#fff;">
+        </div>
+        <div style="flex:1;min-width:50px;">
+          <div style="font-size:8px;color:#FFD966;text-transform:uppercase;letter-spacing:0.5px;">Grade</div>
+          <select class="block-select product-grade" data-idx="${idx}" style="font-size:11px;padding:4px 6px;background:#0a1228; border:1px solid rgba(124,252,0,0.3); color:#7CFC00;">
+            <option value="Grade A (Premium)" ${(product.grade === 'Grade A (Premium)' || !product.grade) ? 'selected' : ''} style="background:#0a1228; color:#7CFC00;">Grade A</option>
+            <option value="Grade B (Standard)" ${product.grade === 'Grade B (Standard)' ? 'selected' : ''} style="background:#0a1228; color:#7CFC00;">Grade B</option>
+            <option value="Organic Certified" ${product.grade === 'Organic Certified' ? 'selected' : ''} style="background:#0a1228; color:#7CFC00;">Organic</option>
+          </select>
+        </div>
+      </div>
+    `;
     container.appendChild(div);
   });
+
   document.querySelectorAll('.product-select').forEach(sel => {
-    sel.addEventListener('change', function(e) {
+    sel.addEventListener('change', function() {
       const idx = parseInt(this.dataset.idx);
       productLines[idx].type = this.value;
       saveAll();
       populateAuctionProductDropdown();
+      showToast('Product type updated', false);
+    });
+  });
+  document.querySelectorAll('.packaging-select').forEach(sel => {
+    sel.addEventListener('change', function() {
+      const idx = parseInt(this.dataset.idx);
+      productLines[idx].packaging = this.value;
+      saveAll();
+      showToast('Packaging updated', false);
+    });
+  });
+  document.querySelectorAll('.product-moisture').forEach(inp => {
+    inp.addEventListener('change', function() {
+      const idx = parseInt(this.dataset.idx);
+      productLines[idx].moisture = parseFloat(this.value) || 12;
+      saveAll();
+      showToast('Moisture updated', false);
+    });
+  });
+  document.querySelectorAll('.product-oil').forEach(inp => {
+    inp.addEventListener('change', function() {
+      const idx = parseInt(this.dataset.idx);
+      productLines[idx].oil = parseFloat(this.value) || 65;
+      saveAll();
+      showToast('Oil content updated', false);
+    });
+  });
+  document.querySelectorAll('.product-grade').forEach(sel => {
+    sel.addEventListener('change', function() {
+      const idx = parseInt(this.dataset.idx);
+      productLines[idx].grade = this.value;
+      saveAll();
+      showToast('Grade updated', false);
     });
   });
 }
 
-function uploadProductImage(idx, input) {
+window.uploadProductImage = function(idx, input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -1248,33 +1711,37 @@ function uploadProductImage(idx, input) {
     productLines[idx].image = ev.target.result;
     saveAll();
     renderProducts();
+    showToast('Product image uploaded!', false);
   };
   reader.readAsDataURL(file);
-}
+};
 
-function addSize(idx) {
+window.addSize = function(idx) {
   const lastSize = productLines[idx].sizes[productLines[idx].sizes.length - 1] || 1;
   const newSize = lastSize <= 5 ? lastSize * 2 : lastSize + 10;
   productLines[idx].sizes.push(newSize);
   saveAll();
   renderProducts();
   populateAuctionProductDropdown();
-}
+  showToast('Size added: ' + newSize + 'kg', false);
+};
 
-function removeSize(idx, si) {
+window.removeSize = function(idx, si) {
   if (productLines[idx].sizes.length <= 1) { showToast('Keep at least one size', true); return; }
   productLines[idx].sizes.splice(si, 1);
   saveAll();
   renderProducts();
   populateAuctionProductDropdown();
-}
+  showToast('Size removed', false);
+};
 
-function deleteProduct(idx) {
+window.deleteProduct = function(idx) {
   productLines.splice(idx, 1);
   saveAll();
   renderProducts();
   populateAuctionProductDropdown();
-}
+  showToast('Product deleted', false);
+};
 
 // =====================================================
 // RENDER: BOTS
@@ -1285,23 +1752,26 @@ function renderBots() {
   container.innerHTML = '';
   bots.forEach((bot, idx) => {
     const card = document.createElement('div');
-    card.style.cssText = 'background:rgba(0,0,0,0.5);border:1px solid rgba(0,206,209,0.3);border-radius:20px;padding:16px;';
+    card.className = 'bot-block';
     card.innerHTML = `
-      <input type="text" class="bot-name-input" value="${bot.name}" data-idx="${idx}" data-field="name" style="background:rgba(0,0,0,0.6);border:1px solid #FFD966;border-radius:30px;padding:6px 14px;color:white;font-family:"Orbitron",monospace;font-weight:700;font-size:14px;width:100%;margin-bottom:12px;">
-      <select class="bot-strategy-select" data-idx="${idx}" data-field="strategy" style="background:rgba(0,0,0,0.6);border:1px solid #7CFC00;border-radius:30px;padding:6px 14px;color:white;width:100%;margin-bottom:12px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" class="bot-name-input" value="${bot.name}" data-idx="${idx}" data-field="name" style="flex:1;">
+        <button class="block-btn block-danger" onclick="window.deleteBot(${idx})" style="padding:4px 10px;font-size:12px;">🗑</button>
+      </div>
+      <select class="bot-strategy-select" data-idx="${idx}" data-field="strategy">
         <option value="aggressive" ${bot.strategy === 'aggressive' ? 'selected' : ''}>⚡ Aggressive</option>
         <option value="conservative" ${bot.strategy === 'conservative' ? 'selected' : ''}>🐢 Conservative</option>
         <option value="sniper" ${bot.strategy === 'sniper' ? 'selected' : ''}>🎯 Sniper</option>
       </select>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-        <div><span style="font-size:10px;color:#FFD966;">Floor ($)</span><input type="number" step="0.01" class="param-input" value="${bot.priceFloor}" data-idx="${idx}" data-field="priceFloor" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
-        <div><span style="font-size:10px;color:#FFD966;">Ceiling ($)</span><input type="number" step="0.01" class="param-input" value="${bot.priceCeiling}" data-idx="${idx}" data-field="priceCeiling" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
-        <div><span style="font-size:10px;color:#FFD966;">Max Dump (kg)</span><input type="number" step="100" class="param-input" value="${bot.maxDumpKilos}" data-idx="${idx}" data-field="maxDumpKilos" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
-        <div><span style="font-size:10px;color:#FFD966;">Dump Rate</span><input type="number" step="25" class="param-input" value="${bot.dumpRate}" data-idx="${idx}" data-field="dumpRate" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
-        <div><span style="font-size:10px;color:#FFD966;">Sniper Reserve</span><input type="number" step="0.01" class="param-input" value="${bot.sniperReserve}" data-idx="${idx}" data-field="sniperReserve" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
-        <div><span style="font-size:10px;color:#FFD966;">Payment (days)</span><input type="number" step="15" class="param-input" value="${bot.minPaymentDays}" data-idx="${idx}" data-field="minPaymentDays" style="width:100%;padding:4px 8px;background:rgba(0,0,0,0.6);border:1px solid rgba(124,252,0,0.3);border-radius:6px;color:white;font-size:12px;"></div>
+      <div class="bot-param-grid">
+        <div><span class="param-label">Floor ($)</span><input type="number" step="0.01" class="param-input" value="${bot.priceFloor}" data-idx="${idx}" data-field="priceFloor"></div>
+        <div><span class="param-label">Ceiling ($)</span><input type="number" step="0.01" class="param-input" value="${bot.priceCeiling}" data-idx="${idx}" data-field="priceCeiling"></div>
+        <div><span class="param-label">Max Dump (kg)</span><input type="number" step="100" class="param-input" value="${bot.maxDumpKilos}" data-idx="${idx}" data-field="maxDumpKilos"></div>
+        <div><span class="param-label">Dump Rate</span><input type="number" step="25" class="param-input" value="${bot.dumpRate}" data-idx="${idx}" data-field="dumpRate"></div>
+        <div><span class="param-label">Sniper Reserve</span><input type="number" step="0.01" class="param-input" value="${bot.sniperReserve}" data-idx="${idx}" data-field="sniperReserve"></div>
+        <div><span class="param-label">Payment (days)</span><input type="number" step="15" class="param-input" value="${bot.minPaymentDays}" data-idx="${idx}" data-field="minPaymentDays"></div>
       </div>
-      <button class="delete-bot" data-idx="${idx}" style="background:rgba(255,77,77,0.2);border:1px solid #FF4D4D;border-radius:30px;padding:6px 12px;cursor:pointer;color:#FFFFFF;font-weight:700;width:100%;margin-top:12px;">🗑 DELETE</button>`;
+    `;
     container.appendChild(card);
   });
   document.querySelectorAll('.bot-name-input, .param-input, .bot-strategy-select').forEach(inp => {
@@ -1310,16 +1780,18 @@ function renderBots() {
       const idx = parseInt(this.dataset.idx);
       bots[idx][field] = (this.type === 'number') ? parseFloat(this.value) : this.value;
       saveAll();
-    });
-  });
-  document.querySelectorAll('.delete-bot').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      bots.splice(parseInt(this.dataset.idx), 1);
-      saveAll();
-      renderBots();
+      showToast('Bot updated: ' + bots[idx].name, false);
     });
   });
 }
+
+window.deleteBot = function(idx) {
+  if (!confirm('Delete this bot?')) return;
+  bots.splice(idx, 1);
+  saveAll();
+  renderBots();
+  showToast('Bot deleted', false);
+};
 
 // =====================================================
 // RENDER: AUCTION DISPLAY
@@ -1336,9 +1808,9 @@ function renderAuctionDisplay() {
   const isLive = currentAuction.status === 'live';
   const badge = document.getElementById('briefBadge');
   if (badge) badge.innerHTML = isLive ? '🔥 LIVE' : 'READY';
-  const timerHtml = isLive ? '<div class="auction-timer" id="auctionTimer">' + Math.floor(timerSeconds/60) + ':' + (timerSeconds%60).toString().padStart(2,'0') + '</div>' : '';
-  const actionBtn = !isLive ? '<button class="btn-primary" id="startAuctionBtn" style="margin-top:12px;">▶ START AUCTION</button>' :
-    '<button class="btn-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171);margin-top:12px;">⏹ END AUCTION</button>';
+  const timerHtml = isLive ? '<div class="auction-timer">' + Math.floor(timerSeconds/60) + ':' + (timerSeconds%60).toString().padStart(2,'0') + '</div>' : '';
+  const actionBtn = !isLive ? '<button class="btn-neon-primary" id="startAuctionBtn" style="margin-top:12px;padding:8px 20px;width:auto;font-size:13px;">▶ START AUCTION</button>' :
+    '<button class="btn-neon-primary" id="endAuctionBtn" style="background:linear-gradient(105deg,#ef4444,#f87171);margin-top:12px;padding:8px 20px;width:auto;font-size:13px;">⏹ END AUCTION</button>';
   const pendingBids = activeBids.filter(b => b.status === 'pending').sort((a,b) => b.pricePerKilo - a.pricePerKilo);
   let bidsHtml = '<table class="auction-bids-table"><thead><tr><th>#</th><th>Bot</th><th>Price/kg ($)</th><th>Kilos</th><th>Payment</th><th>Strategy</th><th></th></tr></thead><tbody>';
   pendingBids.forEach((bid, idx) => {
@@ -1349,7 +1821,7 @@ function renderAuctionDisplay() {
       '<td>' + formatWeight(bid.kilos) + '</td>' +
       '<td>' + bid.paymentDays + 'd</td>' +
       '<td style="font-size:10px;">' + bid.strategyUsed + '</td>' +
-      '<td><button class="btn-accept" onclick="acceptBid('' + bid.id + '')">✓ Accept</button></td></tr>';
+      '<td><button class="btn-accept" onclick="window.acceptBid(\'' + bid.id + '\')">✓ Accept</button></td></tr>';
   });
   bidsHtml += '</tbody></table>';
   if (pendingBids.length === 0) bidsHtml = '<div class="empty-state">No bids yet.</div>';
@@ -1363,7 +1835,7 @@ function renderAuctionDisplay() {
         </div>
         <div class="auction-company">
           <div class="company-name">${currentAuction.companyName || (companyProfile && companyProfile.name) || 'Company'}</div>
-          <div class="company-detail">${currentAuction.fobPort || (companyProfile && companyProfile.fobPort) || 'FOB Port'}</div>
+          <div class="company-detail">${currentAuction.fobPort || (companyProfile && companyProfile.fobPorts && companyProfile.fobPorts[0]) || 'FOB Port'}</div>
         </div>
       </div>
       <div class="auction-product-display">
@@ -1397,21 +1869,37 @@ function renderAuctionDisplay() {
 // AUCTION FUNCTIONS
 // =====================================================
 function launchAuction() {
-  if (!companyProfile || !companyProfile.name) { showToast('Save your company profile first!', true); return; }
-  if (!certImages || !certImages.incorporation) { showToast('⚠️ Incorporation Certificate is MANDATORY!', true); return; }
+  // Validation
+  if (!companyProfile || !companyProfile.name) { 
+    showToast('Save your company profile first!', true); 
+    return; 
+  }
+  if (!certImages || !certImages.incorporation) { 
+    showToast('⚠️ Incorporation Certificate is MANDATORY!', true); 
+    return; 
+  }
   const productIdx = parseInt(document.getElementById('auctionProductSelect').value);
-  if (isNaN(productIdx) || productIdx < 0 || productIdx >= productLines.length) {
-    showToast('Please select a product from the dropdown!', true); return;
+  if (isNaN(productIdx) || productIdx === '' || productIdx < 0 || productIdx >= productLines.length) {
+    showToast('Please select a product from the dropdown!', true); 
+    return;
   }
   const selectedProduct = productLines[productIdx];
   const quantity = parseFloat(document.getElementById('auctionQuantity').value);
   const sizes = document.getElementById('auctionSizes').value.trim();
-  if (!quantity || quantity <= 0) { showToast('Enter total quantity in kg!', true); return; }
+  if (!quantity || quantity <= 0) { 
+    showToast('Enter total quantity in kg!', true); 
+    return; 
+  }
+  if (!sizes) {
+    showToast('Enter packaging sizes!', true);
+    return;
+  }
+  
   currentAuction = {
     id: 'auc_' + Date.now(),
     companyName: companyProfile.name,
     companyLogo: companyProfile.logo,
-    fobPort: companyProfile.fobPort || document.getElementById('fobPort').value,
+    fobPort: (companyProfile.fobPorts || [''])[0],
     productName: selectedProduct.type,
     productSizes: selectedProduct.sizes,
     totalRemainingKilos: quantity,
@@ -1456,7 +1944,7 @@ function startTimer() {
     timerSeconds--;
     if (timerSeconds <= 0) { clearInterval(auctionTimer); endAuction(); }
     else {
-      const el = document.getElementById('auctionTimer');
+      const el = document.querySelector('.auction-timer');
       if (el) el.innerText = Math.floor(timerSeconds/60) + ':' + (timerSeconds%60).toString().padStart(2,'0');
       if (currentAuction && currentAuction.status === 'live') {
         if (timerSeconds % 10 === 0) bots.forEach(b => botBid(b));
@@ -1469,28 +1957,61 @@ function startTimer() {
 function botBid(bot, isSniper) {
   isSniper = isSniper || false;
   if (!currentAuction || currentAuction.status !== 'live' || currentAuction.totalRemainingKilos <= 0) return;
+  
   const currentBids = activeBids.filter(b => b.status === 'pending');
   const topPrice = currentBids.length > 0 ? Math.max(...currentBids.map(b => b.pricePerKilo)) : bot.priceFloor;
+  
   let bidPrice = bot.priceFloor;
   let strategyUsed = '';
+  
+  const spread = bot.priceCeiling - bot.priceFloor;
+  const marketPressure = Math.random();
+  
   if (bot.strategy === 'aggressive') {
-    bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement);
-    if (isSniper) bidPrice = Math.min(bot.priceCeiling, bidPrice + bot.sniperReserve);
-    strategyUsed = '⚡ Aggressive';
+    const increment = bot.priceIncrement * (1 + marketPressure);
+    bidPrice = Math.min(bot.priceCeiling, topPrice + increment);
+    if (isSniper && timerSeconds <= 15) {
+      bidPrice = Math.min(bot.priceCeiling, topPrice + bot.sniperReserve * 2);
+      strategyUsed = '⚡ Aggressive Sniper!';
+    } else {
+      strategyUsed = '⚡ Aggressive';
+    }
   } else if (bot.strategy === 'conservative') {
-    bidPrice = Math.min(bot.priceCeiling, topPrice + (bot.priceIncrement * 0.5));
+    const increment = bot.priceIncrement * 0.5 * (1 - marketPressure * 0.5);
+    bidPrice = Math.min(bot.priceCeiling, topPrice + increment);
+    if (bidPrice > bot.priceFloor + spread * 0.7 && Math.random() > 0.6) {
+      return;
+    }
     strategyUsed = '🐢 Conservative';
   } else if (bot.strategy === 'sniper') {
     if (isSniper || timerSeconds <= 30) {
-      bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement + (bot.sniperReserve * (timerSeconds / 10)));
+      const timePressure = (30 - timerSeconds) / 30;
+      const sniperJump = bot.sniperReserve * (1 + timePressure * 2);
+      bidPrice = Math.min(bot.priceCeiling, topPrice + sniperJump);
       strategyUsed = '🎯 Sniper!';
-    } else return;
+    } else {
+      if (Math.random() > 0.7) {
+        bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement * 0.3);
+        strategyUsed = '🎯 Sniper (Probe)';
+      } else {
+        return;
+      }
+    }
   }
+  
   bidPrice = Math.max(bidPrice, bot.priceFloor);
+  bidPrice = Math.min(bidPrice, bot.priceCeiling);
+  bidPrice = Math.round(bidPrice * 1000) / 1000;
+  
+  if (currentBids.length > 0 && bidPrice <= topPrice) {
+    bidPrice = Math.min(bot.priceCeiling, topPrice + bot.priceIncrement);
+  }
+  
   const dumpAmount = Math.min(bot.maxDumpKilos, currentAuction.totalRemainingKilos, Math.floor(Math.random() * bot.dumpRate) + bot.dumpRate/2);
   const paymentDays = Math.max(bot.minPaymentDays, Math.floor(Math.random() * (bot.maxPaymentDays - bot.minPaymentDays) + bot.minPaymentDays));
+  
   activeBids.push({
-    id: 'bid_' + Date.now() + '_' + Math.random(),
+    id: 'bid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
     botName: bot.name,
     pricePerKilo: bidPrice,
     kilos: dumpAmount,
@@ -1547,9 +2068,8 @@ function setupAuctionImageUpload() {
   });
 }
 
-
 // =====================================================
-// COMPANY PROFILE — FIXED TO SAVE TO SUPABASE
+// COMPANY PROFILE SETUP
 // =====================================================
 function setupCompanyProfile() {
   const saveBtn = document.getElementById('saveProfileBtn');
@@ -1557,73 +2077,57 @@ function setupCompanyProfile() {
   const logoInput = document.getElementById('companyLogoInput');
   const originSelect = document.getElementById('originCountry');
 
+  if (logoBtn && logoInput) {
+    logoBtn.addEventListener('click', function() {
+      logoInput.click();
+    });
+  }
+
   if (saveBtn) {
     saveBtn.addEventListener('click', async function() {
-      console.log('[TradeAux] Save Profile clicked');
       const origin = document.getElementById('originCountry').value;
+      const prevLogo = companyProfile.logo;
+      const prevFob = Array.isArray(companyProfile.fobPorts) ? companyProfile.fobPorts : [];
       companyProfile = {
-        logo: companyProfile.logo,
-        name: document.getElementById('companyName').value || '',
-        email: document.getElementById('contactEmail').value || '',
-        phone: document.getElementById('contactPhone').value || '',
+        logo: prevLogo,
+        name: document.getElementById('companyName').value.trim() || '',
+        email: document.getElementById('contactEmail').value.trim() || '',
+        phone: document.getElementById('contactPhone').value.trim() || '',
         origin: origin || '',
-        otherCountry: (origin === 'Other') ? (document.getElementById('otherCountryInput').value || '') : '',
-        fobPort: document.getElementById('fobPort').value || '',
-        description: document.getElementById('companyDescription').value || ''
+        otherCountry: (origin === 'Other') ? (document.getElementById('otherCountryInput').value.trim() || '') : '',
+        fobPorts: prevFob,
+        description: document.getElementById('companyDescription').value.trim() || ''
       };
-      console.log('[TradeAux] Profile object built:', JSON.stringify(companyProfile));
-
-      // Save to localStorage first (always works)
       saveAll();
-
-      // Then save to Supabase (source of truth)
       const btn = document.getElementById('saveProfileBtn');
       const originalText = btn.textContent;
       btn.textContent = '💾 Saving...';
       btn.disabled = true;
-
       const result = await saveProfileToSupabase();
-
       btn.textContent = originalText;
       btn.disabled = false;
-
       if (result.success) {
         showToast('✅ Profile saved to cloud!', false);
       } else {
         showToast('⚠️ Saved locally. Cloud sync failed: ' + result.error, true);
       }
+      updateHeader();
     });
   }
 
   if (logoInput) {
     logoInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
-      if (!file) {
-        console.log('[TradeAux] No file selected');
-        return;
-      }
-      console.log('[TradeAux] File selected:', file.name, file.size);
+      if (!file) return;
       const reader = new FileReader();
       reader.onload = function(ev) {
-        if (!companyProfile || typeof companyProfile !== 'object') {
-          console.warn('[TradeAux] Profile was null, reinitializing');
-          companyProfile = { logo: null, name: '', email: '', phone: '', origin: '', otherCountry: '', fobPort: '', description: '' };
-        }
         companyProfile.logo = ev.target.result;
         const preview = document.getElementById('companyLogoPreview');
         const placeholder = document.getElementById('companyLogoPlaceholder');
-        if (preview) {
-          preview.src = companyProfile.logo;
-          preview.style.display = 'block';
-        }
+        if (preview) { preview.src = companyProfile.logo; preview.style.display = 'block'; }
         if (placeholder) placeholder.style.display = 'none';
         saveAll();
         showToast('Logo uploaded!', false);
-        console.log('[TradeAux] Logo loaded, size:', companyProfile.logo ? companyProfile.logo.length : 0);
-      };
-      reader.onerror = function(err) {
-        console.error('[TradeAux] FileReader error:', err);
-        showToast('Error reading image', true);
       };
       reader.readAsDataURL(file);
     });
@@ -1644,10 +2148,19 @@ function setupProducts() {
   const btn = document.getElementById('addProductBtn');
   if (btn) {
     btn.addEventListener('click', function() {
-      productLines.push({ type: 'Desiccated Coconut Regular', sizes: [1, 5, 25], image: null });
+      productLines.push({ 
+        type: 'Desiccated Coconut Regular', 
+        sizes: [1, 5, 25], 
+        packaging: 'Bag', 
+        image: null, 
+        moisture: 12, 
+        oil: 65, 
+        grade: 'Grade A (Premium)' 
+      });
       saveAll();
       renderProducts();
       populateAuctionProductDropdown();
+      showToast('New product added', false);
     });
   }
 }
@@ -1657,18 +2170,20 @@ function setupProducts() {
 // =====================================================
 function setupCertificates() {
   const btn = document.getElementById('addCertBtn');
-  if (btn) {
+  const dropdown = document.getElementById('certDropdown');
+  if (btn && dropdown) {
     btn.addEventListener('click', function() {
-      const type = document.getElementById('certDropdown').value;
+      const type = dropdown.value;
       if (!type) { showToast('Select a certificate type first', true); return; }
       if (certToggles[type] !== undefined) { showToast('Certificate already added', true); return; }
       certToggles[type] = false;
       certImages[type] = null;
       certStacks[type] = [];
+      if (!certApprovalImages[type]) certApprovalImages[type] = {};
       saveAll();
       renderCertificates();
-      document.getElementById('certDropdown').value = '';
-      showToast('Certificate added! Upload images and verify.', false);
+      dropdown.value = '';
+      showToast('Certificate type added! Add approval bodies and documents.', false);
     });
   }
 }
@@ -1695,21 +2210,20 @@ function setupBots() {
       });
       saveAll();
       renderBots();
+      showToast('New bot added', false);
     });
   }
 }
 
 // =====================================================
-// SIGN OUT — BULLETPROOF WITH CACHE BUST
+// SIGN OUT
 // =====================================================
 function setupSignOut() {
   const btn = document.getElementById('signOutBtn');
-  if (!btn) { console.warn('[TradeAux] Sign Out button not found'); return; }
+  if (!btn) return;
   btn.addEventListener('click', async function() {
-    console.log('[TradeAux] Sign Out clicked');
     if (!confirm('Sign out?')) return;
     await bulletproofSignOut();
-    console.log('[TradeAux] Redirecting to signin with cache bust...');
     window.location.replace('signin.html?logout=1&_t=' + Date.now());
   });
 }
@@ -1725,16 +2239,31 @@ function showToast(msg, isError) {
   t.classList.add('visible');
   setTimeout(() => t.classList.remove('visible'), 4000);
 }
-window.closeModal = function() { document.getElementById('mediaModal').style.display = 'none'; };
+
+// =====================================================
+// OPEN MEDIA (FIXED)
+// =====================================================
 window.openMedia = function(src, type) {
   const modal = document.getElementById('mediaModal');
+  if (!modal) {
+    // Fallback: open in new tab
+    window.open(src, '_blank');
+    return;
+  }
   const img = document.getElementById('modalImage');
   const video = document.getElementById('modalVideo');
-  if (img) img.style.display = 'none';
-  if (video) video.style.display = 'none';
-  if (type === 'image' && img) { img.src = src; img.style.display = 'block'; }
-  else if (video) { video.src = src; video.style.display = 'block'; video.play(); }
-  if (modal) modal.style.display = 'flex';
+  if (img) { img.style.display = 'none'; img.src = ''; }
+  if (video) { video.style.display = 'none'; video.src = ''; }
+  if (type === 'image' && img) {
+    img.src = src;
+    img.style.display = 'block';
+    modal.style.display = 'flex';
+  } else if (video) {
+    video.src = src;
+    video.style.display = 'block';
+    video.play();
+    modal.style.display = 'flex';
+  }
 };
 
 // =====================================================
@@ -1775,27 +2304,44 @@ function updateTickerPrices() {
 setInterval(updateTickerPrices, 8000);
 
 // =====================================================
-// INIT — DOM READY + ERROR BOUNDARIES
+// INIT
 // =====================================================
 async function initApp() {
-  console.log('[TradeAux] DOM ready. Initializing v6.0...');
+  console.log('[TradeAux] DOM ready. Initializing block UI version...');
   setupCompanyProfile();
   setupAuctionImageUpload();
   setupProducts();
   setupCertificates();
   setupBots();
   setupSignOut();
+  const syncBtn = document.getElementById('syncCloudBtn');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', async function() {
+      if (!supabaseClient || !currentUser) {
+        showToast('Not connected to cloud — working offline', true);
+        return;
+      }
+      syncBtn.textContent = '⏳ SYNCING...';
+      syncBtn.disabled = true;
+      const result = await saveProfileToSupabase();
+      syncBtn.textContent = '☁️ SYNC';
+      syncBtn.disabled = false;
+      if (result.success) {
+        showToast('Profile synced to cloud ✅', false);
+      } else {
+        showToast('Cloud sync failed: ' + result.error, true);
+      }
+    });
+  }
+  setupTAR();
+  setupFobPorts();
   const launchBtn = document.getElementById('launchAuctionBtn');
   if (launchBtn) launchBtn.addEventListener('click', launchAuction);
-  console.log('[TradeAux] Event listeners attached.');
 
   const authenticated = await checkAuth();
   if (authenticated) {
-    console.log('[TradeAux] Auth OK — loading data');
     await loadFromStorage();
     showToast('Dashboard ready', false);
-  } else {
-    console.log('[TradeAux] Auth failed — should have redirected');
   }
 }
 
