@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>TradeAux • Buyer Dashboard | Bot-Powered Trading</title>
+  <title>TradeAux • Seller Dashboard | TAR Advisor</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- FIX #1: Load Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
@@ -17,7 +18,7 @@
     @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } 100% { transform: translate(-30px,20px) scale(1); } }
     .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
 
-    /* ===== 3D LOGO ===== */
+    /* ===== 3D LOGO - FIXED ANIMATION DELAYS ===== */
     .gem-logo-corner {
       position: fixed; top: 20px; left: 20px; z-index: 9999;
       filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
@@ -31,18 +32,10 @@
     .gem-letter:nth-child(3) { animation-delay: 0.4s; }
     .gem-letter:nth-child(4) { animation-delay: 0.6s; }
     .gem-letter:nth-child(5) { animation-delay: 0.8s; }
-    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
-    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
-    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
     @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
-    .gem-letter:nth-child(1)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
-    .gem-letter:nth-child(2)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
-    .gem-letter:nth-child(3)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
-    .gem-letter:nth-child(4)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
-    .gem-letter:nth-child(5)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
-    .gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
-    .gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
-    .gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
     .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
     .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
     .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
@@ -63,6 +56,7 @@
     .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
     .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
 
+    /* ===== REST OF CSS (unchanged) ===== */
     .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
     .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px; background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; }
@@ -71,23 +65,12 @@
     .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
     .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
     .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
     .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
     .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
-    .brief-btn { background: linear-gradient(135deg, #FFD966, #ff9500); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; color: #000; margin-left: 8px; }
-    .brief-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,217,102,0.5); }
     .top-trader { text-align: center; background: rgba(0, 0, 0, 0.5); padding: 12px 24px; border-radius: 40px; display: inline-block; width: auto; margin: 20px auto; border: 1px solid rgba(124, 252, 0, 0.3); backdrop-filter: blur(4px); font-family: 'Orbitron', sans-serif; font-size: 14px; }
     .banner-container { text-align: center; padding-top: 60px; }
-    .ticker-section { margin: 20px 0 30px; text-align: center; }
-    .ticker-header { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #9ca3af; letter-spacing: 2px; margin-bottom: 12px; }
-    .live-ticker { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-    .ticker-item { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 206, 209, 0.2); border-radius: 40px; padding: 8px 20px; display: flex; align-items: center; gap: 16px; animation: pulse 4s infinite; }
-    @keyframes pulse { 0%, 100% { box-shadow: 0 0 5px rgba(0,206,209,0.2); } 50% { box-shadow: 0 0 20px rgba(0,206,209,0.4); } }
-    .ticker-commodity { font-family: 'Orbitron', sans-serif; font-weight: 600; }
-    .ticker-price { font-family: 'Orbitron', sans-serif; font-weight: 800; color: #00ced1; }
-    .ticker-change.up { color: #7CFC00; }
-    .ticker-change.down { color: #ff3b3b; }
 
-    /* ===== SECTION CARDS WITH ANIMATED BORDERS ===== */
     .section-card {
       background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95));
       border-radius: 24px; padding: 24px; margin-bottom: 24px;
@@ -112,7 +95,6 @@
     }
     .section-header .badge { background: rgba(0,206,209,0.2); padding: 3px 10px; border-radius: 20px; font-size: 10px; color: #00ced1; }
 
-    /* ===== COMPANY PROFILE ===== */
     .company-section { margin-top: 30px; }
     .company-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .company-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 24px; }
@@ -120,7 +102,7 @@
     .company-logo-section { text-align: center; }
     .company-logo-upload { width: 160px; height: 160px; border: 2px dashed rgba(0,206,209,0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; margin: 0 auto; overflow: hidden; background: rgba(0,0,0,0.3); }
     .company-logo-upload:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
-    .company-logo-upload img { width: 100%; height: 100%; object-fit: contain; }
+    .company-logo-upload img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
     .company-logo-upload .placeholder { color: #9ca3af; font-size: 13px; }
     .company-logo-upload .placeholder-icon { font-size: 48px; margin-bottom: 8px; }
     .company-verification-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
@@ -132,7 +114,6 @@
     .company-field label { display: block; font-size: 10px; color: #9ca3af; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
     .company-field .field-value { font-size: 13px; color: #e5e7eb; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-    /* ===== DOCUMENTS ===== */
     .documents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
     .document-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
     .document-item:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
@@ -141,8 +122,9 @@
     .document-item .doc-name { font-size: 11px; font-weight: 600; }
     .document-item .doc-status { font-size: 10px; color: #9ca3af; }
     .document-item .doc-upload { font-size: 10px; color: #00ced1; cursor: pointer; }
+    .company-documents-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
+    .company-photos-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
 
-    /* ===== PHOTOS ===== */
     .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
     .photo-item { aspect-ratio: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
     .photo-item:hover { border-color: #00ced1; transform: scale(1.02); }
@@ -154,7 +136,6 @@
     .photo-upload-btn .icon { font-size: 28px; color: #00ced1; }
     .photo-upload-btn .text { font-size: 10px; color: #9ca3af; margin-top: 4px; }
 
-    /* ===== CERTIFICATION BLOCKS ===== */
     .cert-block-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px;
     }
@@ -183,6 +164,7 @@
     .cert-block .cert-preview .placeholder { font-size: 9px; color: #9ca3af; }
     .cert-block .cert-toggle-row { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; margin-top: 4px; }
     .cert-block .cert-toggle-row span { font-size: 9px; color: #9ca3af; }
+    .block-select { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; color: #7CFC00; padding: 10px; font-family: 'Inter', sans-serif; }
 
     .btn-remove-cert { background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.4); color: #FF4D4D; padding: 2px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
     .btn-remove-cert:hover { background: rgba(255,77,77,0.3); border-color: #FF4D4D; }
@@ -194,7 +176,6 @@
     .toggle-switch input:checked + .slider { background-color: #7CFC00; }
     .toggle-switch input:checked + .slider:before { transform: translateX(12px); }
 
-    /* ===== BUTTONS - BLACK BG, NEON LETTERING ===== */
     .btn-neon {
       background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px;
       padding: 10px 32px; color: #7CFC00; font-family: 'Inter', sans-serif;
@@ -208,129 +189,142 @@
     }
     .btn-neon-primary:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(16,185,129,0.4); }
 
-    /* ===== TOAST ===== */
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; }
     .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
     .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
 
-    /* BOTS FLEET */
-    .bots-section { margin-top: 30px; }
-    .bots-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; }
-    .bots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-    .bot-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 16px; cursor: pointer; transition: all 0.3s; position: relative; }
-    .bot-card:hover { transform: translateY(-4px); border-color: #00ced1; }
-    .bot-emoji { font-size: 32px; margin-bottom: 8px; }
-    .bot-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-    .bot-status { font-size: 10px; color: #7CFC00; margin-bottom: 8px; }
-    .bot-target { font-size: 10px; color: #FFD966; margin-bottom: 8px; }
-    .bot-stats { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; margin-top: 8px; }
-    .bot-scanning { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #00ced1; border-radius: 50%; animation: scanningPulse 1.5s infinite; }
-    @keyframes scanningPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.5); } }
-    .add-bot-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 150px; cursor: pointer; transition: all 0.3s; }
-    .add-bot-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
-    .add-bot-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
-    .add-bot-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; }
+    .tar-section { margin-top: 30px; }
+    .tar-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .tar-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .tar-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; }
+    .tar-status-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #7CFC00; }
+    .tar-status-dot { width: 12px; height: 12px; border-radius: 50%; background: #7CFC00; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+    .tar-status-text { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #7CFC00; }
+    .tar-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+    .tar-metric { text-align: center; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; }
+    .tar-metric-value { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .tar-metric-label { font-size: 9px; color: #9ca3af; margin-top: 4px; }
 
-    /* BOT LOG */
-    .bot-log-section { margin-top: 30px; }
-    .bot-log-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .bot-log-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; }
-    .bot-log-entry { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px; display: flex; align-items: center; gap: 10px; }
-    .bot-log-entry .log-time { color: #666; font-size: 10px; min-width: 70px; }
-    .bot-log-entry .log-bot { color: #FFD966; font-weight: 600; min-width: 100px; }
-    .bot-log-entry .log-action { color: #e5e7eb; flex: 1; }
-    .bot-log-entry .log-status { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
-    .log-status.scan { background: rgba(0,206,209,0.2); color: #00ced1; }
-    .log-status.bid { background: rgba(124,252,0,0.2); color: #7CFC00; }
-    .log-status.skip { background: rgba(255,59,59,0.15); color: #ff3b3b; }
-    .log-status.alert { background: rgba(255,217,102,0.2); color: #FFD966; }
-    .log-status.sync { background: rgba(0,102,255,0.2); color: #0066ff; }
-    .clear-log-btn { background: rgba(255,59,59,0.15); border: 1px solid rgba(255,59,59,0.3); color: #ff3b3b; padding: 6px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+    .tar-receivable-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #FFD966; cursor: pointer; transition: all 0.2s; }
+    .tar-receivable-item:hover { background: rgba(0,206,209,0.05); transform: translateX(4px); }
+    .tar-receivable-item .receivable-info { flex: 1; }
+    .tar-receivable-item .receivable-name { font-weight: 600; font-size: 13px; }
+    .tar-receivable-item .receivable-details { font-size: 11px; color: #9ca3af; }
+    .tar-receivable-item .receivable-amount { font-family: 'Orbitron', sans-serif; color: #00ced1; font-size: 14px; }
+    .tar-receivable-item .receivable-status { font-size: 10px; padding: 2px 10px; border-radius: 12px; margin-left: 12px; }
+    .tar-receivable-item .receivable-status.ready { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .tar-receivable-item .receivable-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .tar-receivable-item .receivable-status.urgent { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .tar-receivable-item .receivable-status.converted { background: rgba(0,206,209,0.2); color: #00ced1; }
 
-    /* CONTRACTS */
-    .contracts-section { margin-top: 30px; }
-    .contracts-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .contracts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .contract-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
-    .contract-card:hover { transform: translateY(-4px); border-color: #00ced1; }
-    .contract-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .contract-product { font-weight: 700; font-size: 16px; }
-    .contract-product .variety { font-weight: 400; color: #9ca3af; font-size: 13px; }
-    .contract-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
-    .contract-status.active { background: rgba(124,252,0,0.2); color: #7CFC00; }
-    .contract-status.completed { background: rgba(0,206,209,0.2); color: #00ced1; }
-    .contract-status.disputed { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-    .contract-details { font-size: 13px; color: #9ca3af; margin-bottom: 12px; }
-    .contract-details div { margin-bottom: 4px; }
-    .contract-details .label { color: #666; }
-    .contract-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .contract-actions button { padding: 6px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-    .contract-actions .view-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
-    .contract-actions .view-btn:hover { background: rgba(0,206,209,0.3); }
-    .contract-actions .track-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
-    .contract-actions .track-btn:hover { background: rgba(0,102,255,0.3); }
-    .contract-actions .track-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .contract-shipment { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
-    .contract-shipment .shipment-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0; }
-    .contract-shipment .shipment-label { color: #9ca3af; }
-    .contract-shipment .shipment-value { font-family: 'Orbitron', sans-serif; color: #00ced1; font-size: 12px; }
+    .tar-batch-btn { background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; transition: 0.2s; }
+    .tar-batch-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(124,252,0,0.3); }
+    .tar-batch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* CONTAINERS */
-    .containers-section { margin-top: 30px; }
-    .containers-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .containers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-    .container-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
-    .container-card:hover { transform: translateY(-4px); border-color: #00ced1; }
-    .container-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .container-name { font-weight: 700; font-size: 16px; font-family: 'Orbitron', sans-serif; color: #00ced1; }
-    .container-name .region { font-weight: 400; color: #9ca3af; font-size: 12px; font-family: 'Inter', sans-serif; }
-    .container-progress-mini { margin: 12px 0; }
-    .container-progress-mini .progress-bar { width: 100%; height: 8px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; }
-    .container-progress-mini .progress-fill { height: 100%; background: linear-gradient(90deg, #00ced1, #00ff7f); border-radius: 4px; transition: width 0.6s ease; }
-    .container-progress-mini .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af; margin-top: 4px; }
-    .container-products-preview { font-size: 12px; color: #9ca3af; margin: 8px 0; }
-    .container-products-preview .product-tag { display: inline-block; background: rgba(0,206,209,0.1); padding: 2px 8px; border-radius: 12px; margin: 2px 4px 2px 0; border: 1px solid rgba(0,206,209,0.15); }
-    .container-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .container-actions .fill-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
-    .container-actions .fill-btn:hover { background: rgba(255,217,102,0.3); }
-    .container-actions .view-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
-    .container-actions .view-btn:hover { background: rgba(0,206,209,0.3); }
-    .container-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
-    .container-actions .delete-btn:hover { background: rgba(255,59,59,0.25); }
-    .add-container-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; cursor: pointer; transition: all 0.3s; }
-    .add-container-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
-    .add-container-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
-    .add-container-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #9ca3af; }
+    .tar-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .tar-setting { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; }
+    .tar-setting-label { font-size: 11px; color: #9ca3af; }
+    .tar-setting-value { font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00ced1; }
 
-    /* DASHBOARD GRID */
-    .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin: 20px 0; }
-    .dashboard-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; }
-    .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; }
-    .badge-count { background: rgba(0,206,209,0.2); padding: 2px 10px; border-radius: 20px; font-size: 12px; }
-    .clickable-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
-    .clickable-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
-    .item-title { font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 4px; }
-    .item-details { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(124,252,0,0.2); color: #7CFC00; }
-    .status-badge.warning { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-    .status-badge.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
-    .status-badge.shipped { background: rgba(0,206,209,0.2); color: #00ced1; }
-    .status-badge.bol-pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .tar-advisory { margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(0,206,209,0.15); }
+    .tar-advisory-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #FFD966; margin-bottom: 8px; }
+    .tar-advisory-text { font-size: 13px; color: #e5e7eb; line-height: 1.6; }
+    .tar-advisory-text .highlight { color: #7CFC00; font-weight: 600; }
+    .tar-advisory-text .warning { color: #ff3b3b; }
+    .tar-advisory-text .info { color: #00ced1; }
 
-    /* SHIPMENT TRACKER */
-    .shipment-info { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,206,209,0.15); }
-    .shipment-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; flex-wrap: wrap; gap: 4px; }
-    .shipment-label { color: #9ca3af; }
-    .shipment-value { font-family: 'Orbitron', sans-serif; color: #00ced1; }
-    .track-shipment-btn { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #0066ff, #00cc44); border: none; padding: 8px 16px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #fff; text-decoration: none; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
-    .track-shipment-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,102,255,0.4); }
-    .track-shipment-btn.disabled { background: rgba(255,255,255,0.1); color: #666; cursor: not-allowed; pointer-events: none; }
-    .bol-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-top: 6px; }
-    .bol-status.uploaded { background: rgba(0,206,209,0.2); color: #00ced1; }
-    .bol-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .auction-schedule { margin-top: 16px; }
+    .auction-schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .auction-schedule-header .title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #00ced1; }
+    .auction-refresh-btn { background: rgba(0,206,209,0.15); border: 1px solid rgba(0,206,209,0.3); color: #00ced1; padding: 2px 12px; border-radius: 12px; font-size: 9px; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.2s; }
+    .auction-refresh-btn:hover { background: rgba(0,206,209,0.25); transform: scale(1.02); }
+    .auction-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #00ced1; }
+    .auction-item .auction-info { flex: 1; }
+    .auction-item .auction-name { font-weight: 600; font-size: 13px; }
+    .auction-item .auction-details { font-size: 11px; color: #9ca3af; }
+    .auction-item .auction-time { font-family: 'Orbitron', sans-serif; color: #7CFC00; font-size: 12px; }
+    .auction-item .auction-status { font-size: 10px; padding: 2px 10px; border-radius: 12px; }
+    .auction-item .auction-status.upcoming { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .auction-item .auction-status.live { background: rgba(124,252,0,0.2); color: #7CFC00; animation: pulse 2s infinite; }
+    .auction-item .auction-status.closed { background: rgba(255,59,59,0.2); color: #ff3b3b; }
 
-    /* MODALS */
+    /* ===== TOUR OVERLAY - FIXED Z-INDEX ===== */
+    .tour-overlay { display: none; position: fixed; inset: 0; z-index: 10000; pointer-events: none; }
+    .tour-overlay.active { display: block; pointer-events: auto; }
+    .tour-highlight { position: absolute; border: 3px solid #7CFC00; border-radius: 16px; box-shadow: 0 0 50px rgba(124,252,0,0.3); animation: tourPulse 2s ease-in-out infinite; pointer-events: none; }
+    @keyframes tourPulse { 0%, 100% { box-shadow: 0 0 30px rgba(124,252,0,0.2); } 50% { box-shadow: 0 0 60px rgba(124,252,0,0.5); } }
+    .tour-tooltip { position: absolute; background: rgba(2,6,23,0.95); border: 1px solid #7CFC00; border-radius: 12px; padding: 16px 20px; max-width: 320px; color: #e5e7eb; font-size: 13px; line-height: 1.6; pointer-events: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); z-index: 10001; }
+    .tour-tooltip h4 { font-family: 'Orbitron', sans-serif; color: #7CFC00; margin-bottom: 6px; font-size: 14px; }
+    .tour-tooltip .tour-btn { margin-top: 10px; padding: 6px 20px; background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; pointer-events: auto; }
+    .tour-tooltip .tour-btn:hover { transform: scale(1.02); }
+    .tour-progress { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10002; background: rgba(2,6,23,0.9); border: 1px solid rgba(0,206,209,0.3); border-radius: 30px; padding: 8px 20px; display: flex; align-items: center; gap: 12px; pointer-events: auto; }
+    .tour-progress .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
+    .tour-progress .dot.active { background: #7CFC00; box-shadow: 0 0 10px rgba(124,252,0,0.5); }
+    .tour-progress .dot.done { background: #00ced1; }
+    .tour-progress .tour-close { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; padding: 0 8px; }
+    .tour-progress .tour-close:hover { color: #ff3b3b; }
+
+    .products-section { margin-top: 30px; }
+    .products-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .product-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
+    .product-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .product-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .product-name { font-weight: 700; font-size: 16px; }
+    .product-name .variety { font-weight: 400; color: #9ca3af; font-size: 13px; }
+    .product-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+    .product-status.listed { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .product-status.sold { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .product-status.draft { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .product-details { font-size: 13px; color: #9ca3af; }
+    .product-details div { margin-bottom: 4px; }
+    .product-details .label { color: #666; }
+    .product-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .product-actions button { padding: 6px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .product-actions .edit-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
+    .product-actions .edit-btn:hover { background: rgba(255,217,102,0.3); }
+    .product-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
+    .product-actions .delete-btn:hover { background: rgba(255,59,59,0.25); }
+    .add-product-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; cursor: pointer; transition: all 0.3s; }
+    .add-product-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
+    .add-product-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
+    .add-product-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #9ca3af; }
+
+    .orders-section { margin-top: 30px; }
+    .orders-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .order-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
+    .order-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .order-id { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; color: #00ced1; }
+    .order-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+    .order-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .order-status.processing { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .order-status.shipped { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .order-status.completed { background: rgba(0,102,255,0.2); color: #0066ff; }
+    .order-status.cancelled { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .order-details { font-size: 13px; color: #9ca3af; }
+    .order-details div { margin-bottom: 4px; }
+    .order-details .label { color: #666; }
+    .order-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .order-actions button { padding: 6px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .order-actions .process-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
+    .order-actions .process-btn:hover { background: rgba(0,206,209,0.3); }
+    .order-actions .ship-btn { background: rgba(124,252,0,0.2); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+    .order-actions .ship-btn:hover { background: rgba(124,252,0,0.3); }
+    .order-actions .view-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
+    .order-actions .view-btn:hover { background: rgba(0,102,255,0.3); }
+
+    .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 20px 0; }
+    .stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
+    .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: #00ced1; }
+    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
     .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
     .modal-content.wide { max-width: 800px; }
@@ -344,83 +338,44 @@
     .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; color: white; font-family: 'Inter', sans-serif; font-size: 14px; }
     .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; }
     .modal-field input[type="file"] { padding: 8px; }
-    .tooltip { font-size: 11px; color: #7CFC00; margin-top: 4px; display: block; }
     .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
     .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
     .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
     .cancel-btn:hover { background: rgba(255,255,255,0.2); }
     .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; color: #000; }
     .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.3); }
-    .create-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
-
-    /* FILL SCANNER */
-    .fill-suggestion-card { background: rgba(0,0,0,0.4); border: 1px solid rgba(124,252,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
-    .fill-suggestion-card:hover { background: rgba(124,252,0,0.1); transform: translateX(4px); }
-    .fill-suggestion-card .suggestion-title { font-weight: 700; font-size: 13px; color: #7CFC00; }
-    .fill-suggestion-card .suggestion-details { font-size: 11px; color: #9ca3af; margin-top: 4px; }
-    .fill-suggestion-card .suggestion-fill { font-size: 11px; color: #FFD966; margin-top: 4px; }
-
-    .container-contents-list { margin: 12px 0; }
-    .container-content-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 12px; }
-    .container-content-item .content-product { font-weight: 600; }
-    .container-content-item .content-qty { color: #9ca3af; }
-
-    .bid-now-btn {
-      background: linear-gradient(105deg, #10b981, #2dd4bf); border: none;
-      padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 10px;
-      cursor: pointer; color: #010101; margin-top: 6px; transition: 0.2s;
-    }
-    .bid-now-btn:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(124,252,0,0.5); }
-    .bid-now-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; max-height: 200px; overflow-y: auto; }
-    .checkbox-item { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(0,206,209,0.2); cursor: pointer; }
-    .checkbox-item:hover { border-color: #00ced1; }
-    .checkbox-item.selected { background: rgba(0,206,209,0.2); border-color: #00ced1; }
-
-    .slider-row { display: flex; align-items: center; gap: 16px; }
-    .slider-row input { flex: 1; }
-    .slider-value { font-family: 'Orbitron', sans-serif; color: #00ced1; min-width: 60px; }
-
-    .bot-program-section { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(0,206,209,0.15); }
-    .bot-program-section h4 { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #FFD966; margin-bottom: 12px; }
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .toggle-label { font-size: 12px; color: #e5e7eb; }
-    .toggle-switch { position: relative; width: 44px; height: 24px; background: rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; transition: 0.3s; }
-    .toggle-switch.active { background: #00ced1; }
-    .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: 0.3s; }
-    .toggle-switch.active::after { left: 22px; }
-
-    .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 8px; }
-    .emoji-option { font-size: 24px; padding: 8px; background: rgba(0,0,0,0.3); border: 2px solid transparent; border-radius: 8px; cursor: pointer; text-align: center; }
-    .emoji-option:hover { border-color: rgba(0,206,209,0.3); }
-    .emoji-option.selected { border-color: #00ced1; background: rgba(0,206,209,0.1); }
 
     @media (max-width: 1000px) {
       .company-profile-layout { grid-template-columns: 1fr; }
       .company-fields { grid-template-columns: 1fr; }
-      .dashboard-grid { grid-template-columns: 1fr; }
-      .bots-grid { grid-template-columns: repeat(2, 1fr); }
-      .contracts-grid { grid-template-columns: 1fr; }
-      .containers-grid { grid-template-columns: 1fr; }
-      .cert-block-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+      .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+      .tar-grid { grid-template-columns: 1fr; }
+      .tar-metrics { grid-template-columns: 1fr 1fr; }
+      .tar-settings { grid-template-columns: 1fr; }
     }
     @media (max-width: 600px) {
-      .bots-grid { grid-template-columns: 1fr; }
+      .dashboard-grid { grid-template-columns: 1fr; }
       .header { flex-direction: column; align-items: stretch; }
       .wallet-section { flex-wrap: wrap; }
       .nav { justify-content: center; }
       .gem-logo-corner { transform: scale(0.2); }
-      .cert-block-grid { grid-template-columns: 1fr; }
+      .tar-metrics { grid-template-columns: 1fr; }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<base target="_blank">
+  <base target="_self">
 </head>
 <body>
 
+<!-- ===== HIDDEN FILE INPUTS ===== -->
+<input type="file" id="logoFileInput" style="display:none;" accept=".jpg,.png,.jpeg">
+<input type="file" id="photoFileInput" style="display:none;" accept=".jpg,.png,.jpeg" multiple>
+<input type="file" id="incorpFileInput" style="display:none;" accept=".pdf,.jpg,.png">
+<input type="file" id="licenseFileInput" style="display:none;" accept=".pdf,.jpg,.png">
+<input type="file" id="taxFileInput" style="display:none;" accept=".pdf,.jpg,.png">
+
+<!-- ===== HTML CONTENT (same as v7) ===== -->
 <div class="bg-waves">
   <div class="wave-bg wave-1"></div>
   <div class="wave-bg wave-2"></div>
@@ -457,31 +412,116 @@
     <nav class="nav">
       <div class="wallet-section">
         <div class="wallet-balance">
-          <span class="wallet-label">WALLET</span>
+          <span class="wallet-label">💰 BALANCE</span>
           <span class="wallet-amount" id="walletAmount">$0.00</span>
+          <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
         </div>
         <button class="deposit-btn" id="depositBtn">+ Deposit</button>
-        <button class="brief-btn" id="fileBriefBtn">📝 File Brief</button>
+        <button class="btn-neon" style="padding:4px 12px; font-size:10px; margin-left:8px;" id="tourBtn">🎯 Tour</button>
         <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px; margin-left:8px;">☁️ Sync</button>
-        <div class="wallet-status"><span id="bidCount">0 bids available</span></div>
       </div>
-      <a href="#">Arena</a>
-      <a href="#">Market Intel</a>
+      <a href="#">Marketplace</a>
+      <a href="#">Analytics</a>
       <a href="#" id="authBtn">Sign Out</a>
     </nav>
   </header>
 
   <div class="banner-container">
-    <div class="top-trader" id="topTraderBanner">🏆 Loading top traders...</div>
+    <div class="top-trader" id="topTraderBanner">🤖 TAR ADVISOR ACTIVE • 10,000 conversions available • $25 each</div>
   </div>
 
-  <div class="ticker-section">
-    <div class="ticker-header">🔴 LIVE MARKET TICKER — YOUR BOT COMMODITIES</div>
-    <div class="live-ticker" id="liveTicker"></div>
+  <!-- ===== STATS DASHBOARD ===== -->
+  <div class="dashboard-grid" id="statsGrid">
+    <div class="stat-card" data-tour="1">
+      <div class="stat-icon">📦</div>
+      <div class="stat-number" id="totalProducts">0</div>
+      <div class="stat-label">Total Products</div>
+    </div>
+    <div class="stat-card" data-tour="2">
+      <div class="stat-icon">🛒</div>
+      <div class="stat-number" id="totalOrders">0</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card" data-tour="3">
+      <div class="stat-icon">💵</div>
+      <div class="stat-number" id="totalRevenue">$0</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card" data-tour="4">
+      <div class="stat-icon">🔄</div>
+      <div class="stat-number" id="totalConversions">0</div>
+      <div class="stat-label">Conversions</div>
+    </div>
+  </div>
+
+  <!-- ===== TAR - Trade Advisor Robot ===== -->
+  <div class="tar-section" id="tarSection" data-tour="5">
+    <div class="tar-header">
+      <span>🤖 TAR - TRADE ADVISOR ROBOT</span>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="tar-batch-btn" id="tarAutoConvertBtn">⚡ Auto-Convert Ready</button>
+        <button class="btn-neon" style="padding:4px 16px; font-size:11px;" id="tarAdviceBtn">💡 Get Advice</button>
+        <button class="btn-neon" style="padding:4px 16px; font-size:11px;" id="tarSettingsBtn">⚙️ Settings</button>
+      </div>
+    </div>
+    <div class="tar-grid">
+      <div class="tar-card">
+        <div class="tar-status-bar">
+          <div class="tar-status-dot"></div>
+          <span class="tar-status-text" id="tarStatusText">🟢 Active • Monitoring 10,000 receivable opportunities</span>
+        </div>
+        <div class="tar-metrics">
+          <div class="tar-metric">
+            <div class="tar-metric-value" id="tarReadyCount">0</div>
+            <div class="tar-metric-label">Ready to Convert</div>
+          </div>
+          <div class="tar-metric">
+            <div class="tar-metric-value" id="tarPendingCount">0</div>
+            <div class="tar-metric-label">Pending Review</div>
+          </div>
+          <div class="tar-metric">
+            <div class="tar-metric-value" id="tarConvertedCount">0</div>
+            <div class="tar-metric-label">Converted</div>
+          </div>
+          <div class="tar-metric">
+            <div class="tar-metric-value" id="tarFeesEarned">$0</div>
+            <div class="tar-metric-label">Fees Earned</div>
+          </div>
+        </div>
+        <div id="tarReceivablesList">
+          <div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;">Loading receivables...</div>
+        </div>
+      </div>
+      <div class="tar-card" id="tarAdvisoryCard">
+        <h4 style="font-family:'Orbitron',sans-serif; font-size:14px; color:#FFD966; margin-bottom:12px;">💡 TAR ADVISORY</h4>
+        <div class="tar-advisory" id="tarAdvisory">
+          <div class="tar-advisory-title">📊 MARKET INSIGHT</div>
+          <div class="tar-advisory-text" id="tarAdvisoryText">
+            Loading market intelligence...
+          </div>
+        </div>
+        <div class="auction-schedule" id="auctionSchedule">
+          <div class="auction-schedule-header">
+            <span class="title">📅 UPCOMING KONTORS</span>
+            <button class="auction-refresh-btn" id="auctionRefreshBtn">🔄 Refresh</button>
+          </div>
+          <div id="auctionList">
+            <div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">Loading auction schedule...</div>
+          </div>
+        </div>
+        <div style="margin-top:12px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px;">
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:#9ca3af;">
+            <span>Today's Conversions: <span id="todayConversions" style="color:#7CFC00; font-family:'Orbitron',sans-serif;">0</span></span>
+            <span>Fees Earned: <span id="todayFees" style="color:#00ced1; font-family:'Orbitron',sans-serif;">$0.00</span></span>
+            <span>Remaining: <span id="remainingCapacity" style="color:#FFD966; font-family:'Orbitron',sans-serif;">10,000</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== COMPANY PROFILE ===== -->
-  <div class="company-section">
+  <div class="company-section" id="companySection" data-tour="6">
     <div class="company-header">
       <span>🏢 COMPANY PROFILE</span>
       <button class="btn-neon" style="padding:6px 20px; font-size:12px; width:auto;" id="editCompanyBtn">✏️ Edit Profile</button>
@@ -498,7 +538,7 @@
           </div>
           <div class="company-verification-badge pending" id="verificationBadge">⏳ Pending Verification</div>
           <div style="font-size:11px; color:#9ca3af; margin-top:8px;">
-            <span id="companyStatusText">Complete your company profile to start bidding</span>
+            <span id="companyStatusText">Complete your company profile to start selling</span>
           </div>
         </div>
         <div class="company-info-section">
@@ -526,7 +566,6 @@
               <div class="doc-status" id="incorpDocStatus">Not uploaded</div>
             </div>
             <div class="doc-upload" onclick="document.getElementById('incorpFileInput').click()">📤 Upload</div>
-            <input type="file" id="incorpFileInput" style="display:none;" accept=".pdf,.jpg,.png">
           </div>
           <div class="document-item">
             <div class="doc-icon">📋</div>
@@ -535,7 +574,6 @@
               <div class="doc-status" id="licenseDocStatus">Not uploaded</div>
             </div>
             <div class="doc-upload" onclick="document.getElementById('licenseFileInput').click()">📤 Upload</div>
-            <input type="file" id="licenseFileInput" style="display:none;" accept=".pdf,.jpg,.png">
           </div>
           <div class="document-item">
             <div class="doc-icon">📑</div>
@@ -544,7 +582,6 @@
               <div class="doc-status" id="taxDocStatus">Not uploaded</div>
             </div>
             <div class="doc-upload" onclick="document.getElementById('taxFileInput').click()">📤 Upload</div>
-            <input type="file" id="taxFileInput" style="display:none;" accept=".pdf,.jpg,.png">
           </div>
         </div>
       </div>
@@ -552,26 +589,20 @@
       <!-- Photos Section -->
       <div class="company-photos">
         <div class="company-photos-title">🖼️ Company Photos</div>
-        <div class="photos-grid" id="photosGrid">
-          <div class="photo-item"><div class="placeholder"><span class="placeholder-icon">🏭</span><span>No photos yet</span></div></div>
-          <div class="photo-upload-btn" onclick="document.getElementById('photoFileInput').click()">
-            <span class="icon">📷</span><span class="text">Add Photo</span>
-          </div>
-          <input type="file" id="photoFileInput" style="display:none;" accept=".jpg,.png,.jpeg" multiple>
-        </div>
+        <div class="photos-grid" id="photosGrid"></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== CERTIFICATIONS (Incorporation Block FIRST) ===== -->
-  <div class="section-card">
+  <!-- ===== CERTIFICATIONS ===== -->
+  <div class="section-card" id="certSection" data-tour="7">
     <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
     <div style="color:#ff6b6b; font-size:12px; margin-bottom:12px;">
-      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No bidding without it!
+      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No selling without it!
     </div>
     <div class="cert-block-grid" id="certGrid"></div>
     <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;">
-      <select id="certDropdown" class="block-select" style="flex:1; min-width:160px; background:#0a1228; border:1px solid rgba(124,252,0,0.3); border-radius:10px; color:#7CFC00; padding:10px;">
+      <select id="certDropdown" class="block-select" style="flex:1; min-width:160px;">
         <option value="" style="background:#0a1228; color:#9ca3af;">Add Certificate Type...</option>
         <option value="export" style="background:#0a1228; color:#7CFC00;">Export License</option>
         <option value="organic" style="background:#0a1228; color:#7CFC00;">Organic</option>
@@ -588,466 +619,149 @@
     </div>
   </div>
 
-  <!-- ===== BOTS FLEET ===== -->
-  <div class="bots-section">
-    <div class="bots-header">🤖 YOUR BOT FLEET</div>
-    <div class="bots-grid" id="botsGrid"></div>
+  <!-- ===== PRODUCTS ===== -->
+  <div class="products-section" id="productsSection" data-tour="8">
+    <div class="products-header">
+      <span>📦 YOUR PRODUCTS</span>
+      <button class="btn-neon" style="padding:6px 20px; font-size:12px; width:auto;" id="addProductBtn">➕ List Product</button>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
   </div>
 
-  <!-- ===== BOT LOG ===== -->
-  <div class="bot-log-section">
-    <div class="bot-log-header">
-      <span>📜 BOT ACTIVITY LOG</span>
-      <button class="btn-neon" id="clearLogBtn" onclick="clearBotLog()" style="padding:4px 12px; font-size:10px;">Clear Log</button>
+  <!-- ===== ORDERS ===== -->
+  <div class="orders-section" id="ordersSection" data-tour="9">
+    <div class="orders-header">
+      <span>📋 ORDERS</span>
+      <span style="font-size:12px; color:#9ca3af; font-family:'Inter', sans-serif;">Manage incoming orders</span>
     </div>
-    <div class="bot-log-card">
-      <div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;" id="botLogEmpty">No bot activity yet.</div>
-      <div id="botLogList"></div>
-    </div>
-  </div>
-
-  <!-- ===== CONTRACTS ===== -->
-  <div class="contracts-section">
-    <div class="contracts-header">
-      <span>📄 CONTRACTS & SHIPMENTS</span>
-      <span style="font-size:12px; color:#9ca3af; font-family:'Inter', sans-serif;">View contract details and track shipments</span>
-    </div>
-    <div class="contracts-grid" id="contractsGrid"></div>
-  </div>
-
-  <!-- ===== CONTAINERS ===== -->
-  <div class="containers-section">
-    <div class="containers-header">
-      <span>📦 CONTAINERS</span>
-      <button class="btn-neon" style="padding:6px 20px; font-size:12px; width:auto;" id="addContainerBtn">➕ New Container</button>
-    </div>
-    <div class="containers-grid" id="containersGrid"></div>
-  </div>
-
-  <!-- ===== DASHBOARD ===== -->
-  <div class="dashboard-grid">
-    <div class="dashboard-card">
-      <div class="card-header">🟢 ACTIVE BIDS <span class="badge-count" id="activeBidsCount">0</span></div>
-      <div id="activeBidsList"><div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div></div>
-    </div>
-    <div class="dashboard-card">
-      <div class="card-header">🏆 WON AUCTIONS <span class="badge-count" id="wonAuctionsCount">0</span></div>
-      <div id="wonAuctionsList"><div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div></div>
-    </div>
+    <div class="orders-grid" id="ordersGrid"></div>
   </div>
 
   <footer class="footer">
-    <p>TRADEAUX © 2026 • Global Commodity Exchange • $25 flat fee. Port on every card.</p>
+    <p>TRADEAUX © 2026 • Global Commodity Exchange • TAR System v7.0</p>
   </footer>
 </div>
 
-<!-- ===== MODALS ===== -->
+<!-- ===== DASHBOARD TOUR OVERLAY ===== -->
+<div class="tour-overlay" id="tourOverlay">
+  <div class="tour-highlight" id="tourHighlight"></div>
+  <div class="tour-tooltip" id="tourTooltip">
+    <h4 id="tourTitle">Welcome to Your Dashboard</h4>
+    <p id="tourDescription">This is your command center. Let's take a quick tour.</p>
+    <button class="tour-btn" id="tourNextBtn">Next →</button>
+  </div>
+  <div class="tour-progress" id="tourProgress">
+    <span class="dot active" data-step="0"></span>
+    <span class="dot" data-step="1"></span>
+    <span class="dot" data-step="2"></span>
+    <span class="dot" data-step="3"></span>
+    <span class="dot" data-step="4"></span>
+    <span class="dot" data-step="5"></span>
+    <span class="dot" data-step="6"></span>
+    <span class="dot" data-step="7"></span>
+    <span class="dot" data-step="8"></span>
+    <button class="tour-close" id="tourCloseBtn">✕</button>
+  </div>
+</div>
 
-<!-- Bot Modal -->
-<div class="modal" id="botModal">
-  <div class="modal-content xwide">
-    <span class="modal-close" onclick="closeModal('botModal')">&times;</span>
-    <div class="modal-header"><h2 id="botModalTitle">🤖 Program Bot</h2></div>
-    <div id="botModalBody">
+<!-- ===== MODALS (same as v7) ===== -->
+
+<!-- Product Modal -->
+<div class="modal" id="productModal">
+  <div class="modal-content wide">
+    <span class="modal-close" onclick="closeModal('productModal')">&times;</span>
+    <div class="modal-header"><h2 id="productModalTitle">📦 List Product</h2></div>
+    <div id="productModalBody">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="modal-field">
-          <label>Bot Name</label>
-          <input type="text" id="botNameInput" placeholder="e.g., Coffee Hunter">
+          <label>Product Name *</label>
+          <input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee">
         </div>
         <div class="modal-field">
-          <label>Avatar</label>
-          <div class="emoji-grid" id="botEmojiGrid" style="grid-template-columns:repeat(6,1fr);"></div>
-          <input type="hidden" id="botEmojiInput" value="🤖">
+          <label>Variety</label>
+          <input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade">
         </div>
       </div>
-      <div class="bot-program-section">
-        <h4>🎯 TARGETING</h4>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="modal-field">
-          <label>Target Commodities</label>
-          <div class="checkbox-group" id="botCommodities" style="max-height:120px; overflow-y:auto;"></div>
+          <label>Quantity *</label>
+          <input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1">
         </div>
         <div class="modal-field">
-          <label>Scan Radius</label>
-          <select id="botRadiusInput">
-            <option value="same_city">Same City Only</option>
-            <option value="same_region">Same Region</option>
-            <option value="global">Global</option>
+          <label>Unit</label>
+          <select id="productUnitInput">
+            <option value="kg">Kilograms (kg)</option>
+            <option value="tons">Metric Tons</option>
+            <option value="bags">Bags (60kg)</option>
+            <option value="pallets">Pallets</option>
+            <option value="cbm">Cubic Meters (m³)</option>
           </select>
         </div>
       </div>
-      <div class="bot-program-section" style="border-color:rgba(124,252,0,0.3);">
-        <h4>📦 QUANTITY SNIPING</h4>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Min Quantity</label>
-            <div class="slider-row">
-              <input type="range" id="botMinQty" min="0" max="500" step="1" value="10">
-              <span class="slider-value" id="botMinQtyVal">10</span>
-            </div>
-          </div>
-          <div class="modal-field">
-            <label>Max Quantity</label>
-            <div class="slider-row">
-              <input type="range" id="botMaxQty" min="0" max="500" step="1" value="0">
-              <span class="slider-value" id="botMaxQtyVal">∞</span>
-            </div>
-          </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="modal-field">
+          <label>Price per Unit ($) *</label>
+          <input type="number" id="productPriceInput" placeholder="e.g., 4.50" step="0.01" min="0.01">
         </div>
         <div class="modal-field">
-          <label>Quantity Match Strategy</label>
-          <select id="botQtyStrategy">
-            <option value="exact">Exact Match Only</option>
-            <option value="range">Within Range</option>
-            <option value="any">Any Quantity</option>
-            <option value="partial">Partial Fill OK</option>
-          </select>
-        </div>
-        <div class="modal-field">
-          <label>Min Fill Rate (%)</label>
-          <div class="slider-row">
-            <input type="range" id="botMinFillRate" min="0" max="100" step="5" value="50">
-            <span class="slider-value" id="botMinFillRateVal">50%</span>
-          </div>
-        </div>
-      </div>
-      <div class="bot-program-section" style="border-color:rgba(255,217,102,0.3);">
-        <h4>🚚 EXW / FOB TOGGLE</h4>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Incoterm</label>
-            <select id="botIncotermInput">
-              <option value="exw">EXW (Ex Works)</option>
-              <option value="fob">FOB (Free On Board)</option>
-              <option value="cif">CIF (Cost, Insurance, Freight)</option>
-              <option value="dap">DAP (Delivered at Place)</option>
-            </select>
-          </div>
-          <div class="modal-field">
-            <label>Location</label>
-            <input type="text" id="botLocationInput" placeholder="e.g., Santos, Brazil">
-          </div>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Allow EXW Only</span>
-          <div class="toggle-switch" id="botExwOnlyToggle" onclick="toggleSwitch(this)"></div>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Allow FOB Only</span>
-          <div class="toggle-switch" id="botFobOnlyToggle" onclick="toggleSwitch(this)"></div>
-        </div>
-        <div class="modal-field">
-          <label>Max Freight Cost ($/unit)</label>
-          <div class="slider-row">
-            <input type="range" id="botMaxFreight" min="0" max="500" step="5" value="50">
-            <span class="slider-value" id="botMaxFreightVal">$50</span>
-          </div>
-        </div>
-      </div>
-      <div class="bot-program-section" style="border-color:rgba(0,206,209,0.4);">
-        <h4>💰 BIDDING STRATEGY</h4>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Strategy Type</label>
-            <select id="botStrategyInput">
-              <option value="conservative">Conservative (Best Price)</option>
-              <option value="balanced">Balanced</option>
-              <option value="aggressive">Aggressive (Win Fast)</option>
-              <option value="scalp">Scalping (Quick Profit)</option>
-              <option value="value">Value Hunter (Deep Discounts)</option>
-            </select>
-          </div>
-          <div class="modal-field">
-            <label>Aggressiveness</label>
-            <div class="slider-row">
-              <input type="range" id="botAggressiveness" min="0" max="100" step="1" value="50">
-              <span class="slider-value" id="botAggressivenessVal">50%</span>
-            </div>
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Max Price per Unit ($)</label>
-            <div class="slider-row">
-              <input type="range" id="botMaxPrice" min="0" max="10000" step="50" value="1000">
-              <span class="slider-value" id="botMaxPriceVal">$1,000</span>
-            </div>
-          </div>
-          <div class="modal-field">
-            <label>Bid Increment ($)</label>
-            <div class="slider-row">
-              <input type="range" id="botBidIncrement" min="1" max="100" step="1" value="10">
-              <span class="slider-value" id="botBidIncrementVal">$10</span>
-            </div>
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Max Bids per Auction</label>
-            <div class="slider-row">
-              <input type="range" id="botMaxBids" min="1" max="20" step="1" value="3">
-              <span class="slider-value" id="botMaxBidsVal">3</span>
-            </div>
-          </div>
-          <div class="modal-field">
-            <label>Sniping Timing</label>
-            <select id="botSnipingTiming">
-              <option value="immediate">Immediate</option>
-              <option value="mid">Mid-Auction</option>
-              <option value="end">Last 10% of Time</option>
-              <option value="last_seconds">Last 30 Seconds</option>
-              <option value="dynamic">Dynamic (AI)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="bot-program-section" style="border-color:rgba(255,59,59,0.3);">
-        <h4>🎯 SNIPING CONDITIONS</h4>
-        <div class="modal-field">
-          <label>Snipe On</label>
-          <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" checked value="price"> Price
-            </label>
-            <label class="checkbox-item" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" value="quantity"> Quantity
-            </label>
-            <label class="checkbox-item" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" value="seller_rating"> Seller Rating
-            </label>
-            <label class="checkbox-item" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" value="seller_verification"> Seller Verification
-            </label>
-            <label class="checkbox-item" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" value="location"> Location
-            </label>
-            <label class="checkbox-item" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" value="incoterm"> Incoterm
-            </label>
-            <label class="checkbox-item" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" value="time_remaining"> Time Remaining
-            </label>
-            <label class="checkbox-item" onclick="this.classList.toggle('selected')">
-              <input type="checkbox" value="container_fill"> Container Fill
-            </label>
-          </div>
-        </div>
-        <div class="modal-field">
-          <label>Snipe Mode</label>
-          <select id="botSnipeMode">
-            <option value="all">Must Match ALL Conditions</option>
-            <option value="any">Match ANY Condition</option>
-            <option value="weighted">Weighted Score (70% threshold)</option>
+          <label>Status</label>
+          <select id="productStatusInput">
+            <option value="listed">Listed (Available)</option>
+            <option value="draft">Draft (Hidden)</option>
           </select>
         </div>
       </div>
-      <div class="bot-program-section">
-        <h4>🛡️ SELLER FILTERS</h4>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Min Seller Rating</label>
-            <div class="slider-row">
-              <input type="range" id="botMinRating" min="0" max="5" step="0.1" value="0">
-              <span class="slider-value" id="botMinRatingVal">0.0</span>
-            </div>
-          </div>
-          <div class="modal-field">
-            <label>Min Seller Verification</label>
-            <select id="botMinVerificationInput">
-              <option value="none">Any Seller</option>
-              <option value="basic">Basic Verified</option>
-              <option value="verified">Fully Verified</option>
-              <option value="premium">Premium Partner</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-field">
-          <label>Min Seller History (days)</label>
-          <div class="slider-row">
-            <input type="range" id="botSellerHistory" min="0" max="730" step="30" value="0">
-            <span class="slider-value" id="botSellerHistoryVal">0 days</span>
-          </div>
-        </div>
+      <div class="modal-field">
+        <label>Description</label>
+        <textarea id="productDescInput" rows="3" placeholder="Describe your product..."></textarea>
       </div>
-      <div class="bot-program-section">
-        <h4>⚡ AUTOMATION</h4>
-        <div class="toggle-row">
-          <span class="toggle-label">Auto-Bid on Match</span>
-          <div class="toggle-switch" id="botAutoBidToggle" onclick="toggleSwitch(this)"></div>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Auto-Increment on Outbid</span>
-          <div class="toggle-switch active" id="botAutoIncToggle" onclick="toggleSwitch(this)"></div>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Notify on Fill Opportunities</span>
-          <div class="toggle-switch active" id="botNotifyToggle" onclick="toggleSwitch(this)"></div>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Auto-Assign to Container</span>
-          <div class="toggle-switch" id="botAutoAssignToggle" onclick="toggleSwitch(this)"></div>
-        </div>
-        <div class="modal-field" style="margin-top:12px;">
-          <label>Link to Container</label>
-          <select id="botContainerInput">
-            <option value="">-- None --</option>
-          </select>
-        </div>
+      <div class="modal-field">
+        <label>Origin</label>
+        <input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil">
       </div>
-      <div class="bot-program-section">
-        <h4>⏰ BOT SCHEDULE</h4>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Active From</label>
-            <input type="time" id="botActiveFrom" value="00:00">
-          </div>
-          <div class="modal-field">
-            <label>Active Until</label>
-            <input type="time" id="botActiveUntil" value="23:59">
-          </div>
-        </div>
-        <div class="modal-field">
-          <label>Days Active</label>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;">
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')"><input type="checkbox" checked value="mon"> Mon</label>
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')"><input type="checkbox" checked value="tue"> Tue</label>
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')"><input type="checkbox" checked value="wed"> Wed</label>
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')"><input type="checkbox" checked value="thu"> Thu</label>
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')"><input type="checkbox" checked value="fri"> Fri</label>
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')"><input type="checkbox" checked value="sat"> Sat</label>
-            <label class="checkbox-item selected" onclick="this.classList.toggle('selected')"><input type="checkbox" checked value="sun"> Sun</label>
-          </div>
-        </div>
+      <div class="modal-field">
+        <label>Product Images</label>
+        <input type="file" id="productImagesInput" accept=".jpg,.png,.jpeg" multiple>
+        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Upload up to 5 images</div>
       </div>
     </div>
     <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('botModal')">Cancel</button>
-      <button class="create-btn" id="saveBotBtn" onclick="saveBot()">Save Bot</button>
+      <button class="cancel-btn" onclick="closeModal('productModal')">Cancel</button>
+      <button class="create-btn" id="saveProductBtn" onclick="saveProduct()">Save Product</button>
     </div>
   </div>
 </div>
 
-<!-- Container Modal -->
-<div class="modal" id="containerModal">
-  <div class="modal-content xwide">
-    <span class="modal-close" onclick="closeModal('containerModal')">&times;</span>
-    <div class="modal-header"><h2 id="containerModalTitle">📦 New Container</h2></div>
-    <div id="containerModalBody">
-      <div id="containerFormSection">
-        <div class="modal-field">
-          <label>Container Name *</label>
-          <input type="text" id="containerNameInput" placeholder="e.g., Santos Coffee Run Q3">
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Region / City *</label>
-            <select id="containerRegionInput">
-              <option value="">Select Region</option>
-              <option value="Santos">Santos, Brazil</option>
-              <option value="Mombasa">Mombasa, Kenya</option>
-              <option value="Jakarta">Jakarta, Indonesia</option>
-              <option value="Ho Chi Minh City">Ho Chi Minh City, Vietnam</option>
-              <option value="Colombo">Colombo, Sri Lanka</option>
-              <option value="Guayaquil">Guayaquil, Ecuador</option>
-              <option value="Abidjan">Abidjan, Ivory Coast</option>
-              <option value="Lagos">Lagos, Nigeria</option>
-            </select>
-          </div>
-          <div class="modal-field">
-            <label>Destination</label>
-            <input type="text" id="containerDestinationInput" placeholder="e.g., Rotterdam, NL">
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="modal-field">
-            <label>Capacity *</label>
-            <input type="number" id="containerCapacityInput" placeholder="e.g., 25000" min="1">
-          </div>
-          <div class="modal-field">
-            <label>Unit</label>
-            <select id="containerUnitInput">
-              <option value="kg">Kilograms (kg)</option>
-              <option value="tons">Metric Tons</option>
-              <option value="TEU">TEU</option>
-              <option value="bags">Bags (60kg)</option>
-              <option value="pallets">Pallets</option>
-              <option value="cbm">Cubic Meters (m³)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div id="containerDetailSection" style="display:none;">
-        <div class="container-progress-mini">
-          <div class="progress-bar"><div class="progress-fill" id="containerDetailProgress" style="width:0%"></div></div>
-          <div class="progress-label"><span id="containerDetailFillText">0 / 0 kg</span><span id="containerDetailPct">0%</span></div>
-        </div>
-        <div class="modal-field">
-          <label>Contents</label>
-          <div class="container-contents-list" id="containerContentsList"></div>
-        </div>
-        <div class="bot-program-section" id="fillScannerSection" style="display:none;">
-          <h4>🔍 FILL SCANNER — BOT SUGGESTIONS</h4>
-          <div id="fillScannerResults"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-actions" id="containerModalActions">
-      <button class="cancel-btn" onclick="closeModal('containerModal')">Cancel</button>
-      <button class="create-btn" id="saveContainerBtn" onclick="saveContainer()">Create Container</button>
-    </div>
-  </div>
-</div>
-
-<!-- Contract Modal -->
-<div class="modal" id="contractModal">
+<!-- Order Modal -->
+<div class="modal" id="orderModal">
   <div class="modal-content wide">
-    <span class="modal-close" onclick="closeModal('contractModal')">&times;</span>
-    <div class="modal-header"><h2 id="contractModalTitle">📄 Contract Details</h2></div>
-    <div id="contractModalBody">
-      <div id="contractViewSection">
-        <div class="company-fields" style="margin-bottom:16px;">
-          <div class="company-field"><label>Product</label><div class="field-value" id="contractViewProduct">-</div></div>
-          <div class="company-field"><label>Variety</label><div class="field-value" id="contractViewVariety">-</div></div>
-          <div class="company-field"><label>Quantity</label><div class="field-value" id="contractViewQty">-</div></div>
-          <div class="company-field"><label>Price</label><div class="field-value" id="contractViewPrice">-</div></div>
-          <div class="company-field"><label>Seller</label><div class="field-value" id="contractViewSeller">-</div></div>
-          <div class="company-field"><label>Status</label><div class="field-value" id="contractViewStatus">-</div></div>
-        </div>
-        <div class="bot-program-section">
-          <h4>🚢 SHIPMENT INFORMATION</h4>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-            <div class="modal-field"><label>Tracking Number</label><input type="text" id="shipTrackingInput" placeholder="e.g., MAEU1234567"></div>
-            <div class="modal-field"><label>Carrier</label><input type="text" id="shipCarrierInput" placeholder="e.g., Maersk"></div>
-            <div class="modal-field"><label>Origin Port</label><input type="text" id="shipOriginInput" placeholder="e.g., Santos"></div>
-            <div class="modal-field"><label>Destination Port</label><input type="text" id="shipDestInput" placeholder="e.g., Rotterdam"></div>
-            <div class="modal-field"><label>ETD</label><input type="date" id="shipEtdInput"></div>
-            <div class="modal-field"><label>ETA</label><input type="date" id="shipEtaInput"></div>
-          </div>
-          <div class="modal-field">
-            <label>BOL Status</label>
-            <select id="shipBolStatusInput">
-              <option value="pending">⏳ Pending Upload</option>
-              <option value="uploaded">✅ Uploaded</option>
-            </select>
-          </div>
-          <div class="modal-field">
-            <label>Shipment Notes</label>
-            <textarea id="shipNotesInput" rows="3" placeholder="Any special instructions..."></textarea>
-          </div>
-        </div>
-        <div class="bot-program-section" style="margin-top:16px;">
-          <h4>📦 CONTAINER ASSIGNMENT</h4>
-          <div class="modal-field">
-            <label>Assign to Container</label>
-            <select id="contractContainerInput">
-              <option value="">-- Unassigned --</option>
-            </select>
-          </div>
-        </div>
+    <span class="modal-close" onclick="closeModal('orderModal')">&times;</span>
+    <div class="modal-header"><h2 id="orderModalTitle">📋 Order Details</h2></div>
+    <div id="orderModalBody">
+      <div class="company-fields" style="margin-bottom:16px;">
+        <div class="company-field"><label>Order ID</label><div class="field-value" id="orderViewId">-</div></div>
+        <div class="company-field"><label>Product</label><div class="field-value" id="orderViewProduct">-</div></div>
+        <div class="company-field"><label>Quantity</label><div class="field-value" id="orderViewQty">-</div></div>
+        <div class="company-field"><label>Total Price</label><div class="field-value" id="orderViewTotal">-</div></div>
+        <div class="company-field"><label>Buyer</label><div class="field-value" id="orderViewBuyer">-</div></div>
+        <div class="company-field"><label>Status</label><div class="field-value" id="orderViewStatus">-</div></div>
+        <div class="company-field" style="grid-column:1/-1;"><label>Shipping Address</label><div class="field-value" id="orderViewAddress">-</div></div>
+        <div class="company-field" style="grid-column:1/-1;"><label>Notes</label><div class="field-value" id="orderViewNotes">-</div></div>
+      </div>
+      <div class="modal-field">
+        <label>Update Status</label>
+        <select id="orderStatusUpdate">
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
       </div>
     </div>
     <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('contractModal')">Close</button>
-      <button class="create-btn" onclick="saveContractShipping()">Save Shipping Info</button>
+      <button class="cancel-btn" onclick="closeModal('orderModal')">Close</button>
+      <button class="create-btn" onclick="updateOrderStatus()">Update Status</button>
     </div>
   </div>
 </div>
@@ -1096,52 +810,56 @@
   </div>
 </div>
 
-<!-- Brief Modal -->
-<div class="modal" id="briefModal">
-  <div class="modal-content" style="max-width:500px;">
-    <span class="modal-close" onclick="closeModal('briefModal')">&times;</span>
-    <div class="modal-header"><h2>📝 File Trade Brief</h2></div>
-    <div class="modal-field">
-      <label>Brief Type</label>
-      <select id="briefType">
-        <option>Request for Quote (RFQ)</option>
-        <option>Dispute</option>
-        <option>General Inquiry</option>
-      </select>
-    </div>
-    <div class="modal-field">
-      <label>Message</label>
-      <textarea id="briefMessage" rows="4" placeholder="Describe your request..."></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('briefModal')">Cancel</button>
-      <button class="create-btn" onclick="fileBrief()">Submit Brief</button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
 
 <script>
 /* ==================== STATE & CONFIG ==================== */
 const APP_STATE = {
   user: null,
-  wallet: { balance: 125000, bids: 12 },
+  wallet: { balance: 250000 },
   company: { name: '', reg: '', country: '', tax: '', address: '', email: '', phone: '', website: '', verified: 'pending', logo: null, documents: {}, photos: [] },
-  bots: [],
-  containers: [],
-  contracts: [],
-  bids: [],
-  wonAuctions: [],
-  auctions: [],
-  botLog: [],
+  products: [],
+  orders: [],
+  receivables: [],
+  conversions: [],
   currentEditId: null,
-  useSupabase: false
+  currentOrderId: null,
+  useSupabase: false,
+  certToggles: { incorporation: true },
+  tar: {
+    active: true,
+    conversionFee: 25,
+    minReceivable: 100,
+    maxReceivable: 50000,
+    autoConvert: true,
+    batchSize: 50,
+    dailyLimit: 500,
+    todayConversions: 0,
+    totalConversions: 0,
+    totalFeesEarned: 0,
+    cachedAuctions: null,
+    cachedAuctionsTimestamp: null,
+    cachedAdvisory: null,
+    lastAdvisoryUpdate: null
+  },
+  tour: {
+    active: false,
+    step: 0,
+    steps: [
+      { selector: '[data-tour="1"]', title: '📊 Stats Dashboard', description: 'Your key metrics at a glance. Track products, orders, revenue, and conversions.' },
+      { selector: '[data-tour="2"]', title: '📊 Orders Count', description: 'Total orders received from buyers across all Kontors.' },
+      { selector: '[data-tour="3"]', title: '💰 Revenue Tracker', description: 'Total revenue from completed sales. Watch it grow!' },
+      { selector: '[data-tour="4"]', title: '🔄 Conversion Counter', description: 'Receivables converted to cash. Each conversion = $25 fee.' },
+      { selector: '#tarSection', title: '🤖 TAR - Your Trade Advisor', description: 'The Trade Advisor Robot monitors receivables, suggests optimal conversion timing, and tracks fees.' },
+      { selector: '#companySection', title: '🏢 Company Profile', description: 'Your business identity. Verified sellers get higher rankings in Kontors.' },
+      { selector: '#certSection', title: '📜 Certifications', description: 'More certifications = better visibility and trust. Incorporation is mandatory!' },
+      { selector: '#productsSection', title: '📦 Products', description: 'List your products here. Each product can be sold in multiple Kontors.' },
+      { selector: '#ordersSection', title: '📋 Orders', description: 'Manage incoming orders. Process, ship, and track all your sales.' }
+    ]
+  }
 };
-
-const COMMODITIES = ['Coffee','Cocoa','Wheat','Sugar','Rice','Corn','Soybeans','Cotton','Palm Oil','Rubber'];
-const BOT_EMOJIS = ['🤖','🦅','🐺','🦁','🦈','🦉','🐉','🚀','⚡','🔥','💎','🎯'];
 
 // =====================================================
 // SUPABASE CONFIGURATION
@@ -1149,16 +867,27 @@ const BOT_EMOJIS = ['🤖','🦅','🐺','🦁','🦈','🦉','🐉','🚀','⚡
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-let supabase = null;
+let supabaseClient = null;
 let currentUser = null;
+let authChecked = false;
+let authInProgress = false;
+
+// Auth loop prevention state
+let authRedirectCount = parseInt(sessionStorage.getItem('auth_redirect_count') || '0');
+const lastRedirectTime = parseInt(sessionStorage.getItem('auth_last_redirect') || '0');
+if (Date.now() - lastRedirectTime > 10000) {
+  authRedirectCount = 0;
+  sessionStorage.removeItem('auth_redirect_count');
+  sessionStorage.removeItem('auth_last_redirect');
+}
 
 try {
   if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     APP_STATE.useSupabase = true;
     console.log('[TradeAux] Supabase connected');
   } else {
-    console.warn('[TradeAux] Supabase not available');
+    console.warn('[TradeAux] Supabase not available - running offline mode');
   }
 } catch(e) { console.warn('[TradeAux] Supabase init error:', e); }
 
@@ -1166,64 +895,658 @@ try {
 function $(id) { return document.getElementById(id); }
 function uuid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c=='x'?r:(r&0x3|0x8)).toString(16); }); }
 function money(n) { return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+// FIX #3: HTML Escaping helper
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function showToast(msg, type='info') {
   const t = $('toast');
   if (!t) return;
   t.textContent = msg;
   t.className = 'toast visible ' + type;
   clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => t.className = 'toast', 3000);
+  t._timeout = setTimeout(() => t.className = 'toast', 4000);
 }
-function openModal(id) { const el = $(id); if (el) el.style.display = 'flex'; }
-function closeModal(id) { const el = $(id); if (el) el.style.display = 'none'; APP_STATE.currentEditId = null; }
-function toggleSwitch(el) { el.classList.toggle('active'); }
+
+function openModal(id) {
+  const el = $(id);
+  if (el) el.style.display = 'flex';
+}
+
+function closeModal(id) {
+  const el = $(id);
+  if (el) el.style.display = 'none';
+  APP_STATE.currentEditId = null;
+  APP_STATE.currentOrderId = null;
+}
 
 /* ==================== AUTH ==================== */
 async function checkAuth() {
-  if (!supabase) { console.warn('[TradeAux] No Supabase — offline mode'); return true; }
+  if (authChecked) return true;
+  if (authInProgress) {
+    return new Promise(resolve => {
+      const interval = setInterval(() => {
+        if (authChecked) {
+          clearInterval(interval);
+          resolve(true);
+        }
+      }, 100);
+    });
+  }
+  authInProgress = true;
+  
+  // Prevent redirect loops - if we've redirected too many times recently, run offline
+  if (authRedirectCount > 2) {
+    console.warn('[TradeAux] Auth redirect loop detected. Running in offline mode.');
+    authChecked = true;
+    authInProgress = false;
+    showToast('Running in offline mode (auth loop detected)', 'warning');
+    return true;
+  }
+  
+  // Silent offline mode if no Supabase
+  if (!supabaseClient) {
+    authChecked = true;
+    authInProgress = false;
+    return true;
+  }
+  
   try {
-    const { data, error } = await supabase.auth.getSession();
+    const { data, error } = await supabaseClient.auth.getSession();
     if (error || !data || !data.session) {
-      window.location.replace('signin.html?_t=' + Date.now());
+      authRedirectCount++;
+      sessionStorage.setItem('auth_redirect_count', String(authRedirectCount));
+      sessionStorage.setItem('auth_last_redirect', String(Date.now()));
+      // FIX #5: Return after redirect
+      window.location.replace('signin.html?signed_out=1&_t=' + Date.now());
       return false;
     }
     currentUser = data.session.user;
     APP_STATE.user = currentUser;
+    authChecked = true;
+    authInProgress = false;
     return true;
   } catch(err) {
-    showToast('Auth unavailable — working offline', 'error');
+    authInProgress = false;
+    showToast('Auth unavailable — working offline', 'warning');
     return true;
   }
 }
 
 async function bulletproofSignOut() {
-  if (supabase) { try { await supabase.auth.signOut(); } catch(e) {} }
-  ['tradeaux_buyer_state'].forEach(k => localStorage.removeItem(k));
+  // Clear all TradeAux-related storage first
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('tradeaux_')) keysToRemove.push(key);
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
   sessionStorage.clear();
-  window.location.replace('index.html');
+  
+  if (supabaseClient) {
+    try { 
+      await supabaseClient.auth.signOut(); 
+    } catch(e) {
+      console.warn('[TradeAux] Sign out error:', e);
+    }
+  }
+  
+  window.location.replace('signin.html?signed_out=1&_t=' + Date.now());
 }
 
 /* ==================== STORAGE ==================== */
 async function saveToStorage() {
-  const payload = {
-    company: APP_STATE.company,
-    bots: APP_STATE.bots,
-    containers: APP_STATE.containers,
-    contracts: APP_STATE.contracts,
-    bids: APP_STATE.bids,
-    wonAuctions: APP_STATE.wonAuctions,
-    auctions: APP_STATE.auctions,
-    wallet: APP_STATE.wallet,
-    botLog: APP_STATE.botLog,
-    certToggles: APP_STATE.certToggles || {}
-  };
-  localStorage.setItem('tradeaux_buyer_state', JSON.stringify(payload));
+  try {
+    const payload = {
+      company: APP_STATE.company,
+      products: APP_STATE.products.slice(0, 100),
+      orders: APP_STATE.orders.slice(0, 100),
+      receivables: APP_STATE.receivables.slice(0, 200),
+      conversions: APP_STATE.conversions.slice(0, 500),
+      wallet: APP_STATE.wallet,
+      certToggles: APP_STATE.certToggles || {},
+      tar: {
+        active: APP_STATE.tar.active,
+        conversionFee: APP_STATE.tar.conversionFee,
+        minReceivable: APP_STATE.tar.minReceivable,
+        maxReceivable: APP_STATE.tar.maxReceivable,
+        autoConvert: APP_STATE.tar.autoConvert,
+        batchSize: APP_STATE.tar.batchSize,
+        dailyLimit: APP_STATE.tar.dailyLimit,
+        todayConversions: APP_STATE.tar.todayConversions || 0,
+        totalConversions: APP_STATE.tar.totalConversions || 0,
+        totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
+      }
+    };
+    localStorage.setItem('tradeaux_seller_state', JSON.stringify(payload));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      showToast('⚠️ Storage quota exceeded. Some data may not be saved.', 'error');
+      console.warn('[TradeAux] localStorage quota exceeded', e);
+      try {
+        const keys = Object.keys(localStorage);
+        for (const key of keys) {
+          if (key.startsWith('tradeaux_') && key !== 'tradeaux_seller_state') {
+            localStorage.removeItem(key);
+          }
+        }
+        const payload = {
+          company: APP_STATE.company,
+          products: APP_STATE.products.slice(0, 50),
+          orders: APP_STATE.orders.slice(0, 50),
+          receivables: APP_STATE.receivables.slice(0, 100),
+          conversions: APP_STATE.conversions.slice(0, 200),
+          wallet: APP_STATE.wallet,
+          certToggles: APP_STATE.certToggles || {},
+          tar: {
+            active: APP_STATE.tar.active,
+            conversionFee: APP_STATE.tar.conversionFee,
+            minReceivable: APP_STATE.tar.minReceivable,
+            maxReceivable: APP_STATE.tar.maxReceivable,
+            autoConvert: APP_STATE.tar.autoConvert,
+            batchSize: APP_STATE.tar.batchSize,
+            dailyLimit: APP_STATE.tar.dailyLimit,
+            todayConversions: APP_STATE.tar.todayConversions || 0,
+            totalConversions: APP_STATE.tar.totalConversions || 0,
+            totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
+          }
+        };
+        localStorage.setItem('tradeaux_seller_state', JSON.stringify(payload));
+        showToast('✅ Data saved after cleanup', 'success');
+      } catch(e2) {
+        showToast('❌ Unable to save data. Please clear browser storage.', 'error');
+      }
+    } else {
+      console.warn('[TradeAux] Save error:', e);
+      showToast('⚠️ Error saving data', 'error');
+    }
+  }
 }
 
 async function loadFromStorage() {
-  const raw = localStorage.getItem('tradeaux_buyer_state');
-  if (!raw) return false;
-  try { const data = JSON.parse(raw); Object.assign(APP_STATE, data); return true; } catch(e) { return false; }
+  try {
+    const raw = localStorage.getItem('tradeaux_seller_state');
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    
+    // Deep merge company
+    if (data.company) {
+      APP_STATE.company = { ...APP_STATE.company, ...data.company };
+    }
+    if (data.products) APP_STATE.products = data.products;
+    if (data.orders) APP_STATE.orders = data.orders;
+    if (data.receivables) APP_STATE.receivables = data.receivables;
+    if (data.conversions) APP_STATE.conversions = data.conversions;
+    if (data.wallet) APP_STATE.wallet = data.wallet;
+    if (data.certToggles) APP_STATE.certToggles = data.certToggles;
+    if (data.tar) {
+      APP_STATE.tar = { 
+        ...APP_STATE.tar, 
+        ...data.tar,
+        cachedAuctions: null,
+        cachedAuctionsTimestamp: null,
+        cachedAdvisory: null,
+        lastAdvisoryUpdate: null
+      };
+    }
+    return true;
+  } catch(e) {
+    console.warn('[TradeAux] Load error:', e);
+    return false;
+  }
+}
+
+/* ==================== TAR FUNCTIONS ==================== */
+// [All TAR functions remain the same - generateAuctionSchedule, generateAdvisory, renderTARAdvisory, etc.]
+
+function generateAuctionSchedule() {
+  const now = Date.now();
+  if (APP_STATE.tar.cachedAuctions && 
+      APP_STATE.tar.cachedAuctionsTimestamp && 
+      (now - APP_STATE.tar.cachedAuctionsTimestamp) < 30 * 60 * 1000) {
+    return APP_STATE.tar.cachedAuctions;
+  }
+  
+  const nowDate = new Date();
+  const auctions = [];
+  const names = ['Coffee Kontor', 'Cocoa Exchange', 'Grains Market', 'Sugar Trading', 'Spice Auction', 'Cotton Bourse', 'Palm Oil Trading', 'Rubber Exchange'];
+  const locations = ['Santos, Brazil', 'Rotterdam, NL', 'Singapore', 'London, UK', 'New York, USA', 'Dubai, UAE', 'Shanghai, CN', 'Tokyo, JP'];
+  const statuses = ['upcoming', 'upcoming', 'live', 'upcoming', 'closed', 'upcoming'];
+  
+  for (let i = 0; i < 8; i++) {
+    const days = i * 2 + (Math.random() * 3);
+    const date = new Date(nowDate);
+    date.setDate(date.getDate() + days);
+    const status = statuses[i % statuses.length];
+    auctions.push({
+      id: uuid(),
+      name: names[i % names.length],
+      location: locations[i % locations.length],
+      date: date.toISOString().split('T')[0],
+      time: `${8 + Math.floor(Math.random() * 10)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+      status: status,
+      products: ['Coffee', 'Cocoa', 'Wheat', 'Sugar', 'Cotton', 'Palm Oil'].slice(0, 2 + Math.floor(Math.random() * 3)),
+      estimatedVolume: Math.round(5000 + Math.random() * 45000)
+    });
+  }
+  APP_STATE.tar.cachedAuctions = auctions.sort((a, b) => new Date(a.date) - new Date(b.date));
+  APP_STATE.tar.cachedAuctionsTimestamp = now;
+  return APP_STATE.tar.cachedAuctions;
+}
+
+function generateAdvisory() {
+  const now = Date.now();
+  if (APP_STATE.tar.cachedAdvisory && (now - APP_STATE.tar.lastAdvisoryUpdate) < 60000) {
+    return APP_STATE.tar.cachedAdvisory;
+  }
+  
+  const tips = [
+    { type: 'market', text: 'The <span class="highlight">Coffee Kontor</span> is in 3 days. List your Arabica receivables now for optimal pricing. <span class="info">Best time: 48hrs before auction.</span>' },
+    { type: 'strategy', text: 'Your <span class="highlight">$250,000 balance</span> can convert <span class="highlight">10,000 receivables</span> at $25 each. Consider batch conversions of 50 to maximize efficiency.' },
+    { type: 'warning', text: '<span class="warning">⚠️ URGENT:</span> 5 receivables are approaching the 30-day mark. Convert them within 48hrs to avoid penalties.' },
+    { type: 'opportunity', text: 'The <span class="highlight">Cocoa Exchange</span> is live tomorrow. List your cocoa products now. <span class="info">Premium pricing expected: +12%</span>' },
+    { type: 'insight', text: 'Your <span class="highlight">conversion rate</span> is 94%. You\'ve earned <span class="highlight">$12,500</span> in fees this month. Keep it up!' },
+    { type: 'timing', text: 'Best time to list receivables: <span class="highlight">2-3 days before Kontor</span>. This gives buyers time to discover and bid on your products.' }
+  ];
+  APP_STATE.tar.cachedAdvisory = tips[Math.floor(Math.random() * tips.length)];
+  APP_STATE.tar.lastAdvisoryUpdate = now;
+  return APP_STATE.tar.cachedAdvisory;
+}
+
+function renderTARAdvisory() {
+  const advisoryText = $('tarAdvisoryText');
+  const auctionList = $('auctionList');
+  
+  if (advisoryText) {
+    const advice = generateAdvisory();
+    advisoryText.innerHTML = advice.text;
+  }
+  
+  if (auctionList) {
+    const auctions = generateAuctionSchedule();
+    // FIX #3: Escape HTML in auction items
+    auctionList.innerHTML = auctions.slice(0, 5).map(a => `
+      <div class="auction-item">
+        <div class="auction-info">
+          <div class="auction-name">${escapeHtml(a.name)} • ${escapeHtml(a.location)}</div>
+          <div class="auction-details">${escapeHtml(a.products.join(', '))} • ${escapeHtml(a.estimatedVolume.toLocaleString())} units</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="auction-time">${escapeHtml(a.date)} ${escapeHtml(a.time)}</div>
+          <div class="auction-status ${escapeHtml(a.status)}">${escapeHtml(a.status.toUpperCase())}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function refreshAuctions() {
+  APP_STATE.tar.cachedAuctions = null;
+  APP_STATE.tar.cachedAuctionsTimestamp = null;
+  renderTARAdvisory();
+  showToast('🔄 Auction schedule refreshed!', 'info');
+}
+
+/* ==================== TAR CONVERSION FUNCTIONS ==================== */
+function generateReceivables() {
+  const companies = [
+    'Blue Mountain Traders', 'Swiss Chocolate Co', 'Nordic Coffee Roasters',
+    'Tokyo Trading Co', 'London Commodities', 'Singapore Exchange',
+    'Dubai Gold & Commodities', 'Hong Kong Trading', 'Milan Coffee Exchange',
+    'New York Mercantile', 'Chicago Board of Trade', 'Shanghai Futures'
+  ];
+  
+  const products = ['Coffee', 'Cocoa', 'Wheat', 'Sugar', 'Corn', 'Soybeans', 'Cotton', 'Palm Oil'];
+  const statuses = ['ready', 'pending', 'urgent'];
+  
+  const receivables = [];
+  const count = 50 + Math.floor(Math.random() * 30);
+  
+  for (let i = 0; i < count; i++) {
+    const amount = 100 + Math.random() * 49900;
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const daysAgo = Math.floor(Math.random() * 30);
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    receivables.push({
+      id: uuid(),
+      company: companies[Math.floor(Math.random() * companies.length)],
+      product: products[Math.floor(Math.random() * products.length)],
+      amount: Math.round(amount / 10) * 10,
+      status: status,
+      date: date.toISOString().split('T')[0],
+      invoiceNumber: 'INV-' + String(10000 + i).padStart(5, '0'),
+      converted: false,
+      daysOld: daysAgo
+    });
+  }
+  return receivables;
+}
+
+function convertReceivable(id) {
+  const receivable = APP_STATE.receivables.find(r => r.id === id);
+  if (!receivable) { showToast('Receivable not found', 'error'); return; }
+  if (receivable.converted) { showToast('Already converted', 'warning'); return; }
+  
+  const fee = APP_STATE.tar.conversionFee;
+  if (APP_STATE.wallet.balance < fee) {
+    showToast('Insufficient balance for conversion fee', 'error');
+    return;
+  }
+  
+  receivable.converted = true;
+  receivable.convertedAt = new Date().toISOString();
+  APP_STATE.wallet.balance -= fee;
+  APP_STATE.tar.totalConversions = (APP_STATE.tar.totalConversions || 0) + 1;
+  APP_STATE.tar.todayConversions = (APP_STATE.tar.todayConversions || 0) + 1;
+  APP_STATE.tar.totalFeesEarned = (APP_STATE.tar.totalFeesEarned || 0) + fee;
+  
+  if (!APP_STATE.conversions) APP_STATE.conversions = [];
+  APP_STATE.conversions.push({
+    id: uuid(),
+    receivableId: receivable.id,
+    company: receivable.company,
+    product: receivable.product,
+    amount: receivable.amount,
+    fee: fee,
+    convertedAt: new Date().toISOString()
+  });
+  
+  saveToStorage();
+  renderAll();
+  showToast(`✅ Converted ${receivable.company} - ${money(receivable.amount)} (fee: ${money(fee)})`, 'success');
+}
+
+function autoConvertReady() {
+  const readyItems = APP_STATE.receivables.filter(r => r.status === 'ready' && !r.converted);
+  if (readyItems.length === 0) {
+    showToast('No ready receivables to convert', 'warning');
+    return;
+  }
+  
+  const batchSize = Math.min(APP_STATE.tar.batchSize, readyItems.length);
+  const batch = readyItems.slice(0, batchSize);
+  const totalFee = batch.length * APP_STATE.tar.conversionFee;
+  
+  if (APP_STATE.wallet.balance < totalFee) {
+    showToast(`Insufficient balance. Need ${money(totalFee)} for ${batch.length} conversions`, 'error');
+    return;
+  }
+  
+  if (!confirm(`Convert ${batch.length} receivables? Total fee: ${money(totalFee)}`)) return;
+  
+  let count = 0;
+  batch.forEach(r => {
+    r.converted = true;
+    r.convertedAt = new Date().toISOString();
+    count++;
+  });
+  
+  APP_STATE.wallet.balance -= totalFee;
+  APP_STATE.tar.totalConversions = (APP_STATE.tar.totalConversions || 0) + count;
+  APP_STATE.tar.todayConversions = (APP_STATE.tar.todayConversions || 0) + count;
+  APP_STATE.tar.totalFeesEarned = (APP_STATE.tar.totalFeesEarned || 0) + totalFee;
+  
+  if (!APP_STATE.conversions) APP_STATE.conversions = [];
+  batch.forEach(r => {
+    APP_STATE.conversions.push({
+      id: uuid(),
+      receivableId: r.id,
+      company: r.company,
+      product: r.product,
+      amount: r.amount,
+      fee: APP_STATE.tar.conversionFee,
+      convertedAt: new Date().toISOString()
+    });
+  });
+  
+  saveToStorage();
+  renderAll();
+  showToast(`✅ Auto-converted ${count} receivables! Total fee: ${money(totalFee)}`, 'success');
+}
+
+function renderTAR() {
+  const readyCount = $('tarReadyCount');
+  const pendingCount = $('tarPendingCount');
+  const convertedCount = $('tarConvertedCount');
+  const feesEarned = $('tarFeesEarned');
+  const todayConversions = $('todayConversions');
+  const todayFees = $('todayFees');
+  const remainingCapacity = $('remainingCapacity');
+  const totalConversions = $('totalConversions');
+  
+  const receivables = APP_STATE.receivables || [];
+  const ready = receivables.filter(r => r.status === 'ready' && !r.converted).length;
+  const pending = receivables.filter(r => r.status === 'pending' && !r.converted).length;
+  const converted = receivables.filter(r => r.converted).length;
+  
+  if (readyCount) readyCount.textContent = ready;
+  if (pendingCount) pendingCount.textContent = pending;
+  if (convertedCount) convertedCount.textContent = converted;
+  if (feesEarned) feesEarned.textContent = money(APP_STATE.tar.totalFeesEarned || 0);
+  if (todayConversions) todayConversions.textContent = APP_STATE.tar.todayConversions || 0;
+  if (todayFees) todayFees.textContent = money((APP_STATE.tar.todayConversions || 0) * APP_STATE.tar.conversionFee);
+  if (remainingCapacity) remainingCapacity.textContent = Math.max(0, 10000 - (APP_STATE.tar.totalConversions || 0));
+  if (totalConversions) totalConversions.textContent = APP_STATE.tar.totalConversions || 0;
+  
+  const list = $('tarReceivablesList');
+  if (!list) return;
+  
+  const allReceivables = [...receivables].filter(r => !r.converted).sort((a, b) => {
+    const order = { urgent: 0, ready: 1, pending: 2 };
+    return (order[a.status] || 3) - (order[b.status] || 3);
+  });
+  
+  if (allReceivables.length === 0) {
+    list.innerHTML = `<div style="color:#7CFC00; text-align:center; padding:20px; font-size:13px;">✅ All receivables have been converted!</div>`;
+    return;
+  }
+  
+  // FIX #3: Escape HTML in receivable items
+  list.innerHTML = allReceivables.slice(0, 8).map(r => {
+    const statusClass = r.status;
+    const statusLabel = r.status.toUpperCase();
+    return `
+      <div class="tar-receivable-item" onclick="convertReceivable('${r.id}')">
+        <div class="receivable-info">
+          <div class="receivable-name">${escapeHtml(r.company)} • ${escapeHtml(r.product)}</div>
+          <div class="receivable-details">${escapeHtml(r.invoiceNumber)} • ${escapeHtml(r.date)} • ${escapeHtml(r.daysOld)}d old</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="receivable-amount">${money(r.amount)}</span>
+          <span class="receivable-status ${escapeHtml(statusClass)}">${escapeHtml(statusLabel)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  if (allReceivables.length > 8) {
+    list.innerHTML += `<div style="text-align:center; color:#9ca3af; font-size:11px; padding:8px;">+ ${allReceivables.length - 8} more receivables</div>`;
+  }
+  
+  renderTARAdvisory();
+}
+
+/* ==================== TAR SETTINGS MODAL ==================== */
+function showTARSettings() {
+  const settingsHtml = `
+    <div style="font-family:'Inter',sans-serif; color:#e5e7eb;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0;">
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <div style="font-size:10px; color:#9ca3af;">Conversion Fee</div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${APP_STATE.tar.conversionFee}</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <div style="font-size:10px; color:#9ca3af;">Min Receivable</div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${APP_STATE.tar.minReceivable}</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <div style="font-size:10px; color:#9ca3af;">Max Receivable</div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${APP_STATE.tar.maxReceivable}</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <div style="font-size:10px; color:#9ca3af;">Auto-Convert</div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:${APP_STATE.tar.autoConvert ? '#7CFC00' : '#ff3b3b'};">${APP_STATE.tar.autoConvert ? '✅ Enabled' : '❌ Disabled'}</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <div style="font-size:10px; color:#9ca3af;">Batch Size</div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">${APP_STATE.tar.batchSize}</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <div style="font-size:10px; color:#9ca3af;">Daily Limit</div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">${APP_STATE.tar.dailyLimit}</div>
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-top:8px;">
+        <div style="font-size:11px; color:#9ca3af;">Total Conversions: <span style="color:#7CFC00; font-family:'Orbitron',sans-serif;">${APP_STATE.tar.totalConversions || 0}</span></div>
+        <div style="font-size:11px; color:#9ca3af;">Total Fees Earned: <span style="color:#00ced1; font-family:'Orbitron',sans-serif;">${money(APP_STATE.tar.totalFeesEarned || 0)}</span></div>
+        <div style="font-size:11px; color:#9ca3af;">Today's Conversions: <span style="color:#FFD966; font-family:'Orbitron',sans-serif;">${APP_STATE.tar.todayConversions || 0}</span></div>
+      </div>
+    </div>
+  `;
+  
+  const existingModal = $('tarSettingsModal');
+  if (existingModal) {
+    const body = existingModal.querySelector('.modal-body');
+    if (body) body.innerHTML = settingsHtml;
+    openModal('tarSettingsModal');
+    return;
+  }
+  
+  const modal = document.createElement('div');
+  modal.id = 'tarSettingsModal';
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width:500px;">
+      <span class="modal-close" onclick="closeModal('tarSettingsModal')">&times;</span>
+      <div class="modal-header"><h2>⚙️ TAR Settings</h2></div>
+      <div class="modal-body">${settingsHtml}</div>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeModal('tarSettingsModal')">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  openModal('tarSettingsModal');
+}
+
+/* ==================== DASHBOARD TOUR ==================== */
+function startTour() {
+  APP_STATE.tour.active = true;
+  APP_STATE.tour.step = 0;
+  const overlay = $('tourOverlay');
+  if (overlay) overlay.classList.add('active');
+  showTourStep(0);
+  window.addEventListener('resize', repositionTourHighlight);
+}
+
+function endTour() {
+  APP_STATE.tour.active = false;
+  // FIX #2: Save tour completion flag
+  localStorage.setItem('tradeaux_tour_complete', 'true');
+  const overlay = $('tourOverlay');
+  if (overlay) overlay.classList.remove('active');
+  const highlight = $('tourHighlight');
+  if (highlight) highlight.style.display = 'none';
+  window.removeEventListener('resize', repositionTourHighlight);
+  showToast('🎯 Tour complete! You\'re ready to trade.', 'success');
+}
+
+function repositionTourHighlight() {
+  if (!APP_STATE.tour.active) return;
+  const step = APP_STATE.tour.step;
+  const steps = APP_STATE.tour.steps;
+  if (step >= steps.length) return;
+  
+  const selector = steps[step].selector;
+  const element = document.querySelector(selector);
+  if (!element) return;
+  
+  const rect = element.getBoundingClientRect();
+  const highlight = $('tourHighlight');
+  if (highlight) {
+    highlight.style.left = (rect.left - 8) + 'px';
+    highlight.style.top = (rect.top - 8) + 'px';
+    highlight.style.width = (rect.width + 16) + 'px';
+    highlight.style.height = (rect.height + 16) + 'px';
+  }
+}
+
+function showTourStep(step) {
+  const steps = APP_STATE.tour.steps;
+  if (step >= steps.length) {
+    endTour();
+    return;
+  }
+  
+  const stepData = steps[step];
+  const selector = stepData.selector;
+  const element = document.querySelector(selector);
+  
+  if (!element) {
+    showTourStep(step + 1);
+    return;
+  }
+  
+  const rect = element.getBoundingClientRect();
+  const highlight = $('tourHighlight');
+  const tooltip = $('tourTooltip');
+  const title = $('tourTitle');
+  const description = $('tourDescription');
+  const nextBtn = $('tourNextBtn');
+  const progress = $('tourProgress');
+  
+  if (highlight) {
+    highlight.style.display = 'block';
+    highlight.style.left = (rect.left - 8) + 'px';
+    highlight.style.top = (rect.top - 8) + 'px';
+    highlight.style.width = (rect.width + 16) + 'px';
+    highlight.style.height = (rect.height + 16) + 'px';
+  }
+  
+  if (tooltip) {
+    const tooltipWidth = 320;
+    let left = Math.max(20, rect.left + rect.width / 2 - tooltipWidth / 2);
+    let top = rect.top - 120;
+    
+    if (top < 20) {
+      top = rect.bottom + 20;
+    }
+    
+    if (left + tooltipWidth > window.innerWidth - 20) {
+      left = window.innerWidth - tooltipWidth - 20;
+    }
+    if (left < 20) left = 20;
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    tooltip.style.display = 'block';
+  }
+  
+  if (title) title.textContent = stepData.title;
+  if (description) description.textContent = stepData.description;
+  if (nextBtn) {
+    if (step === steps.length - 1) {
+      nextBtn.textContent = '✅ Finish';
+    } else {
+      nextBtn.textContent = 'Next →';
+    }
+    nextBtn.onclick = () => showTourStep(step + 1);
+  }
+  
+  if (progress) {
+    const dots = progress.querySelectorAll('.dot');
+    dots.forEach((dot, i) => {
+      dot.className = 'dot';
+      if (i < step) dot.classList.add('done');
+      if (i === step) dot.classList.add('active');
+    });
+  }
+  
+  APP_STATE.tour.step = step;
 }
 
 /* ==================== CERTIFICATES ==================== */
@@ -1241,11 +1564,10 @@ const CERT_LABELS = {
   other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
 };
 
-APP_STATE.certToggles = { incorporation: true };
-
 function renderCertificates() {
   const grid = $('certGrid');
   if (!grid) return;
+  
   grid.innerHTML = '';
   
   const certTypes = ['incorporation', ...Object.keys(APP_STATE.certToggles || {}).filter(k => k !== 'incorporation').sort()];
@@ -1259,7 +1581,6 @@ function renderCertificates() {
     div.className = 'cert-block';
     div.style.borderColor = isRequired ? 'rgba(124,252,0,0.6)' : 'rgba(0,206,209,0.2)';
     
-    // Check if this cert has an image
     const certImage = APP_STATE.company.documents?.[type] || null;
     const imageHtml = certImage ? 
       `<div class="cert-preview"><img src="${certImage}" style="cursor:pointer;" onclick="window.open('${certImage}','_blank')"></div>` :
@@ -1272,31 +1593,42 @@ function renderCertificates() {
       '<span style="font-size:9px; color:#7CFC00;">🔒 Admin Verified</span>' :
       `<div class="cert-toggle-row">
         <span>${isVerified ? '✅ Verified' : '⏳ Pending'}</span>
-        <label class="toggle-switch" for="cert_${type}">
-          <input type="checkbox" id="cert_${type}" ${isVerified ? 'checked' : ''}>
+        <label class="toggle-switch">
+          <input type="checkbox" data-cert="${type}" ${isVerified ? 'checked' : ''}>
           <span class="slider"></span>
         </label>
       </div>`;
     
+    // FIX #3: Escape HTML in certificate display
     div.innerHTML = `
       <div class="cert-icon">${info.icon}</div>
-      <div class="cert-name">${info.label}</div>
-      <div class="cert-desc">${info.desc}</div>
+      <div class="cert-name">${escapeHtml(info.label)}</div>
+      <div class="cert-desc">${escapeHtml(info.desc)}</div>
       ${isRequired ? '<div class="cert-required">★ REQUIRED</div>' : ''}
       ${imageHtml}
       ${toggleHtml}
-      ${isRequired ? '' : `<button class="btn-remove-cert" onclick="removeCert('${type}')">🗑 Remove</button>`}
+      ${isRequired ? '' : `<button class="btn-remove-cert" data-cert-type="${type}">🗑 Remove</button>`}
     `;
     grid.appendChild(div);
     
     if (!isRequired) {
-      const toggle = div.querySelector('input[type="checkbox"]');
+      const toggle = div.querySelector('input[data-cert]');
       if (toggle) {
         toggle.addEventListener('change', function(e) {
-          APP_STATE.certToggles[type] = e.target.checked;
+          const certType = this.dataset.cert;
+          APP_STATE.certToggles[certType] = this.checked;
           saveToStorage();
           renderCertificates();
-          showToast((APP_STATE.certToggles[type] ? 'Verified: ' : 'Unverified: ') + info.label, false);
+          showToast((APP_STATE.certToggles[certType] ? 'Verified: ' : 'Unverified: ') + info.label, 'info');
+        });
+      }
+      
+      const removeBtn = div.querySelector('.btn-remove-cert');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const certType = this.dataset.certType;
+          removeCert(certType);
         });
       }
     }
@@ -1314,52 +1646,21 @@ function uploadCertImage(type, input) {
     renderCertificates();
     showToast('Certificate uploaded!', 'success');
   };
+  reader.onerror = function() {
+    showToast('Failed to read image file', 'error');
+  };
   reader.readAsDataURL(file);
+  input.value = '';
 }
 
 function removeCert(type) {
-  if (type === 'incorporation') { showToast('Incorporation cannot be removed', true); return; }
+  if (type === 'incorporation') { showToast('Incorporation cannot be removed', 'warning'); return; }
   if (!confirm('Remove "' + (CERT_LABELS[type]?.label || type) + '" certificate?')) return;
   delete APP_STATE.certToggles[type];
   delete APP_STATE.company.documents?.[type];
   saveToStorage();
   renderCertificates();
-  showToast('Certificate removed', false);
-}
-
-/* ==================== BOT LOG ==================== */
-function addBotLog(botName, action, status) {
-  APP_STATE.botLog.unshift({ id: uuid(), botName: botName || 'SYSTEM', action, status: status || 'scan', timestamp: new Date().toISOString() });
-  if (APP_STATE.botLog.length > 100) APP_STATE.botLog.pop();
-  renderBotLog();
-}
-
-function renderBotLog() {
-  const list = $('botLogList');
-  const empty = $('botLogEmpty');
-  if (!APP_STATE.botLog.length) {
-    if (empty) empty.style.display = 'block';
-    list.innerHTML = '';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-  list.innerHTML = APP_STATE.botLog.slice(0, 20).map(entry => {
-    const time = new Date(entry.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    return `<div class="bot-log-entry">
-      <span class="log-time">${time}</span>
-      <span class="log-bot">${entry.botName}</span>
-      <span class="log-action">${entry.action}</span>
-      <span class="log-status ${entry.status}">${entry.status.toUpperCase()}</span>
-    </div>`;
-  }).join('');
-}
-
-function clearBotLog() {
-  if (!confirm('Clear all bot activity logs?')) return;
-  APP_STATE.botLog = [];
-  saveToStorage();
-  renderBotLog();
-  showToast('Bot log cleared', 'success');
+  showToast('Certificate removed', 'info');
 }
 
 /* ==================== RENDER FUNCTIONS ==================== */
@@ -1367,707 +1668,474 @@ function renderAll() {
   renderWallet();
   renderCompany();
   renderCertificates();
-  renderBots();
-  renderContainers();
-  renderContracts();
-  renderBids();
-  renderWonAuctions();
-  renderTicker();
-  renderBotLog();
+  renderProducts();
+  renderOrders();
+  renderStats();
+  renderTAR();
 }
 
 function renderWallet() {
-  $('walletAmount').textContent = money(APP_STATE.wallet.balance);
-  $('bidCount').textContent = APP_STATE.wallet.bids + ' bids available';
+  const walletAmount = $('walletAmount');
+  if (walletAmount) walletAmount.textContent = money(APP_STATE.wallet.balance);
+  
+  const conversionCapacity = $('conversionCapacity');
+  if (conversionCapacity) {
+    const capacity = Math.floor(APP_STATE.wallet.balance / APP_STATE.tar.conversionFee);
+    conversionCapacity.textContent = capacity + ' conversions';
+  }
 }
 
 function renderCompany() {
   const c = APP_STATE.company;
-  $('companyNameDisplay').textContent = c.name || 'Not set';
-  $('companyRegDisplay').textContent = c.reg || 'Not set';
-  $('companyCountryDisplay').textContent = c.country || 'Not set';
-  $('companyTaxDisplay').textContent = c.tax || 'Not set';
-  $('companyAddressDisplay').textContent = c.address || 'Not set';
-  $('companyEmailDisplay').textContent = c.email || 'Not set';
-  $('companyPhoneDisplay').textContent = c.phone || 'Not set';
-  $('companyWebsiteDisplay').textContent = c.website || 'Not set';
-  const badge = $('verificationBadge');
-  badge.className = 'company-verification-badge ' + (c.verified || 'pending');
-  badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending' : '❌ Unverified';
-  $('companyStatusText').textContent = c.verified === 'verified' ? 'Ready to trade.' : 'Complete your profile.';
-  if (c.logo) { $('companyLogoPreview').src = c.logo; $('companyLogoPreview').style.display = 'block'; $('logoPlaceholder').style.display = 'none'; }
-}
-
-function renderBots() {
-  const grid = $('botsGrid');
-  grid.innerHTML = '';
-  if (!APP_STATE.bots || APP_STATE.bots.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#666; font-size:12px;">No bots yet. Click "Add Bot" to create one.</div>`;
-    const add = document.createElement('div');
-    add.className = 'add-bot-card';
-    add.id = 'addBotCard';
-    add.innerHTML = '<div class="add-bot-icon">+</div><div class="add-bot-text">Add Bot</div>';
-    grid.appendChild(add);
-    return;
-  }
-  APP_STATE.bots.forEach(bot => {
-    const card = document.createElement('div');
-    card.className = 'bot-card';
-    card.onclick = () => openBotModal(bot.id);
-    const comms = (bot.commodities || []).join(', ');
-    const strat = bot.strategy || 'balanced';
-    card.innerHTML = `
-      ${bot.status === 'scanning' ? '<div class="bot-scanning"></div>' : ''}
-      <div class="bot-emoji">${bot.emoji || '🤖'}</div>
-      <div class="bot-name">${bot.name || 'Unnamed Bot'}</div>
-      <div class="bot-status">${(bot.status || 'active').toUpperCase()}</div>
-      <div class="bot-target">${comms || 'No commodities'}</div>
-      <div class="bot-stats">
-        <span>${strat}</span>
-        <span>Max $${bot.maxPrice || 0}</span>
-      </div>
-      <div class="bot-stats" style="margin-top:4px;">
-        <span>Min ${bot.minQuantity || 0}</span>
-        <span>${bot.aggressiveness || 50}% aggro</span>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-  const add = document.createElement('div');
-  add.className = 'add-bot-card';
-  add.id = 'addBotCard';
-  add.innerHTML = '<div class="add-bot-icon">+</div><div class="add-bot-text">Add Bot</div>';
-  grid.appendChild(add);
-}
-
-function renderContainers() {
-  const grid = $('containersGrid');
-  grid.innerHTML = '';
-  if (!APP_STATE.containers || APP_STATE.containers.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#666; font-size:12px;">No containers yet. Click "New Container" to create one.</div>`;
-    const add = document.createElement('div');
-    add.className = 'add-container-card';
-    add.id = 'addContainerCard';
-    add.innerHTML = '<div class="add-container-icon">📦</div><div class="add-container-text">Create New Container</div>';
-    grid.appendChild(add);
-    return;
-  }
-  APP_STATE.containers.forEach(cont => {
-    const pct = Math.min(100, Math.round((cont.currentFill / cont.capacity) * 100));
-    const card = document.createElement('div');
-    card.className = 'container-card';
-    card.innerHTML = `
-      <div class="container-card-header">
-        <div class="container-name">${cont.name || 'Unnamed'}<div class="region">${cont.region || 'Unknown'} → ${cont.destination || 'TBD'}</div></div>
-      </div>
-      <div class="container-progress-mini">
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        <div class="progress-label"><span>${cont.currentFill || 0} / ${cont.capacity || 0} ${cont.unit || 'kg'}</span><span>${pct}%</span></div>
-      </div>
-      <div class="container-products-preview">
-        ${(cont.contents || []).map(c => `<span class="product-tag">${c.product} ${c.quantity}${cont.unit}</span>`).join('')}
-        ${!cont.contents || cont.contents.length === 0 ? '<span style="color:#666">Empty</span>' : ''}
-      </div>
-      <div class="container-actions">
-        <button class="fill-btn" onclick="event.stopPropagation(); runFillScanner('${cont.id}')">🔍 Fill Scan</button>
-        <button class="view-btn" onclick="event.stopPropagation(); openContainerDetail('${cont.id}')">View</button>
-        <button class="delete-btn" onclick="event.stopPropagation(); deleteContainer('${cont.id}')">Delete</button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-  const add = document.createElement('div');
-  add.className = 'add-container-card';
-  add.id = 'addContainerCard';
-  add.innerHTML = '<div class="add-container-icon">📦</div><div class="add-container-text">Create New Container</div>';
-  grid.appendChild(add);
-}
-
-function renderContracts() {
-  const grid = $('contractsGrid');
-  grid.innerHTML = '';
-  if (!APP_STATE.contracts || APP_STATE.contracts.length === 0) {
-    grid.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:40px;">No contracts yet.</div>';
-    return;
-  }
-  APP_STATE.contracts.forEach(c => {
-    const card = document.createElement('div');
-    card.className = 'contract-card';
-    const statusClass = c.status === 'active' ? 'active' : c.status === 'completed' ? 'completed' : 'disputed';
-    const ship = c.shipment || {};
-    card.innerHTML = `
-      <div class="contract-header">
-        <div class="contract-product">${c.product || 'Unknown'}<div class="variety">${c.variety || ''}</div></div>
-        <div class="contract-status ${statusClass}">${(c.status || 'active').toUpperCase()}</div>
-      </div>
-      <div class="contract-details">
-        <div><span class="label">Qty:</span> ${(c.quantity || 0).toLocaleString()} units</div>
-        <div><span class="label">Price:</span> ${money(c.price || 0)} / unit</div>
-        <div><span class="label">Total:</span> ${money((c.quantity || 0) * (c.price || 0))}</div>
-        <div><span class="label">Seller:</span> ${c.seller || 'Unknown'}</div>
-      </div>
-      <div class="contract-shipment">
-        <div class="shipment-row"><span class="shipment-label">Tracking</span><span class="shipment-value">${ship.trackingNumber || '—'}</span></div>
-        <div class="shipment-row"><span class="shipment-label">Carrier</span><span class="shipment-value">${ship.carrier || '—'}</span></div>
-        <div class="shipment-row"><span class="shipment-label">BOL</span><span class="shipment-value">${ship.bolStatus === 'uploaded' ? '✅ Uploaded' : '⏳ Pending'}</span></div>
-      </div>
-      <div class="contract-actions">
-        <button class="view-btn" onclick="openContractModal('${c.id}')">View / Edit</button>
-        <button class="track-btn" ${!ship.trackingNumber ? 'disabled' : ''} onclick="window.open('https://www.google.com/search?q=track+container+'+'${ship.trackingNumber||''}', '_blank')">Track</button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-function renderBids() {
-  const list = $('activeBidsList');
-  $('activeBidsCount').textContent = APP_STATE.bids ? APP_STATE.bids.length : 0;
-  if (!APP_STATE.bids || APP_STATE.bids.length === 0) {
-    list.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No active bids</div>';
-    return;
-  }
-  list.innerHTML = APP_STATE.bids.map(b => `
-    <div class="clickable-item">
-      <div class="item-title"><span>${b.product || 'Unknown'} — ${b.variety || 'Standard'}</span><span style="color:#00ced1">${money(b.price || 0)}</span></div>
-      <div class="item-details"><span>Qty: ${(b.quantity || 0).toLocaleString()}</span><span class="status-badge">${b.status || 'active'}</span><span>Exp: ${b.expiry || 'N/A'}</span></div>
-    </div>
-  `).join('');
-}
-
-function renderWonAuctions() {
-  const list = $('wonAuctionsList');
-  $('wonAuctionsCount').textContent = APP_STATE.wonAuctions ? APP_STATE.wonAuctions.length : 0;
-  if (!APP_STATE.wonAuctions || APP_STATE.wonAuctions.length === 0) {
-    list.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:20px;">No won auctions</div>';
-    return;
-  }
-  list.innerHTML = APP_STATE.wonAuctions.map(w => `
-    <div class="clickable-item">
-      <div class="item-title"><span>${w.product || 'Unknown'} — ${w.variety || 'Standard'}</span><span style="color:#7CFC00">WON</span></div>
-      <div class="item-details"><span>Qty: ${(w.quantity || 0).toLocaleString()}</span><span>${money(w.price || 0)}</span><span>${w.date || ''}</span></div>
-    </div>
-  `).join('');
-}
-
-function renderTicker() {
-  const ticker = $('liveTicker');
-  const prices = [
-    {c:'Coffee', p:4.35, ch:-0.12},{c:'Cocoa', p:3200, ch:1.45},{c:'Wheat', p:245, ch:-0.80},
-    {c:'Sugar', p:0.18, ch:0.05},{c:'Corn', p:195, ch:-0.30},{c:'Soybeans', p:420, ch:0.90}
+  const fields = [
+    'companyNameDisplay', 'companyRegDisplay', 'companyCountryDisplay',
+    'companyTaxDisplay', 'companyAddressDisplay', 'companyEmailDisplay',
+    'companyPhoneDisplay', 'companyWebsiteDisplay'
   ];
-  ticker.innerHTML = prices.map(t => {
-    const up = t.ch >= 0;
-    return `<div class="ticker-item">
-      <span class="ticker-commodity">${t.c}</span>
-      <span class="ticker-price">${typeof t.p === 'number' && t.p < 1 ? '$'+t.p.toFixed(2) : '$'+t.p.toLocaleString()}</span>
-      <span class="ticker-change ${up?'up':'down'}">${up?'+':''}${t.ch}%</span>
-    </div>`;
-  }).join('');
+  const values = [c.name, c.reg, c.country, c.tax, c.address, c.email, c.phone, c.website];
+  fields.forEach((id, i) => {
+    const el = $(id);
+    if (el) el.textContent = escapeHtml(values[i]) || 'Not set';
+  });
+  
+  const badge = $('verificationBadge');
+  if (badge) {
+    badge.className = 'company-verification-badge ' + (c.verified || 'pending');
+    badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending' : '❌ Unverified';
+  }
+  
+  const statusText = $('companyStatusText');
+  if (statusText) statusText.textContent = c.verified === 'verified' ? 'Ready to sell.' : 'Complete your profile.';
+  
+  const logoPreview = $('companyLogoPreview');
+  const logoPlaceholder = $('logoPlaceholder');
+  if (c.logo) {
+    if (logoPreview) { logoPreview.src = c.logo; logoPreview.style.display = 'block'; }
+    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+  } else {
+    if (logoPreview) logoPreview.style.display = 'none';
+    if (logoPlaceholder) logoPlaceholder.style.display = 'flex';
+  }
+  
+  const photosGrid = $('photosGrid');
+  if (photosGrid) {
+    photosGrid.innerHTML = '';
+    if (APP_STATE.company.photos && APP_STATE.company.photos.length > 0) {
+      APP_STATE.company.photos.forEach((src) => {
+        const div = document.createElement('div');
+        div.className = 'photo-item';
+        div.innerHTML = `<img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;">`;
+        photosGrid.appendChild(div);
+      });
+    }
+    const uploadBtn = document.createElement('div');
+    uploadBtn.className = 'photo-upload-btn';
+    uploadBtn.onclick = () => {
+      const input = $('photoFileInput');
+      if (input) input.click();
+    };
+    uploadBtn.innerHTML = '<span class="icon">📷</span><span class="text">Add Photo</span>';
+    photosGrid.appendChild(uploadBtn);
+  }
+  
+  const docs = c.documents || {};
+  const incorpStatus = $('incorpDocStatus');
+  const licenseStatus = $('licenseDocStatus');
+  const taxStatus = $('taxDocStatus');
+  if (incorpStatus) incorpStatus.textContent = docs.incorporation ? '✅ Uploaded' : 'Not uploaded';
+  if (licenseStatus) licenseStatus.textContent = docs.license ? '✅ Uploaded' : 'Not uploaded';
+  if (taxStatus) taxStatus.textContent = docs.tax ? '✅ Uploaded' : 'Not uploaded';
 }
 
-/* ==================== BOT FUNCTIONS ==================== */
-function openBotModal(botId) {
-  APP_STATE.currentEditId = botId || null;
-  const isEdit = !!botId;
-  $('botModalTitle').textContent = isEdit ? '🤖 Edit Bot' : '🤖 Create Bot';
+function renderProducts() {
+  const grid = $('productsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
   
-  // Populate emoji grid
-  const eg = $('botEmojiGrid');
-  eg.innerHTML = '';
-  BOT_EMOJIS.forEach(em => {
-    const div = document.createElement('div');
-    div.className = 'emoji-option';
-    div.textContent = em;
-    div.onclick = () => {
-      document.querySelectorAll('.emoji-option').forEach(x => x.classList.remove('selected'));
-      div.classList.add('selected');
-      $('botEmojiInput').value = em;
-    };
-    eg.appendChild(div);
+  if (!APP_STATE.products || APP_STATE.products.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#666; font-size:12px;">No products listed yet. Click "List Product" to get started.</div>`;
+    const add = document.createElement('div');
+    add.className = 'add-product-card';
+    add.id = 'addProductCard';
+    add.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">List Product</div>';
+    grid.appendChild(add);
+    return;
+  }
+  
+  APP_STATE.products.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    const statusClass = product.status === 'listed' ? 'listed' : product.status === 'sold' ? 'sold' : 'draft';
+    // FIX #3: Escape HTML in product display
+    card.innerHTML = `
+      <div class="product-card-header">
+        <div class="product-name">${escapeHtml(product.name || 'Unnamed')}<div class="variety">${escapeHtml(product.variety || '')}</div></div>
+        <div class="product-status ${escapeHtml(statusClass)}">${escapeHtml((product.status || 'draft').toUpperCase())}</div>
+      </div>
+      <div class="product-details">
+        <div><span class="label">Quantity:</span> ${escapeHtml((product.quantity || 0).toLocaleString())} ${escapeHtml(product.unit || 'kg')}</div>
+        <div><span class="label">Price:</span> ${money(product.price || 0)} / ${escapeHtml(product.unit || 'kg')}</div>
+        <div><span class="label">Origin:</span> ${escapeHtml(product.origin || 'Not specified')}</div>
+      </div>
+      <div class="product-actions">
+        <button class="edit-btn" onclick="openProductModal('${product.id}')">✏️ Edit</button>
+        <button class="delete-btn" onclick="deleteProduct('${product.id}')">🗑 Delete</button>
+      </div>
+    `;
+    grid.appendChild(card);
   });
   
-  // Populate commodities
-  const cg = $('botCommodities');
-  cg.innerHTML = '';
-  COMMODITIES.forEach(com => {
-    const div = document.createElement('div');
-    div.className = 'checkbox-item';
-    div.textContent = com;
-    div.onclick = () => div.classList.toggle('selected');
-    cg.appendChild(div);
-  });
+  const add = document.createElement('div');
+  add.className = 'add-product-card';
+  add.id = 'addProductCard';
+  add.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">List Product</div>';
+  grid.appendChild(add);
+}
+
+function renderOrders() {
+  const grid = $('ordersGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
   
-  // Populate container dropdown
-  const bc = $('botContainerInput');
-  bc.innerHTML = '<option value="">-- None --</option>' + (APP_STATE.containers || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  if (!APP_STATE.orders || APP_STATE.orders.length === 0) {
+    grid.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:40px;">No orders yet.</div>';
+    return;
+  }
+  
+  APP_STATE.orders.forEach(order => {
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    const statusClass = order.status || 'pending';
+    // FIX #3: Escape HTML in order display
+    card.innerHTML = `
+      <div class="order-header">
+        <div class="order-id">#${escapeHtml(order.id.slice(0, 8))}</div>
+        <div class="order-status ${escapeHtml(statusClass)}">${escapeHtml(statusClass.toUpperCase())}</div>
+      </div>
+      <div class="order-details">
+        <div><span class="label">Product:</span> ${escapeHtml(order.product || 'Unknown')}</div>
+        <div><span class="label">Quantity:</span> ${escapeHtml((order.quantity || 0).toLocaleString())} ${escapeHtml(order.unit || 'kg')}</div>
+        <div><span class="label">Total:</span> ${money(order.total || 0)}</div>
+        <div><span class="label">Buyer:</span> ${escapeHtml(order.buyer || 'Unknown')}</div>
+        <div><span class="label">Date:</span> ${escapeHtml(order.date || 'N/A')}</div>
+      </div>
+      <div class="order-actions">
+        <button class="view-btn" onclick="openOrderModal('${order.id}')">📋 View</button>
+        ${order.status === 'pending' ? `<button class="process-btn" onclick="updateOrderStatus('${order.id}', 'processing')">⚙️ Process</button>` : ''}
+        ${order.status === 'processing' ? `<button class="ship-btn" onclick="updateOrderStatus('${order.id}', 'shipped')">🚚 Ship</button>` : ''}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderStats() {
+  const totalProducts = $('totalProducts');
+  const totalOrders = $('totalOrders');
+  const totalRevenue = $('totalRevenue');
+  
+  if (totalProducts) totalProducts.textContent = APP_STATE.products ? APP_STATE.products.length : 0;
+  if (totalOrders) totalOrders.textContent = APP_STATE.orders ? APP_STATE.orders.length : 0;
+  
+  let revenue = 0;
+  if (APP_STATE.orders) {
+    APP_STATE.orders.forEach(o => { if (o.status === 'completed' || o.status === 'shipped') revenue += (o.total || 0); });
+  }
+  if (totalRevenue) totalRevenue.textContent = money(revenue);
+}
+
+/* ==================== PRODUCT FUNCTIONS ==================== */
+function openProductModal(productId) {
+  APP_STATE.currentEditId = productId || null;
+  const isEdit = !!productId;
+  const title = $('productModalTitle');
+  if (title) title.textContent = isEdit ? '📦 Edit Product' : '📦 List Product';
+  
+  const imagesInput = $('productImagesInput');
+  if (imagesInput) imagesInput.value = '';
   
   if (isEdit) {
-    const bot = APP_STATE.bots.find(b => b.id === botId);
-    if (bot) {
-      $('botNameInput').value = bot.name || '';
-      $('botEmojiInput').value = bot.emoji || '🤖';
-      document.querySelectorAll('.emoji-option').forEach(el => {
-        if (el.textContent === bot.emoji) el.classList.add('selected');
-      });
-      document.querySelectorAll('#botCommodities .checkbox-item').forEach(el => {
-        if ((bot.commodities || []).includes(el.textContent)) el.classList.add('selected');
-      });
-      $('botRadiusInput').value = bot.scanRadius || 'same_city';
-      $('botQtyStrategy').value = bot.qtyStrategy || 'range';
-      $('botMinQty').value = bot.minQuantity || 10;
-      $('botMinQtyVal').textContent = bot.minQuantity || 10;
-      $('botMaxQty').value = bot.maxQuantity || 0;
-      $('botMaxQtyVal').textContent = bot.maxQuantity || '∞';
-      $('botMinFillRate').value = bot.minFillRate || 50;
-      $('botMinFillRateVal').textContent = (bot.minFillRate || 50) + '%';
-      $('botIncotermInput').value = bot.incoterm || 'exw';
-      $('botLocationInput').value = bot.location || '';
-      $('botStrategyInput').value = bot.strategy || 'balanced';
-      $('botAggressiveness').value = bot.aggressiveness || 50;
-      $('botAggressivenessVal').textContent = (bot.aggressiveness || 50) + '%';
-      $('botMaxPrice').value = bot.maxPrice || 1000;
-      $('botMaxPriceVal').textContent = '$' + (bot.maxPrice || 1000).toLocaleString();
-      $('botBidIncrement').value = bot.bidIncrement || 10;
-      $('botBidIncrementVal').textContent = '$' + (bot.bidIncrement || 10);
-      $('botMaxBids').value = bot.maxBids || 3;
-      $('botMaxBidsVal').textContent = bot.maxBids || 3;
-      $('botSnipingTiming').value = bot.snipingTiming || 'dynamic';
-      $('botSnipeMode').value = bot.snipeMode || 'all';
-      $('botMinRating').value = bot.minRating || 0;
-      $('botMinRatingVal').textContent = (bot.minRating || 0).toFixed(1);
-      $('botMinVerificationInput').value = bot.minVerification || 'none';
-      $('botSellerHistory').value = bot.sellerHistory || 0;
-      $('botSellerHistoryVal').textContent = (bot.sellerHistory || 0) + ' days';
-      $('botContainerInput').value = bot.containerId || '';
-      $('botActiveFrom').value = bot.activeFrom || '00:00';
-      $('botActiveUntil').value = bot.activeUntil || '23:59';
+    const product = APP_STATE.products.find(p => p.id === productId);
+    if (product) {
+      const nameInput = $('productNameInput');
+      const varietyInput = $('productVarietyInput');
+      const qtyInput = $('productQuantityInput');
+      const unitInput = $('productUnitInput');
+      const priceInput = $('productPriceInput');
+      const statusInput = $('productStatusInput');
+      const descInput = $('productDescInput');
+      const originInput = $('productOriginInput');
       
-      // Toggles
-      ['autoBid','autoIncrement','notifyFill','autoAssign','exwOnly','fobOnly'].forEach(t => {
-        const el = document.getElementById('bot' + t.charAt(0).toUpperCase() + t.slice(1) + 'Toggle');
-        if (el) {
-          if (bot[t]) el.classList.add('active');
-          else el.classList.remove('active');
-        }
-      });
+      if (nameInput) nameInput.value = product.name || '';
+      if (varietyInput) varietyInput.value = product.variety || '';
+      if (qtyInput) qtyInput.value = product.quantity || '';
+      if (unitInput) unitInput.value = product.unit || 'kg';
+      if (priceInput) priceInput.value = product.price || '';
+      if (statusInput) statusInput.value = product.status || 'draft';
+      if (descInput) descInput.value = product.description || '';
+      if (originInput) originInput.value = product.origin || '';
     }
   } else {
-    $('botNameInput').value = '';
-    $('botEmojiInput').value = '🤖';
-    document.querySelectorAll('.emoji-option').forEach((el, i) => el.classList.toggle('selected', i === 0));
-    document.querySelectorAll('#botCommodities .checkbox-item').forEach(el => el.classList.remove('selected'));
-    $('botRadiusInput').value = 'same_city';
-    $('botQtyStrategy').value = 'range';
-    $('botMinQty').value = 10;
-    $('botMinQtyVal').textContent = '10';
-    $('botMaxQty').value = 0;
-    $('botMaxQtyVal').textContent = '∞';
-    $('botMinFillRate').value = 50;
-    $('botMinFillRateVal').textContent = '50%';
-    $('botIncotermInput').value = 'exw';
-    $('botLocationInput').value = '';
-    $('botStrategyInput').value = 'balanced';
-    $('botAggressiveness').value = 50;
-    $('botAggressivenessVal').textContent = '50%';
-    $('botMaxPrice').value = 1000;
-    $('botMaxPriceVal').textContent = '$1,000';
-    $('botBidIncrement').value = 10;
-    $('botBidIncrementVal').textContent = '$10';
-    $('botMaxBids').value = 3;
-    $('botMaxBidsVal').textContent = '3';
-    $('botSnipingTiming').value = 'dynamic';
-    $('botSnipeMode').value = 'all';
-    $('botMinRating').value = 0;
-    $('botMinRatingVal').textContent = '0.0';
-    $('botMinVerificationInput').value = 'none';
-    $('botSellerHistory').value = 0;
-    $('botSellerHistoryVal').textContent = '0 days';
-    $('botContainerInput').value = '';
-    $('botActiveFrom').value = '00:00';
-    $('botActiveUntil').value = '23:59';
-    
-    // Default toggles
-    ['autoBid','autoAssign','exwOnly','fobOnly'].forEach(t => {
-      const el = document.getElementById('bot' + t.charAt(0).toUpperCase() + t.slice(1) + 'Toggle');
-      if (el) el.classList.remove('active');
-    });
-    ['autoIncrement','notifyFill'].forEach(t => {
-      const el = document.getElementById('bot' + t.charAt(0).toUpperCase() + t.slice(1) + 'Toggle');
-      if (el) el.classList.add('active');
-    });
+    const inputs = ['productNameInput', 'productVarietyInput', 'productQuantityInput', 'productPriceInput', 'productDescInput', 'productOriginInput'];
+    inputs.forEach(id => { const el = $(id); if (el) el.value = ''; });
+    const unitInput = $('productUnitInput');
+    if (unitInput) unitInput.value = 'kg';
+    const statusInput = $('productStatusInput');
+    if (statusInput) statusInput.value = 'listed';
   }
   
-  // Slider listeners
-  const sliders = [
-    { id: 'botMinQty', display: 'botMinQtyVal' },
-    { id: 'botMaxQty', display: 'botMaxQtyVal', transform: (v) => v == 0 ? '∞' : v },
-    { id: 'botMinFillRate', display: 'botMinFillRateVal', suffix: '%' },
-    { id: 'botMaxFreight', display: 'botMaxFreightVal', prefix: '$' },
-    { id: 'botAggressiveness', display: 'botAggressivenessVal', suffix: '%' },
-    { id: 'botMaxPrice', display: 'botMaxPriceVal', prefix: '$', transform: (v) => parseInt(v).toLocaleString() },
-    { id: 'botBidIncrement', display: 'botBidIncrementVal', prefix: '$' },
-    { id: 'botMaxBids', display: 'botMaxBidsVal' },
-    { id: 'botMinRating', display: 'botMinRatingVal', transform: (v) => parseFloat(v).toFixed(1) },
-    { id: 'botSellerHistory', display: 'botSellerHistoryVal', suffix: ' days' }
-  ];
-  sliders.forEach(({id, display, prefix, suffix, transform}) => {
-    const el = $(id);
-    const disp = $(display);
-    if (el && disp) {
-      el.oninput = function() {
-        let val = this.value;
-        if (transform) val = transform(val);
-        disp.textContent = (prefix || '') + val + (suffix || '');
-      };
-    }
-  });
-  
-  openModal('botModal');
+  openModal('productModal');
 }
 
-function saveBot() {
-  const name = $('botNameInput').value.trim();
-  if (!name) { showToast('Bot name is required', 'error'); return; }
+function saveProduct() {
+  const nameInput = $('productNameInput');
+  const qtyInput = $('productQuantityInput');
+  const priceInput = $('productPriceInput');
   
-  const commodities = Array.from(document.querySelectorAll('#botCommodities .checkbox-item.selected')).map(el => el.textContent);
-  if (!commodities.length) { showToast('Select at least one commodity', 'error'); return; }
+  if (!nameInput) { showToast('Product name input not found', 'error'); return; }
+  const name = nameInput.value.trim();
+  if (!name) { showToast('Product name is required', 'error'); return; }
   
-  const botData = {
+  if (!qtyInput) { showToast('Quantity input not found', 'error'); return; }
+  const quantity = parseFloat(qtyInput.value);
+  if (!quantity || quantity <= 0) { showToast('Enter a valid quantity', 'error'); return; }
+  
+  if (!priceInput) { showToast('Price input not found', 'error'); return; }
+  const price = parseFloat(priceInput.value);
+  if (!price || price <= 0) { showToast('Enter a valid price', 'error'); return; }
+  
+  const productData = {
     name: name,
-    emoji: $('botEmojiInput').value || '🤖',
-    commodities: commodities,
-    scanRadius: $('botRadiusInput').value,
-    minQuantity: parseInt($('botMinQty').value) || 10,
-    maxQuantity: parseInt($('botMaxQty').value) || null,
-    qtyStrategy: $('botQtyStrategy').value,
-    minFillRate: parseInt($('botMinFillRate').value) || 50,
-    incoterm: $('botIncotermInput').value,
-    location: $('botLocationInput').value.trim(),
-    exwOnly: $('botExwOnlyToggle').classList.contains('active'),
-    fobOnly: $('botFobOnlyToggle').classList.contains('active'),
-    maxFreight: parseInt($('botMaxFreight').value) || 50,
-    strategy: $('botStrategyInput').value,
-    aggressiveness: parseInt($('botAggressiveness').value) || 50,
-    maxPrice: parseInt($('botMaxPrice').value) || 1000,
-    bidIncrement: parseInt($('botBidIncrement').value) || 10,
-    maxBids: parseInt($('botMaxBids').value) || 3,
-    snipingTiming: $('botSnipingTiming').value,
-    snipeMode: $('botSnipeMode').value,
-    minRating: parseFloat($('botMinRating').value) || 0,
-    minVerification: $('botMinVerificationInput').value,
-    sellerHistory: parseInt($('botSellerHistory').value) || 0,
-    autoBid: $('botAutoBidToggle').classList.contains('active'),
-    autoIncrement: $('botAutoIncToggle').classList.contains('active'),
-    notifyFill: $('botNotifyToggle').classList.contains('active'),
-    autoAssign: $('botAutoAssignToggle').classList.contains('active'),
-    containerId: $('botContainerInput').value,
-    activeFrom: $('botActiveFrom').value,
-    activeUntil: $('botActiveUntil').value,
-    status: 'active'
+    variety: $('productVarietyInput')?.value?.trim() || '',
+    quantity: quantity,
+    unit: $('productUnitInput')?.value || 'kg',
+    price: price,
+    status: $('productStatusInput')?.value || 'draft',
+    description: $('productDescInput')?.value?.trim() || '',
+    origin: $('productOriginInput')?.value?.trim() || '',
+    listedAt: new Date().toISOString()
   };
   
+  const imagesInput = $('productImagesInput');
+  if (imagesInput && imagesInput.files.length > 0) {
+    const maxImages = Math.min(imagesInput.files.length, 5);
+    const imageUrls = [];
+    let processed = 0;
+    
+    Array.from(imagesInput.files).slice(0, 5).forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imageUrls[index] = e.target.result;
+        processed++;
+        if (processed === maxImages) {
+          productData.images = imageUrls.filter(Boolean);
+          saveProductData(productData);
+        }
+      };
+      reader.onerror = () => {
+        showToast(`Failed to read image ${index + 1}`, 'warning');
+        processed++;
+        if (processed === maxImages) {
+          productData.images = imageUrls.filter(Boolean);
+          saveProductData(productData);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    if (imagesInput.files.length > 5) {
+      showToast('Only first 5 images will be saved', 'warning');
+    }
+    return;
+  }
+  
+  saveProductData(productData);
+}
+
+function saveProductData(productData) {
   if (APP_STATE.currentEditId) {
-    const idx = APP_STATE.bots.findIndex(b => b.id === APP_STATE.currentEditId);
+    const idx = APP_STATE.products.findIndex(p => p.id === APP_STATE.currentEditId);
     if (idx > -1) {
-      APP_STATE.bots[idx] = { ...APP_STATE.bots[idx], ...botData };
+      APP_STATE.products[idx] = { ...APP_STATE.products[idx], ...productData };
     }
   } else {
-    APP_STATE.bots.push({ id: uuid(), ...botData });
+    APP_STATE.products.push({ id: uuid(), ...productData });
   }
   
-  saveToStorage();
-  renderBots();
-  closeModal('botModal');
-  showToast('Bot saved!', 'success');
-}
-
-/* ==================== CONTAINER FUNCTIONS ==================== */
-function openContainerModal() {
-  APP_STATE.currentEditId = null;
-  $('containerModalTitle').textContent = '📦 New Container';
-  $('containerFormSection').style.display = 'block';
-  $('containerDetailSection').style.display = 'none';
-  $('containerModalActions').style.display = 'flex';
-  $('saveContainerBtn').textContent = 'Create Container';
-  $('saveContainerBtn').onclick = saveContainer;
-  $('containerNameInput').value = '';
-  $('containerRegionInput').value = '';
-  $('containerDestinationInput').value = '';
-  $('containerCapacityInput').value = '';
-  $('containerUnitInput').value = 'kg';
-  openModal('containerModal');
-}
-
-function openContainerDetail(contId) {
-  const cont = APP_STATE.containers.find(c => c.id === contId);
-  if (!cont) return;
-  $('containerModalTitle').textContent = '📦 ' + cont.name;
-  $('containerFormSection').style.display = 'none';
-  $('containerDetailSection').style.display = 'block';
-  $('containerModalActions').style.display = 'none';
-  
-  const pct = Math.min(100, Math.round((cont.currentFill / cont.capacity) * 100));
-  $('containerDetailProgress').style.width = pct + '%';
-  $('containerDetailFillText').textContent = `${cont.currentFill} / ${cont.capacity} ${cont.unit}`;
-  $('containerDetailPct').textContent = pct + '%';
-  
-  const list = $('containerContentsList');
-  list.innerHTML = '';
-  if (!cont.contents || cont.contents.length === 0) {
-    list.innerHTML = '<div style="color:#666; font-size:12px; padding:8px;">No contents yet.</div>';
-  } else {
-    cont.contents.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'container-content-item';
-      div.innerHTML = `<span class="content-product">${item.product || 'Unknown'}</span><span class="content-qty">${item.quantity || 0} ${cont.unit}</span>`;
-      list.appendChild(div);
-    });
-  }
-  
-  // Show fill scanner
-  $('fillScannerSection').style.display = 'block';
-  runFillScanner(contId);
-  
-  openModal('containerModal');
-}
-
-function saveContainer() {
-  const name = $('containerNameInput').value.trim();
-  const region = $('containerRegionInput').value;
-  const capacity = parseFloat($('containerCapacityInput').value);
-  if (!name) { showToast('Container name is required', 'error'); return; }
-  if (!region) { showToast('Select a region', 'error'); return; }
-  if (!capacity || capacity <= 0) { showToast('Enter a valid capacity', 'error'); return; }
-  
-  APP_STATE.containers.push({
-    id: uuid(),
-    name: name,
-    region: region,
-    destination: $('containerDestinationInput').value.trim(),
-    capacity: capacity,
-    unit: $('containerUnitInput').value,
-    currentFill: 0,
-    contents: [],
-    status: 'open',
-    createdAt: new Date().toISOString()
-  });
-  
-  saveToStorage();
-  renderContainers();
-  closeModal('containerModal');
-  showToast('Container created!', 'success');
-}
-
-function deleteContainer(id) {
-  if (!confirm('Delete this container?')) return;
-  APP_STATE.containers = APP_STATE.containers.filter(c => c.id !== id);
-  saveToStorage();
-  renderContainers();
-  showToast('Container deleted', false);
-}
-
-function runFillScanner(containerId) {
-  const cont = APP_STATE.containers.find(c => c.id === containerId);
-  if (!cont) return;
-  const remaining = (cont.capacity || 0) - (cont.currentFill || 0);
-  if (remaining <= 0) {
-    const res = $('fillScannerResults');
-    if (res) res.innerHTML = '<div style="color:#7CFC00; text-align:center; padding:20px;">Container is already full!</div>';
-    return;
-  }
-  
-  // Demo auctions
-  const demoAuctions = [
-    { id: 'a1', product: 'Coffee', variety: 'Arabica', quantity: 500, price: 4.20, seller: 'Fazenda Nova', sellerRating: 4.8, sellerVerification: 'premium', location: 'Santos' },
-    { id: 'a2', product: 'Coffee', variety: 'Robusta', quantity: 300, price: 3.80, seller: 'Cooperminas', sellerRating: 4.2, sellerVerification: 'verified', location: 'Santos' },
-    { id: 'a3', product: 'Cocoa', variety: 'Criollo', quantity: 200, price: 5.10, seller: 'Premium Cacao', sellerRating: 4.9, sellerVerification: 'premium', location: 'Guayaquil' }
-  ];
-  
-  const matches = demoAuctions.filter(a => a.quantity <= remaining);
-  const res = $('fillScannerResults');
-  if (!res) return;
-  
-  if (matches.length === 0) {
-    res.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:20px;">No fill opportunities found for ${remaining}${cont.unit} remaining.</div>`;
-    return;
-  }
-  
-  res.innerHTML = `<div style="font-size:12px; color:#9ca3af; margin-bottom:8px;">Found ${matches.length} auction(s) that fit ${remaining}${cont.unit} remaining:</div>`;
-  matches.forEach(m => {
-    const card = document.createElement('div');
-    card.className = 'fill-suggestion-card';
-    card.innerHTML = `
-      <div class="suggestion-title">${m.product} — ${m.variety}</div>
-      <div class="suggestion-details">Seller: ${m.seller} • ${m.quantity} ${cont.unit} • ${money(m.price)}/unit</div>
-      <button class="bid-now-btn" onclick="placeBid('${m.id}', ${m.price}, ${m.quantity}, '${containerId}')">💰 Bid Now</button>
-    `;
-    res.appendChild(card);
-  });
-}
-
-function placeBid(auctionId, bidAmount, quantity, containerId) {
-  if (APP_STATE.wallet.balance < 25) {
-    showToast('Insufficient funds. Need $25 to bid.', 'error');
-    return;
-  }
-  APP_STATE.wallet.balance -= 25;
-  APP_STATE.wallet.bids = Math.floor(APP_STATE.wallet.balance / 25);
-  
-  // Add to container
-  const cont = APP_STATE.containers.find(c => c.id === containerId);
-  if (cont) {
-    if (!cont.contents) cont.contents = [];
-    cont.contents.push({
-      product: 'Auction #' + auctionId,
-      variety: 'Standard',
-      quantity: quantity,
-      seller: 'Unknown',
-      status: 'pending'
-    });
-    cont.currentFill = (cont.currentFill || 0) + quantity;
-  }
-  
-  APP_STATE.bids.push({
-    id: 'bid_' + Date.now(),
-    product: 'Auction #' + auctionId,
-    variety: 'Standard',
-    quantity: quantity,
-    price: bidAmount,
-    status: 'active',
-    expiry: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
-  });
-  
-  addBotLog('SYSTEM', `Bid placed: ${quantity} units @ ${money(bidAmount)}`, 'bid');
   saveToStorage();
   renderAll();
-  showToast(`✅ Bid placed: ${quantity} units @ ${money(bidAmount)}`, 'success');
+  closeModal('productModal');
+  showToast('Product saved!', 'success');
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  APP_STATE.products = APP_STATE.products.filter(p => p.id !== id);
+  saveToStorage();
+  renderAll();
+  showToast('Product deleted', 'info');
+}
+
+/* ==================== ORDER FUNCTIONS ==================== */
+function openOrderModal(orderId) {
+  APP_STATE.currentOrderId = orderId;
+  const order = APP_STATE.orders.find(o => o.id === orderId);
+  if (!order) { showToast('Order not found', 'error'); return; }
+  
+  const idEl = $('orderViewId');
+  const productEl = $('orderViewProduct');
+  const qtyEl = $('orderViewQty');
+  const totalEl = $('orderViewTotal');
+  const buyerEl = $('orderViewBuyer');
+  const statusEl = $('orderViewStatus');
+  const addressEl = $('orderViewAddress');
+  const notesEl = $('orderViewNotes');
+  const statusUpdate = $('orderStatusUpdate');
+  
+  if (idEl) idEl.textContent = order.id.slice(0, 8);
+  if (productEl) productEl.textContent = order.product || '-';
+  if (qtyEl) qtyEl.textContent = `${(order.quantity || 0).toLocaleString()} ${order.unit || 'kg'}`;
+  if (totalEl) totalEl.textContent = money(order.total || 0);
+  if (buyerEl) buyerEl.textContent = order.buyer || '-';
+  if (statusEl) statusEl.textContent = (order.status || 'pending').toUpperCase();
+  if (addressEl) addressEl.textContent = order.address || '-';
+  if (notesEl) notesEl.textContent = order.notes || '-';
+  if (statusUpdate) statusUpdate.value = order.status || 'pending';
+  
+  openModal('orderModal');
+}
+
+function updateOrderStatus(orderId, newStatus) {
+  if (!orderId) {
+    orderId = APP_STATE.currentOrderId;
+    const statusUpdate = $('orderStatusUpdate');
+    if (statusUpdate) newStatus = statusUpdate.value;
+  }
+  
+  const order = APP_STATE.orders.find(o => o.id === orderId);
+  if (!order) { showToast('Order not found', 'error'); return; }
+  
+  order.status = newStatus;
+  if (newStatus === 'shipped') {
+    order.shippedAt = new Date().toISOString();
+  }
+  if (newStatus === 'completed') {
+    order.completedAt = new Date().toISOString();
+  }
+  
+  saveToStorage();
+  renderAll();
+  closeModal('orderModal');
+  showToast(`Order status updated to ${newStatus}`, 'success');
 }
 
 /* ==================== COMPANY ==================== */
-$('editCompanyBtn').onclick = () => {
-  $('editCompanyName').value = APP_STATE.company.name || '';
-  $('editCompanyReg').value = APP_STATE.company.reg || '';
-  $('editCompanyCountry').value = APP_STATE.company.country || '';
-  $('editCompanyTax').value = APP_STATE.company.tax || '';
-  $('editCompanyAddress').value = APP_STATE.company.address || '';
-  $('editCompanyEmail').value = APP_STATE.company.email || '';
-  $('editCompanyPhone').value = APP_STATE.company.phone || '';
-  $('editCompanyWebsite').value = APP_STATE.company.website || '';
-  openModal('companyModal');
-};
-
-function saveCompanyProfile() {
-  APP_STATE.company = {
-    ...APP_STATE.company,
-    name: $('editCompanyName').value.trim(),
-    reg: $('editCompanyReg').value.trim(),
-    country: $('editCompanyCountry').value.trim(),
-    tax: $('editCompanyTax').value.trim(),
-    address: $('editCompanyAddress').value.trim(),
-    email: $('editCompanyEmail').value.trim(),
-    phone: $('editCompanyPhone').value.trim(),
-    website: $('editCompanyWebsite').value.trim()
+const editCompanyBtn = $('editCompanyBtn');
+if (editCompanyBtn) {
+  editCompanyBtn.onclick = () => {
+    const nameInput = $('editCompanyName');
+    const regInput = $('editCompanyReg');
+    const countryInput = $('editCompanyCountry');
+    const taxInput = $('editCompanyTax');
+    const addressInput = $('editCompanyAddress');
+    const emailInput = $('editCompanyEmail');
+    const phoneInput = $('editCompanyPhone');
+    const websiteInput = $('editCompanyWebsite');
+    
+    if (nameInput) nameInput.value = APP_STATE.company.name || '';
+    if (regInput) regInput.value = APP_STATE.company.reg || '';
+    if (countryInput) countryInput.value = APP_STATE.company.country || '';
+    if (taxInput) taxInput.value = APP_STATE.company.tax || '';
+    if (addressInput) addressInput.value = APP_STATE.company.address || '';
+    if (emailInput) emailInput.value = APP_STATE.company.email || '';
+    if (phoneInput) phoneInput.value = APP_STATE.company.phone || '';
+    if (websiteInput) websiteInput.value = APP_STATE.company.website || '';
+    
+    openModal('companyModal');
   };
-  saveToStorage();
-  renderCompany();
-  closeModal('companyModal');
-  showToast('Company profile updated', 'success');
 }
 
-/* ==================== DEPOSIT & BRIEF ==================== */
-$('depositBtn').onclick = () => openModal('depositModal');
-$('fileBriefBtn').onclick = () => openModal('briefModal');
+function saveCompanyProfile() {
+  const nameInput = $('editCompanyName');
+  if (!nameInput) { showToast('Form not ready', 'error'); return; }
+  
+  APP_STATE.company = {
+    ...APP_STATE.company,
+    name: nameInput.value?.trim() || '',
+    reg: $('editCompanyReg')?.value?.trim() || '',
+    country: $('editCompanyCountry')?.value?.trim() || '',
+    tax: $('editCompanyTax')?.value?.trim() || '',
+    address: $('editCompanyAddress')?.value?.trim() || '',
+    email: $('editCompanyEmail')?.value?.trim() || '',
+    phone: $('editCompanyPhone')?.value?.trim() || '',
+    website: $('editCompanyWebsite')?.value?.trim() || ''
+  };
+  
+  if (APP_STATE.company.name && APP_STATE.company.reg && APP_STATE.company.country) {
+    APP_STATE.company.verified = 'pending';
+  }
+  
+  saveToStorage().then(() => {
+    renderCompany();
+    closeModal('companyModal');
+    showToast('Company profile updated & saved', 'success');
+  });
+}
+
+/* ==================== DEPOSIT ==================== */
+const depositBtn = $('depositBtn');
+if (depositBtn) depositBtn.onclick = () => openModal('depositModal');
 
 function processDeposit() {
-  const amt = parseFloat($('depositAmount').value);
+  const amtInput = $('depositAmount');
+  if (!amtInput) { showToast('Deposit amount input not found', 'error'); return; }
+  const amt = parseFloat(amtInput.value);
   if (!amt || amt < 100) { showToast('Minimum deposit $100', 'error'); return; }
   APP_STATE.wallet.balance += amt;
-  APP_STATE.wallet.bids += Math.floor(amt / 1000);
   saveToStorage();
-  renderWallet();
+  renderAll();
   closeModal('depositModal');
   showToast('Deposit processed: ' + money(amt), 'success');
 }
 
-function fileBrief() {
-  const msg = $('briefMessage').value.trim();
-  if (!msg) { showToast('Enter a message', 'error'); return; }
-  closeModal('briefModal');
-  showToast('Brief filed successfully', 'success');
-  $('briefMessage').value = '';
-}
-
-/* ==================== CONTRACT ==================== */
-function openContractModal(contractId) {
-  const c = APP_STATE.contracts.find(x => x.id === contractId);
-  if (!c) return;
-  $('contractViewProduct').textContent = c.product || '-';
-  $('contractViewVariety').textContent = c.variety || '-';
-  $('contractViewQty').textContent = (c.quantity || 0).toLocaleString() + ' units';
-  $('contractViewPrice').textContent = money(c.price || 0) + ' / unit';
-  $('contractViewSeller').textContent = c.seller || '-';
-  $('contractViewStatus').textContent = (c.status || 'active').toUpperCase();
-  
-  const ship = c.shipment || {};
-  $('shipTrackingInput').value = ship.trackingNumber || '';
-  $('shipCarrierInput').value = ship.carrier || '';
-  $('shipOriginInput').value = ship.origin || '';
-  $('shipDestInput').value = ship.destination || '';
-  $('shipEtdInput').value = ship.etd || '';
-  $('shipEtaInput').value = ship.eta || '';
-  $('shipBolStatusInput').value = ship.bolStatus || 'pending';
-  $('shipNotesInput').value = ship.notes || '';
-  
-  const cc = $('contractContainerInput');
-  cc.innerHTML = '<option value="">-- Unassigned --</option>' + (APP_STATE.containers || []).map(ct => `<option value="${ct.id}">${ct.name}</option>`).join('');
-  cc.value = c.containerId || '';
-  
-  openModal('contractModal');
-}
-
-function saveContractShipping() {
-  const c = APP_STATE.contracts.find(x => x.id === APP_STATE.currentContractId);
-  if (!c) return;
-  c.shipment = {
-    trackingNumber: $('shipTrackingInput').value.trim(),
-    carrier: $('shipCarrierInput').value.trim(),
-    origin: $('shipOriginInput').value.trim(),
-    destination: $('shipDestInput').value.trim(),
-    etd: $('shipEtdInput').value,
-    eta: $('shipEtaInput').value,
-    bolStatus: $('shipBolStatusInput').value,
-    notes: $('shipNotesInput').value.trim(),
-    status: $('shipTrackingInput').value.trim() ? 'In Transit' : 'Pending'
+/* ==================== SYNC CLOUD ==================== */
+const syncCloudBtn = $('syncCloudBtn');
+if (syncCloudBtn) {
+  syncCloudBtn.onclick = async () => {
+    showToast('☁️ Syncing with cloud...', 'info');
+    await saveToStorage();
+    showToast('✅ Synced successfully!', 'success');
   };
-  c.containerId = $('contractContainerInput').value;
-  saveToStorage();
-  renderContracts();
-  renderContainers();
-  closeModal('contractModal');
-  showToast('Shipping info saved', 'success');
 }
 
-let currentContractId = null;
-window.openContractModal = function(id) {
-  currentContractId = id;
-  openContractModal(id);
-};
-window.saveContractShipping = saveContractShipping;
+/* ==================== TAR SETTINGS ==================== */
+const tarSettingsBtn = $('tarSettingsBtn');
+if (tarSettingsBtn) {
+  tarSettingsBtn.onclick = showTARSettings;
+}
 
 /* ==================== AUTH BUTTON ==================== */
-$('authBtn').onclick = async () => {
-  if (!confirm('Sign out?')) return;
-  await bulletproofSignOut();
-  window.location.replace('index.html');
-};
+const authBtn = $('authBtn');
+if (authBtn) {
+  // FIX #4: Prevent default on auth link
+  authBtn.onclick = async (e) => {
+    e.preventDefault();
+    if (!confirm('Sign out?')) return;
+    await bulletproofSignOut();
+  };
+}
 
 /* ==================== FILE UPLOADS ==================== */
-$('companyLogoUpload').onclick = () => {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.jpg,.png,.jpeg';
-  input.onchange = (e) => {
+// Logo upload
+const logoUpload = $('companyLogoUpload');
+const logoFileInput = $('logoFileInput');
+
+if (logoUpload && logoFileInput) {
+  logoUpload.onclick = () => {
+    logoFileInput.click();
+  };
+  
+  logoFileInput.onchange = function(e) {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -2077,74 +2145,238 @@ $('companyLogoUpload').onclick = () => {
         renderCompany();
         showToast('Logo uploaded!', 'success');
       };
+      reader.onerror = () => showToast('Failed to read logo file', 'error');
       reader.readAsDataURL(file);
     }
+    this.value = '';
   };
-  input.click();
-};
+}
 
-document.getElementById('photoFileInput').onchange = (e) => {
-  const files = e.target.files;
-  if (files.length > 0) {
-    Array.from(files).forEach(file => {
+// Photo upload
+const photoInput = $('photoFileInput');
+if (photoInput) {
+  photoInput.onchange = function(e) {
+    const files = e.target.files;
+    if (files.length > 0) {
+      let loaded = 0;
+      const total = files.length;
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
+          APP_STATE.company.photos.push(ev.target.result);
+          loaded++;
+          if (loaded === total) {
+            saveToStorage();
+            renderCompany();
+            showToast(`${total} photo(s) uploaded!`, 'success');
+          }
+        };
+        reader.onerror = () => {
+          loaded++;
+          showToast('Failed to read some photos', 'warning');
+          if (loaded === total) {
+            saveToStorage();
+            renderCompany();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    this.value = '';
+  };
+}
+
+// Document uploads
+const incorpFileInput = $('incorpFileInput');
+if (incorpFileInput) {
+  incorpFileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
       const reader = new FileReader();
       reader.onload = (ev) => {
-        if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
-        APP_STATE.company.photos.push(ev.target.result);
+        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
+        APP_STATE.company.documents.incorporation = ev.target.result;
         saveToStorage();
         renderCompany();
+        showToast('Certificate of Incorporation uploaded!', 'success');
       };
+      reader.onerror = () => showToast('Failed to read file', 'error');
       reader.readAsDataURL(file);
-    });
-    showToast(`${files.length} photo(s) uploaded!`, 'success');
-  }
+    }
+    this.value = '';
+  };
+}
+
+const licenseFileInput = $('licenseFileInput');
+if (licenseFileInput) {
+  licenseFileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
+        APP_STATE.company.documents.license = ev.target.result;
+        saveToStorage();
+        renderCompany();
+        showToast('Business License uploaded!', 'success');
+      };
+      reader.onerror = () => showToast('Failed to read file', 'error');
+      reader.readAsDataURL(file);
+    }
+    this.value = '';
+  };
+}
+
+const taxFileInput = $('taxFileInput');
+if (taxFileInput) {
+  taxFileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
+        APP_STATE.company.documents.tax = ev.target.result;
+        saveToStorage();
+        renderCompany();
+        showToast('Tax Registration uploaded!', 'success');
+      };
+      reader.onerror = () => showToast('Failed to read file', 'error');
+      reader.readAsDataURL(file);
+    }
+    this.value = '';
+  };
+}
+
+/* ==================== EXPOSE FUNCTIONS TO WINDOW ==================== */
+window.openProductModal = openProductModal;
+window.deleteProduct = deleteProduct;
+window.openOrderModal = openOrderModal;
+window.updateOrderStatus = updateOrderStatus;
+window.convertReceivable = convertReceivable;
+window.autoConvertReady = autoConvertReady;
+window.startTour = startTour;
+window.endTour = endTour;
+window.uploadCertImage = uploadCertImage;
+window.removeCert = removeCert;
+window.saveProduct = saveProduct;
+window.saveCompanyProfile = saveCompanyProfile;
+window.processDeposit = processDeposit;
+window.closeModal = closeModal;
+window.showTARSettings = showTARSettings;
+window.refreshAuctions = refreshAuctions;
+
+// Global error handler for debugging
+window.onerror = function(msg, url, line) {
+  console.error('[TradeAux Error]', msg, 'at', url + ':' + line);
+  return true;
 };
 
 /* ==================== INIT ==================== */
 async function initApp() {
+  // Clean up signed_out param from URL to prevent loop if page is refreshed
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('signed_out') === '1') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+  
+  showToast('🔐 Loading dashboard...', 'info');
+  
+  const authOk = await checkAuth();
+  if (!authOk) return;
+  
   const loaded = await loadFromStorage();
   if (!loaded) {
-    // Seed demo data
-    APP_STATE.bots = [
-      { id: uuid(), name: 'Coffee Hunter', emoji: '🦅', status: 'active', commodities: ['Coffee'], strategy: 'balanced', maxPrice: 4500, minQuantity: 50, aggressiveness: 65 },
-      { id: uuid(), name: 'Grain Scout', emoji: '🐺', status: 'active', commodities: ['Wheat'], strategy: 'conservative', maxPrice: 320, minQuantity: 200, aggressiveness: 30 }
+    APP_STATE.products = [
+      { id: uuid(), name: 'Arabica Coffee', variety: 'Specialty Grade', quantity: 8200, unit: 'kg', price: 4.25, status: 'listed', description: 'High-quality Arabica from Santos, Brazil', origin: 'Santos, Brazil', listedAt: new Date().toISOString() },
+      { id: uuid(), name: 'Cocoa Beans', variety: 'Criollo', quantity: 5000, unit: 'kg', price: 5.10, status: 'listed', description: 'Premium Criollo cocoa from Ecuador', origin: 'Guayaquil, Ecuador', listedAt: new Date().toISOString() }
     ];
-    APP_STATE.containers = [
-      { id: uuid(), name: 'Santos Run #1', region: 'Santos', destination: 'Rotterdam', capacity: 25000, unit: 'kg', currentFill: 14200, contents: [{ product: 'Coffee', variety: 'Arabica', quantity: 8200, seller: 'Fazenda Aurora', status: 'active' }] }
+    APP_STATE.orders = [
+      { id: uuid(), product: 'Arabica Coffee', quantity: 2000, unit: 'kg', total: 8500, buyer: 'Blue Mountain Traders', status: 'processing', address: 'Rotterdam, Netherlands', date: '2026-06-28', notes: 'Need BOL by Friday' },
+      { id: uuid(), product: 'Cocoa Beans', quantity: 1000, unit: 'kg', total: 5100, buyer: 'Swiss Chocolate Co', status: 'pending', address: 'Zurich, Switzerland', date: '2026-06-29', notes: '' }
     ];
-    APP_STATE.contracts = [
-      { id: 'c1', product: 'Coffee', variety: 'Arabica', quantity: 8200, price: 4.25, seller: 'Fazenda Aurora', status: 'active', shipment: { trackingNumber: 'MAEU9876543', carrier: 'Maersk', bolStatus: 'uploaded' } }
-    ];
-    APP_STATE.wonAuctions = [
-      { id: 'w1', product: 'Coffee', variety: 'Robusta', quantity: 6000, price: 2.80, seller: 'Cooperminas', date: '2026-06-20' }
-    ];
-    APP_STATE.bids = [
-      { id: 'b1', product: 'Coffee', variety: 'Arabica', quantity: 5000, price: 4.50, status: 'active', expiry: '2026-06-28' }
-    ];
+    APP_STATE.wallet = { balance: 250000 };
+    APP_STATE.receivables = generateReceivables();
+    APP_STATE.tar = {
+      active: true,
+      conversionFee: 25,
+      minReceivable: 100,
+      maxReceivable: 50000,
+      autoConvert: true,
+      batchSize: 50,
+      dailyLimit: 500,
+      todayConversions: 0,
+      totalConversions: 0,
+      totalFeesEarned: 0,
+      cachedAuctions: null,
+      cachedAuctionsTimestamp: null,
+      cachedAdvisory: null,
+      lastAdvisoryUpdate: null
+    };
     saveToStorage();
   }
   
   renderAll();
   
-  // Add event listeners for add buttons
-  document.getElementById('addContainerBtn').onclick = openContainerModal;
-  document.getElementById('addContainerCard').onclick = openContainerModal;
-  document.getElementById('addBotBtn').onclick = () => openBotModal();
-  document.getElementById('addBotCard').onclick = () => openBotModal();
-  document.getElementById('addCertBtn').onclick = function() {
-    const type = document.getElementById('certDropdown').value;
-    if (!type) { showToast('Select a certificate type', 'error'); return; }
-    if (APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'error'); return; }
-    APP_STATE.certToggles[type] = false;
-    saveToStorage();
-    renderCertificates();
-    document.getElementById('certDropdown').value = '';
-    showToast('Certificate type added!', 'success');
+  // Event listeners
+  const addProductBtn = $('addProductBtn');
+  if (addProductBtn) addProductBtn.onclick = () => openProductModal();
+  
+  const productsGrid = $('productsGrid');
+  if (productsGrid) {
+    productsGrid.addEventListener('click', function(e) {
+      const card = e.target.closest('.add-product-card');
+      if (card) openProductModal();
+    });
+  }
+  
+  const tarAutoConvertBtn = $('tarAutoConvertBtn');
+  if (tarAutoConvertBtn) tarAutoConvertBtn.onclick = autoConvertReady;
+  
+  const tarAdviceBtn = $('tarAdviceBtn');
+  if (tarAdviceBtn) tarAdviceBtn.onclick = () => {
+    APP_STATE.tar.cachedAdvisory = null;
+    APP_STATE.tar.lastAdvisoryUpdate = null;
+    renderTARAdvisory();
+    showToast('💡 New trade advice generated!', 'info');
   };
+  
+  const auctionRefreshBtn = $('auctionRefreshBtn');
+  if (auctionRefreshBtn) auctionRefreshBtn.onclick = refreshAuctions;
+  
+  const tourBtn = $('tourBtn');
+  if (tourBtn) tourBtn.onclick = startTour;
+  
+  const tourCloseBtn = $('tourCloseBtn');
+  if (tourCloseBtn) tourCloseBtn.onclick = endTour;
+  
+  const addCertBtn = $('addCertBtn');
+  if (addCertBtn) {
+    addCertBtn.onclick = function() {
+      const dropdown = $('certDropdown');
+      if (!dropdown) { showToast('Certificate dropdown not found', 'error'); return; }
+      const type = dropdown.value;
+      if (!type) { showToast('Select a certificate type', 'error'); return; }
+      if (APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'warning'); return; }
+      APP_STATE.certToggles[type] = false;
+      saveToStorage();
+      renderCertificates();
+      dropdown.value = '';
+      showToast('Certificate type added!', 'success');
+    };
+  }
   
   document.querySelectorAll('.modal').forEach(m => {
     m.onclick = (e) => { if (e.target === m) closeModal(m.id); };
   });
+  
+  // Use localStorage for tour persistence
+  const tourCompleted = localStorage.getItem('tradeaux_tour_complete');
+  if (!tourCompleted) {
+    setTimeout(startTour, 1500);
+  }
+  
+  showToast('✅ Dashboard ready!', 'success');
 }
 
 initApp();
