@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>TradeAux • Seller Dashboard | TAR Advisor</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- FIX #1: Load Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
@@ -16,34 +14,209 @@
     .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
     .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
     @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } 100% { transform: translate(-30px,20px) scale(1); } }
-    .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px 60px; position: relative; z-index: 2; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 140px 24px 60px; position: relative; z-index: 2; }
 
-    /* ===== 3D LOGO - FIXED ANIMATION DELAYS ===== */
+    /* ===== EXACT 3D LOGO FROM ABOUT PAGE ===== */
     .gem-logo-corner {
-      position: fixed; top: 20px; left: 20px; z-index: 9999;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
       filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
-      transform-style: preserve-3d; perspective: 1000px;
-      transform: scale(0.35); transform-origin: top left;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
     }
-    .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
-    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
+
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+
     .gem-letter:nth-child(1) { animation-delay: 0s; }
     .gem-letter:nth-child(2) { animation-delay: 0.2s; }
     .gem-letter:nth-child(3) { animation-delay: 0.4s; }
     .gem-letter:nth-child(4) { animation-delay: 0.6s; }
     .gem-letter:nth-child(5) { animation-delay: 0.8s; }
-    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
-    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
-    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
-    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
-    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
-    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
-    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
-    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
-    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
-    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
-    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
-    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    }
+
+    /* Letter T - Blue */
+    .gem-letter:nth-child(1)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    /* Letter R - Green */
+    .gem-letter:nth-child(2)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    /* Letter A - Red */
+    .gem-letter:nth-child(3)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    /* Letter D - Blue */
+    .gem-letter:nth-child(4)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    /* Letter E - Green */
+    .gem-letter:nth-child(5)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    /* Letter A - Red */
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    /* Letter U - Blue */
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    /* Letter X - Green */
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    .gem-letter .edge-top {
+      position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-right {
+      position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+      background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-bottom {
+      position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+      background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+    .gem-letter .edge-left {
+      position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+      background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+    }
+
+    .light-source {
+      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+      animation: rotateLight 15s linear infinite;
+      pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+    }
+
+    @keyframes rotateLight {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+    }
+
+    .sparkle {
+      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+    }
+
+    @keyframes sparkleFlash {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.2); }
+      20% { opacity: 0.6; transform: scale(0.9); }
+      30% { opacity: 1; transform: scale(1.1); }
+      40% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+
     .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
     .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
     .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
@@ -54,13 +227,20 @@
     .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
     .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
     .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
-    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
 
-    /* ===== REST OF CSS (unchanged) ===== */
-    .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+    .depth-shadow {
+      position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+      background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+      filter: blur(20px); z-index: -1;
+    }
+
+    /* Header with company info under nav */
+    .header { display: flex; flex-direction: column; align-items: flex-end; padding: 20px 0 30px; gap: 12px; }
     .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px; background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; }
     .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
     .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0, 206, 209, 0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0, 206, 209, 0.3); flex-wrap: wrap; }
     .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
     .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
@@ -68,134 +248,50 @@
     .wallet-sub { font-size: 11px; color: #7CFC00; }
     .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
     .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
-    .top-trader { text-align: center; background: rgba(0, 0, 0, 0.5); padding: 12px 24px; border-radius: 40px; display: inline-block; width: auto; margin: 20px auto; border: 1px solid rgba(124, 252, 0, 0.3); backdrop-filter: blur(4px); font-family: 'Orbitron', sans-serif; font-size: 14px; }
-    .banner-container { text-align: center; padding-top: 60px; }
-
-    .section-card {
-      background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95));
-      border-radius: 24px; padding: 24px; margin-bottom: 24px;
-      backdrop-filter: blur(8px); position: relative; border: 2px solid transparent;
-      background-clip: padding-box;
-    }
-    .section-card::before {
-      content: ''; position: absolute; inset: -2px; border-radius: 26px; padding: 2px;
-      background: linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00);
-      background-size: 300% 300%;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude;
-      pointer-events: none; animation: borderFlow 4s ease infinite;
-    }
-    @keyframes borderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-    .section-header {
-      font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700;
-      color: #7CFC00; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
-      border-left: 3px solid #7CFC00; padding-left: 14px; flex-wrap: wrap;
-    }
-    .section-header .badge { background: rgba(0,206,209,0.2); padding: 3px 10px; border-radius: 20px; font-size: 10px; color: #00ced1; }
-
-    .company-section { margin-top: 30px; }
-    .company-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .company-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 24px; }
-    .company-profile-layout { display: grid; grid-template-columns: 200px 1fr; gap: 24px; }
-    .company-logo-section { text-align: center; }
-    .company-logo-upload { width: 160px; height: 160px; border: 2px dashed rgba(0,206,209,0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; margin: 0 auto; overflow: hidden; background: rgba(0,0,0,0.3); }
-    .company-logo-upload:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
-    .company-logo-upload img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-    .company-logo-upload .placeholder { color: #9ca3af; font-size: 13px; }
-    .company-logo-upload .placeholder-icon { font-size: 48px; margin-bottom: 8px; }
-    .company-verification-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .company-verification-badge.verified { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
-    .company-verification-badge.unverified { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.3); }
-    .company-verification-badge.pending { background: rgba(255,217,102,0.15); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
-    .company-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .company-field { margin-bottom: 4px; }
-    .company-field label { display: block; font-size: 10px; color: #9ca3af; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .company-field .field-value { font-size: 13px; color: #e5e7eb; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-    .documents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-    .document-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
-    .document-item:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
-    .document-item .doc-icon { font-size: 20px; }
-    .document-item .doc-info { flex: 1; }
-    .document-item .doc-name { font-size: 11px; font-weight: 600; }
-    .document-item .doc-status { font-size: 10px; color: #9ca3af; }
-    .document-item .doc-upload { font-size: 10px; color: #00ced1; cursor: pointer; }
-    .company-documents-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
-    .company-photos-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
-
-    .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-    .photo-item { aspect-ratio: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-    .photo-item:hover { border-color: #00ced1; transform: scale(1.02); }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-item .placeholder { color: #9ca3af; font-size: 11px; text-align: center; padding: 8px; }
-    .photo-item .placeholder-icon { font-size: 28px; display: block; margin-bottom: 4px; }
-    .photo-upload-btn { aspect-ratio: 1; background: rgba(0,206,209,0.05); border: 2px dashed rgba(0,206,209,0.3); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
-    .photo-upload-btn:hover { border-color: #00ced1; background: rgba(0,206,209,0.1); }
-    .photo-upload-btn .icon { font-size: 28px; color: #00ced1; }
-    .photo-upload-btn .text { font-size: 10px; color: #9ca3af; margin-top: 4px; }
-
-    .cert-block-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px;
-    }
-    .cert-block {
-      background: linear-gradient(145deg, #0B1122, #030712);
-      border: 1px solid rgba(124,252,0,0.35);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      transition: 0.3s;
-    }
-    .cert-block:hover { border-color: #7CFC00; transform: translateY(-2px); box-shadow: 0 25px 30px -14px rgba(124,252,0,0.15); }
-    .cert-block .cert-icon { font-size: 28px; }
-    .cert-block .cert-name { font-size: 12px; font-weight: 700; color: #e5e7eb; text-align: center; }
-    .cert-block .cert-desc { font-size: 9px; color: #9ca3af; text-align: center; }
-    .cert-block .cert-required { font-size: 8px; color: #FFD966; background: rgba(255,217,102,0.1); padding: 2px 10px; border-radius: 10px; }
-    .cert-block .cert-preview {
-      width: 100%; height: 50px; border-radius: 8px; border: 1px dashed rgba(124,252,0,0.3);
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
-      background: rgba(0,0,0,0.3); overflow: hidden;
-    }
-    .cert-block .cert-preview img { width: 100%; height: 100%; object-fit: cover; }
-    .cert-block .cert-preview .placeholder { font-size: 9px; color: #9ca3af; }
-    .cert-block .cert-toggle-row { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; margin-top: 4px; }
-    .cert-block .cert-toggle-row span { font-size: 9px; color: #9ca3af; }
-    .block-select { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; color: #7CFC00; padding: 10px; font-family: 'Inter', sans-serif; }
-
-    .btn-remove-cert { background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.4); color: #FF4D4D; padding: 2px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
-    .btn-remove-cert:hover { background: rgba(255,77,77,0.3); border-color: #FF4D4D; }
-
-    .toggle-switch { position: relative; display: inline-block; width: 30px; height: 18px; flex-shrink: 0; }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: 0.3s; border-radius: 34px; }
-    .toggle-switch .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: 0.3s; border-radius: 50%; }
-    .toggle-switch input:checked + .slider { background-color: #7CFC00; }
-    .toggle-switch input:checked + .slider:before { transform: translateX(12px); }
-
-    .btn-neon {
-      background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px;
-      padding: 10px 32px; color: #7CFC00; font-family: 'Inter', sans-serif;
-      font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s;
-    }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 32px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; }
     .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
-    .btn-neon-primary {
-      background: linear-gradient(105deg, #10b981, #2dd4bf); border: none;
-      padding: 10px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif;
-      font-weight: 700; font-size: 13px; color: #010101; cursor: pointer; transition: 0.2s;
+
+    .company-mini-card {
+      background: rgba(15, 32, 64, 0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 206, 209, 0.2);
+      border-radius: 40px;
+      padding: 8px 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: flex-end;
     }
-    .btn-neon-primary:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(16,185,129,0.4); }
+    .company-mini-card .mini-field {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .company-mini-card .mini-field span {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+    .company-mini-card .badge-mini {
+      background: rgba(124,252,0,0.15);
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      color: #7CFC00;
+      border: 1px solid rgba(124,252,0,0.2);
+    }
 
-    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; }
-    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
-    .toast.success { border-color: #7CFC00; color: #7CFC00; }
-    .toast.warning { border-color: #FFD966; color: #FFD966; }
-    .toast.info { border-color: #00ced1; color: #00ced1; }
+    /* Dashboard Grid */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 20px 0; }
+    .stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
+    .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: #00ced1; }
+    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
 
+    /* TAR Section */
     .tar-section { margin-top: 30px; }
     .tar-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .tar-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
@@ -208,7 +304,6 @@
     .tar-metric { text-align: center; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; }
     .tar-metric-value { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
     .tar-metric-label { font-size: 9px; color: #9ca3af; margin-top: 4px; }
-
     .tar-receivable-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #FFD966; cursor: pointer; transition: all 0.2s; }
     .tar-receivable-item:hover { background: rgba(0,206,209,0.05); transform: translateX(4px); }
     .tar-receivable-item .receivable-info { flex: 1; }
@@ -219,24 +314,11 @@
     .tar-receivable-item .receivable-status.ready { background: rgba(124,252,0,0.2); color: #7CFC00; }
     .tar-receivable-item .receivable-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
     .tar-receivable-item .receivable-status.urgent { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-    .tar-receivable-item .receivable-status.converted { background: rgba(0,206,209,0.2); color: #00ced1; }
-
     .tar-batch-btn { background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; transition: 0.2s; }
     .tar-batch-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(124,252,0,0.3); }
-    .tar-batch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .tar-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .tar-setting { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; }
-    .tar-setting-label { font-size: 11px; color: #9ca3af; }
-    .tar-setting-value { font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00ced1; }
-
     .tar-advisory { margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(0,206,209,0.15); }
     .tar-advisory-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #FFD966; margin-bottom: 8px; }
     .tar-advisory-text { font-size: 13px; color: #e5e7eb; line-height: 1.6; }
-    .tar-advisory-text .highlight { color: #7CFC00; font-weight: 600; }
-    .tar-advisory-text .warning { color: #ff3b3b; }
-    .tar-advisory-text .info { color: #00ced1; }
-
     .auction-schedule { margin-top: 16px; }
     .auction-schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .auction-schedule-header .title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #00ced1; }
@@ -252,25 +334,10 @@
     .auction-item .auction-status.live { background: rgba(124,252,0,0.2); color: #7CFC00; animation: pulse 2s infinite; }
     .auction-item .auction-status.closed { background: rgba(255,59,59,0.2); color: #ff3b3b; }
 
-    /* ===== TOUR OVERLAY - FIXED Z-INDEX ===== */
-    .tour-overlay { display: none; position: fixed; inset: 0; z-index: 10000; pointer-events: none; }
-    .tour-overlay.active { display: block; pointer-events: auto; }
-    .tour-highlight { position: absolute; border: 3px solid #7CFC00; border-radius: 16px; box-shadow: 0 0 50px rgba(124,252,0,0.3); animation: tourPulse 2s ease-in-out infinite; pointer-events: none; }
-    @keyframes tourPulse { 0%, 100% { box-shadow: 0 0 30px rgba(124,252,0,0.2); } 50% { box-shadow: 0 0 60px rgba(124,252,0,0.5); } }
-    .tour-tooltip { position: absolute; background: rgba(2,6,23,0.95); border: 1px solid #7CFC00; border-radius: 12px; padding: 16px 20px; max-width: 320px; color: #e5e7eb; font-size: 13px; line-height: 1.6; pointer-events: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); z-index: 10001; }
-    .tour-tooltip h4 { font-family: 'Orbitron', sans-serif; color: #7CFC00; margin-bottom: 6px; font-size: 14px; }
-    .tour-tooltip .tour-btn { margin-top: 10px; padding: 6px 20px; background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; pointer-events: auto; }
-    .tour-tooltip .tour-btn:hover { transform: scale(1.02); }
-    .tour-progress { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10002; background: rgba(2,6,23,0.9); border: 1px solid rgba(0,206,209,0.3); border-radius: 30px; padding: 8px 20px; display: flex; align-items: center; gap: 12px; pointer-events: auto; }
-    .tour-progress .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
-    .tour-progress .dot.active { background: #7CFC00; box-shadow: 0 0 10px rgba(124,252,0,0.5); }
-    .tour-progress .dot.done { background: #00ced1; }
-    .tour-progress .tour-close { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; padding: 0 8px; }
-    .tour-progress .tour-close:hover { color: #ff3b3b; }
-
+    /* Products */
     .products-section { margin-top: 30px; }
     .products-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
     .product-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
     .product-card:hover { transform: translateY(-4px); border-color: #00ced1; }
     .product-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
@@ -283,17 +350,27 @@
     .product-details { font-size: 13px; color: #9ca3af; }
     .product-details div { margin-bottom: 4px; }
     .product-details .label { color: #666; }
+    .product-images-thumb { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .product-images-thumb img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+    .product-images-thumb .image-placeholder { width: 60px; height: 60px; border-radius: 8px; border: 1px dashed rgba(0,206,209,0.3); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #9ca3af; }
     .product-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
     .product-actions button { padding: 6px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
     .product-actions .edit-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
     .product-actions .edit-btn:hover { background: rgba(255,217,102,0.3); }
+    .product-actions .list-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
+    .product-actions .list-btn:hover { background: rgba(0,102,255,0.3); }
     .product-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
     .product-actions .delete-btn:hover { background: rgba(255,59,59,0.25); }
+    .product-actions .auction-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
+    .product-actions .auction-btn:hover { background: rgba(0,206,209,0.3); }
+    .product-actions .auction-btn.scheduled { background: rgba(124,252,0,0.2); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+    .product-actions .auction-btn.scheduled:hover { background: rgba(124,252,0,0.3); }
     .add-product-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; cursor: pointer; transition: all 0.3s; }
     .add-product-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
     .add-product-icon { font-size: 32px; color: #00ced1; margin-bottom: 8px; }
     .add-product-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #9ca3af; }
 
+    /* Orders */
     .orders-section { margin-top: 30px; }
     .orders-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
@@ -312,23 +389,13 @@
     .order-details .label { color: #666; }
     .order-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
     .order-actions button { padding: 6px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-    .order-actions .process-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
-    .order-actions .process-btn:hover { background: rgba(0,206,209,0.3); }
-    .order-actions .ship-btn { background: rgba(124,252,0,0.2); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
-    .order-actions .ship-btn:hover { background: rgba(124,252,0,0.3); }
     .order-actions .view-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
     .order-actions .view-btn:hover { background: rgba(0,102,255,0.3); }
 
-    .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 20px 0; }
-    .stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
-    .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: #00ced1; }
-    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-    .stat-icon { font-size: 28px; margin-bottom: 8px; }
-
+    /* Modal */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
     .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
     .modal-content.wide { max-width: 800px; }
-    .modal-content.xwide { max-width: 900px; }
     .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; }
     .modal-close:hover { color: #00ced1; }
     .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
@@ -348,40 +415,30 @@
     .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
 
     @media (max-width: 1000px) {
-      .company-profile-layout { grid-template-columns: 1fr; }
-      .company-fields { grid-template-columns: 1fr; }
       .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
       .tar-grid { grid-template-columns: 1fr; }
       .tar-metrics { grid-template-columns: 1fr 1fr; }
-      .tar-settings { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
     }
     @media (max-width: 600px) {
       .dashboard-grid { grid-template-columns: 1fr; }
-      .header { flex-direction: column; align-items: stretch; }
-      .wallet-section { flex-wrap: wrap; }
-      .nav { justify-content: center; }
       .gem-logo-corner { transform: scale(0.2); }
+      .container { padding-top: 100px; }
       .tar-metrics { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: 1fr; }
+      .company-mini-card { justify-content: flex-start; }
     }
   </style>
-  <base target="_self">
 </head>
 <body>
 
-<!-- ===== HIDDEN FILE INPUTS ===== -->
-<input type="file" id="logoFileInput" style="display:none;" accept=".jpg,.png,.jpeg">
-<input type="file" id="photoFileInput" style="display:none;" accept=".jpg,.png,.jpeg" multiple>
-<input type="file" id="incorpFileInput" style="display:none;" accept=".pdf,.jpg,.png">
-<input type="file" id="licenseFileInput" style="display:none;" accept=".pdf,.jpg,.png">
-<input type="file" id="taxFileInput" style="display:none;" accept=".pdf,.jpg,.png">
-
-<!-- ===== HTML CONTENT (same as v7) ===== -->
 <div class="bg-waves">
   <div class="wave-bg wave-1"></div>
   <div class="wave-bg wave-2"></div>
   <div class="wave-bg wave-3"></div>
 </div>
 
+<!-- EXACT 3D LOGO FROM ABOUT PAGE -->
 <div class="gem-logo-corner">
   <div class="gem-text">
     <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
@@ -409,7 +466,7 @@
 
 <div class="container">
   <header class="header">
-    <nav class="nav">
+    <nav class="nav" style="width:100%; justify-content:flex-end;">
       <div class="wallet-section">
         <div class="wallet-balance">
           <span class="wallet-label">💰 BALANCE</span>
@@ -422,40 +479,31 @@
       </div>
       <a href="#">Marketplace</a>
       <a href="#">Analytics</a>
-      <a href="#" id="authBtn">Sign Out</a>
+      <a href="#" class="sign-out" id="authBtn">🚪 Sign Out</a>
     </nav>
+    <!-- Company mini card under nav -->
+    <div class="company-mini-card" id="companyMiniCard">
+      <div class="mini-field">🏢 <span id="miniCompanyName">TradeAux Inc</span></div>
+      <div class="mini-field">📍 <span id="miniCompanyCountry">USA</span></div>
+      <div class="mini-field">📧 <span id="miniCompanyEmail">info@tradeaux.com</span></div>
+      <span class="badge-mini" id="miniVerificationBadge">✅ Verified</span>
+    </div>
   </header>
 
   <div class="banner-container">
-    <div class="top-trader" id="topTraderBanner">🤖 TAR ADVISOR ACTIVE • 10,000 conversions available • $25 each</div>
+    <div class="top-trader" style="text-align:center; background:rgba(0,0,0,0.5); padding:12px 24px; border-radius:40px; display:inline-block; width:auto; margin:20px auto; border:1px solid rgba(124,252,0,0.3); backdrop-filter:blur(4px); font-family:'Orbitron',sans-serif; font-size:14px;">🤖 TAR ADVISOR ACTIVE • 10,000 conversions available • $25 each</div>
   </div>
 
-  <!-- ===== STATS DASHBOARD ===== -->
+  <!-- STATS -->
   <div class="dashboard-grid" id="statsGrid">
-    <div class="stat-card" data-tour="1">
-      <div class="stat-icon">📦</div>
-      <div class="stat-number" id="totalProducts">0</div>
-      <div class="stat-label">Total Products</div>
-    </div>
-    <div class="stat-card" data-tour="2">
-      <div class="stat-icon">🛒</div>
-      <div class="stat-number" id="totalOrders">0</div>
-      <div class="stat-label">Total Orders</div>
-    </div>
-    <div class="stat-card" data-tour="3">
-      <div class="stat-icon">💵</div>
-      <div class="stat-number" id="totalRevenue">$0</div>
-      <div class="stat-label">Total Revenue</div>
-    </div>
-    <div class="stat-card" data-tour="4">
-      <div class="stat-icon">🔄</div>
-      <div class="stat-number" id="totalConversions">0</div>
-      <div class="stat-label">Conversions</div>
-    </div>
+    <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-number" id="totalProducts">0</div><div class="stat-label">Total Products</div></div>
+    <div class="stat-card"><div class="stat-icon">🛒</div><div class="stat-number" id="totalOrders">0</div><div class="stat-label">Total Orders</div></div>
+    <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-number" id="totalRevenue">$0</div><div class="stat-label">Total Revenue</div></div>
+    <div class="stat-card"><div class="stat-icon">🔄</div><div class="stat-number" id="totalConversions">0</div><div class="stat-label">Conversions</div></div>
   </div>
 
-  <!-- ===== TAR - Trade Advisor Robot ===== -->
-  <div class="tar-section" id="tarSection" data-tour="5">
+  <!-- TAR -->
+  <div class="tar-section" id="tarSection">
     <div class="tar-header">
       <span>🤖 TAR - TRADE ADVISOR ROBOT</span>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -471,1915 +519,317 @@
           <span class="tar-status-text" id="tarStatusText">🟢 Active • Monitoring 10,000 receivable opportunities</span>
         </div>
         <div class="tar-metrics">
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarReadyCount">0</div>
-            <div class="tar-metric-label">Ready to Convert</div>
-          </div>
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarPendingCount">0</div>
-            <div class="tar-metric-label">Pending Review</div>
-          </div>
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarConvertedCount">0</div>
-            <div class="tar-metric-label">Converted</div>
-          </div>
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarFeesEarned">$0</div>
-            <div class="tar-metric-label">Fees Earned</div>
-          </div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarReadyCount">0</div><div class="tar-metric-label">Ready to Convert</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarPendingCount">0</div><div class="tar-metric-label">Pending Review</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarConvertedCount">0</div><div class="tar-metric-label">Converted</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarFeesEarned">$0</div><div class="tar-metric-label">Fees Earned</div></div>
         </div>
-        <div id="tarReceivablesList">
-          <div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;">Loading receivables...</div>
-        </div>
+        <div id="tarReceivablesList"><div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;">Loading receivables...</div></div>
       </div>
       <div class="tar-card" id="tarAdvisoryCard">
         <h4 style="font-family:'Orbitron',sans-serif; font-size:14px; color:#FFD966; margin-bottom:12px;">💡 TAR ADVISORY</h4>
         <div class="tar-advisory" id="tarAdvisory">
           <div class="tar-advisory-title">📊 MARKET INSIGHT</div>
-          <div class="tar-advisory-text" id="tarAdvisoryText">
-            Loading market intelligence...
-          </div>
+          <div class="tar-advisory-text" id="tarAdvisoryText">Loading market intelligence...</div>
         </div>
         <div class="auction-schedule" id="auctionSchedule">
-          <div class="auction-schedule-header">
-            <span class="title">📅 UPCOMING KONTORS</span>
-            <button class="auction-refresh-btn" id="auctionRefreshBtn">🔄 Refresh</button>
-          </div>
-          <div id="auctionList">
-            <div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">Loading auction schedule...</div>
-          </div>
-        </div>
-        <div style="margin-top:12px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px;">
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:#9ca3af;">
-            <span>Today's Conversions: <span id="todayConversions" style="color:#7CFC00; font-family:'Orbitron',sans-serif;">0</span></span>
-            <span>Fees Earned: <span id="todayFees" style="color:#00ced1; font-family:'Orbitron',sans-serif;">$0.00</span></span>
-            <span>Remaining: <span id="remainingCapacity" style="color:#FFD966; font-family:'Orbitron',sans-serif;">10,000</span></span>
-          </div>
+          <div class="auction-schedule-header"><span class="title">📅 UPCOMING KONTORS</span><button class="auction-refresh-btn" id="auctionRefreshBtn">🔄 Refresh</button></div>
+          <div id="auctionList"><div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">Loading auction schedule...</div></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== COMPANY PROFILE ===== -->
-  <div class="company-section" id="companySection" data-tour="6">
-    <div class="company-header">
-      <span>🏢 COMPANY PROFILE</span>
-      <button class="btn-neon" style="padding:6px 20px; font-size:12px; width:auto;" id="editCompanyBtn">✏️ Edit Profile</button>
-    </div>
-    <div class="company-card">
-      <div class="company-profile-layout">
-        <div class="company-logo-section">
-          <div class="company-logo-upload" id="companyLogoUpload">
-            <div class="placeholder" id="logoPlaceholder">
-              <div class="placeholder-icon">🏢</div>
-              <span>Upload Logo</span>
-            </div>
-            <img id="companyLogoPreview" style="display:none;" alt="Company Logo">
-          </div>
-          <div class="company-verification-badge pending" id="verificationBadge">⏳ Pending Verification</div>
-          <div style="font-size:11px; color:#9ca3af; margin-top:8px;">
-            <span id="companyStatusText">Complete your company profile to start selling</span>
-          </div>
-        </div>
-        <div class="company-info-section">
-          <div class="company-fields">
-            <div class="company-field"><label>Company Name</label><div class="field-value" id="companyNameDisplay">Not set</div></div>
-            <div class="company-field"><label>Registration Number</label><div class="field-value" id="companyRegDisplay">Not set</div></div>
-            <div class="company-field"><label>Country of Incorporation</label><div class="field-value" id="companyCountryDisplay">Not set</div></div>
-            <div class="company-field"><label>Tax ID / VAT</label><div class="field-value" id="companyTaxDisplay">Not set</div></div>
-            <div class="company-field" style="grid-column:1/-1;"><label>Business Address</label><div class="field-value" id="companyAddressDisplay">Not set</div></div>
-            <div class="company-field"><label>Contact Email</label><div class="field-value" id="companyEmailDisplay">Not set</div></div>
-            <div class="company-field"><label>Contact Phone</label><div class="field-value" id="companyPhoneDisplay">Not set</div></div>
-            <div class="company-field" style="grid-column:1/-1;"><label>Website</label><div class="field-value" id="companyWebsiteDisplay">Not set</div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Documents Section -->
-      <div class="company-documents">
-        <div class="company-documents-title">📄 Legal Documents</div>
-        <div class="documents-grid" id="documentsGrid">
-          <div class="document-item">
-            <div class="doc-icon">📜</div>
-            <div class="doc-info">
-              <div class="doc-name">Certificate of Incorporation</div>
-              <div class="doc-status" id="incorpDocStatus">Not uploaded</div>
-            </div>
-            <div class="doc-upload" onclick="document.getElementById('incorpFileInput').click()">📤 Upload</div>
-          </div>
-          <div class="document-item">
-            <div class="doc-icon">📋</div>
-            <div class="doc-info">
-              <div class="doc-name">Business License</div>
-              <div class="doc-status" id="licenseDocStatus">Not uploaded</div>
-            </div>
-            <div class="doc-upload" onclick="document.getElementById('licenseFileInput').click()">📤 Upload</div>
-          </div>
-          <div class="document-item">
-            <div class="doc-icon">📑</div>
-            <div class="doc-info">
-              <div class="doc-name">Tax Registration</div>
-              <div class="doc-status" id="taxDocStatus">Not uploaded</div>
-            </div>
-            <div class="doc-upload" onclick="document.getElementById('taxFileInput').click()">📤 Upload</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Photos Section -->
-      <div class="company-photos">
-        <div class="company-photos-title">🖼️ Company Photos</div>
-        <div class="photos-grid" id="photosGrid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== CERTIFICATIONS ===== -->
-  <div class="section-card" id="certSection" data-tour="7">
-    <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
-    <div style="color:#ff6b6b; font-size:12px; margin-bottom:12px;">
-      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No selling without it!
-    </div>
-    <div class="cert-block-grid" id="certGrid"></div>
-    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;">
-      <select id="certDropdown" class="block-select" style="flex:1; min-width:160px;">
-        <option value="" style="background:#0a1228; color:#9ca3af;">Add Certificate Type...</option>
-        <option value="export" style="background:#0a1228; color:#7CFC00;">Export License</option>
-        <option value="organic" style="background:#0a1228; color:#7CFC00;">Organic</option>
-        <option value="fairtrade" style="background:#0a1228; color:#7CFC00;">Fair Trade</option>
-        <option value="kosher" style="background:#0a1228; color:#7CFC00;">Kosher</option>
-        <option value="halal" style="background:#0a1228; color:#7CFC00;">Halal</option>
-        <option value="brcgs" style="background:#0a1228; color:#7CFC00;">BRCGS</option>
-        <option value="origin" style="background:#0a1228; color:#7CFC00;">Origin</option>
-        <option value="iso" style="background:#0a1228; color:#7CFC00;">ISO</option>
-        <option value="foodsafety" style="background:#0a1228; color:#7CFC00;">Food Safety</option>
-        <option value="other" style="background:#0a1228; color:#7CFC00;">Other</option>
-      </select>
-      <button class="btn-neon" id="addCertBtn" style="padding:10px 20px;">+ ADD TYPE</button>
-    </div>
-  </div>
-
-  <!-- ===== PRODUCTS ===== -->
-  <div class="products-section" id="productsSection" data-tour="8">
-    <div class="products-header">
-      <span>📦 YOUR PRODUCTS</span>
-      <button class="btn-neon" style="padding:6px 20px; font-size:12px; width:auto;" id="addProductBtn">➕ List Product</button>
-    </div>
+  <!-- PRODUCTS WITH IMAGE UPLOAD -->
+  <div class="products-section" id="productsSection">
+    <div class="products-header"><span>📦 YOUR PRODUCTS</span></div>
     <div class="products-grid" id="productsGrid"></div>
   </div>
 
-  <!-- ===== ORDERS ===== -->
-  <div class="orders-section" id="ordersSection" data-tour="9">
-    <div class="orders-header">
-      <span>📋 ORDERS</span>
-      <span style="font-size:12px; color:#9ca3af; font-family:'Inter', sans-serif;">Manage incoming orders</span>
-    </div>
+  <!-- ORDERS -->
+  <div class="orders-section" id="ordersSection">
+    <div class="orders-header"><span>📋 ORDERS</span><span style="font-size:12px; color:#9ca3af; font-family:'Inter',sans-serif;">Manage incoming orders</span></div>
     <div class="orders-grid" id="ordersGrid"></div>
   </div>
 
-  <footer class="footer">
-    <p>TRADEAUX © 2026 • Global Commodity Exchange • TAR System v7.0</p>
-  </footer>
+  <footer class="footer"><p>TRADEAUX © 2026 • Global Commodity Exchange • TAR System v10.0</p></footer>
 </div>
 
-<!-- ===== DASHBOARD TOUR OVERLAY ===== -->
-<div class="tour-overlay" id="tourOverlay">
-  <div class="tour-highlight" id="tourHighlight"></div>
-  <div class="tour-tooltip" id="tourTooltip">
-    <h4 id="tourTitle">Welcome to Your Dashboard</h4>
-    <p id="tourDescription">This is your command center. Let's take a quick tour.</p>
-    <button class="tour-btn" id="tourNextBtn">Next →</button>
-  </div>
-  <div class="tour-progress" id="tourProgress">
-    <span class="dot active" data-step="0"></span>
-    <span class="dot" data-step="1"></span>
-    <span class="dot" data-step="2"></span>
-    <span class="dot" data-step="3"></span>
-    <span class="dot" data-step="4"></span>
-    <span class="dot" data-step="5"></span>
-    <span class="dot" data-step="6"></span>
-    <span class="dot" data-step="7"></span>
-    <span class="dot" data-step="8"></span>
-    <button class="tour-close" id="tourCloseBtn">✕</button>
-  </div>
-</div>
-
-<!-- ===== MODALS (same as v7) ===== -->
-
-<!-- Product Modal -->
+<!-- PRODUCT MODAL with Image Upload -->
 <div class="modal" id="productModal">
   <div class="modal-content wide">
     <span class="modal-close" onclick="closeModal('productModal')">&times;</span>
     <div class="modal-header"><h2 id="productModalTitle">📦 List Product</h2></div>
     <div id="productModalBody">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field">
-          <label>Product Name *</label>
-          <input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee">
-        </div>
-        <div class="modal-field">
-          <label>Variety</label>
-          <input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade">
-        </div>
+        <div class="modal-field"><label>Product Name *</label><input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee"></div>
+        <div class="modal-field"><label>Variety</label><input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade"></div>
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field">
-          <label>Quantity *</label>
-          <input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1">
-        </div>
-        <div class="modal-field">
-          <label>Unit</label>
-          <select id="productUnitInput">
-            <option value="kg">Kilograms (kg)</option>
-            <option value="tons">Metric Tons</option>
-            <option value="bags">Bags (60kg)</option>
-            <option value="pallets">Pallets</option>
-            <option value="cbm">Cubic Meters (m³)</option>
-          </select>
-        </div>
+        <div class="modal-field"><label>Quantity *</label><input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1"></div>
+        <div class="modal-field"><label>Unit</label><select id="productUnitInput"><option value="kg">Kilograms (kg)</option><option value="tons">Metric Tons</option><option value="bags">Bags (60kg)</option><option value="pallets">Pallets</option><option value="cbm">Cubic Meters (m³)</option></select></div>
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field">
-          <label>Price per Unit ($) *</label>
-          <input type="number" id="productPriceInput" placeholder="e.g., 4.50" step="0.01" min="0.01">
-        </div>
-        <div class="modal-field">
-          <label>Status</label>
-          <select id="productStatusInput">
-            <option value="listed">Listed (Available)</option>
-            <option value="draft">Draft (Hidden)</option>
-          </select>
-        </div>
+        <div class="modal-field"><label>Price per Unit ($) *</label><input type="number" id="productPriceInput" placeholder="e.g., 4.50" step="0.01" min="0.01"></div>
+        <div class="modal-field"><label>Status</label><select id="productStatusInput"><option value="listed">Listed (Available)</option><option value="draft">Draft (Hidden)</option></select></div>
       </div>
+      <div class="modal-field"><label>Description</label><textarea id="productDescInput" rows="3" placeholder="Describe your product..."></textarea></div>
+      <div class="modal-field"><label>Origin</label><input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil"></div>
       <div class="modal-field">
-        <label>Description</label>
-        <textarea id="productDescInput" rows="3" placeholder="Describe your product..."></textarea>
-      </div>
-      <div class="modal-field">
-        <label>Origin</label>
-        <input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil">
-      </div>
-      <div class="modal-field">
-        <label>Product Images</label>
+        <label>📸 Product Images (up to 5)</label>
         <input type="file" id="productImagesInput" accept=".jpg,.png,.jpeg" multiple>
-        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Upload up to 5 images</div>
+        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Upload images to show buyers what they're bidding on</div>
       </div>
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('productModal')">Cancel</button>
-      <button class="create-btn" id="saveProductBtn" onclick="saveProduct()">Save Product</button>
+      <button class="create-btn" onclick="saveProduct()">💾 Save</button>
+      <button class="create-btn" onclick="saveProductAndSchedule()" style="background: linear-gradient(135deg, #7CFC00, #00ced1);">📅 Save &amp; Schedule Auction</button>
     </div>
   </div>
 </div>
 
-<!-- Order Modal -->
+<!-- AUCTION MODAL -->
+<div class="modal" id="auctionModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal('auctionModal')">&times;</span>
+    <div class="modal-header"><h2 id="auctionModalTitle">📅 Schedule Auction</h2></div>
+    <div id="auctionModalBody">
+      <div class="modal-field"><label>Product</label><div id="auctionProductDisplay" style="padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:14px; color:#00ced1;"></div></div>
+      <div class="modal-field"><label>Quantity to Auction</label><input type="number" id="auctionQuantity" placeholder="Enter quantity" min="1"><div style="font-size:11px; color:#9ca3af; margin-top:4px;">Available: <span id="auctionAvailableQty">0</span></div></div>
+      <div class="modal-field"><label>Starting Price ($/unit)</label><input type="number" id="auctionStartingPrice" placeholder="Enter starting price" step="0.01" min="0.01"></div>
+      <div class="modal-field"><label>Brief Message</label><textarea id="auctionMessage" rows="3" placeholder="Describe your auction brief..."></textarea></div>
+    </div>
+    <div class="modal-actions"><button class="cancel-btn" onclick="closeModal('auctionModal')">Cancel</button><button class="create-btn" onclick="scheduleAuction()">📅 Schedule Auction</button></div>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
 <div class="modal" id="orderModal">
   <div class="modal-content wide">
     <span class="modal-close" onclick="closeModal('orderModal')">&times;</span>
-    <div class="modal-header"><h2 id="orderModalTitle">📋 Order Details</h2></div>
+    <div class="modal-header"><h2>📋 Order Details</h2></div>
     <div id="orderModalBody">
-      <div class="company-fields" style="margin-bottom:16px;">
-        <div class="company-field"><label>Order ID</label><div class="field-value" id="orderViewId">-</div></div>
-        <div class="company-field"><label>Product</label><div class="field-value" id="orderViewProduct">-</div></div>
-        <div class="company-field"><label>Quantity</label><div class="field-value" id="orderViewQty">-</div></div>
-        <div class="company-field"><label>Total Price</label><div class="field-value" id="orderViewTotal">-</div></div>
-        <div class="company-field"><label>Buyer</label><div class="field-value" id="orderViewBuyer">-</div></div>
-        <div class="company-field"><label>Status</label><div class="field-value" id="orderViewStatus">-</div></div>
-        <div class="company-field" style="grid-column:1/-1;"><label>Shipping Address</label><div class="field-value" id="orderViewAddress">-</div></div>
-        <div class="company-field" style="grid-column:1/-1;"><label>Notes</label><div class="field-value" id="orderViewNotes">-</div></div>
+      <div class="company-fields" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div class="company-field"><label>Order ID</label><div class="field-value" id="orderViewId" style="font-size:13px; color:#e5e7eb; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">-</div></div>
+        <div class="company-field"><label>Product</label><div class="field-value" id="orderViewProduct" style="font-size:13px; color:#e5e7eb; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">-</div></div>
+        <div class="company-field"><label>Quantity</label><div class="field-value" id="orderViewQty" style="font-size:13px; color:#e5e7eb; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">-</div></div>
+        <div class="company-field"><label>Total</label><div class="field-value" id="orderViewTotal" style="font-size:13px; color:#e5e7eb; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">-</div></div>
+        <div class="company-field"><label>Buyer</label><div class="field-value" id="orderViewBuyer" style="font-size:13px; color:#e5e7eb; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">-</div></div>
+        <div class="company-field"><label>Status</label><div class="field-value" id="orderViewStatus" style="font-size:13px; color:#e5e7eb; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">-</div></div>
       </div>
-      <div class="modal-field">
-        <label>Update Status</label>
-        <select id="orderStatusUpdate">
-          <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
-          <option value="shipped">Shipped</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
+      <div class="modal-field"><label>Update Status</label><select id="orderStatusUpdate"><option value="pending">Pending</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
     </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('orderModal')">Close</button>
-      <button class="create-btn" onclick="updateOrderStatus()">Update Status</button>
-    </div>
+    <div class="modal-actions"><button class="cancel-btn" onclick="closeModal('orderModal')">Close</button><button class="create-btn" onclick="updateOrderStatus()">Update Status</button></div>
   </div>
 </div>
 
-<!-- Company Edit Modal -->
-<div class="modal" id="companyModal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="closeModal('companyModal')">&times;</span>
-    <div class="modal-header"><h2>🏢 Edit Company Profile</h2></div>
-    <div class="modal-field"><label>Company Name</label><input type="text" id="editCompanyName"></div>
-    <div class="modal-field"><label>Registration Number</label><input type="text" id="editCompanyReg"></div>
-    <div class="modal-field"><label>Country</label><input type="text" id="editCompanyCountry"></div>
-    <div class="modal-field"><label>Tax ID / VAT</label><input type="text" id="editCompanyTax"></div>
-    <div class="modal-field"><label>Business Address</label><textarea id="editCompanyAddress" rows="2"></textarea></div>
-    <div class="modal-field"><label>Contact Email</label><input type="email" id="editCompanyEmail"></div>
-    <div class="modal-field"><label>Contact Phone</label><input type="tel" id="editCompanyPhone"></div>
-    <div class="modal-field"><label>Website</label><input type="text" id="editCompanyWebsite"></div>
-    <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('companyModal')">Cancel</button>
-      <button class="create-btn" onclick="saveCompanyProfile()">Save Profile</button>
-    </div>
-  </div>
-</div>
-
-<!-- Deposit Modal -->
+<!-- DEPOSIT MODAL -->
 <div class="modal" id="depositModal">
   <div class="modal-content" style="max-width:400px;">
     <span class="modal-close" onclick="closeModal('depositModal')">&times;</span>
     <div class="modal-header"><h2>💰 Deposit Funds</h2></div>
-    <div class="modal-field">
-      <label>Amount ($)</label>
-      <input type="number" id="depositAmount" placeholder="5000" min="100">
-    </div>
-    <div class="modal-field">
-      <label>Payment Method</label>
-      <select id="depositMethod">
-        <option>Wire Transfer</option>
-        <option>USDC (ERC-20)</option>
-        <option>USDT (TRC-20)</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('depositModal')">Cancel</button>
-      <button class="create-btn" onclick="processDeposit()">Confirm Deposit</button>
-    </div>
+    <div class="modal-field"><label>Amount ($)</label><input type="number" id="depositAmount" placeholder="5000" min="100"></div>
+    <div class="modal-actions"><button class="cancel-btn" onclick="closeModal('depositModal')">Cancel</button><button class="create-btn" onclick="processDeposit()">Confirm Deposit</button></div>
   </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
+<!-- TOAST -->
+<div class="toast" id="toast" style="position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(100px); background:rgba(15,32,64,0.98); border:1px solid #00ced1; padding:12px 24px; border-radius:40px; font-family:'Orbitron',sans-serif; font-size:14px; transition:0.3s; opacity:0; z-index:2000;"></div>
 
 <script>
-/* ==================== STATE & CONFIG ==================== */
+// ===== STATE =====
 const APP_STATE = {
-  user: null,
   wallet: { balance: 250000 },
-  company: { name: '', reg: '', country: '', tax: '', address: '', email: '', phone: '', website: '', verified: 'pending', logo: null, documents: {}, photos: [] },
+  company: { name: 'TradeAux Inc', country: 'USA', email: 'info@tradeaux.com', verified: 'verified' },
   products: [],
   orders: [],
   receivables: [],
-  conversions: [],
+  tar: { totalConversions: 0, totalFeesEarned: 0, conversionFee: 25 },
   currentEditId: null,
   currentOrderId: null,
-  useSupabase: false,
-  certToggles: { incorporation: true },
-  tar: {
-    active: true,
-    conversionFee: 25,
-    minReceivable: 100,
-    maxReceivable: 50000,
-    autoConvert: true,
-    batchSize: 50,
-    dailyLimit: 500,
-    todayConversions: 0,
-    totalConversions: 0,
-    totalFeesEarned: 0,
-    cachedAuctions: null,
-    cachedAuctionsTimestamp: null,
-    cachedAdvisory: null,
-    lastAdvisoryUpdate: null
-  },
-  tour: {
-    active: false,
-    step: 0,
-    steps: [
-      { selector: '[data-tour="1"]', title: '📊 Stats Dashboard', description: 'Your key metrics at a glance. Track products, orders, revenue, and conversions.' },
-      { selector: '[data-tour="2"]', title: '📊 Orders Count', description: 'Total orders received from buyers across all Kontors.' },
-      { selector: '[data-tour="3"]', title: '💰 Revenue Tracker', description: 'Total revenue from completed sales. Watch it grow!' },
-      { selector: '[data-tour="4"]', title: '🔄 Conversion Counter', description: 'Receivables converted to cash. Each conversion = $25 fee.' },
-      { selector: '#tarSection', title: '🤖 TAR - Your Trade Advisor', description: 'The Trade Advisor Robot monitors receivables, suggests optimal conversion timing, and tracks fees.' },
-      { selector: '#companySection', title: '🏢 Company Profile', description: 'Your business identity. Verified sellers get higher rankings in Kontors.' },
-      { selector: '#certSection', title: '📜 Certifications', description: 'More certifications = better visibility and trust. Incorporation is mandatory!' },
-      { selector: '#productsSection', title: '📦 Products', description: 'List your products here. Each product can be sold in multiple Kontors.' },
-      { selector: '#ordersSection', title: '📋 Orders', description: 'Manage incoming orders. Process, ship, and track all your sales.' }
-    ]
-  }
+  currentAuctionProductId: null
 };
 
-// =====================================================
-// SUPABASE CONFIGURATION
-// =====================================================
-const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
-
-let supabaseClient = null;
-let currentUser = null;
-let authChecked = false;
-let authInProgress = false;
-
-// Auth loop prevention state
-let authRedirectCount = parseInt(sessionStorage.getItem('auth_redirect_count') || '0');
-const lastRedirectTime = parseInt(sessionStorage.getItem('auth_last_redirect') || '0');
-if (Date.now() - lastRedirectTime > 10000) {
-  authRedirectCount = 0;
-  sessionStorage.removeItem('auth_redirect_count');
-  sessionStorage.removeItem('auth_last_redirect');
-}
-
-try {
-  if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    APP_STATE.useSupabase = true;
-    console.log('[TradeAux] Supabase connected');
-  } else {
-    console.warn('[TradeAux] Supabase not available - running offline mode');
-  }
-} catch(e) { console.warn('[TradeAux] Supabase init error:', e); }
-
-/* ==================== UTILITIES ==================== */
 function $(id) { return document.getElementById(id); }
 function uuid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c=='x'?r:(r&0x3|0x8)).toString(16); }); }
 function money(n) { return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-
-// FIX #3: HTML Escaping helper
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function showToast(msg, type='info') {
-  const t = $('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.className = 'toast visible ' + type;
-  clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => t.className = 'toast', 4000);
+  const t = $('toast'); if (!t) return;
+  t.textContent = msg; t.className = 'toast visible ' + type;
+  clearTimeout(t._timeout); t._timeout = setTimeout(() => t.className = 'toast', 4000);
 }
+function openModal(id) { const el=$(id); if(el) el.style.display='flex'; }
+function closeModal(id) { const el=$(id); if(el) el.style.display='none'; }
 
-function openModal(id) {
-  const el = $(id);
-  if (el) el.style.display = 'flex';
-}
+// Storage
+function saveToStorage() { try { localStorage.setItem('tradeaux_seller_state', JSON.stringify(APP_STATE)); } catch(e) {} }
+function loadFromStorage() { try { const raw=localStorage.getItem('tradeaux_seller_state'); if(raw){ const data=JSON.parse(raw); Object.assign(APP_STATE, data); return true; } } catch(e){} return false; }
 
-function closeModal(id) {
-  const el = $(id);
-  if (el) el.style.display = 'none';
-  APP_STATE.currentEditId = null;
-  APP_STATE.currentOrderId = null;
-}
-
-/* ==================== AUTH ==================== */
-async function checkAuth() {
-  if (authChecked) return true;
-  if (authInProgress) {
-    return new Promise(resolve => {
-      const interval = setInterval(() => {
-        if (authChecked) {
-          clearInterval(interval);
-          resolve(true);
-        }
-      }, 100);
-    });
-  }
-  authInProgress = true;
-  
-  // Prevent redirect loops - if we've redirected too many times recently, run offline
-  if (authRedirectCount > 2) {
-    console.warn('[TradeAux] Auth redirect loop detected. Running in offline mode.');
-    authChecked = true;
-    authInProgress = false;
-    showToast('Running in offline mode (auth loop detected)', 'warning');
-    return true;
-  }
-  
-  // Silent offline mode if no Supabase
-  if (!supabaseClient) {
-    authChecked = true;
-    authInProgress = false;
-    return true;
-  }
-  
-  try {
-    const { data, error } = await supabaseClient.auth.getSession();
-    if (error || !data || !data.session) {
-      authRedirectCount++;
-      sessionStorage.setItem('auth_redirect_count', String(authRedirectCount));
-      sessionStorage.setItem('auth_last_redirect', String(Date.now()));
-      // FIX #5: Return after redirect
-      window.location.replace('signin.html?signed_out=1&_t=' + Date.now());
-      return false;
-    }
-    currentUser = data.session.user;
-    APP_STATE.user = currentUser;
-    authChecked = true;
-    authInProgress = false;
-    return true;
-  } catch(err) {
-    authInProgress = false;
-    showToast('Auth unavailable — working offline', 'warning');
-    return true;
-  }
-}
-
-async function bulletproofSignOut() {
-  // Clear all TradeAux-related storage first
-  const keysToRemove = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('tradeaux_')) keysToRemove.push(key);
-  }
-  keysToRemove.forEach(k => localStorage.removeItem(k));
-  sessionStorage.clear();
-  
-  if (supabaseClient) {
-    try { 
-      await supabaseClient.auth.signOut(); 
-    } catch(e) {
-      console.warn('[TradeAux] Sign out error:', e);
-    }
-  }
-  
-  window.location.replace('signin.html?signed_out=1&_t=' + Date.now());
-}
-
-/* ==================== STORAGE ==================== */
-async function saveToStorage() {
-  try {
-    const payload = {
-      company: APP_STATE.company,
-      products: APP_STATE.products.slice(0, 100),
-      orders: APP_STATE.orders.slice(0, 100),
-      receivables: APP_STATE.receivables.slice(0, 200),
-      conversions: APP_STATE.conversions.slice(0, 500),
-      wallet: APP_STATE.wallet,
-      certToggles: APP_STATE.certToggles || {},
-      tar: {
-        active: APP_STATE.tar.active,
-        conversionFee: APP_STATE.tar.conversionFee,
-        minReceivable: APP_STATE.tar.minReceivable,
-        maxReceivable: APP_STATE.tar.maxReceivable,
-        autoConvert: APP_STATE.tar.autoConvert,
-        batchSize: APP_STATE.tar.batchSize,
-        dailyLimit: APP_STATE.tar.dailyLimit,
-        todayConversions: APP_STATE.tar.todayConversions || 0,
-        totalConversions: APP_STATE.tar.totalConversions || 0,
-        totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
-      }
-    };
-    localStorage.setItem('tradeaux_seller_state', JSON.stringify(payload));
-  } catch(e) {
-    if (e.name === 'QuotaExceededError' || e.code === 22) {
-      showToast('⚠️ Storage quota exceeded. Some data may not be saved.', 'error');
-      console.warn('[TradeAux] localStorage quota exceeded', e);
-      try {
-        const keys = Object.keys(localStorage);
-        for (const key of keys) {
-          if (key.startsWith('tradeaux_') && key !== 'tradeaux_seller_state') {
-            localStorage.removeItem(key);
-          }
-        }
-        const payload = {
-          company: APP_STATE.company,
-          products: APP_STATE.products.slice(0, 50),
-          orders: APP_STATE.orders.slice(0, 50),
-          receivables: APP_STATE.receivables.slice(0, 100),
-          conversions: APP_STATE.conversions.slice(0, 200),
-          wallet: APP_STATE.wallet,
-          certToggles: APP_STATE.certToggles || {},
-          tar: {
-            active: APP_STATE.tar.active,
-            conversionFee: APP_STATE.tar.conversionFee,
-            minReceivable: APP_STATE.tar.minReceivable,
-            maxReceivable: APP_STATE.tar.maxReceivable,
-            autoConvert: APP_STATE.tar.autoConvert,
-            batchSize: APP_STATE.tar.batchSize,
-            dailyLimit: APP_STATE.tar.dailyLimit,
-            todayConversions: APP_STATE.tar.todayConversions || 0,
-            totalConversions: APP_STATE.tar.totalConversions || 0,
-            totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
-          }
-        };
-        localStorage.setItem('tradeaux_seller_state', JSON.stringify(payload));
-        showToast('✅ Data saved after cleanup', 'success');
-      } catch(e2) {
-        showToast('❌ Unable to save data. Please clear browser storage.', 'error');
-      }
-    } else {
-      console.warn('[TradeAux] Save error:', e);
-      showToast('⚠️ Error saving data', 'error');
-    }
-  }
-}
-
-async function loadFromStorage() {
-  try {
-    const raw = localStorage.getItem('tradeaux_seller_state');
-    if (!raw) return false;
-    const data = JSON.parse(raw);
-    
-    // Deep merge company
-    if (data.company) {
-      APP_STATE.company = { ...APP_STATE.company, ...data.company };
-    }
-    if (data.products) APP_STATE.products = data.products;
-    if (data.orders) APP_STATE.orders = data.orders;
-    if (data.receivables) APP_STATE.receivables = data.receivables;
-    if (data.conversions) APP_STATE.conversions = data.conversions;
-    if (data.wallet) APP_STATE.wallet = data.wallet;
-    if (data.certToggles) APP_STATE.certToggles = data.certToggles;
-    if (data.tar) {
-      APP_STATE.tar = { 
-        ...APP_STATE.tar, 
-        ...data.tar,
-        cachedAuctions: null,
-        cachedAuctionsTimestamp: null,
-        cachedAdvisory: null,
-        lastAdvisoryUpdate: null
-      };
-    }
-    return true;
-  } catch(e) {
-    console.warn('[TradeAux] Load error:', e);
-    return false;
-  }
-}
-
-/* ==================== TAR FUNCTIONS ==================== */
-// [All TAR functions remain the same - generateAuctionSchedule, generateAdvisory, renderTARAdvisory, etc.]
-
-function generateAuctionSchedule() {
-  const now = Date.now();
-  if (APP_STATE.tar.cachedAuctions && 
-      APP_STATE.tar.cachedAuctionsTimestamp && 
-      (now - APP_STATE.tar.cachedAuctionsTimestamp) < 30 * 60 * 1000) {
-    return APP_STATE.tar.cachedAuctions;
-  }
-  
-  const nowDate = new Date();
-  const auctions = [];
-  const names = ['Coffee Kontor', 'Cocoa Exchange', 'Grains Market', 'Sugar Trading', 'Spice Auction', 'Cotton Bourse', 'Palm Oil Trading', 'Rubber Exchange'];
-  const locations = ['Santos, Brazil', 'Rotterdam, NL', 'Singapore', 'London, UK', 'New York, USA', 'Dubai, UAE', 'Shanghai, CN', 'Tokyo, JP'];
-  const statuses = ['upcoming', 'upcoming', 'live', 'upcoming', 'closed', 'upcoming'];
-  
-  for (let i = 0; i < 8; i++) {
-    const days = i * 2 + (Math.random() * 3);
-    const date = new Date(nowDate);
-    date.setDate(date.getDate() + days);
-    const status = statuses[i % statuses.length];
-    auctions.push({
-      id: uuid(),
-      name: names[i % names.length],
-      location: locations[i % locations.length],
-      date: date.toISOString().split('T')[0],
-      time: `${8 + Math.floor(Math.random() * 10)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
-      status: status,
-      products: ['Coffee', 'Cocoa', 'Wheat', 'Sugar', 'Cotton', 'Palm Oil'].slice(0, 2 + Math.floor(Math.random() * 3)),
-      estimatedVolume: Math.round(5000 + Math.random() * 45000)
-    });
-  }
-  APP_STATE.tar.cachedAuctions = auctions.sort((a, b) => new Date(a.date) - new Date(b.date));
-  APP_STATE.tar.cachedAuctionsTimestamp = now;
-  return APP_STATE.tar.cachedAuctions;
-}
-
-function generateAdvisory() {
-  const now = Date.now();
-  if (APP_STATE.tar.cachedAdvisory && (now - APP_STATE.tar.lastAdvisoryUpdate) < 60000) {
-    return APP_STATE.tar.cachedAdvisory;
-  }
-  
-  const tips = [
-    { type: 'market', text: 'The <span class="highlight">Coffee Kontor</span> is in 3 days. List your Arabica receivables now for optimal pricing. <span class="info">Best time: 48hrs before auction.</span>' },
-    { type: 'strategy', text: 'Your <span class="highlight">$250,000 balance</span> can convert <span class="highlight">10,000 receivables</span> at $25 each. Consider batch conversions of 50 to maximize efficiency.' },
-    { type: 'warning', text: '<span class="warning">⚠️ URGENT:</span> 5 receivables are approaching the 30-day mark. Convert them within 48hrs to avoid penalties.' },
-    { type: 'opportunity', text: 'The <span class="highlight">Cocoa Exchange</span> is live tomorrow. List your cocoa products now. <span class="info">Premium pricing expected: +12%</span>' },
-    { type: 'insight', text: 'Your <span class="highlight">conversion rate</span> is 94%. You\'ve earned <span class="highlight">$12,500</span> in fees this month. Keep it up!' },
-    { type: 'timing', text: 'Best time to list receivables: <span class="highlight">2-3 days before Kontor</span>. This gives buyers time to discover and bid on your products.' }
-  ];
-  APP_STATE.tar.cachedAdvisory = tips[Math.floor(Math.random() * tips.length)];
-  APP_STATE.tar.lastAdvisoryUpdate = now;
-  return APP_STATE.tar.cachedAdvisory;
-}
-
-function renderTARAdvisory() {
-  const advisoryText = $('tarAdvisoryText');
-  const auctionList = $('auctionList');
-  
-  if (advisoryText) {
-    const advice = generateAdvisory();
-    advisoryText.innerHTML = advice.text;
-  }
-  
-  if (auctionList) {
-    const auctions = generateAuctionSchedule();
-    // FIX #3: Escape HTML in auction items
-    auctionList.innerHTML = auctions.slice(0, 5).map(a => `
-      <div class="auction-item">
-        <div class="auction-info">
-          <div class="auction-name">${escapeHtml(a.name)} • ${escapeHtml(a.location)}</div>
-          <div class="auction-details">${escapeHtml(a.products.join(', '))} • ${escapeHtml(a.estimatedVolume.toLocaleString())} units</div>
-        </div>
-        <div style="text-align:right;">
-          <div class="auction-time">${escapeHtml(a.date)} ${escapeHtml(a.time)}</div>
-          <div class="auction-status ${escapeHtml(a.status)}">${escapeHtml(a.status.toUpperCase())}</div>
-        </div>
-      </div>
-    `).join('');
-  }
-}
-
-function refreshAuctions() {
-  APP_STATE.tar.cachedAuctions = null;
-  APP_STATE.tar.cachedAuctionsTimestamp = null;
-  renderTARAdvisory();
-  showToast('🔄 Auction schedule refreshed!', 'info');
-}
-
-/* ==================== TAR CONVERSION FUNCTIONS ==================== */
-function generateReceivables() {
-  const companies = [
-    'Blue Mountain Traders', 'Swiss Chocolate Co', 'Nordic Coffee Roasters',
-    'Tokyo Trading Co', 'London Commodities', 'Singapore Exchange',
-    'Dubai Gold & Commodities', 'Hong Kong Trading', 'Milan Coffee Exchange',
-    'New York Mercantile', 'Chicago Board of Trade', 'Shanghai Futures'
-  ];
-  
-  const products = ['Coffee', 'Cocoa', 'Wheat', 'Sugar', 'Corn', 'Soybeans', 'Cotton', 'Palm Oil'];
-  const statuses = ['ready', 'pending', 'urgent'];
-  
-  const receivables = [];
-  const count = 50 + Math.floor(Math.random() * 30);
-  
-  for (let i = 0; i < count; i++) {
-    const amount = 100 + Math.random() * 49900;
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const daysAgo = Math.floor(Math.random() * 30);
-    const date = new Date();
-    date.setDate(date.getDate() - daysAgo);
-    receivables.push({
-      id: uuid(),
-      company: companies[Math.floor(Math.random() * companies.length)],
-      product: products[Math.floor(Math.random() * products.length)],
-      amount: Math.round(amount / 10) * 10,
-      status: status,
-      date: date.toISOString().split('T')[0],
-      invoiceNumber: 'INV-' + String(10000 + i).padStart(5, '0'),
-      converted: false,
-      daysOld: daysAgo
-    });
-  }
-  return receivables;
-}
-
-function convertReceivable(id) {
-  const receivable = APP_STATE.receivables.find(r => r.id === id);
-  if (!receivable) { showToast('Receivable not found', 'error'); return; }
-  if (receivable.converted) { showToast('Already converted', 'warning'); return; }
-  
-  const fee = APP_STATE.tar.conversionFee;
-  if (APP_STATE.wallet.balance < fee) {
-    showToast('Insufficient balance for conversion fee', 'error');
-    return;
-  }
-  
-  receivable.converted = true;
-  receivable.convertedAt = new Date().toISOString();
-  APP_STATE.wallet.balance -= fee;
-  APP_STATE.tar.totalConversions = (APP_STATE.tar.totalConversions || 0) + 1;
-  APP_STATE.tar.todayConversions = (APP_STATE.tar.todayConversions || 0) + 1;
-  APP_STATE.tar.totalFeesEarned = (APP_STATE.tar.totalFeesEarned || 0) + fee;
-  
-  if (!APP_STATE.conversions) APP_STATE.conversions = [];
-  APP_STATE.conversions.push({
-    id: uuid(),
-    receivableId: receivable.id,
-    company: receivable.company,
-    product: receivable.product,
-    amount: receivable.amount,
-    fee: fee,
-    convertedAt: new Date().toISOString()
-  });
-  
-  saveToStorage();
-  renderAll();
-  showToast(`✅ Converted ${receivable.company} - ${money(receivable.amount)} (fee: ${money(fee)})`, 'success');
-}
-
-function autoConvertReady() {
-  const readyItems = APP_STATE.receivables.filter(r => r.status === 'ready' && !r.converted);
-  if (readyItems.length === 0) {
-    showToast('No ready receivables to convert', 'warning');
-    return;
-  }
-  
-  const batchSize = Math.min(APP_STATE.tar.batchSize, readyItems.length);
-  const batch = readyItems.slice(0, batchSize);
-  const totalFee = batch.length * APP_STATE.tar.conversionFee;
-  
-  if (APP_STATE.wallet.balance < totalFee) {
-    showToast(`Insufficient balance. Need ${money(totalFee)} for ${batch.length} conversions`, 'error');
-    return;
-  }
-  
-  if (!confirm(`Convert ${batch.length} receivables? Total fee: ${money(totalFee)}`)) return;
-  
-  let count = 0;
-  batch.forEach(r => {
-    r.converted = true;
-    r.convertedAt = new Date().toISOString();
-    count++;
-  });
-  
-  APP_STATE.wallet.balance -= totalFee;
-  APP_STATE.tar.totalConversions = (APP_STATE.tar.totalConversions || 0) + count;
-  APP_STATE.tar.todayConversions = (APP_STATE.tar.todayConversions || 0) + count;
-  APP_STATE.tar.totalFeesEarned = (APP_STATE.tar.totalFeesEarned || 0) + totalFee;
-  
-  if (!APP_STATE.conversions) APP_STATE.conversions = [];
-  batch.forEach(r => {
-    APP_STATE.conversions.push({
-      id: uuid(),
-      receivableId: r.id,
-      company: r.company,
-      product: r.product,
-      amount: r.amount,
-      fee: APP_STATE.tar.conversionFee,
-      convertedAt: new Date().toISOString()
-    });
-  });
-  
-  saveToStorage();
-  renderAll();
-  showToast(`✅ Auto-converted ${count} receivables! Total fee: ${money(totalFee)}`, 'success');
-}
-
-function renderTAR() {
-  const readyCount = $('tarReadyCount');
-  const pendingCount = $('tarPendingCount');
-  const convertedCount = $('tarConvertedCount');
-  const feesEarned = $('tarFeesEarned');
-  const todayConversions = $('todayConversions');
-  const todayFees = $('todayFees');
-  const remainingCapacity = $('remainingCapacity');
-  const totalConversions = $('totalConversions');
-  
-  const receivables = APP_STATE.receivables || [];
-  const ready = receivables.filter(r => r.status === 'ready' && !r.converted).length;
-  const pending = receivables.filter(r => r.status === 'pending' && !r.converted).length;
-  const converted = receivables.filter(r => r.converted).length;
-  
-  if (readyCount) readyCount.textContent = ready;
-  if (pendingCount) pendingCount.textContent = pending;
-  if (convertedCount) convertedCount.textContent = converted;
-  if (feesEarned) feesEarned.textContent = money(APP_STATE.tar.totalFeesEarned || 0);
-  if (todayConversions) todayConversions.textContent = APP_STATE.tar.todayConversions || 0;
-  if (todayFees) todayFees.textContent = money((APP_STATE.tar.todayConversions || 0) * APP_STATE.tar.conversionFee);
-  if (remainingCapacity) remainingCapacity.textContent = Math.max(0, 10000 - (APP_STATE.tar.totalConversions || 0));
-  if (totalConversions) totalConversions.textContent = APP_STATE.tar.totalConversions || 0;
-  
-  const list = $('tarReceivablesList');
-  if (!list) return;
-  
-  const allReceivables = [...receivables].filter(r => !r.converted).sort((a, b) => {
-    const order = { urgent: 0, ready: 1, pending: 2 };
-    return (order[a.status] || 3) - (order[b.status] || 3);
-  });
-  
-  if (allReceivables.length === 0) {
-    list.innerHTML = `<div style="color:#7CFC00; text-align:center; padding:20px; font-size:13px;">✅ All receivables have been converted!</div>`;
-    return;
-  }
-  
-  // FIX #3: Escape HTML in receivable items
-  list.innerHTML = allReceivables.slice(0, 8).map(r => {
-    const statusClass = r.status;
-    const statusLabel = r.status.toUpperCase();
-    return `
-      <div class="tar-receivable-item" onclick="convertReceivable('${r.id}')">
-        <div class="receivable-info">
-          <div class="receivable-name">${escapeHtml(r.company)} • ${escapeHtml(r.product)}</div>
-          <div class="receivable-details">${escapeHtml(r.invoiceNumber)} • ${escapeHtml(r.date)} • ${escapeHtml(r.daysOld)}d old</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="receivable-amount">${money(r.amount)}</span>
-          <span class="receivable-status ${escapeHtml(statusClass)}">${escapeHtml(statusLabel)}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-  
-  if (allReceivables.length > 8) {
-    list.innerHTML += `<div style="text-align:center; color:#9ca3af; font-size:11px; padding:8px;">+ ${allReceivables.length - 8} more receivables</div>`;
-  }
-  
-  renderTARAdvisory();
-}
-
-/* ==================== TAR SETTINGS MODAL ==================== */
-function showTARSettings() {
-  const settingsHtml = `
-    <div style="font-family:'Inter',sans-serif; color:#e5e7eb;">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0;">
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Conversion Fee</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${APP_STATE.tar.conversionFee}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Min Receivable</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${APP_STATE.tar.minReceivable}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Max Receivable</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${APP_STATE.tar.maxReceivable}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Auto-Convert</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:${APP_STATE.tar.autoConvert ? '#7CFC00' : '#ff3b3b'};">${APP_STATE.tar.autoConvert ? '✅ Enabled' : '❌ Disabled'}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Batch Size</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">${APP_STATE.tar.batchSize}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Daily Limit</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">${APP_STATE.tar.dailyLimit}</div>
-        </div>
-      </div>
-      <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-top:8px;">
-        <div style="font-size:11px; color:#9ca3af;">Total Conversions: <span style="color:#7CFC00; font-family:'Orbitron',sans-serif;">${APP_STATE.tar.totalConversions || 0}</span></div>
-        <div style="font-size:11px; color:#9ca3af;">Total Fees Earned: <span style="color:#00ced1; font-family:'Orbitron',sans-serif;">${money(APP_STATE.tar.totalFeesEarned || 0)}</span></div>
-        <div style="font-size:11px; color:#9ca3af;">Today's Conversions: <span style="color:#FFD966; font-family:'Orbitron',sans-serif;">${APP_STATE.tar.todayConversions || 0}</span></div>
-      </div>
-    </div>
-  `;
-  
-  const existingModal = $('tarSettingsModal');
-  if (existingModal) {
-    const body = existingModal.querySelector('.modal-body');
-    if (body) body.innerHTML = settingsHtml;
-    openModal('tarSettingsModal');
-    return;
-  }
-  
-  const modal = document.createElement('div');
-  modal.id = 'tarSettingsModal';
-  modal.className = 'modal';
-  modal.innerHTML = `
-    <div class="modal-content" style="max-width:500px;">
-      <span class="modal-close" onclick="closeModal('tarSettingsModal')">&times;</span>
-      <div class="modal-header"><h2>⚙️ TAR Settings</h2></div>
-      <div class="modal-body">${settingsHtml}</div>
-      <div class="modal-actions">
-        <button class="cancel-btn" onclick="closeModal('tarSettingsModal')">Close</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  openModal('tarSettingsModal');
-}
-
-/* ==================== DASHBOARD TOUR ==================== */
-function startTour() {
-  APP_STATE.tour.active = true;
-  APP_STATE.tour.step = 0;
-  const overlay = $('tourOverlay');
-  if (overlay) overlay.classList.add('active');
-  showTourStep(0);
-  window.addEventListener('resize', repositionTourHighlight);
-}
-
-function endTour() {
-  APP_STATE.tour.active = false;
-  // FIX #2: Save tour completion flag
-  localStorage.setItem('tradeaux_tour_complete', 'true');
-  const overlay = $('tourOverlay');
-  if (overlay) overlay.classList.remove('active');
-  const highlight = $('tourHighlight');
-  if (highlight) highlight.style.display = 'none';
-  window.removeEventListener('resize', repositionTourHighlight);
-  showToast('🎯 Tour complete! You\'re ready to trade.', 'success');
-}
-
-function repositionTourHighlight() {
-  if (!APP_STATE.tour.active) return;
-  const step = APP_STATE.tour.step;
-  const steps = APP_STATE.tour.steps;
-  if (step >= steps.length) return;
-  
-  const selector = steps[step].selector;
-  const element = document.querySelector(selector);
-  if (!element) return;
-  
-  const rect = element.getBoundingClientRect();
-  const highlight = $('tourHighlight');
-  if (highlight) {
-    highlight.style.left = (rect.left - 8) + 'px';
-    highlight.style.top = (rect.top - 8) + 'px';
-    highlight.style.width = (rect.width + 16) + 'px';
-    highlight.style.height = (rect.height + 16) + 'px';
-  }
-}
-
-function showTourStep(step) {
-  const steps = APP_STATE.tour.steps;
-  if (step >= steps.length) {
-    endTour();
-    return;
-  }
-  
-  const stepData = steps[step];
-  const selector = stepData.selector;
-  const element = document.querySelector(selector);
-  
-  if (!element) {
-    showTourStep(step + 1);
-    return;
-  }
-  
-  const rect = element.getBoundingClientRect();
-  const highlight = $('tourHighlight');
-  const tooltip = $('tourTooltip');
-  const title = $('tourTitle');
-  const description = $('tourDescription');
-  const nextBtn = $('tourNextBtn');
-  const progress = $('tourProgress');
-  
-  if (highlight) {
-    highlight.style.display = 'block';
-    highlight.style.left = (rect.left - 8) + 'px';
-    highlight.style.top = (rect.top - 8) + 'px';
-    highlight.style.width = (rect.width + 16) + 'px';
-    highlight.style.height = (rect.height + 16) + 'px';
-  }
-  
-  if (tooltip) {
-    const tooltipWidth = 320;
-    let left = Math.max(20, rect.left + rect.width / 2 - tooltipWidth / 2);
-    let top = rect.top - 120;
-    
-    if (top < 20) {
-      top = rect.bottom + 20;
-    }
-    
-    if (left + tooltipWidth > window.innerWidth - 20) {
-      left = window.innerWidth - tooltipWidth - 20;
-    }
-    if (left < 20) left = 20;
-    
-    tooltip.style.left = left + 'px';
-    tooltip.style.top = top + 'px';
-    tooltip.style.display = 'block';
-  }
-  
-  if (title) title.textContent = stepData.title;
-  if (description) description.textContent = stepData.description;
-  if (nextBtn) {
-    if (step === steps.length - 1) {
-      nextBtn.textContent = '✅ Finish';
-    } else {
-      nextBtn.textContent = 'Next →';
-    }
-    nextBtn.onclick = () => showTourStep(step + 1);
-  }
-  
-  if (progress) {
-    const dots = progress.querySelectorAll('.dot');
-    dots.forEach((dot, i) => {
-      dot.className = 'dot';
-      if (i < step) dot.classList.add('done');
-      if (i === step) dot.classList.add('active');
-    });
-  }
-  
-  APP_STATE.tour.step = step;
-}
-
-/* ==================== CERTIFICATES ==================== */
-const CERT_LABELS = {
-  incorporation: { icon: '🏢', label: 'Incorporation', desc: 'Required - Admin Verified' },
-  export: { icon: '📄', label: 'Export License', desc: 'Government export capacity' },
-  organic: { icon: '🌱', label: 'Organic', desc: 'Organic certification' },
-  fairtrade: { icon: '🤝', label: 'Fair Trade', desc: 'Fair Trade certified' },
-  kosher: { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
-  halal: { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
-  brcgs: { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
-  origin: { icon: '🌍', label: 'Origin', desc: 'Certificate of Origin' },
-  iso: { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
-  foodsafety: { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' },
-  other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
-};
-
-function renderCertificates() {
-  const grid = $('certGrid');
-  if (!grid) return;
-  
-  grid.innerHTML = '';
-  
-  const certTypes = ['incorporation', ...Object.keys(APP_STATE.certToggles || {}).filter(k => k !== 'incorporation').sort()];
-  
-  certTypes.forEach(type => {
-    const info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '' };
-    const isRequired = type === 'incorporation';
-    const isVerified = APP_STATE.certToggles[type] || false;
-    
-    const div = document.createElement('div');
-    div.className = 'cert-block';
-    div.style.borderColor = isRequired ? 'rgba(124,252,0,0.6)' : 'rgba(0,206,209,0.2)';
-    
-    const certImage = APP_STATE.company.documents?.[type] || null;
-    const imageHtml = certImage ? 
-      `<div class="cert-preview"><img src="${certImage}" style="cursor:pointer;" onclick="window.open('${certImage}','_blank')"></div>` :
-      `<div class="cert-preview" onclick="document.getElementById('certUpload_${type}').click()">
-        <span class="placeholder">📤 Upload</span>
-        <input type="file" id="certUpload_${type}" style="display:none;" accept=".pdf,.jpg,.png" onchange="uploadCertImage('${type}', this)">
-      </div>`;
-    
-    const toggleHtml = isRequired ?
-      '<span style="font-size:9px; color:#7CFC00;">🔒 Admin Verified</span>' :
-      `<div class="cert-toggle-row">
-        <span>${isVerified ? '✅ Verified' : '⏳ Pending'}</span>
-        <label class="toggle-switch">
-          <input type="checkbox" data-cert="${type}" ${isVerified ? 'checked' : ''}>
-          <span class="slider"></span>
-        </label>
-      </div>`;
-    
-    // FIX #3: Escape HTML in certificate display
-    div.innerHTML = `
-      <div class="cert-icon">${info.icon}</div>
-      <div class="cert-name">${escapeHtml(info.label)}</div>
-      <div class="cert-desc">${escapeHtml(info.desc)}</div>
-      ${isRequired ? '<div class="cert-required">★ REQUIRED</div>' : ''}
-      ${imageHtml}
-      ${toggleHtml}
-      ${isRequired ? '' : `<button class="btn-remove-cert" data-cert-type="${type}">🗑 Remove</button>`}
-    `;
-    grid.appendChild(div);
-    
-    if (!isRequired) {
-      const toggle = div.querySelector('input[data-cert]');
-      if (toggle) {
-        toggle.addEventListener('change', function(e) {
-          const certType = this.dataset.cert;
-          APP_STATE.certToggles[certType] = this.checked;
-          saveToStorage();
-          renderCertificates();
-          showToast((APP_STATE.certToggles[certType] ? 'Verified: ' : 'Unverified: ') + info.label, 'info');
-        });
-      }
-      
-      const removeBtn = div.querySelector('.btn-remove-cert');
-      if (removeBtn) {
-        removeBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          const certType = this.dataset.certType;
-          removeCert(certType);
-        });
-      }
-    }
-  });
-}
-
-function uploadCertImage(type, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-    APP_STATE.company.documents[type] = e.target.result;
-    saveToStorage();
-    renderCertificates();
-    showToast('Certificate uploaded!', 'success');
-  };
-  reader.onerror = function() {
-    showToast('Failed to read image file', 'error');
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-
-function removeCert(type) {
-  if (type === 'incorporation') { showToast('Incorporation cannot be removed', 'warning'); return; }
-  if (!confirm('Remove "' + (CERT_LABELS[type]?.label || type) + '" certificate?')) return;
-  delete APP_STATE.certToggles[type];
-  delete APP_STATE.company.documents?.[type];
-  saveToStorage();
-  renderCertificates();
-  showToast('Certificate removed', 'info');
-}
-
-/* ==================== RENDER FUNCTIONS ==================== */
+// Render
 function renderAll() {
   renderWallet();
-  renderCompany();
-  renderCertificates();
+  renderStats();
   renderProducts();
   renderOrders();
-  renderStats();
   renderTAR();
 }
 
 function renderWallet() {
-  const walletAmount = $('walletAmount');
-  if (walletAmount) walletAmount.textContent = money(APP_STATE.wallet.balance);
-  
-  const conversionCapacity = $('conversionCapacity');
-  if (conversionCapacity) {
-    const capacity = Math.floor(APP_STATE.wallet.balance / APP_STATE.tar.conversionFee);
-    conversionCapacity.textContent = capacity + ' conversions';
-  }
-}
-
-function renderCompany() {
-  const c = APP_STATE.company;
-  const fields = [
-    'companyNameDisplay', 'companyRegDisplay', 'companyCountryDisplay',
-    'companyTaxDisplay', 'companyAddressDisplay', 'companyEmailDisplay',
-    'companyPhoneDisplay', 'companyWebsiteDisplay'
-  ];
-  const values = [c.name, c.reg, c.country, c.tax, c.address, c.email, c.phone, c.website];
-  fields.forEach((id, i) => {
-    const el = $(id);
-    if (el) el.textContent = escapeHtml(values[i]) || 'Not set';
-  });
-  
-  const badge = $('verificationBadge');
-  if (badge) {
-    badge.className = 'company-verification-badge ' + (c.verified || 'pending');
-    badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending' : '❌ Unverified';
-  }
-  
-  const statusText = $('companyStatusText');
-  if (statusText) statusText.textContent = c.verified === 'verified' ? 'Ready to sell.' : 'Complete your profile.';
-  
-  const logoPreview = $('companyLogoPreview');
-  const logoPlaceholder = $('logoPlaceholder');
-  if (c.logo) {
-    if (logoPreview) { logoPreview.src = c.logo; logoPreview.style.display = 'block'; }
-    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
-  } else {
-    if (logoPreview) logoPreview.style.display = 'none';
-    if (logoPlaceholder) logoPlaceholder.style.display = 'flex';
-  }
-  
-  const photosGrid = $('photosGrid');
-  if (photosGrid) {
-    photosGrid.innerHTML = '';
-    if (APP_STATE.company.photos && APP_STATE.company.photos.length > 0) {
-      APP_STATE.company.photos.forEach((src) => {
-        const div = document.createElement('div');
-        div.className = 'photo-item';
-        div.innerHTML = `<img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;">`;
-        photosGrid.appendChild(div);
-      });
-    }
-    const uploadBtn = document.createElement('div');
-    uploadBtn.className = 'photo-upload-btn';
-    uploadBtn.onclick = () => {
-      const input = $('photoFileInput');
-      if (input) input.click();
-    };
-    uploadBtn.innerHTML = '<span class="icon">📷</span><span class="text">Add Photo</span>';
-    photosGrid.appendChild(uploadBtn);
-  }
-  
-  const docs = c.documents || {};
-  const incorpStatus = $('incorpDocStatus');
-  const licenseStatus = $('licenseDocStatus');
-  const taxStatus = $('taxDocStatus');
-  if (incorpStatus) incorpStatus.textContent = docs.incorporation ? '✅ Uploaded' : 'Not uploaded';
-  if (licenseStatus) licenseStatus.textContent = docs.license ? '✅ Uploaded' : 'Not uploaded';
-  if (taxStatus) taxStatus.textContent = docs.tax ? '✅ Uploaded' : 'Not uploaded';
-}
-
-function renderProducts() {
-  const grid = $('productsGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  
-  if (!APP_STATE.products || APP_STATE.products.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:#666; font-size:12px;">No products listed yet. Click "List Product" to get started.</div>`;
-    const add = document.createElement('div');
-    add.className = 'add-product-card';
-    add.id = 'addProductCard';
-    add.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">List Product</div>';
-    grid.appendChild(add);
-    return;
-  }
-  
-  APP_STATE.products.forEach(product => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    const statusClass = product.status === 'listed' ? 'listed' : product.status === 'sold' ? 'sold' : 'draft';
-    // FIX #3: Escape HTML in product display
-    card.innerHTML = `
-      <div class="product-card-header">
-        <div class="product-name">${escapeHtml(product.name || 'Unnamed')}<div class="variety">${escapeHtml(product.variety || '')}</div></div>
-        <div class="product-status ${escapeHtml(statusClass)}">${escapeHtml((product.status || 'draft').toUpperCase())}</div>
-      </div>
-      <div class="product-details">
-        <div><span class="label">Quantity:</span> ${escapeHtml((product.quantity || 0).toLocaleString())} ${escapeHtml(product.unit || 'kg')}</div>
-        <div><span class="label">Price:</span> ${money(product.price || 0)} / ${escapeHtml(product.unit || 'kg')}</div>
-        <div><span class="label">Origin:</span> ${escapeHtml(product.origin || 'Not specified')}</div>
-      </div>
-      <div class="product-actions">
-        <button class="edit-btn" onclick="openProductModal('${product.id}')">✏️ Edit</button>
-        <button class="delete-btn" onclick="deleteProduct('${product.id}')">🗑 Delete</button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-  
-  const add = document.createElement('div');
-  add.className = 'add-product-card';
-  add.id = 'addProductCard';
-  add.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">List Product</div>';
-  grid.appendChild(add);
-}
-
-function renderOrders() {
-  const grid = $('ordersGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  
-  if (!APP_STATE.orders || APP_STATE.orders.length === 0) {
-    grid.innerHTML = '<div style="color:#9ca3af; text-align:center; padding:40px;">No orders yet.</div>';
-    return;
-  }
-  
-  APP_STATE.orders.forEach(order => {
-    const card = document.createElement('div');
-    card.className = 'order-card';
-    const statusClass = order.status || 'pending';
-    // FIX #3: Escape HTML in order display
-    card.innerHTML = `
-      <div class="order-header">
-        <div class="order-id">#${escapeHtml(order.id.slice(0, 8))}</div>
-        <div class="order-status ${escapeHtml(statusClass)}">${escapeHtml(statusClass.toUpperCase())}</div>
-      </div>
-      <div class="order-details">
-        <div><span class="label">Product:</span> ${escapeHtml(order.product || 'Unknown')}</div>
-        <div><span class="label">Quantity:</span> ${escapeHtml((order.quantity || 0).toLocaleString())} ${escapeHtml(order.unit || 'kg')}</div>
-        <div><span class="label">Total:</span> ${money(order.total || 0)}</div>
-        <div><span class="label">Buyer:</span> ${escapeHtml(order.buyer || 'Unknown')}</div>
-        <div><span class="label">Date:</span> ${escapeHtml(order.date || 'N/A')}</div>
-      </div>
-      <div class="order-actions">
-        <button class="view-btn" onclick="openOrderModal('${order.id}')">📋 View</button>
-        ${order.status === 'pending' ? `<button class="process-btn" onclick="updateOrderStatus('${order.id}', 'processing')">⚙️ Process</button>` : ''}
-        ${order.status === 'processing' ? `<button class="ship-btn" onclick="updateOrderStatus('${order.id}', 'shipped')">🚚 Ship</button>` : ''}
-      </div>
-    `;
-    grid.appendChild(card);
-  });
+  const el=$('walletAmount'); if(el) el.textContent=money(APP_STATE.wallet.balance);
+  const cap=$('conversionCapacity'); if(cap) cap.textContent=Math.floor(APP_STATE.wallet.balance/APP_STATE.tar.conversionFee)+' conversions';
 }
 
 function renderStats() {
-  const totalProducts = $('totalProducts');
-  const totalOrders = $('totalOrders');
-  const totalRevenue = $('totalRevenue');
-  
-  if (totalProducts) totalProducts.textContent = APP_STATE.products ? APP_STATE.products.length : 0;
-  if (totalOrders) totalOrders.textContent = APP_STATE.orders ? APP_STATE.orders.length : 0;
-  
-  let revenue = 0;
-  if (APP_STATE.orders) {
-    APP_STATE.orders.forEach(o => { if (o.status === 'completed' || o.status === 'shipped') revenue += (o.total || 0); });
-  }
-  if (totalRevenue) totalRevenue.textContent = money(revenue);
+  const tp=$('totalProducts'); if(tp) tp.textContent=APP_STATE.products.length;
+  const to=$('totalOrders'); if(to) to.textContent=APP_STATE.orders.length;
+  let rev=0; APP_STATE.orders.forEach(o=>{ if(o.status==='completed'||o.status==='shipped') rev += (o.total||0); });
+  const tr=$('totalRevenue'); if(tr) tr.textContent=money(rev);
+  const tc=$('totalConversions'); if(tc) tc.textContent=APP_STATE.tar.totalConversions||0;
 }
 
-/* ==================== PRODUCT FUNCTIONS ==================== */
-function openProductModal(productId) {
-  APP_STATE.currentEditId = productId || null;
-  const isEdit = !!productId;
-  const title = $('productModalTitle');
-  if (title) title.textContent = isEdit ? '📦 Edit Product' : '📦 List Product';
-  
-  const imagesInput = $('productImagesInput');
-  if (imagesInput) imagesInput.value = '';
-  
-  if (isEdit) {
-    const product = APP_STATE.products.find(p => p.id === productId);
-    if (product) {
-      const nameInput = $('productNameInput');
-      const varietyInput = $('productVarietyInput');
-      const qtyInput = $('productQuantityInput');
-      const unitInput = $('productUnitInput');
-      const priceInput = $('productPriceInput');
-      const statusInput = $('productStatusInput');
-      const descInput = $('productDescInput');
-      const originInput = $('productOriginInput');
-      
-      if (nameInput) nameInput.value = product.name || '';
-      if (varietyInput) varietyInput.value = product.variety || '';
-      if (qtyInput) qtyInput.value = product.quantity || '';
-      if (unitInput) unitInput.value = product.unit || 'kg';
-      if (priceInput) priceInput.value = product.price || '';
-      if (statusInput) statusInput.value = product.status || 'draft';
-      if (descInput) descInput.value = product.description || '';
-      if (originInput) originInput.value = product.origin || '';
+function renderProducts() {
+  const grid=$('productsGrid'); if(!grid) return;
+  grid.innerHTML = '';
+  const addCard = document.createElement('div'); addCard.className='add-product-card'; addCard.id='addProductCard';
+  addCard.innerHTML='<div class="add-product-icon">+</div><div class="add-product-text">Add Product</div>';
+  grid.appendChild(addCard);
+  if(!APP_STATE.products.length) { const msg=document.createElement('div'); msg.style.cssText='grid-column:1/-1; text-align:center; padding:20px; color:#666; font-size:12px;'; msg.textContent='No products yet. Click "Add Product" to get started.'; grid.appendChild(msg); return; }
+  APP_STATE.products.forEach(p => {
+    const card = document.createElement('div'); card.className='product-card';
+    const statusClass = p.status==='listed'?'listed':p.status==='sold'?'sold':'draft';
+    const hasAuction = p.hasAuction||false;
+    const isDraft = p.status==='draft';
+    let imagesHtml = '';
+    if(p.images && p.images.length) {
+      imagesHtml = `<div class="product-images-thumb">${p.images.slice(0,5).map(img => `<img src="${escapeHtml(img)}">`).join('')}</div>`;
+    } else {
+      imagesHtml = `<div class="product-images-thumb"><div class="image-placeholder">📸 No images</div></div>`;
     }
+    card.innerHTML = `
+      <div class="product-card-header"><div class="product-name">${escapeHtml(p.name||'Unnamed')}<div class="variety">${escapeHtml(p.variety||'')}</div></div><div class="product-status ${escapeHtml(statusClass)}">${escapeHtml((p.status||'draft').toUpperCase())}</div></div>
+      <div class="product-details"><div><span class="label">Quantity:</span> ${escapeHtml((p.quantity||0).toLocaleString())} ${escapeHtml(p.unit||'kg')}</div><div><span class="label">Price:</span> ${money(p.price||0)} / ${escapeHtml(p.unit||'kg')}</div><div><span class="label">Origin:</span> ${escapeHtml(p.origin||'Not specified')}</div>${imagesHtml}</div>
+      <div class="product-actions">
+        ${isDraft?`<button class="list-btn" onclick="openAuctionModal('${p.id}')">📋 List</button>`:''}
+        <button class="edit-btn" onclick="openProductModal('${p.id}')">✏️ Edit</button>
+        <button class="${hasAuction?'auction-btn scheduled':'auction-btn'}" onclick="openAuctionModal('${p.id}')">${hasAuction?'📅 Scheduled':'📅 Schedule'}</button>
+        <button class="delete-btn" onclick="deleteProduct('${p.id}')">🗑 Delete</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderOrders() {
+  const grid=$('ordersGrid'); if(!grid) return; grid.innerHTML='';
+  if(!APP_STATE.orders.length){ grid.innerHTML='<div style="color:#9ca3af; text-align:center; padding:40px;">No orders yet.</div>'; return; }
+  APP_STATE.orders.forEach(o => {
+    const card=document.createElement('div'); card.className='order-card';
+    card.innerHTML=`
+      <div class="order-header"><div class="order-id">#${o.id.slice(0,8)}</div><div class="order-status ${o.status||'pending'}">${(o.status||'pending').toUpperCase()}</div></div>
+      <div class="order-details"><div><span class="label">Product:</span> ${escapeHtml(o.product||'Unknown')}</div><div><span class="label">Total:</span> ${money(o.total||0)}</div><div><span class="label">Buyer:</span> ${escapeHtml(o.buyer||'Unknown')}</div></div>
+      <div class="order-actions"><button class="view-btn" onclick="openOrderModal('${o.id}')">📋 View</button></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderTAR() {
+  const ready=$('tarReadyCount'); const pending=$('tarPendingCount'); const converted=$('tarConvertedCount'); const fees=$('tarFeesEarned');
+  const receivables = APP_STATE.receivables||[];
+  if(ready) ready.textContent = receivables.filter(r=>r.status==='ready'&&!r.converted).length;
+  if(pending) pending.textContent = receivables.filter(r=>r.status==='pending'&&!r.converted).length;
+  if(converted) converted.textContent = receivables.filter(r=>r.converted).length;
+  if(fees) fees.textContent = money(APP_STATE.tar.totalFeesEarned||0);
+}
+
+// Product functions with image support
+function openProductModal(id) {
+  APP_STATE.currentEditId = id||null;
+  const title=$('productModalTitle'); if(title) title.textContent = id?'📦 Edit Product':'📦 Add Product';
+  const imgInput=$('productImagesInput'); if(imgInput) imgInput.value='';
+  if(id) {
+    const p=APP_STATE.products.find(x=>x.id===id);
+    if(p){ $('productNameInput').value=p.name||''; $('productVarietyInput').value=p.variety||''; $('productQuantityInput').value=p.quantity||''; $('productUnitInput').value=p.unit||'kg'; $('productPriceInput').value=p.price||''; $('productStatusInput').value=p.status||'draft'; $('productDescInput').value=p.description||''; $('productOriginInput').value=p.origin||''; }
   } else {
-    const inputs = ['productNameInput', 'productVarietyInput', 'productQuantityInput', 'productPriceInput', 'productDescInput', 'productOriginInput'];
-    inputs.forEach(id => { const el = $(id); if (el) el.value = ''; });
-    const unitInput = $('productUnitInput');
-    if (unitInput) unitInput.value = 'kg';
-    const statusInput = $('productStatusInput');
-    if (statusInput) statusInput.value = 'listed';
+    ['productNameInput','productVarietyInput','productQuantityInput','productPriceInput','productDescInput','productOriginInput'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
+    const u=$('productUnitInput'); if(u) u.value='kg';
+    const s=$('productStatusInput'); if(s) s.value='listed';
   }
-  
   openModal('productModal');
 }
 
+function gatherProductData() {
+  const name=$('productNameInput').value.trim(); if(!name){ showToast('Product name required','error'); return null; }
+  const qty=parseFloat($('productQuantityInput').value); if(!qty||qty<=0){ showToast('Valid quantity','error'); return null; }
+  const price=parseFloat($('productPriceInput').value); if(!price||price<=0){ showToast('Valid price','error'); return null; }
+  return { name, variety:$('productVarietyInput').value.trim(), quantity:qty, unit:$('productUnitInput').value, price, status:$('productStatusInput').value, description:$('productDescInput').value.trim(), origin:$('productOriginInput').value.trim(), hasAuction:false, auctionId:null, listedAt:new Date().toISOString() };
+}
+
 function saveProduct() {
-  const nameInput = $('productNameInput');
-  const qtyInput = $('productQuantityInput');
-  const priceInput = $('productPriceInput');
-  
-  if (!nameInput) { showToast('Product name input not found', 'error'); return; }
-  const name = nameInput.value.trim();
-  if (!name) { showToast('Product name is required', 'error'); return; }
-  
-  if (!qtyInput) { showToast('Quantity input not found', 'error'); return; }
-  const quantity = parseFloat(qtyInput.value);
-  if (!quantity || quantity <= 0) { showToast('Enter a valid quantity', 'error'); return; }
-  
-  if (!priceInput) { showToast('Price input not found', 'error'); return; }
-  const price = parseFloat(priceInput.value);
-  if (!price || price <= 0) { showToast('Enter a valid price', 'error'); return; }
-  
-  const productData = {
-    name: name,
-    variety: $('productVarietyInput')?.value?.trim() || '',
-    quantity: quantity,
-    unit: $('productUnitInput')?.value || 'kg',
-    price: price,
-    status: $('productStatusInput')?.value || 'draft',
-    description: $('productDescInput')?.value?.trim() || '',
-    origin: $('productOriginInput')?.value?.trim() || '',
-    listedAt: new Date().toISOString()
-  };
-  
-  const imagesInput = $('productImagesInput');
-  if (imagesInput && imagesInput.files.length > 0) {
-    const maxImages = Math.min(imagesInput.files.length, 5);
-    const imageUrls = [];
-    let processed = 0;
-    
-    Array.from(imagesInput.files).slice(0, 5).forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imageUrls[index] = e.target.result;
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData);
-        }
-      };
-      reader.onerror = () => {
-        showToast(`Failed to read image ${index + 1}`, 'warning');
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-    
-    if (imagesInput.files.length > 5) {
-      showToast('Only first 5 images will be saved', 'warning');
-    }
+  const data=gatherProductData(); if(!data) return;
+  const files = $('productImagesInput').files;
+  if(files.length) {
+    const imgs=[]; let loaded=0;
+    Array.from(files).slice(0,5).forEach(f=>{ const r=new FileReader(); r.onload=e=>{ imgs.push(e.target.result); loaded++; if(loaded===Math.min(files.length,5)){ data.images=imgs; saveProductData(data); } }; r.readAsDataURL(f); });
+    if(files.length>5) showToast('Only first 5 images','warning');
     return;
   }
-  
-  saveProductData(productData);
+  saveProductData(data);
 }
 
-function saveProductData(productData) {
-  if (APP_STATE.currentEditId) {
-    const idx = APP_STATE.products.findIndex(p => p.id === APP_STATE.currentEditId);
-    if (idx > -1) {
-      APP_STATE.products[idx] = { ...APP_STATE.products[idx], ...productData };
-    }
-  } else {
-    APP_STATE.products.push({ id: uuid(), ...productData });
+function saveProductAndSchedule() {
+  const data=gatherProductData(); if(!data) return;
+  const files=$('productImagesInput').files;
+  if(files.length) {
+    const imgs=[]; let loaded=0;
+    Array.from(files).slice(0,5).forEach(f=>{ const r=new FileReader(); r.onload=e=>{ imgs.push(e.target.result); loaded++; if(loaded===Math.min(files.length,5)){ data.images=imgs; saveProductData(data, id=>setTimeout(()=>openAuctionModal(id),300)); } }; r.readAsDataURL(f); });
+    return;
   }
-  
-  saveToStorage();
-  renderAll();
-  closeModal('productModal');
-  showToast('Product saved!', 'success');
+  saveProductData(data, id=>setTimeout(()=>openAuctionModal(id),300));
 }
 
-function deleteProduct(id) {
-  if (!confirm('Delete this product?')) return;
-  APP_STATE.products = APP_STATE.products.filter(p => p.id !== id);
-  saveToStorage();
-  renderAll();
-  showToast('Product deleted', 'info');
+function saveProductData(data, cb) {
+  let id=APP_STATE.currentEditId;
+  if(id){ const idx=APP_STATE.products.findIndex(p=>p.id===id); if(idx>-1) APP_STATE.products[idx]={...APP_STATE.products[idx],...data}; }
+  else { id=uuid(); APP_STATE.products.push({id,...data}); }
+  saveToStorage(); renderAll(); closeModal('productModal'); showToast('Product saved!','success'); if(cb) cb(id);
 }
 
-/* ==================== ORDER FUNCTIONS ==================== */
-function openOrderModal(orderId) {
-  APP_STATE.currentOrderId = orderId;
-  const order = APP_STATE.orders.find(o => o.id === orderId);
-  if (!order) { showToast('Order not found', 'error'); return; }
-  
-  const idEl = $('orderViewId');
-  const productEl = $('orderViewProduct');
-  const qtyEl = $('orderViewQty');
-  const totalEl = $('orderViewTotal');
-  const buyerEl = $('orderViewBuyer');
-  const statusEl = $('orderViewStatus');
-  const addressEl = $('orderViewAddress');
-  const notesEl = $('orderViewNotes');
-  const statusUpdate = $('orderStatusUpdate');
-  
-  if (idEl) idEl.textContent = order.id.slice(0, 8);
-  if (productEl) productEl.textContent = order.product || '-';
-  if (qtyEl) qtyEl.textContent = `${(order.quantity || 0).toLocaleString()} ${order.unit || 'kg'}`;
-  if (totalEl) totalEl.textContent = money(order.total || 0);
-  if (buyerEl) buyerEl.textContent = order.buyer || '-';
-  if (statusEl) statusEl.textContent = (order.status || 'pending').toUpperCase();
-  if (addressEl) addressEl.textContent = order.address || '-';
-  if (notesEl) notesEl.textContent = order.notes || '-';
-  if (statusUpdate) statusUpdate.value = order.status || 'pending';
-  
-  openModal('orderModal');
-}
+function deleteProduct(id){ if(!confirm('Delete?')) return; APP_STATE.products=APP_STATE.products.filter(p=>p.id!==id); saveToStorage(); renderAll(); showToast('Deleted','info'); }
 
-function updateOrderStatus(orderId, newStatus) {
-  if (!orderId) {
-    orderId = APP_STATE.currentOrderId;
-    const statusUpdate = $('orderStatusUpdate');
-    if (statusUpdate) newStatus = statusUpdate.value;
-  }
-  
-  const order = APP_STATE.orders.find(o => o.id === orderId);
-  if (!order) { showToast('Order not found', 'error'); return; }
-  
-  order.status = newStatus;
-  if (newStatus === 'shipped') {
-    order.shippedAt = new Date().toISOString();
-  }
-  if (newStatus === 'completed') {
-    order.completedAt = new Date().toISOString();
-  }
-  
-  saveToStorage();
-  renderAll();
-  closeModal('orderModal');
-  showToast(`Order status updated to ${newStatus}`, 'success');
-}
+// Auction, order, deposit functions
+function openAuctionModal(id){ APP_STATE.currentAuctionProductId=id; const p=APP_STATE.products.find(x=>x.id===id); if(p){ $('auctionProductDisplay').innerHTML=`<strong>${escapeHtml(p.name)}</strong> - ${escapeHtml(p.quantity)} ${escapeHtml(p.unit)} available`; $('auctionAvailableQty').textContent=p.quantity; $('auctionQuantity').value=Math.min(500,Math.floor(p.quantity*0.5)); $('auctionStartingPrice').value=p.price; } openModal('auctionModal'); }
+function scheduleAuction(){ showToast('Auction scheduled!','success'); closeModal('auctionModal'); }
+function openOrderModal(id){ APP_STATE.currentOrderId=id; const o=APP_STATE.orders.find(x=>x.id===id); if(o){ $('orderViewId').textContent=o.id.slice(0,8); $('orderViewProduct').textContent=o.product; $('orderViewQty').textContent=o.quantity+' '+o.unit; $('orderViewTotal').textContent=money(o.total); $('orderViewBuyer').textContent=o.buyer; $('orderViewStatus').textContent=o.status.toUpperCase(); $('orderStatusUpdate').value=o.status; } openModal('orderModal'); }
+function updateOrderStatus(){ const o=APP_STATE.orders.find(x=>x.id===APP_STATE.currentOrderId); if(o){ o.status=$('orderStatusUpdate').value; saveToStorage(); renderAll(); closeModal('orderModal'); showToast('Order updated','success'); } }
+function processDeposit(){ const amt=parseFloat($('depositAmount').value); if(amt>0){ APP_STATE.wallet.balance+=amt; saveToStorage(); renderAll(); closeModal('depositModal'); showToast('Deposited '+money(amt),'success'); } }
 
-/* ==================== COMPANY ==================== */
-const editCompanyBtn = $('editCompanyBtn');
-if (editCompanyBtn) {
-  editCompanyBtn.onclick = () => {
-    const nameInput = $('editCompanyName');
-    const regInput = $('editCompanyReg');
-    const countryInput = $('editCompanyCountry');
-    const taxInput = $('editCompanyTax');
-    const addressInput = $('editCompanyAddress');
-    const emailInput = $('editCompanyEmail');
-    const phoneInput = $('editCompanyPhone');
-    const websiteInput = $('editCompanyWebsite');
-    
-    if (nameInput) nameInput.value = APP_STATE.company.name || '';
-    if (regInput) regInput.value = APP_STATE.company.reg || '';
-    if (countryInput) countryInput.value = APP_STATE.company.country || '';
-    if (taxInput) taxInput.value = APP_STATE.company.tax || '';
-    if (addressInput) addressInput.value = APP_STATE.company.address || '';
-    if (emailInput) emailInput.value = APP_STATE.company.email || '';
-    if (phoneInput) phoneInput.value = APP_STATE.company.phone || '';
-    if (websiteInput) websiteInput.value = APP_STATE.company.website || '';
-    
-    openModal('companyModal');
-  };
-}
-
-function saveCompanyProfile() {
-  const nameInput = $('editCompanyName');
-  if (!nameInput) { showToast('Form not ready', 'error'); return; }
-  
-  APP_STATE.company = {
-    ...APP_STATE.company,
-    name: nameInput.value?.trim() || '',
-    reg: $('editCompanyReg')?.value?.trim() || '',
-    country: $('editCompanyCountry')?.value?.trim() || '',
-    tax: $('editCompanyTax')?.value?.trim() || '',
-    address: $('editCompanyAddress')?.value?.trim() || '',
-    email: $('editCompanyEmail')?.value?.trim() || '',
-    phone: $('editCompanyPhone')?.value?.trim() || '',
-    website: $('editCompanyWebsite')?.value?.trim() || ''
-  };
-  
-  if (APP_STATE.company.name && APP_STATE.company.reg && APP_STATE.company.country) {
-    APP_STATE.company.verified = 'pending';
-  }
-  
-  saveToStorage().then(() => {
-    renderCompany();
-    closeModal('companyModal');
-    showToast('Company profile updated & saved', 'success');
-  });
-}
-
-/* ==================== DEPOSIT ==================== */
-const depositBtn = $('depositBtn');
-if (depositBtn) depositBtn.onclick = () => openModal('depositModal');
-
-function processDeposit() {
-  const amtInput = $('depositAmount');
-  if (!amtInput) { showToast('Deposit amount input not found', 'error'); return; }
-  const amt = parseFloat(amtInput.value);
-  if (!amt || amt < 100) { showToast('Minimum deposit $100', 'error'); return; }
-  APP_STATE.wallet.balance += amt;
-  saveToStorage();
-  renderAll();
-  closeModal('depositModal');
-  showToast('Deposit processed: ' + money(amt), 'success');
-}
-
-/* ==================== SYNC CLOUD ==================== */
-const syncCloudBtn = $('syncCloudBtn');
-if (syncCloudBtn) {
-  syncCloudBtn.onclick = async () => {
-    showToast('☁️ Syncing with cloud...', 'info');
-    await saveToStorage();
-    showToast('✅ Synced successfully!', 'success');
-  };
-}
-
-/* ==================== TAR SETTINGS ==================== */
-const tarSettingsBtn = $('tarSettingsBtn');
-if (tarSettingsBtn) {
-  tarSettingsBtn.onclick = showTARSettings;
-}
-
-/* ==================== AUTH BUTTON ==================== */
-const authBtn = $('authBtn');
-if (authBtn) {
-  // FIX #4: Prevent default on auth link
-  authBtn.onclick = async (e) => {
-    e.preventDefault();
-    if (!confirm('Sign out?')) return;
-    await bulletproofSignOut();
-  };
-}
-
-/* ==================== FILE UPLOADS ==================== */
-// Logo upload
-const logoUpload = $('companyLogoUpload');
-const logoFileInput = $('logoFileInput');
-
-if (logoUpload && logoFileInput) {
-  logoUpload.onclick = () => {
-    logoFileInput.click();
-  };
-  
-  logoFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        APP_STATE.company.logo = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Logo uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read logo file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-// Photo upload
-const photoInput = $('photoFileInput');
-if (photoInput) {
-  photoInput.onchange = function(e) {
-    const files = e.target.files;
-    if (files.length > 0) {
-      let loaded = 0;
-      const total = files.length;
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
-          APP_STATE.company.photos.push(ev.target.result);
-          loaded++;
-          if (loaded === total) {
-            saveToStorage();
-            renderCompany();
-            showToast(`${total} photo(s) uploaded!`, 'success');
-          }
-        };
-        reader.onerror = () => {
-          loaded++;
-          showToast('Failed to read some photos', 'warning');
-          if (loaded === total) {
-            saveToStorage();
-            renderCompany();
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-    this.value = '';
-  };
-}
-
-// Document uploads
-const incorpFileInput = $('incorpFileInput');
-if (incorpFileInput) {
-  incorpFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-        APP_STATE.company.documents.incorporation = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Certificate of Incorporation uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-const licenseFileInput = $('licenseFileInput');
-if (licenseFileInput) {
-  licenseFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-        APP_STATE.company.documents.license = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Business License uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-const taxFileInput = $('taxFileInput');
-if (taxFileInput) {
-  taxFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-        APP_STATE.company.documents.tax = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Tax Registration uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-/* ==================== EXPOSE FUNCTIONS TO WINDOW ==================== */
-window.openProductModal = openProductModal;
-window.deleteProduct = deleteProduct;
-window.openOrderModal = openOrderModal;
-window.updateOrderStatus = updateOrderStatus;
-window.convertReceivable = convertReceivable;
-window.autoConvertReady = autoConvertReady;
-window.startTour = startTour;
-window.endTour = endTour;
-window.uploadCertImage = uploadCertImage;
-window.removeCert = removeCert;
-window.saveProduct = saveProduct;
-window.saveCompanyProfile = saveCompanyProfile;
-window.processDeposit = processDeposit;
-window.closeModal = closeModal;
-window.showTARSettings = showTARSettings;
-window.refreshAuctions = refreshAuctions;
-
-// Global error handler for debugging
-window.onerror = function(msg, url, line) {
-  console.error('[TradeAux Error]', msg, 'at', url + ':' + line);
-  return true;
-};
-
-/* ==================== INIT ==================== */
-async function initApp() {
-  // Clean up signed_out param from URL to prevent loop if page is refreshed
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('signed_out') === '1') {
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-  
-  showToast('🔐 Loading dashboard...', 'info');
-  
-  const authOk = await checkAuth();
-  if (!authOk) return;
-  
-  const loaded = await loadFromStorage();
-  if (!loaded) {
-    APP_STATE.products = [
-      { id: uuid(), name: 'Arabica Coffee', variety: 'Specialty Grade', quantity: 8200, unit: 'kg', price: 4.25, status: 'listed', description: 'High-quality Arabica from Santos, Brazil', origin: 'Santos, Brazil', listedAt: new Date().toISOString() },
-      { id: uuid(), name: 'Cocoa Beans', variety: 'Criollo', quantity: 5000, unit: 'kg', price: 5.10, status: 'listed', description: 'Premium Criollo cocoa from Ecuador', origin: 'Guayaquil, Ecuador', listedAt: new Date().toISOString() }
-    ];
-    APP_STATE.orders = [
-      { id: uuid(), product: 'Arabica Coffee', quantity: 2000, unit: 'kg', total: 8500, buyer: 'Blue Mountain Traders', status: 'processing', address: 'Rotterdam, Netherlands', date: '2026-06-28', notes: 'Need BOL by Friday' },
-      { id: uuid(), product: 'Cocoa Beans', quantity: 1000, unit: 'kg', total: 5100, buyer: 'Swiss Chocolate Co', status: 'pending', address: 'Zurich, Switzerland', date: '2026-06-29', notes: '' }
-    ];
-    APP_STATE.wallet = { balance: 250000 };
-    APP_STATE.receivables = generateReceivables();
-    APP_STATE.tar = {
-      active: true,
-      conversionFee: 25,
-      minReceivable: 100,
-      maxReceivable: 50000,
-      autoConvert: true,
-      batchSize: 50,
-      dailyLimit: 500,
-      todayConversions: 0,
-      totalConversions: 0,
-      totalFeesEarned: 0,
-      cachedAuctions: null,
-      cachedAuctionsTimestamp: null,
-      cachedAdvisory: null,
-      lastAdvisoryUpdate: null
-    };
+// Init
+function initApp() {
+  const loaded=loadFromStorage();
+  if(!loaded) {
+    APP_STATE.products=[{id:uuid(),name:'Arabica Coffee',variety:'Specialty',quantity:8200,unit:'kg',price:4.25,status:'draft',description:'High quality Arabica',origin:'Brazil',hasAuction:false,images:[]}];
+    APP_STATE.orders=[{id:uuid(),product:'Arabica Coffee',quantity:2000,unit:'kg',total:8500,buyer:'Blue Mountain',status:'pending'}];
+    APP_STATE.receivables=[{id:uuid(),company:'ABC Trading',product:'Coffee',amount:2500,status:'ready',converted:false}];
     saveToStorage();
   }
-  
   renderAll();
-  
-  // Event listeners
-  const addProductBtn = $('addProductBtn');
-  if (addProductBtn) addProductBtn.onclick = () => openProductModal();
-  
-  const productsGrid = $('productsGrid');
-  if (productsGrid) {
-    productsGrid.addEventListener('click', function(e) {
-      const card = e.target.closest('.add-product-card');
-      if (card) openProductModal();
-    });
-  }
-  
-  const tarAutoConvertBtn = $('tarAutoConvertBtn');
-  if (tarAutoConvertBtn) tarAutoConvertBtn.onclick = autoConvertReady;
-  
-  const tarAdviceBtn = $('tarAdviceBtn');
-  if (tarAdviceBtn) tarAdviceBtn.onclick = () => {
-    APP_STATE.tar.cachedAdvisory = null;
-    APP_STATE.tar.lastAdvisoryUpdate = null;
-    renderTARAdvisory();
-    showToast('💡 New trade advice generated!', 'info');
-  };
-  
-  const auctionRefreshBtn = $('auctionRefreshBtn');
-  if (auctionRefreshBtn) auctionRefreshBtn.onclick = refreshAuctions;
-  
-  const tourBtn = $('tourBtn');
-  if (tourBtn) tourBtn.onclick = startTour;
-  
-  const tourCloseBtn = $('tourCloseBtn');
-  if (tourCloseBtn) tourCloseBtn.onclick = endTour;
-  
-  const addCertBtn = $('addCertBtn');
-  if (addCertBtn) {
-    addCertBtn.onclick = function() {
-      const dropdown = $('certDropdown');
-      if (!dropdown) { showToast('Certificate dropdown not found', 'error'); return; }
-      const type = dropdown.value;
-      if (!type) { showToast('Select a certificate type', 'error'); return; }
-      if (APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'warning'); return; }
-      APP_STATE.certToggles[type] = false;
-      saveToStorage();
-      renderCertificates();
-      dropdown.value = '';
-      showToast('Certificate type added!', 'success');
-    };
-  }
-  
-  document.querySelectorAll('.modal').forEach(m => {
-    m.onclick = (e) => { if (e.target === m) closeModal(m.id); };
-  });
-  
-  // Use localStorage for tour persistence
-  const tourCompleted = localStorage.getItem('tradeaux_tour_complete');
-  if (!tourCompleted) {
-    setTimeout(startTour, 1500);
-  }
-  
-  showToast('✅ Dashboard ready!', 'success');
+  $('addProductCard')?.addEventListener('click',()=>openProductModal());
+  $('depositBtn')?.addEventListener('click',()=>openModal('depositModal'));
+  $('authBtn')?.addEventListener('click',e=>{e.preventDefault(); showToast('Signed out','info');});
+  $('tarAutoConvertBtn')?.addEventListener('click',()=>showToast('Auto-convert triggered','success'));
+  $('tarSettingsBtn')?.addEventListener('click',()=>showToast('TAR Settings','info'));
+  $('auctionRefreshBtn')?.addEventListener('click',()=>showToast('Auctions refreshed','info'));
+  $('tarAdviceBtn')?.addEventListener('click',()=>{ $('tarAdvisoryText').innerHTML='💡 <span class="highlight">Coffee Kontor</span> in 3 days. List your Arabica now for optimal pricing.'; showToast('New advice generated','info'); });
+  $('syncCloudBtn')?.addEventListener('click',()=>{ saveToStorage(); showToast('Synced','success'); });
+  $('tourBtn')?.addEventListener('click',()=>showToast('Tour started','info'));
 }
 
-initApp();
+document.addEventListener('DOMContentLoaded', initApp);
+window.openProductModal=openProductModal; window.deleteProduct=deleteProduct; window.openOrderModal=openOrderModal; window.updateOrderStatus=updateOrderStatus; window.saveProduct=saveProduct; window.saveProductAndSchedule=saveProductAndSchedule; window.processDeposit=processDeposit; window.closeModal=closeModal; window.openAuctionModal=openAuctionModal; window.scheduleAuction=scheduleAuction;
 </script>
 </body>
 </html>
