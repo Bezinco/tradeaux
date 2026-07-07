@@ -103,34 +103,13 @@ body {
   50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
 }
 
-.gem-letter[data-letter="T"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="R"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="A"] {
-  background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="D"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="E"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="U"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="X"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
+.gem-letter[data-letter="T"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="R"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="A"] { background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="D"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="E"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="U"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="X"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 .gem-letter .edge-top {
   position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
@@ -1000,7 +979,9 @@ Each kontor grows as real trade activity increases..</p></div>
     </div>
     <div id="tar-chat-messages" class="tar-chat-messages">
       <div class="tar-chat-message bot">
-        Hello! I'm TAR, your Trade Advisor Robot. Ask me anything about TradeAux, auctions, trading strategies, or the market!
+        💡 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>
+        I know EVERYTHING about TradeAux - from how Kontors work to AI agents to auction types.<br><br>
+        <span class="info">Try asking:</span> "What is a Kontor?" or "How do the auctions work?" or "What is the Container Captain?"
       </div>
     </div>
     <div class="tar-chat-input">
@@ -1011,14 +992,18 @@ Each kontor grows as real trade activity increases..</p></div>
 </div>
 
 <script>
-// ===== SUPABASE CONFIG =====
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ===== TAR ENGINE =====
+// ============================================================
+// TAR ENGINE
+// ============================================================
 class TAR {
   constructor() {
     if (window.__TAR_INSTANCE) return window.__TAR_INSTANCE;
@@ -1029,7 +1014,7 @@ class TAR {
     this.supabase = null;
     window.__TAR_INSTANCE = this;
   }
-  
+
   init(supabaseClient) {
     if (this.initialized) return this;
     this.supabase = supabaseClient;
@@ -1040,7 +1025,7 @@ class TAR {
     console.log('✅ TAR Ready');
     return this;
   }
-  
+
   loadDemoData() {
     this.auctions = [
       { id: 'AUC-001', commodity: 'Coffee', quantity: 60, status: 'open', bids: [{ bidder: 'Bot A', quantity: 10, price: 4.85 }], current_high: 4.85 },
@@ -1048,25 +1033,29 @@ class TAR {
     ];
     this.marketData = { activeAuctions: 2, totalVolume: 105, averagePrice: 4.65, completedAuctions: 5 };
   }
-  
+
   getState() {
     return { initialized: this.initialized, ...this.marketData, auctions: this.auctions };
   }
-  
+
   subscribe(callback) { this.listeners.push(callback); return () => { this.listeners = this.listeners.filter(l => l !== callback); }; }
   broadcast(event, data) { this.listeners.forEach(cb => { try { cb(event, data); } catch(e) {} }); }
 }
 
-// ===== INIT =====
+// ============================================================
+// INIT TAR
+// ============================================================
 const tar = new TAR();
 tar.init(supabaseClient);
 
-// ===== TAR UI =====
+// ============================================================
+// TAR UI
+// ============================================================
 function updateTARUI() {
   const state = tar.getState();
   const dot = document.getElementById('tarDot');
   const label = document.getElementById('tarLabel');
-  
+
   if (state.initialized) {
     dot.className = 'tar-status-dot';
     label.textContent = 'TAR ACTIVE';
@@ -1076,7 +1065,7 @@ function updateTARUI() {
     label.textContent = 'TAR LOADING';
     label.style.color = '#9ca3af';
   }
-  
+
   document.getElementById('tarActive').textContent = state.activeAuctions || 0;
   document.getElementById('tarVolume').textContent = state.totalVolume || 0;
   document.getElementById('tarPrice').textContent = `$${(state.averagePrice || 0).toFixed(2)}`;
@@ -1090,7 +1079,9 @@ function updateTARUI() {
 tar.subscribe(updateTARUI);
 setTimeout(updateTARUI, 500);
 
-// ===== UI CONTROLS =====
+// ============================================================
+// UI CONTROLS
+// ============================================================
 const expandBtn = document.getElementById('tarExpandBtn');
 const panel = document.getElementById('tar-panel');
 const closePanel = document.getElementById('tarClosePanel');
@@ -1113,7 +1104,9 @@ statusBar.addEventListener('click', (e) => {
   expandBtn.textContent = panel.classList.contains('open') ? '📉' : '📈';
 });
 
-// ===== AUTH =====
+// ============================================================
+// AUTH
+// ============================================================
 document.addEventListener('DOMContentLoaded', async function() {
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -1132,126 +1125,256 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 });
 
-// ===== TAR CHAT ENGINE - COMPLETE SITE ASSISTANT =====
+// ============================================================
+// TAR CHAT ENGINE - COMPLETE KNOWLEDGE
+// ============================================================
 class TARChat {
   constructor() {
     this.messages = [];
     this.isOpen = false;
     this.setupUI();
-    
-    // Site knowledge base
+
+    // ===== COMPLETE KNOWLEDGE BASE =====
     this.knowledge = {
-      about: `TradeAux is a coordination layer for global trade, designed to improve how shipments are formed, connected, and executed. We connect buyers, sellers, and logistics providers in one transparent marketplace.`,
-      
-      howItWorks: `TradeAux works through a 3-minute auction system. 
-- Sellers list their products with a starting price
-- Buyers place bids in 250kg increments
-- The auction runs for 3 minutes
-- The knapsack solver selects the winning combination that maximizes the seller's revenue
-- The container captain stops the auction when the container is full`,
 
-      auctions: `Our auction system runs in 3 minutes:
-1. Seller creates an auction with product details
-2. Buyers place bids (minimum 250kg increments)
-3. The auction timer counts down
-4. The knapsack solver finds the optimal combination
-5. Winners are announced
-6. The container captain ensures efficient loading`,
+      // ===== THE CORE IDEA =====
+      coreIdea: `🎯 THE CORE IDEA:
 
-      bots: `Buyer bots are AI agents that bid automatically:
-- Each buyer can create multiple bots for different strategies
-- Bots can be configured for specific commodities
-- Bots learn from past auctions
-- You can prompt your bot with custom instructions
-- Bots compete against each other in real-time`,
+TradeAux is an AI-native operating system for international trade.
 
-      knapsack: `The knapsack solver is the seller's agent. It:
-- Analyzes all bids in an auction
-- Finds the combination that maximizes total revenue (Price × Quantity)
-- Selects the winning bids
-- Ensures the seller gets the best possible outcome
-- Considers puzzle fit for efficient loading`,
+It is designed around one central observation:
 
-      containerCaptain: `The container captain is the rule enforcer:
-- Stops the auction when the container is full
-- Ensures efficient loading
-- Prevents overselling
-- Maximizes container utilization
-- Creates a fair and efficient market`,
+Global trade is not inefficient because goods cannot move. It is inefficient because the decisions that create those shipments are fragmented.
 
-      kontor: `A kontor is a connected trading hub where buyers, sellers, logistics, and finance converge. TradeAux builds markets by focusing activity into kontors, creating structured trading environments instead of scattered activities. Each kontor grows as real trade activity increases.`,
+Today:
+• Sellers operate independently
+• Buyers search independently
+• Freight operates independently
+• Finance operates independently
 
-      pricing: `Our pricing model is simple:
-- $25 flat fee per auction (paid by the buyer)
-- No subscription fees
-- No hidden costs
-- FOB port required on every listing
-- Transparent, market-driven pricing`,
+TradeAux connects these systems into one coordinated network.
 
-      howToBuy: `To buy on TradeAux:
-1. Create an account
-2. Set up your buyer profile
-3. Create a trading bot
-4. Browse active auctions
-5. Let your bot bid or bid manually
-6. Win the auction
-7. Arrange shipment and payment`,
+The objective is to move from:
+"transactions connected by logistics"
+to:
+"trade ecosystems optimized by intelligence."`,
 
-      howToSell: `To sell on TradeAux:
-1. Create an account
-2. Set up your seller profile
-3. List your products
-4. Create an auction (3 minutes)
-5. Receive bids from buyer bots
-6. Let the knapsack solver find the best combination
-7. Close the auction
-8. Get paid and ship`,
+      // ===== THE PROBLEM =====
+      problem: `📋 THE PROBLEM TRADEAUX SOLVES:
 
-      fees: `TradeAux charges:
-- $25 flat fee per auction (paid by the buyer)
-- No subscription fees
-- No listing fees
-- No hidden costs
-- Fee is deducted from the winning bid`,
+1. CONTAINER INEFFICIENCY:
+A container is a fixed-cost asset. Whether it is 65%, 80%, or 95% full, many transportation costs remain similar. The current trade system optimizes individual purchases, not the complete container.
 
-      trust: `TradeAux is built on trust:
-- Neutral marketplace
-- Buyers, sellers, and carriers trade directly
-- FOB port required on every listing
-- Transparency is our product
-- Disputes resolved via reputation system
-- Governed by Canadian law`,
+TradeAux changes the optimization target.
+Not: "Is this product a good deal?"
+But: "Does this product improve the total container outcome?"
 
-      time: `Auctions run for exactly 3 minutes. This creates:
-- Urgency for buyers to bid
-- Efficient price discovery
-- Fast transaction times
-- Real-time market dynamics`,
+2. FRAGMENTED SUPPLY:
+Many regions have excellent export products but struggle with international discovery, buyer access, shipment scale, and financing. The problem is not a lack of supply. The problem is coordination.
 
-      increments: `Bidding is in 250kg increments. This allows:
-- Fine-grained price competition
-- Optimal puzzle fitting
-- Efficient container utilization
-- Fair bidding for all participants`,
+3. FRAGMENTED DEMAND:
+Buyers struggle with finding new suppliers, evaluating products, managing many small purchases, and optimizing inventory. TradeAux provides an intelligence layer between supply and demand.`,
 
-      strategy: `Winning bidding strategies:
-1. Use structural quantities (12 MT = 1/5 of 60 MT)
-2. Bid lower for larger quantities (better total value)
-3. Consider payment terms (Net 15 vs Net 30)
-4. Use 250kg increments for puzzle fit
-5. Differentiate from the herd`,
+      // ===== THE KONTOR THEORY =====
+      kontor: `🏛️ THE KONTOR THEORY:
 
-      benefits: `Benefits of using TradeAux:
-- Transparent pricing
-- No middlemen
-- Fast transactions (3 minutes)
-- Fair competition
-- Global reach
-- Efficiency through AI
-- Risk reduction through reputation system`
+A TradeAux Kontor is a modern port-centered trade ecosystem.
+
+It combines:
+• Production
+• Processing
+• Logistics
+• Commercial intelligence
+• Finance
+
+A port alone is not a Kontor. A Kontor is a NETWORK.
+
+TWO TYPES OF KONTORS:
+
+1. TRADITIONAL KONTOR (e.g., Davao):
+A region where most of the required trade ecosystem exists locally.
+• Seafood, agricultural exports, processed foods, snacks, dried products
+• Advantage: Internal production depth
+
+2. MAGNETIC KONTOR (e.g., Koper):
+A port that attracts production from surrounding economies.
+• Consolidates activity from Slovenia, Croatia, Austria, Hungary, Northern Italy, surrounding regions
+• Advantage: Connectivity - becomes a gateway for multiple economies`,
+
+      // ===== MARKETPLACE PHILOSOPHY =====
+      marketplace: `🛒 MARKETPLACE PHILOSOPHY:
+
+TradeAux is not simply a marketplace.
+
+Traditional marketplaces connect: Seller → Buyer
+
+TradeAux connects: Production → Discovery → Purchase → Container → Shipment → Finance → Reinvestment
+
+The marketplace becomes an OPERATING SYSTEM.
+
+THE PARTICIPANTS:
+
+BUYERS:
+• Not just purchasers - they are trading entities managing inventory, margins, suppliers, logistics, and working capital
+• A buyer can later become a seller
+
+SELLERS:
+• Not just suppliers - they are production nodes
+• TradeAux helps them find buyers, test products, increase exports, improve cash flow
+• Sellers are NOT charged simply for participating
+• They pay only when using optional value-added services
+
+LOGISTICS PROVIDERS:
+• TradeAux does not replace logistics
+• It improves logistics decisions by optimizing the shipment before movement begins
+
+FINANCE PROVIDERS:
+• TradeAux connects verified trade activity with liquidity
+• A completed trade can become a financial asset`,
+
+      // ===== AI ARCHITECTURE =====
+      ai: `🧠 AI ARCHITECTURE:
+
+TradeAux uses specialized AI agents.
+
+1. BUYER AI:
+Acts as a digital procurement partner.
+Evaluates: price, margin, supplier quality, container impact, buyer strategy
+The buyer provides objectives. The AI determines opportunities.
+
+2. SELLER AI:
+Helps producers choose auction types, understand demand, optimize inventory, build relationships.
+
+3. CONTAINER CAPTAIN:
+Optimizes the physical shipment.
+Considers: weight, volume, pallets, product compatibility, destination, margins
+The container becomes the optimization problem.
+
+4. FREIGHT AI:
+Optimizes transportation choices.
+Considers: cost, timing, reliability, total economic impact.
+
+5. FINANCE AI:
+Manages the transition from completed trade activity to available capital.
+Evaluates documentation, shipment verification, receivable quality, risk factors, market demand.`,
+
+      // ===== AUCTION ARCHITECTURE =====
+      auctions: `📊 AUCTION ARCHITECTURE:
+
+TradeAux uses different auctions because different trade problems require different solutions.
+
+1. PRODUCT DISCOVERY AUCTION:
+• Purpose: Find new products and suppliers
+• Typical size: 50 kg
+• Goal: Reduce the cost of discovery
+• Not designed for profit - designed to create future commercial relationships
+
+2. PALLET AUCTION:
+• Purpose: Normal commercial trading
+• Typical size: One pallet (~250 kg depending on product)
+• The pallet becomes the practical trading unit because it connects warehouse, truck, and container
+
+3. BULK AUCTION:
+• Purpose: Large commercial purchases
+• Used for: Established suppliers, large quantities, contracts
+
+4. FREIGHT AUCTION:
+• Purpose: Create competition among logistics providers
+• The cheapest freight is not always the best freight
+• Objective: The best total trade outcome
+
+5. RECEIVABLE AUCTION:
+• Purpose: Convert verified trade receivables into liquidity
+• After shipment, documentation, and delivery verification, the receivable may enter the financing marketplace
+• The seller chooses whether to use this service`,
+
+      // ===== THE FLYWHEEL =====
+      flywheel: `🔄 THE TRADEAUX FLYWHEEL:
+
+A successful TradeAux ecosystem works like this:
+
+New products enter through discovery
+        ↓
+Products become commercial purchases
+        ↓
+Purchases combine into optimized containers
+        ↓
+Freight is optimized
+        ↓
+Goods move
+        ↓
+Receivables are created
+        ↓
+Receivables become liquidity
+        ↓
+Liquidity funds more trade
+
+The cycle repeats. Each stage creates value for the next stage.`,
+
+      // ===== FEES & HOLDS =====
+      fees: `💰 FEES & HOLDS:
+
+BUYER:
+• $25 hold is BLOCKED from buyer's account for EACH auction their bot participates in
+• Prevents tire-kicking and ensures only serious buyers
+• If buyer WINS: TradeAux keeps the $25 (auction fee with discounts)
+• If buyer LOSES: The $25 hold is UNBLOCKED immediately
+• Buyers should ALWAYS keep accounts funded to not miss auctions
+
+SELLER:
+• Pays NOTHING for the auction
+• Free to list products
+• Free to participate
+• Only pays when they want to sell their receivable (optional service)
+
+BUYER FUNDING:
+• Buyers must keep their accounts FUNDED at all times
+• Each auction your bot participates in requires a $25 hold
+• Multiple auctions = multiple holds
+• Best practice: Always keep at least $100-200 in your account`,
+
+      // ===== THE FUNDAMENTAL INSIGHT =====
+      insight: `💡 THE FUNDAMENTAL INSIGHT:
+
+TradeAux is NOT:
+• An auction company
+• A freight company
+• A factoring company
+• A marketplace
+
+TradeAux IS:
+A coordinated intelligence layer connecting all of them.
+
+The innovation is not any individual component.
+The innovation is the combination:
+
+AI decision-making + container optimization + regional trade ecosystems + liquidity management.
+
+That creates a new model for global commerce.`,
+
+      // ===== QUICK REFERENCE =====
+      summary: `📊 TRADEAUX QUICK REFERENCE:
+
+CORE IDEA: AI-native operating system for international trade
+
+THE PROBLEM: Trade decisions are fragmented, containers are inefficient
+
+KONTOR: Port-centered trade ecosystem (Traditional or Magnetic)
+
+PARTICIPANTS: Buyers, Sellers, Logistics, Finance
+
+AI AGENTS: Buyer AI, Seller AI, Container Captain, Freight AI, Finance AI
+
+AUCTIONS: Discovery (50kg), Pallet (~250kg), Bulk, Freight, Receivable
+
+FLYWHEEL: Discovery → Commerce → Container → Shipment → Receivable → Liquidity → More Trade
+
+FEES: Buyer pays $25 hold (refundable if lost), Seller pays nothing for auctions
+
+FUNDAMENTAL INSIGHT: Coordinated intelligence layer connecting everything`
     };
   }
-  
+
   setupUI() {
     this.toggle = document.getElementById('tar-chat-toggle');
     this.panel = document.getElementById('tar-chat-panel');
@@ -1259,7 +1382,7 @@ class TARChat {
     this.input = document.getElementById('tar-chat-input');
     this.send = document.getElementById('tar-chat-send');
     this.messagesContainer = document.getElementById('tar-chat-messages');
-    
+
     this.toggle.addEventListener('click', () => this.togglePanel());
     this.close.addEventListener('click', () => this.togglePanel());
     this.send.addEventListener('click', () => this.handleSend());
@@ -1267,7 +1390,7 @@ class TARChat {
       if (e.key === 'Enter') this.handleSend();
     });
   }
-  
+
   togglePanel() {
     this.isOpen = !this.isOpen;
     this.panel.classList.toggle('hidden');
@@ -1276,21 +1399,21 @@ class TARChat {
       this.input.focus();
     }
   }
-  
+
   handleSend() {
     const text = this.input.value.trim();
     if (!text) return;
-    
+
     this.addMessage('user', text);
     this.input.value = '';
     this.input.focus();
-    
+
     setTimeout(() => {
       const response = this.processQuestion(text);
       this.addMessage('bot', response);
     }, 300 + Math.random() * 400);
   }
-  
+
   addMessage(type, text) {
     const div = document.createElement('div');
     div.className = `tar-chat-message ${type}`;
@@ -1298,93 +1421,156 @@ class TARChat {
     this.messagesContainer.appendChild(div);
     this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
   }
-  
+
   processQuestion(question) {
     const lower = question.toLowerCase();
     const state = window.TAR ? window.TAR.getState() : null;
-    
-    // Site knowledge questions
-    if (lower.includes('how does') && (lower.includes('auction') || lower.includes('system') || lower.includes('work'))) {
-      return `📚 <span class="highlight">How the Auction System Works:</span><br><br>${this.knowledge.howItWorks}<br><br><span class="info">💡 Key insight:</span> The 3-minute timer creates urgency and efficient price discovery.`;
+
+    // ===== CORE IDEA =====
+    if (lower.includes('core idea') || lower.includes('what is tradeaux') || lower.includes('what does tradeaux do')) {
+      return `🎯 <span class="highlight">The Core Idea:</span><br><br>${this.knowledge.coreIdea}`;
     }
-    
-    if (lower.includes('what is') && (lower.includes('knapsack') || lower.includes('solver'))) {
-      return `🧩 <span class="highlight">What is the Knapsack Solver?</span><br><br>${this.knowledge.knapsack}<br><br><span class="warning">🎯 It works for the seller, not the buyer!</span>`;
+
+    // ===== THE PROBLEM =====
+    if (lower.includes('problem') || lower.includes('container inefficiency') || lower.includes('fragmented') || lower.includes('inefficient')) {
+      return `📋 <span class="highlight">The Problem TradeAux Solves:</span><br><br>${this.knowledge.problem}`;
     }
-    
-    if (lower.includes('container captain') || lower.includes('container')) {
-      return `🚢 <span class="highlight">What is the Container Captain?</span><br><br>${this.knowledge.containerCaptain}<br><br><span class="info">💡 Stops the auction when full - no wasted space!</span>`;
+
+    // ===== KONTOR =====
+    if (lower.includes('kontor') || lower.includes('what is a kontor') || lower.includes('traditional kontor') || lower.includes('magnetic kontor') || lower.includes('davao') || lower.includes('koper')) {
+      return `🏛️ <span class="highlight">The Kontor Theory:</span><br><br>${this.knowledge.kontor}`;
     }
-    
-    if (lower.includes('kontor') || lower.includes('what is kontor')) {
-      return `🏛️ <span class="highlight">What is a Kontor?</span><br><br>${this.knowledge.kontor}<br><br><span class="warning">📈 Each kontor grows with real trade activity.</span>`;
+
+    // ===== MARKETPLACE =====
+    if (lower.includes('marketplace') || lower.includes('participants') || (lower.includes('buyer') && !lower.includes('auction')) || (lower.includes('seller') && !lower.includes('auction'))) {
+      return `🛒 <span class="highlight">Marketplace Philosophy:</span><br><br>${this.knowledge.marketplace}`;
     }
-    
-    if (lower.includes('buy') || lower.includes('purchase') || lower.includes('buyer')) {
-      return `🛒 <span class="highlight">How to Buy on TradeAux:</span><br><br>${this.knowledge.howToBuy}<br><br><span class="info">💡 Start by creating a trading bot for automated bidding.</span>`;
+
+    // ===== AI AGENTS =====
+    if (lower.includes('ai') || lower.includes('buyer ai') || lower.includes('seller ai') || lower.includes('container captain') || lower.includes('freight ai') || lower.includes('finance ai') || lower.includes('agent')) {
+      return `🧠 <span class="highlight">AI Architecture:</span><br><br>${this.knowledge.ai}`;
     }
-    
-    if (lower.includes('sell') || lower.includes('seller') || lower.includes('listing')) {
-      return `📦 <span class="highlight">How to Sell on TradeAux:</span><br><br>${this.knowledge.howToSell}<br><br><span class="info">💡 Your auction runs for only 3 minutes!</span>`;
+
+    // ===== AUCTIONS =====
+    if (lower.includes('auction') || lower.includes('discovery') || lower.includes('pallet') || lower.includes('bulk') || lower.includes('freight') || lower.includes('receivable')) {
+      return `📊 <span class="highlight">Auction Architecture:</span><br><br>${this.knowledge.auctions}`;
     }
-    
-    if (lower.includes('fee') || lower.includes('cost') || lower.includes('pricing')) {
-      return `💰 <span class="highlight">TradeAux Fees:</span><br><br>${this.knowledge.fees}<br><br><span class="warning">✅ $25 flat fee - no subscriptions, no hidden costs!</span>`;
+
+    // ===== FLYWHEEL =====
+    if (lower.includes('flywheel') || lower.includes('cycle') || lower.includes('ecosystem') || lower.includes('flow')) {
+      return `🔄 <span class="highlight">The TradeAux Flywheel:</span><br><br>${this.knowledge.flywheel}`;
     }
-    
-    if (lower.includes('time') || lower.includes('duration') || lower.includes('how long')) {
-      return `⏰ <span class="highlight">Auction Duration:</span><br><br>${this.knowledge.time}<br><br><span class="warning">⚡ 3 minutes of fast, efficient trading!</span>`;
+
+    // ===== FEES =====
+    if (lower.includes('fee') || lower.includes('cost') || lower.includes('hold') || lower.includes('pay') || lower.includes('fund') || lower.includes('balance')) {
+      return `💰 <span class="highlight">Fees & Holds:</span><br><br>${this.knowledge.fees}`;
     }
-    
-    if (lower.includes('increment') || lower.includes('250kg') || lower.includes('unit')) {
-      return `📏 <span class="highlight">Bidding Increments:</span><br><br>${this.knowledge.increments}<br><br><span class="info">🧩 250kg = 0.25 MT = the atomic unit of bidding.</span>`;
+
+    // ===== FUNDAMENTAL INSIGHT =====
+    if (lower.includes('insight') || lower.includes('fundamental') || lower.includes('innovation') || lower.includes('combination')) {
+      return `💡 <span class="highlight">The Fundamental Insight:</span><br><br>${this.knowledge.insight}`;
     }
-    
-    if (lower.includes('strategy') || lower.includes('win') || lower.includes('winning')) {
-      return `🎯 <span class="highlight">Winning Strategies:</span><br><br>${this.knowledge.strategy}<br><br><span class="warning">💡 The 12 MT bid often wins over 10 MT!</span>`;
+
+    // ===== SUMMARY =====
+    if (lower.includes('summary') || lower.includes('recap') || lower.includes('overview') || lower.includes('quick')) {
+      return `📊 <span class="highlight">TradeAux Quick Reference:</span><br><br>${this.knowledge.summary}`;
     }
-    
-    if (lower.includes('benefit') || lower.includes('advantage') || lower.includes('why use')) {
-      return `✨ <span class="highlight">Why Use TradeAux?</span><br><br>${this.knowledge.benefits}<br><br><span class="highlight">🚀 Join the future of global trade!</span>`;
+
+    // ===== HOW TO BUY =====
+    if (lower.includes('how to buy') || lower.includes('buy on')) {
+      return `🛒 <span class="highlight">How to Buy on TradeAux:</span><br><br>
+1. Create an account
+2. FUND YOUR ACCOUNT (critical!)
+3. Set up your buyer profile
+4. Define your commercial strategy
+5. Your Buyer AI monitors auctions
+6. When your bot bids: $25 is BLOCKED from your account
+7. If you WIN: TradeAux keeps the $25 (auction fee)
+8. If you LOSE: $25 is UNBLOCKED immediately
+9. You also pay for the product if you win
+10. Arrange shipping
+
+💡 Always keep your account funded!
+   Insufficient funds = missed opportunities.`;
     }
-    
-    if (lower.includes('trust') || lower.includes('safe') || lower.includes('secure')) {
-      return `🔒 <span class="highlight">Trust & Safety:</span><br><br>${this.knowledge.trust}<br><br><span class="info">⚖️ Governed by Canadian law.</span>`;
+
+    // ===== HOW TO SELL =====
+    if (lower.includes('how to sell') || lower.includes('sell on')) {
+      return `📦 <span class="highlight">How to Sell on TradeAux:</span><br><br>
+1. Create an account - FREE
+2. Set up your seller profile - FREE
+3. List your products - FREE
+4. Create an auction - FREE
+5. Receive bids from buyer AIs - FREE
+6. Container Captain optimizes - FREE
+7. Knapsack solver selects winners - FREE
+8. Close the auction - FREE
+9. Get paid - FREE
+10. ONLY pay if you want to sell your receivable (optional)
+
+💡 Seller pays NOTHING for the auction!
+💡 Seller pays ONLY for receivables financing (optional!)`;
     }
-    
-    if (lower.includes('bot') || lower.includes('ai') || lower.includes('agent')) {
-      return `🤖 <span class="highlight">About Trading Bots:</span><br><br>${this.knowledge.bots}<br><br><span class="info">📊 Bots learn and improve with every auction!</span>`;
+
+    // ===== TRUST =====
+    if (lower.includes('trust') || lower.includes('safe') || lower.includes('secure') || lower.includes('reputation')) {
+      return `🔒 <span class="highlight">Trust & Safety:</span><br><br>
+• Neutral marketplace
+• Buyers, sellers, and carriers trade directly
+• FOB port required on every listing
+• Transparency is our product
+• Disputes resolved via reputation system
+• Governed by Canadian law
+• Verified trade assets
+• Buyer funds are reserved before bidding
+• No financing of promises - only verified execution`;
     }
-    
-    if (lower.includes('about') || lower.includes('what is tradeaux')) {
-      return `💎 <span class="highlight">About TradeAux:</span><br><br>${this.knowledge.about}<br><br><span class="warning">🌍 Global trade, reimagined.</span>`;
-    }
-    
-    // Market questions (with real data)
+
+    // ===== MARKET DATA =====
     if (lower.includes('price') || lower.includes('cost') || lower.includes('rate')) {
       if (state) {
-        return `📊 <span class="highlight">Current Market Prices:</span><br><br>Average: <span class="highlight">$${(state.averagePrice || 4.65).toFixed(2)}</span>/MT<br><span class="info">☕ Coffee:</span> $4.85/MT (trending up)<br><span class="info">🍫 Cocoa:</span> $4.45/MT (stable)<br><br><span class="warning">💡 3% increase this week - good time to sell!</span>`;
+        return `📊 <span class="highlight">Current Market Prices:</span><br><br>Average: <span class="highlight">$${(state.averagePrice || 4.65).toFixed(2)}</span>/MT<br><span class="info">☕ Coffee:</span> $4.85/MT<br><span class="info">🍫 Cocoa:</span> $4.45/MT<br><br><span class="warning">💡 3% increase this week!</span>`;
       }
     }
-    
+
     if (lower.includes('active') || (lower.includes('auction') && lower.includes('how many'))) {
       if (state) {
-        return `📊 <span class="highlight">Auction Activity:</span><br><br><span class="highlight">${state.activeAuctions || 2}</span> active auctions right now<br><span class="info">Total volume:</span> ${state.totalVolume || 105} MT available<br><span class="warning">⏰ Average time remaining: 1:45</span>`;
+        return `📊 <span class="highlight">Auction Activity:</span><br><br><span class="highlight">${state.activeAuctions || 2}</span> active auctions<br><span class="info">Total volume:</span> ${state.totalVolume || 105} MT<br><span class="warning">⏰ Average time remaining: 1:45</span>`;
       }
     }
-    
-    if (lower.includes('volume') || lower.includes('traded')) {
-      if (state) {
-        return `📊 <span class="highlight">Trading Volume:</span><br><br>Today: <span class="highlight">${state.totalVolume || 105}</span> MT<br><span class="info">☕ Coffee:</span> 60 MT<br><span class="info">🍫 Cocoa:</span> 45 MT<br><span class="warning">📈 15% increase from yesterday!</span>`;
-      }
-    }
-    
-    // Default help response
-    return `🤖 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>I can answer questions about:<br>📚 <span class="info">How the auction system works</span><br>🧩 <span class="info">The knapsack solver</span><br>🚢 <span class="info">Container captain</span><br>🏛️ <span class="info">Kontors</span><br>🤖 <span class="info">Trading bots</span><br>💰 <span class="info">Fees and pricing</span><br>🎯 <span class="info">Winning strategies</span><br><br><span class="highlight">Try asking:</span><br>"How does the auction system work?"<br>"What is the knapsack solver?"<br>"How do I win more auctions?"<br>"What are the fees?"<br><br><span class="warning">💡 I know everything about TradeAux!</span>`;
+
+    // ===== DEFAULT =====
+    return `🤖 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>
+
+I can answer questions about EVERYTHING in the TradeAux White Paper:
+
+🎯 <span class="info">The Core Idea</span>
+📋 <span class="info">The Problem</span> (Container inefficiency, fragmented supply/demand)
+🏛️ <span class="info">Kontor Theory</span> (Traditional & Magnetic)
+🛒 <span class="info">Marketplace Architecture</span> (Buyers, Sellers, Logistics, Finance)
+🧠 <span class="info">AI Agents</span> (Buyer AI, Seller AI, Container Captain, Freight AI, Finance AI)
+📊 <span class="info">Auctions</span> (Discovery, Pallet, Bulk, Freight, Receivable)
+🔄 <span class="info">The Flywheel</span>
+💰 <span class="info">Fees & Holds</span>
+💡 <span class="info">The Fundamental Insight</span>
+
+<br><span class="highlight">Try asking:</span><br>
+• "What is TradeAux?"<br>
+• "What is a Kontor?"<br>
+• "What are the auction types?"<br>
+• "How do the AI agents work?"<br>
+• "What are the fees?"<br>
+• "What is the Container Captain?"<br>
+• "How does the flywheel work?"<br>
+• "What's the difference between Davao and Koper?"<br>
+
+<br><span class="warning">💡 I know the COMPLETE TradeAux architecture!</span>`;
   }
 }
 
-// Initialize TAR Chat
+// ============================================================
+// INITIALIZE TAR CHAT
+// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
   const chat = new TARChat();
   window.TARChat = chat;
