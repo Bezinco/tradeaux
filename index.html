@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <title>TradeAux — Global Surplus Exchange</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -271,7 +268,6 @@ body {
   line-height: 1.5;
 }
 
-/* ===== MARKET CARDS ===== */
 .market-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -330,17 +326,6 @@ body {
   height: 180px;
   z-index: 1;
   overflow: hidden;
-}
-
-.market-image-area img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.market-card:hover .market-image-area img {
-  transform: scale(1.05);
 }
 
 .market-image-placeholder {
@@ -507,6 +492,163 @@ footer a:hover { color: #4a9e5a; }
 @media (max-width: 600px) {
   .trust { grid-template-columns: 1fr; }
 }
+
+/* ===== TAR STATUS BAR ===== */
+#tar-status-bar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9998;
+  background: rgba(2, 6, 23, 0.95);
+  border: 1px solid rgba(124, 252, 0, 0.3);
+  border-radius: 12px;
+  padding: 10px 16px;
+  backdrop-filter: blur(12px);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+#tar-status-bar:hover {
+  border-color: #7CFC00;
+  box-shadow: 0 10px 40px rgba(124, 252, 0, 0.15);
+}
+
+.tar-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7CFC00;
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.tar-status-dot.inactive {
+  background: #ff6b6b;
+  animation: none;
+}
+
+.tar-status-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  color: #7CFC00;
+  letter-spacing: 0.5px;
+}
+
+.tar-metrics {
+  display: flex;
+  gap: 10px;
+  font-size: 9px;
+  color: #9ca3af;
+}
+
+.tar-metrics .metric {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tar-metrics .metric-value {
+  color: #e5e7eb;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+}
+
+.tar-expand-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+  transition: color 0.3s;
+}
+
+.tar-expand-btn:hover {
+  color: #7CFC00;
+}
+
+#tar-panel {
+  position: fixed;
+  bottom: 75px;
+  right: 20px;
+  width: 320px;
+  max-height: 400px;
+  background: rgba(2, 6, 23, 0.98);
+  border: 1px solid rgba(124, 252, 0, 0.2);
+  border-radius: 16px;
+  padding: 16px 20px;
+  backdrop-filter: blur(12px);
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+  display: none;
+  z-index: 9997;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  overflow-y: auto;
+}
+
+#tar-panel.open {
+  display: block;
+}
+
+#tar-panel h4 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  color: #7CFC00;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#tar-panel .close-panel {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#tar-panel .close-panel:hover {
+  color: #ff6b6b;
+}
+
+#tar-panel .panel-content {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+#tar-panel .panel-item {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
+}
+
+#tar-panel .panel-item:last-child {
+  border-bottom: none;
+}
+
+#tar-panel .panel-item .label {
+  color: #9ca3af;
+}
+
+#tar-panel .panel-item .value {
+  color: #e5e7eb;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+}
 </style>
 </head>
 <body>
@@ -558,19 +700,16 @@ footer a:hover { color: #4a9e5a; }
   </header>
 
   <div class="hero">
-    <h1>International trade shouldn’t waste opportunities.</h1>
+    <h1>International trade shouldn't waste opportunities.</h1>
     <p>Profitable products go unsold. 
 Containers leave half empty.
 Buyers never see better options.
 Sellers never see the right demand.
 Not because trade is broken.
-Because it’s disconnected...</p>
+Because it's disconnected...</p>
   </div>
 
-  <!-- ===== MARKET CARDS ===== -->
   <div class="market-cards">
-
-    <!-- COCONUTS — ACTIVE -->
     <div class="market-card card-active">
       <div class="card-wave"></div>
       <div class="market-image-area">
@@ -591,7 +730,6 @@ Because it’s disconnected...</p>
       </div>
     </div>
 
-    <!-- PEANUTS — COMING SOON -->
     <div class="market-card card-soon">
       <div class="card-wave"></div>
       <div class="market-image-area">
@@ -608,7 +746,6 @@ Because it’s disconnected...</p>
       </div>
     </div>
 
-    <!-- CASHEWS — COMING SOON -->
     <div class="market-card card-soon-2">
       <div class="card-wave"></div>
       <div class="market-image-area">
@@ -624,7 +761,6 @@ Because it’s disconnected...</p>
         <div class="status-badge status-soon-2">🔴 COMING SOON</div>
       </div>
     </div>
-
   </div>
 
   <div class="how-it-works">
@@ -657,59 +793,153 @@ Each kontor grows as real trade activity increases..</p></div>
   </footer>
 </div>
 
+<!-- ===== TAR STATUS BAR ===== -->
+<div id="tar-status-bar">
+  <div class="tar-status-dot" id="tarDot"></div>
+  <span class="tar-status-label" id="tarLabel">TAR LOADING</span>
+  <div class="tar-metrics">
+    <span class="metric">📊 <span class="metric-value" id="tarActive">0</span></span>
+    <span class="metric">📦 <span class="metric-value" id="tarVolume">0</span></span>
+    <span class="metric">💰 <span class="metric-value" id="tarPrice">$0</span></span>
+  </div>
+  <button class="tar-expand-btn" id="tarExpandBtn">📈</button>
+</div>
+
+<!-- ===== TAR PANEL ===== -->
+<div id="tar-panel">
+  <h4>
+    🤖 TAR SYSTEM
+    <button class="close-panel" id="tarClosePanel">✕</button>
+  </h4>
+  <div class="panel-content">
+    <div class="panel-item"><span class="label">Status</span><span class="value" id="panelStatus">Loading...</span></div>
+    <div class="panel-item"><span class="label">Active Auctions</span><span class="value" id="panelActive">0</span></div>
+    <div class="panel-item"><span class="label">Total Volume</span><span class="value" id="panelVolume">0 MT</span></div>
+    <div class="panel-item"><span class="label">Avg Price</span><span class="value" id="panelPrice">$0.00</span></div>
+    <div class="panel-item"><span class="label">Completed Today</span><span class="value" id="panelCompleted">0</span></div>
+  </div>
+</div>
+
 <script>
-// SUPABASE CONFIGURATION
+// ===== SUPABASE CONFIG =====
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-document.addEventListener('DOMContentLoaded', async function() {
-  const loginBtn = document.getElementById('login-btn');
-  const signupBtn = document.getElementById('signup-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const userInfo = document.getElementById('user-info');
-  const userEmail = document.getElementById('user-email');
+// ===== TAR ENGINE =====
+class TAR {
+  constructor() {
+    if (window.__TAR_INSTANCE) return window.__TAR_INSTANCE;
+    this.initialized = false;
+    this.auctions = [];
+    this.marketData = { activeAuctions: 0, totalVolume: 0, averagePrice: 0, completedAuctions: 0 };
+    this.listeners = [];
+    this.supabase = null;
+    window.__TAR_INSTANCE = this;
+  }
+  
+  init(supabaseClient) {
+    if (this.initialized) return this;
+    this.supabase = supabaseClient;
+    console.log('🚀 TAR initializing with Supabase...');
+    this.loadDemoData();
+    this.initialized = true;
+    this.broadcast('ready', this.getState());
+    console.log('✅ TAR Ready');
+    return this;
+  }
+  
+  loadDemoData() {
+    this.auctions = [
+      { id: 'AUC-001', commodity: 'Coffee', quantity: 60, status: 'open', bids: [{ bidder: 'Bot A', quantity: 10, price: 4.85 }], current_high: 4.85 },
+      { id: 'AUC-002', commodity: 'Cocoa', quantity: 45, status: 'open', bids: [{ bidder: 'Bot B', quantity: 12, price: 4.45 }], current_high: 4.45 }
+    ];
+    this.marketData = { activeAuctions: 2, totalVolume: 105, averagePrice: 4.65, completedAuctions: 5 };
+  }
+  
+  getState() {
+    return { initialized: this.initialized, ...this.marketData, auctions: this.auctions };
+  }
+  
+  subscribe(callback) { this.listeners.push(callback); return () => { this.listeners = this.listeners.filter(l => l !== callback); }; }
+  broadcast(event, data) { this.listeners.forEach(cb => { try { cb(event, data); } catch(e) {} }); }
+}
 
-  // Check session on load with error handling
+// ===== INIT =====
+const tar = new TAR();
+tar.init(supabaseClient);
+
+// ===== TAR UI =====
+function updateTARUI() {
+  const state = tar.getState();
+  const dot = document.getElementById('tarDot');
+  const label = document.getElementById('tarLabel');
+  
+  if (state.initialized) {
+    dot.className = 'tar-status-dot';
+    label.textContent = 'TAR ACTIVE';
+    label.style.color = '#7CFC00';
+  } else {
+    dot.className = 'tar-status-dot inactive';
+    label.textContent = 'TAR LOADING';
+    label.style.color = '#9ca3af';
+  }
+  
+  document.getElementById('tarActive').textContent = state.activeAuctions || 0;
+  document.getElementById('tarVolume').textContent = state.totalVolume || 0;
+  document.getElementById('tarPrice').textContent = `$${(state.averagePrice || 0).toFixed(2)}`;
+  document.getElementById('panelStatus').textContent = state.initialized ? '🟢 Active' : '🟡 Loading';
+  document.getElementById('panelActive').textContent = state.activeAuctions || 0;
+  document.getElementById('panelVolume').textContent = `${state.totalVolume || 0} MT`;
+  document.getElementById('panelPrice').textContent = `$${(state.averagePrice || 0).toFixed(2)}`;
+  document.getElementById('panelCompleted').textContent = state.completedAuctions || 0;
+}
+
+tar.subscribe(updateTARUI);
+setTimeout(updateTARUI, 500);
+
+// ===== UI CONTROLS =====
+const expandBtn = document.getElementById('tarExpandBtn');
+const panel = document.getElementById('tar-panel');
+const closePanel = document.getElementById('tarClosePanel');
+const statusBar = document.getElementById('tar-status-bar');
+
+expandBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  panel.classList.toggle('open');
+  expandBtn.textContent = panel.classList.contains('open') ? '📉' : '📈';
+});
+
+closePanel.addEventListener('click', () => {
+  panel.classList.remove('open');
+  expandBtn.textContent = '📈';
+});
+
+statusBar.addEventListener('click', (e) => {
+  if (e.target.closest('.tar-expand-btn')) return;
+  panel.classList.toggle('open');
+  expandBtn.textContent = panel.classList.contains('open') ? '📉' : '📈';
+});
+
+// ===== AUTH =====
+document.addEventListener('DOMContentLoaded', async function() {
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) showLoggedIn(session.user);
-  } catch (err) {
-    console.error('Session check failed:', err);
-  }
+    if (session) {
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('signup-btn').style.display = 'none';
+      document.getElementById('user-info').classList.add('show');
+      document.getElementById('user-email').textContent = session.user.email;
+    }
+  } catch(err) { console.error('Auth error:', err); }
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) showLoggedIn(session.user);
-    else if (event === 'SIGNED_OUT') showLoggedOut();
+  document.getElementById('logout-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await supabaseClient.auth.signOut();
+    window.location.reload();
   });
-
-  function showLoggedIn(user) {
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (signupBtn) signupBtn.style.display = 'none';
-    userInfo.classList.add('show');
-    userEmail.textContent = user.email;
-  }
-
-  function showLoggedOut() {
-    if (loginBtn) loginBtn.style.display = 'block';
-    if (signupBtn) signupBtn.style.display = 'block';
-    userInfo.classList.remove('show');
-  }
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        await supabaseClient.auth.signOut();
-        window.location.href = 'signin.html?logout=1';
-      } catch (error) {
-        console.error('Sign out error:', error);
-        window.location.href = 'signin.html?logout=1';
-      }
-    });
-  }
 });
 </script>
 </body>
