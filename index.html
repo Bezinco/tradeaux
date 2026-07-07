@@ -1000,7 +1000,7 @@ Each kontor grows as real trade activity increases..</p></div>
     </div>
     <div id="tar-chat-messages" class="tar-chat-messages">
       <div class="tar-chat-message bot">
-        Hello! I'm TAR, your Trade Advisor Robot. Ask me anything about the market, auctions, or trading strategies!
+        Hello! I'm TAR, your Trade Advisor Robot. Ask me anything about TradeAux, auctions, trading strategies, or the market!
       </div>
     </div>
     <div class="tar-chat-input">
@@ -1132,12 +1132,124 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 });
 
-// ===== TAR CHAT ENGINE =====
+// ===== TAR CHAT ENGINE - COMPLETE SITE ASSISTANT =====
 class TARChat {
   constructor() {
     this.messages = [];
     this.isOpen = false;
     this.setupUI();
+    
+    // Site knowledge base
+    this.knowledge = {
+      about: `TradeAux is a coordination layer for global trade, designed to improve how shipments are formed, connected, and executed. We connect buyers, sellers, and logistics providers in one transparent marketplace.`,
+      
+      howItWorks: `TradeAux works through a 3-minute auction system. 
+- Sellers list their products with a starting price
+- Buyers place bids in 250kg increments
+- The auction runs for 3 minutes
+- The knapsack solver selects the winning combination that maximizes the seller's revenue
+- The container captain stops the auction when the container is full`,
+
+      auctions: `Our auction system runs in 3 minutes:
+1. Seller creates an auction with product details
+2. Buyers place bids (minimum 250kg increments)
+3. The auction timer counts down
+4. The knapsack solver finds the optimal combination
+5. Winners are announced
+6. The container captain ensures efficient loading`,
+
+      bots: `Buyer bots are AI agents that bid automatically:
+- Each buyer can create multiple bots for different strategies
+- Bots can be configured for specific commodities
+- Bots learn from past auctions
+- You can prompt your bot with custom instructions
+- Bots compete against each other in real-time`,
+
+      knapsack: `The knapsack solver is the seller's agent. It:
+- Analyzes all bids in an auction
+- Finds the combination that maximizes total revenue (Price × Quantity)
+- Selects the winning bids
+- Ensures the seller gets the best possible outcome
+- Considers puzzle fit for efficient loading`,
+
+      containerCaptain: `The container captain is the rule enforcer:
+- Stops the auction when the container is full
+- Ensures efficient loading
+- Prevents overselling
+- Maximizes container utilization
+- Creates a fair and efficient market`,
+
+      kontor: `A kontor is a connected trading hub where buyers, sellers, logistics, and finance converge. TradeAux builds markets by focusing activity into kontors, creating structured trading environments instead of scattered activities. Each kontor grows as real trade activity increases.`,
+
+      pricing: `Our pricing model is simple:
+- $25 flat fee per auction (paid by the buyer)
+- No subscription fees
+- No hidden costs
+- FOB port required on every listing
+- Transparent, market-driven pricing`,
+
+      howToBuy: `To buy on TradeAux:
+1. Create an account
+2. Set up your buyer profile
+3. Create a trading bot
+4. Browse active auctions
+5. Let your bot bid or bid manually
+6. Win the auction
+7. Arrange shipment and payment`,
+
+      howToSell: `To sell on TradeAux:
+1. Create an account
+2. Set up your seller profile
+3. List your products
+4. Create an auction (3 minutes)
+5. Receive bids from buyer bots
+6. Let the knapsack solver find the best combination
+7. Close the auction
+8. Get paid and ship`,
+
+      fees: `TradeAux charges:
+- $25 flat fee per auction (paid by the buyer)
+- No subscription fees
+- No listing fees
+- No hidden costs
+- Fee is deducted from the winning bid`,
+
+      trust: `TradeAux is built on trust:
+- Neutral marketplace
+- Buyers, sellers, and carriers trade directly
+- FOB port required on every listing
+- Transparency is our product
+- Disputes resolved via reputation system
+- Governed by Canadian law`,
+
+      time: `Auctions run for exactly 3 minutes. This creates:
+- Urgency for buyers to bid
+- Efficient price discovery
+- Fast transaction times
+- Real-time market dynamics`,
+
+      increments: `Bidding is in 250kg increments. This allows:
+- Fine-grained price competition
+- Optimal puzzle fitting
+- Efficient container utilization
+- Fair bidding for all participants`,
+
+      strategy: `Winning bidding strategies:
+1. Use structural quantities (12 MT = 1/5 of 60 MT)
+2. Bid lower for larger quantities (better total value)
+3. Consider payment terms (Net 15 vs Net 30)
+4. Use 250kg increments for puzzle fit
+5. Differentiate from the herd`,
+
+      benefits: `Benefits of using TradeAux:
+- Transparent pricing
+- No middlemen
+- Fast transactions (3 minutes)
+- Fair competition
+- Global reach
+- Efficiency through AI
+- Risk reduction through reputation system`
+    };
   }
   
   setupUI() {
@@ -1173,7 +1285,6 @@ class TARChat {
     this.input.value = '';
     this.input.focus();
     
-    // Process the question
     setTimeout(() => {
       const response = this.processQuestion(text);
       this.addMessage('bot', response);
@@ -1192,110 +1303,84 @@ class TARChat {
     const lower = question.toLowerCase();
     const state = window.TAR ? window.TAR.getState() : null;
     
-    // Market questions
+    // Site knowledge questions
+    if (lower.includes('how does') && (lower.includes('auction') || lower.includes('system') || lower.includes('work'))) {
+      return `📚 <span class="highlight">How the Auction System Works:</span><br><br>${this.knowledge.howItWorks}<br><br><span class="info">💡 Key insight:</span> The 3-minute timer creates urgency and efficient price discovery.`;
+    }
+    
+    if (lower.includes('what is') && (lower.includes('knapsack') || lower.includes('solver'))) {
+      return `🧩 <span class="highlight">What is the Knapsack Solver?</span><br><br>${this.knowledge.knapsack}<br><br><span class="warning">🎯 It works for the seller, not the buyer!</span>`;
+    }
+    
+    if (lower.includes('container captain') || lower.includes('container')) {
+      return `🚢 <span class="highlight">What is the Container Captain?</span><br><br>${this.knowledge.containerCaptain}<br><br><span class="info">💡 Stops the auction when full - no wasted space!</span>`;
+    }
+    
+    if (lower.includes('kontor') || lower.includes('what is kontor')) {
+      return `🏛️ <span class="highlight">What is a Kontor?</span><br><br>${this.knowledge.kontor}<br><br><span class="warning">📈 Each kontor grows with real trade activity.</span>`;
+    }
+    
+    if (lower.includes('buy') || lower.includes('purchase') || lower.includes('buyer')) {
+      return `🛒 <span class="highlight">How to Buy on TradeAux:</span><br><br>${this.knowledge.howToBuy}<br><br><span class="info">💡 Start by creating a trading bot for automated bidding.</span>`;
+    }
+    
+    if (lower.includes('sell') || lower.includes('seller') || lower.includes('listing')) {
+      return `📦 <span class="highlight">How to Sell on TradeAux:</span><br><br>${this.knowledge.howToSell}<br><br><span class="info">💡 Your auction runs for only 3 minutes!</span>`;
+    }
+    
+    if (lower.includes('fee') || lower.includes('cost') || lower.includes('pricing')) {
+      return `💰 <span class="highlight">TradeAux Fees:</span><br><br>${this.knowledge.fees}<br><br><span class="warning">✅ $25 flat fee - no subscriptions, no hidden costs!</span>`;
+    }
+    
+    if (lower.includes('time') || lower.includes('duration') || lower.includes('how long')) {
+      return `⏰ <span class="highlight">Auction Duration:</span><br><br>${this.knowledge.time}<br><br><span class="warning">⚡ 3 minutes of fast, efficient trading!</span>`;
+    }
+    
+    if (lower.includes('increment') || lower.includes('250kg') || lower.includes('unit')) {
+      return `📏 <span class="highlight">Bidding Increments:</span><br><br>${this.knowledge.increments}<br><br><span class="info">🧩 250kg = 0.25 MT = the atomic unit of bidding.</span>`;
+    }
+    
+    if (lower.includes('strategy') || lower.includes('win') || lower.includes('winning')) {
+      return `🎯 <span class="highlight">Winning Strategies:</span><br><br>${this.knowledge.strategy}<br><br><span class="warning">💡 The 12 MT bid often wins over 10 MT!</span>`;
+    }
+    
+    if (lower.includes('benefit') || lower.includes('advantage') || lower.includes('why use')) {
+      return `✨ <span class="highlight">Why Use TradeAux?</span><br><br>${this.knowledge.benefits}<br><br><span class="highlight">🚀 Join the future of global trade!</span>`;
+    }
+    
+    if (lower.includes('trust') || lower.includes('safe') || lower.includes('secure')) {
+      return `🔒 <span class="highlight">Trust & Safety:</span><br><br>${this.knowledge.trust}<br><br><span class="info">⚖️ Governed by Canadian law.</span>`;
+    }
+    
+    if (lower.includes('bot') || lower.includes('ai') || lower.includes('agent')) {
+      return `🤖 <span class="highlight">About Trading Bots:</span><br><br>${this.knowledge.bots}<br><br><span class="info">📊 Bots learn and improve with every auction!</span>`;
+    }
+    
+    if (lower.includes('about') || lower.includes('what is tradeaux')) {
+      return `💎 <span class="highlight">About TradeAux:</span><br><br>${this.knowledge.about}<br><br><span class="warning">🌍 Global trade, reimagined.</span>`;
+    }
+    
+    // Market questions (with real data)
     if (lower.includes('price') || lower.includes('cost') || lower.includes('rate')) {
       if (state) {
-        return `📊 <span class="highlight">Current average price:</span> $${(state.averagePrice || 4.65).toFixed(2)}/MT<br>
-        <span class="info">Coffee:</span> $4.85/MT | <span class="info">Cocoa:</span> $4.45/MT<br>
-        <span class="warning">Tip:</span> Prices are trending up 3% this week.`;
+        return `📊 <span class="highlight">Current Market Prices:</span><br><br>Average: <span class="highlight">$${(state.averagePrice || 4.65).toFixed(2)}</span>/MT<br><span class="info">☕ Coffee:</span> $4.85/MT (trending up)<br><span class="info">🍫 Cocoa:</span> $4.45/MT (stable)<br><br><span class="warning">💡 3% increase this week - good time to sell!</span>`;
       }
     }
     
-    if (lower.includes('active') || lower.includes('auction') && lower.includes('how many')) {
+    if (lower.includes('active') || (lower.includes('auction') && lower.includes('how many'))) {
       if (state) {
-        return `📊 <span class="highlight">${state.activeAuctions || 2}</span> active auctions right now<br>
-        <span class="info">Coffee:</span> 60 MT | <span class="info">Cocoa:</span> 45 MT<br>
-        <span class="warning">⌛</span> Average time remaining: 1:45`;
+        return `📊 <span class="highlight">Auction Activity:</span><br><br><span class="highlight">${state.activeAuctions || 2}</span> active auctions right now<br><span class="info">Total volume:</span> ${state.totalVolume || 105} MT available<br><span class="warning">⏰ Average time remaining: 1:45</span>`;
       }
     }
     
-    if (lower.includes('volume') || lower.includes('trade') && lower.includes('how much')) {
+    if (lower.includes('volume') || lower.includes('traded')) {
       if (state) {
-        return `📊 <span class="highlight">${state.totalVolume || 105}</span> MT traded today<br>
-        <span class="info">Volume breakdown:</span><br>
-        Coffee: 60 MT | Cocoa: 45 MT<br>
-        <span class="warning">📈</span> 15% increase from yesterday`;
+        return `📊 <span class="highlight">Trading Volume:</span><br><br>Today: <span class="highlight">${state.totalVolume || 105}</span> MT<br><span class="info">☕ Coffee:</span> 60 MT<br><span class="info">🍫 Cocoa:</span> 45 MT<br><span class="warning">📈 15% increase from yesterday!</span>`;
       }
     }
     
-    // Strategy questions
-    if (lower.includes('strategy') || lower.includes('should i bid') || lower.includes('how to win')) {
-      return `🎯 <span class="highlight">Strategy Recommendations:</span><br>
-      1. For Coffee auctions: <span class="info">Bid 12 MT at $4.45-4.50</span><br>
-      2. For Cocoa auctions: <span class="info">Bid 10 MT at $4.40-4.50</span><br>
-      3. <span class="warning">💡 Key insight:</span> Bigger quantities win even with lower prices!<br>
-      4. <span class="highlight">Pro tip:</span> Use 250kg increments for better puzzle fit.`;
-    }
-    
-    if (lower.includes('10 mt') || lower.includes('12 mt') || lower.includes('quantity')) {
-      return `🧩 <span class="highlight">Quantity Analysis:</span><br>
-      <span class="info">10 MT bids</span> are highly competitive (7-8 bidders)<br>
-      <span class="info">12 MT bids</span> have less competition (2-3 bidders)<br>
-      <span class="warning">💡 Advantage:</span> 12 MT creates cleaner puzzle fit<br>
-      <span class="highlight">Recommendation:</span> Use 12 MT for better win rate`;
-    }
-    
-    if (lower.includes('bot') || lower.includes('my bot') || lower.includes('performance')) {
-      return `🤖 <span class="highlight">Your Bot Performance:</span><br>
-      <span class="info">Coffee Structuralist:</span> 78% win rate<br>
-      <span class="info">Total Volume:</span> 245 MT<br>
-      <span class="info">Avg Price:</span> $4.52/MT<br>
-      <span class="warning">📈</span> Performing in top 15% of all bots!`;
-    }
-    
-    // Auction questions
-    if (lower.includes('auction-001') || lower.includes('coffee auction')) {
-      return `☕ <span class="highlight">Coffee Auction (AUC-001):</span><br>
-      📦 60 MT available<br>
-      💰 Current high: <span class="highlight">$4.85</span><br>
-      👥 3 bids placed<br>
-      ⏰ 1:45 remaining<br>
-      <span class="warning">💡</span> 12 MT at $4.50 would be a strong bid!`;
-    }
-    
-    if (lower.includes('auction-002') || lower.includes('cocoa auction')) {
-      return `🍫 <span class="highlight">Cocoa Auction (AUC-002):</span><br>
-      📦 45 MT available<br>
-      💰 Current high: <span class="highlight">$4.45</span><br>
-      👥 2 bids placed<br>
-      ⏰ 2:15 remaining<br>
-      <span class="warning">💡</span> 10 MT at $4.40 would be competitive!`;
-    }
-    
-    // General questions
-    if (lower.includes('what is tar') || lower.includes('who are you') || lower.includes('yourself')) {
-      return `🤖 <span class="highlight">I'm TAR - Trade Advisor Robot</span><br>
-      I'm the market maker and referee for TradeAux.<br>
-      I create auctions, enforce rules, and provide intelligence.<br>
-      <span class="info">Ask me about:</span> prices, strategies, bots, auctions, or anything trade-related!`;
-    }
-    
-    if (lower.includes('kontor') || lower.includes('what is a kontor')) {
-      return `🏛️ <span class="highlight">What is a Kontor?</span><br>
-      A kontor is a connected trading hub where buyers, sellers, logistics, and finance converge.<br>
-      <span class="info">TradeAux builds markets</span> by focusing activity into kontors.<br>
-      <span class="warning">💡</span> Each kontor grows as real trade activity increases.`;
-    }
-    
-    if (lower.includes('help') || lower.includes('what can you')) {
-      return `💡 <span class="highlight">I can help with:</span><br>
-      📊 <span class="info">Market prices</span> - Current rates and trends<br>
-      🎯 <span class="info">Strategy</span> - Bidding recommendations<br>
-      🤖 <span class="info">Bots</span> - Performance and configurations<br>
-      📦 <span class="info">Auctions</span> - Status and details<br>
-      🧩 <span class="info">Puzzle fit</span> - Optimize your bidding<br>
-      <span class="warning">Just ask me anything!</span>`;
-    }
-    
-    // Default response
-    return `🤔 <span class="highlight">Good question!</span><br>
-    I understand you're asking about "${question.substring(0, 50)}..."<br>
-    <span class="info">I can help with:</span><br>
-    - Market prices and trends<br>
-    - Auction strategies<br>
-    - Bot performance<br>
-    - Trading recommendations<br>
-    <span class="warning">💡</span> Try asking me about coffee prices, auction strategies, or bot performance!`;
+    // Default help response
+    return `🤖 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>I can answer questions about:<br>📚 <span class="info">How the auction system works</span><br>🧩 <span class="info">The knapsack solver</span><br>🚢 <span class="info">Container captain</span><br>🏛️ <span class="info">Kontors</span><br>🤖 <span class="info">Trading bots</span><br>💰 <span class="info">Fees and pricing</span><br>🎯 <span class="info">Winning strategies</span><br><br><span class="highlight">Try asking:</span><br>"How does the auction system work?"<br>"What is the knapsack solver?"<br>"How do I win more auctions?"<br>"What are the fees?"<br><br><span class="warning">💡 I know everything about TradeAux!</span>`;
   }
 }
 
