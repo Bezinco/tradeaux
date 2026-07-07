@@ -7,14 +7,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* ===== COMPLETE STYLES (same as before) ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  background: #020617;
-  min-height: 100vh;
-  font-family: 'Orbitron', sans-serif;
-  overflow-x: hidden;
-}
+body { background: #020617; min-height: 100vh; font-family: 'Orbitron', sans-serif; overflow-x: hidden; padding-bottom: 80px; }
 
 .bg-waves {
   position: fixed;
@@ -47,12 +42,12 @@ body {
 .container {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 20px 24px 80px 140px;
+  padding: 20px 24px 40px 140px;
   position: relative;
   z-index: 2;
 }
 
-/* ===== TRADEAUX 3D LOGO ===== */
+/* ===== 3D LOGO ===== */
 .gem-logo-corner {
   position: fixed;
   top: 20px;
@@ -466,7 +461,7 @@ footer a:hover { color: #4a9e5a; }
   .trust { grid-template-columns: repeat(2, 1fr); }
   .gem-logo-corner { transform: scale(0.25); }
   .hero h1 { font-size: 1.8rem; }
-  .container { padding: 16px 16px 80px 16px; }
+  .container { padding: 16px 16px 40px 16px; }
 }
 @media (max-width: 600px) {
   .trust { grid-template-columns: 1fr; }
@@ -475,7 +470,7 @@ footer a:hover { color: #4a9e5a; }
 /* ===== TAR STATUS BAR ===== */
 #tar-status-bar {
   position: fixed;
-  bottom: 20px;
+  bottom: 45px;
   right: 20px;
   z-index: 9998;
   background: rgba(2, 6, 23, 0.95);
@@ -560,7 +555,7 @@ footer a:hover { color: #4a9e5a; }
 
 #tar-panel {
   position: fixed;
-  bottom: 75px;
+  bottom: 95px;
   right: 20px;
   width: 320px;
   max-height: 400px;
@@ -632,7 +627,7 @@ footer a:hover { color: #4a9e5a; }
 /* ===== TAR CHAT WIDGET ===== */
 #tar-chat-widget {
   position: fixed;
-  bottom: 90px;
+  bottom: 105px;
   right: 20px;
   z-index: 9999;
 }
@@ -743,21 +738,11 @@ footer a:hover { color: #4a9e5a; }
   border-bottom-right-radius: 4px;
 }
 
-.tar-chat-message .highlight {
-  color: #7CFC00;
-}
-
-.tar-chat-message .info {
-  color: #00ced1;
-}
-
-.tar-chat-message .warning {
-  color: #FFD966;
-}
-
-.tar-chat-message .danger {
-  color: #ff6b6b;
-}
+.tar-chat-message .highlight { color: #7CFC00; }
+.tar-chat-message .info { color: #00ced1; }
+.tar-chat-message .warning { color: #FFD966; }
+.tar-chat-message .danger { color: #ff6b6b; }
+.tar-chat-message .commentary { color: #FFD966; font-style: italic; }
 
 .tar-chat-input {
   padding: 12px 16px;
@@ -798,6 +783,93 @@ footer a:hover { color: #4a9e5a; }
 .tar-chat-input button:hover {
   transform: scale(1.02);
 }
+
+/* ===== TAR TICKER BAR ===== */
+#tar-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45px;
+  background: rgba(2, 6, 23, 0.98);
+  border-top: 2px solid rgba(124, 252, 0, 0.3);
+  z-index: 9996;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -5px 30px rgba(0,0,0,0.5);
+}
+
+.ticker-container {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-content {
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  animation: tickerScroll 45s linear infinite;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.ticker-item .ticker-icon { font-size: 14px; }
+.ticker-item .ticker-highlight { color: #7CFC00; font-weight: 600; }
+.ticker-item .ticker-info { color: #00ced1; }
+.ticker-item .ticker-warning { color: #FFD966; }
+.ticker-item .ticker-danger { color: #ff6b6b; }
+.ticker-item .ticker-commentary { color: #FFD966; font-style: italic; }
+
+.ticker-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  height: 100%;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  color: #9ca3af;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.ticker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7CFC00;
+  animation: tickerPulse 1.5s infinite;
+}
+
+.ticker-dot.inactive { background: #ff6b6b; animation: none; }
+.ticker-dot.demo { background: #FFD966; animation: tickerPulse 2s infinite; }
+
+@keyframes tickerPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+
+.ticker-label { letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -850,12 +922,7 @@ footer a:hover { color: #4a9e5a; }
 
   <div class="hero">
     <h1>International trade shouldn't waste opportunities.</h1>
-    <p>Profitable products go unsold. 
-Containers leave half empty.
-Buyers never see better options.
-Sellers never see the right demand.
-Not because trade is broken.
-Because it's disconnected...</p>
+    <p>Profitable products go unsold. Containers leave half empty. Buyers never see better options. Sellers never see the right demand. Not because trade is broken. Because it's disconnected...</p>
   </div>
 
   <div class="market-cards">
@@ -867,13 +934,7 @@ Because it's disconnected...</p>
       <div class="market-info">
         <div class="market-title">COCONUTS</div>
         <div class="market-products">
-          <ul>
-            <li>Dessicated</li>
-            <li>Coconut Water</li>
-            <li>Coconut Milk</li>
-            <li>Coconut Cream</li>
-            <li>Coconut Flour</li>
-          </ul>
+          <ul><li>Dessicated</li><li>Coconut Water</li><li>Coconut Milk</li><li>Coconut Cream</li><li>Coconut Flour</li></ul>
         </div>
         <div class="status-badge status-active">🟢 MARKET ACTIVE</div>
       </div>
@@ -886,11 +947,7 @@ Because it's disconnected...</p>
       </div>
       <div class="market-info">
         <div class="market-title">PEANUTS</div>
-        <div class="market-products">
-          <ul>
-            <li>Coming Soon</li>
-          </ul>
-        </div>
+        <div class="market-products"><ul><li>Coming Soon</li></ul></div>
         <div class="status-badge status-soon">🟡 COMING SOON</div>
       </div>
     </div>
@@ -902,11 +959,7 @@ Because it's disconnected...</p>
       </div>
       <div class="market-info">
         <div class="market-title">CASHEWS</div>
-        <div class="market-products">
-          <ul>
-            <li>Coming Soon</li>
-          </ul>
-        </div>
+        <div class="market-products"><ul><li>Coming Soon</li></ul></div>
         <div class="status-badge status-soon-2">🔴 COMING SOON</div>
       </div>
     </div>
@@ -915,17 +968,10 @@ Because it's disconnected...</p>
   <div class="how-it-works">
     <h2>The TradeAux Method</h2>
     <div class="steps">
-      <div class="step"><div class="step-number">1</div><h3>Buying Through TradeAux</h3><p>Create demand. 
-Compete for business using your own digital trading assets. Choose the best auctions.
-Learn how buyers use RFQs, auctions, freight procurement, and transparent bidding to purchase with confidence.</p></div>
-      <div class="step"><div class="step-number">2</div><h3>Selling Through TradeAux</h3><p>Invite competition.Build reputation. Grow your market. Move your inventory in 3 minutes.</p></div>
-      <div class="step"><div class="step-number">3</div><h3>Creating Opportunity</h3><p>Every shipment contains more opportunity than first appears.
-Discover how Opportunity Surfaces, Trade Bots, and Container Captain connect buyers, suppliers, products, and freight into opportunities that would otherwise remain unseen.</p></div>
-      <div class="step"><div class="step-number">4</div><h3>What Is a Kontor?</h3><p>A kontor is a connected trading hub where buyers, sellers, logistics activity and financial factoring are concentrated.
-
-TradeAux builds markets by focusing activity into kontors—so demand, supply, and freight can interact in one structured environment instead of being scattered.
-
-Each kontor grows as real trade activity increases..</p></div>
+      <div class="step"><div class="step-number">1</div><h3>Buying Through TradeAux</h3><p>Create demand. Compete for business using your own digital trading assets. Choose the best auctions. Learn how buyers use RFQs, auctions, freight procurement, and transparent bidding to purchase with confidence.</p></div>
+      <div class="step"><div class="step-number">2</div><h3>Selling Through TradeAux</h3><p>Invite competition. Build reputation. Grow your market. Move your inventory in 3 minutes.</p></div>
+      <div class="step"><div class="step-number">3</div><h3>Creating Opportunity</h3><p>Every shipment contains more opportunity than first appears. Discover how Opportunity Surfaces, Trade Bots, and Container Captain connect buyers, suppliers, products, and freight into opportunities that would otherwise remain unseen.</p></div>
+      <div class="step"><div class="step-number">4</div><h3>What Is a Kontor?</h3><p>A kontor is a connected trading hub where buyers, sellers, logistics activity and financial factoring are concentrated. TradeAux builds markets by focusing activity into kontors—so demand, supply, and freight can interact in one structured environment instead of being scattered. Each kontor grows as real trade activity increases.</p></div>
     </div>
   </div>
 
@@ -940,6 +986,19 @@ Each kontor grows as real trade activity increases..</p></div>
     <div>© TradeAux — Global Surplus Exchange</div>
     <div><a href="#">Legal</a> · <a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Contact</a></div>
   </footer>
+</div>
+
+<!-- ===== TAR TICKER BAR ===== -->
+<div id="tar-ticker">
+  <div class="ticker-container">
+    <div class="ticker-content" id="tickerContent">
+      <span class="ticker-item"><span class="ticker-icon">🎯</span><span class="ticker-highlight">TradeAux Live Feed - Loading...</span></span>
+    </div>
+  </div>
+  <div class="ticker-status">
+    <span class="ticker-dot" id="tickerDot"></span>
+    <span class="ticker-label" id="tickerLabel">STARTING</span>
+  </div>
 </div>
 
 <!-- ===== TAR STATUS BAR ===== -->
@@ -980,8 +1039,17 @@ Each kontor grows as real trade activity increases..</p></div>
     <div id="tar-chat-messages" class="tar-chat-messages">
       <div class="tar-chat-message bot">
         💡 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>
-        I know EVERYTHING about TradeAux - from how Kontors work to AI agents to auction types.<br><br>
-        <span class="info">Try asking:</span> "What is a Kontor?" or "How do the auctions work?" or "What is the Container Captain?"
+        I know everything about TradeAux and I watch every auction live.<br><br>
+        <span class="info">Ask me anything about:</span><br>
+        • How TradeAux works<br>
+        • What a Kontor is<br>
+        • Auction strategies<br>
+        • Current auction status<br>
+        • Why you won or lost<br>
+        • Container optimization<br>
+        • Fees and holds<br>
+        • The flywheel<br>
+        • Or just say hello! 👋
       </div>
     </div>
     <div class="tar-chat-input">
@@ -1018,7 +1086,7 @@ class TAR {
   init(supabaseClient) {
     if (this.initialized) return this;
     this.supabase = supabaseClient;
-    console.log('🚀 TAR initializing with Supabase...');
+    console.log('🚀 TAR initializing...');
     this.loadDemoData();
     this.initialized = true;
     this.broadcast('ready', this.getState());
@@ -1028,8 +1096,8 @@ class TAR {
 
   loadDemoData() {
     this.auctions = [
-      { id: 'AUC-001', commodity: 'Coffee', quantity: 60, status: 'open', bids: [{ bidder: 'Bot A', quantity: 10, price: 4.85 }], current_high: 4.85 },
-      { id: 'AUC-002', commodity: 'Cocoa', quantity: 45, status: 'open', bids: [{ bidder: 'Bot B', quantity: 12, price: 4.45 }], current_high: 4.45 }
+      { id: 'AUC-001', commodity: 'Coffee', quantity: 60, status: 'open', bids: [{ bidder: 'Bot A', quantity: 10, price: 4.85 }], current_high: 4.85, timeRemaining: 45 },
+      { id: 'AUC-002', commodity: 'Cocoa', quantity: 45, status: 'open', bids: [{ bidder: 'Bot B', quantity: 12, price: 4.45 }], current_high: 4.45, timeRemaining: 120 }
     ];
     this.marketData = { activeAuctions: 2, totalVolume: 105, averagePrice: 4.65, completedAuctions: 5 };
   }
@@ -1042,9 +1110,6 @@ class TAR {
   broadcast(event, data) { this.listeners.forEach(cb => { try { cb(event, data); } catch(e) {} }); }
 }
 
-// ============================================================
-// INIT TAR
-// ============================================================
 const tar = new TAR();
 tar.init(supabaseClient);
 
@@ -1126,6 +1191,271 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ============================================================
+// TAR TICKER ENGINE
+// ============================================================
+class TARTicker {
+  constructor() {
+    this.container = document.getElementById('tickerContent');
+    this.dot = document.getElementById('tickerDot');
+    this.label = document.getElementById('tickerLabel');
+    this.realDataCount = 0;
+    this.demoInterval = null;
+    this.setupTicker();
+  }
+
+  setupTicker() {
+    this.addItem('🎯', 'TradeAux Live Feed - Demo Mode', 'highlight', 'system');
+    this.addItem('📊', 'Real auctions will appear here when they start!', 'info', 'system');
+    this.addItem('🔄', 'Bots are active and monitoring all auctions', 'warning', 'system');
+    this.startDemoMode();
+    if (window.TAR) {
+      window.TAR.subscribe((event, data) => {
+        this.handleTAREvent(event, data);
+      });
+    }
+  }
+
+  startDemoMode() {
+    this.demoInterval = setInterval(() => {
+      this.generateDemoUpdate();
+    }, 5000 + Math.random() * 3000);
+  }
+
+  generateDemoUpdate() {
+    if (this.realDataCount < 10 || Math.random() < 0.3) {
+      const updates = [
+        { icon: '📈', text: 'Bot ' + ['A','B','C','D','E'][Math.floor(Math.random()*5)] + ' bid $' + (4.20 + Math.random() * 0.8).toFixed(2) + ' on DEMO Coffee (10 MT)', type: 'info', source: 'demo' },
+        { icon: '📊', text: 'DEMO Cocoa price now $' + (4.30 + Math.random() * 0.3).toFixed(2), type: 'warning', source: 'demo' },
+        { icon: '📦', text: 'DEMO Container ' + (60 + Math.floor(Math.random() * 35)) + '% full', type: 'info', source: 'demo' },
+        { icon: '✅', text: 'DEMO Coffee auction closed! Winners: 3 bidders', type: 'highlight', source: 'demo' },
+        { icon: '🔔', text: 'DEMO Pallet Auction: ' + ['Cocoa','Sugar','Coconut Oil'][Math.floor(Math.random()*3)] + ' ' + (40 + Math.floor(Math.random()*20)) + ' MT', type: 'highlight', source: 'demo' },
+      ];
+      const update = updates[Math.floor(Math.random() * updates.length)];
+      this.addItem(update.icon, update.text, update.type, update.source);
+    }
+  }
+
+  handleTAREvent(event, data) {
+    switch(event) {
+      case 'auction_created':
+        this.addItem('🆕', `${data.commodity} ${data.quantity} MT @ $${data.start_price || 4.50} - Auction Started!`, 'highlight', 'real');
+        break;
+      case 'bid_placed':
+        this.addItem('📈', `${data.bidder} bid $${data.price} on ${data.commodity} (${data.quantity} MT)`, 'info', 'real');
+        break;
+      case 'auction_closed':
+        this.addItem('✅', `${data.commodity} ${data.quantity} MT SOLD!`, 'highlight', 'real');
+        break;
+      case 'high_bid':
+        this.addItem('📊', `${data.commodity} now $${data.bid.price} ↑ $${(data.bid.price - (data.previous || data.bid.price - 0.05)).toFixed(2)}`, 'warning', 'real');
+        break;
+      case 'container_update':
+        this.addItem('📦', `Container ${data.percentage}% full (${data.filled} MT of ${data.total} MT)`, 'info', 'real');
+        break;
+    }
+  }
+
+  addItem(icon, text, type = 'info', source = 'system') {
+    const item = document.createElement('span');
+    item.className = 'ticker-item';
+    const colorClass = type === 'highlight' ? 'ticker-highlight' :
+                       type === 'warning' ? 'ticker-warning' :
+                       type === 'danger' ? 'ticker-danger' : 'ticker-info';
+
+    const sourceBadge = source === 'real' ? '🔴' : source === 'demo' ? '🟡' : '';
+    const sourceLabel = source === 'real' ? 'LIVE' : source === 'demo' ? 'DEMO' : '';
+
+    item.innerHTML = `<span class="ticker-icon">${icon}</span>
+                      <span class="${colorClass}">${text}</span>
+                      ${sourceBadge ? `<span style="font-size:8px;color:#9ca3af;margin-left:4px;">${sourceLabel}</span>` : ''}`;
+
+    this.container.appendChild(item);
+
+    while (this.container.children.length > 30) {
+      this.container.removeChild(this.container.children[0]);
+    }
+
+    if (source === 'real') {
+      this.realDataCount++;
+      if (this.realDataCount >= 5 && this.demoInterval) {
+        clearInterval(this.demoInterval);
+        this.demoInterval = null;
+        this.addItem('🚀', 'Transitioning to LIVE mode - Real auctions detected!', 'highlight', 'system');
+        setTimeout(() => {
+          this.label.textContent = 'LIVE';
+          this.dot.className = 'ticker-dot';
+          this.addItem('🔴', 'LIVE MODE ACTIVE - Real auction data streaming', 'highlight', 'system');
+        }, 3000);
+      }
+    }
+  }
+}
+
+// ============================================================
+// TAR LIVE AUCTION COMMENTATOR
+// ============================================================
+class TARAuctionCommentator {
+  constructor() {
+    this.activeAuctions = {};
+    this.setupCommentator();
+  }
+
+  setupCommentator() {
+    if (window.TAR) {
+      window.TAR.subscribe((event, data) => {
+        this.handleEvent(event, data);
+      });
+    }
+    setInterval(() => {
+      this.checkActiveAuctions();
+    }, 10000);
+  }
+
+  handleEvent(event, data) {
+    switch(event) {
+      case 'auction_created':
+        this.commentOnAuctionStart(data);
+        break;
+      case 'bid_placed':
+        this.commentOnBid(data);
+        break;
+      case 'high_bid':
+        this.commentOnPriceMovement(data);
+        break;
+      case 'auction_closed':
+        this.commentOnAuctionEnd(data);
+        break;
+    }
+  }
+
+  commentOnAuctionStart(auction) {
+    const startPrice = auction.start_price || 4.50;
+    const expectedLow = (startPrice * 1.05).toFixed(2);
+    const expectedHigh = (startPrice * 1.12).toFixed(2);
+
+    let comment = `🔴 ${auction.commodity} ${auction.quantity} MT @ $${startPrice} - Auction Started!\n`;
+    comment += `🤖 TAR: "${auction.commodity} auction just opened. `;
+    comment += `${auction.quantity} MT available at $${startPrice}.\n`;
+    comment += `Expected final price: $${expectedLow}-$${expectedHigh}.\n`;
+    comment += `Based on historical patterns, expect strong competition within 30 seconds."\n\n`;
+    this.addComment(comment);
+  }
+
+  commentOnBid(bid) {
+    const price = bid.price || 4.50;
+    const quantity = bid.quantity || 10;
+    const bidder = bid.bidder || 'Bot';
+    const commodity = bid.commodity || 'product';
+
+    let comment = `📈 ${bidder} bid $${price} on ${commodity} (${quantity} MT)\n`;
+    comment += `🤖 TAR: "${bidder} just placed a bid at $${price}.\n`;
+
+    if (quantity >= 13) {
+      comment += `💡 KEY OBSERVATION: ${quantity} MT is a strategic quantity.\n`;
+      comment += `They're leveraging volume advantage - can afford to bid lower.\n`;
+    } else if (quantity <= 10) {
+      comment += `💡 NOTE: ${quantity} MT is in the competitive zone.\n`;
+      comment += `Larger bidders may undercut on price while offering more volume.\n`;
+    }
+
+    if (price > 4.80) {
+      comment += `Aggressive move - they really want this.\n`;
+    } else if (price < 4.60) {
+      comment += `They're playing the volume game - watch for counter-bids.\n`;
+    }
+
+    comment += `\nExpect response within 15 seconds."\n\n`;
+    this.addComment(comment);
+  }
+
+  commentOnPriceMovement(data) {
+    const currentPrice = data.bid?.price || 4.50;
+    const commodity = data.commodity || 'product';
+
+    let comment = `📊 ${commodity} now $${currentPrice}\n`;
+    comment += `🤖 TAR: "Price just moved to $${currentPrice}.\n`;
+
+    if (currentPrice > 4.80) {
+      comment += `💡 Strong demand here. Expect more buyers to enter.\n`;
+    } else if (currentPrice < 4.60) {
+      comment += `💡 Market is finding support at this level.\n`;
+    } else {
+      comment += `💡 Stable trading. Watch for the final rush.\n`;
+    }
+
+    comment += `\n${currentPrice > 4.75 ? 'Resistance' : 'Support'} at $${(currentPrice + (currentPrice > 4.75 ? 0.05 : -0.05)).toFixed(2)}.\n\n`;
+    this.addComment(comment);
+  }
+
+  commentOnAuctionEnd(auction) {
+    const winners = auction.winners || [];
+    const totalQuantity = auction.quantity || 60;
+    const commodity = auction.commodity || 'product';
+
+    let comment = `✅ ${commodity} ${totalQuantity} MT - AUCTION CLOSED!\n`;
+    comment += `🤖 TAR: "Auction complete!\n`;
+
+    if (winners.length > 0) {
+      comment += `🏆 Winners:\n`;
+      winners.forEach((w, i) => {
+        comment += `   ${i+1}. ${w.bidder} - ${w.quantity} MT @ $${w.price}\n`;
+      });
+    }
+
+    if (winners.length >= 2) {
+      const quantities = winners.map(w => w.quantity);
+      const total = quantities.reduce((a, b) => a + b, 0);
+      comment += `\n🧩 PUZZLE ANALYSIS: ${quantities.join(' + ')} = ${total} MT.\n`;
+      const remaining = totalQuantity - total;
+      if (remaining > 0) {
+        comment += `   ${remaining} MT remaining. `;
+        comment += `The solver ${remaining < 5 ? 'almost' : 'could'} have used a filler.\n`;
+      } else {
+        comment += `   ✅ PERFECT FIT! The container is full.\n`;
+      }
+    }
+
+    if (winners.length > 0) {
+      const winner = winners[0];
+      if (winner.quantity >= 13) {
+        comment += `\n💡 VOLUME ADVANTAGE: The winner (${winner.quantity} MT at $${winner.price}) `;
+        comment += `used volume strategy - lower price but more quantity.\n`;
+      }
+    }
+
+    comment += `\n🤖 Ready for the next auction!"\n\n`;
+    this.addComment(comment);
+  }
+
+  checkActiveAuctions() {
+    const state = window.TAR ? window.TAR.getState() : null;
+    if (!state || !state.auctions) return;
+
+    state.auctions.forEach(auction => {
+      if (auction.status === 'open' && auction.timeRemaining < 30 && !this.activeAuctions[auction.id]) {
+        this.activeAuctions[auction.id] = true;
+        const comment = `⚡ FINAL COUNTDOWN - ${auction.commodity} ${auction.quantity} MT\n`;
+        const comment2 = `🤖 TAR: "Less than 30 seconds remaining! `;
+        const comment3 = `Current high: ${auction.current_high || 4.50}\n`;
+        const comment4 = `💡 Watch for a surge in the final 10 seconds!"\n\n`;
+        this.addComment(comment + comment2 + comment3 + comment4);
+      }
+    });
+  }
+
+  addComment(comment) {
+    if (window.TARChat) {
+      window.TARChat.addMessage('bot', comment.replace(/\n/g, '<br>'));
+    }
+    if (window.TARTicker) {
+      const lines = comment.split('\n');
+      const firstLine = lines[0] || comment;
+      window.TARTicker.addItem('💬', firstLine.substring(0, 80), 'commentary', 'system');
+    }
+  }
+}
+
+// ============================================================
 // TAR CHAT ENGINE - COMPLETE KNOWLEDGE
 // ============================================================
 class TARChat {
@@ -1137,241 +1467,113 @@ class TARChat {
     // ===== COMPLETE KNOWLEDGE BASE =====
     this.knowledge = {
 
-      // ===== THE CORE IDEA =====
-      coreIdea: `🎯 THE CORE IDEA:
+      // ===== CORE IDEA =====
+      coreIdea: `🎯 TradeAux is an AI-native operating system for international trade.
 
-TradeAux is an AI-native operating system for international trade.
+It connects: Production → Discovery → Purchase → Container → Shipment → Finance → Reinvestment
 
-It is designed around one central observation:
-
-Global trade is not inefficient because goods cannot move. It is inefficient because the decisions that create those shipments are fragmented.
-
-Today:
-• Sellers operate independently
-• Buyers search independently
-• Freight operates independently
-• Finance operates independently
-
-TradeAux connects these systems into one coordinated network.
-
-The objective is to move from:
-"transactions connected by logistics"
-to:
-"trade ecosystems optimized by intelligence."`,
+The objective is to move from "transactions connected by logistics" to "trade ecosystems optimized by intelligence."`,
 
       // ===== THE PROBLEM =====
-      problem: `📋 THE PROBLEM TRADEAUX SOLVES:
+      problem: `📋 TradeAux solves three core problems:
 
-1. CONTAINER INEFFICIENCY:
-A container is a fixed-cost asset. Whether it is 65%, 80%, or 95% full, many transportation costs remain similar. The current trade system optimizes individual purchases, not the complete container.
+1. CONTAINER INEFFICIENCY: A container is a fixed-cost asset. Whether 65% or 95% full, costs remain similar. TradeAux optimizes the whole container, not individual purchases.
 
-TradeAux changes the optimization target.
-Not: "Is this product a good deal?"
-But: "Does this product improve the total container outcome?"
+2. FRAGMENTED SUPPLY: Many regions have excellent exports but struggle with discovery, buyer access, and scale. The problem is coordination, not supply.
 
-2. FRAGMENTED SUPPLY:
-Many regions have excellent export products but struggle with international discovery, buyer access, shipment scale, and financing. The problem is not a lack of supply. The problem is coordination.
+3. FRAGMENTED DEMAND: Buyers struggle to find suppliers, evaluate products, and optimize inventory. TradeAux provides an intelligence layer between supply and demand.`,
 
-3. FRAGMENTED DEMAND:
-Buyers struggle with finding new suppliers, evaluating products, managing many small purchases, and optimizing inventory. TradeAux provides an intelligence layer between supply and demand.`,
+      // ===== KONTOR =====
+      kontor: `🏛️ A TradeAux Kontor is a port-centered trade ecosystem combining production, processing, logistics, commercial intelligence, and finance.
 
-      // ===== THE KONTOR THEORY =====
-      kontor: `🏛️ THE KONTOR THEORY:
+TRADITIONAL (e.g., Davao): Internal production depth - seafood, agricultural exports, processed foods, snacks, dried products.
 
-A TradeAux Kontor is a modern port-centered trade ecosystem.
+MAGNETIC (e.g., Koper): Gateway for multiple economies - Slovenia, Croatia, Austria, Hungary, Northern Italy, surrounding regions.
 
-It combines:
-• Production
-• Processing
-• Logistics
-• Commercial intelligence
-• Finance
+💡 A port alone is not a Kontor. A Kontor is a NETWORK.`,
 
-A port alone is not a Kontor. A Kontor is a NETWORK.
+      // ===== MARKETPLACE =====
+      marketplace: `🛒 TradeAux is not simply a marketplace.
 
-TWO TYPES OF KONTORS:
+Traditional: Seller → Buyer
+TradeAux: Production → Discovery → Purchase → Container → Shipment → Finance → Reinvestment
 
-1. TRADITIONAL KONTOR (e.g., Davao):
-A region where most of the required trade ecosystem exists locally.
-• Seafood, agricultural exports, processed foods, snacks, dried products
-• Advantage: Internal production depth
+BUYERS: Trading entities managing inventory, margins, suppliers, logistics, working capital. Buyers can become sellers.
 
-2. MAGNETIC KONTOR (e.g., Koper):
-A port that attracts production from surrounding economies.
-• Consolidates activity from Slovenia, Croatia, Austria, Hungary, Northern Italy, surrounding regions
-• Advantage: Connectivity - becomes a gateway for multiple economies`,
+SELLERS: Production nodes. TradeAux helps find buyers, test products, increase exports. Sellers pay NOTHING for auctions.
 
-      // ===== MARKETPLACE PHILOSOPHY =====
-      marketplace: `🛒 MARKETPLACE PHILOSOPHY:
+LOGISTICS: TradeAux improves logistics decisions by optimizing the shipment before movement begins.
 
-TradeAux is not simply a marketplace.
+FINANCE: Verified trade activity connects to liquidity.`,
 
-Traditional marketplaces connect: Seller → Buyer
+      // ===== AI AGENTS =====
+      ai: `🧠 TradeAux uses specialized AI agents:
 
-TradeAux connects: Production → Discovery → Purchase → Container → Shipment → Finance → Reinvestment
+1. BUYER AI: Digital procurement partner. Evaluates price, margin, supplier quality, container impact, buyer strategy. The buyer provides objectives, AI finds opportunities.
 
-The marketplace becomes an OPERATING SYSTEM.
+2. SELLER AI: Helps producers choose auction types, understand demand, optimize inventory, build relationships.
 
-THE PARTICIPANTS:
+3. CONTAINER CAPTAIN: Optimizes the physical shipment. Considers weight, volume, pallets, product compatibility, destination, margins.
 
-BUYERS:
-• Not just purchasers - they are trading entities managing inventory, margins, suppliers, logistics, and working capital
-• A buyer can later become a seller
+4. FREIGHT AI: Optimizes transportation choices. Considers cost, timing, reliability, total economic impact.
 
-SELLERS:
-• Not just suppliers - they are production nodes
-• TradeAux helps them find buyers, test products, increase exports, improve cash flow
-• Sellers are NOT charged simply for participating
-• They pay only when using optional value-added services
+5. FINANCE AI: Manages the transition from completed trade activity to available capital.`,
 
-LOGISTICS PROVIDERS:
-• TradeAux does not replace logistics
-• It improves logistics decisions by optimizing the shipment before movement begins
+      // ===== AUCTIONS =====
+      auctions: `📊 TradeAux has five auction types:
 
-FINANCE PROVIDERS:
-• TradeAux connects verified trade activity with liquidity
-• A completed trade can become a financial asset`,
+1. 🔬 DISCOVERY (50 kg): Find new products and suppliers. Reduces discovery cost. Designed to create future commercial relationships.
 
-      // ===== AI ARCHITECTURE =====
-      ai: `🧠 AI ARCHITECTURE:
+2. 📦 PALLET (~250 kg): Primary commercial trading. The pallet connects warehouse, truck, and container.
 
-TradeAux uses specialized AI agents.
+3. 🚛 BULK: Large commercial purchases. Used for established suppliers, large quantities, contracts.
 
-1. BUYER AI:
-Acts as a digital procurement partner.
-Evaluates: price, margin, supplier quality, container impact, buyer strategy
-The buyer provides objectives. The AI determines opportunities.
+4. 🚢 FREIGHT: Creates competition among logistics providers. Cheapest freight isn't always best - objective is best total trade outcome.
 
-2. SELLER AI:
-Helps producers choose auction types, understand demand, optimize inventory, build relationships.
+5. 💰 RECEIVABLE: Converts verified trade receivables into liquidity. Seller chooses whether to use this service.`,
 
-3. CONTAINER CAPTAIN:
-Optimizes the physical shipment.
-Considers: weight, volume, pallets, product compatibility, destination, margins
-The container becomes the optimization problem.
-
-4. FREIGHT AI:
-Optimizes transportation choices.
-Considers: cost, timing, reliability, total economic impact.
-
-5. FINANCE AI:
-Manages the transition from completed trade activity to available capital.
-Evaluates documentation, shipment verification, receivable quality, risk factors, market demand.`,
-
-      // ===== AUCTION ARCHITECTURE =====
-      auctions: `📊 AUCTION ARCHITECTURE:
-
-TradeAux uses different auctions because different trade problems require different solutions.
-
-1. PRODUCT DISCOVERY AUCTION:
-• Purpose: Find new products and suppliers
-• Typical size: 50 kg
-• Goal: Reduce the cost of discovery
-• Not designed for profit - designed to create future commercial relationships
-
-2. PALLET AUCTION:
-• Purpose: Normal commercial trading
-• Typical size: One pallet (~250 kg depending on product)
-• The pallet becomes the practical trading unit because it connects warehouse, truck, and container
-
-3. BULK AUCTION:
-• Purpose: Large commercial purchases
-• Used for: Established suppliers, large quantities, contracts
-
-4. FREIGHT AUCTION:
-• Purpose: Create competition among logistics providers
-• The cheapest freight is not always the best freight
-• Objective: The best total trade outcome
-
-5. RECEIVABLE AUCTION:
-• Purpose: Convert verified trade receivables into liquidity
-• After shipment, documentation, and delivery verification, the receivable may enter the financing marketplace
-• The seller chooses whether to use this service`,
-
-      // ===== THE FLYWHEEL =====
-      flywheel: `🔄 THE TRADEAUX FLYWHEEL:
-
-A successful TradeAux ecosystem works like this:
-
-New products enter through discovery
-        ↓
-Products become commercial purchases
-        ↓
-Purchases combine into optimized containers
-        ↓
-Freight is optimized
-        ↓
-Goods move
-        ↓
-Receivables are created
-        ↓
-Receivables become liquidity
-        ↓
-Liquidity funds more trade
-
-The cycle repeats. Each stage creates value for the next stage.`,
-
-      // ===== FEES & HOLDS =====
-      fees: `💰 FEES & HOLDS:
-
-BUYER:
-• $25 hold is BLOCKED from buyer's account for EACH auction their bot participates in
-• Prevents tire-kicking and ensures only serious buyers
-• If buyer WINS: TradeAux keeps the $25 (auction fee with discounts)
-• If buyer LOSES: The $25 hold is UNBLOCKED immediately
-• Buyers should ALWAYS keep accounts funded to not miss auctions
+      // ===== FEES =====
+      fees: `💰 BUYER:
+• $25 hold BLOCKED from account per auction
+• If WIN: TradeAux keeps the $25
+• If LOSE: $25 is UNBLOCKED immediately
+• Must keep account funded to participate
 
 SELLER:
 • Pays NOTHING for the auction
 • Free to list products
 • Free to participate
-• Only pays when they want to sell their receivable (optional service)
+• Only pays when selling receivables (optional service)
 
-BUYER FUNDING:
-• Buyers must keep their accounts FUNDED at all times
-• Each auction your bot participates in requires a $25 hold
-• Multiple auctions = multiple holds
-• Best practice: Always keep at least $100-200 in your account`,
+💡 Best practice: Keep at least $100-200 in your account.`,
 
-      // ===== THE FUNDAMENTAL INSIGHT =====
-      insight: `💡 THE FUNDAMENTAL INSIGHT:
+      // ===== FLYWHEEL =====
+      flywheel: `🔄 The TradeAux Flywheel:
 
-TradeAux is NOT:
-• An auction company
-• A freight company
-• A factoring company
-• A marketplace
+Product Discovery → Commercial Orders → Containers → Shipments → Receivables → Liquidity → More Trade
 
-TradeAux IS:
-A coordinated intelligence layer connecting all of them.
+Each stage creates value for the next stage. It's a continuous trade cycle.`,
 
-The innovation is not any individual component.
-The innovation is the combination:
+      // ===== INSIGHT =====
+      insight: `💡 The Fundamental Insight:
 
-AI decision-making + container optimization + regional trade ecosystems + liquidity management.
+TradeAux is NOT an auction company, freight company, factoring company, or marketplace.
 
-That creates a new model for global commerce.`,
+TradeAux IS a coordinated intelligence layer connecting all of them.
 
-      // ===== QUICK REFERENCE =====
-      summary: `📊 TRADEAUX QUICK REFERENCE:
+The innovation is the combination: AI decision-making + container optimization + regional trade ecosystems + liquidity management.`,
 
-CORE IDEA: AI-native operating system for international trade
-
-THE PROBLEM: Trade decisions are fragmented, containers are inefficient
-
-KONTOR: Port-centered trade ecosystem (Traditional or Magnetic)
-
-PARTICIPANTS: Buyers, Sellers, Logistics, Finance
-
-AI AGENTS: Buyer AI, Seller AI, Container Captain, Freight AI, Finance AI
-
-AUCTIONS: Discovery (50kg), Pallet (~250kg), Bulk, Freight, Receivable
-
-FLYWHEEL: Discovery → Commerce → Container → Shipment → Receivable → Liquidity → More Trade
-
-FEES: Buyer pays $25 hold (refundable if lost), Seller pays nothing for auctions
-
-FUNDAMENTAL INSIGHT: Coordinated intelligence layer connecting everything`
+      // ===== TRUST =====
+      trust: `🔒 Trust & Safety:
+• Neutral marketplace
+• Buyers, sellers, and carriers trade directly
+• FOB port required on every listing
+• Transparency is our product
+• Disputes resolved via reputation system
+• Governed by Canadian law
+• Verified trade assets
+• Buyer funds reserved before bidding
+• No financing of promises - only verified execution`
     };
   }
 
@@ -1426,154 +1628,125 @@ FUNDAMENTAL INSIGHT: Coordinated intelligence layer connecting everything`
     const lower = question.toLowerCase();
     const state = window.TAR ? window.TAR.getState() : null;
 
-    // ===== CORE IDEA =====
-    if (lower.includes('core idea') || lower.includes('what is tradeaux') || lower.includes('what does tradeaux do')) {
-      return `🎯 <span class="highlight">The Core Idea:</span><br><br>${this.knowledge.coreIdea}`;
+    // ===== LIVE AUCTION QUESTIONS =====
+    if (lower.includes('what\'s happening') || lower.includes('current') || lower.includes('status') || lower.includes('what\'s going on')) {
+      if (state && state.auctions && state.auctions.length > 0) {
+        const open = state.auctions.filter(a => a.status === 'open');
+        if (open.length > 0) {
+          let response = `📊 <span class="highlight">Live Auction Status:</span><br><br>`;
+          open.forEach(a => {
+            const timeLeft = a.timeRemaining || 120;
+            response += `☕ <span class="info">${a.commodity}</span> ${a.quantity} MT `;
+            response += `⏰ ${Math.floor(timeLeft/60)}:${String(Math.floor(timeLeft%60)).padStart(2,'0')} remaining<br>`;
+            response += `💰 Current high: <span class="highlight">$${a.current_high || a.start_price || 4.50}</span><br>`;
+            response += `👥 ${a.bids ? a.bids.length : 0} bids placed<br><br>`;
+          });
+          return response + `💡 <span class="warning">Anything specific you want to know?</span>`;
+        }
+      }
+      return `📊 <span class="highlight">No active auctions right now.</span><br><br>💡 Check back soon - new auctions start regularly!`;
     }
 
-    // ===== THE PROBLEM =====
-    if (lower.includes('problem') || lower.includes('container inefficiency') || lower.includes('fragmented') || lower.includes('inefficient')) {
-      return `📋 <span class="highlight">The Problem TradeAux Solves:</span><br><br>${this.knowledge.problem}`;
+    if (lower.includes('why did i lose') || lower.includes('lose') || lower.includes('lost')) {
+      return `🤔 <span class="highlight">Why you might have lost:</span><br><br>
+1. 📦 <span class="info">Quantity strategy</span> - The winner likely used 13 MT+ to get volume advantage<br>
+2. 💰 <span class="info">Puzzle fit</span> - Your quantity didn't fit the container as well<br>
+3. ⏰ <span class="info">Timing</span> - You might have bid too early or too late<br>
+4. 🧩 <span class="info">Competition</span> - Multiple 10 MT bidders competed against each other<br><br>
+💡 <span class="warning">Try a different quantity next time - 12 MT often wins over 10 MT!</span>`;
     }
 
-    // ===== KONTOR =====
-    if (lower.includes('kontor') || lower.includes('what is a kontor') || lower.includes('traditional kontor') || lower.includes('magnetic kontor') || lower.includes('davao') || lower.includes('koper')) {
-      return `🏛️ <span class="highlight">The Kontor Theory:</span><br><br>${this.knowledge.kontor}`;
+    if (lower.includes('strategy') || lower.includes('should i bid')) {
+      return `🎯 <span class="highlight">Current Strategy Recommendations:</span><br><br>
+1. 📦 <span class="info">Use 12-13 MT</span> - More volume = better puzzle fit<br>
+2. 💰 <span class="info">Don't set a floor</span> - Let bots compete the price up<br>
+3. ⏰ <span class="info">Watch the final 30 seconds</span> - That's where the action is<br>
+4. 🧩 <span class="info">Think about the container</span> - Your product is part of a puzzle<br>
+5. 📊 <span class="info">Check other auctions</span> - Avoid competing with similar products<br><br>
+💡 <span class="highlight">The 13 MT bidder often wins with lower price!</span>`;
     }
 
-    // ===== MARKETPLACE =====
+    // ===== GENERAL KNOWLEDGE =====
+    if (lower.includes('what is tradeaux') || lower.includes('what does tradeaux do')) {
+      return this.knowledge.coreIdea;
+    }
+
+    if (lower.includes('problem') || lower.includes('inefficiency') || lower.includes('fragmented')) {
+      return this.knowledge.problem;
+    }
+
+    if (lower.includes('kontor') || lower.includes('what is a kontor') || lower.includes('davao') || lower.includes('koper')) {
+      return this.knowledge.kontor;
+    }
+
     if (lower.includes('marketplace') || lower.includes('participants') || (lower.includes('buyer') && !lower.includes('auction')) || (lower.includes('seller') && !lower.includes('auction'))) {
-      return `🛒 <span class="highlight">Marketplace Philosophy:</span><br><br>${this.knowledge.marketplace}`;
+      return this.knowledge.marketplace;
     }
 
-    // ===== AI AGENTS =====
-    if (lower.includes('ai') || lower.includes('buyer ai') || lower.includes('seller ai') || lower.includes('container captain') || lower.includes('freight ai') || lower.includes('finance ai') || lower.includes('agent')) {
-      return `🧠 <span class="highlight">AI Architecture:</span><br><br>${this.knowledge.ai}`;
+    if (lower.includes('ai') || lower.includes('buyer ai') || lower.includes('seller ai') || lower.includes('container captain') || lower.includes('freight ai') || lower.includes('finance ai')) {
+      return this.knowledge.ai;
     }
 
-    // ===== AUCTIONS =====
-    if (lower.includes('auction') || lower.includes('discovery') || lower.includes('pallet') || lower.includes('bulk') || lower.includes('freight') || lower.includes('receivable')) {
-      return `📊 <span class="highlight">Auction Architecture:</span><br><br>${this.knowledge.auctions}`;
+    if (lower.includes('auction types') || lower.includes('what auctions') || lower.includes('discovery') || lower.includes('pallet') || lower.includes('bulk')) {
+      return this.knowledge.auctions;
     }
 
-    // ===== FLYWHEEL =====
-    if (lower.includes('flywheel') || lower.includes('cycle') || lower.includes('ecosystem') || lower.includes('flow')) {
-      return `🔄 <span class="highlight">The TradeAux Flywheel:</span><br><br>${this.knowledge.flywheel}`;
+    if (lower.includes('fee') || lower.includes('cost') || lower.includes('hold') || lower.includes('pay') || lower.includes('fund')) {
+      return this.knowledge.fees;
     }
 
-    // ===== FEES =====
-    if (lower.includes('fee') || lower.includes('cost') || lower.includes('hold') || lower.includes('pay') || lower.includes('fund') || lower.includes('balance')) {
-      return `💰 <span class="highlight">Fees & Holds:</span><br><br>${this.knowledge.fees}`;
+    if (lower.includes('flywheel') || lower.includes('cycle') || lower.includes('ecosystem')) {
+      return this.knowledge.flywheel;
     }
 
-    // ===== FUNDAMENTAL INSIGHT =====
-    if (lower.includes('insight') || lower.includes('fundamental') || lower.includes('innovation') || lower.includes('combination')) {
-      return `💡 <span class="highlight">The Fundamental Insight:</span><br><br>${this.knowledge.insight}`;
+    if (lower.includes('insight') || lower.includes('fundamental')) {
+      return this.knowledge.insight;
     }
 
-    // ===== SUMMARY =====
-    if (lower.includes('summary') || lower.includes('recap') || lower.includes('overview') || lower.includes('quick')) {
-      return `📊 <span class="highlight">TradeAux Quick Reference:</span><br><br>${this.knowledge.summary}`;
-    }
-
-    // ===== HOW TO BUY =====
-    if (lower.includes('how to buy') || lower.includes('buy on')) {
-      return `🛒 <span class="highlight">How to Buy on TradeAux:</span><br><br>
-1. Create an account
-2. FUND YOUR ACCOUNT (critical!)
-3. Set up your buyer profile
-4. Define your commercial strategy
-5. Your Buyer AI monitors auctions
-6. When your bot bids: $25 is BLOCKED from your account
-7. If you WIN: TradeAux keeps the $25 (auction fee)
-8. If you LOSE: $25 is UNBLOCKED immediately
-9. You also pay for the product if you win
-10. Arrange shipping
-
-💡 Always keep your account funded!
-   Insufficient funds = missed opportunities.`;
-    }
-
-    // ===== HOW TO SELL =====
-    if (lower.includes('how to sell') || lower.includes('sell on')) {
-      return `📦 <span class="highlight">How to Sell on TradeAux:</span><br><br>
-1. Create an account - FREE
-2. Set up your seller profile - FREE
-3. List your products - FREE
-4. Create an auction - FREE
-5. Receive bids from buyer AIs - FREE
-6. Container Captain optimizes - FREE
-7. Knapsack solver selects winners - FREE
-8. Close the auction - FREE
-9. Get paid - FREE
-10. ONLY pay if you want to sell your receivable (optional)
-
-💡 Seller pays NOTHING for the auction!
-💡 Seller pays ONLY for receivables financing (optional!)`;
-    }
-
-    // ===== TRUST =====
-    if (lower.includes('trust') || lower.includes('safe') || lower.includes('secure') || lower.includes('reputation')) {
-      return `🔒 <span class="highlight">Trust & Safety:</span><br><br>
-• Neutral marketplace
-• Buyers, sellers, and carriers trade directly
-• FOB port required on every listing
-• Transparency is our product
-• Disputes resolved via reputation system
-• Governed by Canadian law
-• Verified trade assets
-• Buyer funds are reserved before bidding
-• No financing of promises - only verified execution`;
-    }
-
-    // ===== MARKET DATA =====
-    if (lower.includes('price') || lower.includes('cost') || lower.includes('rate')) {
-      if (state) {
-        return `📊 <span class="highlight">Current Market Prices:</span><br><br>Average: <span class="highlight">$${(state.averagePrice || 4.65).toFixed(2)}</span>/MT<br><span class="info">☕ Coffee:</span> $4.85/MT<br><span class="info">🍫 Cocoa:</span> $4.45/MT<br><br><span class="warning">💡 3% increase this week!</span>`;
-      }
-    }
-
-    if (lower.includes('active') || (lower.includes('auction') && lower.includes('how many'))) {
-      if (state) {
-        return `📊 <span class="highlight">Auction Activity:</span><br><br><span class="highlight">${state.activeAuctions || 2}</span> active auctions<br><span class="info">Total volume:</span> ${state.totalVolume || 105} MT<br><span class="warning">⏰ Average time remaining: 1:45</span>`;
-      }
+    if (lower.includes('trust') || lower.includes('safe') || lower.includes('secure')) {
+      return this.knowledge.trust;
     }
 
     // ===== DEFAULT =====
     return `🤖 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>
 
-I can answer questions about EVERYTHING in the TradeAux White Paper:
+I can answer questions about:
 
-🎯 <span class="info">The Core Idea</span>
-📋 <span class="info">The Problem</span> (Container inefficiency, fragmented supply/demand)
-🏛️ <span class="info">Kontor Theory</span> (Traditional & Magnetic)
-🛒 <span class="info">Marketplace Architecture</span> (Buyers, Sellers, Logistics, Finance)
-🧠 <span class="info">AI Agents</span> (Buyer AI, Seller AI, Container Captain, Freight AI, Finance AI)
-📊 <span class="info">Auctions</span> (Discovery, Pallet, Bulk, Freight, Receivable)
-🔄 <span class="info">The Flywheel</span>
+📋 <span class="info">What TradeAux is and how it works</span>
+🏛️ <span class="info">Kontors</span> (Traditional & Magnetic)
+🧠 <span class="info">AI Agents</span> (Buyer AI, Seller AI, Container Captain)
+📊 <span class="info">Auction Types</span> (Discovery, Pallet, Bulk, Freight, Receivable)
 💰 <span class="info">Fees & Holds</span>
+🔄 <span class="info">The Flywheel</span>
 💡 <span class="info">The Fundamental Insight</span>
 
-<br><span class="highlight">Try asking:</span><br>
-• "What is TradeAux?"<br>
-• "What is a Kontor?"<br>
-• "What are the auction types?"<br>
-• "How do the AI agents work?"<br>
-• "What are the fees?"<br>
-• "What is the Container Captain?"<br>
-• "How does the flywheel work?"<br>
-• "What's the difference between Davao and Koper?"<br>
+📈 <span class="info">I also watch auctions live!</span>
+• "What's happening in the auctions?"<br>
+• "Why did I lose?"<br>
+• "What's the best strategy now?"<br>
 
-<br><span class="warning">💡 I know the COMPLETE TradeAux architecture!</span>`;
+<br><span class="warning">💡 Ask me anything about TradeAux!</span>`;
   }
 }
 
 // ============================================================
-// INITIALIZE TAR CHAT
+// INITIALIZE EVERYTHING
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
   const chat = new TARChat();
   window.TARChat = chat;
+
+  const ticker = new TARTicker();
+  window.TARTicker = ticker;
+
+  const commentator = new TARAuctionCommentator();
+  window.TARCommentator = commentator;
+
+  console.log('🚀 TAR System Fully Loaded!');
+  console.log('   ✅ TAR Engine Ready');
+  console.log('   ✅ TAR Chat Ready');
+  console.log('   ✅ TAR Ticker Ready');
+  console.log('   ✅ TAR Commentator Ready');
 });
 </script>
 </body>
