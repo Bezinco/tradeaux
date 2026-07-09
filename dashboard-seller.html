@@ -122,6 +122,7 @@
     .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
     .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
 
+    /* ===== HEADER ===== */
     .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
     .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px; background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; }
@@ -138,6 +139,18 @@
     .top-trader { text-align: center; background: rgba(0, 0, 0, 0.5); padding: 12px 24px; border-radius: 40px; display: inline-block; width: auto; margin: 20px auto; border: 1px solid rgba(124, 252, 0, 0.3); backdrop-filter: blur(4px); font-family: 'Orbitron', sans-serif; font-size: 14px; }
     .banner-container { text-align: center; padding-top: 20px; }
 
+    /* ===== SLIDER STYLES ===== */
+    .slider-row { display: flex; align-items: center; gap: 16px; width: 100%; }
+    .slider-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #00ced1, #7CFC00); outline: none; }
+    .slider-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #00ced1; cursor: pointer; border: 2px solid #0a1228; box-shadow: 0 0 10px rgba(0,206,209,0.3); }
+    .slider-row input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #00ced1; cursor: pointer; border: 2px solid #0a1228; }
+    .slider-value { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #00ced1; min-width: 55px; text-align: right; }
+
+    .spec-group { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 3px solid #00ced1; }
+    .spec-group .spec-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .packaging-preview { background: rgba(0,206,209,0.05); border: 1px solid rgba(0,206,209,0.15); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #7CFC00; margin-top: 6px; display: inline-block; }
+
+    /* ===== COMPANY PROFILE ===== */
     .company-section { margin-top: 10px; }
     .company-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .company-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 24px; }
@@ -177,6 +190,7 @@
     .photo-upload-btn .icon { font-size: 28px; color: #00ced1; }
     .photo-upload-btn .text { font-size: 10px; color: #9ca3af; margin-top: 4px; }
 
+    /* ===== CERTIFICATIONS ===== */
     .section-card { background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95)); border-radius: 24px; padding: 24px; margin-bottom: 24px; backdrop-filter: blur(8px); position: relative; border: 2px solid transparent; background-clip: padding-box; }
     .section-card::before { content: ''; position: absolute; inset: -2px; border-radius: 26px; padding: 2px; background: linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00); background-size: 300% 300%; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; animation: borderFlow 4s ease infinite; }
     @keyframes borderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -204,6 +218,7 @@
     .btn-remove-cert { background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.4); color: #FF4D4D; padding: 2px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
     .btn-remove-cert:hover { background: rgba(255,77,77,0.3); border-color: #FF4D4D; }
 
+    /* ===== TAR SECTION ===== */
     .tar-section { margin-top: 30px; }
     .tar-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .tar-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
@@ -243,41 +258,35 @@
     .auction-item .auction-status.live { background: rgba(124,252,0,0.2); color: #7CFC00; animation: pulse 2s infinite; }
     .auction-item .auction-status.closed { background: rgba(255,59,59,0.2); color: #ff3b3b; }
 
+    /* ===== PRODUCTS ===== */
     .products-section { margin-top: 30px; }
     .products-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
     .product-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 16px; padding: 16px; transition: all 0.3s; display: flex; flex-direction: column; }
     .product-card:hover { transform: translateY(-4px); border-color: #00ced1; }
-    .product-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .product-name { font-weight: 700; font-size: 14px; line-height: 1.2; }
-    .product-name .variety { font-weight: 400; color: #9ca3af; font-size: 11px; display: block; }
-    .product-status { font-size: 10px; padding: 2px 10px; border-radius: 20px; white-space: nowrap; }
-    .product-status.listed { background: rgba(124,252,0,0.2); color: #7CFC00; }
-    .product-status.sold { background: rgba(0,206,209,0.2); color: #00ced1; }
-    .product-status.draft { background: rgba(255,217,102,0.2); color: #FFD966; }
-    .product-details { font-size: 11px; color: #9ca3af; margin: 4px 0; }
-    .product-details div { margin-bottom: 2px; }
-    .product-details .label { color: #666; }
-    .product-image-preview { width: 100%; height: 80px; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.3); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,206,209,0.2); flex-shrink: 0; }
-    .product-image-preview img { width: 100%; height: 100%; object-fit: cover; }
-    .product-image-preview .no-image { color: #9ca3af; font-size: 10px; }
-    .product-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
-    .product-actions button { padding: 4px 10px; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10px; cursor: pointer; transition: all 0.2s; }
-    .product-actions .edit-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
-    .product-actions .edit-btn:hover { background: rgba(255,217,102,0.3); }
-    .product-actions .list-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
-    .product-actions .list-btn:hover { background: rgba(0,102,255,0.3); }
-    .product-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
-    .product-actions .delete-btn:hover { background: rgba(255,59,59,0.25); }
-    .product-actions .auction-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
-    .product-actions .auction-btn:hover { background: rgba(0,206,209,0.3); }
-    .product-actions .auction-btn.scheduled { background: rgba(124,252,0,0.2); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
-    .product-actions .auction-btn.scheduled:hover { background: rgba(124,252,0,0.3); }
-    .add-product-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; cursor: pointer; transition: all 0.3s; }
+    .product-card .product-image { width: 100%; height: 120px; border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.3); margin-bottom: 10px; border: 1px solid rgba(0,206,209,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .product-card .product-image img { width: 100%; height: 100%; object-fit: cover; }
+    .product-card .product-image .no-image { color: #9ca3af; font-size: 12px; }
+    .product-card .product-name { font-weight: 700; font-size: 15px; }
+    .product-card .product-variety { color: #9ca3af; font-size: 12px; }
+    .product-card .product-specs { font-size: 11px; color: #9ca3af; margin: 6px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+    .product-card .product-specs .tag { background: rgba(0,206,209,0.08); padding: 1px 8px; border-radius: 10px; border: 1px solid rgba(0,206,209,0.1); }
+    .product-card .product-packaging { font-size: 11px; color: #7CFC00; margin: 4px 0; }
+    .product-card .product-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+    .product-card .product-actions button { padding: 4px 10px; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10px; cursor: pointer; transition: all 0.2s; }
+    .product-card .product-actions .post-auction-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .product-card .product-actions .post-auction-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+    .product-card .product-actions .post-auction-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .product-card .product-actions .edit-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
+    .product-card .product-actions .edit-btn:hover { background: rgba(255,217,102,0.3); }
+    .product-card .product-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
+    .product-card .product-actions .delete-btn:hover { background: rgba(255,59,59,0.25); }
+    .add-product-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; cursor: pointer; transition: all 0.3s; }
     .add-product-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
     .add-product-icon { font-size: 28px; color: #00ced1; margin-bottom: 6px; }
     .add-product-text { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #9ca3af; }
 
+    /* ===== ARCHIVE ===== */
     .archive-section { margin-top: 30px; }
     .archive-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #FFD966; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; cursor: pointer; padding: 12px 16px; background: rgba(255, 217, 102, 0.05); border-radius: 12px; border: 1px solid rgba(255, 217, 102, 0.2); transition: all 0.3s; }
     .archive-header:hover { background: rgba(255, 217, 102, 0.1); border-color: #FFD966; }
@@ -301,14 +310,7 @@
     .archive-header .toggle-icon { transition: transform 0.3s; }
     .archive-header.open .toggle-icon { transform: rotate(180deg); }
 
-    .simulation-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-    .simulation-detail .sim-item { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
-    .simulation-detail .sim-item label { font-size: 9px; color: #9ca3af; text-transform: uppercase; display: block; }
-    .simulation-detail .sim-item .value { font-family: 'Orbitron', sans-serif; font-size: 16px; color: #00ced1; }
-    .sim-chart { width: 100%; height: 100px; background: rgba(0,0,0,0.3); border-radius: 8px; margin: 12px 0; display: flex; align-items: flex-end; padding: 8px; gap: 4px; overflow-x: auto; }
-    .sim-chart .bar { flex: 1; min-width: 20px; background: linear-gradient(180deg, #00ced1, #0066ff); border-radius: 4px 4px 0 0; transition: height 0.5s ease; position: relative; }
-    .sim-chart .bar .bar-label { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 7px; color: #9ca3af; white-space: nowrap; }
-
+    /* ===== ORDERS ===== */
     .orders-section { margin-top: 30px; }
     .orders-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
@@ -334,49 +336,34 @@
     .order-actions .view-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
     .order-actions .view-btn:hover { background: rgba(0,102,255,0.3); }
 
+    /* ===== STATS ===== */
     .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 20px 0; }
     .stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
     .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: #00ced1; }
     .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; }
     .stat-icon { font-size: 28px; margin-bottom: 8px; }
 
+    /* ===== MODALS ===== */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
-    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
     .modal-content.wide { max-width: 800px; }
     .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; }
     .modal-close:hover { color: #00ced1; }
     .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
     .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
-    .modal-field { margin-bottom: 20px; }
-    .modal-field label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; color: white; font-family: 'Inter', sans-serif; font-size: 14px; }
-    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; }
-    .modal-field input[type="file"] { padding: 8px; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
-    .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
+    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 20px rgba(0,206,209,0.05); }
+    .modal-field .hint { font-size: 10px; color: #9ca3af; margin-top: 4px; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; }
     .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
     .cancel-btn:hover { background: rgba(255,255,255,0.2); }
-    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; color: #000; }
-    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.3); }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
 
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 12px 0; }
-    .calendar-grid .day-header { text-align: center; font-size: 11px; color: #9ca3af; padding: 4px; font-weight: 600; }
-    .calendar-grid .day { text-align: center; padding: 10px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; background: rgba(0,0,0,0.3); font-size: 14px; }
-    .calendar-grid .day:hover { background: rgba(0,206,209,0.2); transform: scale(1.05); }
-    .calendar-grid .day.selected { background: #00ced1; color: #000; font-weight: 700; }
-    .calendar-grid .day.empty { background: transparent; cursor: default; }
-    .calendar-grid .day.weekend { color: #ff6b6b; }
-    .calendar-grid .day.today { border: 2px solid #00ced1; }
-    .calendar-grid .day.past { opacity: 0.3; cursor: not-allowed; }
-    .time-slots { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-    .time-slot { padding: 6px 14px; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.2); cursor: pointer; transition: all 0.2s; font-size: 12px; }
-    .time-slot:hover { background: rgba(0,206,209,0.2); transform: scale(1.02); }
-    .time-slot.selected { background: #00ced1; color: #000; border-color: #00ced1; }
-    .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .calendar-nav button { background: rgba(0,206,209,0.15); border: 1px solid rgba(0,206,209,0.3); color: #00ced1; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; }
-    .calendar-nav button:hover { background: rgba(0,206,209,0.25); }
-    .calendar-nav .month-year { font-family: 'Orbitron', sans-serif; font-size: 16px; color: #00ced1; }
-
+    /* ===== TOAST ===== */
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; }
     .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
@@ -384,32 +371,21 @@
     .toast.warning { border-color: #FFD966; color: #FFD966; }
     .toast.info { border-color: #00ced1; color: #00ced1; }
 
-    .tour-overlay { display: none; position: fixed; inset: 0; z-index: 10000; pointer-events: none; }
-    .tour-overlay.active { display: block; pointer-events: auto; }
-    .tour-highlight { position: absolute; border: 3px solid #7CFC00; border-radius: 16px; box-shadow: 0 0 50px rgba(124,252,0,0.3); animation: tourPulse 2s ease-in-out infinite; pointer-events: none; }
-    @keyframes tourPulse { 0%, 100% { box-shadow: 0 0 30px rgba(124,252,0,0.2); } 50% { box-shadow: 0 0 60px rgba(124,252,0,0.5); } }
-    .tour-tooltip { position: absolute; background: rgba(2,6,23,0.95); border: 1px solid #7CFC00; border-radius: 12px; padding: 16px 20px; max-width: 320px; color: #e5e7eb; font-size: 13px; line-height: 1.6; pointer-events: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.8); z-index: 10001; max-height: 90vh; overflow-y: auto; }
-    .tour-tooltip h4 { font-family: 'Orbitron', sans-serif; color: #7CFC00; margin-bottom: 6px; font-size: 14px; }
-    .tour-tooltip .tour-btn { margin-top: 10px; padding: 6px 20px; background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; pointer-events: auto; }
-    .tour-tooltip .tour-btn:hover { transform: scale(1.02); }
-    .tour-progress { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10002; background: rgba(2,6,23,0.9); border: 1px solid rgba(0,206,209,0.3); border-radius: 30px; padding: 8px 20px; display: flex; align-items: center; gap: 12px; pointer-events: auto; }
-    .tour-progress .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
-    .tour-progress .dot.active { background: #7CFC00; box-shadow: 0 0 10px rgba(124,252,0,0.5); }
-    .tour-progress .dot.done { background: #00ced1; }
-    .tour-progress .tour-close { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; padding: 0 8px; }
-    .tour-progress .tour-close:hover { color: #ff3b3b; }
-
     .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 32px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; }
     .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
-    .btn-neon-primary { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 10px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; color: #010101; cursor: pointer; transition: 0.2s; }
-    .btn-neon-primary:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(16,185,129,0.4); }
     .tar-batch-btn { background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; transition: 0.2s; }
     .tar-batch-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(124,252,0,0.3); }
 
     .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
 
-    @media (max-width: 1000px) { .company-profile-layout { grid-template-columns: 1fr; } .company-fields { grid-template-columns: 1fr; } .dashboard-grid { grid-template-columns: repeat(2, 1fr); } .tar-grid { grid-template-columns: 1fr; } .tar-metrics { grid-template-columns: 1fr 1fr; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
-    @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: stretch; } .wallet-section { flex-wrap: wrap; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .tar-metrics { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr 1fr; } .calendar-grid .day { padding: 6px 2px; font-size: 12px; } }
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1000px) { .company-profile-layout { grid-template-columns: 1fr; } .company-fields { grid-template-columns: 1fr; } .dashboard-grid { grid-template-columns: repeat(2, 1fr); } .tar-grid { grid-template-columns: 1fr; } .tar-metrics { grid-template-columns: 1fr 1fr; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+    @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: stretch; } .wallet-section { flex-wrap: wrap; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .tar-metrics { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr; } }
+
+    .company-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .company-field { margin-bottom: 4px; }
+    .company-field label { display: block; font-size: 10px; color: #9ca3af; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .company-field .field-value { font-size: 13px; color: #e5e7eb; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
   </style>
   <base target="_self">
 </head>
@@ -578,6 +554,7 @@
   <div class="products-section" id="productsSection" data-tour="8">
     <div class="products-header">
       <span>📦 YOUR PRODUCTS</span>
+      <button class="deposit-btn" style="padding:6px 20px; font-size:12px; width:auto;" id="addProductBtn">+ Add Product</button>
     </div>
     <div class="products-grid" id="productsGrid"></div>
   </div>
@@ -625,34 +602,18 @@
           <span class="tar-status-text" id="tarStatusText">🟢 Active • Monitoring your auction pipeline</span>
         </div>
         <div class="tar-metrics">
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarReadyCount">0</div>
-            <div class="tar-metric-label">Ready to Convert</div>
-          </div>
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarPendingCount">0</div>
-            <div class="tar-metric-label">Pending Review</div>
-          </div>
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarConvertedCount">0</div>
-            <div class="tar-metric-label">Converted</div>
-          </div>
-          <div class="tar-metric">
-            <div class="tar-metric-value" id="tarFeesEarned">$0</div>
-            <div class="tar-metric-label">Fees Earned</div>
-          </div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarReadyCount">0</div><div class="tar-metric-label">Ready to Convert</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarPendingCount">0</div><div class="tar-metric-label">Pending Review</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarConvertedCount">0</div><div class="tar-metric-label">Converted</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarFeesEarned">$0</div><div class="tar-metric-label">Fees Earned</div></div>
         </div>
-        <div id="tarReceivablesList">
-          <div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;">Loading your auction data...</div>
-        </div>
+        <div id="tarReceivablesList"><div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;">Loading your auction data...</div></div>
       </div>
       <div class="tar-card" id="tarAdvisoryCard">
         <h4 style="font-family:'Orbitron',sans-serif; font-size:14px; color:#FFD966; margin-bottom:12px;">💡 TAR ADVISORY</h4>
         <div class="tar-advisory" id="tarAdvisory">
           <div class="tar-advisory-title">📊 AUCTION INSIGHT</div>
-          <div class="tar-advisory-text" id="tarAdvisoryText">
-            Loading auction intelligence...
-          </div>
+          <div class="tar-advisory-text" id="tarAdvisoryText">Loading auction intelligence...</div>
         </div>
         <div style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; border-left:3px solid #00ced1;">
           <div style="font-size:11px; color:#9ca3af; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -664,13 +625,8 @@
           </div>
         </div>
         <div class="auction-schedule" id="auctionSchedule">
-          <div class="auction-schedule-header">
-            <span class="title">📅 YOUR UPCOMING AUCTIONS</span>
-            <button class="auction-refresh-btn" id="auctionRefreshBtn">🔄 Refresh</button>
-          </div>
-          <div id="auctionList">
-            <div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">No auctions scheduled yet. Create one from your products!</div>
-          </div>
+          <div class="auction-schedule-header"><span class="title">📅 YOUR UPCOMING AUCTIONS</span><button class="auction-refresh-btn" id="auctionRefreshBtn">🔄 Refresh</button></div>
+          <div id="auctionList"><div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">No auctions scheduled yet. Create one from your products!</div></div>
         </div>
         <div style="margin-top:12px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px;">
           <div style="display:flex; justify-content:space-between; font-size:11px; color:#9ca3af; flex-wrap:wrap;">
@@ -711,14 +667,14 @@
 </div>
 
 <!-- ===== TOUR OVERLAY ===== -->
-<div class="tour-overlay" id="tourOverlay">
-  <div class="tour-highlight" id="tourHighlight"></div>
-  <div class="tour-tooltip" id="tourTooltip">
-    <h4 id="tourTitle">Welcome to Your Dashboard</h4>
-    <p id="tourDescription">This is your command center. Let's take a quick tour.</p>
-    <button class="tour-btn" id="tourNextBtn">Next →</button>
+<div class="tour-overlay" id="tourOverlay" style="display:none; position:fixed; inset:0; z-index:10000; pointer-events:none;">
+  <div class="tour-highlight" id="tourHighlight" style="position:absolute; border:3px solid #7CFC00; border-radius:16px; box-shadow:0 0 50px rgba(124,252,0,0.3); pointer-events:none;"></div>
+  <div class="tour-tooltip" id="tourTooltip" style="position:absolute; background:rgba(2,6,23,0.95); border:1px solid #7CFC00; border-radius:12px; padding:16px 20px; max-width:320px; color:#e5e7eb; font-size:13px; line-height:1.6; pointer-events:auto; box-shadow:0 20px 60px rgba(0,0,0,0.8); z-index:10001; max-height:90vh; overflow-y:auto;">
+    <h4 id="tourTitle" style="font-family:'Orbitron',sans-serif; color:#7CFC00; margin-bottom:6px; font-size:14px;">Welcome</h4>
+    <p id="tourDescription">This is your command center.</p>
+    <button class="tour-btn" id="tourNextBtn" style="margin-top:10px; padding:6px 20px; background:linear-gradient(135deg, #7CFC00, #00ced1); border:none; border-radius:20px; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:#000; cursor:pointer; pointer-events:auto;">Next →</button>
   </div>
-  <div class="tour-progress" id="tourProgress">
+  <div class="tour-progress" id="tourProgress" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:10002; background:rgba(2,6,23,0.9); border:1px solid rgba(0,206,209,0.3); border-radius:30px; padding:8px 20px; display:flex; align-items:center; gap:12px; pointer-events:auto;">
     <span class="dot active" data-step="0"></span>
     <span class="dot" data-step="1"></span>
     <span class="dot" data-step="2"></span>
@@ -728,7 +684,7 @@
     <span class="dot" data-step="6"></span>
     <span class="dot" data-step="7"></span>
     <span class="dot" data-step="8"></span>
-    <button class="tour-close" id="tourCloseBtn">✕</button>
+    <button class="tour-close" id="tourCloseBtn" style="background:none; border:none; color:#9ca3af; cursor:pointer; font-size:16px; padding:0 8px;">✕</button>
   </div>
 </div>
 
@@ -738,171 +694,265 @@
 <div class="modal" id="productModal">
   <div class="modal-content wide">
     <span class="modal-close" onclick="closeModal('productModal')">&times;</span>
-    <div class="modal-header"><h2 id="productModalTitle">📦 List Product</h2></div>
+    <div class="modal-header"><h2 id="productModalTitle">📦 Add/Edit Product</h2></div>
     <div id="productModalBody">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field">
-          <label>Product Name *</label>
-          <input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee">
-        </div>
-        <div class="modal-field">
-          <label>Variety</label>
-          <input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade">
-        </div>
+        <div class="modal-field"><label>Product Name *</label><input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee"></div>
+        <div class="modal-field"><label>Variety</label><input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade"></div>
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field">
-          <label>Quantity *</label>
-          <input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1">
-        </div>
-        <div class="modal-field">
-          <label>Unit</label>
-          <select id="productUnitInput">
-            <option value="kg">Kilograms (kg)</option>
-            <option value="tons">Metric Tons</option>
-            <option value="bags">Bags (60kg)</option>
-            <option value="pallets">Pallets</option>
-            <option value="cbm">Cubic Meters (m³)</option>
-          </select>
-        </div>
+        <div class="modal-field"><label>Quantity (MT) *</label><input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1" step="0.01"></div>
+        <div class="modal-field"><label>Grade</label><select id="productGradeInput"><option value="Grade A">Grade A (Premium)</option><option value="Grade B">Grade B (Standard)</option><option value="Grade C">Grade C (Good)</option><option value="Organic">Organic Certified</option><option value="Fair Trade">Fair Trade Certified</option></select></div>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field">
-          <label>Price per Unit ($) *</label>
-          <input type="number" id="productPriceInput" placeholder="e.g., 4.50" step="0.01" min="0.01">
-        </div>
-        <div class="modal-field">
-          <label>Status</label>
-          <select id="productStatusInput">
-            <option value="listed">Listed (Available)</option>
-            <option value="draft">Draft (Hidden)</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-field">
-        <label>Description</label>
-        <textarea id="productDescInput" rows="3" placeholder="Describe your product..."></textarea>
-      </div>
-      <div class="modal-field">
-        <label>Origin</label>
-        <input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil">
-      </div>
+      <div class="modal-field"><label>Origin</label><input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil"></div>
+
       <div class="modal-field">
         <label>Product Images</label>
         <input type="file" id="productImagesInput" accept=".jpg,.png,.jpeg" multiple>
         <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Upload up to 5 images</div>
+        <div id="productImagePreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label>📦 Packaging</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div>
+            <label style="font-size:10px; color:#9ca3af;">Package Type</label>
+            <select id="productPackageType">
+              <option value="">Select...</option>
+              <optgroup label="Bags">
+                <option value="Paper Bag">Paper Bag</option>
+                <option value="Plastic Bag">Plastic Bag</option>
+                <option value="Jute Bag">Jute Bag</option>
+                <option value="PP Woven Bag">PP Woven Bag</option>
+                <option value="Cotton Bag">Cotton Bag</option>
+                <option value="Burlap Sack">Burlap Sack</option>
+              </optgroup>
+              <optgroup label="Boxes">
+                <option value="Cardboard Box">Cardboard Box</option>
+                <option value="Wooden Crate">Wooden Crate</option>
+                <option value="Plastic Crate">Plastic Crate</option>
+                <option value="Corrugated Box">Corrugated Box</option>
+              </optgroup>
+              <optgroup label="Drums">
+                <option value="Plastic Drum">Plastic Drum</option>
+                <option value="Steel Drum">Steel Drum</option>
+                <option value="Fiber Drum">Fiber Drum</option>
+              </optgroup>
+              <optgroup label="Containers">
+                <option value="Flexitank">Flexitank</option>
+                <option value="IBC Tote">IBC Tote</option>
+                <option value="Bulk Container">Bulk Container</option>
+                <option value="ISO Container">ISO Container</option>
+              </optgroup>
+              <optgroup label="Pallets">
+                <option value="Palletized (Shrink Wrap)">Palletized (Shrink Wrap)</option>
+                <option value="Palletized (Stretch Wrap)">Palletized (Stretch Wrap)</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="Carton">Carton</option>
+                <option value="Sacks">Sacks</option>
+                <option value="Bale">Bale</option>
+                <option value="Can">Can</option>
+                <option value="Tin">Tin</option>
+                <option value="Jar">Jar</option>
+                <option value="Bottle">Bottle</option>
+                <option value="Bulk (Loose)">Bulk (Loose)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px; color:#9ca3af;">Package Size</label>
+            <select id="productPackageSize">
+              <option value="">Select...</option>
+              <optgroup label="Weight (kg)">
+                <option value="1kg">1kg</option><option value="5kg">5kg</option><option value="10kg">10kg</option>
+                <option value="15kg">15kg</option><option value="20kg">20kg</option><option value="25kg">25kg</option>
+                <option value="30kg">30kg</option><option value="40kg">40kg</option><option value="50kg">50kg</option>
+                <option value="60kg">60kg</option><option value="80kg">80kg</option><option value="100kg">100kg</option>
+                <option value="200kg">200kg</option><option value="500kg">500kg</option><option value="1000kg">1000kg</option>
+              </optgroup>
+              <optgroup label="Weight (lbs)">
+                <option value="2lbs">2lbs</option><option value="5lbs">5lbs</option><option value="10lbs">10lbs</option>
+                <option value="20lbs">20lbs</option><option value="25lbs">25lbs</option><option value="50lbs">50lbs</option>
+                <option value="100lbs">100lbs</option><option value="200lbs">200lbs</option><option value="500lbs">500lbs</option>
+                <option value="1000lbs">1000lbs</option>
+              </optgroup>
+              <optgroup label="Volume (litres)">
+                <option value="1L">1L</option><option value="5L">5L</option><option value="10L">10L</option>
+                <option value="20L">20L</option><option value="25L">25L</option><option value="50L">50L</option>
+                <option value="100L">100L</option><option value="200L">200L</option><option value="500L">500L</option>
+                <option value="1000L">1000L</option>
+              </optgroup>
+              <optgroup label="Volume (gallons)">
+                <option value="1gal">1gal</option><option value="5gal">5gal</option><option value="10gal">10gal</option>
+                <option value="20gal">20gal</option><option value="25gal">25gal</option><option value="50gal">50gal</option>
+                <option value="100gal">100gal</option><option value="200gal">200gal</option><option value="500gal">500gal</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div id="packagingPreview" class="packaging-preview" style="margin-top:8px;">Select packaging above</div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label>🔬 Product Specifications</label>
+        
+        <div class="spec-group">
+          <div class="spec-label"><span>💧 Moisture Content</span><span>0-20%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productMoisture" min="0" max="20" step="0.1" value="12">
+            <span class="slider-value" id="productMoistureVal">12.0%</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>📏 Screen Size</span><span>10-20</span></div>
+          <div class="slider-row">
+            <input type="range" id="productScreenSize" min="10" max="20" step="0.5" value="15">
+            <span class="slider-value" id="productScreenSizeVal">15.0</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>🔬 Defects</span><span>0-10%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productDefects" min="0" max="10" step="0.1" value="2">
+            <span class="slider-value" id="productDefectsVal">2.0%</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>🌾 Foreign Matter</span><span>0-5%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productForeignMatter" min="0" max="5" step="0.1" value="0.5">
+            <span class="slider-value" id="productForeignMatterVal">0.5%</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>🧪 Protein Content (optional)</span><span>0-30%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productProtein" min="0" max="30" step="0.1" value="0">
+            <span class="slider-value" id="productProteinVal">0.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAdvancedSpecs()">
+          <label style="margin:0; cursor:pointer;">🔬 Advanced Specs <span style="font-size:10px; color:#9ca3af;">(optional)</span></label>
+          <span id="advancedSpecsToggle" style="color:#00ced1;">▼ Expand</span>
+        </div>
+        <div id="advancedSpecsContainer" style="display:none; margin-top:12px;">
+          <div class="spec-group" style="border-left-color:#FFD966;">
+            <div class="spec-label"><span>🧫 Aflatoxin</span><span>0-20 ppb</span></div>
+            <div class="slider-row">
+              <input type="range" id="productAflatoxin" min="0" max="20" step="0.5" value="0">
+              <span class="slider-value" id="productAflatoxinVal">0 ppb</span>
+            </div>
+            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
+          </div>
+
+          <div class="spec-group" style="border-left-color:#FFD966;">
+            <div class="spec-label"><span>🫒 Oil Content</span><span>0-60%</span></div>
+            <div class="slider-row">
+              <input type="range" id="productOilContent" min="0" max="60" step="0.5" value="0">
+              <span class="slider-value" id="productOilContentVal">0.0%</span>
+            </div>
+            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
+          </div>
+
+          <div class="spec-group" style="border-left-color:#FFD966;">
+            <div class="spec-label"><span>🎨 Color Grade</span><span>0-100</span></div>
+            <div class="slider-row">
+              <input type="range" id="productColorGrade" min="0" max="100" step="1" value="0">
+              <span class="slider-value" id="productColorGradeVal">0</span>
+            </div>
+            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label>💰 Ideal Price (for knapsack optimization)</label>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:12px; color:#9ca3af;">$0.10</span>
+          <input type="range" id="productIdealPrice" min="0.10" max="100" step="0.05" value="4.25" style="flex:1;">
+          <span style="font-size:12px; color:#9ca3af;">$100.00</span>
+        </div>
+        <div style="text-align:center; font-family:'Orbitron',sans-serif; font-size:20px; color:#7CFC00; margin-top:4px;" id="productIdealPriceVal">$4.25 / MT</div>
+        <div style="font-size:10px; color:#9ca3af; text-align:center;">💡 This price guides the knapsack algorithm — not shown to buyers</div>
       </div>
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('productModal')">Cancel</button>
-      <button class="create-btn" onclick="saveProduct()">💾 Save</button>
-      <button class="create-btn" onclick="saveProductAndSchedule()" style="background: linear-gradient(135deg, #7CFC00, #00ced1);">📅 Save &amp; Schedule Auction</button>
+      <button class="create-btn" id="saveProductBtn">💾 Save</button>
+      <button class="create-btn" id="saveAndPostBtn" style="background: linear-gradient(135deg, #7CFC00, #00ced1);">📅 Save &amp; Post Auction</button>
     </div>
   </div>
 </div>
 
-<!-- Auction Schedule Modal -->
+<!-- ===== POST AUCTION MODAL ===== -->
 <div class="modal" id="auctionModal">
-  <div class="modal-content" style="max-width:500px;">
+  <div class="modal-content" style="max-width:550px;">
     <span class="modal-close" onclick="closeModal('auctionModal')">&times;</span>
-    <div class="modal-header"><h2 id="auctionModalTitle">📅 Schedule Auction</h2></div>
+    <div class="modal-header"><h2>📅 Post Auction</h2></div>
     <div id="auctionModalBody">
       <div class="modal-field">
         <label>Product</label>
         <div id="auctionProductDisplay" style="padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:14px; color:#00ced1;"></div>
       </div>
       <div class="modal-field">
-        <label>Quantity to Auction</label>
-        <input type="number" id="auctionQuantity" placeholder="Enter quantity" min="1">
-        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Available: <span id="auctionAvailableQty">0</span></div>
+        <label>Quantity to Auction (MT) *</label>
+        <input type="number" id="auctionQty" placeholder="Enter quantity" min="1" step="0.01" required>
+        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Available: <span id="auctionAvailableQty">0</span> MT</div>
       </div>
       <div class="modal-field">
-        <label>Select Date &amp; Time</label>
-        <div class="calendar-nav">
-          <button id="calendarPrev">‹</button>
-          <span class="month-year" id="calendarMonthYear"></span>
-          <button id="calendarNext">›</button>
-        </div>
-        <div class="calendar-grid" id="calendarGrid"></div>
-        <div class="time-slots" id="timeSlots">
-          <div class="time-slot" data-time="09:00">9:00 AM</div>
-          <div class="time-slot" data-time="10:00">10:00 AM</div>
-          <div class="time-slot" data-time="11:00">11:00 AM</div>
-          <div class="time-slot" data-time="12:00">12:00 PM</div>
-          <div class="time-slot" data-time="13:00">1:00 PM</div>
-          <div class="time-slot" data-time="14:00">2:00 PM</div>
-          <div class="time-slot" data-time="15:00">3:00 PM</div>
-          <div class="time-slot" data-time="16:00">4:00 PM</div>
-        </div>
-        <div style="margin-top:8px; font-size:12px; color:#9ca3af;">
-          Selected: <span id="selectedDateTime" style="color:#00ced1;">None</span>
-        </div>
+        <label>Auction Date &amp; Time *</label>
+        <input type="datetime-local" id="auctionDateTime" required>
       </div>
       <div class="modal-field">
         <label>Auction Duration</label>
-        <select id="auctionDuration">
-          <option value="1">1 Hour</option>
-          <option value="2">2 Hours</option>
-          <option value="4">4 Hours</option>
-          <option value="8">8 Hours</option>
-          <option value="24">24 Hours</option>
-          <option value="48">48 Hours</option>
-          <option value="72">72 Hours (3 Days)</option>
-        </select>
+        <select id="auctionDuration"><option value="1">1 Hour</option><option value="2">2 Hours</option><option value="4">4 Hours</option><option value="8">8 Hours</option><option value="24" selected>24 Hours</option><option value="48">48 Hours</option><option value="72">72 Hours</option></select>
       </div>
       <div class="modal-field">
-        <label>Starting Price ($/unit)</label>
-        <input type="number" id="auctionStartingPrice" placeholder="Enter starting price" step="0.01" min="0.01">
+        <label>Location (Kontor) *</label>
+        <select id="auctionLocation"><option value="Santos">Santos, Brazil</option><option value="Mombasa">Mombasa, Kenya</option><option value="Jakarta">Jakarta, Indonesia</option><option value="Ho Chi Minh City">Ho Chi Minh City, Vietnam</option><option value="Colombo">Colombo, Sri Lanka</option><option value="Guayaquil">Guayaquil, Ecuador</option><option value="Abidjan">Abidjan, Ivory Coast</option><option value="Lagos">Lagos, Nigeria</option></select>
       </div>
       <div class="modal-field">
-        <label>Brief Message</label>
-        <textarea id="auctionMessage" rows="3" placeholder="Describe your auction brief..."></textarea>
+        <label>Brief Notes</label>
+        <textarea id="auctionNotes" rows="3" placeholder="Quality, packaging, inspection, shipping terms..."></textarea>
       </div>
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('auctionModal')">Cancel</button>
-      <button class="create-btn" id="scheduleAuctionBtn" onclick="scheduleAuction()">📅 Schedule Auction</button>
+      <button class="create-btn" id="submitAuctionBtn">📤 Post Auction</button>
     </div>
   </div>
 </div>
 
-<!-- Simulation Modal -->
-<div class="modal" id="simulationModal">
-  <div class="modal-content wide">
-    <span class="modal-close" onclick="closeModal('simulationModal')">&times;</span>
-    <div class="modal-header"><h2>📊 Simulation: <span id="simTitle">Auction Analysis</span></h2></div>
-    <div id="simulationBody">
-      <div class="simulation-detail" id="simDetails"></div>
-      <div style="margin: 16px 0;">
-        <h4 style="font-family:'Orbitron',sans-serif; font-size:12px; color:#FFD966; margin-bottom:8px;">📈 Price History</h4>
-        <div class="sim-chart" id="simChart"></div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:12px 0;" id="simMetrics">
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; text-align:center;">
-          <div style="font-size:9px; color:#9ca3af;">WIN RATE</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:20px; color:#7CFC00;" id="simWinRate">0%</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; text-align:center;">
-          <div style="font-size:9px; color:#9ca3af;">AVG PRICE</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:20px; color:#00ced1;" id="simAvgPrice">$0</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; text-align:center;">
-          <div style="font-size:9px; color:#9ca3af;">TOTAL VALUE</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:20px; color:#FFD966;" id="simTotalValue">$0</div>
-        </div>
-      </div>
-      <div style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; border-left:3px solid #FFD966;">
-        <div style="font-size:11px; color:#9ca3af;">💡 <strong>Simulation Insights:</strong> <span id="simInsights">Loading analysis...</span></div>
-      </div>
-    </div>
+<!-- ===== COMPANY MODAL ===== -->
+<div class="modal" id="companyModal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal('companyModal')">&times;</span>
+    <div class="modal-header"><h2>🏢 Edit Company Profile</h2></div>
+    <div class="modal-field"><label>Company Name</label><input type="text" id="editCompanyName"></div>
+    <div class="modal-field"><label>Registration Number</label><input type="text" id="editCompanyReg"></div>
+    <div class="modal-field"><label>Country</label><input type="text" id="editCompanyCountry"></div>
+    <div class="modal-field"><label>Tax Registration Number</label><input type="text" id="editCompanyTax"></div>
+    <div class="modal-field"><label>Business Address</label><textarea id="editCompanyAddress" rows="2"></textarea></div>
+    <div class="modal-field"><label>Contact Email</label><input type="email" id="editCompanyEmail"></div>
+    <div class="modal-field"><label>Contact Phone</label><input type="tel" id="editCompanyPhone"></div>
+    <div class="modal-field"><label>Website</label><input type="text" id="editCompanyWebsite"></div>
     <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('simulationModal')">Close</button>
-      <button class="create-btn" onclick="runFullSimulation()" style="background: linear-gradient(135deg, #FFD966, #FFB347);">🔄 Run Full Simulation</button>
+      <button class="cancel-btn" onclick="closeModal('companyModal')">Cancel</button>
+      <button class="create-btn" onclick="saveCompanyProfile()">Save Profile</button>
     </div>
   </div>
 </div>
 
-<!-- Order Modal -->
+<!-- ===== ORDER MODAL ===== -->
 <div class="modal" id="orderModal">
   <div class="modal-content wide">
     <span class="modal-close" onclick="closeModal('orderModal')">&times;</span>
@@ -936,60 +986,28 @@
   </div>
 </div>
 
-<!-- Company Edit Modal -->
-<div class="modal" id="companyModal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="closeModal('companyModal')">&times;</span>
-    <div class="modal-header"><h2>🏢 Edit Company Profile</h2></div>
-    <div class="modal-field"><label>Company Name</label><input type="text" id="editCompanyName"></div>
-    <div class="modal-field"><label>Registration Number</label><input type="text" id="editCompanyReg"></div>
-    <div class="modal-field"><label>Country</label><input type="text" id="editCompanyCountry"></div>
-    <div class="modal-field"><label>Tax Registration Number</label><input type="text" id="editCompanyTax"></div>
-    <div class="modal-field"><label>Business Address</label><textarea id="editCompanyAddress" rows="2"></textarea></div>
-    <div class="modal-field"><label>Contact Email</label><input type="email" id="editCompanyEmail"></div>
-    <div class="modal-field"><label>Contact Phone</label><input type="tel" id="editCompanyPhone"></div>
-    <div class="modal-field"><label>Website</label><input type="text" id="editCompanyWebsite"></div>
-    <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('companyModal')">Cancel</button>
-      <button class="create-btn" onclick="saveCompanyProfile()">Save Profile</button>
-    </div>
-  </div>
-</div>
-
-<!-- Deposit Modal -->
-<div class="modal" id="depositModal">
-  <div class="modal-content" style="max-width:400px;">
-    <span class="modal-close" onclick="closeModal('depositModal')">&times;</span>
-    <div class="modal-header"><h2>💰 Deposit Funds</h2></div>
-    <div class="modal-field">
-      <label>Amount ($)</label>
-      <input type="number" id="depositAmount" placeholder="5000" min="100">
-    </div>
-    <div class="modal-field">
-      <label>Payment Method</label>
-      <select id="depositMethod">
-        <option>Wire Transfer</option>
-        <option>USDC (ERC-20)</option>
-        <option>USDT (TRC-20)</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('depositModal')">Cancel</button>
-      <button class="create-btn" onclick="processDeposit()">Confirm Deposit</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
+<!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
-// FULL JAVASCRIPT - Same as previous working version
-// (All functions: state, storage, render, auction, archive, simulation)
+// CERT_LABELS — GLOBAL SCOPE
 // ============================================================
+const CERT_LABELS = {
+  incorporation: { icon: '🏢', label: 'Incorporation', desc: 'Required - Admin Verified' },
+  export: { icon: '📄', label: 'Export License', desc: 'Government export capacity' },
+  organic: { icon: '🌱', label: 'Organic', desc: 'Organic certification' },
+  fairtrade: { icon: '🤝', label: 'Fair Trade', desc: 'Fair Trade certified' },
+  kosher: { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
+  halal: { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
+  brcgs: { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
+  origin: { icon: '🌍', label: 'Origin', desc: 'Certificate of Origin' },
+  iso: { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
+  foodsafety: { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' },
+  other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
+};
 
-/* ==================== STATE & CONFIG ==================== */
+/* ==================== STATE ==================== */
 const APP_STATE = {
   wallet: { balance: 250000 },
   company: { name: '', reg: '', country: '', tax: '', address: '', email: '', phone: '', website: '', verified: 'pending', logo: null, documents: {}, photos: [] },
@@ -1041,6 +1059,10 @@ const APP_STATE = {
   }
 };
 
+let toastTimeout = null;
+let statusTimer = null;
+let advancedSpecsOpen = false;
+
 /* ==================== UTILITIES ==================== */
 function $(id) { return document.getElementById(id); }
 function uuid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c=='x'?r:(r&0x3|0x8)).toString(16); }); }
@@ -1059,331 +1081,333 @@ function showToast(msg, type='info') {
   t._timeout = setTimeout(() => t.className = 'toast', 4000);
 }
 
-function openModal(id) {
-  const el = $(id);
-  if (el) el.style.display = 'flex';
+function openModal(id) { const el = $(id); if (el) el.style.display = 'flex'; }
+function closeModal(id) { const el = $(id); if (el) el.style.display = 'none'; APP_STATE.currentEditId = null; APP_STATE.currentAuctionProductId = null; }
+
+function toggleAdvancedSpecs() {
+  advancedSpecsOpen = !advancedSpecsOpen;
+  const container = $('advancedSpecsContainer');
+  const toggle = $('advancedSpecsToggle');
+  if (container) container.style.display = advancedSpecsOpen ? 'block' : 'none';
+  if (toggle) toggle.textContent = advancedSpecsOpen ? '▲ Collapse' : '▼ Expand';
 }
 
-function closeModal(id) {
-  const el = $(id);
-  if (el) el.style.display = 'none';
-  APP_STATE.currentEditId = null;
-  APP_STATE.currentOrderId = null;
-  APP_STATE.currentAuctionProductId = null;
+/* ==================== SLIDER HELPERS ==================== */
+function setupSlider(id, valId, suffix, decimals = 1) {
+  const input = $(id);
+  const display = $(valId);
+  if (!input || !display) return;
+  input.addEventListener('input', function() {
+    const val = parseFloat(this.value);
+    display.textContent = val.toFixed(decimals) + suffix;
+  });
+  const initial = parseFloat(input.value);
+  display.textContent = initial.toFixed(decimals) + suffix;
 }
 
-function signOut() {
-  const keysToRemove = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('tradeaux_')) keysToRemove.push(key);
+function setupIdealPriceSlider() {
+  const input = $('productIdealPrice');
+  const display = $('productIdealPriceVal');
+  if (!input || !display) return;
+  input.addEventListener('input', function() {
+    const val = parseFloat(this.value);
+    display.textContent = '$' + val.toFixed(2) + ' / MT';
+  });
+}
+
+function setupPackagingPreview() {
+  const typeSelect = $('productPackageType');
+  const sizeSelect = $('productPackageSize');
+  const preview = $('packagingPreview');
+  if (!typeSelect || !sizeSelect || !preview) return;
+  function updatePreview() {
+    const type = typeSelect.value || '?';
+    const size = sizeSelect.value || '?';
+    preview.textContent = type + ' — ' + size;
+    preview.style.color = (type && size) ? '#7CFC00' : '#9ca3af';
   }
-  keysToRemove.forEach(k => localStorage.removeItem(k));
-  sessionStorage.clear();
-  window.location.href = 'index.html';
+  typeSelect.addEventListener('change', updatePreview);
+  sizeSelect.addEventListener('change', updatePreview);
+  updatePreview();
 }
 
-/* ==================== CALENDAR ==================== */
-function renderCalendar() {
-  const grid = $('calendarGrid');
-  const monthYear = $('calendarMonthYear');
-  if (!grid || !monthYear) return;
-  const month = APP_STATE.calendarMonth;
-  const year = APP_STATE.calendarYear;
-  monthYear.textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const today = new Date();
-  const todayDate = today.getDate();
-  const todayMonth = today.getMonth();
-  const todayYear = today.getFullYear();
-  let html = '';
-  const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  dayHeaders.forEach(d => html += `<div class="day-header">${d}</div>`);
-  for (let i = 0; i < firstDay; i++) {
-    html += `<div class="day empty"></div>`;
+/* ==================== GATHER PRODUCT DATA ==================== */
+function gatherProductData() {
+  const name = $('productNameInput').value.trim();
+  const variety = $('productVarietyInput').value.trim();
+  const quantity = parseFloat($('productQuantityInput').value);
+  const grade = $('productGradeInput').value;
+  const origin = $('productOriginInput').value.trim();
+  
+  if (!name) { showToast('Product name is required', 'error'); return null; }
+  if (!quantity || quantity <= 0) { showToast('Enter a valid quantity', 'error'); return null; }
+  
+  return {
+    name: name,
+    variety: variety || '',
+    quantity: quantity,
+    grade: grade,
+    origin: origin || 'Not specified',
+    packageType: $('productPackageType').value || '',
+    packageSize: $('productPackageSize').value || '',
+    moisture: parseFloat($('productMoisture').value) || 0,
+    screenSize: parseFloat($('productScreenSize').value) || 0,
+    defects: parseFloat($('productDefects').value) || 0,
+    foreignMatter: parseFloat($('productForeignMatter').value) || 0,
+    protein: parseFloat($('productProtein').value) || 0,
+    aflatoxin: parseFloat($('productAflatoxin').value) || 0,
+    oilContent: parseFloat($('productOilContent').value) || 0,
+    colorGrade: parseFloat($('productColorGrade').value) || 0,
+    idealPrice: parseFloat($('productIdealPrice').value) || 0
+  };
+}
+
+function loadProductIntoModal(product) {
+  if (!product) return;
+  $('productNameInput').value = product.name || '';
+  $('productVarietyInput').value = product.variety || '';
+  $('productQuantityInput').value = product.quantity || '';
+  $('productGradeInput').value = product.grade || 'Grade A';
+  $('productOriginInput').value = product.origin || '';
+  $('productPackageType').value = product.packageType || '';
+  $('productPackageSize').value = product.packageSize || '';
+  const preview = $('packagingPreview');
+  if (preview) preview.textContent = (product.packageType && product.packageSize) ? product.packageType + ' — ' + product.packageSize : 'Select packaging above';
+  if (preview && product.packageType && product.packageSize) preview.style.color = '#7CFC00';
+  $('productMoisture').value = product.moisture || 12;
+  $('productMoistureVal').textContent = (product.moisture || 12).toFixed(1) + '%';
+  $('productScreenSize').value = product.screenSize || 15;
+  $('productScreenSizeVal').textContent = (product.screenSize || 15).toFixed(1);
+  $('productDefects').value = product.defects || 2;
+  $('productDefectsVal').textContent = (product.defects || 2).toFixed(1) + '%';
+  $('productForeignMatter').value = product.foreignMatter || 0.5;
+  $('productForeignMatterVal').textContent = (product.foreignMatter || 0.5).toFixed(1) + '%';
+  $('productProtein').value = product.protein || 0;
+  $('productProteinVal').textContent = (product.protein || 0).toFixed(1) + '%';
+  $('productAflatoxin').value = product.aflatoxin || 0;
+  $('productAflatoxinVal').textContent = (product.aflatoxin || 0).toFixed(1) + ' ppb';
+  $('productOilContent').value = product.oilContent || 0;
+  $('productOilContentVal').textContent = (product.oilContent || 0).toFixed(1) + '%';
+  $('productColorGrade').value = product.colorGrade || 0;
+  $('productColorGradeVal').textContent = (product.colorGrade || 0);
+  $('productIdealPrice').value = product.idealPrice || 4.25;
+  $('productIdealPriceVal').textContent = '$' + (product.idealPrice || 4.25).toFixed(2) + ' / MT';
+  const previewContainer = $('productImagePreview');
+  if (previewContainer && product.images && product.images.length > 0) {
+    previewContainer.innerHTML = '';
+    product.images.forEach(src => {
+      const img = document.createElement('img');
+      img.src = src;
+      img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
+      previewContainer.appendChild(img);
+    });
   }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = (d === todayDate && month === todayMonth && year === todayYear);
-    const isPast = (year < todayYear) || (year === todayYear && month < todayMonth) || (year === todayYear && month === todayMonth && d < todayDate);
-    const isWeekend = (new Date(year, month, d).getDay() === 0 || new Date(year, month, d).getDay() === 6);
-    const isSelected = (APP_STATE.selectedDate === `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
-    let classes = 'day';
-    if (isToday) classes += ' today';
-    if (isPast) classes += ' past';
-    if (isWeekend) classes += ' weekend';
-    if (isSelected) classes += ' selected';
-    if (!isPast) classes += ' clickable';
-    html += `<div class="${classes}" data-date="${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}" onclick="${isPast ? '' : 'selectDate(this)'}">${d}</div>`;
+}
+
+/* ==================== SAVE PRODUCT ==================== */
+function saveProduct(callback) {
+  const productData = gatherProductData();
+  if (!productData) return;
+  const imagesInput = $('productImagesInput');
+  if (imagesInput && imagesInput.files.length > 0) {
+    const maxImages = Math.min(imagesInput.files.length, 5);
+    const imageUrls = [];
+    let processed = 0;
+    Array.from(imagesInput.files).slice(0, 5).forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imageUrls[index] = e.target.result;
+        processed++;
+        if (processed === maxImages) {
+          productData.images = imageUrls.filter(Boolean);
+          saveProductData(productData, callback);
+        }
+      };
+      reader.onerror = () => {
+        processed++;
+        if (processed === maxImages) {
+          productData.images = imageUrls.filter(Boolean);
+          saveProductData(productData, callback);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    if (imagesInput.files.length > 5) {
+      showToast('Only first 5 images will be saved', 'warning');
+    }
+    return;
   }
-  grid.innerHTML = html;
+  if (APP_STATE.currentEditId) {
+    const existing = APP_STATE.products.find(p => p.id === APP_STATE.currentEditId);
+    if (existing && existing.images) {
+      productData.images = existing.images;
+    }
+  }
+  saveProductData(productData, callback);
 }
 
-function selectDate(el) {
-  const date = el.dataset.date;
-  document.querySelectorAll('.calendar-grid .day').forEach(d => d.classList.remove('selected'));
-  el.classList.add('selected');
-  APP_STATE.selectedDate = date;
-  updateSelectedDateTime();
-}
-
-function selectTime(el) {
-  document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
-  el.classList.add('selected');
-  APP_STATE.selectedTime = el.dataset.time;
-  updateSelectedDateTime();
-}
-
-function updateSelectedDateTime() {
-  const display = $('selectedDateTime');
-  if (!display) return;
-  if (APP_STATE.selectedDate && APP_STATE.selectedTime) {
-    const date = new Date(APP_STATE.selectedDate + 'T' + APP_STATE.selectedTime + ':00');
-    display.textContent = date.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-  } else if (APP_STATE.selectedDate) {
-    display.textContent = new Date(APP_STATE.selectedDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' (select time)';
+function saveProductData(productData, callback) {
+  let productId = APP_STATE.currentEditId;
+  if (productId) {
+    const idx = APP_STATE.products.findIndex(p => p.id === productId);
+    if (idx > -1) {
+      APP_STATE.products[idx] = { ...APP_STATE.products[idx], ...productData };
+    }
   } else {
-    display.textContent = 'None';
+    productId = uuid();
+    APP_STATE.products.push({ id: productId, ...productData, createdAt: Date.now() });
   }
+  saveToStorage();
+  renderAll();
+  closeModal('productModal');
+  showToast('✅ Product saved!', 'success');
+  if (callback) callback(productId);
 }
 
-/* ==================== AUCTION ==================== */
+/* ==================== POST AUCTION ==================== */
 function openAuctionModal(productId) {
   APP_STATE.currentAuctionProductId = productId;
   const product = APP_STATE.products.find(p => p.id === productId);
   if (!product) { showToast('Product not found', 'error'); return; }
-  const isDraft = product.status === 'draft';
-  $('auctionModalTitle').textContent = isDraft ? `📋 List Product: ${product.name}` : `📅 Schedule Auction: ${product.name}`;
   const display = $('auctionProductDisplay');
   if (display) {
+    let imgHtml = '';
+    if (product.images && product.images.length > 0) {
+      imgHtml = `<img src="${product.images[0]}" style="width:60px; height:60px; object-fit:cover; border-radius:8px; margin-right:12px; border:1px solid rgba(0,206,209,0.2);">`;
+    }
     display.innerHTML = `
-      <div style="font-weight:600; margin-bottom:4px;">${escapeHtml(product.name)} ${product.variety ? '- ' + escapeHtml(product.variety) : ''}</div>
-      <div style="font-size:12px; color:#9ca3af; line-height:1.5;">
-        <div>📦 Total Quantity: <span style="color:#7CFC00;">${escapeHtml((product.quantity || 0).toLocaleString())} ${escapeHtml(product.unit || 'kg')}</span></div>
-        <div>💰 List Price: <span style="color:#7CFC00;">${money(product.price || 0)} / ${escapeHtml(product.unit || 'kg')}</span></div>
-        ${product.origin ? `<div>🌍 Origin: <span style="color:#7CFC00;">${escapeHtml(product.origin)}</span></div>` : ''}
-        ${product.description ? `<div style="margin-top:4px; color:#e5e7eb;">${escapeHtml(product.description)}</div>` : ''}
+      <div style="display:flex; align-items:center;">
+        ${imgHtml}
+        <div>
+          <div style="font-weight:600;">${escapeHtml(product.name)} ${product.variety ? '- ' + escapeHtml(product.variety) : ''}</div>
+          <div style="font-size:12px; color:#9ca3af;">📦 ${escapeHtml(product.quantity)} MT • ${escapeHtml(product.grade || 'Standard')} • 📍 ${escapeHtml(product.origin || '')}</div>
+          ${product.packageType && product.packageSize ? `<div style="font-size:11px; color:#7CFC00;">📦 ${escapeHtml(product.packageType)} — ${escapeHtml(product.packageSize)}</div>` : ''}
+        </div>
       </div>
     `;
   }
-  $('auctionAvailableQty').textContent = `${product.quantity} ${product.unit}`;
-  $('auctionQuantity').value = Math.min(500, Math.floor(product.quantity * 0.5));
-  $('auctionStartingPrice').value = product.price;
-  $('auctionMessage').value = `Auction for ${product.name} - ${product.variety || 'Standard'}`;
-  const scheduleBtn = $('scheduleAuctionBtn');
-  if (scheduleBtn) {
-    scheduleBtn.textContent = isDraft ? '📋 List Product & Schedule Auction' : '📅 Schedule Auction';
-  }
-  APP_STATE.selectedDate = null;
-  APP_STATE.selectedTime = null;
-  const today = new Date();
-  APP_STATE.calendarMonth = today.getMonth();
-  APP_STATE.calendarYear = today.getFullYear();
-  renderCalendar();
-  document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
-  updateSelectedDateTime();
+  $('auctionAvailableQty').textContent = product.quantity;
+  $('auctionQty').value = Math.min(500, Math.floor(product.quantity * 0.5));
+  const future = new Date(Date.now() + 7 * 86400000);
+  const pad = n => String(n).padStart(2, '0');
+  $('auctionDateTime').value = `${future.getFullYear()}-${pad(future.getMonth()+1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}`;
   openModal('auctionModal');
 }
 
-function scheduleAuction() {
+function postAuction() {
   const productId = APP_STATE.currentAuctionProductId;
   const product = APP_STATE.products.find(p => p.id === productId);
   if (!product) { showToast('Product not found', 'error'); return; }
-  const quantity = parseFloat($('auctionQuantity').value);
-  const startingPrice = parseFloat($('auctionStartingPrice').value);
+  const quantity = parseFloat($('auctionQty').value);
+  const dateTime = $('auctionDateTime').value;
   const duration = parseInt($('auctionDuration').value);
-  const message = $('auctionMessage').value.trim();
-  const date = APP_STATE.selectedDate;
-  const time = APP_STATE.selectedTime;
-  if (!date) { showToast('Please select a date', 'error'); return; }
-  if (!time) { showToast('Please select a time', 'error'); return; }
+  const location = $('auctionLocation').value;
+  const notes = $('auctionNotes').value.trim();
   if (!quantity || quantity <= 0) { showToast('Please enter a valid quantity', 'error'); return; }
-  if (quantity > product.quantity) { showToast(`Only ${product.quantity} ${product.unit} available`, 'error'); return; }
-  if (!startingPrice || startingPrice <= 0) { showToast('Please enter a valid starting price', 'error'); return; }
-  if (!message) { showToast('Please enter a brief message', 'error'); return; }
-  const wasDraft = product.status === 'draft';
-  if (wasDraft) {
-    product.status = 'listed';
-    product.listedAt = new Date().toISOString();
-  }
-  const auctionDateTime = new Date(date + 'T' + time + ':00');
-  const endDateTime = new Date(auctionDateTime.getTime() + duration * 60 * 60 * 1000);
-  const brief = {
+  if (quantity > product.quantity) { showToast(`Only ${product.quantity} MT available`, 'error'); return; }
+  if (!dateTime) { showToast('Please select an auction date and time', 'error'); return; }
+  const auctionTime = new Date(dateTime).getTime();
+  if (auctionTime <= Date.now()) { showToast('Auction time must be in the future', 'error'); return; }
+  
+  const auction = {
     id: uuid(),
     productId: product.id,
-    productName: product.name,
-    productVariety: product.variety || 'Standard',
+    product: product.name,
+    variety: product.variety || '',
     quantity: quantity,
-    unit: product.unit || 'kg',
-    startingPrice: startingPrice,
+    grade: product.grade || 'Standard',
+    origin: product.origin || '',
+    images: product.images || [],
+    packageType: product.packageType || '',
+    packageSize: product.packageSize || '',
+    moisture: product.moisture || 0,
+    screenSize: product.screenSize || 0,
+    defects: product.defects || 0,
+    foreignMatter: product.foreignMatter || 0,
+    protein: product.protein || 0,
+    aflatoxin: product.aflatoxin || 0,
+    oilContent: product.oilContent || 0,
+    colorGrade: product.colorGrade || 0,
+    idealPrice: product.idealPrice || 0,
+    location: location,
+    seller: APP_STATE.company.name || 'TradeAux Seller',
+    notes: notes,
+    auctionTime: auctionTime,
     duration: duration,
-    message: message,
-    scheduledDate: date,
-    scheduledTime: time,
-    startDateTime: auctionDateTime.toISOString(),
-    endDateTime: endDateTime.toISOString(),
     status: 'scheduled',
-    createdAt: new Date().toISOString(),
-    finalPrice: null,
-    bids: [],
-    winner: null,
-    archived: false
+    createdAt: Date.now()
   };
-  if (!APP_STATE.briefs) APP_STATE.briefs = [];
-  APP_STATE.briefs.push(brief);
+  
+  APP_STATE.briefs.push(auction);
+  product.quantity -= quantity;
   product.hasAuction = true;
-  product.auctionId = brief.id;
+  product.auctionId = auction.id;
   saveToStorage();
+  syncToBuyerArena();
   renderAll();
   closeModal('auctionModal');
-  const successMsg = wasDraft
-    ? `📋 Product listed & auction scheduled for ${auctionDateTime.toLocaleString()}!`
-    : `📅 Auction scheduled for ${auctionDateTime.toLocaleString()}!`;
-  showToast(successMsg, 'success');
+  showToast(`✅ Auction posted! ${auction.product} ${auction.quantity} MT`, 'success');
 }
 
-/* ==================== ARCHIVE FUNCTIONS ==================== */
-function archiveAuction(briefId) {
-  const briefIndex = APP_STATE.briefs.findIndex(b => b.id === briefId);
-  if (briefIndex === -1) { showToast('Auction not found', 'error'); return; }
-  const brief = APP_STATE.briefs[briefIndex];
-  if (brief.archived) { showToast('Already archived', 'warning'); return; }
-  const finalPrice = brief.startingPrice * (1 + (Math.random() * 0.3 - 0.1));
-  const bidCount = 3 + Math.floor(Math.random() * 15);
-  const won = Math.random() > 0.3;
-  const archiveEntry = {
-    ...brief,
-    archivedAt: new Date().toISOString(),
-    finalPrice: finalPrice,
-    bidCount: bidCount,
-    won: won,
-    winner: won ? ['Blue Mountain Traders', 'Swiss Chocolate Co', 'Nordic Coffee Roasters', 'Tokyo Trading Co'][Math.floor(Math.random() * 4)] : null,
-    conversionResult: won ? Math.random() > 0.2 : false,
-    simulationRuns: 0
+/* ==================== SYNC TO BUYER ARENA ==================== */
+function syncToBuyerArena() {
+  const buyerData = {
+    auctions: APP_STATE.briefs.filter(b => !b.archived).map(a => ({
+      id: a.id,
+      product: a.product,
+      variety: a.variety || '',
+      quantity: a.quantity || 0,
+      grade: a.grade || 'Standard',
+      origin: a.origin || '',
+      images: a.images || [],
+      packageType: a.packageType || '',
+      packageSize: a.packageSize || '',
+      moisture: a.moisture || 0,
+      screenSize: a.screenSize || 0,
+      defects: a.defects || 0,
+      foreignMatter: a.foreignMatter || 0,
+      protein: a.protein || 0,
+      aflatoxin: a.aflatoxin || 0,
+      oilContent: a.oilContent || 0,
+      colorGrade: a.colorGrade || 0,
+      location: a.location || 'Santos',
+      seller: a.seller || 'TradeAux Seller',
+      notes: a.notes || '',
+      auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
+      duration: a.duration || 24,
+      status: a.status || 'scheduled'
+    }))
   };
-  APP_STATE.briefs.splice(briefIndex, 1);
-  if (!APP_STATE.archivedAuctions) APP_STATE.archivedAuctions = [];
-  APP_STATE.archivedAuctions.push(archiveEntry);
-  saveToStorage();
-  renderAll();
-  showToast('📚 Auction archived and ready for simulation!', 'success');
-}
-
-function simulateAuction(archiveId) {
-  const archive = APP_STATE.archivedAuctions.find(a => a.id === archiveId);
-  if (!archive) { showToast('Archive not found', 'error'); return; }
-  archive.simulationRuns = (archive.simulationRuns || 0) + 1;
-  const simPrice = archive.startingPrice * (1 + (Math.random() * 0.4 - 0.2));
-  const simBids = 2 + Math.floor(Math.random() * 20);
-  const simWon = Math.random() > 0.35;
-  if (!archive.simulations) archive.simulations = [];
-  archive.simulations.push({
-    run: archive.simulationRuns,
-    price: simPrice,
-    bids: simBids,
-    won: simWon,
-    timestamp: new Date().toISOString()
-  });
-  const allSims = archive.simulations || [];
-  const avgPrice = allSims.reduce((sum, s) => sum + s.price, 0) / allSims.length;
-  const winRate = allSims.filter(s => s.won).length / allSims.length * 100;
-  archive.simAvgPrice = avgPrice;
-  archive.simWinRate = winRate;
-  archive.lastSimulated = new Date().toISOString();
-  saveToStorage();
-  renderAll();
-  showToast(`🔄 Simulation #${archive.simulationRuns} complete! ${simWon ? '✅ Won' : '❌ Lost'} at ${money(simPrice)}/unit`, 'success');
-}
-
-function openSimulationModal(archiveId) {
-  const archive = APP_STATE.archivedAuctions.find(a => a.id === archiveId);
-  if (!archive) { showToast('Archive not found', 'error'); return; }
-  $('simTitle').textContent = archive.productName || 'Auction Analysis';
-  const detailsHtml = `
-    <div class="sim-item"><label>Product</label><div class="value">${escapeHtml(archive.productName)} ${archive.productVariety ? '- ' + escapeHtml(archive.productVariety) : ''}</div></div>
-    <div class="sim-item"><label>Quantity</label><div class="value">${escapeHtml((archive.quantity || 0).toLocaleString())} ${escapeHtml(archive.unit || 'kg')}</div></div>
-    <div class="sim-item"><label>Starting Price</label><div class="value">${money(archive.startingPrice || 0)} / ${escapeHtml(archive.unit || 'kg')}</div></div>
-    <div class="sim-item"><label>Final Price</label><div class="value" style="color:${archive.won ? '#7CFC00' : '#ff6b6b'}">${archive.finalPrice ? money(archive.finalPrice) : 'N/A'}</div></div>
-    <div class="sim-item"><label>Bids Received</label><div class="value">${archive.bidCount || 0}</div></div>
-    <div class="sim-item"><label>Status</label><div class="value" style="color:${archive.won ? '#7CFC00' : '#ff6b6b'}">${archive.won ? '✅ Won' : '❌ Lost'}</div></div>
-    <div class="sim-item"><label>Simulation Runs</label><div class="value">${archive.simulationRuns || 0}</div></div>
-    <div class="sim-item"><label>Last Simulated</label><div class="value" style="font-size:12px;">${archive.lastSimulated ? new Date(archive.lastSimulated).toLocaleDateString() : 'Never'}</div></div>
-  `;
-  $('simDetails').innerHTML = detailsHtml;
-  const sims = archive.simulations || [];
-  const chartHtml = sims.length > 0 ? sims.slice(-10).map(s => `
-    <div class="bar" style="height: ${(s.price / (archive.startingPrice * 1.5)) * 80 + 10}%;">
-      <span class="bar-label">${s.won ? '✅' : '❌'}</span>
-    </div>
-  `).join('') : '<div style="color:#9ca3af; width:100%; text-align:center; padding:20px;">Run simulations to see price history</div>';
-  $('simChart').innerHTML = chartHtml;
-  const simsList = archive.simulations || [];
-  const avgPrice = simsList.length > 0 ? simsList.reduce((sum, s) => sum + s.price, 0) / simsList.length : 0;
-  const winRate = simsList.length > 0 ? (simsList.filter(s => s.won).length / simsList.length * 100) : 0;
-  const totalValue = avgPrice * (archive.quantity || 0);
-  $('simWinRate').textContent = winRate.toFixed(1) + '%';
-  $('simAvgPrice').textContent = money(avgPrice);
-  $('simTotalValue').textContent = money(totalValue);
-  let insights = '';
-  if (simsList.length === 0) {
-    insights = 'No simulations run yet. Click "Run Full Simulation" to see how this auction might perform under different conditions.';
-  } else {
-    const bestPrice = Math.max(...simsList.map(s => s.price));
-    const worstPrice = Math.min(...simsList.map(s => s.price));
-    insights = `Based on ${simsList.length} simulations: Best price ${money(bestPrice)}, worst ${money(worstPrice)}, average ${money(avgPrice)}. Win rate ${winRate.toFixed(1)}%. ${winRate > 60 ? 'Strong performance! Consider similar auction strategies.' : 'Room for improvement. Try adjusting starting price or timing.'}`;
-  }
-  $('simInsights').textContent = insights;
-  APP_STATE.currentSimArchiveId = archiveId;
-  openModal('simulationModal');
-}
-
-function runFullSimulation() {
-  const archiveId = APP_STATE.currentSimArchiveId;
-  if (!archiveId) { showToast('No auction selected', 'error'); return; }
-  for (let i = 0; i < 20; i++) {
-    simulateAuction(archiveId);
-  }
-  openSimulationModal(archiveId);
-}
-
-function restoreAuction(archiveId) {
-  const index = APP_STATE.archivedAuctions.findIndex(a => a.id === archiveId);
-  if (index === -1) { showToast('Archive not found', 'error'); return; }
-  const archive = APP_STATE.archivedAuctions[index];
-  const restored = {
-    ...archive,
-    archived: false,
-    restoredAt: new Date().toISOString(),
-    status: 'scheduled'
-  };
-  delete restored.archivedAt;
-  delete restored.finalPrice;
-  delete restored.bidCount;
-  delete restored.won;
-  delete restored.winner;
-  delete restored.conversionResult;
-  delete restored.simulationRuns;
-  delete restored.simulations;
-  delete restored.simAvgPrice;
-  delete restored.simWinRate;
-  delete restored.lastSimulated;
-  APP_STATE.briefs.push(restored);
-  APP_STATE.archivedAuctions.splice(index, 1);
-  saveToStorage();
-  renderAll();
-  showToast('↩️ Auction restored to active!', 'success');
-}
-
-function toggleArchive() {
-  const collapse = $('archiveCollapse');
-  const header = $('archiveHeader');
-  if (collapse.classList.contains('open')) {
-    collapse.classList.remove('open');
-    header.classList.remove('open');
-  } else {
-    collapse.classList.add('open');
-    header.classList.add('open');
-  }
+  localStorage.setItem('tradeaux_buyer_auctions', JSON.stringify(buyerData));
+  
+  const botTargets = APP_STATE.briefs
+    .filter(a => a.status === 'scheduled' || a.status === 'live')
+    .map(a => ({
+      id: a.id,
+      product: a.product,
+      variety: a.variety || '',
+      seller: a.seller || 'TradeAux Seller',
+      location: a.location || 'Santos',
+      quantity: a.quantity || 0,
+      idealPrice: a.idealPrice || 0,
+      auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
+      productId: a.productId,
+      specs: {
+        moisture: a.moisture || 0,
+        screenSize: a.screenSize || 0,
+        defects: a.defects || 0,
+        foreignMatter: a.foreignMatter || 0,
+        protein: a.protein || 0,
+        aflatoxin: a.aflatoxin || 0,
+        oilContent: a.oilContent || 0,
+        colorGrade: a.colorGrade || 0
+      },
+      packaging: {
+        type: a.packageType || '',
+        size: a.packageSize || ''
+      }
+    }));
+  localStorage.setItem('tradeaux_bot_targets', JSON.stringify(botTargets));
 }
 
 /* ==================== STORAGE ==================== */
@@ -1415,7 +1439,7 @@ async function saveToStorage() {
     localStorage.setItem('tradeaux_seller_state', JSON.stringify(payload));
   } catch(e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
-      showToast('⚠️ Storage quota exceeded.', 'error');
+      showToast('⚠️ Storage quota exceeded. Cleaning up...', 'warning');
       try {
         const keys = Object.keys(localStorage);
         for (const key of keys) {
@@ -1480,126 +1504,7 @@ async function loadFromStorage() {
   }
 }
 
-/* ==================== TAR ==================== */
-function generateAuctionSchedule() {
-  const now = Date.now();
-  if (APP_STATE.tar.cachedAuctions && APP_STATE.tar.cachedAuctionsTimestamp && (now - APP_STATE.tar.cachedAuctionsTimestamp) < 30 * 60 * 1000) {
-    return APP_STATE.tar.cachedAuctions;
-  }
-  const briefs = APP_STATE.briefs || [];
-  const auctions = briefs.filter(b => !b.archived).map(b => ({
-    id: b.id,
-    name: b.productName || 'Unnamed Auction',
-    location: b.location || 'Online',
-    date: b.scheduledDate || new Date().toISOString().split('T')[0],
-    time: b.scheduledTime || '12:00',
-    status: b.status === 'live' ? 'live' : 'upcoming',
-    products: [b.productName || 'Product'],
-    estimatedVolume: b.quantity || 0,
-    productId: b.productId,
-    isArchived: false
-  }));
-  APP_STATE.tar.cachedAuctions = auctions.sort((a, b) => new Date(a.date) - new Date(b.date));
-  APP_STATE.tar.cachedAuctionsTimestamp = now;
-  return APP_STATE.tar.cachedAuctions;
-}
-
-function generateAdvisory() {
-  const now = Date.now();
-  if (APP_STATE.tar.cachedAdvisory && (now - APP_STATE.tar.lastAdvisoryUpdate) < 60000) {
-    return APP_STATE.tar.cachedAdvisory;
-  }
-  const briefs = APP_STATE.briefs || [];
-  const archived = APP_STATE.archivedAuctions || [];
-  const totalAuctions = briefs.length;
-  const upcoming = briefs.filter(b => b.status === 'scheduled').length;
-  const live = briefs.filter(b => b.status === 'live').length;
-  const archivedCount = archived.length;
-  let adviceText = `You have <span class="highlight">${totalAuctions}</span> active auctions and <span class="highlight">${archivedCount}</span> archived. `;
-  if (upcoming > 0) {
-    adviceText += `<span class="info">${upcoming} upcoming</span> and `;
-  }
-  if (live > 0) {
-    adviceText += `<span class="highlight">${live} live</span> right now! `;
-  }
-  if (totalAuctions === 0 && archivedCount === 0) {
-    adviceText = `No auctions yet. <span class="highlight">Create your first auction</span> from the Products section to start trading!`;
-  } else if (totalAuctions === 0 && archivedCount > 0) {
-    adviceText += `Check your archive for simulation insights. <span class="highlight">Create new auctions</span> based on your archived performance.`;
-  } else {
-    adviceText += `Monitor your active auctions and archive completed ones for simulation and analysis.`;
-  }
-  APP_STATE.tar.cachedAdvisory = { type: 'custom', text: adviceText };
-  APP_STATE.tar.lastAdvisoryUpdate = now;
-  return APP_STATE.tar.cachedAdvisory;
-}
-
-function renderTARAdvisory() {
-  const advisoryText = $('tarAdvisoryText');
-  const auctionList = $('auctionList');
-  if (advisoryText) {
-    const advice = generateAdvisory();
-    advisoryText.innerHTML = advice.text;
-  }
-  if (auctionList) {
-    const auctions = generateAuctionSchedule();
-    if (auctions.length === 0) {
-      auctionList.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">No active auctions. Create one from your products!</div>`;
-    } else {
-      auctionList.innerHTML = auctions.slice(0, 5).map(a => `
-        <div class="auction-item">
-          <div class="auction-info">
-            <div class="auction-name">${escapeHtml(a.name)}</div>
-            <div class="auction-details">${escapeHtml(a.products.join(', '))} • ${escapeHtml(a.estimatedVolume.toLocaleString())} units</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="auction-time">${escapeHtml(a.date)} ${escapeHtml(a.time)}</div>
-            <div class="auction-status ${escapeHtml(a.status)}">${escapeHtml(a.status.toUpperCase())}</div>
-          </div>
-        </div>
-      `).join('');
-    }
-  }
-}
-
-function renderArchive() {
-  const grid = $('archiveGrid');
-  const count = $('archiveCount');
-  if (!grid) return;
-  const archived = APP_STATE.archivedAuctions || [];
-  if (count) count.textContent = archived.length;
-  if (archived.length === 0) {
-    grid.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:20px; grid-column:1/-1;">No archived auctions yet. Completed auctions will appear here for simulation and analysis.</div>`;
-    return;
-  }
-  grid.innerHTML = archived.slice(0, 20).map(a => `
-    <div class="archive-card">
-      <div class="archive-status">${a.won ? '✅ WON' : '❌ LOST'}</div>
-      <div class="archive-date">${new Date(a.scheduledDate || a.createdAt).toLocaleDateString()}</div>
-      <div class="archive-name">${escapeHtml(a.productName || 'Unnamed')}</div>
-      <div class="archive-details">${escapeHtml(a.productVariety || '')} • ${escapeHtml((a.quantity || 0).toLocaleString())} ${escapeHtml(a.unit || 'kg')}</div>
-      <div class="archive-metrics">
-        <div class="metric-item"><div class="metric-value">${money(a.finalPrice || a.startingPrice || 0)}</div><div class="metric-label">Final Price</div></div>
-        <div class="metric-item"><div class="metric-value">${a.bidCount || 0}</div><div class="metric-label">Bids</div></div>
-        <div class="metric-item"><div class="metric-value">${a.simulationRuns || 0}</div><div class="metric-label">Sims</div></div>
-      </div>
-      ${a.simWinRate !== undefined ? `<div class="simulation-result">📊 Win Rate: ${a.simWinRate.toFixed(1)}% (${a.simulationRuns || 0} simulations)</div>` : ''}
-      <div style="display:flex; gap:8px; margin-top:8px;">
-        <button class="simulate-btn" onclick="openSimulationModal('${a.id}')">📊 Analyze</button>
-        <button class="simulate-btn" onclick="simulateAuction('${a.id}')" style="background: linear-gradient(135deg, #00ced1, #0066ff); color:white;">🔄 Simulate</button>
-        <button class="simulate-btn" onclick="restoreAuction('${a.id}')" style="background: linear-gradient(135deg, #7CFC00, #00ff7f); color:black;">↩️ Restore</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function refreshAuctions() {
-  APP_STATE.tar.cachedAuctions = null;
-  APP_STATE.tar.cachedAuctionsTimestamp = null;
-  renderTARAdvisory();
-  showToast('🔄 Auction schedule refreshed!', 'info');
-}
-
+/* ==================== TAR FUNCTIONS ==================== */
 function generateReceivables() {
   const briefs = APP_STATE.briefs || [];
   const archived = APP_STATE.archivedAuctions || [];
@@ -1630,11 +1535,11 @@ function generateReceivables() {
   }
   return briefs.map(b => ({
     id: b.id,
-    company: b.productName || 'Unknown',
-    product: b.productVariety || 'Commodity',
-    amount: b.startingPrice * b.quantity || 1000,
+    company: b.product || 'Unknown',
+    product: b.variety || 'Commodity',
+    amount: (b.idealPrice || 0) * (b.quantity || 0) || 1000,
     status: b.status === 'scheduled' ? 'ready' : b.status === 'live' ? 'pending' : 'ready',
-    date: b.scheduledDate || new Date().toISOString().split('T')[0],
+    date: new Date(b.auctionTime || Date.now()).toISOString().split('T')[0],
     invoiceNumber: 'AUCTION-' + b.id.slice(0, 6),
     converted: false,
     daysOld: 0
@@ -1708,238 +1613,79 @@ function autoConvertReady() {
   showToast(`✅ Auto-converted ${count} receivables! Total fee: ${money(totalFee)}`, 'success');
 }
 
-function renderTAR() {
-  const readyCount = $('tarReadyCount');
-  const pendingCount = $('tarPendingCount');
-  const convertedCount = $('tarConvertedCount');
-  const feesEarned = $('tarFeesEarned');
-  const todayConversions = $('todayConversions');
-  const todayFees = $('todayFees');
-  const remainingCapacity = $('remainingCapacity');
-  const totalConversions = $('totalConversions');
-  const receivables = APP_STATE.receivables || [];
-  const ready = receivables.filter(r => r.status === 'ready' && !r.converted).length;
-  const pending = receivables.filter(r => r.status === 'pending' && !r.converted).length;
-  const converted = receivables.filter(r => r.converted).length;
-  if (readyCount) readyCount.textContent = ready;
-  if (pendingCount) pendingCount.textContent = pending;
-  if (convertedCount) convertedCount.textContent = converted;
-  if (feesEarned) feesEarned.textContent = money(APP_STATE.tar.totalFeesEarned || 0);
-  if (todayConversions) todayConversions.textContent = APP_STATE.tar.todayConversions || 0;
-  if (todayFees) todayFees.textContent = money((APP_STATE.tar.todayConversions || 0) * APP_STATE.tar.conversionFee);
-  if (remainingCapacity) remainingCapacity.textContent = Math.max(0, 10000 - (APP_STATE.tar.totalConversions || 0));
-  if (totalConversions) totalConversions.textContent = APP_STATE.tar.totalConversions || 0;
-  const list = $('tarReceivablesList');
-  if (!list) return;
-  const allReceivables = [...receivables].filter(r => !r.converted).sort((a, b) => {
-    const order = { urgent: 0, ready: 1, pending: 2 };
-    return (order[a.status] || 3) - (order[b.status] || 3);
-  });
-  if (allReceivables.length === 0) {
-    list.innerHTML = `<div style="color:#7CFC00; text-align:center; padding:20px; font-size:13px;">✅ All receivables have been converted!</div>`;
-    return;
-  }
-  list.innerHTML = allReceivables.slice(0, 8).map(r => {
-    const statusClass = r.status;
-    const statusLabel = r.status.toUpperCase();
-    return `
-      <div class="tar-receivable-item" onclick="convertReceivable('${r.id}')">
-        <div class="receivable-info">
-          <div class="receivable-name">${escapeHtml(r.company)} • ${escapeHtml(r.product)}</div>
-          <div class="receivable-details">${escapeHtml(r.invoiceNumber)} • ${escapeHtml(r.date)} • ${escapeHtml(r.daysOld || 0)}d old</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="receivable-amount">${money(r.amount)}</span>
-          <span class="receivable-status ${escapeHtml(statusClass)}">${escapeHtml(statusLabel)}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-  if (allReceivables.length > 8) {
-    list.innerHTML += `<div style="text-align:center; color:#9ca3af; font-size:11px; padding:8px;">+ ${allReceivables.length - 8} more receivables</div>`;
-  }
-  renderTARAdvisory();
+/* ==================== RENDER FUNCTIONS ==================== */
+function renderAll() {
+  renderWallet();
+  renderCompany();
+  renderCertificates();
+  renderProducts();
+  renderOrders();
+  renderStats();
+  renderTAR();
   renderArchive();
+  renderAuctionSchedule();
+  renderTARAdvisory();
 }
 
-function showTARSettings() {
-  const settingsHtml = `
-    <div style="font-family:'Inter',sans-serif; color:#e5e7eb;">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0;">
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Conversion Fee</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${escapeHtml(APP_STATE.tar.conversionFee)}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Min Receivable</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${escapeHtml(APP_STATE.tar.minReceivable)}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Max Receivable</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">$${escapeHtml(APP_STATE.tar.maxReceivable)}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Auto-Convert</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:${APP_STATE.tar.autoConvert ? '#7CFC00' : '#ff3b3b'};">${escapeHtml(APP_STATE.tar.autoConvert ? '✅ Enabled' : '❌ Disabled')}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Batch Size</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">${escapeHtml(APP_STATE.tar.batchSize)}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <div style="font-size:10px; color:#9ca3af;">Daily Limit</div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:18px; color:#00ced1;">${escapeHtml(APP_STATE.tar.dailyLimit)}</div>
-        </div>
-      </div>
-      <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-top:8px;">
-        <div style="font-size:11px; color:#9ca3af;">Total Conversions: <span style="color:#7CFC00; font-family:'Orbitron',sans-serif;">${escapeHtml(APP_STATE.tar.totalConversions || 0)}</span></div>
-        <div style="font-size:11px; color:#9ca3af;">Total Fees Earned: <span style="color:#00ced1; font-family:'Orbitron',sans-serif;">${escapeHtml(money(APP_STATE.tar.totalFeesEarned || 0))}</span></div>
-        <div style="font-size:11px; color:#9ca3af;">Today's Conversions: <span style="color:#FFD966; font-family:'Orbitron',sans-serif;">${escapeHtml(APP_STATE.tar.todayConversions || 0)}</span></div>
-      </div>
-    </div>
-  `;
-  const existingModal = $('tarSettingsModal');
-  if (existingModal) {
-    const body = existingModal.querySelector('.modal-body');
-    if (body) body.innerHTML = settingsHtml;
-    openModal('tarSettingsModal');
-    return;
+function renderWallet() {
+  const walletAmount = $('walletAmount');
+  if (walletAmount) walletAmount.textContent = money(APP_STATE.wallet.balance);
+  const conversionCapacity = $('conversionCapacity');
+  if (conversionCapacity) {
+    const capacity = Math.floor(APP_STATE.wallet.balance / APP_STATE.tar.conversionFee);
+    conversionCapacity.textContent = capacity + ' conversions';
   }
-  const modal = document.createElement('div');
-  modal.id = 'tarSettingsModal';
-  modal.className = 'modal';
-  modal.innerHTML = `
-    <div class="modal-content" style="max-width:500px;">
-      <span class="modal-close" onclick="closeModal('tarSettingsModal')">&times;</span>
-      <div class="modal-header"><h2>⚙️ TAR Settings</h2></div>
-      <div class="modal-body">${settingsHtml}</div>
-      <div class="modal-actions">
-        <button class="cancel-btn" onclick="closeModal('tarSettingsModal')">Close</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  openModal('tarSettingsModal');
 }
 
-/* ==================== TOUR ==================== */
-function startTour() {
-  APP_STATE.tour.active = true;
-  APP_STATE.tour.step = 0;
-  const overlay = $('tourOverlay');
-  if (overlay) overlay.classList.add('active');
-  showTourStep(0);
-  window.addEventListener('resize', repositionTourHighlight);
-}
-
-function endTour() {
-  APP_STATE.tour.active = false;
-  localStorage.setItem('tradeaux_tour_complete', 'true');
-  const overlay = $('tourOverlay');
-  if (overlay) overlay.classList.remove('active');
-  const highlight = $('tourHighlight');
-  if (highlight) highlight.style.display = 'none';
-  window.removeEventListener('resize', repositionTourHighlight);
-  showToast('🎯 Tour complete!', 'success');
-}
-
-function repositionTourHighlight() {
-  if (!APP_STATE.tour.active) return;
-  const step = APP_STATE.tour.step;
-  const steps = APP_STATE.tour.steps;
-  if (step >= steps.length) return;
-  const selector = steps[step].selector;
-  const element = document.querySelector(selector);
-  if (!element) return;
-  const rect = element.getBoundingClientRect();
-  const highlight = $('tourHighlight');
-  if (highlight) {
-    highlight.style.left = (rect.left - 8) + 'px';
-    highlight.style.top = (rect.top - 8) + 'px';
-    highlight.style.width = (rect.width + 16) + 'px';
-    highlight.style.height = (rect.height + 16) + 'px';
+function renderCompany() {
+  const c = APP_STATE.company;
+  const fields = ['companyNameDisplay', 'companyRegDisplay', 'companyCountryDisplay', 'companyTaxDisplay', 'companyAddressDisplay', 'companyEmailDisplay', 'companyPhoneDisplay', 'companyWebsiteDisplay'];
+  const values = [c.name, c.reg, c.country, c.tax, c.address, c.email, c.phone, c.website];
+  fields.forEach((id, i) => {
+    const el = $(id);
+    if (el) el.textContent = escapeHtml(values[i]) || 'Not set';
+  });
+  const badge = $('verificationBadge');
+  if (badge) {
+    badge.className = 'company-verification-badge ' + (c.verified || 'pending');
+    badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending' : '❌ Unverified';
   }
-  const tooltip = $('tourTooltip');
-  if (tooltip) {
-    const tooltipRect = tooltip.getBoundingClientRect();
-    if (tooltipRect.bottom > window.innerHeight - 20) {
-      tooltip.style.top = Math.max(20, window.innerHeight - tooltipRect.height - 20) + 'px';
+  const statusText = $('companyStatusText');
+  if (statusText) statusText.textContent = c.verified === 'verified' ? 'Ready to sell.' : 'Complete your profile.';
+  const logoPreview = $('companyLogoPreview');
+  const logoPlaceholder = $('logoPlaceholder');
+  if (c.logo) {
+    if (logoPreview) { logoPreview.src = c.logo; logoPreview.style.display = 'block'; }
+    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+  } else {
+    if (logoPreview) logoPreview.style.display = 'none';
+    if (logoPlaceholder) logoPlaceholder.style.display = 'flex';
+  }
+  const photosGrid = $('photosGrid');
+  if (photosGrid) {
+    photosGrid.innerHTML = '';
+    if (APP_STATE.company.photos && APP_STATE.company.photos.length > 0) {
+      APP_STATE.company.photos.forEach((src) => {
+        const div = document.createElement('div');
+        div.className = 'photo-item';
+        div.innerHTML = `<img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;">`;
+        photosGrid.appendChild(div);
+      });
     }
-    if (tooltipRect.top < 20) {
-      tooltip.style.top = '20px';
-    }
+    const uploadBtn = document.createElement('div');
+    uploadBtn.className = 'photo-upload-btn';
+    uploadBtn.onclick = () => { const input = $('photoFileInput'); if (input) input.click(); };
+    uploadBtn.innerHTML = '<span class="icon">📷</span><span class="text">Add Photo</span>';
+    photosGrid.appendChild(uploadBtn);
   }
+  const docs = c.documents || {};
+  const incorpStatus = $('incorpDocStatus');
+  const licenseStatus = $('licenseDocStatus');
+  const taxStatus = $('taxDocStatus');
+  if (incorpStatus) incorpStatus.textContent = docs.incorporation ? '✅ Uploaded' : 'Not uploaded';
+  if (licenseStatus) licenseStatus.textContent = docs.license ? '✅ Uploaded' : 'Not uploaded';
+  if (taxStatus) taxStatus.textContent = docs.tax ? '✅ Uploaded' : 'Not uploaded';
 }
-
-function showTourStep(step) {
-  const steps = APP_STATE.tour.steps;
-  if (step >= steps.length) { endTour(); return; }
-  const stepData = steps[step];
-  const selector = stepData.selector;
-  const element = document.querySelector(selector);
-  if (!element) { showTourStep(step + 1); return; }
-  const rect = element.getBoundingClientRect();
-  const highlight = $('tourHighlight');
-  const tooltip = $('tourTooltip');
-  const title = $('tourTitle');
-  const description = $('tourDescription');
-  const nextBtn = $('tourNextBtn');
-  const progress = $('tourProgress');
-  if (highlight) {
-    highlight.style.display = 'block';
-    highlight.style.left = (rect.left - 8) + 'px';
-    highlight.style.top = (rect.top - 8) + 'px';
-    highlight.style.width = (rect.width + 16) + 'px';
-    highlight.style.height = (rect.height + 16) + 'px';
-  }
-  if (tooltip) {
-    const tooltipWidth = 320;
-    let left = Math.max(20, rect.left + rect.width / 2 - tooltipWidth / 2);
-    let top = rect.top - 120;
-    if (top < 20) { top = rect.bottom + 20; }
-    const tooltipHeight = tooltip.offsetHeight || 200;
-    if (top + tooltipHeight > window.innerHeight - 20) {
-      top = window.innerHeight - tooltipHeight - 20;
-    }
-    if (left + tooltipWidth > window.innerWidth - 20) {
-      left = window.innerWidth - tooltipWidth - 20;
-    }
-    if (left < 20) left = 20;
-    tooltip.style.left = left + 'px';
-    tooltip.style.top = Math.max(20, top) + 'px';
-    tooltip.style.display = 'block';
-  }
-  if (title) title.textContent = stepData.title;
-  if (description) description.textContent = stepData.description;
-  if (nextBtn) {
-    nextBtn.textContent = step === steps.length - 1 ? '✅ Finish' : 'Next →';
-    nextBtn.onclick = () => showTourStep(step + 1);
-  }
-  if (progress) {
-    const dots = progress.querySelectorAll('.dot');
-    dots.forEach((dot, i) => {
-      dot.className = 'dot';
-      if (i < step) dot.classList.add('done');
-      if (i === step) dot.classList.add('active');
-    });
-  }
-  APP_STATE.tour.step = step;
-}
-
-/* ==================== CERTIFICATES ==================== */
-const CERT_LABELS = {
-  incorporation: { icon: '🏢', label: 'Incorporation', desc: 'Required - Admin Verified' },
-  export: { icon: '📄', label: 'Export License', desc: 'Government export capacity' },
-  organic: { icon: '🌱', label: 'Organic', desc: 'Organic certification' },
-  fairtrade: { icon: '🤝', label: 'Fair Trade', desc: 'Fair Trade certified' },
-  kosher: { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
-  halal: { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
-  brcgs: { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
-  origin: { icon: '🌍', label: 'Origin', desc: 'Certificate of Origin' },
-  iso: { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
-  foodsafety: { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' },
-  other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
-};
 
 function renderCertificates() {
   const grid = $('certGrid');
@@ -2028,86 +1774,15 @@ function removeCert(type) {
   showToast('Certificate removed', 'info');
 }
 
-/* ==================== RENDER FUNCTIONS ==================== */
-function renderAll() {
-  renderWallet();
-  renderCompany();
-  renderCertificates();
-  renderProducts();
-  renderOrders();
-  renderStats();
-  renderTAR();
-}
-
-function renderWallet() {
-  const walletAmount = $('walletAmount');
-  if (walletAmount) walletAmount.textContent = money(APP_STATE.wallet.balance);
-  const conversionCapacity = $('conversionCapacity');
-  if (conversionCapacity) {
-    const capacity = Math.floor(APP_STATE.wallet.balance / APP_STATE.tar.conversionFee);
-    conversionCapacity.textContent = capacity + ' conversions';
-  }
-}
-
-function renderCompany() {
-  const c = APP_STATE.company;
-  const fields = ['companyNameDisplay', 'companyRegDisplay', 'companyCountryDisplay', 'companyTaxDisplay', 'companyAddressDisplay', 'companyEmailDisplay', 'companyPhoneDisplay', 'companyWebsiteDisplay'];
-  const values = [c.name, c.reg, c.country, c.tax, c.address, c.email, c.phone, c.website];
-  fields.forEach((id, i) => {
-    const el = $(id);
-    if (el) el.textContent = escapeHtml(values[i]) || 'Not set';
-  });
-  const badge = $('verificationBadge');
-  if (badge) {
-    badge.className = 'company-verification-badge ' + (c.verified || 'pending');
-    badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending' : '❌ Unverified';
-  }
-  const statusText = $('companyStatusText');
-  if (statusText) statusText.textContent = c.verified === 'verified' ? 'Ready to sell.' : 'Complete your profile.';
-  const logoPreview = $('companyLogoPreview');
-  const logoPlaceholder = $('logoPlaceholder');
-  if (c.logo) {
-    if (logoPreview) { logoPreview.src = c.logo; logoPreview.style.display = 'block'; }
-    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
-  } else {
-    if (logoPreview) logoPreview.style.display = 'none';
-    if (logoPlaceholder) logoPlaceholder.style.display = 'flex';
-  }
-  const photosGrid = $('photosGrid');
-  if (photosGrid) {
-    photosGrid.innerHTML = '';
-    if (APP_STATE.company.photos && APP_STATE.company.photos.length > 0) {
-      APP_STATE.company.photos.forEach((src) => {
-        const div = document.createElement('div');
-        div.className = 'photo-item';
-        div.innerHTML = `<img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;">`;
-        photosGrid.appendChild(div);
-      });
-    }
-    const uploadBtn = document.createElement('div');
-    uploadBtn.className = 'photo-upload-btn';
-    uploadBtn.onclick = () => { const input = $('photoFileInput'); if (input) input.click(); };
-    uploadBtn.innerHTML = '<span class="icon">📷</span><span class="text">Add Photo</span>';
-    photosGrid.appendChild(uploadBtn);
-  }
-  const docs = c.documents || {};
-  const incorpStatus = $('incorpDocStatus');
-  const licenseStatus = $('licenseDocStatus');
-  const taxStatus = $('taxDocStatus');
-  if (incorpStatus) incorpStatus.textContent = docs.incorporation ? '✅ Uploaded' : 'Not uploaded';
-  if (licenseStatus) licenseStatus.textContent = docs.license ? '✅ Uploaded' : 'Not uploaded';
-  if (taxStatus) taxStatus.textContent = docs.tax ? '✅ Uploaded' : 'Not uploaded';
-}
-
 function renderProducts() {
   const grid = $('productsGrid');
   if (!grid) return;
   grid.innerHTML = '';
-  const addProductCard = document.createElement('div');
-  addProductCard.className = 'add-product-card';
-  addProductCard.id = 'addProductCard';
-  addProductCard.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">Add Product</div>';
-  grid.appendChild(addProductCard);
+  const addCard = document.createElement('div');
+  addCard.className = 'add-product-card';
+  addCard.id = 'addProductCard';
+  addCard.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">Add Product</div>';
+  grid.appendChild(addCard);
   if (!APP_STATE.products || APP_STATE.products.length === 0) {
     const emptyMsg = document.createElement('div');
     emptyMsg.style.cssText = 'grid-column:1/-1; text-align:center; padding:20px; color:#666; font-size:12px;';
@@ -2118,30 +1793,33 @@ function renderProducts() {
   APP_STATE.products.forEach(product => {
     const card = document.createElement('div');
     card.className = 'product-card';
-    const statusClass = product.status === 'listed' ? 'listed' : product.status === 'sold' ? 'sold' : 'draft';
+    const imageHtml = (product.images && product.images.length > 0) 
+      ? `<img src="${product.images[0]}" alt="${escapeHtml(product.name)}">` 
+      : '<span class="no-image">📷 No image</span>';
+    const specsHtml = [];
+    if (product.moisture > 0) specsHtml.push(`💧 ${product.moisture.toFixed(1)}%`);
+    if (product.screenSize > 0) specsHtml.push(`📏 ${product.screenSize.toFixed(1)}`);
+    if (product.defects > 0) specsHtml.push(`🔬 ${product.defects.toFixed(1)}%`);
+    if (product.protein > 0) specsHtml.push(`🧪 ${product.protein.toFixed(1)}%`);
+    const packagingHtml = (product.packageType && product.packageSize) 
+      ? `📦 ${escapeHtml(product.packageType)} — ${escapeHtml(product.packageSize)}` 
+      : '';
     const hasAuction = product.hasAuction || false;
-    const auctionBtnClass = hasAuction ? 'auction-btn scheduled' : 'auction-btn';
-    const auctionBtnText = hasAuction ? '📅 Auction Scheduled' : '📅 Schedule Auction';
-    const isDraft = product.status === 'draft';
-    const imageSrc = product.images && product.images.length > 0 ? product.images[0] : null;
     card.innerHTML = `
-      <div class="product-card-header">
-        <div class="product-name">${escapeHtml(product.name || 'Unnamed')}<span class="variety">${escapeHtml(product.variety || '')}</span></div>
-        <div class="product-status ${escapeHtml(statusClass)}">${escapeHtml((product.status || 'draft').toUpperCase())}</div>
+      <div class="product-image">${imageHtml}</div>
+      <div class="product-name">${escapeHtml(product.name)}</div>
+      <div class="product-variety">${escapeHtml(product.variety || '')}</div>
+      <div class="product-specs">${specsHtml.map(s => `<span class="tag">${s}</span>`).join('')}</div>
+      ${packagingHtml ? `<div class="product-packaging">${packagingHtml}</div>` : ''}
+      <div style="font-size:11px; color:#9ca3af; margin:4px 0;">
+        📦 ${escapeHtml(product.quantity || 0)} MT • ${escapeHtml(product.grade || 'Standard')}
       </div>
-      <div class="product-image-preview">
-        ${imageSrc ? `<img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(product.name)}">` : `<span class="no-image">📷 No image</span>`}
-      </div>
-      <div class="product-details">
-        <div><span class="label">Qty:</span> ${escapeHtml((product.quantity || 0).toLocaleString())} ${escapeHtml(product.unit || 'kg')}</div>
-        <div><span class="label">Price:</span> ${money(product.price || 0)} / ${escapeHtml(product.unit || 'kg')}</div>
-        <div><span class="label">Origin:</span> ${escapeHtml(product.origin || 'Not specified')}</div>
-        ${hasAuction ? `<div style="color:#7CFC00; font-size:10px; margin-top:2px;">✅ Auction brief filed</div>` : ''}
-      </div>
+      ${hasAuction ? `<div style="color:#7CFC00; font-size:10px;">✅ Auction active</div>` : ''}
       <div class="product-actions">
-        ${isDraft ? `<button class="list-btn" onclick="openAuctionModal('${product.id}')">📋 List</button>` : ''}
+        <button class="post-auction-btn" onclick="openAuctionModal('${product.id}')" ${hasAuction ? 'disabled style="opacity:0.4;"' : ''}>
+          ${hasAuction ? '⏳ Active' : '📤 Post Auction'}
+        </button>
         <button class="edit-btn" onclick="openProductModal('${product.id}')">✏️ Edit</button>
-        <button class="${auctionBtnClass}" onclick="openAuctionModal('${product.id}')">${auctionBtnText}</button>
         <button class="delete-btn" onclick="deleteProduct('${product.id}')">🗑</button>
       </div>
     `;
@@ -2187,6 +1865,7 @@ function renderStats() {
   const totalProducts = $('totalProducts');
   const totalOrders = $('totalOrders');
   const totalRevenue = $('totalRevenue');
+  const totalConversions = $('totalConversions');
   if (totalProducts) totalProducts.textContent = APP_STATE.products ? APP_STATE.products.length : 0;
   if (totalOrders) totalOrders.textContent = APP_STATE.orders ? APP_STATE.orders.length : 0;
   let revenue = 0;
@@ -2194,6 +1873,249 @@ function renderStats() {
     APP_STATE.orders.forEach(o => { if (o.status === 'completed' || o.status === 'shipped') revenue += (o.total || 0); });
   }
   if (totalRevenue) totalRevenue.textContent = money(revenue);
+  if (totalConversions) totalConversions.textContent = APP_STATE.tar.totalConversions || 0;
+}
+
+function renderTAR() {
+  const readyCount = $('tarReadyCount');
+  const pendingCount = $('tarPendingCount');
+  const convertedCount = $('tarConvertedCount');
+  const feesEarned = $('tarFeesEarned');
+  const todayConversions = $('todayConversions');
+  const todayFees = $('todayFees');
+  const remainingCapacity = $('remainingCapacity');
+  
+  const receivables = APP_STATE.receivables || [];
+  const ready = receivables.filter(r => r.status === 'ready' && !r.converted).length;
+  const pending = receivables.filter(r => r.status === 'pending' && !r.converted).length;
+  const converted = receivables.filter(r => r.converted).length;
+  
+  if (readyCount) readyCount.textContent = ready;
+  if (pendingCount) pendingCount.textContent = pending;
+  if (convertedCount) convertedCount.textContent = converted;
+  if (feesEarned) feesEarned.textContent = money(APP_STATE.tar.totalFeesEarned || 0);
+  if (todayConversions) todayConversions.textContent = APP_STATE.tar.todayConversions || 0;
+  if (todayFees) todayFees.textContent = money((APP_STATE.tar.todayConversions || 0) * APP_STATE.tar.conversionFee);
+  if (remainingCapacity) remainingCapacity.textContent = Math.max(0, 10000 - (APP_STATE.tar.totalConversions || 0));
+  
+  const list = $('tarReceivablesList');
+  if (list) {
+    const allReceivables = [...receivables].filter(r => !r.converted).sort((a, b) => {
+      const order = { urgent: 0, ready: 1, pending: 2 };
+      return (order[a.status] || 3) - (order[b.status] || 3);
+    });
+    if (allReceivables.length === 0) {
+      list.innerHTML = `<div style="color:#7CFC00; text-align:center; padding:20px; font-size:13px;">✅ All receivables have been converted!</div>`;
+    } else {
+      list.innerHTML = allReceivables.slice(0, 8).map(r => `
+        <div class="tar-receivable-item" onclick="convertReceivable('${r.id}')">
+          <div class="receivable-info">
+            <div class="receivable-name">${escapeHtml(r.company)} • ${escapeHtml(r.product)}</div>
+            <div class="receivable-details">${escapeHtml(r.invoiceNumber)} • ${escapeHtml(r.date)} • ${escapeHtml(r.daysOld || 0)}d old</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="receivable-amount">${money(r.amount)}</span>
+            <span class="receivable-status ${escapeHtml(r.status)}">${escapeHtml(r.status.toUpperCase())}</span>
+          </div>
+        </div>
+      `).join('');
+      if (allReceivables.length > 8) {
+        list.innerHTML += `<div style="text-align:center; color:#9ca3af; font-size:11px; padding:8px;">+ ${allReceivables.length - 8} more receivables</div>`;
+      }
+    }
+  }
+}
+
+function renderArchive() {
+  const grid = $('archiveGrid');
+  const count = $('archiveCount');
+  if (!grid) return;
+  const archived = APP_STATE.archivedAuctions || [];
+  if (count) count.textContent = archived.length;
+  if (archived.length === 0) {
+    grid.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:20px; grid-column:1/-1;">No archived auctions yet. Completed auctions will appear here for simulation and analysis.</div>`;
+    return;
+  }
+  grid.innerHTML = archived.slice(0, 20).map(a => `
+    <div class="archive-card">
+      <div class="archive-status">${a.won ? '✅ WON' : '❌ LOST'}</div>
+      <div class="archive-date">${new Date(a.scheduledDate || a.createdAt).toLocaleDateString()}</div>
+      <div class="archive-name">${escapeHtml(a.productName || 'Unnamed')}</div>
+      <div class="archive-details">${escapeHtml(a.productVariety || '')} • ${escapeHtml((a.quantity || 0).toLocaleString())} ${escapeHtml(a.unit || 'kg')}</div>
+      <div class="archive-metrics">
+        <div class="metric-item"><div class="metric-value">${money(a.finalPrice || a.startingPrice || 0)}</div><div class="metric-label">Final Price</div></div>
+        <div class="metric-item"><div class="metric-value">${a.bidCount || 0}</div><div class="metric-label">Bids</div></div>
+        <div class="metric-item"><div class="metric-value">${a.simulationRuns || 0}</div><div class="metric-label">Sims</div></div>
+      </div>
+      ${a.simWinRate !== undefined ? `<div class="simulation-result">📊 Win Rate: ${a.simWinRate.toFixed(1)}% (${a.simulationRuns || 0} simulations)</div>` : ''}
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="simulate-btn" onclick="openSimulationModal('${a.id}')">📊 Analyze</button>
+        <button class="simulate-btn" onclick="simulateAuction('${a.id}')" style="background: linear-gradient(135deg, #00ced1, #0066ff); color:white;">🔄 Simulate</button>
+        <button class="simulate-btn" onclick="restoreAuction('${a.id}')" style="background: linear-gradient(135deg, #7CFC00, #00ff7f); color:black;">↩️ Restore</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAuctionSchedule() {
+  const auctionList = $('auctionList');
+  if (!auctionList) return;
+  const briefs = APP_STATE.briefs || [];
+  const upcoming = briefs.filter(b => b.status === 'scheduled' || b.status === 'live');
+  if (upcoming.length === 0) {
+    auctionList.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">No active auctions. Create one from your products!</div>`;
+    return;
+  }
+  auctionList.innerHTML = upcoming.slice(0, 5).map(b => {
+    const date = new Date(b.auctionTime || Date.now());
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const statusClass = b.status === 'live' ? 'live' : 'upcoming';
+    return `
+      <div class="auction-item">
+        <div class="auction-info">
+          <div class="auction-name">${escapeHtml(b.product || 'Unnamed Auction')}</div>
+          <div class="auction-details">${escapeHtml(b.variety || '')} • ${escapeHtml(b.quantity || 0)} MT</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="auction-time">${dateStr} ${timeStr}</div>
+          <div class="auction-status ${statusClass}">${escapeHtml((b.status || 'scheduled').toUpperCase())}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTARAdvisory() {
+  const advisoryText = $('tarAdvisoryText');
+  if (!advisoryText) return;
+  const briefs = APP_STATE.briefs || [];
+  const archived = APP_STATE.archivedAuctions || [];
+  const totalAuctions = briefs.length;
+  const upcoming = briefs.filter(b => b.status === 'scheduled').length;
+  const live = briefs.filter(b => b.status === 'live').length;
+  const archivedCount = archived.length;
+  let adviceText = `You have <span class="highlight">${totalAuctions}</span> active auctions and <span class="highlight">${archivedCount}</span> archived. `;
+  if (upcoming > 0) {
+    adviceText += `<span class="info">${upcoming} upcoming</span> and `;
+  }
+  if (live > 0) {
+    adviceText += `<span class="highlight">${live} live</span> right now! `;
+  }
+  if (totalAuctions === 0 && archivedCount === 0) {
+    adviceText = `No auctions yet. <span class="highlight">Create your first auction</span> from the Products section to start trading!`;
+  } else if (totalAuctions === 0 && archivedCount > 0) {
+    adviceText += `Check your archive for simulation insights. <span class="highlight">Create new auctions</span> based on your archived performance.`;
+  } else {
+    adviceText += `Monitor your active auctions and archive completed ones for simulation and analysis.`;
+  }
+  advisoryText.innerHTML = adviceText;
+}
+
+/* ==================== FILE UPLOAD HANDLERS ==================== */
+function setupFileUploads() {
+  const logoUpload = $('companyLogoUpload');
+  const logoInput = $('logoFileInput');
+  if (logoUpload && logoInput) {
+    logoUpload.onclick = () => logoInput.click();
+    logoInput.onchange = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          APP_STATE.company.logo = ev.target.result;
+          saveToStorage();
+          renderCompany();
+          showToast('Logo uploaded!', 'success');
+        };
+        reader.onerror = () => showToast('Failed to read logo file', 'error');
+        reader.readAsDataURL(file);
+      }
+      this.value = '';
+    };
+  }
+
+  const photoInput = $('photoFileInput');
+  if (photoInput) {
+    photoInput.onchange = function(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        let loaded = 0;
+        const total = files.length;
+        Array.from(files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
+            APP_STATE.company.photos.push(ev.target.result);
+            loaded++;
+            if (loaded === total) {
+              saveToStorage();
+              renderCompany();
+              showToast(`${total} photo(s) uploaded!`, 'success');
+            }
+          };
+          reader.onerror = () => {
+            loaded++;
+            showToast('Failed to read some photos', 'warning');
+            if (loaded === total) {
+              saveToStorage();
+              renderCompany();
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      this.value = '';
+    };
+  }
+
+  const docFiles = [
+    { input: $('incorpFileInput'), statusId: 'incorpDocStatus', key: 'incorporation' },
+    { input: $('licenseFileInput'), statusId: 'licenseDocStatus', key: 'license' },
+    { input: $('taxFileInput'), statusId: 'taxDocStatus', key: 'tax' }
+  ];
+  docFiles.forEach(({ input, statusId, key }) => {
+    if (input) {
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
+            APP_STATE.company.documents[key] = ev.target.result;
+            saveToStorage();
+            renderCompany();
+            const statusEl = $(statusId);
+            if (statusEl) statusEl.textContent = '✅ Uploaded';
+            showToast('Document uploaded!', 'success');
+          };
+          reader.onerror = () => showToast('Failed to read file', 'error');
+          reader.readAsDataURL(file);
+        }
+        this.value = '';
+      };
+    }
+  });
+
+  const productImagesInput = $('productImagesInput');
+  if (productImagesInput) {
+    productImagesInput.onchange = function(e) {
+      const previewContainer = $('productImagePreview');
+      if (!previewContainer) return;
+      previewContainer.innerHTML = '';
+      const files = Array.from(e.target.files).slice(0, 5);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+  }
 }
 
 /* ==================== PRODUCT FUNCTIONS ==================== */
@@ -2204,153 +2126,42 @@ function openProductModal(productId) {
   if (title) title.textContent = isEdit ? '📦 Edit Product' : '📦 Add Product';
   const imagesInput = $('productImagesInput');
   if (imagesInput) imagesInput.value = '';
+  const previewContainer = $('productImagePreview');
+  if (previewContainer) previewContainer.innerHTML = '';
   if (isEdit) {
     const product = APP_STATE.products.find(p => p.id === productId);
-    if (product) {
-      const nameInput = $('productNameInput');
-      const varietyInput = $('productVarietyInput');
-      const qtyInput = $('productQuantityInput');
-      const unitInput = $('productUnitInput');
-      const priceInput = $('productPriceInput');
-      const statusInput = $('productStatusInput');
-      const descInput = $('productDescInput');
-      const originInput = $('productOriginInput');
-      if (nameInput) nameInput.value = product.name || '';
-      if (varietyInput) varietyInput.value = product.variety || '';
-      if (qtyInput) qtyInput.value = product.quantity || '';
-      if (unitInput) unitInput.value = product.unit || 'kg';
-      if (priceInput) priceInput.value = product.price || '';
-      if (statusInput) statusInput.value = product.status || 'draft';
-      if (descInput) descInput.value = product.description || '';
-      if (originInput) originInput.value = product.origin || '';
-    }
+    if (product) loadProductIntoModal(product);
   } else {
-    const inputs = ['productNameInput', 'productVarietyInput', 'productQuantityInput', 'productPriceInput', 'productDescInput', 'productOriginInput'];
-    inputs.forEach(id => { const el = $(id); if (el) el.value = ''; });
-    const unitInput = $('productUnitInput');
-    if (unitInput) unitInput.value = 'kg';
-    const statusInput = $('productStatusInput');
-    if (statusInput) statusInput.value = 'listed';
+    $('productNameInput').value = '';
+    $('productVarietyInput').value = '';
+    $('productQuantityInput').value = '';
+    $('productGradeInput').value = 'Grade A';
+    $('productOriginInput').value = '';
+    $('productPackageType').value = '';
+    $('productPackageSize').value = '';
+    $('packagingPreview').textContent = 'Select packaging above';
+    $('packagingPreview').style.color = '#9ca3af';
+    $('productMoisture').value = 12;
+    $('productMoistureVal').textContent = '12.0%';
+    $('productScreenSize').value = 15;
+    $('productScreenSizeVal').textContent = '15.0';
+    $('productDefects').value = 2;
+    $('productDefectsVal').textContent = '2.0%';
+    $('productForeignMatter').value = 0.5;
+    $('productForeignMatterVal').textContent = '0.5%';
+    $('productProtein').value = 0;
+    $('productProteinVal').textContent = '0.0%';
+    $('productAflatoxin').value = 0;
+    $('productAflatoxinVal').textContent = '0 ppb';
+    $('productOilContent').value = 0;
+    $('productOilContentVal').textContent = '0.0%';
+    $('productColorGrade').value = 0;
+    $('productColorGradeVal').textContent = '0';
+    $('productIdealPrice').value = 4.25;
+    $('productIdealPriceVal').textContent = '$4.25 / MT';
+    if (advancedSpecsOpen) toggleAdvancedSpecs();
   }
   openModal('productModal');
-}
-
-function gatherProductData() {
-  const nameInput = $('productNameInput');
-  const qtyInput = $('productQuantityInput');
-  const priceInput = $('productPriceInput');
-  if (!nameInput) { showToast('Product name input not found', 'error'); return null; }
-  const name = nameInput.value.trim();
-  if (!name) { showToast('Product name is required', 'error'); return null; }
-  if (!qtyInput) { showToast('Quantity input not found', 'error'); return null; }
-  const quantity = parseFloat(qtyInput.value);
-  if (!quantity || quantity <= 0) { showToast('Enter a valid quantity', 'error'); return null; }
-  if (!priceInput) { showToast('Price input not found', 'error'); return null; }
-  const price = parseFloat(priceInput.value);
-  if (!price || price <= 0) { showToast('Enter a valid price', 'error'); return null; }
-  return {
-    name: name,
-    variety: $('productVarietyInput')?.value?.trim() || '',
-    quantity: quantity,
-    unit: $('productUnitInput')?.value || 'kg',
-    price: price,
-    status: $('productStatusInput')?.value || 'draft',
-    description: $('productDescInput')?.value?.trim() || '',
-    origin: $('productOriginInput')?.value?.trim() || '',
-    hasAuction: false,
-    auctionId: null,
-    listedAt: new Date().toISOString()
-  };
-}
-
-function saveProduct() {
-  const productData = gatherProductData();
-  if (!productData) return;
-  const imagesInput = $('productImagesInput');
-  if (imagesInput && imagesInput.files.length > 0) {
-    const maxImages = Math.min(imagesInput.files.length, 5);
-    const imageUrls = [];
-    let processed = 0;
-    Array.from(imagesInput.files).slice(0, 5).forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imageUrls[index] = e.target.result;
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData);
-        }
-      };
-      reader.onerror = () => {
-        showToast(`Failed to read image ${index + 1}`, 'warning');
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-    if (imagesInput.files.length > 5) {
-      showToast('Only first 5 images will be saved', 'warning');
-    }
-    return;
-  }
-  saveProductData(productData);
-}
-
-function saveProductAndSchedule() {
-  const productData = gatherProductData();
-  if (!productData) return;
-  const imagesInput = $('productImagesInput');
-  if (imagesInput && imagesInput.files.length > 0) {
-    const maxImages = Math.min(imagesInput.files.length, 5);
-    const imageUrls = [];
-    let processed = 0;
-    Array.from(imagesInput.files).slice(0, 5).forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imageUrls[index] = e.target.result;
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData, (id) => { setTimeout(() => openAuctionModal(id), 300); });
-        }
-      };
-      reader.onerror = () => {
-        showToast(`Failed to read image ${index + 1}`, 'warning');
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData, (id) => { setTimeout(() => openAuctionModal(id), 300); });
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-    if (imagesInput.files.length > 5) {
-      showToast('Only first 5 images will be saved', 'warning');
-    }
-    return;
-  }
-  saveProductData(productData, (id) => { setTimeout(() => openAuctionModal(id), 300); });
-}
-
-function saveProductData(productData, callback) {
-  let productId = APP_STATE.currentEditId;
-  if (productId) {
-    const idx = APP_STATE.products.findIndex(p => p.id === productId);
-    if (idx > -1) {
-      APP_STATE.products[idx] = { ...APP_STATE.products[idx], ...productData };
-    }
-  } else {
-    productId = uuid();
-    APP_STATE.products.push({ id: productId, ...productData });
-  }
-  saveToStorage();
-  renderAll();
-  closeModal('productModal');
-  showToast('Product saved!', 'success');
-  if (callback) callback(productId);
 }
 
 function deleteProduct(id) {
@@ -2404,43 +2215,30 @@ function updateOrderStatus(orderId, newStatus) {
   showToast(`Order status updated to ${newStatus}`, 'success');
 }
 
-/* ==================== COMPANY ==================== */
-const editCompanyBtn = $('editCompanyBtn');
-if (editCompanyBtn) {
-  editCompanyBtn.onclick = () => {
-    const nameInput = $('editCompanyName');
-    const regInput = $('editCompanyReg');
-    const countryInput = $('editCompanyCountry');
-    const taxInput = $('editCompanyTax');
-    const addressInput = $('editCompanyAddress');
-    const emailInput = $('editCompanyEmail');
-    const phoneInput = $('editCompanyPhone');
-    const websiteInput = $('editCompanyWebsite');
-    if (nameInput) nameInput.value = APP_STATE.company.name || '';
-    if (regInput) regInput.value = APP_STATE.company.reg || '';
-    if (countryInput) countryInput.value = APP_STATE.company.country || '';
-    if (taxInput) taxInput.value = APP_STATE.company.tax || '';
-    if (addressInput) addressInput.value = APP_STATE.company.address || '';
-    if (emailInput) emailInput.value = APP_STATE.company.email || '';
-    if (phoneInput) phoneInput.value = APP_STATE.company.phone || '';
-    if (websiteInput) websiteInput.value = APP_STATE.company.website || '';
-    openModal('companyModal');
-  };
+/* ==================== COMPANY FUNCTIONS ==================== */
+function openCompanyModal() {
+  $('editCompanyName').value = APP_STATE.company.name || '';
+  $('editCompanyReg').value = APP_STATE.company.reg || '';
+  $('editCompanyCountry').value = APP_STATE.company.country || '';
+  $('editCompanyTax').value = APP_STATE.company.tax || '';
+  $('editCompanyAddress').value = APP_STATE.company.address || '';
+  $('editCompanyEmail').value = APP_STATE.company.email || '';
+  $('editCompanyPhone').value = APP_STATE.company.phone || '';
+  $('editCompanyWebsite').value = APP_STATE.company.website || '';
+  openModal('companyModal');
 }
 
 function saveCompanyProfile() {
-  const nameInput = $('editCompanyName');
-  if (!nameInput) { showToast('Form not ready', 'error'); return; }
   APP_STATE.company = {
     ...APP_STATE.company,
-    name: nameInput.value?.trim() || '',
-    reg: $('editCompanyReg')?.value?.trim() || '',
-    country: $('editCompanyCountry')?.value?.trim() || '',
-    tax: $('editCompanyTax')?.value?.trim() || '',
-    address: $('editCompanyAddress')?.value?.trim() || '',
-    email: $('editCompanyEmail')?.value?.trim() || '',
-    phone: $('editCompanyPhone')?.value?.trim() || '',
-    website: $('editCompanyWebsite')?.value?.trim() || ''
+    name: $('editCompanyName').value?.trim() || '',
+    reg: $('editCompanyReg').value?.trim() || '',
+    country: $('editCompanyCountry').value?.trim() || '',
+    tax: $('editCompanyTax').value?.trim() || '',
+    address: $('editCompanyAddress').value?.trim() || '',
+    email: $('editCompanyEmail').value?.trim() || '',
+    phone: $('editCompanyPhone').value?.trim() || '',
+    website: $('editCompanyWebsite').value?.trim() || ''
   };
   if (APP_STATE.company.name && APP_STATE.company.reg && APP_STATE.company.country) {
     APP_STATE.company.verified = 'pending';
@@ -2453,192 +2251,240 @@ function saveCompanyProfile() {
 }
 
 /* ==================== DEPOSIT ==================== */
-const depositBtn = $('depositBtn');
-if (depositBtn) depositBtn.onclick = () => openModal('depositModal');
-
 function processDeposit() {
-  const amtInput = $('depositAmount');
-  if (!amtInput) { showToast('Deposit amount input not found', 'error'); return; }
-  const amt = parseFloat(amtInput.value);
-  if (!amt || amt < 100) { showToast('Minimum deposit $100', 'error'); return; }
-  APP_STATE.wallet.balance += amt;
+  const amt = prompt('Enter deposit amount ($):', '1000');
+  if (amt) {
+    const val = parseFloat(amt);
+    if (val > 0) {
+      APP_STATE.wallet.balance += val;
+      saveToStorage();
+      renderAll();
+      showToast(`Deposited ${money(val)}`, 'success');
+    }
+  }
+}
+
+/* ==================== TOUR ==================== */
+function startTour() {
+  APP_STATE.tour.active = true;
+  APP_STATE.tour.step = 0;
+  const overlay = $('tourOverlay');
+  if (overlay) overlay.style.display = 'block';
+  showTourStep(0);
+}
+
+function endTour() {
+  APP_STATE.tour.active = false;
+  const overlay = $('tourOverlay');
+  if (overlay) overlay.style.display = 'none';
+  const highlight = $('tourHighlight');
+  if (highlight) highlight.style.display = 'none';
+  showToast('🎯 Tour complete!', 'success');
+}
+
+function showTourStep(step) {
+  const steps = APP_STATE.tour.steps;
+  if (step >= steps.length) { endTour(); return; }
+  const stepData = steps[step];
+  const element = document.querySelector(stepData.selector);
+  if (!element) { showTourStep(step + 1); return; }
+  const rect = element.getBoundingClientRect();
+  const highlight = $('tourHighlight');
+  const tooltip = $('tourTooltip');
+  const title = $('tourTitle');
+  const description = $('tourDescription');
+  const nextBtn = $('tourNextBtn');
+  if (highlight) {
+    highlight.style.display = 'block';
+    highlight.style.left = (rect.left - 8) + 'px';
+    highlight.style.top = (rect.top - 8) + 'px';
+    highlight.style.width = (rect.width + 16) + 'px';
+    highlight.style.height = (rect.height + 16) + 'px';
+  }
+  if (tooltip) {
+    tooltip.style.left = Math.max(20, rect.left + rect.width / 2 - 160) + 'px';
+    tooltip.style.top = Math.max(20, rect.top - 120) + 'px';
+    tooltip.style.display = 'block';
+  }
+  if (title) title.textContent = stepData.title;
+  if (description) description.textContent = stepData.description;
+  if (nextBtn) {
+    nextBtn.textContent = step === steps.length - 1 ? '✅ Finish' : 'Next →';
+    nextBtn.onclick = () => showTourStep(step + 1);
+  }
+  const progress = $('tourProgress');
+  if (progress) {
+    const dots = progress.querySelectorAll('.dot');
+    dots.forEach((dot, i) => {
+      dot.className = 'dot';
+      if (i < step) dot.classList.add('done');
+      if (i === step) dot.classList.add('active');
+    });
+  }
+  APP_STATE.tour.step = step;
+}
+
+/* ==================== ARCHIVE ==================== */
+function toggleArchive() {
+  const collapse = $('archiveCollapse');
+  const header = $('archiveHeader');
+  if (collapse.classList.contains('open')) {
+    collapse.classList.remove('open');
+    header.classList.remove('open');
+  } else {
+    collapse.classList.add('open');
+    header.classList.add('open');
+  }
+}
+
+function simulateAuction(archiveId) {
+  const archive = APP_STATE.archivedAuctions.find(a => a.id === archiveId);
+  if (!archive) { showToast('Archive not found', 'error'); return; }
+  archive.simulationRuns = (archive.simulationRuns || 0) + 1;
+  const simPrice = archive.startingPrice * (1 + (Math.random() * 0.4 - 0.2));
+  const simWon = Math.random() > 0.35;
+  if (!archive.simulations) archive.simulations = [];
+  archive.simulations.push({
+    run: archive.simulationRuns,
+    price: simPrice,
+    won: simWon,
+    timestamp: new Date().toISOString()
+  });
+  const allSims = archive.simulations || [];
+  const avgPrice = allSims.reduce((sum, s) => sum + s.price, 0) / allSims.length;
+  const winRate = allSims.filter(s => s.won).length / allSims.length * 100;
+  archive.simAvgPrice = avgPrice;
+  archive.simWinRate = winRate;
+  archive.lastSimulated = new Date().toISOString();
   saveToStorage();
   renderAll();
-  closeModal('depositModal');
-  showToast('Deposit processed: ' + money(amt), 'success');
+  showToast(`🔄 Simulation #${archive.simulationRuns} complete!`, 'success');
 }
 
-/* ==================== SYNC ==================== */
-const syncCloudBtn = $('syncCloudBtn');
-if (syncCloudBtn) {
-  syncCloudBtn.onclick = async () => {
-    showToast('☁️ Syncing with cloud...', 'info');
-    await saveToStorage();
-    showToast('✅ Synced successfully!', 'success');
+function openSimulationModal(archiveId) {
+  const archive = APP_STATE.archivedAuctions.find(a => a.id === archiveId);
+  if (!archive) { showToast('Archive not found', 'error'); return; }
+  showToast(`📊 Analysis: ${archive.productName || 'Auction'} - ${archive.simulationRuns || 0} simulations run`, 'info');
+}
+
+function restoreAuction(archiveId) {
+  const index = APP_STATE.archivedAuctions.findIndex(a => a.id === archiveId);
+  if (index === -1) { showToast('Archive not found', 'error'); return; }
+  const archive = APP_STATE.archivedAuctions[index];
+  const restored = { ...archive, archived: false, status: 'scheduled' };
+  delete restored.archivedAt;
+  delete restored.finalPrice;
+  delete restored.bidCount;
+  delete restored.won;
+  delete restored.winner;
+  delete restored.conversionResult;
+  delete restored.simulationRuns;
+  delete restored.simulations;
+  delete restored.simAvgPrice;
+  delete restored.simWinRate;
+  delete restored.lastSimulated;
+  APP_STATE.briefs.push(restored);
+  APP_STATE.archivedAuctions.splice(index, 1);
+  saveToStorage();
+  renderAll();
+  showToast('↩️ Auction restored to active!', 'success');
+}
+
+/* ==================== EVENT LISTENERS ==================== */
+function initEventListeners() {
+  $('addProductBtn').onclick = () => openProductModal();
+  $('saveProductBtn').onclick = () => saveProduct();
+  $('saveAndPostBtn').onclick = () => saveProduct((id) => { setTimeout(() => openAuctionModal(id), 300); });
+  $('submitAuctionBtn').onclick = postAuction;
+  $('depositBtn').onclick = processDeposit;
+  $('authBtn').onclick = function(e) { e.preventDefault(); if (confirm('Sign out?')) { localStorage.clear(); location.reload(); } };
+  $('tarAutoConvertBtn').onclick = autoConvertReady;
+  $('tourBtn').onclick = startTour;
+  $('tourCloseBtn').onclick = endTour;
+  $('tarAdviceBtn').onclick = function() { showToast('💡 TAR Advisory: Check your receivables and auctions!', 'info'); };
+  $('tarSettingsBtn').onclick = function() { showToast('⚙️ TAR Settings: Fee $25 • Batch 50 • Auto-Convert ON', 'info'); };
+  $('archiveToggleBtn').onclick = toggleArchive;
+  $('auctionRefreshBtn').onclick = function() { APP_STATE.tar.cachedAuctions = null; renderAuctionSchedule(); showToast('🔄 Auctions refreshed!', 'info'); };
+  $('syncCloudBtn').onclick = function() { saveToStorage().then(() => showToast('☁️ Synced to cloud!', 'success')); };
+  $('editCompanyBtn').onclick = openCompanyModal;
+  
+  $('addCertBtn').onclick = function() {
+    const dropdown = $('certDropdown');
+    if (!dropdown) { showToast('Certificate dropdown not found', 'error'); return; }
+    const type = dropdown.value;
+    if (!type) { showToast('Select a certificate type', 'error'); return; }
+    if (APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'warning'); return; }
+    APP_STATE.certToggles[type] = false;
+    saveToStorage();
+    renderCertificates();
+    dropdown.value = '';
+    showToast('Certificate type added!', 'success');
   };
+  
+  const addProductCard = document.getElementById('addProductCard');
+  if (addProductCard) addProductCard.onclick = () => openProductModal();
+  
+  const productsGrid = $('productsGrid');
+  if (productsGrid) {
+    productsGrid.addEventListener('click', function(e) {
+      const card = e.target.closest('.add-product-card');
+      if (card) openProductModal();
+    });
+  }
 }
 
-/* ==================== TAR SETTINGS ==================== */
-const tarSettingsBtn = $('tarSettingsBtn');
-if (tarSettingsBtn) {
-  tarSettingsBtn.onclick = showTARSettings;
-}
-
-/* ==================== SIGN OUT BUTTON ==================== */
-const authBtn = $('authBtn');
-if (authBtn) {
-  authBtn.onclick = function(e) {
-    e.preventDefault();
-    signOut();
-  };
-}
-
-/* ==================== CALENDAR NAVIGATION ==================== */
-const calendarPrev = $('calendarPrev');
-const calendarNext = $('calendarNext');
-if (calendarPrev) {
-  calendarPrev.onclick = function() {
-    APP_STATE.calendarMonth--;
-    if (APP_STATE.calendarMonth < 0) {
-      APP_STATE.calendarMonth = 11;
-      APP_STATE.calendarYear--;
-    }
-    renderCalendar();
-  };
-}
-if (calendarNext) {
-  calendarNext.onclick = function() {
-    APP_STATE.calendarMonth++;
-    if (APP_STATE.calendarMonth > 11) {
-      APP_STATE.calendarMonth = 0;
-      APP_STATE.calendarYear++;
-    }
-    renderCalendar();
-  };
-}
-document.querySelectorAll('.time-slot').forEach(slot => {
-  slot.onclick = function() { selectTime(this); };
-});
-
-/* ==================== FILE UPLOADS ==================== */
-const logoUpload = $('companyLogoUpload');
-const logoFileInput = $('logoFileInput');
-if (logoUpload && logoFileInput) {
-  logoUpload.onclick = () => { logoFileInput.click(); };
-  logoFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        APP_STATE.company.logo = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Logo uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read logo file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-const photoInput = $('photoFileInput');
-if (photoInput) {
-  photoInput.onchange = function(e) {
-    const files = e.target.files;
-    if (files.length > 0) {
-      let loaded = 0;
-      const total = files.length;
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
-          APP_STATE.company.photos.push(ev.target.result);
-          loaded++;
-          if (loaded === total) {
-            saveToStorage();
-            renderCompany();
-            showToast(`${total} photo(s) uploaded!`, 'success');
-          }
-        };
-        reader.onerror = () => {
-          loaded++;
-          showToast('Failed to read some photos', 'warning');
-          if (loaded === total) {
-            saveToStorage();
-            renderCompany();
-          }
-        };
-        reader.readAsDataURL(file);
+/* ==================== INIT ==================== */
+async function initApp() {
+  showToast('🔐 Loading dashboard...', 'info');
+  const loaded = await loadFromStorage();
+  if (!loaded) {
+    APP_STATE.products = [
+      { id: uuid(), name: 'Arabica Coffee', variety: 'Specialty Grade', quantity: 8200, grade: 'Grade A', origin: 'Santos, Brazil', packageType: 'Jute Bag', packageSize: '60kg', moisture: 12, screenSize: 15, defects: 2, foreignMatter: 0.5, protein: 0, aflatoxin: 0, oilContent: 0, colorGrade: 0, idealPrice: 4.25, images: [], hasAuction: false, auctionId: null, createdAt: Date.now() },
+      { id: uuid(), name: 'Cocoa Beans', variety: 'Criollo', quantity: 5000, grade: 'Grade A', origin: 'Guayaquil, Ecuador', packageType: 'Plastic Bag', packageSize: '25kg', moisture: 8, screenSize: 18, defects: 1.5, foreignMatter: 0.3, protein: 0, aflatoxin: 0, oilContent: 0, colorGrade: 0, idealPrice: 5.10, images: [], hasAuction: false, auctionId: null, createdAt: Date.now() }
+    ];
+    APP_STATE.wallet = { balance: 250000 };
+    APP_STATE.receivables = generateReceivables();
+    APP_STATE.tar = { active: true, conversionFee: 25, minReceivable: 100, maxReceivable: 50000, autoConvert: true, batchSize: 50, dailyLimit: 500, todayConversions: 0, totalConversions: 0, totalFeesEarned: 0, cachedAuctions: null, cachedAuctionsTimestamp: null, cachedAdvisory: null, lastAdvisoryUpdate: null };
+    saveToStorage();
+  }
+  
+  setupSlider('productMoisture', 'productMoistureVal', '%', 1);
+  setupSlider('productScreenSize', 'productScreenSizeVal', '', 1);
+  setupSlider('productDefects', 'productDefectsVal', '%', 1);
+  setupSlider('productForeignMatter', 'productForeignMatterVal', '%', 1);
+  setupSlider('productProtein', 'productProteinVal', '%', 1);
+  setupSlider('productAflatoxin', 'productAflatoxinVal', ' ppb', 1);
+  setupSlider('productOilContent', 'productOilContentVal', '%', 1);
+  setupSlider('productColorGrade', 'productColorGradeVal', '', 0);
+  setupIdealPriceSlider();
+  setupPackagingPreview();
+  setupFileUploads();
+  initEventListeners();
+  renderAll();
+  syncToBuyerArena();
+  
+  document.querySelectorAll('.modal').forEach(m => {
+    m.onclick = (e) => { if (e.target === m) closeModal(m.id); };
+  });
+  
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal').forEach(m => {
+        if (m.style.display === 'flex') closeModal(m.id);
       });
     }
-    this.value = '';
-  };
+  });
+  
+  showToast('✅ Dashboard ready!', 'success');
 }
 
-const incorpFileInput = $('incorpFileInput');
-if (incorpFileInput) {
-  incorpFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-        APP_STATE.company.documents.incorporation = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Certificate of Incorporation uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-const licenseFileInput = $('licenseFileInput');
-if (licenseFileInput) {
-  licenseFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-        APP_STATE.company.documents.license = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Business License uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-const taxFileInput = $('taxFileInput');
-if (taxFileInput) {
-  taxFileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-        APP_STATE.company.documents.tax = ev.target.result;
-        saveToStorage();
-        renderCompany();
-        showToast('Tax Registration uploaded!', 'success');
-      };
-      reader.onerror = () => showToast('Failed to read file', 'error');
-      reader.readAsDataURL(file);
-    }
-    this.value = '';
-  };
-}
-
-/* ==================== EXPOSE FUNCTIONS ==================== */
-window.openProductModal = openProductModal;
-window.deleteProduct = deleteProduct;
+// ===== EXPOSE FUNCTIONS =====
+window.openCompanyModal = openCompanyModal;
+window.saveCompanyProfile = saveCompanyProfile;
+window.simulateAuction = simulateAuction;
+window.openSimulationModal = openSimulationModal;
+window.restoreAuction = restoreAuction;
+window.toggleArchive = toggleArchive;
 window.openOrderModal = openOrderModal;
 window.updateOrderStatus = updateOrderStatus;
 window.convertReceivable = convertReceivable;
@@ -2648,144 +2494,12 @@ window.endTour = endTour;
 window.uploadCertImage = uploadCertImage;
 window.removeCert = removeCert;
 window.saveProduct = saveProduct;
-window.saveProductAndSchedule = saveProductAndSchedule;
-window.saveCompanyProfile = saveCompanyProfile;
-window.processDeposit = processDeposit;
-window.closeModal = closeModal;
-window.showTARSettings = showTARSettings;
-window.refreshAuctions = refreshAuctions;
-window.signOut = signOut;
+window.openProductModal = openProductModal;
+window.deleteProduct = deleteProduct;
 window.openAuctionModal = openAuctionModal;
-window.scheduleAuction = scheduleAuction;
-window.selectDate = selectDate;
-window.selectTime = selectTime;
-window.archiveAuction = archiveAuction;
-window.simulateAuction = simulateAuction;
-window.openSimulationModal = openSimulationModal;
-window.runFullSimulation = runFullSimulation;
-window.restoreAuction = restoreAuction;
-window.toggleArchive = toggleArchive;
-
-window.onerror = function(msg, url, line) {
-  console.error('[TradeAux Error]', msg, 'at', url + ':' + line);
-  return true;
-};
-
-/* ==================== INIT ==================== */
-async function initApp() {
-  showToast('🔐 Loading dashboard...', 'info');
-  const loaded = await loadFromStorage();
-  if (!loaded) {
-    APP_STATE.products = [
-      { id: uuid(), name: 'Arabica Coffee', variety: 'Specialty Grade', quantity: 8200, unit: 'kg', price: 4.25, status: 'draft', description: 'High-quality Arabica from Santos, Brazil', origin: 'Santos, Brazil', hasAuction: false, auctionId: null, listedAt: new Date().toISOString() },
-      { id: uuid(), name: 'Cocoa Beans', variety: 'Criollo', quantity: 5000, unit: 'kg', price: 5.10, status: 'draft', description: 'Premium Criollo cocoa from Ecuador', origin: 'Guayaquil, Ecuador', hasAuction: false, auctionId: null, listedAt: new Date().toISOString() }
-    ];
-    APP_STATE.orders = [
-      { id: uuid(), product: 'Arabica Coffee', quantity: 2000, unit: 'kg', total: 8500, buyer: 'Blue Mountain Traders', status: 'processing', address: 'Rotterdam, Netherlands', date: '2026-06-28', notes: 'Need BOL by Friday' },
-      { id: uuid(), product: 'Cocoa Beans', quantity: 1000, unit: 'kg', total: 5100, buyer: 'Swiss Chocolate Co', status: 'pending', address: 'Zurich, Switzerland', date: '2026-06-29', notes: '' }
-    ];
-    APP_STATE.wallet = { balance: 250000 };
-    APP_STATE.receivables = generateReceivables();
-    APP_STATE.tar = {
-      active: true,
-      conversionFee: 25,
-      minReceivable: 100,
-      maxReceivable: 50000,
-      autoConvert: true,
-      batchSize: 50,
-      dailyLimit: 500,
-      todayConversions: 0,
-      totalConversions: 0,
-      totalFeesEarned: 0,
-      cachedAuctions: null,
-      cachedAuctionsTimestamp: null,
-      cachedAdvisory: null,
-      lastAdvisoryUpdate: null
-    };
-    APP_STATE.archivedAuctions = [
-      {
-        id: uuid(),
-        productName: 'Ethiopian Yirgacheffe',
-        productVariety: 'Single Origin',
-        quantity: 1200,
-        unit: 'kg',
-        startingPrice: 6.50,
-        scheduledDate: '2026-06-15',
-        scheduledTime: '14:00',
-        status: 'closed',
-        createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-        archivedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        finalPrice: 7.85,
-        bidCount: 12,
-        won: true,
-        winner: 'Blue Mountain Traders',
-        conversionResult: true,
-        simulationRuns: 5,
-        simAvgPrice: 7.92,
-        simWinRate: 75,
-        lastSimulated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        simulations: [
-          { run: 1, price: 7.45, bids: 8, won: true, timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-          { run: 2, price: 8.10, bids: 14, won: true, timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
-          { run: 3, price: 6.90, bids: 6, won: false, timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-          { run: 4, price: 8.25, bids: 18, won: true, timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-          { run: 5, price: 7.90, bids: 10, won: true, timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() }
-        ]
-      }
-    ];
-    saveToStorage();
-  }
-  renderAll();
-  const addProductCard = document.getElementById('addProductCard');
-  if (addProductCard) { addProductCard.onclick = () => openProductModal(); }
-  const productsGrid = $('productsGrid');
-  if (productsGrid) {
-    productsGrid.addEventListener('click', function(e) {
-      const card = e.target.closest('.add-product-card');
-      if (card) openProductModal();
-    });
-  }
-  const tarAutoConvertBtn = $('tarAutoConvertBtn');
-  if (tarAutoConvertBtn) tarAutoConvertBtn.onclick = autoConvertReady;
-  const tarAdviceBtn = $('tarAdviceBtn');
-  if (tarAdviceBtn) {
-    tarAdviceBtn.onclick = () => {
-      APP_STATE.tar.cachedAdvisory = null;
-      APP_STATE.tar.lastAdvisoryUpdate = null;
-      renderTARAdvisory();
-      showToast('💡 New trade advice generated!', 'info');
-    };
-  }
-  const auctionRefreshBtn = $('auctionRefreshBtn');
-  if (auctionRefreshBtn) auctionRefreshBtn.onclick = refreshAuctions;
-  const tourBtn = $('tourBtn');
-  if (tourBtn) tourBtn.onclick = startTour;
-  const tourCloseBtn = $('tourCloseBtn');
-  if (tourCloseBtn) tourCloseBtn.onclick = endTour;
-  const archiveToggleBtn = $('archiveToggleBtn');
-  if (archiveToggleBtn) archiveToggleBtn.onclick = toggleArchive;
-  const addCertBtn = $('addCertBtn');
-  if (addCertBtn) {
-    addCertBtn.onclick = function() {
-      const dropdown = $('certDropdown');
-      if (!dropdown) { showToast('Certificate dropdown not found', 'error'); return; }
-      const type = dropdown.value;
-      if (!type) { showToast('Select a certificate type', 'error'); return; }
-      if (APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'warning'); return; }
-      APP_STATE.certToggles[type] = false;
-      saveToStorage();
-      renderCertificates();
-      dropdown.value = '';
-      showToast('Certificate type added!', 'success');
-    };
-  }
-  document.querySelectorAll('.modal').forEach(m => {
-    m.onclick = (e) => { if (e.target === m) closeModal(m.id); };
-  });
-  const tourCompleted = localStorage.getItem('tradeaux_tour_complete');
-  if (!tourCompleted) { setTimeout(startTour, 1500); }
-  showToast('✅ Dashboard ready!', 'success');
-}
+window.postAuction = postAuction;
+window.closeModal = closeModal;
+window.processDeposit = processDeposit;
 
 initApp();
 </script>
