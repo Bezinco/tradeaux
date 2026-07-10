@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>TradeAux • Auctions</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --neon-green: #7CFC00;
+    --gold: #FFD966;
+    --cyan: #00ced1;
+    --muted: #9ca3af;
+  }
+  body {
+    background: #020617;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #F0F3FA;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .bg-waves {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .wave-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    filter: blur(100px);
+    opacity: 0.15;
+    animation: waveBgDrift 24s ease-in-out infinite;
+    border-radius: 50%;
+  }
+  .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+  .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.3), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+  .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,217,102,0.3), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+  @keyframes waveBgDrift {
+    0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
+    50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
+    100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
+  }
+
+  /* ===== 3D LOGO - TRADEAUX ===== */
+  .gem-logo-corner {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 150;
+    filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transform: scale(0.35);
+    transform-origin: top left;
+    pointer-events: none;
+  }
+  .gem-text {
+    font-size: 160px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    position: relative;
+    display: flex;
+    text-transform: uppercase;
+    line-height: 0.9;
+    font-family: 'Orbitron', sans-serif;
+    transform-style: preserve-3d;
+    gap: 2px;
+  }
+  .gem-letter {
+    display: inline-block;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: letterFloat 6s ease-in-out infinite;
+    filter: brightness(1.2);
+    color: transparent;
+  }
+  .gem-letter:nth-child(1) { animation-delay: 0s; }
+  .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+  .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+  .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+  .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+  .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+  .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+  .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+  @keyframes letterFloat {
+    0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
+    50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+  }
+
+  /* Letter T - Blue */
+  .gem-letter:nth-child(1)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+  /* Letter R - Green */
+  .gem-letter:nth-child(2)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+  /* Letter A - Red */
+  .gem-letter:nth-child(3)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+  /* Letter D - Blue */
+  .gem-letter:nth-child(4)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+  /* Letter E - Green */
+  .gem-letter:nth-child(5)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+  /* Letter A - Red */
+  .gem-letter:nth-child(6)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+  /* Letter U - Blue */
+  .gem-letter:nth-child(7)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+  /* Letter X - Green */
+  .gem-letter:nth-child(8)::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+    transform: translateZ(2px);
+  }
+
+  .gem-letter .edge-top {
+    position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+    mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+  }
+  .gem-letter .edge-right {
+    position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
+    background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+    mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+  }
+  .gem-letter .edge-bottom {
+    position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
+    background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
+    mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+  }
+  .gem-letter .edge-left {
+    position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
+    background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
+    mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+  }
+
+  .light-source {
+    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+    animation: rotateLight 15s linear infinite;
+    pointer-events: none; z-index: 10; mix-blend-mode: overlay;
+  }
+  @keyframes rotateLight {
+    0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+    50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
+    100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+  }
+
+  .sparkle {
+    position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+    box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
+    animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
+  }
+  @keyframes sparkleFlash {
+    0% { opacity: 0; transform: scale(0.5); }
+    10% { opacity: 1; transform: scale(1.2); }
+    20% { opacity: 0.6; transform: scale(0.9); }
+    30% { opacity: 1; transform: scale(1.1); }
+    40% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 0; transform: scale(0.5); }
+  }
+  .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+  .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+  .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+  .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+  .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+  .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+  .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+  .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+  .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+  .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+  .depth-shadow {
+    position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
+    background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
+    filter: blur(20px); z-index: -1;
+  }
+
+  .container { 
+    max-width: 1400px; 
+    margin: 0 auto; 
+    padding: 80px 24px 60px; 
+    position: relative; 
+    z-index: 2; 
+  }
+  
+  /* Header */
+  .header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 0 30px; flex-wrap: wrap; gap: 16px; }
+  .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .nav a { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 600; color: #BFC9E0; text-decoration: none; padding: 6px 16px; border-radius: 40px; border: 1px solid rgba(124,252,0,0.3); background: rgba(0,0,0,0.3); transition: all 0.3s; cursor: pointer; }
+  .nav a:hover { border-color: var(--neon-green); color: var(--neon-green); }
+  .nav a.active { background: rgba(124,252,0,0.15); border-color: var(--neon-green); color: var(--neon-green); }
+  .nav .sign-out { border-color: rgba(255,94,94,0.3); color: #FF5E5E; }
+  .nav .sign-out:hover { border-color: #FF5E5E; color: #FF5E5E; }
+
+  /* Stats Bar */
+  .stats-bar { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 16px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border: 1px solid rgba(124,252,0,0.1); }
+  .stat-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+  .stat-number { font-weight: 700; font-size: 1.1rem; color: var(--neon-green); }
+  .stat-label { color: var(--muted); }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .stat-dot.green { background: var(--neon-green); }
+  .stat-dot.yellow { background: var(--gold); }
+  .stat-dot.red { background: #FF5E5E; }
+
+  /* Controls */
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; align-items: center; padding: 16px 20px; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid rgba(124,252,0,0.1); }
+  .controls-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .controls-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .control-select { background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.2); border-radius: 8px; padding: 8px 12px; color: white; font-family: inherit; font-size: 0.8rem; cursor: pointer; min-width: 120px; }
+  .control-select:focus { outline: none; border-color: var(--neon-green); }
+  .search-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.2); border-radius: 8px; padding: 8px 14px; color: white; font-family: inherit; font-size: 0.8rem; min-width: 200px; }
+  .search-input:focus { outline: none; border-color: var(--neon-green); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* Auction Grid */
+  .auction-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin: 20px 0 30px; }
+  
+  /* Auction Card */
+  .auction-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.98)); border-radius: 20px; border: 1px solid rgba(124,252,0,0.2); padding: 20px; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; }
+  .auction-card:hover { transform: translateY(-4px); border-color: var(--neon-green); box-shadow: 0 8px 30px rgba(124,252,0,0.1); }
+  .auction-card .card-wave { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(124,252,0,0.03) 0px, rgba(124,252,0,0.03) 40px, rgba(124,252,0,0.06) 40px, rgba(124,252,0,0.06) 80px); background-size: 200% 200%; animation: waveFlow 6s linear infinite; pointer-events: none; border-radius: 20px; }
+  @keyframes waveFlow { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+  
+  .auction-card .card-content { position: relative; z-index: 1; }
+  .auction-card .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .auction-card .card-product { font-size: 1.1rem; font-weight: 700; }
+  .auction-card .card-variety { font-size: 0.8rem; color: var(--muted); }
+  .auction-card .card-status { font-size: 0.65rem; font-weight: 600; padding: 3px 12px; border-radius: 20px; }
+  .auction-card .card-status.live { background: rgba(124,252,0,0.15); color: var(--neon-green); border: 1px solid rgba(124,252,0,0.3); }
+  .auction-card .card-status.ending { background: rgba(255,217,102,0.15); color: var(--gold); border: 1px solid rgba(255,217,102,0.3); animation: pulseYellow 1s infinite; }
+  @keyframes pulseYellow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+  .auction-card .card-status.completed { background: rgba(255,94,94,0.15); color: #FF5E5E; border: 1px solid rgba(255,94,94,0.3); }
+  
+  .auction-card .card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+  .auction-card .detail-item { display: flex; flex-direction: column; }
+  .auction-card .detail-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+  .auction-card .detail-value { font-size: 0.9rem; font-weight: 600; }
+  .auction-card .detail-value.price { color: var(--gold); }
+  
+  .auction-card .card-seller { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(124,252,0,0.1); }
+  .auction-card .seller-name { font-size: 0.8rem; font-weight: 500; }
+  .auction-card .seller-rating { font-size: 0.7rem; color: var(--gold); }
+  .auction-card .seller-sales { font-size: 0.65rem; color: var(--muted); }
+  
+  .auction-card .card-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .auction-card .view-btn { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 8px 20px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.7rem; color: #010101; cursor: pointer; transition: transform 0.2s; }
+  .auction-card .view-btn:hover { transform: scale(1.05); }
+  .auction-card .view-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* Auction in Progress Overlay */
+  .auction-in-progress { background: rgba(255,217,102,0.05); border: 2px solid var(--gold); border-radius: 16px; padding: 16px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .auction-in-progress .indicator { display: flex; align-items: center; gap: 8px; }
+  .auction-in-progress .pulse-dot { width: 12px; height: 12px; background: var(--gold); border-radius: 50%; animation: pulseDot 1.5s infinite; }
+  @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+  .auction-in-progress .message { font-size: 0.85rem; color: var(--gold); }
+  .auction-in-progress .auction-name { font-weight: 700; color: white; }
+
+  /* Pagination */
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 30px; flex-wrap: wrap; }
+  .page-btn { background: rgba(0,0,0,0.4); border: 1px solid rgba(124,252,0,0.2); border-radius: 8px; padding: 8px 14px; color: white; cursor: pointer; font-family: inherit; font-size: 0.8rem; transition: all 0.2s; min-width: 36px; text-align: center; }
+  .page-btn:hover:not(:disabled) { background: rgba(124,252,0,0.1); border-color: var(--neon-green); }
+  .page-btn.active { background: rgba(124,252,0,0.15); border-color: var(--neon-green); color: var(--neon-green); }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .page-info { color: var(--muted); font-size: 0.8rem; padding: 0 8px; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: #0f1a2e; padding: 12px 28px; border-radius: 60px; border-left: 4px solid var(--neon-green); transition: 0.3s; opacity: 0; z-index: 2000; max-width: 90%; font-size: 0.85rem; word-wrap: break-word; text-align: center; }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+  .toast.error { border-left-color: #FF5E5E; }
+
+  /* Empty State */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); grid-column: 1 / -1; }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state .empty-title { font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 8px; }
+  .empty-state .empty-desc { font-size: 0.9rem; }
+
+  /* Loading State */
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted); grid-column: 1 / -1; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid rgba(124,252,0,0.1); border-top-color: var(--neon-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .container { padding: 80px 16px 40px; }
+    .header { flex-direction: column; align-items: flex-start; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .controls-group { flex-wrap: wrap; }
+    .search-input { min-width: 100%; }
+    .auction-grid { grid-template-columns: 1fr; }
+    .stats-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .auction-card .card-details { grid-template-columns: 1fr 1fr; }
+    .gem-logo-corner { transform: scale(0.25); }
+    .pagination { gap: 4px; }
+    .page-btn { padding: 6px 10px; font-size: 0.7rem; min-width: 30px; }
+  }
+
+  @media (max-width: 480px) {
+    .auction-card .card-details { grid-template-columns: 1fr; }
+    .stats-bar { font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<!-- 3D TRADEAUX LOGO -->
+<div class="gem-logo-corner">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="nav">
+      <a href="#" class="active" onclick="return false;">Live Auctions</a>
+      <a href="#" onclick="showToast('My Bids — coming soon'); return false;">My Bids</a>
+      <a href="#" onclick="showToast('Co-ops — coming soon'); return false;">Co-ops</a>
+      <a href="#" onclick="showToast('Leaderboard — coming soon'); return false;">Leaderboard</a>
+      <a href="#" class="sign-out" onclick="signOut(); return false;">🚪 Sign Out</a>
+    </div>
+  </header>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-item">
+      <span class="stat-dot green"></span>
+      <span>Active: <span class="stat-number" id="activeCount">0</span></span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-dot yellow"></span>
+      <span>Ending Soon: <span class="stat-number" id="endingCount">0</span></span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-dot red"></span>
+      <span>Completed: <span class="stat-number" id="completedCount">0</span></span>
+    </div>
+    <div class="stat-item">
+      <span>🏷️ <span class="stat-number" id="totalBids">0</span> total bids</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="controls-group">
+      <span class="controls-label">Sort:</span>
+      <select class="control-select" id="sortSelect">
+        <option value="date">Date (Newest)</option>
+        <option value="commodity">Commodity A-Z</option>
+        <option value="company">Company A-Z</option>
+      </select>
+    </div>
+    <div class="controls-group">
+      <span class="controls-label">Commodity:</span>
+      <select class="control-select" id="commodityFilter">
+        <option value="all">All Commodities</option>
+      </select>
+    </div>
+    <div class="controls-group">
+      <span class="controls-label">Seller:</span>
+      <select class="control-select" id="sellerFilter">
+        <option value="all">All Sellers</option>
+      </select>
+    </div>
+    <div class="controls-group">
+      <span class="controls-label">Status:</span>
+      <select class="control-select" id="statusFilter">
+        <option value="all">All Status</option>
+        <option value="active">🟢 Active</option>
+        <option value="ending">🟡 Ending Soon</option>
+        <option value="completed">🔴 Completed</option>
+      </select>
+    </div>
+    <div class="controls-group" style="flex:1; justify-content:flex-end;">
+      <input class="search-input" id="searchInput" type="text" placeholder="🔍 Search auctions..." />
+    </div>
+  </div>
+
+  <!-- Auction In Progress Notice -->
+  <div class="auction-in-progress" id="auctionInProgress" style="display:none;">
+    <div class="indicator">
+      <span class="pulse-dot"></span>
+      <span class="message">⏳ Auction in progress:</span>
+    </div>
+    <span class="auction-name" id="inProgressAuctionName">Loading...</span>
+    <span style="color:var(--muted); font-size:0.8rem;" id="inProgressTime">Time remaining: 02:45</span>
+  </div>
+
+  <!-- Auction Grid -->
+  <div class="auction-grid" id="auctionGrid">
+    <!-- Loading state -->
+    <div class="loading">
+      <div class="spinner"></div>
+      <div>Loading auctions...</div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" id="pagination">
+    <button class="page-btn" id="prevPage" disabled>←</button>
+    <span class="page-info" id="pageInfo">Page 1 of 1</span>
+    <button class="page-btn" id="nextPage" disabled>→</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== SUPABASE CONFIG ==========
+const SUPABASE_URL = "https://pfutaovwbygefummienf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I";
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ========== STATE ==========
+let currentPage = 1;
+const ITEMS_PER_PAGE = 9;
+let totalItems = 0;
+let allAuctions = [];
+let filteredAuctions = [];
+let realtimeChannel = null;
+let timerInterval = null;
+
+// ========== SIGN OUT ==========
+function signOut() {
+  window.location.href = 'index.html';
+}
+
+// ========== ESCAPE HTML (XSS Prevention) ==========
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ========== LOAD AUCTIONS ==========
+async function loadAuctions() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('auctions')
+      .select(`
+        *,
+        sellers!auctions_seller_id_fkey (
+          id,
+          coop_name,
+          business_name,
+          name,
+          rating,
+          sales_count,
+          fob_port
+        ),
+        seller_briefs!auctions_brief_id_fkey (
+          product,
+          variety,
+          quantity_mt,
+          remaining_mt,
+          ideal_price,
+          fob_port,
+          origin
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const auctionIds = (data || []).map(a => a.id).filter(Boolean);
+    
+    let bidsMap = {};
+    if (auctionIds.length > 0) {
+      const { data: bids, error: bidsErr } = await supabaseClient
+        .from('bids')
+        .select('auction_id, amount')
+        .in('auction_id', auctionIds)
+        .eq('status', 'pending');
+
+      if (!bidsErr && bids) {
+        bidsMap = bids.reduce((acc, bid) => {
+          if (!acc[bid.auction_id]) acc[bid.auction_id] = [];
+          acc[bid.auction_id].push(bid.amount || 0);
+          return acc;
+        }, {});
+      }
+    }
+
+    allAuctions = (data || []).map(item => {
+      const auctionBids = bidsMap[item.id] || [];
+      return {
+        id: item.id,
+        seller_id: item.seller_id,
+        brief_id: item.brief_id,
+        seller_name: item.sellers?.coop_name || item.sellers?.business_name || item.sellers?.name || 'Unknown Co-op',
+        seller_rating: item.sellers?.rating || '4.5',
+        seller_sales: item.sellers?.sales_count || 0,
+        product: item.seller_briefs?.product || 'Product',
+        variety: item.seller_briefs?.variety || 'Standard',
+        total_qty: item.seller_briefs?.quantity_mt || 0,
+        remaining_qty: item.seller_briefs?.remaining_mt || 0,
+        ideal_price: item.seller_briefs?.ideal_price || 0,
+        fob_port: item.seller_briefs?.fob_port || item.sellers?.fob_port || 'Location',
+        origin: item.seller_briefs?.origin || '',
+        status: item.status || 'active',
+        created_at: item.created_at,
+        started_at: item.started_at,
+        duration_seconds: item.duration_seconds || 180,
+        fees_collected: item.fees_collected || 0,
+        bids_count: auctionBids.length,
+        highest_bid: auctionBids.length > 0 ? Math.max(...auctionBids) : 0
+      };
+    });
+
+    populateFilters();
+    applyFiltersAndSort();
+    updateStats();
+
+  } catch (err) {
+    console.error('Error loading auctions:', err);
+    showToast('Error loading auctions', true);
+  }
+}
+
+// ========== POPULATE FILTERS ==========
+function populateFilters() {
+  const commodities = [...new Set(allAuctions.map(a => a.product).filter(Boolean))].sort();
+  const commoditySelect = document.getElementById('commodityFilter');
+  const currentValue = commoditySelect.value;
+  commoditySelect.innerHTML = '<option value="all">All Commodities</option>';
+  commodities.forEach(c => {
+    const option = document.createElement('option');
+    option.value = c;
+    option.textContent = c;
+    commoditySelect.appendChild(option);
+  });
+  if (currentValue && commodities.includes(currentValue)) {
+    commoditySelect.value = currentValue;
+  }
+
+  const sellers = [...new Set(allAuctions.map(a => a.seller_name).filter(Boolean))].sort();
+  const sellerSelect = document.getElementById('sellerFilter');
+  const currentSeller = sellerSelect.value;
+  sellerSelect.innerHTML = '<option value="all">All Sellers</option>';
+  sellers.forEach(s => {
+    const option = document.createElement('option');
+    option.value = s;
+    option.textContent = s;
+    sellerSelect.appendChild(option);
+  });
+  if (currentSeller && sellers.includes(currentSeller)) {
+    sellerSelect.value = currentSeller;
+  }
+}
+
+// ========== APPLY FILTERS & SORT ==========
+function applyFiltersAndSort() {
+  const commodityFilter = document.getElementById('commodityFilter').value;
+  const sellerFilter = document.getElementById('sellerFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+  const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+  const sortBy = document.getElementById('sortSelect').value;
+
+  let filtered = [...allAuctions];
+
+  if (commodityFilter !== 'all') {
+    filtered = filtered.filter(a => a.product === commodityFilter);
+  }
+
+  if (sellerFilter !== 'all') {
+    filtered = filtered.filter(a => a.seller_name === sellerFilter);
+  }
+
+  if (statusFilter === 'active') {
+    filtered = filtered.filter(a => a.status === 'active' && !isAuctionEndingSoon(a));
+  } else if (statusFilter === 'ending') {
+    filtered = filtered.filter(a => a.status === 'active' && isAuctionEndingSoon(a));
+  } else if (statusFilter === 'completed') {
+    filtered = filtered.filter(a => a.status === 'completed');
+  }
+
+  if (searchQuery) {
+    filtered = filtered.filter(a => 
+      (a.product || '').toLowerCase().includes(searchQuery) ||
+      (a.variety || '').toLowerCase().includes(searchQuery) ||
+      (a.seller_name || '').toLowerCase().includes(searchQuery) ||
+      (a.fob_port || '').toLowerCase().includes(searchQuery)
+    );
+  }
+
+  filtered.sort((a, b) => {
+    switch (sortBy) {
+      case 'date':
+        return new Date(b.created_at) - new Date(a.created_at);
+      case 'commodity':
+        return (a.product || '').localeCompare(b.product || '');
+      case 'company':
+        return (a.seller_name || '').localeCompare(b.seller_name || '');
+      default:
+        return 0;
+    }
+  });
+
+  filteredAuctions = filtered;
+  totalItems = filtered.length;
+  renderPagination();
+  renderPage(filtered);
+  checkAuctionInProgress(filtered);
+}
+
+// ========== CHECK AUCTION IN PROGRESS ==========
+function checkAuctionInProgress(auctions) {
+  const inProgress = auctions.find(a => a.status === 'active' && a.started_at);
+  const container = document.getElementById('auctionInProgress');
+  
+  if (inProgress) {
+    container.style.display = 'flex';
+    document.getElementById('inProgressAuctionName').textContent = `${inProgress.product} - ${inProgress.variety}`;
+    
+    if (inProgress.started_at) {
+      const started = new Date(inProgress.started_at);
+      const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
+      const remaining = Math.max(0, (inProgress.duration_seconds || 180) - elapsed);
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      document.getElementById('inProgressTime').textContent = `Time remaining: ${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+// ========== IS AUCTION ENDING SOON ==========
+function isAuctionEndingSoon(auction) {
+  if (!auction.started_at) return false;
+  const started = new Date(auction.started_at);
+  const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
+  const remaining = (auction.duration_seconds || 180) - elapsed;
+  return remaining > 0 && remaining < 30;
+}
+
+// ========== RENDER PAGE ==========
+function renderPage(auctions) {
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const end = Math.min(start + ITEMS_PER_PAGE, auctions.length);
+  const pageItems = auctions.slice(start, end);
+
+  const grid = document.getElementById('auctionGrid');
+
+  if (pageItems.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No auctions found</div>
+        <div class="empty-desc">Try adjusting your filters or check back later</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = pageItems.map(auction => {
+    const isEnding = isAuctionEndingSoon(auction);
+    const isCompleted = auction.status === 'completed';
+    let statusClass = 'live';
+    let statusText = '🟢 LIVE';
+    if (isCompleted) {
+      statusClass = 'completed';
+      statusText = '🔴 COMPLETED';
+    } else if (isEnding) {
+      statusClass = 'ending';
+      statusText = '🟡 ENDING SOON';
+    }
+
+    let timeRemaining = '—';
+    if (auction.started_at && !isCompleted) {
+      const started = new Date(auction.started_at);
+      const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
+      const remaining = Math.max(0, (auction.duration_seconds || 180) - elapsed);
+      if (remaining > 0) {
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        timeRemaining = `${mins}:${secs.toString().padStart(2, '0')}`;
+      } else {
+        timeRemaining = 'Ended';
+      }
+    }
+
+    const safeProduct = escapeHtml(auction.product);
+    const safeVariety = escapeHtml(auction.variety);
+    const safeSeller = escapeHtml(auction.seller_name);
+    const safeFob = escapeHtml(auction.fob_port);
+
+    return `
+      <div class="auction-card" data-id="${auction.id}">
+        <div class="card-wave"></div>
+        <div class="card-content">
+          <div class="card-header">
+            <div>
+              <div class="card-product">${safeProduct}</div>
+              <div class="card-variety">${safeVariety}</div>
+            </div>
+            <span class="card-status ${statusClass}">${statusText}</span>
+          </div>
+          <div class="card-details">
+            <div class="detail-item">
+              <span class="detail-label">📦 Remaining</span>
+              <span class="detail-value">${auction.remaining_qty || 0} / ${auction.total_qty || 0} MT</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">💎 Ideal Price</span>
+              <span class="detail-value price">$${(auction.ideal_price || 0).toFixed(2)}/MT</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">🏷️ Bids</span>
+              <span class="detail-value">${auction.bids_count || 0}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">⏱️ Time Left</span>
+              <span class="detail-value">${isCompleted ? '—' : timeRemaining}</span>
+            </div>
+            <div class="detail-item" style="grid-column: 1 / -1;">
+              <span class="detail-label">📍 FOB</span>
+              <span class="detail-value" style="font-size:0.8rem;">${safeFob}</span>
+            </div>
+          </div>
+          <div class="card-seller">
+            <span>🏢 <span class="seller-name">${safeSeller}</span></span>
+            <span class="seller-rating">⭐ ${auction.seller_rating}</span>
+            <span class="seller-sales">(${auction.seller_sales || 0} sales)</span>
+          </div>
+          <div class="card-actions">
+            <button class="view-btn" onclick="viewAuction('${auction.id}')" ${isCompleted ? 'disabled' : ''}>
+              ${isCompleted ? 'COMPLETED' : 'VIEW AUCTION →'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ========== RENDER PAGINATION ==========
+function renderPagination() {
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+  document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+  document.getElementById('prevPage').disabled = currentPage <= 1;
+  document.getElementById('nextPage').disabled = currentPage >= totalPages;
+}
+
+// ========== UPDATE STATS ==========
+function updateStats() {
+  const active = allAuctions.filter(a => a.status === 'active' && !isAuctionEndingSoon(a)).length;
+  const ending = allAuctions.filter(a => a.status === 'active' && isAuctionEndingSoon(a)).length;
+  const completed = allAuctions.filter(a => a.status === 'completed').length;
+  const totalBids = allAuctions.reduce((sum, a) => sum + (a.bids_count || 0), 0);
+  
+  document.getElementById('activeCount').textContent = active;
+  document.getElementById('endingCount').textContent = ending;
+  document.getElementById('completedCount').textContent = completed;
+  document.getElementById('totalBids').textContent = totalBids;
+}
+
+// ========== VIEW AUCTION ==========
+function viewAuction(auctionId) {
+  const auction = allAuctions.find(a => a.id === auctionId);
+  if (!auction) {
+    showToast('Auction not found', true);
+    return;
+  }
+  
+  if (auction.status === 'completed') {
+    showToast('This auction has already completed', true);
+    return;
+  }
+  
+  if (auction.started_at) {
+    showToast('⏳ Auction is in progress! Please wait for it to complete.', true);
+    return;
+  }
+  
+  window.location.href = `auction-detail.html?id=${auctionId}`;
+}
+
+// ========== SETUP REALTIME ==========
+function setupRealtime() {
+  if (realtimeChannel) {
+    supabaseClient.removeChannel(realtimeChannel).catch(console.warn);
+    realtimeChannel = null;
+  }
+
+  realtimeChannel = supabaseClient
+    .channel('auctions-channel')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'auctions'
+    }, () => {
+      console.log('🔄 Auction update');
+      loadAuctions();
+    })
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'bids'
+    }, () => {
+      console.log('🔄 New bid');
+      loadAuctions();
+    })
+    .subscribe((status) => {
+      console.log('📡 Realtime status:', status);
+    });
+}
+
+// ========== TOAST ==========
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('visible');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('visible'), 4000);
+}
+
+// ========== EVENT LISTENERS ==========
+document.getElementById('sortSelect').addEventListener('change', () => {
+  currentPage = 1;
+  applyFiltersAndSort();
+});
+
+document.getElementById('commodityFilter').addEventListener('change', () => {
+  currentPage = 1;
+  applyFiltersAndSort();
+});
+
+document.getElementById('sellerFilter').addEventListener('change', () => {
+  currentPage = 1;
+  applyFiltersAndSort();
+});
+
+document.getElementById('statusFilter').addEventListener('change', () => {
+  currentPage = 1;
+  applyFiltersAndSort();
+});
+
+document.getElementById('searchInput').addEventListener('input', () => {
+  currentPage = 1;
+  applyFiltersAndSort();
+});
+
+document.getElementById('prevPage').addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage--;
+    applyFiltersAndSort();
+  }
+});
+
+document.getElementById('nextPage').addEventListener('click', () => {
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  if (currentPage < totalPages) {
+    currentPage++;
+    applyFiltersAndSort();
+  }
+});
+
+// ========== CLEANUP ON UNLOAD ==========
+window.addEventListener('beforeunload', function() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  if (realtimeChannel) {
+    supabaseClient.removeChannel(realtimeChannel).catch(console.warn);
+    realtimeChannel = null;
+  }
+});
+
+// ========== LIVE TIMER UPDATE ==========
+timerInterval = setInterval(() => {
+  document.querySelectorAll('.auction-card').forEach(card => {
+    const id = card.dataset.id;
+    const auction = filteredAuctions.find(a => a.id === id);
+    if (auction && auction.started_at && auction.status !== 'completed') {
+      const started = new Date(auction.started_at);
+      const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
+      const remaining = Math.max(0, (auction.duration_seconds || 180) - elapsed);
+      if (remaining > 0) {
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        const timeEl = card.querySelector('.detail-value:last-child');
+        if (timeEl) timeEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
+    }
+  });
+  
+  checkAuctionInProgress(filteredAuctions);
+}, 1000);
+
+// ========== INIT ==========
+loadAuctions();
+setupRealtime();
+console.log('🚀 TradeAux Auctions loaded!');
+</script>
+</body>
+</html>
