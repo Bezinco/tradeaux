@@ -6,6 +6,7 @@
   <title>TradeAux • Seller Dashboard | TAR Advisor</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ===== ALL EXISTING STYLES REMAIN UNCHANGED ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
     .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
@@ -30,9 +31,9 @@
     .gem-letter:nth-child(3) { animation-delay: 0.4s; }
     .gem-letter:nth-child(4) { animation-delay: 0.6s; }
     .gem-letter:nth-child(5) { animation-delay: 0.8s; }
-    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
-    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
-    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
     @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
     
     .gem-letter:nth-child(1)::before {
@@ -378,14 +379,14 @@
 
     .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
 
+    /* ===== TOUR STYLES ===== */
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); display: inline-block; transition: all 0.3s; cursor: pointer; }
+    .dot.active { background: #7CFC00; box-shadow: 0 0 10px rgba(124,252,0,0.5); transform: scale(1.2); }
+    .dot.done { background: #00ced1; }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 1000px) { .company-profile-layout { grid-template-columns: 1fr; } .company-fields { grid-template-columns: 1fr; } .dashboard-grid { grid-template-columns: repeat(2, 1fr); } .tar-grid { grid-template-columns: 1fr; } .tar-metrics { grid-template-columns: 1fr 1fr; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
     @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: stretch; } .wallet-section { flex-wrap: wrap; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .tar-metrics { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr; } }
-
-    .company-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .company-field { margin-bottom: 4px; }
-    .company-field label { display: block; font-size: 10px; color: #9ca3af; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .company-field .field-value { font-size: 13px; color: #e5e7eb; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
   </style>
   <base target="_self">
 </head>
@@ -884,10 +885,17 @@
         <div style="text-align:center; font-family:'Orbitron',sans-serif; font-size:20px; color:#7CFC00; margin-top:4px;" id="productIdealPriceVal">$4.25 / MT</div>
         <div style="font-size:10px; color:#9ca3af; text-align:center;">💡 This price guides the knapsack algorithm — not shown to buyers</div>
       </div>
+
+      <!-- ✅ Scheduled Start Date/Time -->
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label>📅 Auction Scheduled Start</label>
+        <input type="datetime-local" id="productScheduledStart" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.5); border:1px solid rgba(0,206,209,0.25); border-radius:10px; color:#e5e7eb; font-family:'Inter', sans-serif; font-size:14px;">
+        <div style="font-size:10px; color:#9ca3af; margin-top:4px;">Set the date and time when this auction should automatically start. Buyers will see a countdown.</div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('productModal')">Cancel</button>
-      <button class="create-btn" id="saveProductBtn">💾 Save</button>
+      <button class="create-btn" id="saveProductBtn">💾 Save Product</button>
       <button class="create-btn" id="saveAndPostBtn" style="background: linear-gradient(135deg, #7CFC00, #00ced1);">📅 Save &amp; Post Auction</button>
     </div>
   </div>
@@ -1063,10 +1071,34 @@ let toastTimeout = null;
 let statusTimer = null;
 let advancedSpecsOpen = false;
 
-/* ==================== UTILITIES ==================== */
-function $(id) { return document.getElementById(id); }
+/* ==================== SAFE DOM HELPERS ==================== */
+function $(id) { 
+  const el = document.getElementById(id); 
+  if (!el) console.warn('Element not found:', id); 
+  return el; 
+}
+
+function safeVal(id, defaultValue = '') {
+  const el = $(id);
+  return el ? el.value : defaultValue;
+}
+
+function safeSet(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+  return el;
+}
+
+function safeSetVal(id, value) {
+  const el = $(id);
+  if (el) el.value = value;
+  return el;
+}
+
 function uuid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c=='x'?r:(r&0x3|0x8)).toString(16); }); }
+
 function money(n) { return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1133,11 +1165,12 @@ function setupPackagingPreview() {
 
 /* ==================== GATHER PRODUCT DATA ==================== */
 function gatherProductData() {
-  const name = $('productNameInput').value.trim();
-  const variety = $('productVarietyInput').value.trim();
-  const quantity = parseFloat($('productQuantityInput').value);
-  const grade = $('productGradeInput').value;
-  const origin = $('productOriginInput').value.trim();
+  const name = safeVal('productNameInput', '').trim();
+  const variety = safeVal('productVarietyInput', '').trim();
+  const quantity = parseFloat(safeVal('productQuantityInput', ''));
+  const grade = safeVal('productGradeInput', 'Grade A');
+  const origin = safeVal('productOriginInput', '').trim();
+  const scheduledStart = safeVal('productScheduledStart', '');
   
   if (!name) { showToast('Product name is required', 'error'); return null; }
   if (!quantity || quantity <= 0) { showToast('Enter a valid quantity', 'error'); return null; }
@@ -1148,53 +1181,88 @@ function gatherProductData() {
     quantity: quantity,
     grade: grade,
     origin: origin || 'Not specified',
-    packageType: $('productPackageType').value || '',
-    packageSize: $('productPackageSize').value || '',
-    moisture: parseFloat($('productMoisture').value) || 0,
-    screenSize: parseFloat($('productScreenSize').value) || 0,
-    defects: parseFloat($('productDefects').value) || 0,
-    foreignMatter: parseFloat($('productForeignMatter').value) || 0,
-    protein: parseFloat($('productProtein').value) || 0,
-    aflatoxin: parseFloat($('productAflatoxin').value) || 0,
-    oilContent: parseFloat($('productOilContent').value) || 0,
-    colorGrade: parseFloat($('productColorGrade').value) || 0,
-    idealPrice: parseFloat($('productIdealPrice').value) || 0
+    packageType: safeVal('productPackageType', ''),
+    packageSize: safeVal('productPackageSize', ''),
+    moisture: parseFloat(safeVal('productMoisture', '0')) || 0,
+    screenSize: parseFloat(safeVal('productScreenSize', '0')) || 0,
+    defects: parseFloat(safeVal('productDefects', '0')) || 0,
+    foreignMatter: parseFloat(safeVal('productForeignMatter', '0')) || 0,
+    protein: parseFloat(safeVal('productProtein', '0')) || 0,
+    aflatoxin: parseFloat(safeVal('productAflatoxin', '0')) || 0,
+    oilContent: parseFloat(safeVal('productOilContent', '0')) || 0,
+    colorGrade: parseFloat(safeVal('productColorGrade', '0')) || 0,
+    idealPrice: parseFloat(safeVal('productIdealPrice', '0')) || 0,
+    scheduledStart: scheduledStart || null
   };
 }
 
 function loadProductIntoModal(product) {
   if (!product) return;
-  $('productNameInput').value = product.name || '';
-  $('productVarietyInput').value = product.variety || '';
-  $('productQuantityInput').value = product.quantity || '';
-  $('productGradeInput').value = product.grade || 'Grade A';
-  $('productOriginInput').value = product.origin || '';
-  $('productPackageType').value = product.packageType || '';
-  $('productPackageSize').value = product.packageSize || '';
-  const preview = $('packagingPreview');
-  if (preview) preview.textContent = (product.packageType && product.packageSize) ? product.packageType + ' — ' + product.packageSize : 'Select packaging above';
-  if (preview && product.packageType && product.packageSize) preview.style.color = '#7CFC00';
-  $('productMoisture').value = product.moisture || 12;
-  $('productMoistureVal').textContent = (product.moisture || 12).toFixed(1) + '%';
-  $('productScreenSize').value = product.screenSize || 15;
-  $('productScreenSizeVal').textContent = (product.screenSize || 15).toFixed(1);
-  $('productDefects').value = product.defects || 2;
-  $('productDefectsVal').textContent = (product.defects || 2).toFixed(1) + '%';
-  $('productForeignMatter').value = product.foreignMatter || 0.5;
-  $('productForeignMatterVal').textContent = (product.foreignMatter || 0.5).toFixed(1) + '%';
-  $('productProtein').value = product.protein || 0;
-  $('productProteinVal').textContent = (product.protein || 0).toFixed(1) + '%';
-  $('productAflatoxin').value = product.aflatoxin || 0;
-  $('productAflatoxinVal').textContent = (product.aflatoxin || 0).toFixed(1) + ' ppb';
-  $('productOilContent').value = product.oilContent || 0;
-  $('productOilContentVal').textContent = (product.oilContent || 0).toFixed(1) + '%';
-  $('productColorGrade').value = product.colorGrade || 0;
-  $('productColorGradeVal').textContent = (product.colorGrade || 0);
-  $('productIdealPrice').value = product.idealPrice || 4.25;
-  $('productIdealPriceVal').textContent = '$' + (product.idealPrice || 4.25).toFixed(2) + ' / MT';
+  
   const previewContainer = $('productImagePreview');
+  if (previewContainer) previewContainer.innerHTML = '';
+  
+  safeSetVal('productNameInput', product.name || '');
+  safeSetVal('productVarietyInput', product.variety || '');
+  safeSetVal('productQuantityInput', product.quantity || '');
+  safeSetVal('productGradeInput', product.grade || 'Grade A');
+  safeSetVal('productOriginInput', product.origin || '');
+  safeSetVal('productPackageType', product.packageType || '');
+  safeSetVal('productPackageSize', product.packageSize || '');
+  
+  if (product.scheduledStart) {
+    const date = new Date(product.scheduledStart);
+    const pad = n => String(n).padStart(2, '0');
+    const startEl = $('productScheduledStart');
+    if (startEl) {
+      startEl.value = 
+        `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+  } else {
+    const future = new Date(Date.now() + 7 * 86400000);
+    const pad = n => String(n).padStart(2, '0');
+    const startEl = $('productScheduledStart');
+    if (startEl) {
+      startEl.value = 
+        `${future.getFullYear()}-${pad(future.getMonth()+1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}`;
+    }
+  }
+  
+  const preview = $('packagingPreview');
+  if (preview) {
+    preview.textContent = (product.packageType && product.packageSize) ? product.packageType + ' — ' + product.packageSize : 'Select packaging above';
+    if (product.packageType && product.packageSize) preview.style.color = '#7CFC00';
+  }
+  
+  safeSetVal('productMoisture', product.moisture || 12);
+  const moistureDisplay = $('productMoistureVal');
+  if (moistureDisplay) moistureDisplay.textContent = (product.moisture || 12).toFixed(1) + '%';
+  safeSetVal('productScreenSize', product.screenSize || 15);
+  const screenDisplay = $('productScreenSizeVal');
+  if (screenDisplay) screenDisplay.textContent = (product.screenSize || 15).toFixed(1);
+  safeSetVal('productDefects', product.defects || 2);
+  const defectsDisplay = $('productDefectsVal');
+  if (defectsDisplay) defectsDisplay.textContent = (product.defects || 2).toFixed(1) + '%';
+  safeSetVal('productForeignMatter', product.foreignMatter || 0.5);
+  const foreignDisplay = $('productForeignMatterVal');
+  if (foreignDisplay) foreignDisplay.textContent = (product.foreignMatter || 0.5).toFixed(1) + '%';
+  safeSetVal('productProtein', product.protein || 0);
+  const proteinDisplay = $('productProteinVal');
+  if (proteinDisplay) proteinDisplay.textContent = (product.protein || 0).toFixed(1) + '%';
+  safeSetVal('productAflatoxin', product.aflatoxin || 0);
+  const aflatoxinDisplay = $('productAflatoxinVal');
+  if (aflatoxinDisplay) aflatoxinDisplay.textContent = (product.aflatoxin || 0).toFixed(1) + ' ppb';
+  safeSetVal('productOilContent', product.oilContent || 0);
+  const oilDisplay = $('productOilContentVal');
+  if (oilDisplay) oilDisplay.textContent = (product.oilContent || 0).toFixed(1) + '%';
+  safeSetVal('productColorGrade', product.colorGrade || 0);
+  const colorDisplay = $('productColorGradeVal');
+  if (colorDisplay) colorDisplay.textContent = (product.colorGrade || 0);
+  safeSetVal('productIdealPrice', product.idealPrice || 4.25);
+  const priceDisplay = $('productIdealPriceVal');
+  if (priceDisplay) priceDisplay.textContent = '$' + (product.idealPrice || 4.25).toFixed(2) + ' / MT';
+  
   if (previewContainer && product.images && product.images.length > 0) {
-    previewContainer.innerHTML = '';
     product.images.forEach(src => {
       const img = document.createElement('img');
       img.src = src;
@@ -1209,7 +1277,7 @@ function saveProduct(callback) {
   const productData = gatherProductData();
   if (!productData) return;
   const imagesInput = $('productImagesInput');
-  if (imagesInput && imagesInput.files.length > 0) {
+  if (imagesInput && imagesInput.files && imagesInput.files.length > 0) {
     const maxImages = Math.min(imagesInput.files.length, 5);
     const imageUrls = [];
     let processed = 0;
@@ -1257,11 +1325,14 @@ function saveProductData(productData, callback) {
     productId = uuid();
     APP_STATE.products.push({ id: productId, ...productData, createdAt: Date.now() });
   }
-  saveToStorage();
-  renderAll();
-  closeModal('productModal');
-  showToast('✅ Product saved!', 'success');
-  if (callback) callback(productId);
+  saveToStorage().then(() => {
+    renderAll();
+    closeModal('productModal');
+    showToast('✅ Product saved!', 'success');
+    if (callback) callback(productId);
+  }).catch(() => {
+    showToast('⚠️ Product saved but storage failed', 'warning');
+  });
 }
 
 /* ==================== POST AUCTION ==================== */
@@ -1269,6 +1340,12 @@ function openAuctionModal(productId) {
   APP_STATE.currentAuctionProductId = productId;
   const product = APP_STATE.products.find(p => p.id === productId);
   if (!product) { showToast('Product not found', 'error'); return; }
+  
+  if (product.hasAuction && APP_STATE.briefs.some(b => b.productId === productId && !b.archived)) {
+    showToast('This product already has an active auction', 'error');
+    return;
+  }
+  
   const display = $('auctionProductDisplay');
   if (display) {
     let imgHtml = '';
@@ -1286,11 +1363,21 @@ function openAuctionModal(productId) {
       </div>
     `;
   }
-  $('auctionAvailableQty').textContent = product.quantity;
-  $('auctionQty').value = Math.min(500, Math.floor(product.quantity * 0.5));
-  const future = new Date(Date.now() + 7 * 86400000);
-  const pad = n => String(n).padStart(2, '0');
-  $('auctionDateTime').value = `${future.getFullYear()}-${pad(future.getMonth()+1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}`;
+  const availQty = $('auctionAvailableQty');
+  if (availQty) availQty.textContent = product.quantity;
+  const qtyInput = $('auctionQty');
+  if (qtyInput) qtyInput.value = Math.min(500, Math.floor(product.quantity * 0.5));
+  
+  const dateTimeInput = $('auctionDateTime');
+  if (dateTimeInput) {
+    if (product.scheduledStart) {
+      dateTimeInput.value = product.scheduledStart;
+    } else {
+      const future = new Date(Date.now() + 7 * 86400000);
+      const pad = n => String(n).padStart(2, '0');
+      dateTimeInput.value = `${future.getFullYear()}-${pad(future.getMonth()+1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}`;
+    }
+  }
   openModal('auctionModal');
 }
 
@@ -1298,11 +1385,18 @@ function postAuction() {
   const productId = APP_STATE.currentAuctionProductId;
   const product = APP_STATE.products.find(p => p.id === productId);
   if (!product) { showToast('Product not found', 'error'); return; }
-  const quantity = parseFloat($('auctionQty').value);
-  const dateTime = $('auctionDateTime').value;
-  const duration = parseInt($('auctionDuration').value);
-  const location = $('auctionLocation').value;
-  const notes = $('auctionNotes').value.trim();
+  
+  if (product.hasAuction && APP_STATE.briefs.some(b => b.productId === productId && !b.archived)) {
+    showToast('This product already has an active auction', 'error');
+    closeModal('auctionModal');
+    return;
+  }
+  
+  const quantity = parseFloat(safeVal('auctionQty', ''));
+  const dateTime = safeVal('auctionDateTime', '');
+  const duration = parseInt(safeVal('auctionDuration', '24')) || 24;
+  const location = safeVal('auctionLocation', 'Santos');
+  const notes = safeVal('auctionNotes', '').trim();
   if (!quantity || quantity <= 0) { showToast('Please enter a valid quantity', 'error'); return; }
   if (quantity > product.quantity) { showToast(`Only ${product.quantity} MT available`, 'error'); return; }
   if (!dateTime) { showToast('Please select an auction date and time', 'error'); return; }
@@ -1335,64 +1429,64 @@ function postAuction() {
     auctionTime: auctionTime,
     duration: duration,
     status: 'scheduled',
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    scheduledStart: dateTime
   };
   
   APP_STATE.briefs.push(auction);
   product.quantity -= quantity;
   product.hasAuction = true;
   product.auctionId = auction.id;
-  saveToStorage();
-  syncToBuyerArena();
-  renderAll();
-  closeModal('auctionModal');
-  showToast(`✅ Auction posted! ${auction.product} ${auction.quantity} MT`, 'success');
+  saveToStorage().then(() => {
+    syncToBuyerArena();
+    renderAll();
+    closeModal('auctionModal');
+    showToast(`✅ Auction posted! ${auction.product} ${auction.quantity} MT`, 'success');
+  }).catch(() => {
+    showToast('⚠️ Auction posted but storage failed', 'warning');
+  });
+}
+
+/* ==================== ARCHIVE AUCTION ==================== */
+function moveAuctionToArchive(auctionId) {
+  const idx = APP_STATE.briefs.findIndex(b => b.id === auctionId);
+  if (idx === -1) return;
+  
+  const auction = APP_STATE.briefs[idx];
+  const product = APP_STATE.products.find(p => p.id === auction.productId);
+  if (product) {
+    product.hasAuction = false;
+    delete product.auctionId;
+  }
+  
+  auction.archived = true;
+  auction.archivedAt = new Date().toISOString();
+  APP_STATE.archivedAuctions.push(auction);
+  APP_STATE.briefs.splice(idx, 1);
+  
+  saveToStorage().then(() => {
+    renderAll();
+    showToast('Auction archived', 'success');
+  }).catch(() => {
+    showToast('⚠️ Archive saved but storage failed', 'warning');
+  });
 }
 
 /* ==================== SYNC TO BUYER ARENA ==================== */
 function syncToBuyerArena() {
-  const buyerData = {
-    auctions: APP_STATE.briefs.filter(b => !b.archived).map(a => ({
-      id: a.id,
-      product: a.product,
-      variety: a.variety || '',
-      quantity: a.quantity || 0,
-      grade: a.grade || 'Standard',
-      origin: a.origin || '',
-      images: a.images || [],
-      packageType: a.packageType || '',
-      packageSize: a.packageSize || '',
-      moisture: a.moisture || 0,
-      screenSize: a.screenSize || 0,
-      defects: a.defects || 0,
-      foreignMatter: a.foreignMatter || 0,
-      protein: a.protein || 0,
-      aflatoxin: a.aflatoxin || 0,
-      oilContent: a.oilContent || 0,
-      colorGrade: a.colorGrade || 0,
-      location: a.location || 'Santos',
-      seller: a.seller || 'TradeAux Seller',
-      notes: a.notes || '',
-      auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
-      duration: a.duration || 24,
-      status: a.status || 'scheduled'
-    }))
-  };
-  localStorage.setItem('tradeaux_buyer_auctions', JSON.stringify(buyerData));
-  
-  const botTargets = APP_STATE.briefs
-    .filter(a => a.status === 'scheduled' || a.status === 'live')
-    .map(a => ({
-      id: a.id,
-      product: a.product,
-      variety: a.variety || '',
-      seller: a.seller || 'TradeAux Seller',
-      location: a.location || 'Santos',
-      quantity: a.quantity || 0,
-      idealPrice: a.idealPrice || 0,
-      auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
-      productId: a.productId,
-      specs: {
+  try {
+    const buyerData = {
+      version: '1.0',
+      auctions: APP_STATE.briefs.filter(b => !b.archived).map(a => ({
+        id: a.id,
+        product: a.product,
+        variety: a.variety || '',
+        quantity: a.quantity || 0,
+        grade: a.grade || 'Standard',
+        origin: a.origin || '',
+        images: a.images || [],
+        packageType: a.packageType || '',
+        packageSize: a.packageSize || '',
         moisture: a.moisture || 0,
         screenSize: a.screenSize || 0,
         defects: a.defects || 0,
@@ -1400,14 +1494,71 @@ function syncToBuyerArena() {
         protein: a.protein || 0,
         aflatoxin: a.aflatoxin || 0,
         oilContent: a.oilContent || 0,
-        colorGrade: a.colorGrade || 0
-      },
-      packaging: {
-        type: a.packageType || '',
-        size: a.packageSize || ''
-      }
-    }));
-  localStorage.setItem('tradeaux_bot_targets', JSON.stringify(botTargets));
+        colorGrade: a.colorGrade || 0,
+        location: a.location || 'Santos',
+        seller: a.seller || 'TradeAux Seller',
+        notes: a.notes || '',
+        auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
+        duration: a.duration || 24,
+        status: a.status || 'scheduled',
+        scheduledStart: a.scheduledStart || a.auctionTime || Date.now() + 86400000 * 7
+      }))
+    };
+    localStorage.setItem('tradeaux_buyer_auctions', JSON.stringify(buyerData));
+    
+    const botTargets = APP_STATE.briefs
+      .filter(a => a.status === 'scheduled' || a.status === 'live')
+      .map(a => ({
+        id: a.id,
+        product: a.product,
+        variety: a.variety || '',
+        seller: a.seller || 'TradeAux Seller',
+        location: a.location || 'Santos',
+        quantity: a.quantity || 0,
+        idealPrice: a.idealPrice || 0,
+        auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
+        productId: a.productId,
+        scheduledStart: a.scheduledStart || a.auctionTime || Date.now() + 86400000 * 7,
+        specs: {
+          moisture: a.moisture || 0,
+          screenSize: a.screenSize || 0,
+          defects: a.defects || 0,
+          foreignMatter: a.foreignMatter || 0,
+          protein: a.protein || 0,
+          aflatoxin: a.aflatoxin || 0,
+          oilContent: a.oilContent || 0,
+          colorGrade: a.colorGrade || 0
+        },
+        packaging: {
+          type: a.packageType || '',
+          size: a.packageSize || ''
+        }
+      }));
+    localStorage.setItem('tradeaux_bot_targets', JSON.stringify(botTargets));
+    
+    if (window.supabaseClient) {
+      try {
+        supabaseClient.from('auctions').upsert(buyerData.auctions.map(a => ({
+          id: a.id,
+          seller_id: window.currentUserId || null,
+          brief_id: a.id,
+          product: a.product,
+          variety: a.variety,
+          quantity_mt: a.quantity,
+          remaining_mt: a.quantity,
+          ideal_price: a.idealPrice || 0,
+          fob_port: a.location || 'Santos',
+          scheduled_start: a.scheduledStart || a.auctionTime,
+          status: 'active',
+          created_at: new Date().toISOString()
+        }))).then(() => {
+          console.log('✅ Auctions synced to Supabase');
+        }).catch(e => console.warn('Supabase sync warning:', e.message));
+      } catch(e) { console.warn('Supabase sync not available:', e.message); }
+    }
+  } catch(e) {
+    console.warn('Sync to buyer arena failed:', e.message);
+  }
 }
 
 /* ==================== STORAGE ==================== */
@@ -1500,6 +1651,7 @@ async function loadFromStorage() {
     }
     return true;
   } catch(e) {
+    console.warn('Failed to load from storage:', e.message);
     return false;
   }
 }
@@ -1571,9 +1723,12 @@ function convertReceivable(id) {
     fee: fee,
     convertedAt: new Date().toISOString()
   });
-  saveToStorage();
-  renderAll();
-  showToast(`✅ Converted ${receivable.company} - ${money(receivable.amount)} (fee: ${money(fee)})`, 'success');
+  saveToStorage().then(() => {
+    renderAll();
+    showToast(`✅ Converted ${receivable.company} - ${money(receivable.amount)} (fee: ${money(fee)})`, 'success');
+  }).catch(() => {
+    showToast('⚠️ Conversion saved but storage failed', 'warning');
+  });
 }
 
 function autoConvertReady() {
@@ -1587,6 +1742,10 @@ function autoConvertReady() {
   const totalFee = batch.length * APP_STATE.tar.conversionFee;
   if (APP_STATE.wallet.balance < totalFee) {
     showToast(`Insufficient balance. Need ${money(totalFee)} for ${batch.length} conversions`, 'error');
+    return;
+  }
+  if (APP_STATE.tar.dailyLimit && APP_STATE.tar.todayConversions + batch.length > APP_STATE.tar.dailyLimit) {
+    showToast(`Daily limit of ${APP_STATE.tar.dailyLimit} conversions reached`, 'warning');
     return;
   }
   if (!confirm(`Convert ${batch.length} receivables? Total fee: ${money(totalFee)}`)) return;
@@ -1608,9 +1767,12 @@ function autoConvertReady() {
       convertedAt: new Date().toISOString()
     });
   });
-  saveToStorage();
-  renderAll();
-  showToast(`✅ Auto-converted ${count} receivables! Total fee: ${money(totalFee)}`, 'success');
+  saveToStorage().then(() => {
+    renderAll();
+    showToast(`✅ Auto-converted ${count} receivables! Total fee: ${money(totalFee)}`, 'success');
+  }).catch(() => {
+    showToast('⚠️ Auto-conversion saved but storage failed', 'warning');
+  });
 }
 
 /* ==================== RENDER FUNCTIONS ==================== */
@@ -1668,7 +1830,10 @@ function renderCompany() {
       APP_STATE.company.photos.forEach((src) => {
         const div = document.createElement('div');
         div.className = 'photo-item';
-        div.innerHTML = `<img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;">`;
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+        div.appendChild(img);
         photosGrid.appendChild(div);
       });
     }
@@ -1700,12 +1865,15 @@ function renderCertificates() {
     div.className = 'cert-block';
     div.style.borderColor = isRequired ? 'rgba(124,252,0,0.6)' : 'rgba(0,206,209,0.2)';
     const certImage = APP_STATE.company.documents?.[type] || null;
-    const imageHtml = certImage ? 
-      `<div class="cert-preview"><img src="${certImage}" style="cursor:pointer;" onclick="window.open('${certImage}','_blank')"></div>` :
-      `<div class="cert-preview" onclick="document.getElementById('certUpload_${type}').click()">
+    let imageHtml;
+    if (certImage) {
+      imageHtml = `<div class="cert-preview"><img src="${certImage}" style="cursor:pointer;" onclick="window.open('${certImage}','_blank')"></div>`;
+    } else {
+      imageHtml = `<div class="cert-preview" onclick="document.getElementById('certUpload_${type}').click()">
         <span class="placeholder">📤 Upload</span>
         <input type="file" id="certUpload_${type}" style="display:none;" accept=".pdf,.jpg,.png" onchange="uploadCertImage('${type}', this)">
       </div>`;
+    }
     const toggleHtml = isRequired ?
       '<span style="font-size:9px; color:#7CFC00;">🔒 Admin Verified</span>' :
       `<div class="cert-toggle-row">
@@ -1731,9 +1899,12 @@ function renderCertificates() {
         toggle.addEventListener('change', function(e) {
           const certType = this.dataset.cert;
           APP_STATE.certToggles[certType] = this.checked;
-          saveToStorage();
-          renderCertificates();
-          showToast((APP_STATE.certToggles[certType] ? 'Verified: ' : 'Unverified: ') + info.label, 'info');
+          saveToStorage().then(() => {
+            renderCertificates();
+            showToast((APP_STATE.certToggles[certType] ? 'Verified: ' : 'Unverified: ') + info.label, 'info');
+          }).catch(() => {
+            showToast('⚠️ Failed to save certificate', 'warning');
+          });
         });
       }
       const removeBtn = div.querySelector('.btn-remove-cert');
@@ -1751,13 +1922,21 @@ function renderCertificates() {
 function uploadCertImage(type, input) {
   const file = input.files[0];
   if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('File too large. Max 5MB.', 'error');
+    input.value = '';
+    return;
+  }
   const reader = new FileReader();
   reader.onload = function(e) {
     if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
     APP_STATE.company.documents[type] = e.target.result;
-    saveToStorage();
-    renderCertificates();
-    showToast('Certificate uploaded!', 'success');
+    saveToStorage().then(() => {
+      renderCertificates();
+      showToast('Certificate uploaded!', 'success');
+    }).catch(() => {
+      showToast('⚠️ Certificate uploaded but storage failed', 'warning');
+    });
   };
   reader.onerror = function() { showToast('Failed to read image file', 'error'); };
   reader.readAsDataURL(file);
@@ -1769,9 +1948,12 @@ function removeCert(type) {
   if (!confirm('Remove "' + (CERT_LABELS[type]?.label || type) + '" certificate?')) return;
   delete APP_STATE.certToggles[type];
   delete APP_STATE.company.documents?.[type];
-  saveToStorage();
-  renderCertificates();
-  showToast('Certificate removed', 'info');
+  saveToStorage().then(() => {
+    renderCertificates();
+    showToast('Certificate removed', 'info');
+  }).catch(() => {
+    showToast('⚠️ Certificate removed but storage failed', 'warning');
+  });
 }
 
 function renderProducts() {
@@ -1782,6 +1964,7 @@ function renderProducts() {
   addCard.className = 'add-product-card';
   addCard.id = 'addProductCard';
   addCard.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">Add Product</div>';
+  addCard.onclick = () => openProductModal();
   grid.appendChild(addCard);
   if (!APP_STATE.products || APP_STATE.products.length === 0) {
     const emptyMsg = document.createElement('div');
@@ -1793,9 +1976,13 @@ function renderProducts() {
   APP_STATE.products.forEach(product => {
     const card = document.createElement('div');
     card.className = 'product-card';
-    const imageHtml = (product.images && product.images.length > 0) 
-      ? `<img src="${product.images[0]}" alt="${escapeHtml(product.name)}">` 
-      : '<span class="no-image">📷 No image</span>';
+    let imageHtml;
+    if (product.images && product.images.length > 0) {
+      const imgSrc = product.images[0];
+      imageHtml = `<img src="${imgSrc}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none';this.parentNode.innerHTML='<span class=\\'no-image\\'>📷 Error</span>';">`;
+    } else {
+      imageHtml = '<span class="no-image">📷 No image</span>';
+    }
     const specsHtml = [];
     if (product.moisture > 0) specsHtml.push(`💧 ${product.moisture.toFixed(1)}%`);
     if (product.screenSize > 0) specsHtml.push(`📏 ${product.screenSize.toFixed(1)}`);
@@ -1971,11 +2158,14 @@ function renderAuctionSchedule() {
     const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const statusClass = b.status === 'live' ? 'live' : 'upcoming';
+    const safeProduct = escapeHtml(b.product || 'Unnamed Auction');
+    const safeVariety = escapeHtml(b.variety || '');
+    const safeQty = b.quantity || 0;
     return `
       <div class="auction-item">
         <div class="auction-info">
-          <div class="auction-name">${escapeHtml(b.product || 'Unnamed Auction')}</div>
-          <div class="auction-details">${escapeHtml(b.variety || '')} • ${escapeHtml(b.quantity || 0)} MT</div>
+          <div class="auction-name">${safeProduct}</div>
+          <div class="auction-details">${safeVariety} • ${safeQty} MT</div>
         </div>
         <div style="text-align:right;">
           <div class="auction-time">${dateStr} ${timeStr}</div>
@@ -2021,12 +2211,20 @@ function setupFileUploads() {
     logoInput.onchange = function(e) {
       const file = e.target.files[0];
       if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Logo file too large. Max 5MB.', 'error');
+          this.value = '';
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (ev) => {
           APP_STATE.company.logo = ev.target.result;
-          saveToStorage();
-          renderCompany();
-          showToast('Logo uploaded!', 'success');
+          saveToStorage().then(() => {
+            renderCompany();
+            showToast('Logo uploaded!', 'success');
+          }).catch(() => {
+            showToast('⚠️ Logo saved but storage failed', 'warning');
+          });
         };
         reader.onerror = () => showToast('Failed to read logo file', 'error');
         reader.readAsDataURL(file);
@@ -2043,23 +2241,31 @@ function setupFileUploads() {
         let loaded = 0;
         const total = files.length;
         Array.from(files).forEach(file => {
+          if (file.size > 5 * 1024 * 1024) {
+            showToast('Some photos exceed 5MB limit. Skipping.', 'warning');
+            loaded++;
+            if (loaded === total) {
+              saveToStorage().then(() => renderCompany()).catch(() => {});
+            }
+            return;
+          }
           const reader = new FileReader();
           reader.onload = (ev) => {
             if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
             APP_STATE.company.photos.push(ev.target.result);
             loaded++;
             if (loaded === total) {
-              saveToStorage();
-              renderCompany();
-              showToast(`${total} photo(s) uploaded!`, 'success');
+              saveToStorage().then(() => {
+                renderCompany();
+                showToast(`${total} photo(s) uploaded!`, 'success');
+              }).catch(() => {});
             }
           };
           reader.onerror = () => {
             loaded++;
             showToast('Failed to read some photos', 'warning');
             if (loaded === total) {
-              saveToStorage();
-              renderCompany();
+              saveToStorage().then(() => renderCompany()).catch(() => {});
             }
           };
           reader.readAsDataURL(file);
@@ -2079,15 +2285,23 @@ function setupFileUploads() {
       input.onchange = function(e) {
         const file = e.target.files[0];
         if (file) {
+          if (file.size > 10 * 1024 * 1024) {
+            showToast('Document too large. Max 10MB.', 'error');
+            this.value = '';
+            return;
+          }
           const reader = new FileReader();
           reader.onload = (ev) => {
             if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
             APP_STATE.company.documents[key] = ev.target.result;
-            saveToStorage();
-            renderCompany();
-            const statusEl = $(statusId);
-            if (statusEl) statusEl.textContent = '✅ Uploaded';
-            showToast('Document uploaded!', 'success');
+            saveToStorage().then(() => {
+              renderCompany();
+              const statusEl = $(statusId);
+              if (statusEl) statusEl.textContent = '✅ Uploaded';
+              showToast('Document uploaded!', 'success');
+            }).catch(() => {
+              showToast('⚠️ Document uploaded but storage failed', 'warning');
+            });
           };
           reader.onerror = () => showToast('Failed to read file', 'error');
           reader.readAsDataURL(file);
@@ -2105,6 +2319,10 @@ function setupFileUploads() {
       previewContainer.innerHTML = '';
       const files = Array.from(e.target.files).slice(0, 5);
       files.forEach(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Image exceeds 5MB limit. Skipping.', 'warning');
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (ev) => {
           const img = document.createElement('img');
@@ -2120,6 +2338,8 @@ function setupFileUploads() {
 
 /* ==================== PRODUCT FUNCTIONS ==================== */
 function openProductModal(productId) {
+  if (advancedSpecsOpen) toggleAdvancedSpecs();
+  
   APP_STATE.currentEditId = productId || null;
   const isEdit = !!productId;
   const title = $('productModalTitle');
@@ -2132,34 +2352,49 @@ function openProductModal(productId) {
     const product = APP_STATE.products.find(p => p.id === productId);
     if (product) loadProductIntoModal(product);
   } else {
-    $('productNameInput').value = '';
-    $('productVarietyInput').value = '';
-    $('productQuantityInput').value = '';
-    $('productGradeInput').value = 'Grade A';
-    $('productOriginInput').value = '';
-    $('productPackageType').value = '';
-    $('productPackageSize').value = '';
-    $('packagingPreview').textContent = 'Select packaging above';
-    $('packagingPreview').style.color = '#9ca3af';
-    $('productMoisture').value = 12;
-    $('productMoistureVal').textContent = '12.0%';
-    $('productScreenSize').value = 15;
-    $('productScreenSizeVal').textContent = '15.0';
-    $('productDefects').value = 2;
-    $('productDefectsVal').textContent = '2.0%';
-    $('productForeignMatter').value = 0.5;
-    $('productForeignMatterVal').textContent = '0.5%';
-    $('productProtein').value = 0;
-    $('productProteinVal').textContent = '0.0%';
-    $('productAflatoxin').value = 0;
-    $('productAflatoxinVal').textContent = '0 ppb';
-    $('productOilContent').value = 0;
-    $('productOilContentVal').textContent = '0.0%';
-    $('productColorGrade').value = 0;
-    $('productColorGradeVal').textContent = '0';
-    $('productIdealPrice').value = 4.25;
-    $('productIdealPriceVal').textContent = '$4.25 / MT';
-    if (advancedSpecsOpen) toggleAdvancedSpecs();
+    safeSetVal('productNameInput', '');
+    safeSetVal('productVarietyInput', '');
+    safeSetVal('productQuantityInput', '');
+    safeSetVal('productGradeInput', 'Grade A');
+    safeSetVal('productOriginInput', '');
+    safeSetVal('productPackageType', '');
+    safeSetVal('productPackageSize', '');
+    const preview = $('packagingPreview');
+    if (preview) { preview.textContent = 'Select packaging above'; preview.style.color = '#9ca3af'; }
+    safeSetVal('productMoisture', 12);
+    const moistureDisplay = $('productMoistureVal');
+    if (moistureDisplay) moistureDisplay.textContent = '12.0%';
+    safeSetVal('productScreenSize', 15);
+    const screenDisplay = $('productScreenSizeVal');
+    if (screenDisplay) screenDisplay.textContent = '15.0';
+    safeSetVal('productDefects', 2);
+    const defectsDisplay = $('productDefectsVal');
+    if (defectsDisplay) defectsDisplay.textContent = '2.0%';
+    safeSetVal('productForeignMatter', 0.5);
+    const foreignDisplay = $('productForeignMatterVal');
+    if (foreignDisplay) foreignDisplay.textContent = '0.5%';
+    safeSetVal('productProtein', 0);
+    const proteinDisplay = $('productProteinVal');
+    if (proteinDisplay) proteinDisplay.textContent = '0.0%';
+    safeSetVal('productAflatoxin', 0);
+    const aflatoxinDisplay = $('productAflatoxinVal');
+    if (aflatoxinDisplay) aflatoxinDisplay.textContent = '0 ppb';
+    safeSetVal('productOilContent', 0);
+    const oilDisplay = $('productOilContentVal');
+    if (oilDisplay) oilDisplay.textContent = '0.0%';
+    safeSetVal('productColorGrade', 0);
+    const colorDisplay = $('productColorGradeVal');
+    if (colorDisplay) colorDisplay.textContent = '0';
+    safeSetVal('productIdealPrice', 4.25);
+    const priceDisplay = $('productIdealPriceVal');
+    if (priceDisplay) priceDisplay.textContent = '$4.25 / MT';
+    const future = new Date(Date.now() + 7 * 86400000);
+    const pad = n => String(n).padStart(2, '0');
+    const startEl = $('productScheduledStart');
+    if (startEl) {
+      startEl.value = 
+        `${future.getFullYear()}-${pad(future.getMonth()+1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}`;
+    }
   }
   openModal('productModal');
 }
@@ -2167,9 +2402,12 @@ function openProductModal(productId) {
 function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
   APP_STATE.products = APP_STATE.products.filter(p => p.id !== id);
-  saveToStorage();
-  renderAll();
-  showToast('Product deleted', 'info');
+  saveToStorage().then(() => {
+    renderAll();
+    showToast('Product deleted', 'info');
+  }).catch(() => {
+    showToast('⚠️ Product deleted but storage failed', 'warning');
+  });
 }
 
 /* ==================== ORDER FUNCTIONS ==================== */
@@ -2209,36 +2447,51 @@ function updateOrderStatus(orderId, newStatus) {
   order.status = newStatus;
   if (newStatus === 'shipped') { order.shippedAt = new Date().toISOString(); }
   if (newStatus === 'completed') { order.completedAt = new Date().toISOString(); }
-  saveToStorage();
-  renderAll();
-  closeModal('orderModal');
-  showToast(`Order status updated to ${newStatus}`, 'success');
+  saveToStorage().then(() => {
+    renderAll();
+    closeModal('orderModal');
+    showToast(`Order status updated to ${newStatus}`, 'success');
+  }).catch(() => {
+    showToast('⚠️ Order updated but storage failed', 'warning');
+  });
 }
 
 /* ==================== COMPANY FUNCTIONS ==================== */
 function openCompanyModal() {
-  $('editCompanyName').value = APP_STATE.company.name || '';
-  $('editCompanyReg').value = APP_STATE.company.reg || '';
-  $('editCompanyCountry').value = APP_STATE.company.country || '';
-  $('editCompanyTax').value = APP_STATE.company.tax || '';
-  $('editCompanyAddress').value = APP_STATE.company.address || '';
-  $('editCompanyEmail').value = APP_STATE.company.email || '';
-  $('editCompanyPhone').value = APP_STATE.company.phone || '';
-  $('editCompanyWebsite').value = APP_STATE.company.website || '';
+  safeSetVal('editCompanyName', APP_STATE.company.name || '');
+  safeSetVal('editCompanyReg', APP_STATE.company.reg || '');
+  safeSetVal('editCompanyCountry', APP_STATE.company.country || '');
+  safeSetVal('editCompanyTax', APP_STATE.company.tax || '');
+  safeSetVal('editCompanyAddress', APP_STATE.company.address || '');
+  safeSetVal('editCompanyEmail', APP_STATE.company.email || '');
+  safeSetVal('editCompanyPhone', APP_STATE.company.phone || '');
+  safeSetVal('editCompanyWebsite', APP_STATE.company.website || '');
   openModal('companyModal');
 }
 
 function saveCompanyProfile() {
+  const email = safeVal('editCompanyEmail', '').trim();
+  const phone = safeVal('editCompanyPhone', '').trim();
+  const website = safeVal('editCompanyWebsite', '').trim();
+  
+  if (email && !email.includes('@')) {
+    showToast('Please enter a valid email address', 'error');
+    return;
+  }
+  if (website && !website.startsWith('http://') && !website.startsWith('https://')) {
+    showToast('Website should start with http:// or https://', 'warning');
+  }
+  
   APP_STATE.company = {
     ...APP_STATE.company,
-    name: $('editCompanyName').value?.trim() || '',
-    reg: $('editCompanyReg').value?.trim() || '',
-    country: $('editCompanyCountry').value?.trim() || '',
-    tax: $('editCompanyTax').value?.trim() || '',
-    address: $('editCompanyAddress').value?.trim() || '',
-    email: $('editCompanyEmail').value?.trim() || '',
-    phone: $('editCompanyPhone').value?.trim() || '',
-    website: $('editCompanyWebsite').value?.trim() || ''
+    name: safeVal('editCompanyName', '').trim(),
+    reg: safeVal('editCompanyReg', '').trim(),
+    country: safeVal('editCompanyCountry', '').trim(),
+    tax: safeVal('editCompanyTax', '').trim(),
+    address: safeVal('editCompanyAddress', '').trim(),
+    email: email,
+    phone: phone,
+    website: website
   };
   if (APP_STATE.company.name && APP_STATE.company.reg && APP_STATE.company.country) {
     APP_STATE.company.verified = 'pending';
@@ -2247,6 +2500,8 @@ function saveCompanyProfile() {
     renderCompany();
     closeModal('companyModal');
     showToast('Company profile updated & saved', 'success');
+  }).catch(() => {
+    showToast('⚠️ Company profile saved but storage failed', 'warning');
   });
 }
 
@@ -2257,9 +2512,12 @@ function processDeposit() {
     const val = parseFloat(amt);
     if (val > 0) {
       APP_STATE.wallet.balance += val;
-      saveToStorage();
-      renderAll();
-      showToast(`Deposited ${money(val)}`, 'success');
+      saveToStorage().then(() => {
+        renderAll();
+        showToast(`Deposited ${money(val)}`, 'success');
+      }).catch(() => {
+        showToast('⚠️ Deposit saved but storage failed', 'warning');
+      });
     }
   }
 }
@@ -2296,14 +2554,20 @@ function showTourStep(step) {
   const nextBtn = $('tourNextBtn');
   if (highlight) {
     highlight.style.display = 'block';
-    highlight.style.left = (rect.left - 8) + 'px';
-    highlight.style.top = (rect.top - 8) + 'px';
+    highlight.style.left = (rect.left + window.scrollX - 8) + 'px';
+    highlight.style.top = (rect.top + window.scrollY - 8) + 'px';
     highlight.style.width = (rect.width + 16) + 'px';
     highlight.style.height = (rect.height + 16) + 'px';
   }
   if (tooltip) {
-    tooltip.style.left = Math.max(20, rect.left + rect.width / 2 - 160) + 'px';
-    tooltip.style.top = Math.max(20, rect.top - 120) + 'px';
+    let tooltipLeft = Math.max(20, rect.left + rect.width / 2 - 160 + window.scrollX);
+    let tooltipTop = Math.max(20, rect.top - 120 + window.scrollY);
+    if (tooltipTop < 20) tooltipTop = rect.bottom + 20 + window.scrollY;
+    if (tooltipLeft + 340 > window.innerWidth + window.scrollX) {
+      tooltipLeft = window.innerWidth + window.scrollX - 360;
+    }
+    tooltip.style.left = tooltipLeft + 'px';
+    tooltip.style.top = tooltipTop + 'px';
     tooltip.style.display = 'block';
   }
   if (title) title.textContent = stepData.title;
@@ -2328,10 +2592,14 @@ function showTourStep(step) {
 function toggleArchive() {
   const collapse = $('archiveCollapse');
   const header = $('archiveHeader');
+  if (!collapse || !header) return;
+  
   if (collapse.classList.contains('open')) {
+    collapse.style.maxHeight = '0';
     collapse.classList.remove('open');
     header.classList.remove('open');
   } else {
+    collapse.style.maxHeight = collapse.scrollHeight + 'px';
     collapse.classList.add('open');
     header.classList.add('open');
   }
@@ -2356,9 +2624,12 @@ function simulateAuction(archiveId) {
   archive.simAvgPrice = avgPrice;
   archive.simWinRate = winRate;
   archive.lastSimulated = new Date().toISOString();
-  saveToStorage();
-  renderAll();
-  showToast(`🔄 Simulation #${archive.simulationRuns} complete!`, 'success');
+  saveToStorage().then(() => {
+    renderAll();
+    showToast(`🔄 Simulation #${archive.simulationRuns} complete!`, 'success');
+  }).catch(() => {
+    showToast('⚠️ Simulation saved but storage failed', 'warning');
+  });
 }
 
 function openSimulationModal(archiveId) {
@@ -2371,6 +2642,14 @@ function restoreAuction(archiveId) {
   const index = APP_STATE.archivedAuctions.findIndex(a => a.id === archiveId);
   if (index === -1) { showToast('Archive not found', 'error'); return; }
   const archive = APP_STATE.archivedAuctions[index];
+  
+  const product = APP_STATE.products.find(p => p.id === archive.productId);
+  if (product) {
+    product.quantity += archive.quantity || 0;
+    product.hasAuction = false;
+    delete product.auctionId;
+  }
+  
   const restored = { ...archive, archived: false, status: 'scheduled' };
   delete restored.archivedAt;
   delete restored.finalPrice;
@@ -2385,97 +2664,150 @@ function restoreAuction(archiveId) {
   delete restored.lastSimulated;
   APP_STATE.briefs.push(restored);
   APP_STATE.archivedAuctions.splice(index, 1);
-  saveToStorage();
-  renderAll();
-  showToast('↩️ Auction restored to active!', 'success');
+  saveToStorage().then(() => {
+    renderAll();
+    showToast('↩️ Auction restored to active!', 'success');
+  }).catch(() => {
+    showToast('⚠️ Auction restored but storage failed', 'warning');
+  });
 }
 
 /* ==================== EVENT LISTENERS ==================== */
 function initEventListeners() {
-  $('addProductBtn').onclick = () => openProductModal();
-  $('saveProductBtn').onclick = () => saveProduct();
-  $('saveAndPostBtn').onclick = () => saveProduct((id) => { setTimeout(() => openAuctionModal(id), 300); });
-  $('submitAuctionBtn').onclick = postAuction;
-  $('depositBtn').onclick = processDeposit;
-  $('authBtn').onclick = function(e) { e.preventDefault(); if (confirm('Sign out?')) { localStorage.clear(); location.reload(); } };
-  $('tarAutoConvertBtn').onclick = autoConvertReady;
-  $('tourBtn').onclick = startTour;
-  $('tourCloseBtn').onclick = endTour;
-  $('tarAdviceBtn').onclick = function() { showToast('💡 TAR Advisory: Check your receivables and auctions!', 'info'); };
-  $('tarSettingsBtn').onclick = function() { showToast('⚙️ TAR Settings: Fee $25 • Batch 50 • Auto-Convert ON', 'info'); };
-  $('archiveToggleBtn').onclick = toggleArchive;
-  $('auctionRefreshBtn').onclick = function() { APP_STATE.tar.cachedAuctions = null; renderAuctionSchedule(); showToast('🔄 Auctions refreshed!', 'info'); };
-  $('syncCloudBtn').onclick = function() { saveToStorage().then(() => showToast('☁️ Synced to cloud!', 'success')); };
-  $('editCompanyBtn').onclick = openCompanyModal;
+  const addProductBtn = $('addProductBtn');
+  if (addProductBtn) addProductBtn.onclick = () => openProductModal();
   
-  $('addCertBtn').onclick = function() {
-    const dropdown = $('certDropdown');
-    if (!dropdown) { showToast('Certificate dropdown not found', 'error'); return; }
-    const type = dropdown.value;
-    if (!type) { showToast('Select a certificate type', 'error'); return; }
-    if (APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'warning'); return; }
-    APP_STATE.certToggles[type] = false;
-    saveToStorage();
-    renderCertificates();
-    dropdown.value = '';
-    showToast('Certificate type added!', 'success');
-  };
+  const saveProductBtn = $('saveProductBtn');
+  if (saveProductBtn) saveProductBtn.onclick = () => saveProduct();
   
-  const addProductCard = document.getElementById('addProductCard');
-  if (addProductCard) addProductCard.onclick = () => openProductModal();
+  const saveAndPostBtn = $('saveAndPostBtn');
+  if (saveAndPostBtn) saveAndPostBtn.onclick = () => saveProduct((id) => { setTimeout(() => openAuctionModal(id), 300); });
   
-  const productsGrid = $('productsGrid');
-  if (productsGrid) {
-    productsGrid.addEventListener('click', function(e) {
-      const card = e.target.closest('.add-product-card');
-      if (card) openProductModal();
-    });
+  const submitAuctionBtn = $('submitAuctionBtn');
+  if (submitAuctionBtn) submitAuctionBtn.onclick = postAuction;
+  
+  const depositBtn = $('depositBtn');
+  if (depositBtn) depositBtn.onclick = processDeposit;
+  
+  const authBtn = $('authBtn');
+  if (authBtn) {
+    authBtn.onclick = function(e) { 
+      e.preventDefault(); 
+      if (confirm('Sign out?')) { 
+        // ✅ Targeted removal instead of localStorage.clear()
+        Object.keys(localStorage).filter(k => k.startsWith('tradeaux_')).forEach(k => localStorage.removeItem(k));
+        location.reload(); 
+      } 
+    };
+  }
+  
+  const tarAutoConvertBtn = $('tarAutoConvertBtn');
+  if (tarAutoConvertBtn) tarAutoConvertBtn.onclick = autoConvertReady;
+  
+  const tourBtn = $('tourBtn');
+  if (tourBtn) tourBtn.onclick = startTour;
+  
+  const tourCloseBtn = $('tourCloseBtn');
+  if (tourCloseBtn) tourCloseBtn.onclick = endTour;
+  
+  const tarAdviceBtn = $('tarAdviceBtn');
+  if (tarAdviceBtn) {
+    tarAdviceBtn.onclick = function() { showToast('💡 TAR Advisory: Check your receivables and auctions!', 'info'); };
+  }
+  
+  const tarSettingsBtn = $('tarSettingsBtn');
+  if (tarSettingsBtn) {
+    tarSettingsBtn.onclick = function() { showToast('⚙️ TAR Settings: Fee $25 • Batch 50 • Auto-Convert ON', 'info'); };
+  }
+  
+  const archiveToggleBtn = $('archiveToggleBtn');
+  if (archiveToggleBtn) archiveToggleBtn.onclick = toggleArchive;
+  
+  const auctionRefreshBtn = $('auctionRefreshBtn');
+  if (auctionRefreshBtn) {
+    auctionRefreshBtn.onclick = function() { 
+      APP_STATE.tar.cachedAuctions = null; 
+      renderAuctionSchedule(); 
+      showToast('🔄 Auctions refreshed!', 'info'); 
+    };
+  }
+  
+  const syncCloudBtn = $('syncCloudBtn');
+  if (syncCloudBtn) {
+    syncCloudBtn.onclick = function() { saveToStorage().then(() => showToast('☁️ Synced to cloud!', 'success')).catch(() => showToast('⚠️ Sync failed', 'error')); };
+  }
+  
+  const editCompanyBtn = $('editCompanyBtn');
+  if (editCompanyBtn) editCompanyBtn.onclick = openCompanyModal;
+  
+  const addCertBtn = $('addCertBtn');
+  if (addCertBtn) {
+    addCertBtn.onclick = function() {
+      const dropdown = $('certDropdown');
+      if (!dropdown) { showToast('Certificate dropdown not found', 'error'); return; }
+      const type = dropdown.value;
+      if (!type) { showToast('Select a certificate type', 'error'); return; }
+      if (APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'warning'); return; }
+      APP_STATE.certToggles[type] = false;
+      saveToStorage().then(() => {
+        renderCertificates();
+        dropdown.value = '';
+        showToast('Certificate type added!', 'success');
+      }).catch(() => {
+        showToast('⚠️ Certificate added but storage failed', 'warning');
+      });
+    };
   }
 }
 
 /* ==================== INIT ==================== */
 async function initApp() {
-  showToast('🔐 Loading dashboard...', 'info');
-  const loaded = await loadFromStorage();
-  if (!loaded) {
-    APP_STATE.products = [
-      { id: uuid(), name: 'Arabica Coffee', variety: 'Specialty Grade', quantity: 8200, grade: 'Grade A', origin: 'Santos, Brazil', packageType: 'Jute Bag', packageSize: '60kg', moisture: 12, screenSize: 15, defects: 2, foreignMatter: 0.5, protein: 0, aflatoxin: 0, oilContent: 0, colorGrade: 0, idealPrice: 4.25, images: [], hasAuction: false, auctionId: null, createdAt: Date.now() },
-      { id: uuid(), name: 'Cocoa Beans', variety: 'Criollo', quantity: 5000, grade: 'Grade A', origin: 'Guayaquil, Ecuador', packageType: 'Plastic Bag', packageSize: '25kg', moisture: 8, screenSize: 18, defects: 1.5, foreignMatter: 0.3, protein: 0, aflatoxin: 0, oilContent: 0, colorGrade: 0, idealPrice: 5.10, images: [], hasAuction: false, auctionId: null, createdAt: Date.now() }
-    ];
-    APP_STATE.wallet = { balance: 250000 };
-    APP_STATE.receivables = generateReceivables();
-    APP_STATE.tar = { active: true, conversionFee: 25, minReceivable: 100, maxReceivable: 50000, autoConvert: true, batchSize: 50, dailyLimit: 500, todayConversions: 0, totalConversions: 0, totalFeesEarned: 0, cachedAuctions: null, cachedAuctionsTimestamp: null, cachedAdvisory: null, lastAdvisoryUpdate: null };
-    saveToStorage();
-  }
-  
-  setupSlider('productMoisture', 'productMoistureVal', '%', 1);
-  setupSlider('productScreenSize', 'productScreenSizeVal', '', 1);
-  setupSlider('productDefects', 'productDefectsVal', '%', 1);
-  setupSlider('productForeignMatter', 'productForeignMatterVal', '%', 1);
-  setupSlider('productProtein', 'productProteinVal', '%', 1);
-  setupSlider('productAflatoxin', 'productAflatoxinVal', ' ppb', 1);
-  setupSlider('productOilContent', 'productOilContentVal', '%', 1);
-  setupSlider('productColorGrade', 'productColorGradeVal', '', 0);
-  setupIdealPriceSlider();
-  setupPackagingPreview();
-  setupFileUploads();
-  initEventListeners();
-  renderAll();
-  syncToBuyerArena();
-  
-  document.querySelectorAll('.modal').forEach(m => {
-    m.onclick = (e) => { if (e.target === m) closeModal(m.id); };
-  });
-  
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal').forEach(m => {
-        if (m.style.display === 'flex') closeModal(m.id);
-      });
+  try {
+    showToast('🔐 Loading dashboard...', 'info');
+    const loaded = await loadFromStorage();
+    if (!loaded) {
+      APP_STATE.products = [
+        { id: uuid(), name: 'Arabica Coffee', variety: 'Specialty Grade', quantity: 8200, grade: 'Grade A', origin: 'Santos, Brazil', packageType: 'Jute Bag', packageSize: '60kg', moisture: 12, screenSize: 15, defects: 2, foreignMatter: 0.5, protein: 0, aflatoxin: 0, oilContent: 0, colorGrade: 0, idealPrice: 4.25, images: [], hasAuction: false, auctionId: null, createdAt: Date.now() },
+        { id: uuid(), name: 'Cocoa Beans', variety: 'Criollo', quantity: 5000, grade: 'Grade A', origin: 'Guayaquil, Ecuador', packageType: 'Plastic Bag', packageSize: '25kg', moisture: 8, screenSize: 18, defects: 1.5, foreignMatter: 0.3, protein: 0, aflatoxin: 0, oilContent: 0, colorGrade: 0, idealPrice: 5.10, images: [], hasAuction: false, auctionId: null, createdAt: Date.now() }
+      ];
+      APP_STATE.wallet = { balance: 250000 };
+      APP_STATE.receivables = generateReceivables();
+      APP_STATE.tar = { active: true, conversionFee: 25, minReceivable: 100, maxReceivable: 50000, autoConvert: true, batchSize: 50, dailyLimit: 500, todayConversions: 0, totalConversions: 0, totalFeesEarned: 0, cachedAuctions: null, cachedAuctionsTimestamp: null, cachedAdvisory: null, lastAdvisoryUpdate: null };
+      await saveToStorage();
     }
-  });
-  
-  showToast('✅ Dashboard ready!', 'success');
+    
+    setupSlider('productMoisture', 'productMoistureVal', '%', 1);
+    setupSlider('productScreenSize', 'productScreenSizeVal', '', 1);
+    setupSlider('productDefects', 'productDefectsVal', '%', 1);
+    setupSlider('productForeignMatter', 'productForeignMatterVal', '%', 1);
+    setupSlider('productProtein', 'productProteinVal', '%', 1);
+    setupSlider('productAflatoxin', 'productAflatoxinVal', ' ppb', 1);
+    setupSlider('productOilContent', 'productOilContentVal', '%', 1);
+    setupSlider('productColorGrade', 'productColorGradeVal', '', 0);
+    setupIdealPriceSlider();
+    setupPackagingPreview();
+    setupFileUploads();
+    initEventListeners();
+    renderAll();
+    syncToBuyerArena();
+    
+    document.querySelectorAll('.modal').forEach(m => {
+      m.onclick = (e) => { if (e.target === m) closeModal(m.id); };
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal').forEach(m => {
+          if (m.style.display === 'flex') closeModal(m.id);
+        });
+      }
+    });
+    
+    showToast('✅ Dashboard ready!', 'success');
+  } catch(e) {
+    console.error('Init error:', e);
+    showToast('❌ Failed to load dashboard. Please refresh.', 'error');
+  }
 }
 
 // ===== EXPOSE FUNCTIONS =====
@@ -2500,6 +2832,7 @@ window.openAuctionModal = openAuctionModal;
 window.postAuction = postAuction;
 window.closeModal = closeModal;
 window.processDeposit = processDeposit;
+window.moveAuctionToArchive = moveAuctionToArchive;
 
 initApp();
 </script>
