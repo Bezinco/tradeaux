@@ -13,6 +13,7 @@
     --gold: #FFD966;
     --cyan: #00ced1;
     --muted: #9ca3af;
+    --red: #FF5E5E;
   }
   body {
     background: #020617;
@@ -306,6 +307,7 @@
   .auction-card .card-status.ending { background: rgba(255,217,102,0.15); color: var(--gold); border: 1px solid rgba(255,217,102,0.3); animation: pulseYellow 1s infinite; }
   @keyframes pulseYellow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
   .auction-card .card-status.completed { background: rgba(255,94,94,0.15); color: #FF5E5E; border: 1px solid rgba(255,94,94,0.3); }
+  .auction-card .card-status.coming { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.2); }
   
   .auction-card .card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
   .auction-card .detail-item { display: flex; flex-direction: column; }
@@ -318,10 +320,18 @@
   .auction-card .seller-rating { font-size: 0.7rem; color: var(--gold); }
   .auction-card .seller-sales { font-size: 0.65rem; color: var(--muted); }
   
-  .auction-card .card-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
-  .auction-card .view-btn { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 8px 20px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.7rem; color: #010101; cursor: pointer; transition: transform 0.2s; }
-  .auction-card .view-btn:hover { transform: scale(1.05); }
+  .auction-card .card-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .auction-card .view-btn { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 8px 20px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.7rem; color: #010101; cursor: pointer; transition: transform 0.2s; width: 100%; }
+  .auction-card .view-btn:hover { transform: scale(1.02); }
   .auction-card .view-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  
+  /* Bot Activation Button */
+  .auction-card .bot-btn { background: linear-gradient(105deg, #FFD966, #F5A623); border: none; padding: 8px 20px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.65rem; color: #0A0C15; cursor: pointer; transition: transform 0.2s; width: 100%; }
+  .auction-card .bot-btn:hover { transform: scale(1.02); }
+  .auction-card .bot-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .auction-card .bot-btn.active { background: linear-gradient(105deg, #7CFC00, #10b981); color: #010101; }
+  
+  .auction-card .bot-status { font-size: 0.6rem; color: var(--muted); text-align: center; margin-top: 4px; }
 
   /* Auction in Progress Overlay */
   .auction-in-progress { background: rgba(255,217,102,0.05); border: 2px solid var(--gold); border-radius: 16px; padding: 16px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -338,6 +348,89 @@
   .page-btn.active { background: rgba(124,252,0,0.15); border-color: var(--neon-green); color: var(--neon-green); }
   .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .page-info { color: var(--muted); font-size: 0.8rem; padding: 0 8px; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: 0.2s;
+  }
+  .modal-overlay.active {
+    visibility: visible;
+    opacity: 1;
+  }
+  .modal-card {
+    background: #0B1122;
+    max-width: 520px;
+    width: 92%;
+    border-radius: 32px;
+    border: 1px solid var(--neon-green);
+    padding: 32px 28px;
+    position: relative;
+    box-shadow: 0 40px 70px black;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-close {
+    position: absolute;
+    right: 20px;
+    top: 16px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #ccc;
+    cursor: pointer;
+  }
+  .modal-close:hover { color: white; }
+  .modal-title { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; margin-bottom: 8px; }
+  .modal-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(124,252,0,0.2);
+    border-radius: 10px;
+    color: white;
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--neon-green); }
+  .fee-box {
+    background: rgba(255,217,102,0.08);
+    border: 1px solid rgba(255,217,102,0.2);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .fee-box .amount { font-size: 1.8rem; font-weight: 800; color: var(--gold); }
+  .fee-box .note { font-size: 0.75rem; color: var(--muted); }
+  .modal-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 40px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 8px;
+  }
+  .modal-btn.primary { background: linear-gradient(105deg, #FFD966, #F5A623); color: #0A0C15; }
+  .modal-btn.primary:hover { transform: scale(1.02); }
+  .modal-btn.primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .modal-btn.secondary { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.1); }
 
   /* Toast */
   .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: #0f1a2e; padding: 12px 28px; border-radius: 60px; border-left: 4px solid var(--neon-green); transition: 0.3s; opacity: 0; z-index: 2000; max-width: 90%; font-size: 0.85rem; word-wrap: break-word; text-align: center; }
@@ -367,6 +460,7 @@
     .gem-logo-corner { transform: scale(0.25); }
     .pagination { gap: 4px; }
     .page-btn { padding: 6px 10px; font-size: 0.7rem; min-width: 30px; }
+    .modal-card { padding: 24px 16px; }
   }
 
   @media (max-width: 480px) {
@@ -424,18 +518,18 @@
   <div class="stats-bar" id="statsBar">
     <div class="stat-item">
       <span class="stat-dot green"></span>
-      <span>Active: <span class="stat-number" id="activeCount">0</span></span>
+      <span>Live: <span class="stat-number" id="activeCount">0</span></span>
     </div>
     <div class="stat-item">
       <span class="stat-dot yellow"></span>
-      <span>Ending Soon: <span class="stat-number" id="endingCount">0</span></span>
+      <span>Coming: <span class="stat-number" id="comingCount">0</span></span>
     </div>
     <div class="stat-item">
       <span class="stat-dot red"></span>
       <span>Completed: <span class="stat-number" id="completedCount">0</span></span>
     </div>
     <div class="stat-item">
-      <span>🏷️ <span class="stat-number" id="totalBids">0</span> total bids</span>
+      <span>🤖 <span class="stat-number" id="botCount">0</span> active bots</span>
     </div>
   </div>
 
@@ -456,17 +550,11 @@
       </select>
     </div>
     <div class="controls-group">
-      <span class="controls-label">Seller:</span>
-      <select class="control-select" id="sellerFilter">
-        <option value="all">All Sellers</option>
-      </select>
-    </div>
-    <div class="controls-group">
       <span class="controls-label">Status:</span>
       <select class="control-select" id="statusFilter">
         <option value="all">All Status</option>
-        <option value="active">🟢 Active</option>
-        <option value="ending">🟡 Ending Soon</option>
+        <option value="live">🟢 Live</option>
+        <option value="coming">🟡 Coming Soon</option>
         <option value="completed">🔴 Completed</option>
       </select>
     </div>
@@ -483,6 +571,7 @@
     </div>
     <span class="auction-name" id="inProgressAuctionName">Loading...</span>
     <span style="color:var(--muted); font-size:0.8rem;" id="inProgressTime">Time remaining: 02:45</span>
+    <span style="color:var(--red); font-size:0.75rem; margin-left:auto;">⛔ Registration Closed</span>
   </div>
 
   <!-- Auction Grid -->
@@ -499,6 +588,49 @@
     <button class="page-btn" id="prevPage" disabled>←</button>
     <span class="page-info" id="pageInfo">Page 1 of 1</span>
     <button class="page-btn" id="nextPage" disabled>→</button>
+  </div>
+</div>
+
+<!-- ==== BOT ACTIVATION MODAL ==== -->
+<div class="modal-overlay" id="botModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeBotModal">✕</button>
+    <div class="modal-title">🤖 Activate Your Bot</div>
+    <div class="modal-sub">Set your bot's strategy for <strong id="modalAuctionName">Premium Coconut</strong></div>
+    
+    <div class="fee-box">
+      <div class="amount">$25</div>
+      <div class="note">Set aside. Refundable if you don't win.</div>
+    </div>
+
+    <div class="form-group">
+      <label>Max Price per MT ($)</label>
+      <input type="number" id="botMaxPrice" value="4.50" step="0.01" min="0.01">
+    </div>
+
+    <div class="form-group">
+      <label>Target Quantity (MT)</label>
+      <input type="number" id="botTargetQty" value="100" step="5" min="1">
+    </div>
+
+    <div class="form-group">
+      <label>Bidding Strategy</label>
+      <select id="botStrategy">
+        <option value="aggressive">🚀 Aggressive — Bid early and often</option>
+        <option value="balanced" selected>⚖️ Balanced — Wait for good price</option>
+        <option value="conservative">🛡️ Conservative — Bid at the last moment</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Auto-bid increment ($/MT)</label>
+      <input type="number" id="botIncrement" value="0.05" step="0.01" min="0.01">
+    </div>
+
+    <button class="modal-btn primary" id="activateBotBtn" onclick="activateBot()">
+      🤖 Activate Bot ($25)
+    </button>
+    <button class="modal-btn secondary" onclick="closeBotModal()">Cancel</button>
   </div>
 </div>
 
@@ -519,10 +651,33 @@ let allAuctions = [];
 let filteredAuctions = [];
 let realtimeChannel = null;
 let timerInterval = null;
+let selectedAuctionId = null;
+let currentUser = null;
+let registeredBots = new Set();
 
 // ========== SIGN OUT ==========
-function signOut() {
-  window.location.href = 'index.html';
+async function signOut() {
+  try {
+    // Clear Supabase session
+    await supabaseClient.auth.signOut();
+    
+    // Clean up intervals and channels
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    if (realtimeChannel) {
+      await supabaseClient.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+    
+    // Redirect to home
+    window.location.href = 'index.html';
+  } catch (err) {
+    console.error('Sign out error:', err);
+    // Even if there's an error, still redirect
+    window.location.href = 'index.html';
+  }
 }
 
 // ========== ESCAPE HTML (XSS Prevention) ==========
@@ -531,6 +686,38 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// ========== CHECK AUTH & LOAD USER ==========
+async function initUser() {
+  try {
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    if (error || !session) {
+      console.log('Not authenticated, guests can view auctions');
+      return;
+    }
+    currentUser = session.user;
+    console.log('✅ User:', currentUser.email);
+    // Load user's registered bots
+    await loadUserBots();
+  } catch (err) {
+    console.error('Auth error:', err);
+  }
+}
+
+// ========== LOAD USER'S BOTS ==========
+async function loadUserBots() {
+  if (!currentUser) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('auction_bots')
+      .select('auction_id')
+      .eq('user_id', currentUser.id);
+    if (error) throw error;
+    data.forEach(bot => registeredBots.add(bot.auction_id));
+  } catch (err) {
+    console.error('Error loading bots:', err);
+  }
 }
 
 // ========== LOAD AUCTIONS ==========
@@ -566,7 +753,9 @@ async function loadAuctions() {
     const auctionIds = (data || []).map(a => a.id).filter(Boolean);
     
     let bidsMap = {};
+    let botCountMap = {};
     if (auctionIds.length > 0) {
+      // Get bid counts
       const { data: bids, error: bidsErr } = await supabaseClient
         .from('bids')
         .select('auction_id, amount')
@@ -580,10 +769,27 @@ async function loadAuctions() {
           return acc;
         }, {});
       }
+
+      // Get bot counts
+      const { data: bots, error: botsErr } = await supabaseClient
+        .from('auction_bots')
+        .select('auction_id')
+        .in('auction_id', auctionIds);
+
+      if (!botsErr && bots) {
+        botCountMap = bots.reduce((acc, bot) => {
+          acc[bot.auction_id] = (acc[bot.auction_id] || 0) + 1;
+          return acc;
+        }, {});
+      }
     }
 
     allAuctions = (data || []).map(item => {
       const auctionBids = bidsMap[item.id] || [];
+      const isLive = item.status === 'active' && item.started_at;
+      const isCompleted = item.status === 'completed' || item.status === 'ended';
+      const isComing = item.status === 'active' && !item.started_at;
+      
       return {
         id: item.id,
         seller_id: item.seller_id,
@@ -604,7 +810,11 @@ async function loadAuctions() {
         duration_seconds: item.duration_seconds || 180,
         fees_collected: item.fees_collected || 0,
         bids_count: auctionBids.length,
-        highest_bid: auctionBids.length > 0 ? Math.max(...auctionBids) : 0
+        highest_bid: auctionBids.length > 0 ? Math.max(...auctionBids) : 0,
+        bot_count: botCountMap[item.id] || 0,
+        is_live: isLive,
+        is_completed: isCompleted,
+        is_coming: isComing
       };
     });
 
@@ -633,26 +843,11 @@ function populateFilters() {
   if (currentValue && commodities.includes(currentValue)) {
     commoditySelect.value = currentValue;
   }
-
-  const sellers = [...new Set(allAuctions.map(a => a.seller_name).filter(Boolean))].sort();
-  const sellerSelect = document.getElementById('sellerFilter');
-  const currentSeller = sellerSelect.value;
-  sellerSelect.innerHTML = '<option value="all">All Sellers</option>';
-  sellers.forEach(s => {
-    const option = document.createElement('option');
-    option.value = s;
-    option.textContent = s;
-    sellerSelect.appendChild(option);
-  });
-  if (currentSeller && sellers.includes(currentSeller)) {
-    sellerSelect.value = currentSeller;
-  }
 }
 
 // ========== APPLY FILTERS & SORT ==========
 function applyFiltersAndSort() {
   const commodityFilter = document.getElementById('commodityFilter').value;
-  const sellerFilter = document.getElementById('sellerFilter').value;
   const statusFilter = document.getElementById('statusFilter').value;
   const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
   const sortBy = document.getElementById('sortSelect').value;
@@ -663,16 +858,12 @@ function applyFiltersAndSort() {
     filtered = filtered.filter(a => a.product === commodityFilter);
   }
 
-  if (sellerFilter !== 'all') {
-    filtered = filtered.filter(a => a.seller_name === sellerFilter);
-  }
-
-  if (statusFilter === 'active') {
-    filtered = filtered.filter(a => a.status === 'active' && !isAuctionEndingSoon(a));
-  } else if (statusFilter === 'ending') {
-    filtered = filtered.filter(a => a.status === 'active' && isAuctionEndingSoon(a));
+  if (statusFilter === 'live') {
+    filtered = filtered.filter(a => a.is_live);
+  } else if (statusFilter === 'coming') {
+    filtered = filtered.filter(a => a.is_coming);
   } else if (statusFilter === 'completed') {
-    filtered = filtered.filter(a => a.status === 'completed');
+    filtered = filtered.filter(a => a.is_completed);
   }
 
   if (searchQuery) {
@@ -706,7 +897,7 @@ function applyFiltersAndSort() {
 
 // ========== CHECK AUCTION IN PROGRESS ==========
 function checkAuctionInProgress(auctions) {
-  const inProgress = auctions.find(a => a.status === 'active' && a.started_at);
+  const inProgress = auctions.find(a => a.is_live);
   const container = document.getElementById('auctionInProgress');
   
   if (inProgress) {
@@ -724,15 +915,6 @@ function checkAuctionInProgress(auctions) {
   } else {
     container.style.display = 'none';
   }
-}
-
-// ========== IS AUCTION ENDING SOON ==========
-function isAuctionEndingSoon(auction) {
-  if (!auction.started_at) return false;
-  const started = new Date(auction.started_at);
-  const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
-  const remaining = (auction.duration_seconds || 180) - elapsed;
-  return remaining > 0 && remaining < 30;
 }
 
 // ========== RENDER PAGE ==========
@@ -755,20 +937,25 @@ function renderPage(auctions) {
   }
 
   grid.innerHTML = pageItems.map(auction => {
-    const isEnding = isAuctionEndingSoon(auction);
-    const isCompleted = auction.status === 'completed';
+    const isLive = auction.is_live;
+    const isComing = auction.is_coming;
+    const isCompleted = auction.is_completed;
+    
     let statusClass = 'live';
     let statusText = '🟢 LIVE';
+    let statusLabel = 'Live — Bots Bidding Now';
     if (isCompleted) {
       statusClass = 'completed';
       statusText = '🔴 COMPLETED';
-    } else if (isEnding) {
-      statusClass = 'ending';
-      statusText = '🟡 ENDING SOON';
+      statusLabel = 'Completed — Auction Ended';
+    } else if (isComing) {
+      statusClass = 'coming';
+      statusText = '🟡 COMING SOON';
+      statusLabel = 'Coming Soon — Register Your Bot';
     }
 
     let timeRemaining = '—';
-    if (auction.started_at && !isCompleted) {
+    if (auction.started_at && isLive) {
       const started = new Date(auction.started_at);
       const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
       const remaining = Math.max(0, (auction.duration_seconds || 180) - elapsed);
@@ -785,6 +972,9 @@ function renderPage(auctions) {
     const safeVariety = escapeHtml(auction.variety);
     const safeSeller = escapeHtml(auction.seller_name);
     const safeFob = escapeHtml(auction.fob_port);
+
+    const isRegistered = currentUser && registeredBots.has(auction.id);
+    const canRegister = !isRegistered && isComing && currentUser;
 
     return `
       <div class="auction-card" data-id="${auction.id}">
@@ -823,11 +1013,39 @@ function renderPage(auctions) {
             <span>🏢 <span class="seller-name">${safeSeller}</span></span>
             <span class="seller-rating">⭐ ${auction.seller_rating}</span>
             <span class="seller-sales">(${auction.seller_sales || 0} sales)</span>
+            <span style="margin-left:auto; font-size:0.65rem; color:var(--muted);">🤖 ${auction.bot_count} bots</span>
           </div>
           <div class="card-actions">
-            <button class="view-btn" onclick="viewAuction('${auction.id}')" ${isCompleted ? 'disabled' : ''}>
-              ${isCompleted ? 'COMPLETED' : 'VIEW AUCTION →'}
-            </button>
+            ${isLive ? `
+              <button class="view-btn" disabled>
+                ⛔ Auction in Progress
+              </button>
+              <div class="bot-status">Registration closed — bots are battling</div>
+            ` : isCompleted ? `
+              <button class="view-btn" disabled>
+                🔴 Completed
+              </button>
+            ` : isComing ? `
+              ${isRegistered ? `
+                <button class="bot-btn active" disabled>
+                  ✅ Bot Activated ($25 held)
+                </button>
+                <div class="bot-status">You're registered for this auction</div>
+              ` : canRegister ? `
+                <button class="bot-btn" onclick="openBotModal('${auction.id}', '${safeProduct} - ${safeVariety}')">
+                  🤖 Activate Bot ($25)
+                </button>
+                <div class="bot-status">$25 set aside • Refundable</div>
+              ` : `
+                <button class="view-btn" onclick="viewAuction('${auction.id}')">
+                  VIEW AUCTION →
+                </button>
+              `}
+            ` : `
+              <button class="view-btn" onclick="viewAuction('${auction.id}')">
+                VIEW AUCTION →
+              </button>
+            `}
           </div>
         </div>
       </div>
@@ -845,15 +1063,15 @@ function renderPagination() {
 
 // ========== UPDATE STATS ==========
 function updateStats() {
-  const active = allAuctions.filter(a => a.status === 'active' && !isAuctionEndingSoon(a)).length;
-  const ending = allAuctions.filter(a => a.status === 'active' && isAuctionEndingSoon(a)).length;
-  const completed = allAuctions.filter(a => a.status === 'completed').length;
-  const totalBids = allAuctions.reduce((sum, a) => sum + (a.bids_count || 0), 0);
+  const live = allAuctions.filter(a => a.is_live).length;
+  const coming = allAuctions.filter(a => a.is_coming).length;
+  const completed = allAuctions.filter(a => a.is_completed).length;
+  const totalBots = allAuctions.reduce((sum, a) => sum + (a.bot_count || 0), 0);
   
-  document.getElementById('activeCount').textContent = active;
-  document.getElementById('endingCount').textContent = ending;
+  document.getElementById('activeCount').textContent = live;
+  document.getElementById('comingCount').textContent = coming;
   document.getElementById('completedCount').textContent = completed;
-  document.getElementById('totalBids').textContent = totalBids;
+  document.getElementById('botCount').textContent = totalBots;
 }
 
 // ========== VIEW AUCTION ==========
@@ -864,17 +1082,84 @@ function viewAuction(auctionId) {
     return;
   }
   
-  if (auction.status === 'completed') {
-    showToast('This auction has already completed', true);
+  // For seller auction page
+  window.location.href = `seller-auction.html?id=${auctionId}`;
+}
+
+// ========== BOT MODAL ==========
+function openBotModal(auctionId, auctionName) {
+  selectedAuctionId = auctionId;
+  document.getElementById('modalAuctionName').textContent = auctionName || 'this auction';
+  document.getElementById('botModal').classList.add('active');
+}
+
+function closeBotModal() {
+  document.getElementById('botModal').classList.remove('active');
+  selectedAuctionId = null;
+}
+
+// ========== ACTIVATE BOT ==========
+async function activateBot() {
+  if (!currentUser) {
+    showToast('Please sign in to activate a bot', true);
+    window.location.href = 'signin.html';
     return;
   }
-  
-  if (auction.started_at) {
-    showToast('⏳ Auction is in progress! Please wait for it to complete.', true);
+
+  if (!selectedAuctionId) {
+    showToast('No auction selected', true);
     return;
   }
-  
-  window.location.href = `auction-detail.html?id=${auctionId}`;
+
+  const maxPrice = parseFloat(document.getElementById('botMaxPrice').value);
+  const targetQty = parseFloat(document.getElementById('botTargetQty').value);
+  const strategy = document.getElementById('botStrategy').value;
+  const increment = parseFloat(document.getElementById('botIncrement').value);
+
+  if (!maxPrice || maxPrice <= 0) {
+    showToast('Please enter a valid max price', true);
+    return;
+  }
+  if (!targetQty || targetQty <= 0) {
+    showToast('Please enter a valid target quantity', true);
+    return;
+  }
+
+  const btn = document.getElementById('activateBotBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  try {
+    // Insert bot registration
+    const { data, error } = await supabaseClient
+      .from('auction_bots')
+      .insert({
+        auction_id: selectedAuctionId,
+        user_id: currentUser.id,
+        max_price: maxPrice,
+        target_qty: targetQty,
+        strategy: strategy,
+        increment: increment,
+        status: 'active',
+        fee_held: true,
+        created_at: new Date().toISOString()
+      })
+      .select();
+
+    if (error) throw error;
+
+    registeredBots.add(selectedAuctionId);
+    showToast('✅ Bot activated successfully! $25 held.', false);
+    closeBotModal();
+    loadAuctions();
+
+  } catch (err) {
+    console.error('Bot activation error:', err);
+    showToast('Error activating bot: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🤖 Activate Bot ($25)';
+  }
 }
 
 // ========== SETUP REALTIME ==========
@@ -902,6 +1187,15 @@ function setupRealtime() {
       console.log('🔄 New bid');
       loadAuctions();
     })
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'auction_bots'
+    }, () => {
+      console.log('🔄 Bot update');
+      loadUserBots();
+      loadAuctions();
+    })
     .subscribe((status) => {
       console.log('📡 Realtime status:', status);
     });
@@ -924,11 +1218,6 @@ document.getElementById('sortSelect').addEventListener('change', () => {
 });
 
 document.getElementById('commodityFilter').addEventListener('change', () => {
-  currentPage = 1;
-  applyFiltersAndSort();
-});
-
-document.getElementById('sellerFilter').addEventListener('change', () => {
   currentPage = 1;
   applyFiltersAndSort();
 });
@@ -958,6 +1247,11 @@ document.getElementById('nextPage').addEventListener('click', () => {
   }
 });
 
+document.getElementById('closeBotModal').addEventListener('click', closeBotModal);
+document.getElementById('botModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('botModal')) closeBotModal();
+});
+
 // ========== CLEANUP ON UNLOAD ==========
 window.addEventListener('beforeunload', function() {
   if (timerInterval) {
@@ -975,7 +1269,7 @@ timerInterval = setInterval(() => {
   document.querySelectorAll('.auction-card').forEach(card => {
     const id = card.dataset.id;
     const auction = filteredAuctions.find(a => a.id === id);
-    if (auction && auction.started_at && auction.status !== 'completed') {
+    if (auction && auction.started_at && auction.is_live) {
       const started = new Date(auction.started_at);
       const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
       const remaining = Math.max(0, (auction.duration_seconds || 180) - elapsed);
@@ -992,8 +1286,10 @@ timerInterval = setInterval(() => {
 }, 1000);
 
 // ========== INIT ==========
-loadAuctions();
-setupRealtime();
+initUser().then(() => {
+  loadAuctions();
+  setupRealtime();
+});
 console.log('🚀 TradeAux Auctions loaded!');
 </script>
 </body>
