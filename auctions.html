@@ -307,18 +307,64 @@
   .auction-card .card-status.ending { background: rgba(255,217,102,0.15); color: var(--gold); border: 1px solid rgba(255,217,102,0.3); animation: pulseYellow 1s infinite; }
   @keyframes pulseYellow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
   .auction-card .card-status.completed { background: rgba(255,94,94,0.15); color: #FF5E5E; border: 1px solid rgba(255,94,94,0.3); }
-  .auction-card .card-status.coming { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.2); }
+  .auction-card .card-status.scheduled { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.2); }
   
   .auction-card .card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
   .auction-card .detail-item { display: flex; flex-direction: column; }
   .auction-card .detail-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
   .auction-card .detail-value { font-size: 0.9rem; font-weight: 600; }
   .auction-card .detail-value.price { color: var(--gold); }
+
+  /* ===== COUNTDOWN DISPLAY ===== */
+  .auction-card .countdown-section {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    text-align: center;
+    border: 1px solid rgba(255,217,102,0.1);
+  }
+  .auction-card .countdown-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+  }
+  .auction-card .countdown-timer {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .auction-card .countdown-timer.started {
+    color: var(--red);
+  }
+  .auction-card .scheduled-date {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Heat Bar */
+  .auction-card .heat-bar-container {
+    margin: 8px 0 6px;
+    background: #1e293b;
+    border-radius: 12px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .auction-card .heat-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7CFC00, #FFD966);
+    border-radius: 12px;
+  }
   
   .auction-card .card-seller { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(124,252,0,0.1); }
   .auction-card .seller-name { font-size: 0.8rem; font-weight: 500; }
   .auction-card .seller-rating { font-size: 0.7rem; color: var(--gold); }
   .auction-card .seller-sales { font-size: 0.65rem; color: var(--muted); }
+  .auction-card .card-meta { display: flex; justify-content: space-between; font-size: 0.6rem; margin-top: 8px; color: #a0aec0; }
   
   .auction-card .card-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
   .auction-card .view-btn { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 8px 20px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.7rem; color: #010101; cursor: pointer; transition: transform 0.2s; width: 100%; }
@@ -522,7 +568,7 @@
     </div>
     <div class="stat-item">
       <span class="stat-dot yellow"></span>
-      <span>Coming: <span class="stat-number" id="comingCount">0</span></span>
+      <span>Scheduled: <span class="stat-number" id="scheduledCount">0</span></span>
     </div>
     <div class="stat-item">
       <span class="stat-dot red"></span>
@@ -554,7 +600,7 @@
       <select class="control-select" id="statusFilter">
         <option value="all">All Status</option>
         <option value="live">🟢 Live</option>
-        <option value="coming">🟡 Coming Soon</option>
+        <option value="scheduled">🟡 Scheduled</option>
         <option value="completed">🔴 Completed</option>
       </select>
     </div>
@@ -651,31 +697,31 @@ let allAuctions = [];
 let filteredAuctions = [];
 let realtimeChannel = null;
 let timerInterval = null;
+let countdownInterval = null;
 let selectedAuctionId = null;
 let currentUser = null;
 let registeredBots = new Set();
+const starRatingCache = new Map();
 
 // ========== SIGN OUT ==========
 async function signOut() {
   try {
-    // Clear Supabase session
     await supabaseClient.auth.signOut();
-    
-    // Clean up intervals and channels
     if (timerInterval) {
       clearInterval(timerInterval);
       timerInterval = null;
+    }
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
     }
     if (realtimeChannel) {
       await supabaseClient.removeChannel(realtimeChannel);
       realtimeChannel = null;
     }
-    
-    // Redirect to home
     window.location.href = 'index.html';
   } catch (err) {
     console.error('Sign out error:', err);
-    // Even if there's an error, still redirect
     window.location.href = 'index.html';
   }
 }
@@ -688,6 +734,34 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// ========== GET TIME UNTIL SCHEDULED START ==========
+function getTimeUntilScheduled(scheduledStart) {
+  if (!scheduledStart) return null;
+  const now = new Date();
+  const start = new Date(scheduledStart);
+  const diff = start - now;
+  
+  if (diff <= 0) return { status: 'started', formatted: '🔴 Auction started!' };
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const secs = Math.floor((diff % (1000 * 60)) / 1000);
+  
+  if (days > 0) return { status: 'scheduled', formatted: `${days}d ${hours}h ${mins}m until auction` };
+  if (hours > 0) return { status: 'scheduled', formatted: `${hours}h ${mins}m ${secs}s until auction` };
+  return { status: 'soon', formatted: `${mins}m ${secs}s until auction` };
+}
+
+function formatScheduledDate(scheduledStart) {
+  if (!scheduledStart) return null;
+  const date = new Date(scheduledStart);
+  return date.toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short'
+  });
+}
+
 // ========== CHECK AUTH & LOAD USER ==========
 async function initUser() {
   try {
@@ -698,7 +772,6 @@ async function initUser() {
     }
     currentUser = session.user;
     console.log('✅ User:', currentUser.email);
-    // Load user's registered bots
     await loadUserBots();
   } catch (err) {
     console.error('Auth error:', err);
@@ -743,7 +816,8 @@ async function loadAuctions() {
           remaining_mt,
           ideal_price,
           fob_port,
-          origin
+          origin,
+          scheduled_start
         )
       `)
       .order('created_at', { ascending: false });
@@ -755,7 +829,6 @@ async function loadAuctions() {
     let bidsMap = {};
     let botCountMap = {};
     if (auctionIds.length > 0) {
-      // Get bid counts
       const { data: bids, error: bidsErr } = await supabaseClient
         .from('bids')
         .select('auction_id, amount')
@@ -770,7 +843,6 @@ async function loadAuctions() {
         }, {});
       }
 
-      // Get bot counts
       const { data: bots, error: botsErr } = await supabaseClient
         .from('auction_bots')
         .select('auction_id')
@@ -786,9 +858,10 @@ async function loadAuctions() {
 
     allAuctions = (data || []).map(item => {
       const auctionBids = bidsMap[item.id] || [];
+      const scheduledStart = item.seller_briefs?.scheduled_start;
       const isLive = item.status === 'active' && item.started_at;
       const isCompleted = item.status === 'completed' || item.status === 'ended';
-      const isComing = item.status === 'active' && !item.started_at;
+      const isScheduled = item.status === 'active' && !item.started_at && scheduledStart;
       
       return {
         id: item.id,
@@ -804,6 +877,7 @@ async function loadAuctions() {
         ideal_price: item.seller_briefs?.ideal_price || 0,
         fob_port: item.seller_briefs?.fob_port || item.sellers?.fob_port || 'Location',
         origin: item.seller_briefs?.origin || '',
+        scheduled_start: scheduledStart,
         status: item.status || 'active',
         created_at: item.created_at,
         started_at: item.started_at,
@@ -814,7 +888,7 @@ async function loadAuctions() {
         bot_count: botCountMap[item.id] || 0,
         is_live: isLive,
         is_completed: isCompleted,
-        is_coming: isComing
+        is_scheduled: isScheduled
       };
     });
 
@@ -860,8 +934,8 @@ function applyFiltersAndSort() {
 
   if (statusFilter === 'live') {
     filtered = filtered.filter(a => a.is_live);
-  } else if (statusFilter === 'coming') {
-    filtered = filtered.filter(a => a.is_coming);
+  } else if (statusFilter === 'scheduled') {
+    filtered = filtered.filter(a => a.is_scheduled);
   } else if (statusFilter === 'completed') {
     filtered = filtered.filter(a => a.is_completed);
   }
@@ -938,7 +1012,7 @@ function renderPage(auctions) {
 
   grid.innerHTML = pageItems.map(auction => {
     const isLive = auction.is_live;
-    const isComing = auction.is_coming;
+    const isScheduled = auction.is_scheduled;
     const isCompleted = auction.is_completed;
     
     let statusClass = 'live';
@@ -948,10 +1022,10 @@ function renderPage(auctions) {
       statusClass = 'completed';
       statusText = '🔴 COMPLETED';
       statusLabel = 'Completed — Auction Ended';
-    } else if (isComing) {
-      statusClass = 'coming';
-      statusText = '🟡 COMING SOON';
-      statusLabel = 'Coming Soon — Register Your Bot';
+    } else if (isScheduled) {
+      statusClass = 'scheduled';
+      statusText = '🟡 SCHEDULED';
+      statusLabel = 'Scheduled — Register Your Bot';
     }
 
     let timeRemaining = '—';
@@ -968,13 +1042,101 @@ function renderPage(auctions) {
       }
     }
 
+    // Countdown timer for scheduled auctions
+    let countdownHtml = '';
+    if (auction.scheduled_start && isScheduled) {
+      const countdown = getTimeUntilScheduled(auction.scheduled_start);
+      const formattedDate = formatScheduledDate(auction.scheduled_start);
+      if (countdown) {
+        const timerClass = countdown.status === 'started' ? 'started' : '';
+        countdownHtml = `
+          <div class="countdown-section">
+            <span class="countdown-label">🗓️ Starts ${formattedDate || ''}</span>
+            <div class="countdown-timer ${timerClass}" data-auction-id="${auction.id}" data-scheduled="${auction.scheduled_start}">
+              ${countdown.formatted}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Heat bar
+    const heatPercent = Math.min(100, Math.max(8, (auction.bids_count || 0) * 8 + 30));
+    const heatHtml = `
+      <div class="heat-bar-container">
+        <div class="heat-fill" style="width: ${heatPercent}%;"></div>
+      </div>
+    `;
+
+    // Star rating
+    let starRating = starRatingCache.get(auction.seller_name);
+    if (!starRating) {
+      let hash = 0;
+      for (let i = 0; i < (auction.seller_name || '').length; i++) {
+        hash = auction.seller_name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      starRating = (3.5 + (Math.abs(hash) % 15) / 10).toFixed(1);
+      starRatingCache.set(auction.seller_name, starRating);
+    }
+
     const safeProduct = escapeHtml(auction.product);
     const safeVariety = escapeHtml(auction.variety);
     const safeSeller = escapeHtml(auction.seller_name);
     const safeFob = escapeHtml(auction.fob_port);
 
     const isRegistered = currentUser && registeredBots.has(auction.id);
-    const canRegister = !isRegistered && isComing && currentUser;
+    const canRegister = !isRegistered && isScheduled && currentUser;
+
+    let actionsHtml = '';
+    if (isLive) {
+      actionsHtml = `
+        <button class="view-btn" disabled>
+          ⛔ Auction in Progress
+        </button>
+        <div class="bot-status">Registration closed — bots are battling</div>
+      `;
+    } else if (isCompleted) {
+      actionsHtml = `
+        <button class="view-btn" disabled>
+          🔴 Completed
+        </button>
+      `;
+    } else if (isScheduled) {
+      if (isRegistered) {
+        actionsHtml = `
+          <button class="bot-btn active" disabled>
+            ✅ Bot Activated ($25 held)
+          </button>
+          <div class="bot-status">You're registered for this auction</div>
+        `;
+      } else if (canRegister) {
+        actionsHtml = `
+          <button class="bot-btn" onclick="openBotModal('${auction.id}', '${safeProduct} - ${safeVariety}')">
+            🤖 Activate Bot ($25)
+          </button>
+          <div class="bot-status">$25 set aside • Refundable</div>
+        `;
+      } else if (!currentUser) {
+        actionsHtml = `
+          <button class="view-btn" onclick="window.location.href='signin.html'">
+            Sign In to Register
+          </button>
+          <div class="bot-status">Sign in to activate your bot</div>
+        `;
+      } else {
+        actionsHtml = `
+          <button class="view-btn" onclick="viewAuction('${auction.id}')">
+            VIEW AUCTION →
+          </button>
+        `;
+      }
+    } else {
+      actionsHtml = `
+        <button class="view-btn" onclick="viewAuction('${auction.id}')">
+          VIEW AUCTION →
+        </button>
+      `;
+    }
 
     return `
       <div class="auction-card" data-id="${auction.id}">
@@ -1009,48 +1171,56 @@ function renderPage(auctions) {
               <span class="detail-value" style="font-size:0.8rem;">${safeFob}</span>
             </div>
           </div>
+          ${countdownHtml}
+          ${heatHtml}
+          <div class="card-meta">
+            <span>⭐ ${starRating} ★</span>
+            <span>🔥 ${Math.round(heatPercent)}°</span>
+            <span>🤖 ${auction.bot_count} bots</span>
+          </div>
           <div class="card-seller">
             <span>🏢 <span class="seller-name">${safeSeller}</span></span>
             <span class="seller-rating">⭐ ${auction.seller_rating}</span>
             <span class="seller-sales">(${auction.seller_sales || 0} sales)</span>
-            <span style="margin-left:auto; font-size:0.65rem; color:var(--muted);">🤖 ${auction.bot_count} bots</span>
           </div>
-          <div class="card-actions">
-            ${isLive ? `
-              <button class="view-btn" disabled>
-                ⛔ Auction in Progress
-              </button>
-              <div class="bot-status">Registration closed — bots are battling</div>
-            ` : isCompleted ? `
-              <button class="view-btn" disabled>
-                🔴 Completed
-              </button>
-            ` : isComing ? `
-              ${isRegistered ? `
-                <button class="bot-btn active" disabled>
-                  ✅ Bot Activated ($25 held)
-                </button>
-                <div class="bot-status">You're registered for this auction</div>
-              ` : canRegister ? `
-                <button class="bot-btn" onclick="openBotModal('${auction.id}', '${safeProduct} - ${safeVariety}')">
-                  🤖 Activate Bot ($25)
-                </button>
-                <div class="bot-status">$25 set aside • Refundable</div>
-              ` : `
-                <button class="view-btn" onclick="viewAuction('${auction.id}')">
-                  VIEW AUCTION →
-                </button>
-              `}
-            ` : `
-              <button class="view-btn" onclick="viewAuction('${auction.id}')">
-                VIEW AUCTION →
-              </button>
-            `}
-          </div>
+          <div class="card-actions">${actionsHtml}</div>
         </div>
       </div>
     `;
   }).join('');
+
+  // Start countdown timer if not already running
+  if (!countdownInterval) {
+    startCountdownTimer();
+  }
+}
+
+// ========== START COUNTDOWN TIMER ==========
+function startCountdownTimer() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  
+  countdownInterval = setInterval(() => {
+    document.querySelectorAll('.countdown-timer[data-scheduled]').forEach(el => {
+      const scheduled = el.getAttribute('data-scheduled');
+      if (scheduled) {
+        const countdown = getTimeUntilScheduled(scheduled);
+        if (countdown) {
+          el.textContent = countdown.formatted;
+          if (countdown.status === 'started') {
+            el.classList.add('started');
+          } else {
+            el.classList.remove('started');
+          }
+        }
+      }
+    });
+    
+    // Also update auction in progress notice
+    checkAuctionInProgress(filteredAuctions);
+  }, 1000);
 }
 
 // ========== RENDER PAGINATION ==========
@@ -1064,12 +1234,12 @@ function renderPagination() {
 // ========== UPDATE STATS ==========
 function updateStats() {
   const live = allAuctions.filter(a => a.is_live).length;
-  const coming = allAuctions.filter(a => a.is_coming).length;
+  const scheduled = allAuctions.filter(a => a.is_scheduled).length;
   const completed = allAuctions.filter(a => a.is_completed).length;
   const totalBots = allAuctions.reduce((sum, a) => sum + (a.bot_count || 0), 0);
   
   document.getElementById('activeCount').textContent = live;
-  document.getElementById('comingCount').textContent = coming;
+  document.getElementById('scheduledCount').textContent = scheduled;
   document.getElementById('completedCount').textContent = completed;
   document.getElementById('botCount').textContent = totalBots;
 }
@@ -1257,6 +1427,10 @@ window.addEventListener('beforeunload', function() {
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
+  }
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
   }
   if (realtimeChannel) {
     supabaseClient.removeChannel(realtimeChannel).catch(console.warn);
