@@ -871,6 +871,7 @@ footer a:hover { color: #4a9e5a; }
 
 .ticker-label { letter-spacing: 1px; }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -1186,7 +1187,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('logout-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
     await supabaseClient.auth.signOut();
-    window.location.reload();
+    window.location.href = 'index.html';
+  });
+
+  // Listen for auth state changes (e.g. sign out in another tab)
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      window.location.href = 'index.html';
+    }
   });
 });
 
