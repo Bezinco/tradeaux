@@ -8,15 +8,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; overflow-y: auto; }
+    .modal-open { overflow: hidden; }
+
     .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
     .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0,206,209,0.3), transparent 70%); top:-40%; left:-20%; }
     .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124,252,0,0.2), transparent 70%); top:-30%; left:-10%; animation-delay:8s; }
     .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,59,59,0.15), transparent 70%); top:-20%; left:0%; animation-delay:16s; }
     @keyframes waveBgDrift { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(40px,-30px) scale(1.05);} 100%{transform:translate(-30px,20px) scale(1);} }
-    
-    /* ===== 3D LOGO - TRADEAUX ===== */
+
     .gem-logo-corner {
       display: inline-block;
       filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
@@ -51,9 +52,9 @@
     .gem-letter:nth-child(3) { animation-delay: 0.4s; }
     .gem-letter:nth-child(4) { animation-delay: 0.6s; }
     .gem-letter:nth-child(5) { animation-delay: 0.8s; }
-    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
-    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
-    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
+    .gem-letter:nth-child(6) { animation-delay: 0.1s; }
+    .gem-letter:nth-child(7) { animation-delay: 0.3s; }
+    .gem-letter:nth-child(8) { animation-delay: 0.5s; }
     @keyframes letterFloat {
       0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
       50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
@@ -136,11 +137,27 @@
     .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
     .logo-area { display: inline-flex; align-items: center; position: relative; }
     .admin-badge { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; background: rgba(0,206,209,0.2); padding: 4px 12px; border-radius: 20px; margin-left: 15px; letter-spacing: 1px; border: 1px solid rgba(0,206,209,0.5); }
-    
+
     .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; }
-    .nav a:hover { border-color: #00ced1; }
-    
+    .nav button, .nav a {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border: 1px solid rgba(0, 206, 209, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 32, 64, 0.7);
+      backdrop-filter: blur(4px);
+      color: #e5e7eb;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      display: inline-block;
+      text-align: center;
+    }
+    .nav button:hover, .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav button.active-tab, .nav a.active-tab { border-color: #7CFC00; color: #7CFC00; background: rgba(124,252,0,0.1); }
+
     .stats-row { margin-bottom: 30px; }
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
     .stat-card { background: linear-gradient(145deg,rgba(15,32,64,0.85),rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; cursor: pointer; }
@@ -149,23 +166,22 @@
     .stat-value { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800; color: #00ced1; }
     .stat-label { font-size: 11px; color: #9ca3af; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
     .stat-sub { font-size: 10px; color: #7CFC00; margin-top: 4px; }
-    
+
     .dashboard-card { background: linear-gradient(145deg,rgba(15,32,64,0.8),rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.3); border-radius: 20px; padding: 20px; margin-bottom: 24px; }
     .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-    
+    .card-header .badge-count { font-size: 11px; color: #9ca3af; font-weight: 400; font-family: 'Inter', sans-serif; }
+
     .market-toggle-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
     .market-toggle { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 8px 16px; border-radius: 40px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(0,206,209,0.2); }
     .market-toggle:hover { border-color: #00ced1; }
     .market-toggle.active { background: rgba(0,206,209,0.2); border-color: #00ced1; }
     .market-toggle.inactive { opacity: 0.5; }
     .market-toggle input { margin-right: 6px; cursor: pointer; }
-    
+
     .commodity-dropdown { margin-top: 10px; }
     .commodity-select { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 12px; color: white; font-family: 'Inter', sans-serif; font-size: 14px; cursor: pointer; }
     .variant-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 12px; }
-    .variant-badge { background: rgba(0,206,209,0.15); padding: 6px 12px; border-radius: 20px; font-size: 12px; border: 1px solid rgba(0,206,209,0.3); cursor: pointer; transition: all 0.2s; }
-    .variant-badge:hover { background: rgba(0,206,209,0.3); transform: scale(1.02); }
-    
+
     .active-auctions-list { max-height: 400px; overflow-y: auto; }
     .auction-item { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border-left: 3px solid #00ced1; }
     .auction-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
@@ -176,48 +192,81 @@
     .type-transport { background: rgba(255,165,0,0.2); color: #FFA500; }
     .type-insurance { background: rgba(124,252,0,0.2); color: #7CFC00; }
     .type-banking { background: rgba(255,217,102,0.2); color: #FFD966; }
-    .commission-badge { background: rgba(255,217,102,0.15); color: #FFD966; padding: 2px 6px; border-radius: 12px; font-size: 10px; }
-    
+    .fee-badge { background: rgba(255,217,102,0.15); color: #FFD966; padding: 2px 6px; border-radius: 12px; font-size: 10px; }
+    .see-more-badge { background: rgba(0,206,209,0.15); color: #00ced1; padding: 4px 12px; border-radius: 20px; font-size: 11px; text-align: center; margin-top: 8px; cursor: pointer; }
+    .see-more-badge:hover { background: rgba(0,206,209,0.25); }
+
     .btn { padding: 8px 16px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
     .btn-primary { background: linear-gradient(135deg,#00ced1,#00ff7f); color: #000; }
+    .btn-success { background: #7CFC00; color: #000; }
+    .btn-danger { background: #ff3b3b; color: #fff; }
+    .btn-warning { background: #FFD966; color: #000; }
     .btn-sm { padding: 4px 12px; font-size: 11px; }
+    .btn-xs { padding: 2px 8px; font-size: 9px; border-radius: 4px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     .role-badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
     .role-buyer { background: rgba(124,252,0,0.15); color: #7CFC00; }
     .role-seller { background: rgba(0,102,255,0.15); color: #0066ff; }
     .role-carrier { background: rgba(255,165,0,0.15); color: #FFA500; }
     .role-admin { background: rgba(255,217,102,0.15); color: #FFD966; }
-    
+
+    .verification-badge { padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+    .verification-badge.verified { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .verification-badge.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .verification-badge.rejected { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .verification-badge.blocked { background: rgba(255,59,59,0.3); color: #ff3b3b; }
+    .verification-badge.needs_docs { background: rgba(255,165,0,0.2); color: #FFA500; }
+
+    .verification-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+    .verification-card { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 16px; border: 1px solid rgba(0,206,209,0.15); transition: all 0.3s; }
+    .verification-card:hover { border-color: rgba(0,206,209,0.4); transform: translateY(-2px); }
+    .verification-card .company-name { font-weight: 700; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .verification-card .company-details { font-size: 12px; color: #9ca3af; margin: 6px 0; }
+    .verification-card .doc-list { margin: 10px 0; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+    .verification-card .doc-item { font-size: 11px; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .verification-card .doc-item:last-child { border-bottom: none; }
+    .verification-card .doc-status { font-size: 10px; }
+    .verification-card .doc-status.uploaded { color: #7CFC00; }
+    .verification-card .doc-status.missing { color: #ff3b3b; }
+    .verification-card .doc-status.pending { color: #FFD966; }
+    .verification-card .verification-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .verification-card .verification-actions button { flex: 1; min-width: 80px; }
+
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
     .modal-content { background: linear-gradient(145deg,#0a1228,#020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
-    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; }
     .modal-close:hover { color: #00ced1; }
-    
+
     .user-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
     .user-stat-card { background: rgba(0,0,0,0.4); border-radius: 12px; padding: 12px; text-align: center; }
     .user-stat-value { font-size: 24px; font-weight: 800; color: #00ced1; }
     .user-stat-label { font-size: 10px; color: #9ca3af; margin-top: 4px; }
-    
-    .history-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 8px; }
+
+    .history-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 8px; flex-wrap: wrap; }
     .history-tab { padding: 6px 16px; background: rgba(0,0,0,0.3); border-radius: 20px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
     .history-tab.active { background: rgba(0,206,209,0.2); color: #00ced1; }
     .history-tab:hover { background: rgba(0,206,209,0.15); }
     .history-content { display: none; }
     .history-content.active { display: block; }
-    
-    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #0f1a2e; border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; transition: 0.3s; opacity: 0; z-index: 2000; }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #0f1a2e; border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; transition: 0.3s; opacity: 0; z-index: 2000; max-width: 90%; }
     .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+
     .empty-state { color: #5c6b8a; text-align: center; padding: 20px; font-size: 13px; }
     .search-bar { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.3); border-radius: 10px; color: #fff; margin-bottom: 14px; }
     .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .admin-table th { text-align: left; padding: 10px 12px; font-family: 'Orbitron', sans-serif; font-size: 10px; color: #9ca3af; border-bottom: 1px solid rgba(0,206,209,0.2); }
+    .admin-table th { text-align: left; padding: 10px 12px; font-family: 'Orbitron', sans-serif; font-size: 10px; color: #9ca3af; border-bottom: 1px solid rgba(0,206,209,0.2); position: sticky; top: 0; background: #0a1228; z-index: 10; }
     .admin-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .table-wrap { overflow-x: auto; max-height: 400px; overflow-y: auto; }
+    .table-wrap .pagination-info { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; color: #9ca3af; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
     .clickable-row { cursor: pointer; transition: background 0.2s; }
     .clickable-row:hover { background: rgba(0,206,209,0.05); }
     .status-active { color: #7CFC00; font-weight: 600; }
-    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .status-inactive { color: #ff3b3b; font-weight: 600; }
 
-    /* Bot Leaderboard Styles */
     .bot-leaderboard { margin-top: 20px; }
     .bot-tier { margin-bottom: 20px; }
     .bot-tier-header { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #00ced1; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,206,209,0.2); }
@@ -230,19 +279,20 @@
     .bot-info { flex: 1; }
     .bot-info-name { font-weight: 700; font-size: 13px; }
     .bot-info-owner { font-size: 11px; color: #9ca3af; }
-    .bot-stats-bar { display: flex; gap: 16px; font-size: 11px; }
+    .bot-stats-bar { display: flex; gap: 16px; font-size: 11px; flex-wrap: wrap; }
     .bot-stat { color: #7CFC00; }
     .bot-stat-label { color: #9ca3af; }
 
-    /* Market Init Styles */
     .market-init-card { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid rgba(0,206,209,0.2); }
-    .market-init-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .market-init-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
     .market-init-title { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #00ced1; }
     .market-init-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
     .status-preview { background: rgba(255,217,102,0.2); color: #FFD966; }
-    .status-active { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .status-live { background: rgba(0,206,209,0.2); color: #00ced1; }
     .status-closed { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .status-overdue { background: rgba(255,59,59,0.3); color: #ff3b3b; border: 1px solid #ff3b3b; }
     .init-btn { padding: 6px 16px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
+    .init-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .init-btn-preview { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid #FFD966; }
     .init-btn-live { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
     .init-btn-close { background: rgba(255,59,59,0.2); color: #ff3b3b; border: 1px solid #ff3b3b; }
@@ -255,8 +305,31 @@
     .spinner { width: 48px; height: 48px; border: 3px solid rgba(0,206,209,0.3); border-top-color: #00ced1; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-text { font-family: 'Orbitron', sans-serif; color: #00ced1; font-size: 14px; }
+
+    .market-init-route { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+    .fee-display { color: #FFD966; font-weight: 600; }
+
+    .missing-schema-warning { background: rgba(255,59,59,0.15); border: 1px solid rgba(255,59,59,0.3); border-radius: 8px; padding: 12px; margin: 8px 0; font-size: 12px; color: #ff6b6b; }
+    .missing-schema-warning strong { color: #ff3b3b; }
+
+    @media (max-width: 768px) {
+      .header { flex-direction: column; align-items: stretch; }
+      .logo-area { justify-content: center; flex-wrap: wrap; }
+      .admin-badge { margin-left: 0; }
+      .nav { justify-content: center; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .verification-grid { grid-template-columns: 1fr; }
+      .user-stats-grid { grid-template-columns: 1fr 1fr; }
+      .market-init-card .market-init-header { flex-direction: column; align-items: stretch; }
+      .market-init-card div[style*="grid-template-columns"] { grid-template-columns: 1fr 1fr !important; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .user-stats-grid { grid-template-columns: 1fr; }
+      .verification-card .verification-actions button { min-width: 100%; }
+      .market-init-card div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+    }
   </style>
-<base target="_blank">
 </head>
 <body>
 <div class="bg-waves"><div class="wave-bg wave-1"></div><div class="wave-bg wave-2"></div><div class="wave-bg wave-3"></div></div>
@@ -287,30 +360,30 @@
       <span class="admin-badge">ADMIN • MARKET CONTROL</span>
     </div>
     <nav class="nav">
-      <a href="#" onclick="showSection('dashboard')">Dashboard</a>
-      <a href="#" onclick="showSection('markets')">Markets</a>
-      <a href="#" onclick="showSection('auctions')">Auctions</a>
-      <a href="#" onclick="showSection('users')">Users</a>
-      <a href="#" onclick="showSection('commodity')">Commodity</a>
-      <a href="#" onclick="showSection('transport')">Freight</a>
-      <a href="#" onclick="showSection('insurance')">Insurance</a>
-      <a href="#" onclick="showSection('banking')">Banking</a>
-      <a href="#" onclick="showSection('bots')">🤖 Bots</a>
-      <a href="#" onclick="showSection('init')">🚀 Init</a>
+      <button data-section="dashboard" class="active-tab">Dashboard</button>
+      <button data-section="markets">Markets</button>
+      <button data-section="auctions">Auctions</button>
+      <button data-section="users">Users</button>
+      <button data-section="verify" style="border-color:rgba(255,217,102,0.4); color:#FFD966;">✅ Verify</button>
+      <button data-section="commodity">Commodity</button>
+      <button data-section="transport">Freight</button>
+      <button data-section="insurance">Insurance</button>
+      <button data-section="banking">Banking</button>
+      <button data-section="bots">🤖 Bots</button>
+      <button data-section="init">🚀 Init</button>
       <button id="refreshBtn" class="btn btn-sm" style="background:rgba(0,206,209,0.2); color:#00ced1;">🔄 Refresh</button>
-      <a href="#" id="signOutBtn">Sign Out</a>
+      <button id="signOutBtn" class="btn btn-sm" style="background:rgba(255,59,59,0.15); color:#ff3b3b; border:1px solid rgba(255,59,59,0.3);">🚪 Sign Out</button>
     </nav>
   </header>
 
-  <!-- DASHBOARD -->
   <div id="section-dashboard" class="section-content">
     <div class="stats-row">
       <div class="stats-grid">
-        <div class="stat-card" onclick="showUserByRole('buyer')"><div class="stat-icon">👑</div><div class="stat-value" id="topBuyerName">—</div><div class="stat-label">Top Buyer</div><div class="stat-sub" id="topBuyerStats">0 deals • $0</div></div>
-        <div class="stat-card" onclick="showUserByRole('seller')"><div class="stat-icon">🏆</div><div class="stat-value" id="topSellerName">—</div><div class="stat-label">Top Seller</div><div class="stat-sub" id="topSellerStats">0 deals • $0</div></div>
-        <div class="stat-card" onclick="showUserByRole('carrier')"><div class="stat-icon">🚛</div><div class="stat-value" id="topFreightName">—</div><div class="stat-label">Top Freight</div><div class="stat-sub" id="topFreightStats">0 deals • $0</div></div>
-        <div class="stat-card" onclick="showUserByRole('insurer')"><div class="stat-icon">🛡️</div><div class="stat-value" id="topInsurerName">—</div><div class="stat-label">Top Insurer</div><div class="stat-sub" id="topInsurerStats">0 deals • $0</div></div>
-        <div class="stat-card" onclick="showUserByRole('banker')"><div class="stat-icon">🏦</div><div class="stat-value" id="topBankerName">—</div><div class="stat-label">Top Banker</div><div class="stat-sub" id="topBankerStats">0 deals • $0</div></div>
+        <div class="stat-card" id="statCardBuyer"><div class="stat-icon">👑</div><div class="stat-value" id="topBuyerName">—</div><div class="stat-label">Top Buyer</div><div class="stat-sub" id="topBuyerStats">0 deals • $0</div></div>
+        <div class="stat-card" id="statCardSeller"><div class="stat-icon">🏆</div><div class="stat-value" id="topSellerName">—</div><div class="stat-label">Top Seller</div><div class="stat-sub" id="topSellerStats">0 deals • $0</div></div>
+        <div class="stat-card" id="statCardCarrier"><div class="stat-icon">🚛</div><div class="stat-value" id="topFreightName">—</div><div class="stat-label">Top Freight</div><div class="stat-sub" id="topFreightStats">0 deals • $0</div></div>
+        <div class="stat-card" id="statCardInsurer"><div class="stat-icon">🛡️</div><div class="stat-value" id="topInsurerName">—</div><div class="stat-label">Top Insurer</div><div class="stat-sub" id="topInsurerStats">0 deals • 0% avg</div></div>
+        <div class="stat-card" id="statCardBanker"><div class="stat-icon">🏦</div><div class="stat-value" id="topBankerName">—</div><div class="stat-label">Top Banker</div><div class="stat-sub" id="topBankerStats">0 deals • 0% avg</div></div>
       </div>
     </div>
     <div class="dashboard-card">
@@ -318,45 +391,63 @@
       <div id="marketToggles" class="market-toggle-group">Loading...</div>
     </div>
     <div class="dashboard-card">
-      <div class="card-header">🔄 ALL ACTIVE AUCTIONS <span style="font-size:11px;">with commissions</span></div>
+      <div class="card-header">🔄 ACTIVE AUCTIONS <span style="font-size:11px;">(showing latest 20)</span></div>
       <div id="activeAuctionsFeed" class="active-auctions-list"></div>
+      <div id="activeAuctionsMore" style="display:none;" class="see-more-badge">📋 View all auctions →</div>
     </div>
   </div>
 
-  <!-- MARKETS -->
   <div id="section-markets" class="section-content" style="display:none;">
     <div class="dashboard-card">
       <div class="card-header">🔧 MARKET ADMINISTRATION</div>
-      <div id="marketAdminPanel"></div>
+      <div id="marketAdminPanel">
+        <div class="empty-state">Market administration tools coming soon.</div>
+      </div>
     </div>
   </div>
 
-  <!-- AUCTIONS -->
   <div id="section-auctions" class="section-content" style="display:none;">
     <div class="dashboard-card">
       <div class="card-header">📋 ALL ACTIVE AUCTIONS</div>
-      <input type="text" class="search-bar" id="auctionSearch" placeholder="🔍 Search auctions..." oninput="filterAuctions()">
+      <input type="text" class="search-bar" id="auctionSearch" placeholder="🔍 Search auctions...">
       <div id="allAuctionsList"></div>
     </div>
   </div>
 
-  <!-- USERS -->
   <div id="section-users" class="section-content" style="display:none;">
     <div class="dashboard-card">
       <div class="card-header">👥 USER MANAGEMENT</div>
-      <input type="text" class="search-bar" id="userSearch" placeholder="🔍 Search users..." oninput="filterUsers()">
+      <input type="text" class="search-bar" id="userSearch" placeholder="🔍 Search users...">
       <div id="userManagement"></div>
     </div>
   </div>
 
-  <!-- COMMODITY -->
+  <div id="section-verify" class="section-content" style="display:none;">
+    <div class="dashboard-card">
+      <div class="card-header">
+        ✅ COMPANY VERIFICATION
+        <span class="badge-count">Approve companies to enable trading</span>
+      </div>
+      <div style="margin-bottom:16px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <button class="btn btn-sm" data-action="filter-verify" data-filter="all" style="background:rgba(124,252,0,0.15); color:#7CFC00; border:1px solid rgba(124,252,0,0.3);">📋 All</button>
+        <button class="btn btn-sm" data-action="filter-verify" data-filter="pending" style="background:rgba(255,217,102,0.15); color:#FFD966; border:1px solid rgba(255,217,102,0.3);">⏳ Pending</button>
+        <button class="btn btn-sm" data-action="filter-verify" data-filter="verified" style="background:rgba(124,252,0,0.15); color:#7CFC00; border:1px solid rgba(124,252,0,0.3);">✅ Verified</button>
+        <button class="btn btn-sm" data-action="filter-verify" data-filter="rejected" style="background:rgba(255,59,59,0.15); color:#ff3b3b; border:1px solid rgba(255,59,59,0.3);">❌ Rejected</button>
+        <button class="btn btn-sm" data-action="filter-verify" data-filter="needs_docs" style="background:rgba(255,165,0,0.15); color:#FFA500; border:1px solid rgba(255,165,0,0.3);">📄 Needs Docs</button>
+        <input type="text" class="search-bar" id="verifySearch" placeholder="🔍 Search companies..." style="max-width:250px; margin-bottom:0;">
+        <input type="hidden" id="verifyFilterType" data-filter="all">
+      </div>
+      <div id="verificationGrid" class="verification-grid"></div>
+    </div>
+  </div>
+
   <div id="section-commodity" class="section-content" style="display:none;">
     <div class="dashboard-card">
       <div class="card-header">🥥 COMMODITY: COCONUT VARIANTS</div>
       <div class="commodity-dropdown">
-        <select id="commodityVariantSelect" class="commodity-select" onchange="selectCommodityVariant(this.value)">
+        <select id="commodityVariantSelect" class="commodity-select">
           <option value="">Select a coconut product...</option>
-          <option value="dehusked">Dehusked Coconut</option><option value="husked">Husked Coconut</option><option value="dessicated">Desiccated Coconut</option>
+          <option value="dehusked">Dehusked Coconut</option><option value="husked">Husked Coconut</option><option value="desiccated">Desiccated Coconut</option>
           <option value="copra">Copra</option><option value="coconut_oil">Coconut Oil</option><option value="coconut_water">Coconut Water</option>
           <option value="coconut_milk">Coconut Milk</option><option value="coconut_sugar">Coconut Sugar</option><option value="coconut_fiber">Coconut Fiber</option>
           <option value="activated_carbon">Activated Carbon</option><option value="coconut_shell">Coconut Shell Charcoal</option>
@@ -367,22 +458,18 @@
     <div class="dashboard-card"><div class="card-header">📊 COMMODITY AUCTIONS</div><div id="commodityAuctionsList"></div></div>
   </div>
 
-  <!-- FREIGHT -->
   <div id="section-transport" class="section-content" style="display:none;">
     <div class="dashboard-card"><div class="card-header">🚛 FREIGHT AUCTIONS</div><div id="transportAuctionsList"></div></div>
   </div>
 
-  <!-- INSURANCE -->
   <div id="section-insurance" class="section-content" style="display:none;">
     <div class="dashboard-card"><div class="card-header">🛡️ INSURANCE AUCTIONS</div><div id="insuranceAuctionsList"></div></div>
   </div>
 
-  <!-- BANKING -->
   <div id="section-banking" class="section-content" style="display:none;">
     <div class="dashboard-card"><div class="card-header">🏦 BANKING AUCTIONS</div><div id="bankingAuctionsList"></div></div>
   </div>
 
-  <!-- BOT LEADERBOARD -->
   <div id="section-bots" class="section-content" style="display:none;">
     <div class="dashboard-card">
       <div class="card-header">🤖 BOT LEADERBOARD <span style="font-size:11px;">Ranked by win rate & volume</span></div>
@@ -390,7 +477,6 @@
     </div>
   </div>
 
-  <!-- MARKET INIT -->
   <div id="section-init" class="section-content" style="display:none;">
     <div class="dashboard-card">
       <div class="card-header">🚀 INITIATE MARKETS <span style="font-size:11px;">Preview → Live → Close</span></div>
@@ -401,334 +487,1921 @@
   <footer style="text-align:center; padding:20px; font-size:12px; color:#5c6b8a;"><p>TRADEAUX ADMIN © 2026</p></footer>
 </div>
 
-<!-- USER DETAIL MODAL -->
-<div id="userDetailModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeUserModal">&times;</span>
+<div id="userDetailModal" class="modal"><div class="modal-content"><span class="modal-close" data-action="closemodal">&times;</span>
   <div id="userDetailContent"></div>
 </div></div>
 
-<!-- ADD FUNDS MODAL -->
-<div id="addFundsModal" class="modal"><div class="modal-content"><span class="modal-close" id="closeAddFundsModal">&times;</span>
+<div id="addFundsModal" class="modal"><div class="modal-content"><span class="modal-close" data-action="closemodal">&times;</span>
   <h2 style="color:#00ced1; margin-bottom:20px;">💰 Add Funds</h2>
   <div id="addFundsUserName"></div>
-  <input type="number" id="addFundsAmount" placeholder="Amount (USD)" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid #00ced1; border-radius:8px; color:white; margin:15px 0;">
-  <div style="display:flex; gap:10px;"><button class="btn" id="cancelAddFundsBtn">Cancel</button><button class="btn btn-primary" id="confirmAddFundsBtn">Add Funds</button></div>
+  <input type="text" id="addFundsAmount" placeholder="Amount (USD)" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid #00ced1; border-radius:8px; color:white; margin:15px 0;">
+  <div style="display:flex; gap:10px;"><button class="btn" data-action="closemodal">Cancel</button><button class="btn btn-primary" id="confirmAddFundsBtn" data-action="confirmfunds">Add Funds</button></div>
+</div></div>
+
+<div id="verifyDetailModal" class="modal"><div class="modal-content"><span class="modal-close" data-action="closemodal">&times;</span>
+  <div id="verifyDetailContent">
+    <h2 style="color:#00ced1; margin-bottom:16px;">📄 Verification Details</h2>
+    <div id="verifyDetailBody" class="empty-state">Select a company to view verification details.</div>
+  </div>
+</div></div>
+
+<div id="auctionDetailModal" class="modal"><div class="modal-content"><span class="modal-close" data-action="closemodal">&times;</span>
+  <h2 style="color:#00ced1; margin-bottom:16px;">📋 Auction Details</h2>
+  <div id="auctionDetailBody"></div>
+</div></div>
+
+<div id="marketFormModal" class="modal"><div class="modal-content"><span class="modal-close" data-action="closemodal">&times;</span>
+  <h2 style="color:#00ced1; margin-bottom:20px;">📝 Create / Edit Market</h2>
+  <div id="marketFormBody"></div>
+</div></div>
+
+<div id="confirmModal" class="modal"><div class="modal-content" style="max-width:450px;"><span class="modal-close">&times;</span>
+  <h2 id="confirmTitle" style="color:#00ced1; margin-bottom:16px;">Confirm</h2>
+  <p id="confirmMessage" style="color:#e5e7eb; margin-bottom:20px;">Are you sure?</p>
+  <div style="display:flex; gap:10px; justify-content:flex-end;">
+    <button class="btn" id="confirmCancelBtn">Cancel</button>
+    <button class="btn" id="confirmActionBtn">Confirm</button>
+  </div>
 </div></div>
 
 <div class="toast" id="toast">Action completed</div>
 
 <script>
+// ============================================================
+// SUPABASE CONFIGURATION
+// ============================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+
+if (!window.supabase) {
+  document.body.innerHTML = '<div style="text-align:center;padding:40px;color:#ff3b3b;font-family:Inter,sans-serif;">❌ Failed to load required libraries. Please check your internet connection and refresh.</div>';
+  throw new Error('Supabase not loaded');
+}
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let currentUser = null;
-let allUsers = [], sellerBriefs = [], transportAuctions = [], insuranceAuctions = [], bankingAuctions = [];
-let allBids = [], transportBids = [], insuranceBids = [], bankingBids = [];
-let marketStatus = { commodity: true, transport: true, insurance: true, banking: true };
-let allBots = [];
+// ============================================================
+// STATE
+// ============================================================
+const DEFAULT_STATE = {
+  currentUser: null,
+  allUsers: [],
+  sellerBriefs: [],
+  transportAuctions: [],
+  insuranceAuctions: [],
+  bankingAuctions: [],
+  allBids: [],
+  transportBids: [],
+  insuranceBids: [],
+  bankingBids: [],
+  marketStatus: { commodity: true, transport: true, insurance: true, banking: true },
+  allBots: [],
+  verificationFilter: 'all',
+  pendingFundUserId: null,
+  marketInitAuctions: [],
+  topPerformerIds: { buyer: null, seller: null, carrier: null, insurer: null, banker: null },
+  userPage: 1,
+  auctionPage: 1,
+  pageSize: 20,
+  filteredUsers: [],
+  filteredAuctions: [],
+  isDataLoaded: false,
+  fundActionInProgress: false,
+  auctionSearchTimeout: null,
+  userSearchTimeout: null,
+  countdownInterval: null,
+  autoCloseInterval: null,
+  _startLock: false,
+  _closeLock: false,
+  _deleteLock: false,
+  _autoCloseLock: false,
+  _openModalCount: 0,
+  _marketInitLoaded: false
+};
 
-function showLoading(text = 'Processing...') {
-  document.getElementById('loadingText').textContent = text;
-  document.getElementById('loadingOverlay').classList.add('visible');
+const AppState = { ...DEFAULT_STATE };
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+    .replace(/`/g, '&#96;');
+}
+
+function escapeAttr(str) {
+  if (!str) return '';
+  return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function safeNum(val, fallback) {
+  const num = parseFloat(val);
+  return isNaN(num) ? (fallback || 0) : num;
+}
+
+function safeGet(obj, key, fallback) {
+  if (!obj) return fallback;
+  const val = obj[key];
+  return val !== undefined && val !== null ? val : fallback;
+}
+
+function formatCurrency(amount) {
+  const num = safeNum(amount, 0);
+  if (num < 0) {
+    return '-$' + Math.abs(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+  return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function safeFormatDate(dateStr, fallback) {
+  fallback = fallback || 'N/A';
+  if (!dateStr) return fallback;
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return fallback;
+    return d.toLocaleString();
+  } catch(e) {
+    return fallback;
+  }
+}
+
+function showLoading(text) {
+  const el = document.getElementById('loadingText');
+  const overlay = document.getElementById('loadingOverlay');
+  if (el) el.textContent = text || 'Processing...';
+  if (overlay) overlay.classList.add('visible');
 }
 
 function hideLoading() {
-  document.getElementById('loadingOverlay').classList.remove('visible');
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) overlay.classList.remove('visible');
 }
 
-function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
-function showSection(section) { document.querySelectorAll('.section-content').forEach(el => el.style.display = 'none'); document.getElementById(`section-${section}`).style.display = 'block'; }
-function showToast(msg, isError = false) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.className = 'toast'; if (isError) toast.classList.add('error'); toast.classList.add('visible'); setTimeout(() => toast.classList.remove('visible'), 3000); }
+let toastTimeout = null;
 
-async function checkAuth() {
+function showToast(msg, isError, isSuccess) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.className = 'toast';
+  if (isError) {
+    toast.classList.add('error');
+  } else if (isSuccess) {
+    toast.classList.add('success');
+  }
+  toast.classList.add('visible');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('visible'), 5000);
+}
+
+// ============================================================
+// VERIFY SESSION
+// ============================================================
+async function verifySession() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) { window.location.href = 'signin.html'; return false; }
-  currentUser = session.user;
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single();
-  if (profile?.role !== 'admin') { showToast('Admin only', true); setTimeout(() => window.location.href = 'signin.html', 1500); return false; }
+  if (!session) {
+    showToast('Session expired. Please sign in again.', true);
+    setTimeout(() => window.location.href = 'signin.html', 1500);
+    return false;
+  }
   return true;
 }
-async function signOut() { await supabase.auth.signOut(); window.location.href = 'signin.html'; }
 
-async function loadUsers() { try { const { data } = await supabase.from('profiles').select('*'); allUsers = data || []; } catch(e) { allUsers = []; } }
-async function loadSellerBriefs() { try { const { data } = await supabase.from('seller_briefs').select('*'); sellerBriefs = data || []; } catch(e) { sellerBriefs = []; } }
-async function loadTransportAuctions() { try { const { data } = await supabase.from('transport_auctions').select('*'); transportAuctions = data || []; } catch(e) { transportAuctions = []; } }
-async function loadInsuranceAuctions() { try { const { data } = await supabase.from('insurance_auctions').select('*'); insuranceAuctions = data || []; } catch(e) { insuranceAuctions = []; } }
-async function loadBankingAuctions() { try { const { data } = await supabase.from('banking_auctions').select('*'); bankingAuctions = data || []; } catch(e) { bankingAuctions = []; } }
-async function loadAllBids() { try { const { data } = await supabase.from('bids').select('*'); allBids = data || []; } catch(e) { allBids = []; } }
-async function loadTransportBids() { try { const { data } = await supabase.from('transport_bids').select('*'); transportBids = data || []; } catch(e) { transportBids = []; } }
-async function loadInsuranceBids() { try { const { data } = await supabase.from('insurance_bids').select('*'); insuranceBids = data || []; } catch(e) { insuranceBids = []; } }
-async function loadBankingBids() { try { const { data } = await supabase.from('banking_bids').select('*'); bankingBids = data || []; } catch(e) { bankingBids = []; } }
+// ============================================================
+// SHOW CONFIRM MODAL
+// ============================================================
+let confirmResolve = null;
+let confirmCleanup = null;
+
+function showConfirm(title, message, onConfirm) {
+  return new Promise((resolve) => {
+    if (confirmCleanup) {
+      confirmCleanup();
+      confirmCleanup = null;
+    }
+    
+    const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmTitle');
+    const msgEl = document.getElementById('confirmMessage');
+    const btn = document.getElementById('confirmActionBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+    const closeBtn = document.querySelector('#confirmModal .modal-close');
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+
+    if (title.includes('Delete') || title.includes('Reject')) {
+      btn.className = 'btn btn-danger';
+    } else if (title.includes('Approve') || title.includes('Start')) {
+      btn.className = 'btn btn-success';
+    } else {
+      btn.className = 'btn btn-primary';
+    }
+    btn.textContent = 'Confirm';
+
+    let isResolved = false;
+
+    const cleanup = () => {
+      if (isResolved) return;
+      isResolved = true;
+      btn.onclick = null;
+      cancelBtn.onclick = null;
+      if (closeBtn) closeBtn.onclick = null;
+      if (window._confirmEscHandler) {
+        document.removeEventListener('keydown', window._confirmEscHandler);
+        window._confirmEscHandler = null;
+      }
+      if (window._confirmBackdropHandler) {
+        modal.removeEventListener('click', window._confirmBackdropHandler);
+        window._confirmBackdropHandler = null;
+      }
+      closeModal('confirmModal');
+      confirmCleanup = null;
+    };
+
+    const resolveAndCleanup = (value) => {
+      if (isResolved) return;
+      cleanup();
+      resolve(value);
+    };
+
+    confirmCleanup = cleanup;
+
+    btn.onclick = function() {
+      if (onConfirm) {
+        Promise.resolve(onConfirm()).then((result) => {
+          resolveAndCleanup(result !== undefined ? result : true);
+        }).catch(err => {
+          showToast('Error: ' + err.message, true);
+          resolveAndCleanup(false);
+        });
+      } else {
+        resolveAndCleanup(true);
+      }
+    };
+
+    cancelBtn.onclick = function() {
+      resolveAndCleanup(false);
+    };
+
+    if (closeBtn) {
+      closeBtn.onclick = function() {
+        resolveAndCleanup(false);
+      };
+    }
+
+    const escHandler = function(e) {
+      if (e.key === 'Escape') {
+        resolveAndCleanup(false);
+      }
+    };
+    window._confirmEscHandler = escHandler;
+    document.addEventListener('keydown', escHandler);
+
+    const backdropHandler = function(e) {
+      if (e.target === modal) {
+        resolveAndCleanup(false);
+      }
+    };
+    window._confirmBackdropHandler = backdropHandler;
+    modal.addEventListener('click', backdropHandler);
+
+    openModal('confirmModal');
+    setTimeout(() => btn.focus(), 150);
+  });
+}
+
+// ============================================================
+// NAVIGATION & MODAL HELPERS
+// ============================================================
+function showSection(section) {
+  const target = document.getElementById('section-' + section);
+  if (!target) return;
+  document.querySelectorAll('.section-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.nav button[data-section], .nav a[data-section]').forEach(el => el.classList.remove('active-tab'));
+  document.querySelectorAll('.nav button[data-section], .nav a[data-section]').forEach(el => {
+    if (el.dataset.section === section) el.classList.add('active-tab');
+  });
+  target.style.display = 'block';
+
+  clearTimeout(AppState.auctionSearchTimeout);
+  clearTimeout(AppState.userSearchTimeout);
+}
+
+function toggleBodyScroll(disable) {
+  if (disable) {
+    AppState._openModalCount++;
+  } else {
+    AppState._openModalCount = Math.max(0, AppState._openModalCount - 1);
+  }
+  document.body.classList.toggle('modal-open', AppState._openModalCount > 0);
+}
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.style.display = 'flex';
+  toggleBodyScroll(true);
+  
+  document.querySelectorAll('.container, .bg-waves, .toast').forEach(el => {
+    if (el) el.setAttribute('aria-hidden', 'true');
+  });
+  
+  const primary = modal.querySelector('.btn-primary, [data-action="confirmfunds"], [data-action="submit-market-form"], [data-action="submit-edit-form"], #confirmActionBtn');
+  if (primary) setTimeout(() => primary.focus(), 150);
+  else {
+    const focusable = modal.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (focusable) setTimeout(() => focusable.focus(), 150);
+  }
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.style.display = 'none';
+  toggleBodyScroll(false);
+  
+  document.querySelectorAll('.container, .bg-waves, .toast').forEach(el => {
+    if (el) el.removeAttribute('aria-hidden');
+  });
+  
+  if (id === 'addFundsModal') {
+    AppState.pendingFundUserId = null;
+  }
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+async function checkAuth() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'signin.html';
+      return false;
+    }
+    AppState.currentUser = session.user;
+    let profile = null;
+    try {
+      const { data } = await supabase.from('profiles').select('role').eq('id', AppState.currentUser.id).single();
+      profile = data;
+    } catch (profileErr) {
+      console.error('Profile fetch error:', profileErr);
+      showToast('Failed to load admin profile', true);
+      setTimeout(() => window.location.href = 'signin.html', 2000);
+      return false;
+    }
+    if (profile?.role !== 'admin') {
+      showToast('Admin only', true);
+      setTimeout(() => window.location.href = 'signin.html', 1500);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    showToast('Auth error: ' + err.message, true);
+    setTimeout(() => window.location.href = 'signin.html', 2000);
+    return false;
+  }
+}
+
+async function signOut() {
+  if (AppState.countdownInterval) { clearInterval(AppState.countdownInterval); AppState.countdownInterval = null; }
+  if (AppState.autoCloseInterval) { clearInterval(AppState.autoCloseInterval); AppState.autoCloseInterval = null; }
+  clearTimeout(AppState.auctionSearchTimeout);
+  clearTimeout(AppState.userSearchTimeout);
+  clearTimeout(toastTimeout);
+
+  await supabase.auth.signOut();
+  Object.keys(AppState).forEach(k => {
+    if (k === 'countdownInterval' || k === 'autoCloseInterval') {
+      if (AppState[k]) { clearInterval(AppState[k]); AppState[k] = null; }
+    } else if (k in DEFAULT_STATE) {
+      AppState[k] = Array.isArray(DEFAULT_STATE[k]) ? [] : 
+                     typeof DEFAULT_STATE[k] === 'object' && DEFAULT_STATE[k] !== null ? { ...DEFAULT_STATE[k] } : 
+                     DEFAULT_STATE[k];
+    }
+  });
+  AppState._openModalCount = 0;
+  window.location.href = 'signin.html';
+}
+
+// ============================================================
+// DATA LOADING
+// ============================================================
+async function loadData(table, stateKey, errorMsg) {
+  try {
+    const { data, error } = await supabase.from(table).select('*');
+    if (error) throw error;
+    AppState[stateKey] = data || [];
+    return data;
+  } catch(e) {
+    console.error('Error loading ' + table + ':', e);
+    AppState[stateKey] = [];
+    if (errorMsg) showToast(errorMsg + ': ' + e.message, true);
+    return [];
+  }
+}
+
+async function loadUsers() { return loadData('profiles', 'allUsers', 'Error loading users'); }
+async function loadSellerBriefs() { return loadData('seller_briefs', 'sellerBriefs'); }
+async function loadTransportAuctions() { return loadData('transport_auctions', 'transportAuctions'); }
+async function loadInsuranceAuctions() { return loadData('insurance_auctions', 'insuranceAuctions'); }
+async function loadBankingAuctions() { return loadData('banking_auctions', 'bankingAuctions'); }
+async function loadAllBids() { return loadData('bids', 'allBids'); }
+async function loadTransportBids() { return loadData('transport_bids', 'transportBids'); }
+async function loadInsuranceBids() { return loadData('insurance_bids', 'insuranceBids'); }
+async function loadBankingBids() { return loadData('banking_bids', 'bankingBids'); }
 
 async function loadAllData() {
   showToast('Loading...');
-  await Promise.all([loadUsers(), loadSellerBriefs(), loadTransportAuctions(), loadInsuranceAuctions(), loadBankingAuctions(), loadAllBids(), loadTransportBids(), loadInsuranceBids(), loadBankingBids(), loadAllBots()]);
-  renderTopPerformers(); renderMarketToggles(); renderActiveAuctionsFeed(); renderAllAuctionsList();
-  renderUserTable(); renderCommodityAuctions(); renderTransportAuctions(); renderInsuranceAuctions(); renderBankingAuctions();
-  renderMarketInitPanel();
-  showToast('Ready');
-}
-
-// ===== (All your existing functions remain the same - renderTopPerformers, renderMarketToggles, etc.) =====
-// Note: For brevity, I'm keeping your existing functions as they are.
-// They are all present and functional in your original code.
-
-// ===== MARKET INIT PANEL =====
-let marketInitAuctions = [];
-
-function renderMarketInitPanel() {
-  const container = document.getElementById('marketInitPanel');
-  const saved = localStorage.getItem('admin_market_init');
-  if (saved) marketInitAuctions = JSON.parse(saved);
-  else {
-    marketInitAuctions = [
-      { id: 'init_1', name: 'Coconut Season Q3 2026', type: 'commodity', commodity: 'Coconuts', quantity: 5000, startPrice: 1500, status: 'preview', scheduledStart: new Date(Date.now() + 86400000).toISOString(), endsAt: new Date(Date.now() + 86400000 + 3600000).toISOString() },
-      { id: 'init_2', name: 'Coffee Arabica Batch', type: 'commodity', commodity: 'Coffee', quantity: 2000, startPrice: 4200, status: 'preview', scheduledStart: new Date(Date.now() + 172800000).toISOString(), endsAt: new Date(Date.now() + 172800000 + 7200000).toISOString() },
-      { id: 'init_3', name: 'Freight Route: Colombo → Rotterdam', type: 'transport', commodity: 'Container Shipping', quantity: 100, startPrice: 2500, status: 'live', scheduledStart: new Date(Date.now() - 3600000).toISOString(), endsAt: new Date(Date.now() + 3600000).toISOString() },
-      { id: 'init_4', name: 'Cocoa Insurance Pool', type: 'insurance', commodity: 'Cocoa', quantity: 1000, startPrice: 2.5, status: 'closed', scheduledStart: new Date(Date.now() - 86400000).toISOString(), endsAt: new Date(Date.now() - 3600000).toISOString() }
-    ];
-  }
-  if (marketInitAuctions.length === 0) { container.innerHTML = '<div class="empty-state">No market init auctions. Click "Create New Market" to start.</div>'; return; }
-  container.innerHTML = `<div style="margin-bottom:20px;"><button class="btn btn-primary" onclick="createNewMarketInit()" style="background:linear-gradient(135deg,#00ced1,#0066ff);color:#000;padding:8px 16px;border-radius:8px;font-family:Orbitron;font-weight:700;cursor:pointer;border:none;">+ Create New Market</button></div>${marketInitAuctions.map(auction => { const timeToStart = new Date(auction.scheduledStart) - new Date(); const timeToEnd = new Date(auction.endsAt) - new Date(); const hoursToStart = Math.max(0, Math.floor(timeToStart / 3600000)); const minutesToStart = Math.max(0, Math.floor((timeToStart % 3600000) / 60000)); const statusClass = auction.status === 'preview' ? 'status-preview' : auction.status === 'live' ? 'status-active' : 'status-closed'; const statusText = auction.status === 'preview' ? '🔍 PREVIEW' : auction.status === 'live' ? '🟢 LIVE' : '🔴 CLOSED'; return `<div class="market-init-card"><div class="market-init-header"><div class="market-init-title">${escapeHtml(auction.name)}</div><div class="market-init-status ${statusClass}">${statusText}</div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;font-size:13px;"><span>📦 Type: ${auction.type}</span><span>🥥 Commodity: ${escapeHtml(auction.commodity)}</span><span>📊 Quantity: ${auction.quantity.toLocaleString()} ${auction.type === 'commodity' ? 'MT' : auction.type === 'transport' ? 'containers' : 'policies'}</span><span>💰 Starting Price: ${auction.type === 'insurance' ? auction.startPrice + '% premium' : '$' + auction.startPrice.toLocaleString()}</span><span>⏰ Start: ${new Date(auction.scheduledStart).toLocaleString()}</span><span>🏁 End: ${new Date(auction.endsAt).toLocaleString()}</span></div><div style="display:flex;gap:12px;flex-wrap:wrap;">${auction.status === 'preview' ? `<button class="init-btn init-btn-live" onclick="startMarketAuction('${auction.id}')">🚀 Start Auction</button>` : ''}${auction.status === 'live' ? `<button class="init-btn init-btn-close" onclick="closeMarketAuction('${auction.id}')">🔒 Close Auction</button>` : ''}<button class="init-btn init-btn-preview" onclick="editMarketAuction('${auction.id}')">✏️ Edit</button><button class="init-btn" style="background:rgba(255,59,59,0.2);color:#ff3b3b;border:1px solid #ff3b3b;" onclick="deleteMarketAuction('${auction.id}')">🗑 Delete</button></div><div style="margin-top:12px;font-size:11px;color:#FFD966;">${auction.status === 'preview' ? `⏰ Starts in: ${hoursToStart}h ${minutesToStart}m` : auction.status === 'live' ? `⏳ Time remaining: ${Math.max(0, Math.floor(timeToEnd / 60000))} minutes` : 'Auction ended'}</div></div>`; }).join('')}`;
-}
-
-function createNewMarketInit() {
-  const name = prompt('Market name (e.g., "Coconut Season Q3 2026"):'); if (!name) return;
-  const type = prompt('Market type: commodity / transport / insurance / banking', 'commodity'); if (!['commodity', 'transport', 'insurance', 'banking'].includes(type)) { showToast('Invalid type', true); return; }
-  const commodity = prompt('Commodity (e.g., Coconuts, Coffee, Cocoa):', 'Coconuts');
-  const quantity = parseInt(prompt('Quantity:', '1000'));
-  const startPrice = parseFloat(prompt('Starting price:', '1500'));
-  const hoursDelay = parseInt(prompt('Hours until auction starts:', '24'), 10);
-  const scheduledStart = new Date(Date.now() + hoursDelay * 3600000);
-  const auctionDuration = parseInt(prompt('Auction duration (minutes):', '60'), 10);
-  const endsAt = new Date(scheduledStart.getTime() + auctionDuration * 60000);
-  const newAuction = { id: 'init_' + Date.now(), name, type, commodity, quantity, startPrice, status: 'preview', scheduledStart: scheduledStart.toISOString(), endsAt: endsAt.toISOString() };
-  marketInitAuctions.push(newAuction);
-  localStorage.setItem('admin_market_init', JSON.stringify(marketInitAuctions));
-  renderMarketInitPanel();
-  showToast(`Market "${name}" created in PREVIEW mode`);
-}
-
-async function startMarketAuction(auctionId) {
-  const auction = marketInitAuctions.find(a => a.id === auctionId);
-  if (!auction) return;
-  if (!confirm(`Start "${auction.name}"? This will make it LIVE on the platform.`)) return;
-  showLoading('Starting auction...');
   try {
-    auction.status = 'live';
-    auction.scheduledStart = new Date().toISOString();
-    localStorage.setItem('admin_market_init', JSON.stringify(marketInitAuctions));
-    if (auction.type === 'commodity') await supabase.from('seller_briefs').insert({ product: auction.commodity, quantity_mt: auction.quantity, est_price: auction.startPrice, status: 'active', created_at: new Date().toISOString() });
-    else if (auction.type === 'transport') await supabase.from('transport_auctions').insert({ cargo_type: auction.commodity, starting_bid: auction.startPrice, status: 'active', created_at: new Date().toISOString() });
-    else if (auction.type === 'insurance') await supabase.from('insurance_auctions').insert({ starting_premium_rate: auction.startPrice, status: 'active', created_at: new Date().toISOString() });
-    else if (auction.type === 'banking') await supabase.from('banking_auctions').insert({ starting_discount_rate: auction.startPrice, status: 'active', created_at: new Date().toISOString() });
-    showToast(`✅ "${auction.name}" is now LIVE!`);
-    await loadAllData();
-  } catch (err) { showToast('Error: ' + err.message, true); } finally { hideLoading(); }
-  renderMarketInitPanel();
+    const results = await Promise.allSettled([
+      loadUsers(), loadSellerBriefs(), loadTransportAuctions(), loadInsuranceAuctions(), loadBankingAuctions(),
+      loadAllBids(), loadTransportBids(), loadInsuranceBids(), loadBankingBids(), loadAllBots()
+    ]);
+    
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.warn('Loading failed for index ' + index + ':', result.reason);
+      }
+    });
+    
+    AppState.isDataLoaded = true;
+    AppState.filteredUsers = [];
+    AppState.filteredAuctions = [];
+    AppState.userPage = 1;
+    AppState.auctionPage = 1;
+    renderAll();
+    showToast('✅ Data loaded!', false, true);
+  } catch (err) {
+    showToast('⚠️ Partial load: ' + err.message, true);
+  }
 }
 
-async function closeMarketAuction(auctionId) {
-  const auction = marketInitAuctions.find(a => a.id === auctionId);
-  if (!auction) return;
-  if (!confirm(`Close "${auction.name}"? This will end all bidding.`)) return;
-  auction.status = 'closed';
-  localStorage.setItem('admin_market_init', JSON.stringify(marketInitAuctions));
-  showToast(`🔒 "${auction.name}" has been closed`);
+function renderAll() {
+  renderTopPerformers();
+  renderMarketToggles();
+  renderActiveAuctionsFeed();
+  renderAllAuctionsList();
+  renderUserTable();
+  renderVerificationGrid();
+  renderCommodityAuctions();
+  renderTransportAuctions();
+  renderInsuranceAuctions();
+  renderBankingAuctions();
   renderMarketInitPanel();
-  await loadAllData();
+  renderMarketAdmin();
+  renderBotLeaderboard();
 }
 
-function editMarketAuction(auctionId) {
-  const auction = marketInitAuctions.find(a => a.id === auctionId);
-  if (!auction) return;
-  const newName = prompt('Market name:', auction.name);
-  if (newName) auction.name = newName;
-  const newStartPrice = parseFloat(prompt('Starting price:', auction.startPrice));
-  if (!isNaN(newStartPrice)) auction.startPrice = newStartPrice;
-  localStorage.setItem('admin_market_init', JSON.stringify(marketInitAuctions));
-  renderMarketInitPanel();
-  showToast('Market updated');
+// ============================================================
+// TOP PERFORMERS
+// ============================================================
+function renderTopPerformers() {
+  const buyerStats = {};
+  AppState.allBids.filter(b => ['accepted','won','completed'].includes(b.status || '')).forEach(bid => {
+    const key = bid.buyer_id || 'unknown';
+    if (!buyerStats[key]) buyerStats[key] = { id: key, name: bid.buyer_name || bid.buyer_id || 'Unknown', deals: 0, volume: 0 };
+    buyerStats[key].deals++;
+    buyerStats[key].volume += safeNum(bid.amount, 0);
+  });
+
+  const sellerStats = {};
+  AppState.sellerBriefs.filter(b => ['closed','completed','sold','fulfilled'].includes(b.status || '')).forEach(b => {
+    const key = b.seller_id || 'unknown';
+    if (!sellerStats[key]) sellerStats[key] = { id: key, name: b.coop_name || b.seller_id || 'Unknown', deals: 0, volume: 0 };
+    sellerStats[key].deals++;
+    const price = safeNum(safeGet(b,'final_price', safeGet(b,'est_price', 0)), 0);
+    const qty = safeNum(safeGet(b,'quantity_mt', 0), 0);
+    sellerStats[key].volume += price * qty;
+  });
+
+  const carrierStats = {};
+  AppState.transportBids.filter(b => ['accepted','won','completed'].includes(b.status || '')).forEach(b => {
+    const key = b.carrier_id || 'unknown';
+    if (!carrierStats[key]) carrierStats[key] = { id: key, name: b.carrier_name || b.carrier_id || 'Unknown', deals: 0, volume: 0 };
+    carrierStats[key].deals++;
+    carrierStats[key].volume += safeNum(b.amount, 0);
+  });
+
+  const insurerStats = {};
+  AppState.insuranceBids.filter(b => ['accepted','won','completed'].includes(b.status || '')).forEach(b => {
+    const key = b.insurer_id || 'unknown';
+    if (!insurerStats[key]) insurerStats[key] = { id: key, name: b.insurer_name || b.insurer_id || 'Unknown', deals: 0, totalRates: 0 };
+    insurerStats[key].deals++;
+    insurerStats[key].totalRates += safeNum(b.premium_rate, 0);
+  });
+
+  const bankerStats = {};
+  AppState.bankingBids.filter(b => ['accepted','won','completed'].includes(b.status || '')).forEach(b => {
+    const key = b.banker_id || 'unknown';
+    if (!bankerStats[key]) bankerStats[key] = { id: key, name: b.banker_name || b.banker_id || 'Unknown', deals: 0, totalRates: 0 };
+    bankerStats[key].deals++;
+    bankerStats[key].totalRates += safeNum(b.discount_rate, 0);
+  });
+
+  const topBuyer = Object.values(buyerStats).sort((a,b) => b.volume - a.volume)[0];
+  const topSeller = Object.values(sellerStats).sort((a,b) => b.volume - a.volume)[0];
+  const topFreight = Object.values(carrierStats).sort((a,b) => b.volume - a.volume)[0];
+  const topInsurer = Object.values(insurerStats).sort((a,b) => b.deals - a.deals)[0];
+  const topBanker = Object.values(bankerStats).sort((a,b) => b.deals - a.deals)[0];
+
+  AppState.topPerformerIds.buyer = topBuyer?.id || null;
+  AppState.topPerformerIds.seller = topSeller?.id || null;
+  AppState.topPerformerIds.carrier = topFreight?.id || null;
+  AppState.topPerformerIds.insurer = topInsurer?.id || null;
+  AppState.topPerformerIds.banker = topBanker?.id || null;
+
+  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+  if (topBuyer) {
+    setText('topBuyerName', topBuyer.name.slice(0,20));
+    setText('topBuyerStats', topBuyer.deals + ' deals • ' + formatCurrency(topBuyer.volume));
+  }
+  if (topSeller) {
+    setText('topSellerName', topSeller.name.slice(0,20));
+    setText('topSellerStats', topSeller.deals + ' deals • ' + formatCurrency(topSeller.volume));
+  }
+  if (topFreight) {
+    setText('topFreightName', topFreight.name.slice(0,20));
+    setText('topFreightStats', topFreight.deals + ' deals • ' + formatCurrency(topFreight.volume));
+  }
+  if (topInsurer) {
+    const avg = topInsurer.deals > 0 ? (topInsurer.totalRates / topInsurer.deals) : 0;
+    setText('topInsurerName', topInsurer.name.slice(0,20));
+    setText('topInsurerStats', topInsurer.deals + ' deals • ' + avg.toFixed(1) + '% avg');
+  }
+  if (topBanker) {
+    const avg = topBanker.deals > 0 ? (topBanker.totalRates / topBanker.deals) : 0;
+    setText('topBankerName', topBanker.name.slice(0,20));
+    setText('topBankerStats', topBanker.deals + ' deals • ' + avg.toFixed(1) + '% avg');
+  }
 }
 
-function deleteMarketAuction(auctionId) {
-  if (!confirm('Delete this market? This cannot be undone.')) return;
-  marketInitAuctions = marketInitAuctions.filter(a => a.id !== auctionId);
-  localStorage.setItem('admin_market_init', JSON.stringify(marketInitAuctions));
-  renderMarketInitPanel();
-  showToast('Market deleted');
+function showTopPerformer(role) {
+  const id = AppState.topPerformerIds[role];
+  if (id) showUserDetails(id);
+  else showToast('No ' + role + ' data');
 }
 
-// ===== BOT LEADERBOARD =====
+// ============================================================
+// MARKET TOGGLES
+// ============================================================
+function saveMarketStatus() {
+  try { localStorage.setItem('admin_market_status', JSON.stringify(AppState.marketStatus)); } catch(e) {}
+}
+
+function loadMarketStatus() {
+  try {
+    const s = localStorage.getItem('admin_market_status');
+    if (s) AppState.marketStatus = { ...AppState.marketStatus, ...JSON.parse(s) };
+  } catch(e) {}
+}
+
+function renderMarketToggles() {
+  const container = document.getElementById('marketToggles');
+  if (!container) return;
+  const markets = [{key:'commodity',label:'🥥 Commodity'},{key:'transport',label:'🚛 Freight'},{key:'insurance',label:'🛡️ Insurance'},{key:'banking',label:'🏦 Banking'}];
+  container.innerHTML = markets.map(m => `<label class="market-toggle ${AppState.marketStatus[m.key] ? 'active' : 'inactive'}"><input type="checkbox" data-market="${m.key}" ${AppState.marketStatus[m.key] ? 'checked' : ''}>${m.label}</label>`).join('');
+}
+
+function toggleMarket(market, isActive) {
+  AppState.marketStatus[market] = isActive;
+  saveMarketStatus();
+  showToast(market + (isActive ? ' activated' : ' deactivated'));
+  const container = document.getElementById('marketToggles');
+  if (container) {
+    const labels = container.querySelectorAll('.market-toggle');
+    const markets = [{key:'commodity'},{key:'transport'},{key:'insurance'},{key:'banking'}];
+    labels.forEach((label, i) => {
+      if (i < markets.length) {
+        const active = AppState.marketStatus[markets[i].key];
+        label.className = 'market-toggle ' + (active ? 'active' : 'inactive');
+        const cb = label.querySelector('input');
+        if (cb) cb.checked = active;
+      }
+    });
+  }
+  renderActiveAuctionsFeed();
+  renderAllAuctionsList();
+}
+
+// ============================================================
+// AUCTIONS
+// ============================================================
+function getActiveAuctionIds() {
+  const ids = new Set();
+  AppState.sellerBriefs.filter(b => b.status === 'active').forEach(b => ids.add('commodity_' + b.id));
+  AppState.transportAuctions.filter(t => t.status === 'active').forEach(t => ids.add('transport_' + t.id));
+  AppState.insuranceAuctions.filter(i => i.status === 'active').forEach(i => ids.add('insurance_' + i.id));
+  AppState.bankingAuctions.filter(b => b.status === 'active').forEach(b => ids.add('banking_' + b.id));
+  return ids;
+}
+
+function getAllActiveAuctions() {
+  const seen = new Set();
+  let allActive = [];
+
+  if (AppState.marketStatus.commodity) {
+    AppState.sellerBriefs.filter(b => b.status === 'active').forEach(b => {
+      const key = 'commodity_' + b.id;
+      if (!seen.has(key)) { seen.add(key); allActive.push({...b, type:'commodity', detail: (safeGet(b,'origin','—')) + '→' + (safeGet(b,'destination','—')) + ' • ' + safeNum(safeGet(b,'quantity_mt',0),0) + ' MT'}); }
+    });
+  }
+  if (AppState.marketStatus.transport) {
+    AppState.transportAuctions.filter(t => t.status === 'active').forEach(t => {
+      const key = 'transport_' + t.id;
+      if (!seen.has(key)) { seen.add(key); allActive.push({...t, type:'transport', detail: (safeGet(t,'origin','—')) + '→' + (safeGet(t,'destination','—')) + ' • ' + formatCurrency(safeGet(t,'starting_bid',0))}); }
+    });
+  }
+  if (AppState.marketStatus.insurance) {
+    AppState.insuranceAuctions.filter(i => i.status === 'active').forEach(i => {
+      const key = 'insurance_' + i.id;
+      if (!seen.has(key)) { seen.add(key); allActive.push({...i, type:'insurance', detail: safeNum(safeGet(i,'starting_premium_rate',0),0) + '% premium'}); }
+    });
+  }
+  if (AppState.marketStatus.banking) {
+    AppState.bankingAuctions.filter(b => b.status === 'active').forEach(b => {
+      const key = 'banking_' + b.id;
+      if (!seen.has(key)) { seen.add(key); allActive.push({...b, type:'banking', detail: safeNum(safeGet(b,'starting_discount_rate',0),0) + '% discount'}); }
+    });
+  }
+  return allActive;
+}
+
+function buildAuctionRows(auctions) {
+  return auctions.map(a => {
+    let details = a.detail || '';
+    const typeClass = a.type.replace(/[^a-zA-Z0-9]/g, '');
+    return `<tr class="clickable-row" data-action="viewauction" data-auction-type="${escapeAttr(a.type)}" data-auction-id="${escapeAttr(a.id)}"><td><span class="auction-type type-${typeClass}">${escapeHtml(a.type)}</span></td><td><strong>${escapeHtml(a.product || a.cargo_type || 'Contract')}</strong></td><td>${escapeHtml(details)}</td><td class="fee-badge">Flat fee</td><td class="status-active">Active</td></tr>`;
+  }).join('');
+}
+
+function renderActiveAuctionsFeed() {
+  const allActive = getAllActiveAuctions();
+  const container = document.getElementById('activeAuctionsFeed');
+  const moreBtn = document.getElementById('activeAuctionsMore');
+  if (!container) return;
+
+  if (!allActive.length) { 
+    container.innerHTML = '<div class="empty-state">No active auctions</div>';
+    if (moreBtn) moreBtn.style.display = 'none';
+    return; 
+  }
+
+  const showCount = Math.min(allActive.length, 20);
+  const displayAuctions = allActive.slice(0, showCount);
+  container.innerHTML = displayAuctions.map(a => {
+    const typeClass = a.type.replace(/[^a-zA-Z0-9]/g, '');
+    const detail = a.detail || '';
+    return `<div class="auction-item" data-action="viewauction" data-auction-type="${escapeAttr(a.type)}" data-auction-id="${escapeAttr(a.id)}"><div class="auction-title"><span>${escapeHtml(a.product || a.cargo_type || a.type + ' Auction')}</span><div><span class="auction-type type-${typeClass}">${escapeHtml(a.type)}</span><span class="fee-badge" style="margin-left:8px;">💰 Flat fee</span></div></div><div class="auction-details">${escapeHtml(detail)}</div></div>`;
+  }).join('');
+
+  if (moreBtn) {
+    if (allActive.length > 20) {
+      moreBtn.style.display = 'block';
+      moreBtn.textContent = '📋 View all ' + allActive.length + ' auctions →';
+      moreBtn.onclick = function() { showSection('auctions'); };
+    } else {
+      moreBtn.style.display = 'none';
+    }
+  }
+}
+
+function renderAllAuctionsList() {
+  const allActive = getAllActiveAuctions();
+  const container = document.getElementById('allAuctionsList');
+  if (!container) return;
+
+  const isSearchActive = document.getElementById('auctionSearch')?.value?.trim()?.length > 0;
+  const dataSource = isSearchActive ? AppState.filteredAuctions : allActive;
+
+  if (!dataSource.length) {
+    container.innerHTML = '<div class="empty-state">' + (isSearchActive ? 'No auctions match your search' : 'No active auctions') + '</div>';
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(dataSource.length / AppState.pageSize));
+  if (AppState.auctionPage > totalPages) AppState.auctionPage = 1;
+  const start = (AppState.auctionPage - 1) * AppState.pageSize;
+  const pageItems = dataSource.slice(start, start + AppState.pageSize);
+
+  let html = '<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Type</th><th scope="col">Item</th><th scope="col">Details</th><th scope="col">Fee</th><th scope="col">Status</th></tr></thead><tbody>' + buildAuctionRows(pageItems) + '</tbody></table>';
+
+  if (totalPages > 1) {
+    html += `<div class="pagination-info">
+      <span>Showing ${Math.min(start+1, dataSource.length)}–${Math.min(start+AppState.pageSize, dataSource.length)} of ${dataSource.length}</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" style="background:rgba(0,206,209,0.2);color:#00ced1;${AppState.auctionPage<=1?'opacity:0.4;':''}" data-action="auction-prev" ${AppState.auctionPage<=1?'disabled':''}>◀</button>
+        <span style="color:#9ca3af;font-size:12px;padding:4px 8px;">${AppState.auctionPage}/${totalPages}</span>
+        <button class="btn btn-sm" style="background:rgba(0,206,209,0.2);color:#00ced1;${AppState.auctionPage>=totalPages?'opacity:0.4;':''}" data-action="auction-next" ${AppState.auctionPage>=totalPages?'disabled':''}>▶</button>
+      </div>
+    </div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function filterAuctions() {
+  clearTimeout(AppState.auctionSearchTimeout);
+  AppState.auctionSearchTimeout = setTimeout(() => {
+    const query = document.getElementById('auctionSearch')?.value?.toLowerCase() || '';
+    const allActive = getAllActiveAuctions();
+    AppState.filteredAuctions = query ? allActive.filter(a => {
+      const searchStr = [(a.product||''),(a.cargo_type||''),(a.origin||''),(a.destination||''),(a.detail||'')].join(' ').toLowerCase();
+      return searchStr.includes(query);
+    }) : [];
+    AppState.auctionPage = 1;
+    renderAllAuctionsList();
+  }, 300);
+}
+
+// ============================================================
+// USER DETAILS
+// ============================================================
+function showUserDetails(userId) {
+  const user = AppState.allUsers.find(u => u.id === userId);
+  if (!user) { showToast('User not found', true); return; }
+
+  const userBids = AppState.allBids.filter(b => b.buyer_id === userId);
+  const userSellerBriefs = AppState.sellerBriefs.filter(b => b.seller_id === userId);
+  const userTransportBids = AppState.transportBids.filter(b => b.carrier_id === userId);
+  const userInsuranceBids = AppState.insuranceBids.filter(b => b.insurer_id === userId);
+  const userBankingBids = AppState.bankingBids.filter(b => b.banker_id === userId);
+
+  const totalSpent = userBids
+    .filter(b => ['accepted','won','completed'].includes(b.status||''))
+    .reduce((s,b) => s + safeNum(b.amount, 0), 0);
+
+  const totalEarned = userSellerBriefs
+    .filter(b => ['completed','closed','sold','fulfilled'].includes(b.status||''))
+    .reduce((s,b) => {
+      const price = safeNum(safeGet(b, 'final_price', safeGet(b, 'est_price', 0)), 0);
+      const qty = safeNum(safeGet(b, 'quantity_mt', 0), 0);
+      return s + (price * qty);
+    }, 0);
+
+  const wonAuctions = userBids.filter(b => ['accepted','won','completed'].includes(b.status||'')).length;
+  const verifStatus = safeGet(user, 'verification_status', 'pending');
+  const verifLabel = verifStatus === 'verified' ? '✅ Verified' : verifStatus === 'pending' ? '⏳ Pending' : verifStatus === 'rejected' ? '❌ Rejected' : '📄 Needs Docs';
+  const verifClass = verifStatus === 'verified' ? 'verified' : verifStatus === 'pending' ? 'pending' : verifStatus === 'rejected' ? 'rejected' : 'needs_docs';
+
+  const safeName = escapeHtml(user.full_name || user.email);
+  const safeEmail = escapeHtml(user.email);
+
+  const content = document.getElementById('userDetailContent');
+  if (!content) return;
+
+  let historyTabs = `<div class="history-tabs" data-modal="userDetail">
+    <div class="history-tab active" data-tab="bids">📝 Bids (${userBids.length})</div>
+    <div class="history-tab" data-tab="auctions">📦 Auctions (${userSellerBriefs.length})</div>`;
+  if (user.role === 'carrier') historyTabs += `<div class="history-tab" data-tab="freight">🚛 Freight (${userTransportBids.length})</div>`;
+  if (user.role === 'insurer') historyTabs += `<div class="history-tab" data-tab="insurance">🛡️ Insurance (${userInsuranceBids.length})</div>`;
+  if (user.role === 'banker') historyTabs += `<div class="history-tab" data-tab="banking">🏦 Banking (${userBankingBids.length})</div>`;
+  historyTabs += `</div>`;
+
+  let historyContent = `<div id="history-bids" class="history-content active">${userBids.length === 0 ? '<div class="empty-state">No bids</div>' : `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Product</th><th scope="col">Amount</th><th scope="col">Status</th><th scope="col">Date</th></tr></thead><tbody>${userBids.slice(0,20).map(b => `<tr><td>${escapeHtml(b.product_name||'N/A')}</td><td style="color:#FFD966;">${formatCurrency(b.amount)}</td><td>${b.status}</td><td>${safeFormatDate(b.created_at)}</td></tr>`).join('')}</tbody></table></div>`}</div>
+    <div id="history-auctions" class="history-content">${userSellerBriefs.length === 0 ? '<div class="empty-state">No auctions</div>' : `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Product</th><th scope="col">Qty</th><th scope="col">Price</th><th scope="col">Status</th></tr></thead><tbody>${userSellerBriefs.map(b => `<tr><td>${escapeHtml(b.product)}</td><td>${safeNum(safeGet(b,'quantity_mt',0),0)} MT</td><td>${formatCurrency(safeGet(b,'est_price',0))}</td><td>${b.status}</td></tr>`).join('')}</tbody></table></div>`}</div>`;
+  if (user.role === 'carrier') historyContent += `<div id="history-freight" class="history-content">${userTransportBids.length === 0 ? '<div class="empty-state">No freight bids</div>' : `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Route</th><th scope="col">Amount</th><th scope="col">Status</th></tr></thead><tbody>${userTransportBids.map(b => `<tr><td>${escapeHtml(b.route||'N/A')}</td><td>${formatCurrency(b.amount)}</td><td>${b.status}</td></tr>`).join('')}</tbody></table></div>`}</div>`;
+  if (user.role === 'insurer') historyContent += `<div id="history-insurance" class="history-content">${userInsuranceBids.length === 0 ? '<div class="empty-state">No insurance bids</div>' : `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Premium %</th><th scope="col">Status</th></tr></thead><tbody>${userInsuranceBids.map(b => `<tr><td>${safeNum(b.premium_rate,0)}%</td><td>${b.status}</td></tr>`).join('')}</tbody></table></div>`}</div>`;
+  if (user.role === 'banker') historyContent += `<div id="history-banking" class="history-content">${userBankingBids.length === 0 ? '<div class="empty-state">No banking bids</div>' : `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Discount %</th><th scope="col">Status</th></tr></thead><tbody>${userBankingBids.map(b => `<tr><td>${safeNum(b.discount_rate,0)}%</td><td>${b.status}</td></tr>`).join('')}</tbody></table></div>`}</div>`;
+
+  content.innerHTML = `
+    <h2 style="color:#00ced1;">${safeName}</h2>
+    <div style="margin:10px 0;"><span class="verification-badge ${verifClass}">${verifLabel}</span></div>
+    <div class="user-stats-grid">
+      <div class="user-stat-card"><div class="user-stat-value">${formatCurrency(safeGet(user,'wallet_balance',0))}</div><div class="user-stat-label">Wallet</div></div>
+      <div class="user-stat-card"><div class="user-stat-value">${userBids.length}</div><div class="user-stat-label">Bids</div></div>
+      <div class="user-stat-card"><div class="user-stat-value">${wonAuctions}</div><div class="user-stat-label">Won</div></div>
+      <div class="user-stat-card"><div class="user-stat-value">${formatCurrency(totalSpent)}</div><div class="user-stat-label">Spent (won)</div></div>
+      <div class="user-stat-card"><div class="user-stat-value">${formatCurrency(totalEarned)}</div><div class="user-stat-label">Earned</div></div>
+      <div class="user-stat-card"><div class="user-stat-value">${user.role||'N/A'}</div><div class="user-stat-label">Role</div></div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; padding:12px; background:rgba(0,0,0,0.3); border-radius:12px;">
+      <button class="btn btn-success btn-sm" data-action="approve" data-userid="${escapeAttr(user.id)}">✅ Approve</button>
+      <button class="btn btn-warning btn-sm" data-action="requestdocs" data-userid="${escapeAttr(user.id)}">📄 Request Docs</button>
+      <button class="btn btn-danger btn-sm" data-action="reject" data-userid="${escapeAttr(user.id)}">❌ Reject</button>
+      <button class="btn btn-sm" style="background:#00ced1;color:#000;" data-action="addfunds" data-userid="${escapeAttr(user.id)}" data-username="${escapeAttr(user.full_name || user.email)}">💰 Add Funds</button>
+      <button class="btn btn-sm" style="background:rgba(255,217,102,0.2);color:#FFD966;" data-action="verifydocs" data-userid="${escapeAttr(user.id)}">📄 Docs</button>
+    </div>
+    ${historyTabs}
+    ${historyContent}
+    <div style="margin-top:20px;"><button class="btn" data-action="closemodal">Close</button></div>
+  `;
+  openModal('userDetailModal');
+}
+
+function openVerifyDetail(userId) {
+  closeModal('userDetailModal');
+  const user = AppState.allUsers.find(u => u.id === userId);
+  if (!user) { showToast('User not found', true); return; }
+  const status = safeGet(user, 'verification_status', 'pending');
+  const statusLabel = status === 'verified' ? '✅ Verified' : status === 'pending' ? '⏳ Pending' : status === 'rejected' ? '❌ Rejected' : '📄 Needs Docs';
+  const statusClass = status === 'verified' ? 'verified' : status === 'pending' ? 'pending' : status === 'rejected' ? 'rejected' : 'needs_docs';
+  const body = document.getElementById('verifyDetailBody');
+  if (!body) return;
+  body.innerHTML = `
+    <div style="margin:16px 0;">
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Company</span><span style="font-weight:600;">${escapeHtml(user.full_name||user.email)}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Role</span><span style="font-weight:600;">${escapeHtml(user.role||'N/A')}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Status</span><span class="verification-badge ${statusClass}">${statusLabel}</span></div>
+      <div style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:12px;"><span>Certificate of Incorporation</span><span style="color:${status!=='rejected'?'#7CFC00':'#ff3b3b'};">${status!=='rejected'?'✅ Uploaded':'❌ Missing'}</span></div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:12px;"><span>Business License</span><span style="color:${status!=='rejected'?'#7CFC00':'#ff3b3b'};">${status!=='rejected'?'✅ Uploaded':'❌ Missing'}</span></div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:12px;"><span>Tax Registration</span><span style="color:${status==='verified'||status==='pending'?'#7CFC00':status==='needs_docs'?'#FFD966':'#ff3b3b'};">${status==='verified'||status==='pending'?'✅ Uploaded':status==='needs_docs'?'⏳ Pending':'❌ Missing'}</span></div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:12px;"><span>Company Photos</span><span style="color:${status==='verified'?'#7CFC00':status==='pending'?'#FFD966':'#ff3b3b'};">${status==='verified'?'✅ Uploaded':status==='pending'?'⏳ Pending':'❌ Missing'}</span></div>
+      </div>
+      <div class="missing-schema-warning"><strong>⚠️ Estimated Document Status:</strong> Placeholder. Implement documents table for accuracy.</div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn btn-success btn-sm" data-action="approve" data-userid="${escapeAttr(user.id)}" ${status==='verified'?'disabled':''}>✅ Approve</button><button class="btn btn-warning btn-sm" data-action="requestdocs" data-userid="${escapeAttr(user.id)}" ${status==='verified'?'disabled':''}>📄 Request Docs</button><button class="btn btn-danger btn-sm" data-action="reject" data-userid="${escapeAttr(user.id)}" ${status==='verified'?'disabled':''}>❌ Reject</button></div>
+  `;
+  openModal('verifyDetailModal');
+}
+
+function switchHistoryTab(el) {
+  const tab = el.dataset.tab;
+  const modal = el.closest('.modal-content');
+  if (!modal) return;
+  modal.querySelectorAll('.history-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  modal.querySelectorAll('.history-content').forEach(c => c.classList.remove('active'));
+  const target = modal.querySelector('#history-' + tab);
+  if (target) target.classList.add('active');
+}
+
+function showAuctionDetails(type, id) {
+  let auction = null;
+  if (type === 'commodity') auction = AppState.sellerBriefs.find(b => b.id === id);
+  else if (type === 'transport') auction = AppState.transportAuctions.find(a => a.id === id);
+  else if (type === 'insurance') auction = AppState.insuranceAuctions.find(a => a.id === id);
+  else if (type === 'banking') auction = AppState.bankingAuctions.find(a => a.id === id);
+  if (!auction) { showToast('Auction not found or no longer active', true); return; }
+
+  let html = `<div style="margin:16px 0;"><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Type</span><span style="font-weight:600;">${escapeHtml(type)}</span></div>`;
+  if (type === 'commodity') {
+    html += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Product</span><span style="font-weight:600;">${escapeHtml(auction.product||'N/A')}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Quantity</span><span style="font-weight:600;">${safeNum(safeGet(auction,'quantity_mt',0),0)} MT</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Origin</span><span style="font-weight:600;">${escapeHtml(safeGet(auction,'origin','—'))}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Destination</span><span style="font-weight:600;">${escapeHtml(safeGet(auction,'destination','—'))}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Price</span><span style="font-weight:600; color:#FFD966;">${formatCurrency(safeGet(auction,'est_price',0))}/MT</span></div>`;
+  } else if (type === 'transport') {
+    const w = safeNum(safeGet(auction,'weight_kg',0),0);
+    html += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Cargo</span><span style="font-weight:600;">${escapeHtml(auction.cargo_type||'N/A')}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Weight</span><span style="font-weight:600;">${w ? (w/1000)+' MT' : '—'}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Route</span><span style="font-weight:600;">${escapeHtml(safeGet(auction,'origin','—'))} → ${escapeHtml(safeGet(auction,'destination','—'))}</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Starting Bid</span><span style="font-weight:600; color:#FFD966;">${formatCurrency(safeGet(auction,'starting_bid',0))}</span></div>`;
+  } else if (type === 'insurance') {
+    html += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Premium Rate</span><span style="font-weight:600; color:#FFD966;">${safeNum(safeGet(auction,'starting_premium_rate',0),0)}%</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Coverage</span><span style="font-weight:600; color:#FFD966;">${safeGet(auction,'coverage_amount',0) ? formatCurrency(auction.coverage_amount) : '—'}</span></div>`;
+  } else if (type === 'banking') {
+    html += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Discount Rate</span><span style="font-weight:600; color:#FFD966;">${safeNum(safeGet(auction,'starting_discount_rate',0),0)}%</span></div>
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Credit Amount</span><span style="font-weight:600; color:#FFD966;">${safeGet(auction,'credit_amount',0) ? formatCurrency(auction.credit_amount) : '—'}</span></div>`;
+  }
+  html += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Fee</span><span style="font-weight:600; color:#FFD966;">Flat fee</span></div>
+    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>Status</span><span style="font-weight:600; color:${auction.status==='active'?'#7CFC00':'#ff3b3b'};">${escapeHtml(auction.status||'N/A')}</span></div>
+    <div style="display:flex; justify-content:space-between; padding:8px 0;"><span>Created</span><span style="font-weight:600;">${safeFormatDate(auction.created_at)}</span></div>
+    <div style="display:flex; justify-content:space-between; padding:8px 0;"><span>Ends</span><span style="font-weight:600;">${safeFormatDate(auction.ends_at)}</span></div>
+    </div><div style="margin-top:20px;"><button class="btn" data-action="closemodal">Close</button></div>`;
+  const body = document.getElementById('auctionDetailBody');
+  if (body) body.innerHTML = html;
+  openModal('auctionDetailModal');
+}
+
+function renderMarketAdmin() {
+  const panel = document.getElementById('marketAdminPanel');
+  if (!panel) return;
+  panel.innerHTML = `<div class="empty-state">Market administration tools coming soon.</div><div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;"><button class="btn btn-sm" data-action="market-settings" style="background:rgba(0,206,209,0.2); color:#00ced1;">⚙️ Settings</button><button class="btn btn-sm" data-action="market-reports" style="background:rgba(124,252,0,0.2); color:#7CFC00;">📊 Reports</button></div>`;
+}
+
+// ============================================================
+// USER TABLE
+// ============================================================
+function renderUserTable() {
+  const query = document.getElementById('userSearch')?.value?.toLowerCase() || '';
+  AppState.filteredUsers = AppState.allUsers.filter(u => (u.email||'').toLowerCase().includes(query) || (u.full_name||'').toLowerCase().includes(query));
+  const start = (AppState.userPage - 1) * 10;
+  const page = AppState.filteredUsers.slice(start, start + 10);
+  const container = document.getElementById('userManagement');
+  if (!container) return;
+  if (!page.length) { container.innerHTML = '<div class="empty-state">No users</div>'; return; }
+
+  container.innerHTML = `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th><th scope="col">Wallet</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody>${page.map(u => {
+    const s = safeGet(u,'verification_status','pending');
+    const label = s === 'verified' ? '✅' : s === 'pending' ? '⏳' : s === 'rejected' ? '❌' : '📄';
+    const safeId = escapeAttr(u.id);
+    return `<tr class="clickable-row" data-action="viewuser" data-userid="${safeId}"><td><strong>${escapeHtml(u.full_name||u.email)}</strong></td><td>${escapeHtml(u.email)}</td><td><span class="role-badge role-${u.role}">${u.role}</span></td><td style="color:#FFD966;">${formatCurrency(safeGet(u,'wallet_balance',0))}</td><td><span class="verification-badge ${s}">${label}</span></td><td><button class="btn btn-sm" style="background:#00ced1;color:#000;" data-action="addfunds" data-userid="${safeId}" data-username="${escapeAttr(u.full_name||u.email)}">💰 Fund</button><button class="btn btn-sm" style="background:rgba(255,217,102,0.2);color:#FFD966;" data-action="verifydocs" data-userid="${safeId}">📄 Verify</button><button class="btn btn-sm" style="background:rgba(0,206,209,0.2);color:#e5e7eb;" data-action="viewuser" data-userid="${safeId}">👤 View</button></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+
+  if (AppState.filteredUsers.length > 10) {
+    const total = Math.ceil(AppState.filteredUsers.length / 10);
+    container.innerHTML += `<div style="display:flex; gap:8px; justify-content:center; margin-top:12px;"><button class="btn btn-sm" style="background:rgba(0,206,209,0.2);color:#00ced1;${AppState.userPage<=1?'opacity:0.4;':''}" data-action="prev-page" ${AppState.userPage<=1?'disabled':''}>◀ Prev</button><span style="color:#9ca3af;font-size:12px;padding:4px 12px;">Page ${AppState.userPage} of ${total}</span><button class="btn btn-sm" style="background:rgba(0,206,209,0.2);color:#00ced1;${AppState.userPage>=total?'opacity:0.4;':''}" data-action="next-page" ${AppState.userPage>=total?'disabled':''}>Next ▶</button></div>`;
+  }
+}
+
+function filterUsers() {
+  clearTimeout(AppState.userSearchTimeout);
+  AppState.userSearchTimeout = setTimeout(() => { AppState.userPage = 1; renderUserTable(); }, 300);
+}
+
+// ============================================================
+// VERIFICATION
+// ============================================================
+function filterVerification(filter, isSearch) {
+  if (!isSearch && filter) {
+    AppState.verificationFilter = filter;
+    const ft = document.getElementById('verifyFilterType');
+    if (ft) ft.dataset.filter = filter;
+  }
+  renderVerificationGrid();
+}
+
+function renderVerificationGrid() {
+  const query = document.getElementById('verifySearch')?.value?.toLowerCase() || '';
+  let users = AppState.allUsers.filter(u => u.role !== 'admin');
+  if (AppState.verificationFilter !== 'all') users = users.filter(u => (safeGet(u,'verification_status','pending')) === AppState.verificationFilter);
+  if (query) users = users.filter(u => (u.full_name||'').toLowerCase().includes(query) || (u.email||'').toLowerCase().includes(query) || (u.company_name||'').toLowerCase().includes(query));
+  const container = document.getElementById('verificationGrid');
+  if (!container) return;
+  if (!users.length) { container.innerHTML = '<div class="empty-state">No companies found</div>'; return; }
+  container.innerHTML = users.map(u => {
+    const status = safeGet(u,'verification_status','pending');
+    const statusLabel = status === 'verified' ? '✅ Verified' : status === 'pending' ? '⏳ Pending' : status === 'rejected' ? '❌ Rejected' : '📄 Needs Docs';
+    const statusClass = status === 'verified' ? 'verified' : status === 'pending' ? 'pending' : status === 'rejected' ? 'rejected' : 'needs_docs';
+    const safeId = escapeAttr(u.id);
+    return `<div class="verification-card">
+      <div class="company-name"><span>${escapeHtml(u.full_name||u.email)}</span><span class="verification-badge ${statusClass}">${statusLabel}</span></div>
+      <div class="company-details">${u.company_name ? escapeHtml(u.company_name) : ''} • ${u.role||'N/A'} • ${escapeHtml(u.email)}</div>
+      <div class="doc-list">
+        <div class="doc-item"><span>Certificate of Incorporation</span><span class="doc-status" style="color:${status!=='rejected'?'#7CFC00':'#ff3b3b'};">${status!=='rejected'?'✅ Uploaded':'❌ Missing'}</span></div>
+        <div class="doc-item"><span>Business License</span><span class="doc-status" style="color:${status!=='rejected'?'#7CFC00':'#ff3b3b'};">${status!=='rejected'?'✅ Uploaded':'❌ Missing'}</span></div>
+        <div class="doc-item"><span>Tax Registration</span><span class="doc-status" style="color:${status==='verified'||status==='pending'?'#7CFC00':status==='needs_docs'?'#FFD966':'#ff3b3b'};">${status==='verified'||status==='pending'?'✅ Uploaded':status==='needs_docs'?'⏳ Pending':'❌ Missing'}</span></div>
+        <div class="doc-item"><span>Company Photos</span><span class="doc-status" style="color:${status==='verified'?'#7CFC00':status==='pending'?'#FFD966':'#ff3b3b'};">${status==='verified'?'✅ Uploaded':status==='pending'?'⏳ Pending':'❌ Missing'}</span></div>
+      </div>
+      <div class="missing-schema-warning" style="font-size:10px;padding:6px;"><strong>⚠️ Estimated Status:</strong> Implement documents table for accuracy.</div>
+      <div class="verification-actions">
+        <button class="btn btn-success btn-sm" data-action="approve" data-userid="${safeId}" ${status==='verified'?'disabled':''}>✅ Approve</button>
+        <button class="btn btn-warning btn-sm" data-action="requestdocs" data-userid="${safeId}" ${status==='verified'?'disabled':''}>📄 Request Docs</button>
+        <button class="btn btn-danger btn-sm" data-action="reject" data-userid="${safeId}" ${status==='verified'?'disabled':''}>❌ Reject</button>
+        <button class="btn btn-sm" style="background:rgba(0,206,209,0.2);color:#e5e7eb;" data-action="viewuser" data-userid="${safeId}">👤 View</button>
+        <button class="btn btn-sm" style="background:rgba(255,217,102,0.2);color:#FFD966;" data-action="verifydocs" data-userid="${safeId}">📄 Docs</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function approveCompany(userId) {
+  if (!(await verifySession())) return;
+  const confirmed = await showConfirm('Approve Company', 'Approve this company and enable trading?');
+  if (!confirmed) return;
+  showLoading('Approving...');
+  try {
+    await supabase.from('profiles').update({ verification_status: 'verified', trading_enabled: true, verified_at: new Date().toISOString() }).eq('id', userId);
+    showToast('✅ Company approved!', false, true);
+    closeModal('verifyDetailModal');
+    await loadUsers();
+    renderVerificationGrid();
+    renderUserTable();
+  } catch(e) { showToast('Error: '+e.message, true); } finally { hideLoading(); }
+}
+
+async function rejectCompany(userId) {
+  if (!(await verifySession())) return;
+  const confirmed = await showConfirm('Reject Company', 'Reject this company?');
+  if (!confirmed) return;
+  showLoading('Rejecting...');
+  try {
+    await supabase.from('profiles').update({ verification_status: 'rejected', trading_enabled: false }).eq('id', userId);
+    showToast('❌ Company rejected', false, true);
+    closeModal('verifyDetailModal');
+    await loadUsers();
+    renderVerificationGrid();
+    renderUserTable();
+  } catch(e) { showToast('Error: '+e.message, true); } finally { hideLoading(); }
+}
+
+async function requestMoreDocs(userId) {
+  if (!(await verifySession())) return;
+  const confirmed = await showConfirm('Request Documents', 'Request additional documents from this company?');
+  if (!confirmed) return;
+  showLoading('Requesting...');
+  try {
+    await supabase.from('profiles').update({ verification_status: 'needs_docs', trading_enabled: false }).eq('id', userId);
+    showToast('📄 Request sent', false, true);
+    closeModal('verifyDetailModal');
+    await loadUsers();
+    renderVerificationGrid();
+    renderUserTable();
+  } catch(e) { showToast('Error: '+e.message, true); } finally { hideLoading(); }
+}
+
+// ============================================================
+// ADD FUNDS
+// ============================================================
+function openAddFunds(userId, userName) {
+  AppState.pendingFundUserId = userId;
+  const nameEl = document.getElementById('addFundsUserName');
+  if (nameEl) nameEl.textContent = 'Adding funds to: ' + userName;
+  const amtEl = document.getElementById('addFundsAmount');
+  if (amtEl) amtEl.value = '';
+  openModal('addFundsModal');
+}
+
+async function confirmAddFunds() {
+  if (AppState.fundActionInProgress) { showToast('Please wait...', true); return; }
+  if (!(await verifySession())) return;
+  AppState.fundActionInProgress = true;
+  try {
+    const amtEl = document.getElementById('addFundsAmount');
+    const rawValue = amtEl ? amtEl.value : '';
+    if (!/^\d+(\.\d+)?$/.test(rawValue.trim())) {
+      showToast('Please enter a valid number (e.g., 100.50)', true);
+      return;
+    }
+    const amount = parseFloat(rawValue);
+    if (!amount || amount <= 0) { 
+      showToast('Amount must be greater than 0', true);
+      return; 
+    }
+    if (!AppState.pendingFundUserId) { 
+      showToast('No user selected', true); 
+      return; 
+    }
+
+    showLoading('Verifying...');
+    const { data: user } = await supabase.from('profiles').select('id, wallet_balance').eq('id', AppState.pendingFundUserId).single();
+    if (!user) { 
+      showToast('User not found', true); 
+      closeModal('addFundsModal'); 
+      AppState.pendingFundUserId = null; 
+      return; 
+    }
+
+    document.getElementById('loadingText').textContent = 'Adding funds...';
+
+    // Use RPC exclusively for atomic update
+    const { error: rpcError } = await supabase.rpc('add_funds', { user_id: AppState.pendingFundUserId, amount: amount });
+
+    if (rpcError) {
+      // If RPC fails, fallback to direct update
+      const { data: fresh } = await supabase.from('profiles').select('wallet_balance').eq('id', AppState.pendingFundUserId).single();
+      if (!fresh) throw new Error('User not found');
+      const newBalance = (fresh.wallet_balance || 0) + amount;
+      const { error: updateError } = await supabase.from('profiles').update({ wallet_balance: newBalance }).eq('id', AppState.pendingFundUserId);
+      if (updateError) throw updateError;
+    }
+
+    showToast(formatCurrency(amount) + ' added!', false, true);
+    const fundedId = AppState.pendingFundUserId;
+    closeModal('addFundsModal');
+    AppState.pendingFundUserId = null;
+    await loadUsers();
+    renderUserTable();
+    renderVerificationGrid();
+    const um = document.getElementById('userDetailModal');
+    if (um && um.style.display === 'flex') showUserDetails(fundedId);
+  } catch(e) { showToast('Error: '+e.message, true); } finally { hideLoading(); AppState.fundActionInProgress = false; }
+}
+
+// ============================================================
+// BOTS
+// ============================================================
 async function loadAllBots() {
   try {
-    const [buyerBots, sellerBots, freightBots, insurerBots, bankerBots] = await Promise.all([
-      supabase.from('buyer_bots').select('*, profiles(full_name, email)').catch(() => ({ data: [] })),
-      supabase.from('seller_bots').select('*, profiles(full_name, email)').catch(() => ({ data: [] })),
-      supabase.from('freight_bots').select('*, profiles(full_name, email)').catch(() => ({ data: [] })),
-      supabase.from('insurer_bots').select('*, profiles(full_name, email)').catch(() => ({ data: [] })),
-      supabase.from('banker_bots').select('*, profiles(full_name, email)').catch(() => ({ data: [] }))
+    const [bb, sb, fb, ib, bk] = await Promise.all([
+      supabase.from('buyer_bots').select('*, profiles(full_name, email)'),
+      supabase.from('seller_bots').select('*, profiles(full_name, email)'),
+      supabase.from('freight_bots').select('*, profiles(full_name, email)'),
+      supabase.from('insurer_bots').select('*, profiles(full_name, email)'),
+      supabase.from('banker_bots').select('*, profiles(full_name, email)')
     ]);
-    allBots = [];
-    (buyerBots.data || []).forEach(b => allBots.push({ id: b.id, name: b.bot_name || 'Buyer Bot', type: 'buyer', owner_name: b.profiles?.full_name || b.profiles?.email || 'Unknown', wins: b.won_count || 0, losses: (b.total_bids || 0) - (b.won_count || 0), total_bids: b.total_bids || 0, total_volume: b.total_volume || 0, win_rate: b.total_bids ? ((b.won_count || 0) / b.total_bids * 100).toFixed(1) : 0, avg_rate: b.avg_bid_rate || 0, commodity: b.commodity || 'All', status: b.is_active ? 'active' : 'idle' }));
-    (sellerBots.data || []).forEach(b => allBots.push({ id: b.id, name: b.bot_name || 'Seller Bot', type: 'seller', owner_name: b.profiles?.full_name || b.profiles?.email || 'Unknown', wins: b.won_count || 0, losses: (b.total_bids || 0) - (b.won_count || 0), total_bids: b.total_bids || 0, total_volume: b.total_volume || 0, win_rate: b.total_bids ? ((b.won_count || 0) / b.total_bids * 100).toFixed(1) : 0, avg_rate: b.avg_reserve_price || 0, commodity: b.commodity || 'All', status: b.is_active ? 'active' : 'idle' }));
-    (freightBots.data || []).forEach(b => allBots.push({ id: b.id, name: b.bot_name || 'Freight Bot', type: 'freight', owner_name: b.profiles?.full_name || b.profiles?.email || 'Unknown', wins: b.won_count || 0, losses: (b.total_bids || 0) - (b.won_count || 0), total_bids: b.total_bids || 0, total_volume: b.total_volume || 0, win_rate: b.total_bids ? ((b.won_count || 0) / b.total_bids * 100).toFixed(1) : 0, avg_rate: b.avg_bid_rate || 0, commodity: b.commodity || 'All', status: b.is_active ? 'active' : 'idle' }));
-    (insurerBots.data || []).forEach(b => allBots.push({ id: b.id, name: b.bot_name || 'Insurer Bot', type: 'insurer', owner_name: b.profiles?.full_name || b.profiles?.email || 'Unknown', wins: b.won_count || 0, losses: (b.total_bids || 0) - (b.won_count || 0), total_bids: b.total_bids || 0, total_volume: b.total_volume || 0, win_rate: b.total_bids ? ((b.won_count || 0) / b.total_bids * 100).toFixed(1) : 0, avg_rate: b.avg_premium_rate || 0, commodity: b.commodity || 'All', status: b.is_active ? 'active' : 'idle' }));
-    (bankerBots.data || []).forEach(b => allBots.push({ id: b.id, name: b.bot_name || 'Banker Bot', type: 'banker', owner_name: b.profiles?.full_name || b.profiles?.email || 'Unknown', wins: b.won_count || 0, losses: (b.total_bids || 0) - (b.won_count || 0), total_bids: b.total_bids || 0, total_volume: b.total_volume || 0, win_rate: b.total_bids ? ((b.won_count || 0) / b.total_bids * 100).toFixed(1) : 0, avg_rate: b.avg_discount_rate || 0, commodity: b.commodity || 'All', status: b.is_active ? 'active' : 'idle' }));
-    if (allBots.length === 0) { allBots = [{ id: 'demo_b1', name: 'Asia Sniper', type: 'banker', owner_name: 'Goldman Sachs', wins: 12, losses: 3, total_bids: 15, total_volume: 850000, win_rate: 80.0, avg_rate: 4.2, commodity: 'Coconuts', status: 'active' }, { id: 'demo_i1', name: 'Lloyds Marine', type: 'insurer', owner_name: "Lloyd's of London", wins: 45, losses: 5, total_bids: 50, total_volume: 2100000, win_rate: 90.0, avg_rate: 2.1, commodity: 'All', status: 'active' }, { id: 'demo_f1', name: 'Maersk Auto', type: 'freight', owner_name: 'Maersk Line', wins: 28, losses: 12, total_bids: 40, total_volume: 1800000, win_rate: 70.0, avg_rate: 1200, commodity: 'All', status: 'active' }]; }
+    AppState.allBots = [];
+    const process = (data, type, rateField) => {
+      (data || []).forEach(b => {
+        const p = b.profiles || {};
+        const wins = b.won_count || 0;
+        const total = b.total_bids || 0;
+        AppState.allBots.push({
+          id: b.id, name: b.bot_name || type + ' Bot', type: type,
+          owner_name: p.full_name || p.email || 'Unknown',
+          wins, losses: total - wins, total_bids: total,
+          total_volume: b.total_volume || 0,
+          win_rate: total ? ((wins/total)*100).toFixed(1) : 0,
+          avg_rate: b[rateField] || 0,
+          commodity: b.commodity || 'All',
+          status: b.is_active ? 'active' : 'idle'
+        });
+      });
+    };
+    process(bb.data, 'buyer', 'avg_bid_rate');
+    process(sb.data, 'seller', 'avg_reserve_price');
+    process(fb.data, 'freight', 'avg_bid_rate');
+    process(ib.data, 'insurer', 'avg_premium_rate');
+    process(bk.data, 'banker', 'avg_discount_rate');
     renderBotLeaderboard();
-  } catch (err) { console.error('Error loading bots:', err); }
+  } catch(e) {
+    console.error('Bots error:', e);
+    AppState.allBots = [];
+    renderBotLeaderboard();
+    showToast('⚠️ Could not load bot data', true);
+  }
 }
 
 function renderBotLeaderboard() {
   const container = document.getElementById('botLeaderboard');
-  if (!allBots.length) { container.innerHTML = '<div class="empty-state">No bots found</div>'; return; }
-  const types = ['banker', 'insurer', 'freight', 'seller', 'buyer'];
-  const typeLabels = { banker: '🏦 BANKING BOTS', insurer: '🛡️ INSURANCE BOTS', freight: '🚛 FREIGHT BOTS', seller: '🏆 SELLER BOTS', buyer: '👑 BUYER BOTS' };
-  let html = '';
-  types.forEach(type => {
-    const bots = allBots.filter(b => b.type === type).sort((a, b) => b.win_rate - a.win_rate);
-    if (!bots.length) return;
-    html += `<div class="bot-tier"><div class="bot-tier-header">${typeLabels[type]}</div>`;
-    bots.forEach((bot, idx) => { const rankClass = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : ''; const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`; const rateLabel = type === 'banker' ? 'avg discount' : type === 'insurer' ? 'avg premium' : type === 'freight' ? 'avg bid' : 'avg price'; html += `<div class="bot-leader-item"><div class="bot-rank ${rankClass}">${medal}</div><div class="bot-info"><div class="bot-info-name">${escapeHtml(bot.name)} <span style="font-size:10px; color:#9ca3af;">(${escapeHtml(bot.commodity)})</span></div><div class="bot-info-owner">Owner: ${escapeHtml(bot.owner_name)}</div></div><div class="bot-stats-bar"><div><span class="bot-stat">${bot.win_rate}%</span> <span class="bot-stat-label">win rate</span></div><div><span class="bot-stat">${bot.wins}/${bot.total_bids}</span> <span class="bot-stat-label">wins</span></div><div><span class="bot-stat">$${bot.total_volume.toLocaleString()}</span> <span class="bot-stat-label">volume</span></div><div><span class="bot-stat">${bot.avg_rate}%</span> <span class="bot-stat-label">${rateLabel}</span></div><div><span class="bot-stat" style="color:${bot.status==='active'?'#7CFC00':'#ff3b3b'}">● ${bot.status}</span></div></div></div>`; });
-    html += '</div>';
+  if (!container) return;
+  try {
+    if (!AppState.allBots.length) { 
+      container.innerHTML = '<div class="empty-state">No bots found. Bot data may not be configured yet.</div>'; 
+      return; 
+    }
+    const types = ['banker','insurer','freight','seller','buyer'];
+    const labels = { banker:'🏦 BANKING BOTS', insurer:'🛡️ INSURANCE BOTS', freight:'🚛 FREIGHT BOTS', seller:'🏆 SELLER BOTS', buyer:'👑 BUYER BOTS' };
+    let html = '';
+    types.forEach(type => {
+      const bots = AppState.allBots.filter(b => b.type === type).sort((a,b) => parseFloat(b.win_rate) - parseFloat(a.win_rate));
+      if (!bots.length) return;
+      html += `<div class="bot-tier"><div class="bot-tier-header">${labels[type]}</div>`;
+      bots.forEach((bot, idx) => {
+        const rank = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : '';
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx+1)+'.';
+        const suffix = bot.type === 'freight' ? '' : '%';
+        const rateLabel = type === 'banker' ? 'avg discount' : type === 'insurer' ? 'avg premium' : type === 'freight' ? 'avg bid' : 'avg price';
+        const rateNum = parseFloat(bot.avg_rate);
+        const rateDisplay = isNaN(rateNum) ? '0' : (bot.type === 'freight' ? rateNum.toLocaleString() : rateNum + suffix);
+        html += `<div class="bot-leader-item"><div class="bot-rank ${rank}">${medal}</div><div class="bot-info"><div class="bot-info-name">${escapeHtml(bot.name)} <span style="font-size:10px;color:#9ca3af;">(${escapeHtml(bot.commodity)})</span></div><div class="bot-info-owner">Owner: ${escapeHtml(bot.owner_name)}</div></div><div class="bot-stats-bar"><div><span class="bot-stat">${bot.win_rate}%</span> <span class="bot-stat-label">win rate</span></div><div><span class="bot-stat">${bot.wins}/${bot.total_bids}</span> <span class="bot-stat-label">wins</span></div><div><span class="bot-stat">${formatCurrency(bot.total_volume)}</span> <span class="bot-stat-label">volume</span></div><div><span class="bot-stat">${rateDisplay}</span> <span class="bot-stat-label">${rateLabel}</span></div><div><span class="bot-stat" style="color:${bot.status==='active'?'#7CFC00':'#ff3b3b'}">● ${bot.status}</span></div></div></div>`;
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  } catch(e) {
+    console.error('Error rendering bot leaderboard:', e);
+    container.innerHTML = '<div class="empty-state">Error loading bot data. Please refresh.</div>';
+  }
+}
+
+// ============================================================
+// COMMODITY
+// ============================================================
+const coconutVariants = {
+  dehusked: { name: 'Dehusked Coconut', keywords: ['dehusked'] },
+  husked: { name: 'Husked Coconut', keywords: ['husked'] },
+  desiccated: { name: 'Desiccated Coconut', keywords: ['dessicated','desiccated'] },
+  copra: { name: 'Copra', keywords: ['copra'] },
+  coconut_oil: { name: 'Coconut Oil', keywords: ['coconut oil','vco'] },
+  coconut_water: { name: 'Coconut Water', keywords: ['coconut water'] },
+  coconut_milk: { name: 'Coconut Milk', keywords: ['coconut milk'] },
+  coconut_sugar: { name: 'Coconut Sugar', keywords: ['coconut sugar'] },
+  coconut_fiber: { name: 'Coconut Fiber', keywords: ['coir','fiber'] },
+  activated_carbon: { name: 'Activated Carbon', keywords: ['activated carbon'] },
+  coconut_shell: { name: 'Coconut Shell Charcoal', keywords: ['shell charcoal'] }
+};
+
+function selectCommodityVariant(key) {
+  const container = document.getElementById('variantDetails');
+  if (!container) return;
+  if (!key) { container.innerHTML = '<div class="empty-state">Select a variant</div>'; return; }
+  const variant = coconutVariants[key];
+  if (!variant) { container.innerHTML = '<div class="empty-state">Variant not found</div>'; return; }
+  const matches = AppState.sellerBriefs.filter(b => variant.keywords.some(kw => (b.product||'').toLowerCase().includes(kw)));
+  container.innerHTML = matches.length ? `<div><div style="color:#7CFC00;margin-bottom:10px;">📦 ${variant.name} auctions:</div>${matches.map(a => `<div class="auction-item" data-action="viewauction" data-auction-type="commodity" data-auction-id="${escapeAttr(a.id)}"><div class="auction-title">${escapeHtml(a.product)} - ${safeNum(safeGet(a,'quantity_mt',0),0)} MT</div><div class="auction-details">${escapeHtml(safeGet(a,'origin','—'))}→${escapeHtml(safeGet(a,'destination','—'))} • ${formatCurrency(safeGet(a,'est_price',0))}/MT</div></div>`).join('')}</div>` : `<div class="empty-state">No ${variant.name} auctions</div>`;
+}
+
+function renderCommodityAuctions() {
+  const container = document.getElementById('commodityAuctionsList');
+  if (!container) return;
+  const active = AppState.sellerBriefs.filter(b => b.status === 'active');
+  container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Product</th><th scope="col">Qty</th><th scope="col">Route</th><th scope="col">Price</th><th scope="col">Fee</th></tr></thead><tbody>${active.map(a => `<tr class="clickable-row" data-action="viewauction" data-auction-type="commodity" data-auction-id="${escapeAttr(a.id)}"><td>${escapeHtml(a.product)}</td><td>${safeNum(safeGet(a,'quantity_mt',0),0)} MT</td><td>${escapeHtml(safeGet(a,'origin','—'))}→${escapeHtml(safeGet(a,'destination','—'))}</td><td>${formatCurrency(safeGet(a,'est_price',0))}</td><td class="fee-badge">Flat fee</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active auctions</div>';
+}
+
+function renderTransportAuctions() {
+  const container = document.getElementById('transportAuctionsList');
+  if (!container) return;
+  const active = AppState.transportAuctions.filter(a => a.status === 'active');
+  container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Cargo</th><th scope="col">Route</th><th scope="col">Weight</th><th scope="col">Bid</th><th scope="col">Fee</th></tr></thead><tbody>${active.map(a => `<tr class="clickable-row" data-action="viewauction" data-auction-type="transport" data-auction-id="${escapeAttr(a.id)}"><td>${escapeHtml(a.cargo_type)}</td><td>${escapeHtml(safeGet(a,'origin','—'))}→${escapeHtml(safeGet(a,'destination','—'))}</td><td>${safeNum(safeGet(a,'weight_kg',0),0) ? (safeNum(safeGet(a,'weight_kg',0),0)/1000)+' MT' : '—'}</td><td>${formatCurrency(safeGet(a,'starting_bid',0))}</td><td class="fee-badge">Flat fee</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active freight</div>';
+}
+
+function renderInsuranceAuctions() {
+  const container = document.getElementById('insuranceAuctionsList');
+  if (!container) return;
+  const active = AppState.insuranceAuctions.filter(a => a.status === 'active');
+  container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Contract</th><th scope="col">Premium %</th><th scope="col">Fee</th><th scope="col">Status</th></tr></thead><tbody>${active.map(a => `<tr class="clickable-row" data-action="viewauction" data-auction-type="insurance" data-auction-id="${escapeAttr(a.id)}"><td>Insurance #${escapeHtml(String(a.id).slice(0,8))}</td><td>${safeNum(safeGet(a,'starting_premium_rate',0),0)}%</td><td class="fee-badge">Flat fee</td><td class="status-active">Active</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active insurance</div>';
+}
+
+function renderBankingAuctions() {
+  const container = document.getElementById('bankingAuctionsList');
+  if (!container) return;
+  const active = AppState.bankingAuctions.filter(a => a.status === 'active');
+  container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th scope="col">Contract</th><th scope="col">Discount %</th><th scope="col">Fee</th><th scope="col">Status</th></tr></thead><tbody>${active.map(a => `<tr class="clickable-row" data-action="viewauction" data-auction-type="banking" data-auction-id="${escapeAttr(a.id)}"><td>Banking #${escapeHtml(String(a.id).slice(0,8))}</td><td>${safeNum(safeGet(a,'starting_discount_rate',0),0)}%</td><td class="fee-badge">Flat fee</td><td class="status-active">Active</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active banking</div>';
+}
+
+// ============================================================
+// MARKET FORM
+// ============================================================
+function showMarketFormModal() {
+  const body = document.getElementById('marketFormBody');
+  if (!body) return;
+  body.innerHTML = `<form id="marketForm" style="display:flex;flex-direction:column;gap:12px;" onsubmit="return false;">
+    <div><label style="color:#9ca3af;font-size:12px;">Market Name *</label><input type="text" id="mf_name" required maxlength="200" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Type *</label><select id="mf_type" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"><option value="commodity">Commodity</option><option value="transport">Freight</option><option value="insurance">Insurance</option><option value="banking">Banking</option></select></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Commodity *</label><input type="text" id="mf_commodity" required maxlength="100" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="Coconuts"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Origin</label><input type="text" id="mf_origin" maxlength="100" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="Colombo"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Destination</label><input type="text" id="mf_destination" maxlength="100" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="Rotterdam"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Quantity (whole) *</label><input type="number" id="mf_quantity" required min="1" step="1" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="1000"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Starting Price/Rate *</label><input type="number" id="mf_startPrice" required min="0.01" step="0.01" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="1500"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Hours Until Start *</label><input type="number" id="mf_hoursDelay" required min="0" step="0.5" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="24"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Duration (minutes) *</label><input type="number" id="mf_duration" required min="1" step="1" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="60"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Owner ID (blank = admin)</label><input type="text" id="mf_ownerId" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;" placeholder="User ID"></div>
+    <div style="display:flex;gap:10px;"><button type="button" class="btn" data-action="closemodal">Cancel</button><button type="submit" class="btn btn-primary" style="flex:1;" data-action="submit-market-form">Create Market</button></div>
+  </form>`;
+  openModal('marketFormModal');
+}
+
+function submitMarketForm() {
+  const name = document.getElementById('mf_name')?.value?.trim() || '';
+  const type = document.getElementById('mf_type')?.value || 'commodity';
+  const commodity = document.getElementById('mf_commodity')?.value?.trim() || '';
+  const origin = (document.getElementById('mf_origin')?.value?.trim() || 'N/A').slice(0, 100);
+  const dest = (document.getElementById('mf_destination')?.value?.trim() || 'N/A').slice(0, 100);
+  const quantity = parseInt(document.getElementById('mf_quantity')?.value || '0');
+  const startPrice = parseFloat(document.getElementById('mf_startPrice')?.value || '0');
+  const hours = parseFloat(document.getElementById('mf_hoursDelay')?.value || '0');
+  const duration = parseInt(document.getElementById('mf_duration')?.value || '0');
+  const ownerId = document.getElementById('mf_ownerId')?.value?.trim() || AppState.currentUser?.id || '';
+
+  if (!name || name.length > 200) { showToast('Name required (max 200 chars)', true); return; }
+  if (!commodity || commodity.length > 100) { showToast('Commodity required (max 100 chars)', true); return; }
+  if (!quantity || quantity <= 0 || !Number.isInteger(quantity)) { showToast('Quantity must be a positive whole number', true); return; }
+  if (!startPrice || startPrice <= 0) { showToast('Starting price required', true); return; }
+  if (isNaN(hours) || hours < 0) { showToast('Invalid hours', true); return; }
+  if (isNaN(duration) || duration <= 0) { showToast('Invalid duration', true); return; }
+
+  let finalOwner = ownerId;
+  if (finalOwner) {
+    const user = AppState.allUsers.find(u => u.id === finalOwner);
+    if (!user) { 
+      showToast('Invalid owner ID', true); 
+      return; 
+    }
+  }
+
+  const start = new Date(Date.now() + hours * 3600000);
+  const end = new Date(start.getTime() + duration * 60000);
+  AppState.marketInitAuctions.push({
+    id: 'init_' + Date.now(), name, type, commodity, quantity, startPrice,
+    status: 'preview', scheduledStart: start.toISOString(), endsAt: end.toISOString(),
+    supabaseId: null, ownerId: finalOwner || null, origin: origin, destination: dest
   });
-  container.innerHTML = html;
+  try { localStorage.setItem('admin_market_init', JSON.stringify(AppState.marketInitAuctions)); } catch(e) {}
+  closeModal('marketFormModal');
+  renderMarketInitPanel();
+  showToast('Market "' + name + '" created in PREVIEW', false, true);
 }
 
-// ===== RENDER FUNCTIONS (simplified for brevity - they work as in your original) =====
-function renderTopPerformers() {
-  const buyerStats = {}; allBids.forEach(bid => { if(!buyerStats[bid.buyer_id]) buyerStats[bid.buyer_id]={name:bid.buyer_name||bid.buyer_id,deals:0,volume:0}; buyerStats[bid.buyer_id].deals++; buyerStats[bid.buyer_id].volume+=bid.amount||0; });
-  const sellerStats = {}; sellerBriefs.forEach(b => { if(!sellerStats[b.seller_id]) sellerStats[b.seller_id]={name:b.coop_name||b.seller_id,deals:0,volume:0}; sellerStats[b.seller_id].deals++; sellerStats[b.seller_id].volume+=(b.final_price||b.est_price||0)*(b.quantity_mt||0); });
-  const carrierStats = {}; transportBids.forEach(b => { if(!carrierStats[b.carrier_id]) carrierStats[b.carrier_id]={name:b.carrier_name||b.carrier_id,deals:0,volume:0}; carrierStats[b.carrier_id].deals++; carrierStats[b.carrier_id].volume+=b.amount||0; });
-  const insurerStats = {}; insuranceBids.forEach(b => { if(!insurerStats[b.insurer_id]) insurerStats[b.insurer_id]={name:b.insurer_name||b.insurer_id,deals:0,volume:0}; insurerStats[b.insurer_id].deals++; insurerStats[b.insurer_id].volume+=b.premium_rate||0; });
-  const bankerStats = {}; bankingBids.forEach(b => { if(!bankerStats[b.banker_id]) bankerStats[b.banker_id]={name:b.banker_name||b.banker_id,deals:0,volume:0}; bankerStats[b.banker_id].deals++; bankerStats[b.banker_id].volume+=b.discount_rate||0; });
-  const topBuyer = Object.values(buyerStats).sort((a,b)=>b.volume - a.volume)[0];
-  const topSeller = Object.values(sellerStats).sort((a,b)=>b.volume - a.volume)[0];
-  const topFreight = Object.values(carrierStats).sort((a,b)=>b.volume - a.volume)[0];
-  const topInsurer = Object.values(insurerStats).sort((a,b)=>b.volume - a.volume)[0];
-  const topBanker = Object.values(bankerStats).sort((a,b)=>b.volume - a.volume)[0];
-  if(topBuyer) { document.getElementById('topBuyerName').innerHTML = topBuyer.name.slice(0,20); document.getElementById('topBuyerStats').innerHTML = `${topBuyer.deals} deals • $${topBuyer.volume.toLocaleString()}`; }
-  if(topSeller) { document.getElementById('topSellerName').innerHTML = topSeller.name.slice(0,20); document.getElementById('topSellerStats').innerHTML = `${topSeller.deals} deals • $${topSeller.volume.toLocaleString()}`; }
-  if(topFreight) { document.getElementById('topFreightName').innerHTML = topFreight.name.slice(0,20); document.getElementById('topFreightStats').innerHTML = `${topFreight.deals} deals • $${topFreight.volume.toLocaleString()}`; }
-  if(topInsurer) { document.getElementById('topInsurerName').innerHTML = topInsurer.name.slice(0,20); document.getElementById('topInsurerStats').innerHTML = `${topInsurer.deals} deals • ${topInsurer.volume.toFixed(1)}% avg`; }
-  if(topBanker) { document.getElementById('topBankerName').innerHTML = topBanker.name.slice(0,20); document.getElementById('topBankerStats').innerHTML = `${topBanker.deals} deals • ${topBanker.volume.toFixed(1)}% avg`; }
+// ============================================================
+// MARKET INIT
+// ============================================================
+function loadMarketInitFromStorage() {
+  if (AppState._marketInitLoaded) return;
+  
+  const saved = localStorage.getItem('admin_market_init');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        AppState.marketInitAuctions = parsed.filter(a => 
+          a.id && a.name && a.type && a.commodity && a.quantity && a.startPrice && a.status
+        );
+      } else {
+        AppState.marketInitAuctions = [];
+        localStorage.removeItem('admin_market_init');
+      }
+    } catch(e) {
+      AppState.marketInitAuctions = [];
+      localStorage.removeItem('admin_market_init');
+    }
+  } else {
+    AppState.marketInitAuctions = [];
+  }
+  AppState._marketInitLoaded = true;
 }
 
-function renderMarketToggles() {
-  const markets = [{key:'commodity',label:'🥥 Commodity'},{key:'transport',label:'🚛 Freight'},{key:'insurance',label:'🛡️ Insurance'},{key:'banking',label:'🏦 Banking'}];
-  document.getElementById('marketToggles').innerHTML = markets.map(m => `<label class="market-toggle ${marketStatus[m.key]?'active':'inactive'}"><input type="checkbox" ${marketStatus[m.key]?'checked':''} onchange="toggleMarket('${m.key}',this.checked)"> ${m.label}</label>`).join('');
-}
-function toggleMarket(market, isActive) { marketStatus[market]=isActive; showToast(`${market} ${isActive?'activated':'deactivated'}`); renderMarketToggles(); renderActiveAuctionsFeed(); renderAllAuctionsList(); }
-
-function renderActiveAuctionsFeed() {
-  let allActive = [];
-  if(marketStatus.commodity) allActive.push(...sellerBriefs.filter(b=>b.status==='active').map(b=>({...b,type:'commodity',title:b.product,detail:`${b.quantity_mt} MT • ${b.origin}→${b.destination}`,commission:b.commission_rate||2.5})));
-  if(marketStatus.transport) allActive.push(...transportAuctions.filter(t=>t.status==='active').map(t=>({...t,type:'transport',title:t.cargo_type,detail:`${t.origin}→${t.destination} • $${t.starting_bid}`,commission:t.commission_rate||1.5})));
-  if(marketStatus.insurance) allActive.push(...insuranceAuctions.filter(i=>i.status==='active').map(i=>({...i,type:'insurance',title:'Insurance Contract',detail:`${i.starting_premium_rate}% premium`,commission:i.commission_rate||1.0})));
-  if(marketStatus.banking) allActive.push(...bankingAuctions.filter(b=>b.status==='active').map(b=>({...b,type:'banking',title:'Banking Contract',detail:`${b.starting_discount_rate}% discount`,commission:b.commission_rate||0.5})));
-  const container = document.getElementById('activeAuctionsFeed');
-  if(allActive.length===0) { container.innerHTML='<div class="empty-state">No active auctions</div>'; return; }
-  container.innerHTML = allActive.slice(0,20).map(a => `<div class="auction-item" onclick="showAuctionDetails('${a.type}','${a.id}')"><div class="auction-title"><span>${escapeHtml(a.title)}</span><div><span class="auction-type type-${a.type}">${a.type}</span><span class="commission-badge" style="margin-left:8px;">💰 ${a.commission}% fee</span></div></div><div class="auction-details">${escapeHtml(a.detail)}</div></div>`).join('');
+function saveMarketInitToStorage() {
+  try { 
+    localStorage.setItem('admin_market_init', JSON.stringify(AppState.marketInitAuctions)); 
+  } catch(e) {}
 }
 
-function renderAllAuctionsList() {
-  let allActive = [];
-  if(marketStatus.commodity) allActive.push(...sellerBriefs.filter(b=>b.status==='active').map(b=>({...b,type:'commodity',commission:b.commission_rate||2.5})));
-  if(marketStatus.transport) allActive.push(...transportAuctions.filter(t=>t.status==='active').map(t=>({...t,type:'transport',commission:t.commission_rate||1.5})));
-  if(marketStatus.insurance) allActive.push(...insuranceAuctions.filter(i=>i.status==='active').map(i=>({...i,type:'insurance',commission:i.commission_rate||1.0})));
-  if(marketStatus.banking) allActive.push(...bankingAuctions.filter(b=>b.status==='active').map(b=>({...b,type:'banking',commission:b.commission_rate||0.5})));
-  const container = document.getElementById('allAuctionsList');
-  if(allActive.length===0) { container.innerHTML='<div class="empty-state">No active auctions</div>'; return; }
-  container.innerHTML = `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Type</th><th>Item</th><th>Details</th><th>Commission</th><th>Status</th></tr></thead><tbody>${allActive.map(a => `<tr class="clickable-row" onclick="showAuctionDetails('${a.type}','${a.id}')"><td><span class="auction-type type-${a.type}">${a.type}</span></td><td><strong>${escapeHtml(a.product || a.cargo_type || 'Contract')}</strong></td><td>${escapeHtml(a.origin || a.destination || a.starting_premium_rate || a.starting_discount_rate || '')}</td><td class="commission-badge">${a.commission}%</td><td class="status-active">Active</td><tr>`).join('')}</tbody></table></div>`;
+function editMarketAuction(id) {
+  const auction = AppState.marketInitAuctions.find(a => a.id === id);
+  if (!auction) { showToast('Not found', true); return; }
+  const body = document.getElementById('marketFormBody');
+  if (!body) return;
+  
+  const now = new Date();
+  const startTime = new Date(auction.scheduledStart);
+  const remainingMs = Math.max(0, startTime - now);
+  const remainingHours = remainingMs / (1000 * 60 * 60);
+  
+  body.innerHTML = `<form id="marketForm" style="display:flex;flex-direction:column;gap:12px;" onsubmit="return false;">
+    <div style="margin-bottom:8px;color:#9ca3af;font-size:12px;">Editing: <strong style="color:#00ced1;">${escapeHtml(auction.name)}</strong></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Market Name *</label><input type="text" id="mf_name" required maxlength="200" value="${escapeHtml(auction.name)}" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Type *</label><select id="mf_type" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"><option value="commodity" ${auction.type==='commodity'?'selected':''}>Commodity</option><option value="transport" ${auction.type==='transport'?'selected':''}>Freight</option><option value="insurance" ${auction.type==='insurance'?'selected':''}>Insurance</option><option value="banking" ${auction.type==='banking'?'selected':''}>Banking</option></select></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Commodity *</label><input type="text" id="mf_commodity" required maxlength="100" value="${escapeHtml(auction.commodity)}" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Origin</label><input type="text" id="mf_origin" maxlength="100" value="${escapeHtml(auction.origin||'N/A')}" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Destination</label><input type="text" id="mf_destination" maxlength="100" value="${escapeHtml(auction.destination||'N/A')}" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Quantity (whole) *</label><input type="number" id="mf_quantity" required min="1" step="1" value="${auction.quantity}" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Starting Price/Rate *</label><input type="number" id="mf_startPrice" required min="0.01" step="0.01" value="${auction.startPrice}" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div><label style="color:#9ca3af;font-size:12px;">Remaining Delay (hours)</label><input type="number" id="mf_hoursDelay" min="0" step="0.5" value="${remainingHours.toFixed(1)}" style="width:100%;padding:10px;background:rgba(0,0,0,0.5);border:1px solid #00ced1;border-radius:8px;color:white;"></div>
+    <div style="display:flex;gap:10px;"><button type="button" class="btn" data-action="closemodal">Cancel</button><button type="submit" class="btn btn-primary" style="flex:1;" data-action="submit-edit-form" data-auction-id="${auction.id}">Update Market</button></div>
+  </form>`;
+  openModal('marketFormModal');
 }
 
-function filterAuctions() {
-  const query = document.getElementById('auctionSearch')?.value.toLowerCase() || '';
-  let allActive = [];
-  if(marketStatus.commodity) allActive.push(...sellerBriefs.filter(b=>b.status==='active').map(b=>({...b,type:'commodity',commission:b.commission_rate||2.5})));
-  if(marketStatus.transport) allActive.push(...transportAuctions.filter(t=>t.status==='active').map(t=>({...t,type:'transport',commission:t.commission_rate||1.5})));
-  if(marketStatus.insurance) allActive.push(...insuranceAuctions.filter(i=>i.status==='active').map(i=>({...i,type:'insurance',commission:i.commission_rate||1.0})));
-  if(marketStatus.banking) allActive.push(...bankingAuctions.filter(b=>b.status==='active').map(b=>({...b,type:'banking',commission:b.commission_rate||0.5})));
-  const filtered = allActive.filter(a => { const searchStr = `${a.product||''} ${a.cargo_type||''} ${a.origin||''} ${a.destination||''} ${a.id||''}`.toLowerCase(); return searchStr.includes(query); });
-  const container = document.getElementById('allAuctionsList');
-  if(filtered.length===0) { container.innerHTML='<div class="empty-state">No matching auctions</div>'; return; }
-  container.innerHTML = `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Type</th><th>Item</th><th>Details</th><th>Commission</th><th>Status</th></tr></thead><tbody>${filtered.map(a => `<tr class="clickable-row" onclick="showAuctionDetails('${a.type}','${a.id}')"><td><span class="auction-type type-${a.type}">${a.type}</span></td><td><strong>${escapeHtml(a.product || a.cargo_type || 'Contract')}</strong></td><td>${escapeHtml(a.origin || a.destination || a.starting_premium_rate || a.starting_discount_rate || '')}</td><td class="commission-badge">${a.commission}%</td><td class="status-active">Active</td></tr>`).join('')}</tbody></table></div>`;
+function submitEditForm(id) {
+  const auction = AppState.marketInitAuctions.find(a => a.id === id);
+  if (!auction) { showToast('Not found', true); return; }
+  const name = document.getElementById('mf_name')?.value?.trim() || '';
+  const type = document.getElementById('mf_type')?.value || 'commodity';
+  const commodity = document.getElementById('mf_commodity')?.value?.trim() || '';
+  const origin = (document.getElementById('mf_origin')?.value?.trim() || 'N/A').slice(0, 100);
+  const dest = (document.getElementById('mf_destination')?.value?.trim() || 'N/A').slice(0, 100);
+  const quantity = parseInt(document.getElementById('mf_quantity')?.value || '0');
+  const startPrice = parseFloat(document.getElementById('mf_startPrice')?.value || '0');
+  const hoursDelay = parseFloat(document.getElementById('mf_hoursDelay')?.value || '0');
+  
+  if (!name || name.length > 200) { showToast('Name required (max 200 chars)', true); return; }
+  if (!commodity || commodity.length > 100) { showToast('Commodity required (max 100 chars)', true); return; }
+  if (!quantity || quantity <= 0 || !Number.isInteger(quantity)) { showToast('Quantity must be a positive whole number', true); return; }
+  if (!startPrice || startPrice <= 0) { showToast('Starting price required', true); return; }
+  
+  auction.name = name; 
+  auction.type = type; 
+  auction.commodity = commodity; 
+  auction.quantity = quantity; 
+  auction.startPrice = startPrice; 
+  auction.origin = origin; 
+  auction.destination = dest;
+  
+  if (!isNaN(hoursDelay) && hoursDelay >= 0) {
+    const start = new Date(Date.now() + hoursDelay * 3600000);
+    const duration = new Date(auction.endsAt) - new Date(auction.scheduledStart);
+    if (!isNaN(duration) && duration > 0) {
+      auction.scheduledStart = start.toISOString();
+      auction.endsAt = new Date(start.getTime() + duration).toISOString();
+    }
+  }
+  
+  saveMarketInitToStorage();
+  closeModal('marketFormModal');
+  renderMarketInitPanel();
+  showToast('✅ Market updated', false, true);
 }
 
-function showUserDetails(userId) {
-  const user = allUsers.find(u => u.id === userId);
-  if(!user) return;
-  const userBids = allBids.filter(b => b.buyer_id === userId);
-  const userSellerBriefs = sellerBriefs.filter(b => b.seller_id === userId);
-  const userTransportBids = transportBids.filter(b => b.carrier_id === userId);
-  const userInsuranceBids = insuranceBids.filter(b => b.insurer_id === userId);
-  const userBankingBids = bankingBids.filter(b => b.banker_id === userId);
-  const totalSpent = userBids.reduce((sum,b)=>sum+(b.amount||0),0);
-  const totalEarned = userSellerBriefs.reduce((sum,b)=>sum+((b.final_price||b.est_price||0)*(b.quantity_mt||0)),0);
-  const wonAuctions = userBids.filter(b=>b.status==='accepted').length;
-  document.getElementById('userDetailContent').innerHTML = `<h2 style="color:#00ced1;">${escapeHtml(user.full_name || user.email)}</h2><div class="user-stats-grid"><div class="user-stat-card"><div class="user-stat-value">$${(user.wallet_balance||0).toLocaleString()}</div><div class="user-stat-label">Wallet Balance</div></div><div class="user-stat-card"><div class="user-stat-value">${userBids.length}</div><div class="user-stat-label">Total Bids</div></div><div class="user-stat-card"><div class="user-stat-value">${wonAuctions}</div><div class="user-stat-label">Won Auctions</div></div><div class="user-stat-card"><div class="user-stat-value">$${totalSpent.toLocaleString()}</div><div class="user-stat-label">Total Spent</div></div><div class="user-stat-card"><div class="user-stat-value">$${totalEarned.toLocaleString()}</div><div class="user-stat-label">Total Earned</div></div><div class="user-stat-card"><div class="user-stat-value">${user.role || 'N/A'}</div><div class="user-stat-label">Role</div></div></div><div class="history-tabs"><div class="history-tab active" onclick="switchHistoryTab('bids')">📝 Bids (${userBids.length})</div><div class="history-tab" onclick="switchHistoryTab('auctions')">📦 My Auctions (${userSellerBriefs.length})</div>${user.role === 'carrier' ? `<div class="history-tab" onclick="switchHistoryTab('freight')">🚛 Freight Bids (${userTransportBids.length})</div>` : ''}${user.role === 'insurer' ? `<div class="history-tab" onclick="switchHistoryTab('insurance')">🛡️ Insurance Bids (${userInsuranceBids.length})</div>` : ''}${user.role === 'banker' ? `<div class="history-tab" onclick="switchHistoryTab('banking')">🏦 Banking Bids (${userBankingBids.length})</div>` : ''}</div><div id="history-bids" class="history-content active">${userBids.length === 0 ? '<div class="empty-state">No bids placed</div>' : `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Product</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${userBids.slice(0,20).map(b => `<tr><td>${escapeHtml(b.product_name||'N/A')}</td><td style="color:#FFD966;">$${b.amount}</td><td>${b.status}</td><td>${new Date(b.created_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`}</div><div id="history-auctions" class="history-content">${userSellerBriefs.length === 0 ? '<div class="empty-state">No auctions created</div>' : `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Product</th><th>Quantity</th><th>Price/MT</th><th>Status</th></tr></thead><tbody>${userSellerBriefs.map(b => `<tr><td>${escapeHtml(b.product)}</td><td>${b.quantity_mt} MT</td><td>$${b.est_price}</td><td>${b.status}</td></tr>`).join('')}</tbody></table></div>`}</div><div id="history-freight" class="history-content">${userTransportBids.length===0?'<div class="empty-state">No freight bids</div>':`<div class="table-wrap"><table class="admin-table"><thead><tr><th>Route</th><th>Bid Amount</th><th>Status</th></tr></thead><tbody>${userTransportBids.map(b=>`<tr><td>${escapeHtml(b.route||'N/A')}</td><td>$${b.amount}</td><td>${b.status}</td></tr>`).join('')}</tbody><td></div>`}</div><div id="history-insurance" class="history-content">${userInsuranceBids.length===0?'<div class="empty-state">No insurance bids</div>':`<div class="table-wrap"><table class="admin-table"><thead><tr><th>Premium %</th><th>Status</th></tr></thead><tbody>${userInsuranceBids.map(b=>`<tr><td>${b.premium_rate}%</td><td>${b.status}</td></tr>`).join('')}</tbody></table></div>`}</div><div id="history-banking" class="history-content">${userBankingBids.length===0?'<div class="empty-state">No banking bids</div>':`<div class="table-wrap"><table class="admin-table"><thead><tr><th>Discount %</th><th>Status</th></tr></thead><tbody>${userBankingBids.map(b=>`<tr><td>${b.discount_rate}%</td><td>${b.status}</td></tr>`).join('')}</tbody></table></div>`}</div><div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;"><button class="btn" style="background:rgba(0,206,209,0.2);" onclick="openAddFunds('${user.id}','${escapeHtml(user.full_name||user.email).replace(/'/g,"\\'")}')">💰 Add Funds</button><button class="btn" onclick="document.getElementById('userDetailModal').style.display='none'">Close</button></div>`;
-  document.getElementById('userDetailModal').style.display = 'flex';
+// ============================================================
+// AUTO-CLOSE
+// ============================================================
+async function autoCloseExpired() {
+  if (AppState._autoCloseLock) return;
+  AppState._autoCloseLock = true;
+  try {
+    const now = new Date();
+    let updated = false;
+    let dbErrors = [];
+    let auctionsToClose = [];
+
+    for (const a of AppState.marketInitAuctions) {
+      const endDate = new Date(a.endsAt);
+      if (isNaN(endDate.getTime())) continue;
+      
+      if (a.status === 'live' && endDate < now) {
+        auctionsToClose.push(a);
+      }
+    }
+
+    for (const a of auctionsToClose) {
+      let dbSuccess = true;
+      if (a.supabaseId) {
+        const tableMap = { commodity:'seller_briefs', transport:'transport_auctions', insurance:'insurance_auctions', banking:'banking_auctions' };
+        const table = tableMap[a.type];
+        if (table) {
+          try {
+            await supabase.from(table).update({ status:'closed', closed_at: now.toISOString() }).eq('id', a.supabaseId);
+          } catch(e) { 
+            console.warn('Auto-close DB error:', e);
+            dbErrors.push(a.name);
+            dbSuccess = false;
+          }
+        }
+      }
+      // Only update local state if DB update succeeded or there was no DB to update
+      if (dbSuccess || !a.supabaseId) {
+        a.status = 'closed';
+        updated = true;
+      }
+    }
+
+    if (updated) {
+      saveMarketInitToStorage();
+      renderAll();
+      if (dbErrors.length > 0) {
+        showToast('⚠️ Auto-closed locally, but DB sync failed for: ' + dbErrors.join(', '), true);
+      } else {
+        showToast('🔄 Auto-closed expired auctions', false, true);
+      }
+    }
+  } finally {
+    AppState._autoCloseLock = false;
+  }
 }
 
-function switchHistoryTab(tab) {
-  document.querySelectorAll('.history-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.history-content').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById(`history-${tab}`).classList.add('active');
+function startAutoCloseTimer() {
+  if (AppState.autoCloseInterval) { clearInterval(AppState.autoCloseInterval); AppState.autoCloseInterval = null; }
+  AppState.autoCloseInterval = setInterval(autoCloseExpired, 60000);
 }
 
-function showUserByRole(role) { const user = allUsers.find(u => u.role === role); if(user) showUserDetails(user.id); else showToast(`No ${role} found`); }
-function showAuctionDetails(type, id) { showToast(`${type} auction ${id.slice(0,8)}`); }
-
-let userPage = 1, filteredUsers = [];
-function renderUserTable() {
-  const query = document.getElementById('userSearch')?.value.toLowerCase() || '';
-  filteredUsers = allUsers.filter(u => (u.email||'').toLowerCase().includes(query) || (u.full_name||'').toLowerCase().includes(query));
-  const start = (userPage-1)*10;
-  const pageUsers = filteredUsers.slice(start, start+10);
-  const container = document.getElementById('userManagement');
-  if(pageUsers.length===0) { container.innerHTML='<div class="empty-state">No users</div>'; return; }
-  container.innerHTML = `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Wallet</th><th>Actions</th></tr></thead><tbody>${pageUsers.map(u => `<tr><td class="clickable-row" onclick="showUserDetails('${u.id}')"><strong>${escapeHtml(u.full_name||u.email)}</strong></td><td>${escapeHtml(u.email)}</span></td><td><span class="role-badge role-${u.role}">${u.role}</span></td><td style="color:#FFD966;">$${(u.wallet_balance||0).toLocaleString()}</td><td><button class="btn btn-sm" style="background:#00ced1; color:#000;" onclick="event.stopPropagation();openAddFunds('${u.id}','${escapeHtml(u.full_name||u.email).replace(/'/g,"\\'")}')">💰 Fund</button></td></tr>`).join('')}</tbody></table></div>`;
-}
-function filterUsers() { userPage=1; renderUserTable(); }
-
-let pendingFundUserId = null;
-function openAddFunds(userId, userName) { pendingFundUserId=userId; document.getElementById('addFundsUserName').innerHTML=`Adding funds to: ${userName}`; document.getElementById('addFundsModal').style.display='flex'; }
-async function confirmAddFunds() {
-  const amount = parseFloat(document.getElementById('addFundsAmount').value);
-  if(!amount||amount<=0) { showToast('Invalid amount',true); return; }
-  const { data:user } = await supabase.from('profiles').select('wallet_balance').eq('id',pendingFundUserId).single();
-  await supabase.from('profiles').update({ wallet_balance: (user.wallet_balance||0)+amount }).eq('id',pendingFundUserId);
-  showToast(`$${amount} added`); document.getElementById('addFundsModal').style.display='none'; await loadUsers(); renderUserTable();
+// ============================================================
+// SEED EXAMPLE MARKETS
+// ============================================================
+function seedExampleMarkets() {
+  const now = new Date();
+  AppState.marketInitAuctions = [
+    { id:'init_1', name:'Coconut Season Q3 2026', type:'commodity', commodity:'Coconuts', quantity:5000, startPrice:1500, status:'preview', scheduledStart:new Date(now.getTime()+86400000).toISOString(), endsAt:new Date(now.getTime()+86400000+3600000).toISOString(), supabaseId:null, ownerId:null, origin:'Colombo', destination:'Rotterdam' },
+    { id:'init_2', name:'Coffee Arabica Batch', type:'commodity', commodity:'Coffee', quantity:2000, startPrice:4200, status:'preview', scheduledStart:new Date(now.getTime()+172800000).toISOString(), endsAt:new Date(now.getTime()+172800000+7200000).toISOString(), supabaseId:null, ownerId:null, origin:'Ethiopia', destination:'Hamburg' },
+    { id:'init_3', name:'Freight Route: Colombo → Rotterdam', type:'transport', commodity:'Container Shipping', quantity:100, startPrice:2500, status:'preview', scheduledStart:new Date(now.getTime()+86400000).toISOString(), endsAt:new Date(now.getTime()+86400000+7200000).toISOString(), supabaseId:null, ownerId:null, origin:'Colombo', destination:'Rotterdam' },
+    { id:'init_4', name:'Cocoa Insurance Pool', type:'insurance', commodity:'Cocoa', quantity:1000, startPrice:2.5, status:'preview', scheduledStart:new Date(now.getTime()+86400000).toISOString(), endsAt:new Date(now.getTime()+86400000+3600000).toISOString(), supabaseId:null, ownerId:null, origin:'N/A', destination:'N/A' }
+  ];
+  saveMarketInitToStorage();
+  localStorage.setItem('admin_market_init_seeded', 'true');
+  renderMarketInitPanel();
+  showToast('📦 Example markets loaded', false, true);
 }
 
-const coconutVariants = { dehusked:{name:'Dehusked Coconut',keywords:['dehusked']}, husked:{name:'Husked Coconut',keywords:['husked']}, dessicated:{name:'Desiccated Coconut',keywords:['dessicated','desiccated']}, copra:{name:'Copra',keywords:['copra']}, coconut_oil:{name:'Coconut Oil',keywords:['coconut oil','vco']}, coconut_water:{name:'Coconut Water',keywords:['coconut water']}, coconut_milk:{name:'Coconut Milk',keywords:['coconut milk']}, coconut_sugar:{name:'Coconut Sugar',keywords:['coconut sugar']}, coconut_fiber:{name:'Coconut Fiber',keywords:['coir','fiber']}, activated_carbon:{name:'Activated Carbon',keywords:['activated carbon']}, coconut_shell:{name:'Coconut Shell Charcoal',keywords:['shell charcoal']} };
-function selectCommodityVariant(variantKey) {
-  if(!variantKey) { document.getElementById('variantDetails').innerHTML='<div class="empty-state">Select a variant</div>'; return; }
-  const variant = coconutVariants[variantKey];
-  const matches = sellerBriefs.filter(b => variant.keywords.some(kw => (b.product||'').toLowerCase().includes(kw)));
-  document.getElementById('variantDetails').innerHTML = matches.length ? `<div><div style="color:#7CFC00; margin-bottom:10px;">📦 ${variant.name} auctions:</div>${matches.map(a=>`<div class="auction-item"><div class="auction-title">${escapeHtml(a.product)} - ${a.quantity_mt} MT</div><div class="auction-details">${escapeHtml(a.origin)}→${escapeHtml(a.destination)} • $${a.est_price}/MT</div></div>`).join('')}</div>` : `<div class="empty-state">No ${variant.name} auctions</div>`;
+function renderMarketInitPanel() {
+  const container = document.getElementById('marketInitPanel');
+  if (!container) return;
+  
+  // Load from storage once
+  if (!AppState._marketInitLoaded) {
+    loadMarketInitFromStorage();
+  }
+
+  const seeded = localStorage.getItem('admin_market_init_seeded');
+  if (!AppState.marketInitAuctions.length && !seeded) {
+    container.innerHTML = '<div class="empty-state">No market init auctions.</div><div style="margin-top:16px;text-align:center;"><button class="btn btn-primary" data-action="seed-examples">📦 Load Example Markets</button></div>';
+    return;
+  }
+
+  if (!AppState.marketInitAuctions.length) {
+    container.innerHTML = '<div class="empty-state">No market init auctions.</div><div style="margin-top:16px;text-align:center;"><button class="btn btn-primary" data-action="create-market">+ Create New Market</button></div>';
+    return;
+  }
+
+  container.innerHTML = `<div style="margin-bottom:20px;"><button class="btn btn-primary" data-action="create-market" style="background:linear-gradient(135deg,#00ced1,#0066ff);color:#000;padding:8px 16px;border-radius:8px;font-family:'Orbitron',sans-serif;font-weight:700;cursor:pointer;border:none;">+ Create New Market</button></div>${AppState.marketInitAuctions.map(a => {
+    const now = new Date();
+    const tStart = new Date(a.scheduledStart) - now;
+    const isOverdue = a.status === 'preview' && !isNaN(tStart) && tStart < 0;
+
+    const absStart = Math.abs(tStart);
+    const hStart = Math.floor(absStart / 3600000);
+    const mStart = Math.floor((absStart % 3600000) / 60000);
+
+    const tEnd = new Date(a.endsAt) - now;
+    const hEnd = Math.floor(tEnd / 3600000);
+    const mEnd = Math.floor((tEnd % 3600000) / 60000);
+
+    let statusClass = a.status === 'preview' ? (isOverdue ? 'status-overdue' : 'status-preview') : a.status === 'live' ? 'status-live' : 'status-closed';
+    let statusText = a.status === 'preview' ? (isOverdue ? '⚠️ OVERDUE' : '🔍 PREVIEW') : a.status === 'live' ? '🟢 LIVE' : '🔴 CLOSED';
+
+    let timeDisplay = '';
+    if (a.status === 'preview') {
+      if (isOverdue) {
+        timeDisplay = `⚠️ Overdue by ${hStart}h ${mStart}m`;
+      } else {
+        timeDisplay = `⏰ Starts in: ${hStart}h ${mStart}m`;
+      }
+    } else if (a.status === 'live') {
+      if (hEnd > 0 || mEnd > 0) {
+        timeDisplay = `⏳ ${hEnd > 0 ? hEnd+'h ' : ''}${mEnd}m remaining`;
+      } else {
+        timeDisplay = '⏳ Ending soon...';
+      }
+    } else {
+      timeDisplay = 'Auction ended';
+    }
+
+    const route = a.origin && a.destination && a.origin !== 'N/A' && a.destination !== 'N/A' ? `📍 ${a.origin} → ${a.destination}` : '';
+    const isLive = a.status === 'live';
+
+    return `<div class="market-init-card"><div class="market-init-header"><div class="market-init-title">${escapeHtml(a.name)}</div><div class="market-init-status ${statusClass}">${statusText}</div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;font-size:13px;"><span>📦 ${a.type}</span><span>🥥 ${escapeHtml(a.commodity)}</span><span>📊 ${a.quantity||0} ${a.type==='commodity'?'MT':a.type==='transport'?'containers':'policies'}</span><span>💰 ${a.type==='insurance'?a.startPrice+'% premium':formatCurrency(a.startPrice)}</span><span>⏰ ${safeFormatDate(a.scheduledStart)}</span><span>🏁 ${safeFormatDate(a.endsAt)}</span>${a.supabaseId ? `<span>🔗 ${escapeHtml(String(a.supabaseId).slice(0,8))}</span>` : ''}</div>${route ? `<div class="market-init-route">${route}</div>` : ''}<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+      ${a.status === 'preview' ? `<button class="init-btn init-btn-live" data-action="start-auction" data-auction-id="${escapeAttr(a.id)}" ${isOverdue ? 'disabled title="This auction is overdue"' : ''}>🚀 Start</button>` : ''}
+      ${a.status === 'live' ? `<button class="init-btn init-btn-close" data-action="close-auction" data-auction-id="${escapeAttr(a.id)}">🔒 Close</button>` : ''}
+      <button class="init-btn init-btn-preview" data-action="edit-auction" data-auction-id="${escapeAttr(a.id)}">✏️ Edit</button>
+      <button class="init-btn" style="background:rgba(255,59,59,0.2);color:#ff3b3b;border:1px solid #ff3b3b;" data-action="delete-auction" data-auction-id="${escapeAttr(a.id)}" ${isLive ? 'disabled title="Cannot delete a live auction. Close it first."' : ''}>🗑 Delete</button>
+    </div><div style="margin-top:12px;font-size:11px;color:#FFD966;">${timeDisplay}</div></div>`;
+  }).join('')}`;
 }
 
-function renderCommodityAuctions() { const container = document.getElementById('commodityAuctionsList'); const active = sellerBriefs.filter(b=>b.status==='active'); container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Product</th><th>Qty</th><th>Route</th><th>Price</th><th>Commission</th></tr></thead><tbody>${active.map(a=>`<tr><td>${escapeHtml(a.product)}</td><td>${a.quantity_mt} MT</td><td>${escapeHtml(a.origin)}→${escapeHtml(a.destination)}</td><td>$${a.est_price}</td><td class="commission-badge">${a.commission_rate||2.5}%</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active auctions</div>'; }
-function renderTransportAuctions() { const container = document.getElementById('transportAuctionsList'); const active = transportAuctions.filter(a=>a.status==='active'); container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Cargo</th><th>Route</th><th>Weight</th><th>Starting Bid</th><th>Commission</th></tr></thead><tbody>${active.map(a=>`<tr><td>${escapeHtml(a.cargo_type)}</td><td>${escapeHtml(a.origin)}→${escapeHtml(a.destination)}</span></td><td>${(a.weight_kg/1000)||0} MT</span></td><td>$${a.starting_bid}</span></td><td class="commission-badge">${a.commission_rate||1.5}%</span></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active freight auctions</div>'; }
-function renderInsuranceAuctions() { const container = document.getElementById('insuranceAuctionsList'); const active = insuranceAuctions.filter(a=>a.status==='active'); container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Contract</th><th>Premium %</th><th>Commission</th><th>Status</th></tr></thead><tbody>${active.map(a=>`<tr><td>Insurance #${a.id.slice(0,8)}</span></td><td>${a.starting_premium_rate}%</span></td><td class="commission-badge">${a.commission_rate||1.0}%</span></td><td class="status-active">Active</span></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active insurance auctions</div>'; }
-function renderBankingAuctions() { const container = document.getElementById('bankingAuctionsList'); const active = bankingAuctions.filter(a=>a.status==='active'); container.innerHTML = active.length ? `<div class="table-wrap"><table class="admin-table"><thead><tr><th>Contract</th><th>Discount %</th><th>Commission</th><th>Status</th></tr></thead><tbody>${active.map(a=>`<tr><td>Banking #${a.id.slice(0,8)}</span></td><td>${a.starting_discount_rate}%</span></td><td class="commission-badge">${a.commission_rate||0.5}%</span></td><td class="status-active">Active</span></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state">No active banking auctions</div>'; }
+function startCountdownUpdates() {
+  if (AppState.countdownInterval) { clearInterval(AppState.countdownInterval); AppState.countdownInterval = null; }
+  AppState.countdownInterval = setInterval(() => {
+    const init = document.getElementById('section-init');
+    const anyModalOpen = document.querySelector('.modal[style*="flex"]');
+    if (init && init.style.display !== 'none' && !anyModalOpen) {
+      const isVisible = init.offsetParent !== null;
+      if (isVisible) {
+        renderMarketInitPanel();
+      }
+    }
+  }, 30000);
+}
 
-document.getElementById('refreshBtn').onclick = () => loadAllData();
-document.getElementById('signOutBtn').onclick = () => signOut();
-document.getElementById('closeUserModal').onclick = () => document.getElementById('userDetailModal').style.display = 'none';
-document.getElementById('closeAddFundsModal').onclick = () => document.getElementById('addFundsModal').style.display = 'none';
-document.getElementById('cancelAddFundsBtn').onclick = () => document.getElementById('addFundsModal').style.display = 'none';
-document.getElementById('confirmAddFundsBtn').onclick = confirmAddFunds;
+// ============================================================
+// MARKET ACTIONS
+// ============================================================
+async function startMarketAuction(id) {
+  if (AppState._startLock) { showToast('Action already in progress...', true); return; }
 
-window.showSection = showSection; window.filterUsers = filterUsers; window.openAddFunds = openAddFunds; window.toggleMarket = toggleMarket;
-window.selectCommodityVariant = selectCommodityVariant; window.showAuctionDetails = showAuctionDetails; window.showUserDetails = showUserDetails;
-window.switchHistoryTab = switchHistoryTab; window.showUserByRole = showUserByRole; window.createNewMarketInit = createNewMarketInit; window.startMarketAuction = startMarketAuction; window.closeMarketAuction = closeMarketAuction; window.editMarketAuction = editMarketAuction; window.deleteMarketAuction = deleteMarketAuction;
+  try {
+    const auction = AppState.marketInitAuctions.find(a => a.id === id);
+    if (!auction) { showToast('Auction not found', true); return; }
 
-async function init() { if(await checkAuth()) await loadAllData(); showSection('dashboard'); }
-init();
+    const isOverdue = new Date(auction.scheduledStart) < new Date();
+    const confirmed = await showConfirm(
+      isOverdue ? 'Overdue Auction' : 'Start Auction',
+      isOverdue ? 'This auction is past its scheduled start time. Start it anyway?' : 'Start "' + auction.name + '"? This will make it LIVE on the platform.'
+    );
+    if (!confirmed) return;
+
+    await doStartMarketAuction(id);
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+async function doStartMarketAuction(id) {
+  if (AppState._startLock) return;
+  AppState._startLock = true;
+
+  let origStatus, origStart, origEnd, origDbId;
+
+  try {
+    if (!(await verifySession())) return;
+    const auction = AppState.marketInitAuctions.find(a => a.id === id);
+    if (!auction) { showToast('Auction not found', true); return; }
+    if (!AppState.currentUser?.id) { showToast('Session expired', true); return; }
+
+    origStatus = auction.status;
+    origStart = auction.scheduledStart;
+    origEnd = auction.endsAt;
+    origDbId = auction.supabaseId;
+
+    const startDate = new Date(auction.scheduledStart);
+    const endDate = new Date(auction.endsAt);
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      showToast('Invalid auction dates. Please edit the market to fix.', true);
+      AppState._startLock = false;
+      hideLoading();
+      return;
+    }
+
+    const duration = endDate - startDate;
+    if (isNaN(duration) || duration < 60000) {
+      showToast('Duration must be at least 1 minute.', true);
+      AppState._startLock = false;
+      hideLoading();
+      return;
+    }
+
+    const ownerId = auction.ownerId || AppState.currentUser.id;
+    const validOwner = AppState.allUsers.find(u => u.id === ownerId);
+    if (!validOwner) { showToast('Invalid owner', true); return; }
+
+    showLoading('Starting...');
+    auction.status = 'live';
+    auction.scheduledStart = new Date().toISOString();
+    auction.endsAt = new Date(Date.now() + duration).toISOString();
+
+    const now = new Date().toISOString();
+    const ends = auction.endsAt;
+    const origin = auction.origin || 'N/A';
+    const dest = auction.destination || 'N/A';
+    let data = null;
+
+    if (auction.type === 'commodity') {
+      const { data: d, error } = await supabase.from('seller_briefs').insert({ seller_id: ownerId, product: auction.commodity, quantity_mt: auction.quantity, est_price: auction.startPrice, status: 'active', created_at: now, ends_at: ends, origin, destination: dest }).select();
+      if (error) throw error;
+      data = d?.[0];
+    } else if (auction.type === 'transport') {
+      const { data: d, error } = await supabase.from('transport_auctions').insert({ carrier_id: ownerId, cargo_type: auction.commodity, starting_bid: auction.startPrice, status: 'active', created_at: now, ends_at: ends, weight_kg: auction.quantity*1000, origin, destination: dest }).select();
+      if (error) throw error;
+      data = d?.[0];
+    } else if (auction.type === 'insurance') {
+      const { data: d, error } = await supabase.from('insurance_auctions').insert({ insurer_id: ownerId, insurer_name: validOwner.full_name || 'Admin', starting_premium_rate: auction.startPrice, status: 'active', created_at: now, ends_at: ends, coverage_amount: auction.quantity*1000, cargo_type: auction.commodity }).select();
+      if (error) throw error;
+      data = d?.[0];
+    } else if (auction.type === 'banking') {
+      const { data: d, error } = await supabase.from('banking_auctions').insert({ banker_id: ownerId, banker_name: validOwner.full_name || 'Admin', starting_discount_rate: auction.startPrice, status: 'active', created_at: now, ends_at: ends, credit_amount: auction.quantity*1000, term_days: 30 }).select();
+      if (error) throw error;
+      data = d?.[0];
+    }
+
+    if (data?.id) auction.supabaseId = data.id;
+    saveMarketInitToStorage();
+    showToast('✅ ' + auction.name + ' is LIVE!', false, true);
+    await loadAllData();
+  } catch(e) {
+    const auction = AppState.marketInitAuctions.find(a => a.id === id);
+    if (auction) {
+      auction.status = origStatus || 'preview';
+      auction.scheduledStart = origStart || new Date().toISOString();
+      auction.endsAt = origEnd || new Date(Date.now() + 3600000).toISOString();
+      auction.supabaseId = origDbId || null;
+      saveMarketInitToStorage();
+    }
+    showToast('Error: ' + e.message, true);
+    renderMarketInitPanel();
+  } finally { 
+    hideLoading(); 
+    AppState._startLock = false;
+  }
+}
+
+async function closeMarketAuction(id) {
+  if (AppState._closeLock) { showToast('Action already in progress...', true); return; }
+
+  try {
+    const auction = AppState.marketInitAuctions.find(a => a.id === id);
+    if (!auction) { showToast('Auction not found', true); return; }
+    if (auction.status !== 'live') { showToast('Auction is not live', true); return; }
+
+    const confirmed = await showConfirm('Close Auction', 'Close "' + auction.name + '"? This will end all bidding.');
+    if (!confirmed) return;
+
+    await doCloseMarketAuction(id);
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+async function doCloseMarketAuction(id) {
+  if (AppState._closeLock) return;
+  AppState._closeLock = true;
+
+  try {
+    if (!(await verifySession())) return;
+    const auction = AppState.marketInitAuctions.find(a => a.id === id);
+    if (!auction) { showToast('Auction not found', true); return; }
+
+    showLoading('Closing...');
+    let dbSuccess = true;
+    if (auction.supabaseId) {
+      const tableMap = { commodity:'seller_briefs', transport:'transport_auctions', insurance:'insurance_auctions', banking:'banking_auctions' };
+      const table = tableMap[auction.type];
+      if (table) {
+        try {
+          await supabase.from(table).update({ status:'closed', closed_at: new Date().toISOString() }).eq('id', auction.supabaseId);
+        } catch(e) {
+          dbSuccess = false;
+          showToast('DB error: ' + e.message, true);
+        }
+      }
+    }
+    if (dbSuccess) {
+      auction.status = 'closed';
+      saveMarketInitToStorage();
+      showToast('🔒 ' + auction.name + ' closed', false, true);
+      await loadAllData();
+      renderMarketInitPanel();
+    }
+  } catch(e) { showToast('Error: ' + e.message, true); } finally { hideLoading(); AppState._closeLock = false; }
+}
+
+async function deleteMarketAuction(id) {
+  const auction = AppState.marketInitAuctions.find(a => a.id === id);
+  if (!auction) { showToast('Auction not found', true); return; }
+  if (auction.status === 'live') {
+    showToast('Cannot delete a live auction. Close it first.', true);
+    return;
+  }
+
+  if (AppState._deleteLock) { showToast('Action already in progress...', true); return; }
+
+  try {
+    const confirmed = await showConfirm('Delete Market', 'Delete "' + auction.name + '"? This cannot be undone.');
+    if (!confirmed) return;
+
+    await doDeleteMarketAuction(id);
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+async function doDeleteMarketAuction(id) {
+  if (AppState._deleteLock) return;
+  AppState._deleteLock = true;
+
+  try {
+    if (!(await verifySession())) return;
+    const auction = AppState.marketInitAuctions.find(a => a.id === id);
+    if (!auction) { showToast('Auction not found', true); return; }
+    if (auction.status === 'live') { showToast('Cannot delete live auction', true); return; }
+
+    showLoading('Deleting...');
+    if (auction?.supabaseId) {
+      const tableMap = { commodity:'seller_briefs', transport:'transport_auctions', insurance:'insurance_auctions', banking:'banking_auctions' };
+      const table = tableMap[auction.type];
+      if (table) await supabase.from(table).delete().eq('id', auction.supabaseId);
+    }
+    AppState.marketInitAuctions = AppState.marketInitAuctions.filter(a => a.id !== id);
+    saveMarketInitToStorage();
+    renderMarketInitPanel();
+    await loadAllData();
+    showToast('🗑 Market deleted', false, true);
+  } catch(e) { showToast('Error: ' + e.message, true); } finally { hideLoading(); AppState._deleteLock = false; }
+}
+
+// ============================================================
+// EVENT DELEGATION
+// ============================================================
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const userId = btn.dataset.userid;
+  const userName = btn.dataset.username || '';
+  const auctionType = btn.dataset.auctionType;
+  const auctionId = btn.dataset.auctionId;
+
+  if (!['closemodal'].includes(action)) e.preventDefault();
+
+  switch(action) {
+    case 'addfunds': openAddFunds(userId, userName); break;
+    case 'verifydocs': openVerifyDetail(userId); break;
+    case 'approve': approveCompany(userId); break;
+    case 'reject': rejectCompany(userId); break;
+    case 'requestdocs': requestMoreDocs(userId); break;
+    case 'viewuser': showUserDetails(userId); break;
+    case 'viewauction': if (auctionType && auctionId) showAuctionDetails(auctionType, auctionId); break;
+    case 'closemodal': closeModal(btn.closest('.modal')?.id); break;
+    case 'filter-verify': filterVerification(btn.dataset.filter, false); break;
+    case 'prev-page': AppState.userPage = Math.max(1, AppState.userPage - 1); renderUserTable(); break;
+    case 'next-page': { const total = Math.ceil(AppState.filteredUsers.length / 10); AppState.userPage = Math.min(total, AppState.userPage + 1); renderUserTable(); break; }
+    case 'auction-prev': AppState.auctionPage = Math.max(1, AppState.auctionPage - 1); renderAllAuctionsList(); break;
+    case 'auction-next': { 
+      const isSearchActive = document.getElementById('auctionSearch')?.value?.trim()?.length > 0;
+      const dataSrc = isSearchActive ? AppState.filteredAuctions : getAllActiveAuctions();
+      const total = Math.max(1, Math.ceil(dataSrc.length / AppState.pageSize));
+      AppState.auctionPage = Math.min(total, AppState.auctionPage + 1);
+      renderAllAuctionsList(); 
+      break; 
+    }
+    case 'confirmfunds': confirmAddFunds(); break;
+    case 'create-market': showMarketFormModal(); break;
+    case 'seed-examples': seedExampleMarkets(); break;
+    case 'start-auction': if (auctionId) startMarketAuction(auctionId); break;
+    case 'close-auction': if (auctionId) closeMarketAuction(auctionId); break;
+    case 'edit-auction': if (auctionId) editMarketAuction(auctionId); break;
+    case 'delete-auction': if (auctionId) deleteMarketAuction(auctionId); break;
+    case 'submit-market-form': submitMarketForm(); break;
+    case 'submit-edit-form': if (auctionId) submitEditForm(auctionId); break;
+    case 'market-settings': showToast('Settings coming soon'); break;
+    case 'market-reports': showToast('Reports coming soon'); break;
+  }
+});
+
+// ============================================================
+// NAV LINKS
+// ============================================================
+document.querySelectorAll('.nav button[data-section], .nav a[data-section]').forEach(el => {
+  el.addEventListener('click', function(e) {
+    e.preventDefault();
+    showSection(this.dataset.section);
+  });
+});
+
+// ============================================================
+// MARKET TOGGLES
+// ============================================================
+document.addEventListener('change', function(e) {
+  const cb = e.target.closest('input[data-market]');
+  if (cb) toggleMarket(cb.dataset.market, cb.checked);
+});
+
+// ============================================================
+// HISTORY TABS
+// ============================================================
+document.addEventListener('click', function(e) {
+  const tab = e.target.closest('.history-tab');
+  if (tab) switchHistoryTab(tab);
+});
+
+// ============================================================
+// COMMODITY DROPDOWN
+// ============================================================
+document.getElementById('commodityVariantSelect')?.addEventListener('change', function() {
+  selectCommodityVariant(this.value);
+});
+
+// ============================================================
+// SEARCH
+// ============================================================
+document.getElementById('auctionSearch')?.addEventListener('input', filterAuctions);
+document.getElementById('userSearch')?.addEventListener('input', filterUsers);
+document.getElementById('verifySearch')?.addEventListener('input', function() {
+  filterVerification(document.getElementById('verifyFilterType')?.dataset?.filter || 'all', true);
+});
+
+// ============================================================
+// STAT CARDS
+// ============================================================
+document.querySelectorAll('.stat-card').forEach(el => {
+  el.addEventListener('click', function() {
+    const id = this.id;
+    if (id === 'statCardBuyer') showTopPerformer('buyer');
+    else if (id === 'statCardSeller') showTopPerformer('seller');
+    else if (id === 'statCardCarrier') showTopPerformer('carrier');
+    else if (id === 'statCardInsurer') showTopPerformer('insurer');
+    else if (id === 'statCardBanker') showTopPerformer('banker');
+  });
+});
+
+// ============================================================
+// MODAL BACKDROPS
+// ============================================================
+document.querySelectorAll('.modal:not(#confirmModal)').forEach(m => {
+  m.addEventListener('click', function(e) {
+    if (e.target === this) {
+      const id = this.id;
+      closeModal(id);
+      if (id === 'addFundsModal') AppState.pendingFundUserId = null;
+    }
+  });
+});
+
+// ============================================================
+// ESCAPE KEY - Close only topmost modal
+// ============================================================
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const modals = document.querySelectorAll('.modal');
+    let topModal = null;
+    let topZIndex = -1;
+    
+    modals.forEach(m => {
+      if (m.style.display === 'flex') {
+        const zIndex = parseInt(window.getComputedStyle(m).zIndex) || 0;
+        if (zIndex > topZIndex) {
+          topZIndex = zIndex;
+          topModal = m;
+        }
+      }
+    });
+    
+    if (topModal && topModal.id !== 'confirmModal') {
+      const id = topModal.id;
+      closeModal(id);
+      if (id === 'addFundsModal') AppState.pendingFundUserId = null;
+    }
+  }
+});
+
+// ============================================================
+// BUTTON BINDINGS
+// ============================================================
+document.getElementById('refreshBtn')?.addEventListener('click', loadAllData);
+document.getElementById('signOutBtn')?.addEventListener('click', function(e) { e.preventDefault(); signOut(); });
+
+// ============================================================
+// CLEANUP
+// ============================================================
+window.addEventListener('pagehide', function() {
+  if (AppState.countdownInterval) { clearInterval(AppState.countdownInterval); AppState.countdownInterval = null; }
+  if (AppState.autoCloseInterval) { clearInterval(AppState.autoCloseInterval); AppState.autoCloseInterval = null; }
+  clearTimeout(AppState.auctionSearchTimeout);
+  clearTimeout(AppState.userSearchTimeout);
+  clearTimeout(toastTimeout);
+});
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', async function() {
+  loadMarketStatus();
+  if (await checkAuth()) {
+    // Load market init from storage once
+    loadMarketInitFromStorage();
+    await loadAllData();
+    showSection('dashboard');
+    startCountdownUpdates();
+    startAutoCloseTimer();
+  }
+});
 </script>
 </body>
 </html>
