@@ -1062,13 +1062,19 @@ footer a:hover { color: #4a9e5a; }
 
 <script>
 // ============================================================
-// SUPABASE CONFIG
+// SUPABASE CONFIG — NO PERSISTENT SESSIONS
 // ============================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
 const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: false,
+    detectSessionInUrl: true
+  }
+});
 
 // ============================================================
 // TAR ENGINE
@@ -1171,30 +1177,18 @@ statusBar.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// AUTH
+// AUTH — No persistent sessions (login required every restart)
 // ============================================================
-document.addEventListener('DOMContentLoaded', async function() {
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      document.getElementById('login-btn').style.display = 'none';
-      document.getElementById('signup-btn').style.display = 'none';
-      document.getElementById('user-info').classList.add('show');
-      document.getElementById('user-email').textContent = session.user.email;
-    }
-  } catch(err) { console.error('Auth error:', err); }
 
+document.addEventListener('DOMContentLoaded', function() {
+  // No session check on page load — session only exists in memory
+  // while tab is open. After browser restart, user must log in again.
+
+  // Logout handler only
   document.getElementById('logout-btn')?.addEventListener('click', async (e) => {
     e.preventDefault();
-    await supabaseClient.auth.signOut();
-    window.location.href = 'index.html';
-  });
-
-  // Listen for auth state changes (e.g. sign out in another tab)
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT') {
-      window.location.href = 'index.html';
-    }
+    await supabaseClient.auth.signOut({ scope: 'global' });
+    window.location.replace('signin.html?logout=1');
   });
 });
 
