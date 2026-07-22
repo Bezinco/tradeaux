@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -254,7 +254,6 @@ let authCheckComplete = false;
 async function bulletproofSignOut() {
   console.log('🔒 Starting bulletproof sign out...');
 
-  // 1. Tell Supabase to sign out (global = all devices/tabs)
   try {
     await supabaseClient.auth.signOut({ scope: 'global' });
     console.log('✅ Supabase signOut completed');
@@ -262,10 +261,8 @@ async function bulletproofSignOut() {
     console.log('⚠️ Supabase signOut error (ignoring):', e.message);
   }
 
-  // 2. Wait a moment for Supabase to clean up its internal state
   await new Promise(r => setTimeout(r, 300));
 
-  // 3. Remove ALL Supabase-related keys from localStorage
   const lsKeys = [];
   for (let i = 0; i < localStorage.length; i++) {
     lsKeys.push(localStorage.key(i));
@@ -277,11 +274,9 @@ async function bulletproofSignOut() {
     }
   });
 
-  // 4. Clear sessionStorage entirely
   sessionStorage.clear();
   console.log('🗑️ sessionStorage cleared');
 
-  // 5. Also clear any non-Supabase keys that might cache auth state
   localStorage.removeItem('tradeaux_user');
   localStorage.removeItem('tradeaux_role');
 
@@ -325,7 +320,6 @@ async function showRolePicker(user) {
   document.getElementById('step3').classList.remove('hidden');
   document.getElementById('subtitle').textContent = 'Choose your dashboard';
 
-  // Fetch display name from profile
   let displayName = user.email;
   try {
     const { data: profile } = await supabaseClient
@@ -349,7 +343,7 @@ async function showRolePicker(user) {
 // =====================================================
 function isSessionValid(session) {
   if (!session) return false;
-  if (!session.expires_at) return true; // no expiry = assume valid
+  if (!session.expires_at) return true;
   const now = Math.floor(Date.now() / 1000);
   const valid = session.expires_at > now;
   if (!valid) {
@@ -367,19 +361,16 @@ async function checkAuth() {
 
   console.log('🚀 TradeAux Signin v6.0 - Auth check starting');
 
-  // === CASE 1: LOGOUT FLAG ===
   if (isLogout) {
     console.log('🔓 Logout detected - performing full cleanup');
     await bulletproofSignOut();
     showSuccess('You have been signed out.');
     document.getElementById('debugInfo').textContent = 'Signed out. You can sign in again.';
-    // Remove logout flag from URL without reloading
     const newUrl = window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
     return;
   }
 
-  // === CASE 2: CHECK EXISTING SESSION ===
   console.log('🔍 Checking for existing session...');
 
   try {
@@ -387,15 +378,14 @@ async function checkAuth() {
 
     if (error) {
       console.log('⚠️ getSession error:', error.message);
-      return; // Stay on sign-in form
+      return;
     }
 
     if (!data || !data.session) {
       console.log('ℹ️ No session found - showing sign-in form');
-      return; // Stay on sign-in form
+      return;
     }
 
-    // Validate session expiry
     if (!isSessionValid(data.session)) {
       console.log('⏰ Session expired - clearing and staying on form');
       await bulletproofSignOut();
@@ -406,7 +396,6 @@ async function checkAuth() {
     const user = data.session.user;
     console.log('✅ Valid session found for:', user.email);
 
-    // Check if user already has a saved role
     let role = null;
     try {
       const { data: profile, error: profileError } = await supabaseClient
@@ -427,12 +416,10 @@ async function checkAuth() {
     }
 
     if (role) {
-      // User has a saved role - redirect immediately, NO role picker
       console.log('✅ Saved role found:', role, '→ redirecting immediately');
       document.getElementById('debugInfo').textContent = 'Redirecting to ' + DASHBOARDS[role] + '...';
       redirectToDashboard(role);
     } else {
-      // No saved role - show role picker (first time only)
       console.log('ℹ️ No saved role — showing role picker (first time)');
       showRolePicker(user);
     }
@@ -449,9 +436,6 @@ async function checkAuth() {
 document.addEventListener('DOMContentLoaded', function() {
   checkAuth();
 
-  // =====================================================
-  // TOGGLE SIGNUP / SIGNIN
-  // =====================================================
   document.getElementById('showSignup').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('step1').classList.add('hidden');
@@ -494,7 +478,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       showSuccess('✅ Signed in successfully!');
 
-      // Check for saved role and redirect or show picker
       let role = null;
       try {
         const { data: profile } = await supabaseClient
@@ -564,7 +547,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       if (error) throw error;
 
-      // If session is null, email confirmation is required
       if (data.user && !data.session) {
         showSuccess('✅ Account created! Check your email to confirm.');
         document.getElementById('step2').classList.add('hidden');
@@ -575,10 +557,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      // Email confirmation is disabled — auto sign-in
       if (data.user && data.session) {
-        // Create profile
-        const { error: profileError } = await supabaseClient.from('profiles').insert({
+        // ✅ UPSERT instead of INSERT (prevents conflict with trigger)
+        const { error: profileError } = await supabaseClient.from('profiles').upsert({
           id: data.user.id,
           email: email,
           full_name: companyName,
@@ -589,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (profileError) {
-          console.error('Profile creation failed:', profileError);
+          console.error('Profile upsert failed:', profileError);
         }
 
         showSuccess('✅ Account created successfully!');
@@ -632,13 +613,15 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
-    // Save the role to the user's profile
     if (currentUser) {
       try {
+        // ✅ UPSERT instead of UPDATE
         const { error } = await supabaseClient
           .from('profiles')
-          .update({ role: selectedRole })
-          .eq('id', currentUser.id);
+          .upsert({ 
+            id: currentUser.id, 
+            role: selectedRole 
+          });
 
         if (error) {
           console.warn('Could not save role:', error);
