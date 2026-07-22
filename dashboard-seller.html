@@ -1,12 +1,19 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>TradeAux • Seller Dashboard | TAR Advisor</title>
+  
+  <!-- ===== CSP META TAG ===== -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://pfutaovwbygefummienf.supabase.co; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://pfutaovwbygefummienf.supabase.co; base-uri 'self';">
+  
+  <!-- ===== SUPABASE CLIENT ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ===== ALL EXISTING STYLES REMAIN UNCHANGED ===== */
+    /* ===== ALL STYLES CONSOLIDATED — NO DUPLICATES ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
     .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
@@ -392,6 +399,14 @@
 </head>
 <body>
 
+<!-- ===== NOSCRIPT TAG ===== -->
+<noscript>
+  <div style="background:#ff3b3b; color:white; padding:20px; text-align:center; position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+    <h2>⚠️ JavaScript Required</h2>
+    <p>TradeAux requires JavaScript to function. Please enable JavaScript in your browser.</p>
+  </div>
+</noscript>
+
 <!-- ===== HIDDEN FILE INPUTS ===== -->
 <input type="file" id="logoFileInput" style="display:none;" accept=".jpg,.png,.jpeg">
 <input type="file" id="photoFileInput" style="display:none;" accept=".jpg,.png,.jpeg" multiple>
@@ -502,14 +517,14 @@
         </div>
         <div class="company-info-section">
           <div class="company-fields">
-            <div class="company-field"><label>Company Name</label><div class="field-value" id="companyNameDisplay">Not set</div></div>
-            <div class="company-field"><label>Registration Number</label><div class="field-value" id="companyRegDisplay">Not set</div></div>
-            <div class="company-field"><label>Country of Incorporation</label><div class="field-value" id="companyCountryDisplay">Not set</div></div>
-            <div class="company-field"><label>Tax Registration Number</label><div class="field-value" id="companyTaxDisplay">Not set</div></div>
-            <div class="company-field" style="grid-column:1/-1;"><label>Business Address</label><div class="field-value" id="companyAddressDisplay">Not set</div></div>
-            <div class="company-field"><label>Contact Email</label><div class="field-value" id="companyEmailDisplay">Not set</div></div>
-            <div class="company-field"><label>Contact Phone</label><div class="field-value" id="companyPhoneDisplay">Not set</div></div>
-            <div class="company-field" style="grid-column:1/-1;"><label>Website</label><div class="field-value" id="companyWebsiteDisplay">Not set</div></div>
+            <div class="company-field"><label for="companyNameDisplay">Company Name</label><div class="field-value" id="companyNameDisplay">Not set</div></div>
+            <div class="company-field"><label for="companyRegDisplay">Registration Number</label><div class="field-value" id="companyRegDisplay">Not set</div></div>
+            <div class="company-field"><label for="companyCountryDisplay">Country of Incorporation</label><div class="field-value" id="companyCountryDisplay">Not set</div></div>
+            <div class="company-field"><label for="companyTaxDisplay">Tax Registration Number</label><div class="field-value" id="companyTaxDisplay">Not set</div></div>
+            <div class="company-field" style="grid-column:1/-1;"><label for="companyAddressDisplay">Business Address</label><div class="field-value" id="companyAddressDisplay">Not set</div></div>
+            <div class="company-field"><label for="companyEmailDisplay">Contact Email</label><div class="field-value" id="companyEmailDisplay">Not set</div></div>
+            <div class="company-field"><label for="companyPhoneDisplay">Contact Phone</label><div class="field-value" id="companyPhoneDisplay">Not set</div></div>
+            <div class="company-field" style="grid-column:1/-1;"><label for="companyWebsiteDisplay">Website</label><div class="field-value" id="companyWebsiteDisplay">Not set</div></div>
           </div>
         </div>
       </div>
@@ -523,7 +538,7 @@
               <div class="doc-name">Certificate of Incorporation</div>
               <div class="doc-status" id="incorpDocStatus">Not uploaded</div>
             </div>
-            <div class="doc-upload" onclick="document.getElementById('incorpFileInput').click()">📤 Upload</div>
+            <div class="doc-upload" id="incorpUploadBtn">📤 Upload</div>
           </div>
           <div class="document-item">
             <div class="doc-icon">📋</div>
@@ -531,7 +546,7 @@
               <div class="doc-name">Business License</div>
               <div class="doc-status" id="licenseDocStatus">Not uploaded</div>
             </div>
-            <div class="doc-upload" onclick="document.getElementById('licenseFileInput').click()">📤 Upload</div>
+            <div class="doc-upload" id="licenseUploadBtn">📤 Upload</div>
           </div>
           <div class="document-item">
             <div class="doc-icon">📑</div>
@@ -539,7 +554,7 @@
               <div class="doc-name">Tax Registration</div>
               <div class="doc-status" id="taxDocStatus">Not uploaded</div>
             </div>
-            <div class="doc-upload" onclick="document.getElementById('taxFileInput').click()">📤 Upload</div>
+            <div class="doc-upload" id="taxUploadBtn">📤 Upload</div>
           </div>
         </div>
       </div>
@@ -668,14 +683,14 @@
 </div>
 
 <!-- ===== TOUR OVERLAY ===== -->
-<div class="tour-overlay" id="tourOverlay" style="display:none; position:fixed; inset:0; z-index:10000; pointer-events:none;">
+<div class="tour-overlay" id="tourOverlay" style="display:none; position:fixed; inset:0; z-index:1000; pointer-events:none;">
   <div class="tour-highlight" id="tourHighlight" style="position:absolute; border:3px solid #7CFC00; border-radius:16px; box-shadow:0 0 50px rgba(124,252,0,0.3); pointer-events:none;"></div>
-  <div class="tour-tooltip" id="tourTooltip" style="position:absolute; background:rgba(2,6,23,0.95); border:1px solid #7CFC00; border-radius:12px; padding:16px 20px; max-width:320px; color:#e5e7eb; font-size:13px; line-height:1.6; pointer-events:auto; box-shadow:0 20px 60px rgba(0,0,0,0.8); z-index:10001; max-height:90vh; overflow-y:auto;">
+  <div class="tour-tooltip" id="tourTooltip" style="position:absolute; background:rgba(2,6,23,0.95); border:1px solid #7CFC00; border-radius:12px; padding:16px 20px; max-width:320px; color:#e5e7eb; font-size:13px; line-height:1.6; pointer-events:auto; box-shadow:0 20px 60px rgba(0,0,0,0.8); z-index:1001; max-height:90vh; overflow-y:auto;">
     <h4 id="tourTitle" style="font-family:'Orbitron',sans-serif; color:#7CFC00; margin-bottom:6px; font-size:14px;">Welcome</h4>
     <p id="tourDescription">This is your command center.</p>
     <button class="tour-btn" id="tourNextBtn" style="margin-top:10px; padding:6px 20px; background:linear-gradient(135deg, #7CFC00, #00ced1); border:none; border-radius:20px; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:#000; cursor:pointer; pointer-events:auto;">Next →</button>
   </div>
-  <div class="tour-progress" id="tourProgress" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:10002; background:rgba(2,6,23,0.9); border:1px solid rgba(0,206,209,0.3); border-radius:30px; padding:8px 20px; display:flex; align-items:center; gap:12px; pointer-events:auto;">
+  <div class="tour-progress" id="tourProgress" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:1002; background:rgba(2,6,23,0.9); border:1px solid rgba(0,206,209,0.3); border-radius:30px; padding:8px 20px; display:flex; align-items:center; gap:12px; pointer-events:auto;">
     <span class="dot active" data-step="0"></span>
     <span class="dot" data-step="1"></span>
     <span class="dot" data-step="2"></span>
@@ -698,17 +713,17 @@
     <div class="modal-header"><h2 id="productModalTitle">📦 Add/Edit Product</h2></div>
     <div id="productModalBody">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field"><label>Product Name *</label><input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee"></div>
-        <div class="modal-field"><label>Variety</label><input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade"></div>
+        <div class="modal-field"><label for="productNameInput">Product Name *</label><input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee"></div>
+        <div class="modal-field"><label for="productVarietyInput">Variety</label><input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade"></div>
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field"><label>Quantity (MT) *</label><input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1" step="0.01"></div>
-        <div class="modal-field"><label>Grade</label><select id="productGradeInput"><option value="Grade A">Grade A (Premium)</option><option value="Grade B">Grade B (Standard)</option><option value="Grade C">Grade C (Good)</option><option value="Organic">Organic Certified</option><option value="Fair Trade">Fair Trade Certified</option></select></div>
+        <div class="modal-field"><label for="productQuantityInput">Quantity (MT) *</label><input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1" step="0.01"></div>
+        <div class="modal-field"><label for="productGradeInput">Grade</label><select id="productGradeInput"><option value="Grade A">Grade A (Premium)</option><option value="Grade B">Grade B (Standard)</option><option value="Grade C">Grade C (Good)</option><option value="Organic">Organic Certified</option><option value="Fair Trade">Fair Trade Certified</option></select></div>
       </div>
-      <div class="modal-field"><label>Origin</label><input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil"></div>
+      <div class="modal-field"><label for="productOriginInput">Origin</label><input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil"></div>
 
       <div class="modal-field">
-        <label>Product Images</label>
+        <label for="productImagesInput">Product Images</label>
         <input type="file" id="productImagesInput" accept=".jpg,.png,.jpeg" multiple>
         <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Upload up to 5 images</div>
         <div id="productImagePreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
@@ -888,7 +903,7 @@
 
       <!-- ✅ Scheduled Start Date/Time -->
       <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
-        <label>📅 Auction Scheduled Start</label>
+        <label for="productScheduledStart">📅 Auction Scheduled Start</label>
         <input type="datetime-local" id="productScheduledStart" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.5); border:1px solid rgba(0,206,209,0.25); border-radius:10px; color:#e5e7eb; font-family:'Inter', sans-serif; font-size:14px;">
         <div style="font-size:10px; color:#9ca3af; margin-top:4px;">Set the date and time when this auction should automatically start. Buyers will see a countdown.</div>
       </div>
@@ -912,24 +927,24 @@
         <div id="auctionProductDisplay" style="padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:14px; color:#00ced1;"></div>
       </div>
       <div class="modal-field">
-        <label>Quantity to Auction (MT) *</label>
+        <label for="auctionQty">Quantity to Auction (MT) *</label>
         <input type="number" id="auctionQty" placeholder="Enter quantity" min="1" step="0.01" required>
         <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Available: <span id="auctionAvailableQty">0</span> MT</div>
       </div>
       <div class="modal-field">
-        <label>Auction Date &amp; Time *</label>
+        <label for="auctionDateTime">Auction Date &amp; Time *</label>
         <input type="datetime-local" id="auctionDateTime" required>
       </div>
       <div class="modal-field">
-        <label>Auction Duration</label>
+        <label for="auctionDuration">Auction Duration</label>
         <select id="auctionDuration"><option value="1">1 Hour</option><option value="2">2 Hours</option><option value="4">4 Hours</option><option value="8">8 Hours</option><option value="24" selected>24 Hours</option><option value="48">48 Hours</option><option value="72">72 Hours</option></select>
       </div>
       <div class="modal-field">
-        <label>Location (Kontor) *</label>
+        <label for="auctionLocation">Location (Kontor) *</label>
         <select id="auctionLocation"><option value="Santos">Santos, Brazil</option><option value="Mombasa">Mombasa, Kenya</option><option value="Jakarta">Jakarta, Indonesia</option><option value="Ho Chi Minh City">Ho Chi Minh City, Vietnam</option><option value="Colombo">Colombo, Sri Lanka</option><option value="Guayaquil">Guayaquil, Ecuador</option><option value="Abidjan">Abidjan, Ivory Coast</option><option value="Lagos">Lagos, Nigeria</option></select>
       </div>
       <div class="modal-field">
-        <label>Brief Notes</label>
+        <label for="auctionNotes">Brief Notes</label>
         <textarea id="auctionNotes" rows="3" placeholder="Quality, packaging, inspection, shipping terms..."></textarea>
       </div>
     </div>
@@ -945,17 +960,17 @@
   <div class="modal-content">
     <span class="modal-close" onclick="closeModal('companyModal')">&times;</span>
     <div class="modal-header"><h2>🏢 Edit Company Profile</h2></div>
-    <div class="modal-field"><label>Company Name</label><input type="text" id="editCompanyName"></div>
-    <div class="modal-field"><label>Registration Number</label><input type="text" id="editCompanyReg"></div>
-    <div class="modal-field"><label>Country</label><input type="text" id="editCompanyCountry"></div>
-    <div class="modal-field"><label>Tax Registration Number</label><input type="text" id="editCompanyTax"></div>
-    <div class="modal-field"><label>Business Address</label><textarea id="editCompanyAddress" rows="2"></textarea></div>
-    <div class="modal-field"><label>Contact Email</label><input type="email" id="editCompanyEmail"></div>
-    <div class="modal-field"><label>Contact Phone</label><input type="tel" id="editCompanyPhone"></div>
-    <div class="modal-field"><label>Website</label><input type="text" id="editCompanyWebsite"></div>
+    <div class="modal-field"><label for="editCompanyName">Company Name</label><input type="text" id="editCompanyName"></div>
+    <div class="modal-field"><label for="editCompanyReg">Registration Number</label><input type="text" id="editCompanyReg"></div>
+    <div class="modal-field"><label for="editCompanyCountry">Country</label><input type="text" id="editCompanyCountry"></div>
+    <div class="modal-field"><label for="editCompanyTax">Tax Registration Number</label><input type="text" id="editCompanyTax"></div>
+    <div class="modal-field"><label for="editCompanyAddress">Business Address</label><textarea id="editCompanyAddress" rows="2"></textarea></div>
+    <div class="modal-field"><label for="editCompanyEmail">Contact Email</label><input type="email" id="editCompanyEmail"></div>
+    <div class="modal-field"><label for="editCompanyPhone">Contact Phone</label><input type="tel" id="editCompanyPhone"></div>
+    <div class="modal-field"><label for="editCompanyWebsite">Website</label><input type="text" id="editCompanyWebsite"></div>
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('companyModal')">Cancel</button>
-      <button class="create-btn" onclick="saveCompanyProfile()">Save Profile</button>
+      <button class="create-btn" id="saveCompanyBtn">Save Profile</button>
     </div>
   </div>
 </div>
@@ -977,7 +992,7 @@
         <div class="company-field" style="grid-column:1/-1;"><label>Notes</label><div class="field-value" id="orderViewNotes">-</div></div>
       </div>
       <div class="modal-field">
-        <label>Update Status</label>
+        <label for="orderStatusUpdate">Update Status</label>
         <select id="orderStatusUpdate">
           <option value="pending">Pending</option>
           <option value="processing">Processing</option>
@@ -989,7 +1004,7 @@
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('orderModal')">Close</button>
-      <button class="create-btn" onclick="updateOrderStatus()">Update Status</button>
+      <button class="create-btn" id="updateOrderBtn">Update Status</button>
     </div>
   </div>
 </div>
@@ -998,6 +1013,27 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ============================================================
+// SUPABASE CONFIG (BULLETPROOF SIGN OUT)
+// ============================================================
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+
+let supabaseClient = null;
+try {
+  if (typeof window.supabase !== 'undefined') {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.supabaseClient = supabaseClient;
+    console.log('✅ Supabase client initialized');
+  } else {
+    console.error('❌ Supabase library not loaded');
+    window.location.href = 'signin.html?reason=no_supabase';
+  }
+} catch (e) {
+  console.error('❌ Failed to initialize Supabase:', e);
+  window.location.href = 'signin.html?reason=init_error';
+}
+
 // ============================================================
 // CERT_LABELS — GLOBAL SCOPE
 // ============================================================
@@ -1267,6 +1303,7 @@ function loadProductIntoModal(product) {
       const img = document.createElement('img');
       img.src = src;
       img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
+      img.alt = escapeHtml(product.name) + ' product image';
       previewContainer.appendChild(img);
     });
   }
@@ -1350,7 +1387,7 @@ function openAuctionModal(productId) {
   if (display) {
     let imgHtml = '';
     if (product.images && product.images.length > 0) {
-      imgHtml = `<img src="${product.images[0]}" style="width:60px; height:60px; object-fit:cover; border-radius:8px; margin-right:12px; border:1px solid rgba(0,206,209,0.2);">`;
+      imgHtml = `<img src="${product.images[0]}" style="width:60px; height:60px; object-fit:cover; border-radius:8px; margin-right:12px; border:1px solid rgba(0,206,209,0.2);" alt="${escapeHtml(product.name)} auction image">`;
     }
     display.innerHTML = `
       <div style="display:flex; align-items:center;">
@@ -1540,7 +1577,7 @@ function syncToBuyerArena() {
       try {
         supabaseClient.from('auctions').upsert(buyerData.auctions.map(a => ({
           id: a.id,
-          seller_id: window.currentUserId || null,
+          seller: window.currentUserId || null,
           brief_id: a.id,
           product: a.product,
           variety: a.variety,
@@ -1832,6 +1869,7 @@ function renderCompany() {
         div.className = 'photo-item';
         const img = document.createElement('img');
         img.src = src;
+        img.alt = 'Company photo';
         img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
         div.appendChild(img);
         photosGrid.appendChild(div);
@@ -1867,7 +1905,7 @@ function renderCertificates() {
     const certImage = APP_STATE.company.documents?.[type] || null;
     let imageHtml;
     if (certImage) {
-      imageHtml = `<div class="cert-preview"><img src="${certImage}" style="cursor:pointer;" onclick="window.open('${certImage}','_blank')"></div>`;
+      imageHtml = `<div class="cert-preview"><img src="${certImage}" alt="${escapeHtml(info.label)} certificate" style="cursor:pointer;" onclick="window.open('${certImage}','_blank')"></div>`;
     } else {
       imageHtml = `<div class="cert-preview" onclick="document.getElementById('certUpload_${type}').click()">
         <span class="placeholder">📤 Upload</span>
@@ -1979,7 +2017,7 @@ function renderProducts() {
     let imageHtml;
     if (product.images && product.images.length > 0) {
       const imgSrc = product.images[0];
-      imageHtml = `<img src="${imgSrc}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none';this.parentNode.innerHTML='<span class=\\'no-image\\'>📷 Error</span>';">`;
+      imageHtml = `<img src="${imgSrc}" alt="${escapeHtml(product.name)} product" onerror="this.style.display='none';this.parentNode.innerHTML='<span class=\\'no-image\\'>📷 Error</span>';">`;
     } else {
       imageHtml = '<span class="no-image">📷 No image</span>';
     }
@@ -2275,41 +2313,58 @@ function setupFileUploads() {
     };
   }
 
-  const docFiles = [
-    { input: $('incorpFileInput'), statusId: 'incorpDocStatus', key: 'incorporation' },
-    { input: $('licenseFileInput'), statusId: 'licenseDocStatus', key: 'license' },
-    { input: $('taxFileInput'), statusId: 'taxDocStatus', key: 'tax' }
-  ];
-  docFiles.forEach(({ input, statusId, key }) => {
-    if (input) {
-      input.onchange = function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          if (file.size > 10 * 1024 * 1024) {
-            showToast('Document too large. Max 10MB.', 'error');
-            this.value = '';
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
-            APP_STATE.company.documents[key] = ev.target.result;
-            saveToStorage().then(() => {
-              renderCompany();
-              const statusEl = $(statusId);
-              if (statusEl) statusEl.textContent = '✅ Uploaded';
-              showToast('Document uploaded!', 'success');
-            }).catch(() => {
-              showToast('⚠️ Document uploaded but storage failed', 'warning');
-            });
-          };
-          reader.onerror = () => showToast('Failed to read file', 'error');
-          reader.readAsDataURL(file);
-        }
-        this.value = '';
-      };
+  // Document upload handlers (using event listeners)
+  const incorpUploadBtn = $('incorpUploadBtn');
+  const licenseUploadBtn = $('licenseUploadBtn');
+  const taxUploadBtn = $('taxUploadBtn');
+  const incorpInput = $('incorpFileInput');
+  const licenseInput = $('licenseFileInput');
+  const taxInput = $('taxFileInput');
+
+  if (incorpUploadBtn && incorpInput) {
+    incorpUploadBtn.onclick = () => incorpInput.click();
+    incorpInput.onchange = function(e) {
+      handleDocUpload(e, 'incorporation', 'incorpDocStatus');
+    };
+  }
+  if (licenseUploadBtn && licenseInput) {
+    licenseUploadBtn.onclick = () => licenseInput.click();
+    licenseInput.onchange = function(e) {
+      handleDocUpload(e, 'license', 'licenseDocStatus');
+    };
+  }
+  if (taxUploadBtn && taxInput) {
+    taxUploadBtn.onclick = () => taxInput.click();
+    taxInput.onchange = function(e) {
+      handleDocUpload(e, 'tax', 'taxDocStatus');
+    };
+  }
+
+  function handleDocUpload(e, key, statusId) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Document too large. Max 10MB.', 'error');
+      e.target.value = '';
+      return;
     }
-  });
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
+      APP_STATE.company.documents[key] = ev.target.result;
+      saveToStorage().then(() => {
+        renderCompany();
+        const statusEl = $(statusId);
+        if (statusEl) statusEl.textContent = '✅ Uploaded';
+        showToast('Document uploaded!', 'success');
+      }).catch(() => {
+        showToast('⚠️ Document uploaded but storage failed', 'warning');
+      });
+    };
+    reader.onerror = () => showToast('Failed to read file', 'error');
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
 
   const productImagesInput = $('productImagesInput');
   if (productImagesInput) {
@@ -2327,12 +2382,46 @@ function setupFileUploads() {
         reader.onload = (ev) => {
           const img = document.createElement('img');
           img.src = ev.target.result;
+          img.alt = 'Product image preview';
           img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
           previewContainer.appendChild(img);
         };
         reader.readAsDataURL(file);
       });
     };
+  }
+}
+
+/* ==================== AUTH GUARD ==================== */
+async function checkAuth() {
+  if (!window.supabaseClient) {
+    window.location.href = 'signin.html?reason=no_auth';
+    return false;
+  }
+
+  try {
+    const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+
+    if (error || !session) {
+      console.log('🔴 No valid session found');
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('supabase') || key.startsWith('sb-') || key.startsWith('tradeaux_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      sessionStorage.clear();
+      window.location.href = 'signin.html?reason=session_expired';
+      return false;
+    }
+
+    window.currentUserId = session.user.id;
+    console.log('✅ Authenticated as:', session.user.email);
+    return true;
+
+  } catch (e) {
+    console.error('❌ Auth check failed:', e);
+    window.location.href = 'signin.html?reason=check_failed';
+    return false;
   }
 }
 
@@ -2672,77 +2761,136 @@ function restoreAuction(archiveId) {
   });
 }
 
+/* ==================== BULLETPROOF SIGN OUT ==================== */
+async function bulletproofSignOut() {
+  console.log('🔒 Starting bulletproof sign out...');
+
+  try {
+    if (window.supabaseClient) {
+      await window.supabaseClient.auth.signOut({ scope: 'global' });
+    }
+  } catch (e) {
+    console.log('⚠️ Supabase signOut error (ignoring):', e.message);
+  }
+
+  await new Promise(r => setTimeout(r, 300));
+
+  const lsKeys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    lsKeys.push(localStorage.key(i));
+  }
+  lsKeys.forEach(key => {
+    if (key && (key.includes('supabase') || key.startsWith('sb-') || key.startsWith('tradeaux_'))) {
+      localStorage.removeItem(key);
+      console.log('🗑️ Removed localStorage key:', key);
+    }
+  });
+
+  sessionStorage.clear();
+  console.log('🗑️ sessionStorage cleared');
+
+  window.location.href = 'signin.html?logout=1&_t=' + Date.now();
+}
+
 /* ==================== EVENT LISTENERS ==================== */
 function initEventListeners() {
   const addProductBtn = $('addProductBtn');
-  if (addProductBtn) addProductBtn.onclick = () => openProductModal();
+  if (addProductBtn) {
+    addProductBtn.addEventListener('click', () => openProductModal());
+  }
   
   const saveProductBtn = $('saveProductBtn');
-  if (saveProductBtn) saveProductBtn.onclick = () => saveProduct();
+  if (saveProductBtn) {
+    saveProductBtn.addEventListener('click', () => saveProduct());
+  }
   
   const saveAndPostBtn = $('saveAndPostBtn');
-  if (saveAndPostBtn) saveAndPostBtn.onclick = () => saveProduct((id) => { setTimeout(() => openAuctionModal(id), 300); });
+  if (saveAndPostBtn) {
+    saveAndPostBtn.addEventListener('click', () => saveProduct((id) => { setTimeout(() => openAuctionModal(id), 300); }));
+  }
   
   const submitAuctionBtn = $('submitAuctionBtn');
-  if (submitAuctionBtn) submitAuctionBtn.onclick = postAuction;
+  if (submitAuctionBtn) {
+    submitAuctionBtn.addEventListener('click', postAuction);
+  }
   
   const depositBtn = $('depositBtn');
-  if (depositBtn) depositBtn.onclick = processDeposit;
+  if (depositBtn) {
+    depositBtn.addEventListener('click', processDeposit);
+  }
   
   const authBtn = $('authBtn');
   if (authBtn) {
-    authBtn.onclick = function(e) { 
-      e.preventDefault(); 
-      if (confirm('Sign out?')) { 
-        // ✅ Targeted removal instead of localStorage.clear()
-        Object.keys(localStorage).filter(k => k.startsWith('tradeaux_')).forEach(k => localStorage.removeItem(k));
-        location.reload(); 
-      } 
-    };
+    authBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (confirm('Sign out?')) {
+        bulletproofSignOut();
+      }
+    });
   }
   
   const tarAutoConvertBtn = $('tarAutoConvertBtn');
-  if (tarAutoConvertBtn) tarAutoConvertBtn.onclick = autoConvertReady;
+  if (tarAutoConvertBtn) {
+    tarAutoConvertBtn.addEventListener('click', autoConvertReady);
+  }
   
   const tourBtn = $('tourBtn');
-  if (tourBtn) tourBtn.onclick = startTour;
+  if (tourBtn) {
+    tourBtn.addEventListener('click', startTour);
+  }
   
   const tourCloseBtn = $('tourCloseBtn');
-  if (tourCloseBtn) tourCloseBtn.onclick = endTour;
+  if (tourCloseBtn) {
+    tourCloseBtn.addEventListener('click', endTour);
+  }
   
   const tarAdviceBtn = $('tarAdviceBtn');
   if (tarAdviceBtn) {
-    tarAdviceBtn.onclick = function() { showToast('💡 TAR Advisory: Check your receivables and auctions!', 'info'); };
+    tarAdviceBtn.addEventListener('click', function() { showToast('💡 TAR Advisory: Check your receivables and auctions!', 'info'); });
   }
   
   const tarSettingsBtn = $('tarSettingsBtn');
   if (tarSettingsBtn) {
-    tarSettingsBtn.onclick = function() { showToast('⚙️ TAR Settings: Fee $25 • Batch 50 • Auto-Convert ON', 'info'); };
+    tarSettingsBtn.addEventListener('click', function() { showToast('⚙️ TAR Settings: Fee $25 • Batch 50 • Auto-Convert ON', 'info'); });
   }
   
   const archiveToggleBtn = $('archiveToggleBtn');
-  if (archiveToggleBtn) archiveToggleBtn.onclick = toggleArchive;
+  if (archiveToggleBtn) {
+    archiveToggleBtn.addEventListener('click', toggleArchive);
+  }
   
   const auctionRefreshBtn = $('auctionRefreshBtn');
   if (auctionRefreshBtn) {
-    auctionRefreshBtn.onclick = function() { 
+    auctionRefreshBtn.addEventListener('click', function() { 
       APP_STATE.tar.cachedAuctions = null; 
       renderAuctionSchedule(); 
       showToast('🔄 Auctions refreshed!', 'info'); 
-    };
+    });
   }
   
   const syncCloudBtn = $('syncCloudBtn');
   if (syncCloudBtn) {
-    syncCloudBtn.onclick = function() { saveToStorage().then(() => showToast('☁️ Synced to cloud!', 'success')).catch(() => showToast('⚠️ Sync failed', 'error')); };
+    syncCloudBtn.addEventListener('click', function() { saveToStorage().then(() => showToast('☁️ Synced to cloud!', 'success')).catch(() => showToast('⚠️ Sync failed', 'error')); });
   }
   
   const editCompanyBtn = $('editCompanyBtn');
-  if (editCompanyBtn) editCompanyBtn.onclick = openCompanyModal;
+  if (editCompanyBtn) {
+    editCompanyBtn.addEventListener('click', openCompanyModal);
+  }
+  
+  const saveCompanyBtn = $('saveCompanyBtn');
+  if (saveCompanyBtn) {
+    saveCompanyBtn.addEventListener('click', saveCompanyProfile);
+  }
+  
+  const updateOrderBtn = $('updateOrderBtn');
+  if (updateOrderBtn) {
+    updateOrderBtn.addEventListener('click', updateOrderStatus);
+  }
   
   const addCertBtn = $('addCertBtn');
   if (addCertBtn) {
-    addCertBtn.onclick = function() {
+    addCertBtn.addEventListener('click', function() {
       const dropdown = $('certDropdown');
       if (!dropdown) { showToast('Certificate dropdown not found', 'error'); return; }
       const type = dropdown.value;
@@ -2756,12 +2904,19 @@ function initEventListeners() {
       }).catch(() => {
         showToast('⚠️ Certificate added but storage failed', 'warning');
       });
-    };
+    });
   }
 }
 
 /* ==================== INIT ==================== */
 async function initApp() {
+  // 🔒 AUTH GUARD - Check authentication first
+  const isAuthed = await checkAuth();
+  if (!isAuthed) {
+    console.log('🔒 Not authenticated, redirecting to signin');
+    return;
+  }
+
   try {
     showToast('🔐 Loading dashboard...', 'info');
     const loaded = await loadFromStorage();
@@ -2787,12 +2942,12 @@ async function initApp() {
     setupIdealPriceSlider();
     setupPackagingPreview();
     setupFileUploads();
-    initEventListeners();
+    initEventListeners();  // ✅ Called ONCE here
     renderAll();
     syncToBuyerArena();
     
     document.querySelectorAll('.modal').forEach(m => {
-      m.onclick = (e) => { if (e.target === m) closeModal(m.id); };
+      m.addEventListener('click', (e) => { if (e.target === m) closeModal(m.id); });
     });
     
     document.addEventListener('keydown', function(e) {
@@ -2800,6 +2955,34 @@ async function initApp() {
         document.querySelectorAll('.modal').forEach(m => {
           if (m.style.display === 'flex') closeModal(m.id);
         });
+      }
+    });
+
+    // ===== AUTH STATE CHANGE LISTENER =====
+    if (window.supabaseClient) {
+      window.supabaseClient.auth.onAuthStateChange((event, session) => {
+        console.log('🔔 Auth state changed:', event);
+        if (event === 'SIGNED_OUT' || !session) {
+          Object.keys(localStorage).forEach(key => {
+            if (key.includes('supabase') || key.startsWith('sb-') || key.startsWith('tradeaux_')) {
+              localStorage.removeItem(key);
+            }
+          });
+          sessionStorage.clear();
+          window.location.href = 'signin.html?reason=signed_out';
+        }
+        if (event === 'USER_UPDATED') {
+          console.log('👤 User updated:', session?.user?.email);
+        }
+      });
+    }
+
+    // ===== BEFORUNLOAD HANDLER =====
+    window.addEventListener('beforeunload', function(e) {
+      if (APP_STATE.products.length > 0 || APP_STATE.briefs.length > 0) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return 'You have unsaved changes. Are you sure you want to leave?';
       }
     });
     
@@ -2833,7 +3016,9 @@ window.postAuction = postAuction;
 window.closeModal = closeModal;
 window.processDeposit = processDeposit;
 window.moveAuctionToArchive = moveAuctionToArchive;
+window.bulletproofSignOut = bulletproofSignOut;
 
+// ===== START THE APP =====
 initApp();
 </script>
 </body>
