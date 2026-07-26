@@ -524,6 +524,9 @@
   </div>
 </div></div>
 
+<div class="toast" id="toast">Action completed</div>
+
+<script>
 // ============================================================
 // SUPABASE CONFIGURATION
 // ============================================================
@@ -535,19 +538,12 @@ if (!window.supabase) {
   throw new Error('Supabase not loaded');
 }
 
-// Only declare if not already defined
+// Only declare if not already defined (prevents "already declared" errors)
 if (typeof supabase === 'undefined') {
   var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
   console.log('✅ Supabase already initialized, using existing instance');
 }
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} else {
-  console.log('Supabase already initialized');
-}
-}
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
 // STATE
@@ -926,6 +922,47 @@ async function loadAllBids() { return loadData('bids', 'allBids'); }
 async function loadTransportBids() { return loadData('transport_bids', 'transportBids'); }
 async function loadInsuranceBids() { return loadData('insurance_bids', 'insuranceBids'); }
 async function loadBankingBids() { return loadData('banking_bids', 'bankingBids'); }
+
+async function loadAllBots() {
+  try {
+    const [bb, sb, fb, ib, bk] = await Promise.all([
+      supabase.from('buyer_bots').select('*, profiles(full_name, email)'),
+      supabase.from('seller_bots').select('*, profiles(full_name, email)'),
+      supabase.from('freight_bots').select('*, profiles(full_name, email)'),
+      supabase.from('insurer_bots').select('*, profiles(full_name, email)'),
+      supabase.from('banker_bots').select('*, profiles(full_name, email)')
+    ]);
+    AppState.allBots = [];
+    const process = (data, type, rateField) => {
+      (data || []).forEach(b => {
+        const p = b.profiles || {};
+        const wins = b.won_count || 0;
+        const total = b.total_bids || 0;
+        AppState.allBots.push({
+          id: b.id, name: b.bot_name || type + ' Bot', type: type,
+          owner_name: p.full_name || p.email || 'Unknown',
+          wins, losses: total - wins, total_bids: total,
+          total_volume: b.total_volume || 0,
+          win_rate: total ? ((wins/total)*100).toFixed(1) : 0,
+          avg_rate: b[rateField] || 0,
+          commodity: b.commodity || 'All',
+          status: b.is_active ? 'active' : 'idle'
+        });
+      });
+    };
+    process(bb.data, 'buyer', 'avg_bid_rate');
+    process(sb.data, 'seller', 'avg_reserve_price');
+    process(fb.data, 'freight', 'avg_bid_rate');
+    process(ib.data, 'insurer', 'avg_premium_rate');
+    process(bk.data, 'banker', 'avg_discount_rate');
+    renderBotLeaderboard();
+  } catch(e) {
+    console.error('Bots error:', e);
+    AppState.allBots = [];
+    renderBotLeaderboard();
+    showToast('⚠️ Could not load bot data', true);
+  }
+}
 
 async function loadAllData() {
   showToast('Loading...');
@@ -1580,47 +1617,6 @@ async function confirmAddFunds() {
 // ============================================================
 // BOTS
 // ============================================================
-async function loadAllBots() {
-  try {
-    const [bb, sb, fb, ib, bk] = await Promise.all([
-      supabase.from('buyer_bots').select('*, profiles(full_name, email)'),
-      supabase.from('seller_bots').select('*, profiles(full_name, email)'),
-      supabase.from('freight_bots').select('*, profiles(full_name, email)'),
-      supabase.from('insurer_bots').select('*, profiles(full_name, email)'),
-      supabase.from('banker_bots').select('*, profiles(full_name, email)')
-    ]);
-    AppState.allBots = [];
-    const process = (data, type, rateField) => {
-      (data || []).forEach(b => {
-        const p = b.profiles || {};
-        const wins = b.won_count || 0;
-        const total = b.total_bids || 0;
-        AppState.allBots.push({
-          id: b.id, name: b.bot_name || type + ' Bot', type: type,
-          owner_name: p.full_name || p.email || 'Unknown',
-          wins, losses: total - wins, total_bids: total,
-          total_volume: b.total_volume || 0,
-          win_rate: total ? ((wins/total)*100).toFixed(1) : 0,
-          avg_rate: b[rateField] || 0,
-          commodity: b.commodity || 'All',
-          status: b.is_active ? 'active' : 'idle'
-        });
-      });
-    };
-    process(bb.data, 'buyer', 'avg_bid_rate');
-    process(sb.data, 'seller', 'avg_reserve_price');
-    process(fb.data, 'freight', 'avg_bid_rate');
-    process(ib.data, 'insurer', 'avg_premium_rate');
-    process(bk.data, 'banker', 'avg_discount_rate');
-    renderBotLeaderboard();
-  } catch(e) {
-    console.error('Bots error:', e);
-    AppState.allBots = [];
-    renderBotLeaderboard();
-    showToast('⚠️ Could not load bot data', true);
-  }
-}
-
 function renderBotLeaderboard() {
   const container = document.getElementById('botLeaderboard');
   if (!container) return;
@@ -1908,7 +1904,6 @@ async function autoCloseExpired() {
           }
         }
       }
-      // Only update local state if DB update succeeded or there was no DB to update
       if (dbSuccess || !a.supabaseId) {
         a.status = 'closed';
         updated = true;
@@ -1955,7 +1950,6 @@ function renderMarketInitPanel() {
   const container = document.getElementById('marketInitPanel');
   if (!container) return;
   
-  // Load from storage once
   if (!AppState._marketInitLoaded) {
     loadMarketInitFromStorage();
   }
@@ -2354,7 +2348,7 @@ document.querySelectorAll('.modal:not(#confirmModal)').forEach(m => {
 });
 
 // ============================================================
-// ESCAPE KEY - Close only topmost modal
+// ESCAPE KEY
 // ============================================================
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
@@ -2403,7 +2397,6 @@ window.addEventListener('pagehide', function() {
 document.addEventListener('DOMContentLoaded', async function() {
   loadMarketStatus();
   if (await checkAuth()) {
-    // Load market init from storage once
     loadMarketInitFromStorage();
     await loadAllData();
     showSection('dashboard');
