@@ -1,4 +1,12 @@
 // =====================================================
+// SAFETY CHECK: Supabase CDN loaded
+// =====================================================
+if (!window.supabase) {
+  document.body.innerHTML = '<div style="color:#ff6b6b;text-align:center;padding:40px;font-family:sans-serif;">Failed to load Supabase. Check your internet connection.</div>';
+  throw new Error('Supabase CDN not loaded');
+}
+
+// =====================================================
 // SUPABASE CONFIGURATION — persistSession: true
 // =====================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
@@ -77,9 +85,9 @@ const signInRateLimit = createRateLimiter();
 const signUpRateLimit = createRateLimiter();
 
 // =====================================================
-// BULLETPROOF LOGOUT
+// BULLETPROOF SIGN OUT
 // =====================================================
-async function bulletproofSignOut() {
+async function fullSignOut() {
   authCheckComplete = false;
 
   try {
@@ -96,7 +104,8 @@ async function bulletproofSignOut() {
     'sb-pfutaovwbygefummienf-auth-token',
     'sb-pfutaovwbygefummienf-auth-token-code-verifier',
     'tradeaux_user',
-    'tradeaux_role'
+    'tradeaux_role',
+    'tradeaux_user_email'
   ];
   knownKeys.forEach(key => {
     if (localStorage.getItem(key) !== null) {
@@ -239,6 +248,10 @@ function redirectToDashboard(role) {
     el.classList.remove('visible');
   });
   showLoading(true, 'Redirecting...');
+  
+  // Set redirect guard before navigation
+  sessionStorage.setItem('auth_redirect_done', Date.now().toString());
+  
   setTimeout(() => { window.location.href = url; }, 300);
 }
 
@@ -266,6 +279,7 @@ async function showRolePicker(user) {
   }
 
   document.getElementById('userEmailDisplay').textContent = 'Welcome, ' + displayName;
+  localStorage.setItem('tradeaux_user_email', displayName);
 
   setTimeout(() => {
     const firstOption = document.querySelector('.role-option');
@@ -274,14 +288,38 @@ async function showRolePicker(user) {
 }
 
 // =====================================================
-// VALIDATE SESSION
+// STRIP QUERY PARAMS
+// =====================================================
+function stripQueryParams() {
+  const currentUrl = window.location.href;
+  const url = new URL(currentUrl);
+  const paramsToRemove = ['logout', 'blocked', 'expired', 'debug'];
+  let changed = false;
+  paramsToRemove.forEach(param => {
+    if (url.searchParams.has(param)) {
+      url.searchParams.delete(param);
+      changed = true;
+    }
+  });
+  if (changed) {
+    window.history.replaceState({}, document.title, url.toString());
+  }
+}
+
+// =====================================================
+// VALIDATE SESSION (bulletproof expiry)
 // =====================================================
 function isSessionValid(session) {
   if (!session) return false;
   if (!session.expires_at) return true;
-  const expiresAt = typeof session.expires_at === 'string' 
-    ? parseInt(session.expires_at, 10) 
-    : session.expires_at;
+  
+  let expiresAt = session.expires_at;
+  if (typeof expiresAt === 'string') {
+    // Try parsing as int first, then as date
+    const asInt = parseInt(expiresAt, 10);
+    expiresAt = isNaN(asInt) ? Math.floor(new Date(expiresAt).getTime() / 1000) : asInt;
+  }
+  
   const now = Math.floor(Date.now() / 1000);
   return expiresAt > now;
 }
@@ -298,6 +336,9 @@ function isOnline() {
 // MAIN AUTH CHECK
 // =====================================================
 async function checkAuth() {
+  // Strip dangerous query params FIRST to prevent loops
+  stripQueryParams();
+
   showLoading(true, 'Checking authentication...');
   document.querySelectorAll('.step-container').forEach(el => {
     el.classList.add('hidden');
@@ -310,13 +351,9 @@ async function checkAuth() {
     localStorage.removeItem('logoutProcessed');
   }
 
-  // Declare newUrl once — reuse in all branches
-  const newUrl = window.location.pathname;
-
+  // Check for logout/blocked/expired AFTER stripping params
   if (isLogout) {
-    // Clean URL before sign-out to prevent refresh loop
-    window.history.replaceState({}, document.title, newUrl);
-    await bulletproofSignOut();
+    await fullSignOut();
     showSuccess('You have been signed out.');
     if (isDebug) {
       document.getElementById('debugInfo').textContent = 'Signed out.';
@@ -327,26 +364,23 @@ async function checkAuth() {
   }
 
   if (isBlocked) {
-    await bulletproofSignOut();
+    await fullSignOut();
     showError('Access denied. Your account is not registered on this platform.');
     if (isDebug) {
       document.getElementById('debugInfo').textContent = 'Access denied.';
       document.getElementById('debugInfo').classList.add('visible');
     }
-    window.history.replaceState({}, document.title, newUrl);
     showStep('step1');
     return;
   }
 
   if (isExpired) {
-    // Clear stale session tokens
-    await bulletproofSignOut();
+    await fullSignOut();
     showError('Your session expired. Please sign in again.');
     if (isDebug) {
       document.getElementById('debugInfo').textContent = 'Session expired.';
       document.getElementById('debugInfo').classList.add('visible');
     }
-    window.history.replaceState({}, document.title, newUrl);
     showStep('step1');
     return;
   }
@@ -355,6 +389,18 @@ async function checkAuth() {
     showError('You are offline. Please check your internet connection.');
     showStep('step1');
     return;
+  }
+
+  // Check for redirect guard to prevent loops
+  const redirectDone = sessionStorage.getItem('auth_redirect_done');
+  if (redirectDone) {
+    const elapsed = Date.now() - parseInt(redirectDone, 10);
+    if (elapsed < 5000) {
+      showStep('step1');
+      return;
+    } else {
+      sessionStorage.removeItem('auth_redirect_done');
+    }
   }
 
   if (authCheckComplete) {
@@ -380,20 +426,25 @@ async function checkAuth() {
 
     if (!isSessionValid(data.session)) {
       showError('Your session expired. Please sign in again.');
-      await bulletproofSignOut();
+      await fullSignOut();
       window.location.href = 'signin.html?expired=1';
       return;
     }
 
     const user = data.session.user;
 
-    if (user.email_confirmed_at !== undefined && user.email_confirmed_at === null) {
-      showError('Please confirm your email before signing in.');
-      await bulletproofSignOut();
-      showStep('step1');
+    // FAST PATH: Check cached role first
+    const cachedRole = localStorage.getItem('tradeaux_role');
+    if (cachedRole && DASHBOARDS[cachedRole]) {
+      if (isDebug) {
+        document.getElementById('debugInfo').textContent = 'Cached role: ' + cachedRole + ' → redirecting';
+        document.getElementById('debugInfo').classList.add('visible');
+      }
+      redirectToDashboard(cachedRole);
       return;
     }
 
+    // Only fetch profile if no cached role
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('role')
@@ -401,35 +452,34 @@ async function checkAuth() {
       .maybeSingle();
 
     if (profileError) {
-      showError('Access denied. Please contact support.');
-      await bulletproofSignOut();
+      showError('Could not verify account. Please sign in again.');
       showStep('step1');
+      showLoading(false);
       return;
     }
 
     if (!profile) {
-      showError('Access denied. Your account is not registered on this platform.');
-      await bulletproofSignOut();
-      window.location.href = 'signin.html?blocked=1';
+      // New user or no profile — show role picker
+      showRolePicker(user);
       return;
     }
 
     if (profile && profile.role && DASHBOARDS[profile.role]) {
+      // Cache the role and redirect
+      localStorage.setItem('tradeaux_role', profile.role);
       const role = profile.role;
       if (isDebug) {
-        document.getElementById('debugInfo').textContent = 'Redirecting to ' + DASHBOARDS[role];
+        document.getElementById('debugInfo').textContent = 'Profile role: ' + role + ' → redirecting';
         document.getElementById('debugInfo').classList.add('visible');
       }
       redirectToDashboard(role);
     } else {
-      if (profile && profile.role === '') {
-        showError('Please select a role to continue.');
-      }
+      // Profile exists but role is empty/null — show role picker
       showRolePicker(user);
     }
 
   } catch (err) {
-    showError('Authentication check failed. Please try again.');
+    showError('Could not verify account. Please sign in again.');
     showStep('step1');
   } finally {
     if (!isRedirecting) {
@@ -453,7 +503,7 @@ async function createProfile(user, companyName, retries = 3) {
         email: user.email,
         full_name: companyName,
         company_name: companyName,
-        role: 'buyer',
+        role: '',
         wallet_balance: 0,
         created_at: new Date().toISOString()
       });
@@ -462,12 +512,14 @@ async function createProfile(user, companyName, retries = 3) {
         return { success: true };
       }
       
+      // Check for duplicate key violation — ignore, it's fine
       if (error.code === '23505' || error.code === '409' || error.status === 409 ||
           (error.message && error.message.toLowerCase().includes('duplicate')) ||
           (error.details && error.details.toLowerCase().includes('already exists'))) {
         return { success: true };
       }
       
+      // Check for RLS/permission error
       if (error.code === '42501' || (error.message && error.message.toLowerCase().includes('permission denied'))) {
         return { success: false, error: error, isRlsError: true };
       }
@@ -487,26 +539,26 @@ async function createProfile(user, companyName, retries = 3) {
 }
 
 // =====================================================
+// PASSWORD TOGGLE
+// =====================================================
+document.getElementById('togglePassword1').addEventListener('click', function() {
+  const pw = document.getElementById('password');
+  const isPassword = pw.type === 'password';
+  pw.type = isPassword ? 'text' : 'password';
+  this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
+});
+
+document.getElementById('togglePassword2').addEventListener('click', function() {
+  const pw = document.getElementById('signupPassword');
+  const isPassword = pw.type === 'password';
+  pw.type = isPassword ? 'text' : 'password';
+  this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
+});
+
+// =====================================================
 // PAGE LOAD
 // =====================================================
 document.addEventListener('DOMContentLoaded', function() {
-  // =====================================================
-  // PASSWORD TOGGLE
-  // =====================================================
-  document.getElementById('togglePassword1').addEventListener('click', function() {
-    const pw = document.getElementById('password');
-    const isPassword = pw.type === 'password';
-    pw.type = isPassword ? 'text' : 'password';
-    this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
-  });
-
-  document.getElementById('togglePassword2').addEventListener('click', function() {
-    const pw = document.getElementById('signupPassword');
-    const isPassword = pw.type === 'password';
-    pw.type = isPassword ? 'text' : 'password';
-    this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
-  });
-
   if (isDebug) {
     document.getElementById('debugInfo').classList.add('visible');
   }
@@ -575,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // =====================================================
-  // FORM SUBMISSION HANDLERS (handle mobile "Go" button and Enter in inputs)
+  // FORM SUBMISSION HANDLERS
   // =====================================================
   document.getElementById('step1').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -588,7 +640,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // =====================================================
-  // ROLE PICKER ENTER KEY HANDLER (step 3 has no form)
+  // ROLE PICKER ENTER KEY HANDLER
   // =====================================================
   document.getElementById('roleContinueBtn').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !this.disabled) {
@@ -676,15 +728,18 @@ document.addEventListener('DOMContentLoaded', function() {
         throw error;
       }
 
-      if (data.user.email_confirmed_at !== undefined && data.user.email_confirmed_at === null) {
-        showError('Please confirm your email before signing in. Check your inbox.');
-        btn.disabled = false;
-        btn.textContent = 'Sign In';
-        signInButtonLocked = false;
+      // Reset rate limit on success
+      signInRateLimit.reset();
+
+      // Check cached role first
+      const cachedRole = localStorage.getItem('tradeaux_role');
+      if (cachedRole && DASHBOARDS[cachedRole]) {
+        redirectToDashboard(cachedRole);
         clearTimeout(timeoutId);
         return;
       }
 
+      // Fetch profile
       const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('role')
@@ -692,45 +747,36 @@ document.addEventListener('DOMContentLoaded', function() {
         .maybeSingle();
 
       if (profileError) {
-        showError('Access denied. Please contact support.');
-        await bulletproofSignOut();
-        clearTimeout(timeoutId);
+        showError('Could not verify account. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
         signInButtonLocked = false;
+        clearTimeout(timeoutId);
         return;
       }
 
-      if (!profile) {
-        showError('Access denied. Your account is not registered on this platform.');
-        await bulletproofSignOut();
-        clearTimeout(timeoutId);
-        signInButtonLocked = false;
-        return;
-      }
-
-      signInRateLimit.reset();
-
-      let role = null;
-      if (profile && profile.role && DASHBOARDS[profile.role]) {
-        role = profile.role;
-      }
-
-      if (role) {
-        clearTimeout(timeoutId);
-        signInButtonLocked = false;
-        redirectToDashboard(role);
-      } else {
+      if (!profile || !profile.role || !DASHBOARDS[profile.role]) {
+        // No role set — show role picker
         signInButtonLocked = false;
         btn.disabled = false;
         btn.textContent = 'Sign In';
         clearTimeout(timeoutId);
         showRolePicker(data.user);
+        return;
       }
+
+      // Cache the role and redirect
+      localStorage.setItem('tradeaux_role', profile.role);
+      redirectToDashboard(profile.role);
+      clearTimeout(timeoutId);
 
     } catch (error) {
       if (error.message.includes('Invalid login credentials')) {
         showError('Invalid email or password.');
       } else if (error.message.includes('Email not confirmed')) {
         showError('Please confirm your email before signing in.');
+      } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+        showError('Network error. Please try again.');
       } else {
         showError(error.message);
       }
@@ -849,8 +895,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await createProfile(data.user, sanitizedCompany);
         if (!result.success) {
           if (result.isRlsError) {
-            // Sign out the user since profile creation failed with RLS
-            await bulletproofSignOut();
+            await fullSignOut();
             showError('Account created but permission denied. Please contact support.');
           } else {
             showError('Account created but profile setup failed. Please sign in and contact support.');
@@ -860,8 +905,11 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
+        // ✅ Profile created — show role picker for first-time user
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
         signUpRateLimit.reset();
-        redirectToDashboard('buyer');
+        showRolePicker(data.user);
       }
 
     } catch (error) {
@@ -950,6 +998,10 @@ document.addEventListener('DOMContentLoaded', function() {
           btn.textContent = 'Go to Dashboard →';
           return;
         }
+        
+        // Cache the role immediately
+        localStorage.setItem('tradeaux_role', selectedRole);
+        redirectToDashboard(selectedRole);
       } catch (e) {
         console.error('[Role save exception]', e.message);
         showError('Could not save role. Please try again.');
@@ -963,8 +1015,6 @@ document.addEventListener('DOMContentLoaded', function() {
       showError('Please sign in again.');
       return;
     }
-
-    redirectToDashboard(selectedRole);
   });
 
   // =====================================================
@@ -972,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // =====================================================
   document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
     e.preventDefault();
-    await bulletproofSignOut();
+    await fullSignOut();
     window.location.href = 'signin.html?logout=1&_t=' + Date.now();
   });
 
@@ -984,23 +1034,7 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     if (forgotPasswordLocked) return;
 
-    // Check if step1 is visible AND auth check is complete before allowing password reset
-    const step1 = document.getElementById('step1');
-    if (!step1 || step1.classList.contains('hidden') || !step1.classList.contains('visible') || !authCheckComplete) {
-      showError('Please go to the Sign In page first.');
-      return;
-    }
-
-    forgotPasswordLocked = true;
-
-    if (!isOnline()) {
-      showError('You are offline. Please check your internet connection.');
-      forgotPasswordLocked = false;
-      return;
-    }
-
     const email = document.getElementById('email').value.trim();
-    const link = this;
 
     document.querySelectorAll('.error-field, [aria-invalid="true"]').forEach(el => {
       el.classList.remove('error-field');
@@ -1013,7 +1047,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('email').classList.add('error-field');
       document.getElementById('email').setAttribute('aria-invalid', 'true');
       document.getElementById('email').setAttribute('aria-describedby', 'errorMsg');
-      forgotPasswordLocked = false;
       return;
     }
 
@@ -1022,16 +1055,17 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('email').classList.add('error-field');
       document.getElementById('email').setAttribute('aria-invalid', 'true');
       document.getElementById('email').setAttribute('aria-describedby', 'errorMsg');
-      forgotPasswordLocked = false;
       return;
     }
 
+    forgotPasswordLocked = true;
+    const link = this;
     const originalText = link.textContent;
     link.textContent = 'Sending...';
 
     try {
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.href.split('?')[0].split('#')[0]
+        redirectTo: window.location.origin + window.location.pathname
       });
       if (error) throw error;
       showSuccess('Password reset email sent!');
@@ -1046,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // =====================================================
-  // KEYBOARD SUPPORT (global Enter handler is REMOVED — form submit handlers handle it)
+  // KEYBOARD SUPPORT
   // =====================================================
   // No global Enter handler — form submit handlers handle Enter in inputs
   // and mobile "Go" buttons. Role picker has its own Enter handler.
