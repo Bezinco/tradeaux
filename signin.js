@@ -1,10 +1,32 @@
 // =====================================================
-// SAFETY CHECK: Supabase CDN loaded
+// SAFETY CHECK: Supabase CDN loaded (BLOCKING)
 // =====================================================
-if (!window.supabase) {
-  document.body.innerHTML = '<div style="color:#ff6b6b;text-align:center;padding:40px;font-family:sans-serif;">Failed to load Supabase. Check your internet connection.</div>';
-  throw new Error('Supabase CDN not loaded');
+function waitForSupabase(retries = 10, delay = 300) {
+  return new Promise((resolve, reject) => {
+    function check() {
+      if (window.supabase) {
+        resolve();
+        return;
+      }
+      if (retries <= 0) {
+        document.body.innerHTML = '<div style="color:#ff6b6b;text-align:center;padding:40px;font-family:sans-serif;">Failed to load Supabase. Check your internet connection.</div>';
+        reject(new Error('Supabase CDN not loaded after retries'));
+        return;
+      }
+      retries--;
+      setTimeout(check, delay);
+    }
+    check();
+  });
 }
+
+// =====================================================
+// WRAP EVERYTHING IN ASYNC IIFE (top-level await fix)
+// =====================================================
+(async function() {
+
+// Wait for Supabase to load before continuing
+await waitForSupabase();
 
 // =====================================================
 // SUPABASE CONFIGURATION — persistSession: true
@@ -98,7 +120,6 @@ async function fullSignOut() {
 
   await new Promise(r => setTimeout(r, 500));
 
-  // Remove known Supabase keys directly
   const knownKeys = [
     'supabase.auth.token',
     'sb-pfutaovwbygefummienf-auth-token',
@@ -113,7 +134,6 @@ async function fullSignOut() {
     }
   });
 
-  // Also remove any keys with 'supabase' or 'sb-' in the name
   const lsKeys = [];
   for (let i = 0; i < localStorage.length; i++) {
     lsKeys.push(localStorage.key(i));
@@ -186,11 +206,9 @@ function showLoading(show, text) {
 }
 
 function showStep(stepId) {
-  // Clear any lingering error/success messages when switching steps
   document.getElementById('errorMsg').style.display = 'none';
   document.getElementById('successMsg').style.display = 'none';
 
-  // Clear ARIA-invalid and error-field attributes from inputs
   document.querySelectorAll('.error-field, [aria-invalid="true"]').forEach(el => {
     el.classList.remove('error-field');
     el.removeAttribute('aria-invalid');
@@ -249,10 +267,9 @@ function redirectToDashboard(role) {
   });
   showLoading(true, 'Redirecting...');
   
-  // Set redirect guard before navigation
   sessionStorage.setItem('auth_redirect_done', Date.now().toString());
   
-  setTimeout(() => { window.location.href = url; }, 300);
+  window.location.href = url;
 }
 
 async function showRolePicker(user) {
@@ -288,6 +305,128 @@ async function showRolePicker(user) {
 }
 
 // =====================================================
+// CONTINUE BANNER
+// =====================================================
+function showContinueBanner(email) {
+  const step1 = document.getElementById('step1');
+  const existingBanner = document.getElementById('continueBanner');
+  if (existingBanner) existingBanner.remove();
+
+  const displayEmail = email || 'Unknown';
+
+  const banner = document.createElement('div');
+  banner.id = 'continueBanner';
+  banner.style.cssText = `
+    background: rgba(0, 206, 209, 0.08);
+    border: 1px solid rgba(0, 206, 209, 0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  `;
+  banner.innerHTML = `
+    <div>
+      <div style="color: #7CFC00; font-size: 13px; font-weight: 600;">✅ Signed in as</div>
+      <div style="color: #e5e7eb; font-size: 14px; font-family: monospace;">${displayEmail}</div>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <button type="button" id="continueBtn" style="
+        background: linear-gradient(135deg, #00ced1, #00ff7f);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        color: #000;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: auto;
+        flex-shrink: 0;
+      ">Continue →</button>
+      <button type="button" id="signOutBannerBtn" style="
+        background: transparent;
+        border: 1px solid #ff6b6b;
+        border-radius: 8px;
+        padding: 7px 16px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        color: #ff6b6b;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: auto;
+        flex-shrink: 0;
+      ">Sign out</button>
+    </div>
+  `;
+
+  const formActions = step1.querySelector('.form-actions');
+  if (formActions) {
+    step1.insertBefore(banner, formActions);
+  } else {
+    const signinBtn = document.getElementById('signinBtn');
+    if (signinBtn) {
+      step1.insertBefore(banner, signinBtn.parentNode);
+    } else {
+      step1.appendChild(banner);
+    }
+  }
+
+  // Continue button
+  const continueBtn = document.getElementById('continueBtn');
+  continueBtn.addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = 'Loading...';
+    this.style.opacity = '0.7';
+    this.style.cursor = 'wait';
+
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      
+      if (!session) {
+        showError('Session expired. Please sign in again.');
+        const banner = document.getElementById('continueBanner');
+        if (banner) banner.remove();
+        return;
+      }
+      
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .maybeSingle();
+      if (profile && profile.role && DASHBOARDS[profile.role]) {
+        localStorage.setItem('tradeaux_role', profile.role);
+        redirectToDashboard(profile.role);
+      } else {
+        showRolePicker(session.user);
+      }
+    } finally {
+      this.disabled = false;
+      this.textContent = 'Continue →';
+      this.style.opacity = '1';
+      this.style.cursor = 'pointer';
+    }
+  });
+
+  // Sign out button
+  const signOutBtn = document.getElementById('signOutBannerBtn');
+  signOutBtn.addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = 'Signing out...';
+    this.style.opacity = '0.7';
+    this.style.cursor = 'wait';
+    await fullSignOut();
+    window.location.href = 'signin.html?logout=1&_t=' + Date.now();
+  });
+}
+
+// =====================================================
 // STRIP QUERY PARAMS
 // =====================================================
 function stripQueryParams() {
@@ -307,7 +446,7 @@ function stripQueryParams() {
 }
 
 // =====================================================
-// VALIDATE SESSION (bulletproof expiry)
+// VALIDATE SESSION
 // =====================================================
 function isSessionValid(session) {
   if (!session) return false;
@@ -315,7 +454,6 @@ function isSessionValid(session) {
   
   let expiresAt = session.expires_at;
   if (typeof expiresAt === 'string') {
-    // Try parsing as int first, then as date
     const asInt = parseInt(expiresAt, 10);
     expiresAt = isNaN(asInt) ? Math.floor(new Date(expiresAt).getTime() / 1000) : asInt;
   }
@@ -333,10 +471,20 @@ function isOnline() {
 }
 
 // =====================================================
-// MAIN AUTH CHECK
+// COMPUTE REDIRECT URL (works for file:// too)
+// =====================================================
+function getRedirectUrl() {
+  const origin = window.location.origin;
+  if (!origin || origin === 'null') {
+    return 'https://example.com' + window.location.pathname;
+  }
+  return origin + window.location.pathname;
+}
+
+// =====================================================
+// MAIN AUTH CHECK — Always shows the sign-in form
 // =====================================================
 async function checkAuth() {
-  // Strip dangerous query params FIRST to prevent loops
   stripQueryParams();
 
   showLoading(true, 'Checking authentication...');
@@ -346,12 +494,10 @@ async function checkAuth() {
   });
   isRedirecting = false;
 
-  // Always clear logoutProcessed at the start to prevent stale flags
   if (localStorage.getItem('logoutProcessed')) {
     localStorage.removeItem('logoutProcessed');
   }
 
-  // Check for logout/blocked/expired AFTER stripping params
   if (isLogout) {
     await fullSignOut();
     showSuccess('You have been signed out.');
@@ -391,7 +537,6 @@ async function checkAuth() {
     return;
   }
 
-  // Check for redirect guard to prevent loops
   const redirectDone = sessionStorage.getItem('auth_redirect_done');
   if (redirectDone) {
     const elapsed = Date.now() - parseInt(redirectDone, 10);
@@ -431,52 +576,8 @@ async function checkAuth() {
       return;
     }
 
-    const user = data.session.user;
-
-    // FAST PATH: Check cached role first
-    const cachedRole = localStorage.getItem('tradeaux_role');
-    if (cachedRole && DASHBOARDS[cachedRole]) {
-      if (isDebug) {
-        document.getElementById('debugInfo').textContent = 'Cached role: ' + cachedRole + ' → redirecting';
-        document.getElementById('debugInfo').classList.add('visible');
-      }
-      redirectToDashboard(cachedRole);
-      return;
-    }
-
-    // Only fetch profile if no cached role
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (profileError) {
-      showError('Could not verify account. Please sign in again.');
-      showStep('step1');
-      showLoading(false);
-      return;
-    }
-
-    if (!profile) {
-      // New user or no profile — show role picker
-      showRolePicker(user);
-      return;
-    }
-
-    if (profile && profile.role && DASHBOARDS[profile.role]) {
-      // Cache the role and redirect
-      localStorage.setItem('tradeaux_role', profile.role);
-      const role = profile.role;
-      if (isDebug) {
-        document.getElementById('debugInfo').textContent = 'Profile role: ' + role + ' → redirecting';
-        document.getElementById('debugInfo').classList.add('visible');
-      }
-      redirectToDashboard(role);
-    } else {
-      // Profile exists but role is empty/null — show role picker
-      showRolePicker(user);
-    }
+    showStep('step1');
+    showContinueBanner(data.session.user.email);
 
   } catch (err) {
     showError('Could not verify account. Please sign in again.');
@@ -512,14 +613,12 @@ async function createProfile(user, companyName, retries = 3) {
         return { success: true };
       }
       
-      // Check for duplicate key violation — ignore, it's fine
       if (error.code === '23505' || error.code === '409' || error.status === 409 ||
           (error.message && error.message.toLowerCase().includes('duplicate')) ||
           (error.details && error.details.toLowerCase().includes('already exists'))) {
         return { success: true };
       }
       
-      // Check for RLS/permission error
       if (error.code === '42501' || (error.message && error.message.toLowerCase().includes('permission denied'))) {
         return { success: false, error: error, isRlsError: true };
       }
@@ -539,31 +638,34 @@ async function createProfile(user, companyName, retries = 3) {
 }
 
 // =====================================================
-// PASSWORD TOGGLE
+// INITIALIZATION — safe DOM ready check
 // =====================================================
-document.getElementById('togglePassword1').addEventListener('click', function() {
-  const pw = document.getElementById('password');
-  const isPassword = pw.type === 'password';
-  pw.type = isPassword ? 'text' : 'password';
-  this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
-});
-
-document.getElementById('togglePassword2').addEventListener('click', function() {
-  const pw = document.getElementById('signupPassword');
-  const isPassword = pw.type === 'password';
-  pw.type = isPassword ? 'text' : 'password';
-  this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
-});
-
-// =====================================================
-// PAGE LOAD
-// =====================================================
-document.addEventListener('DOMContentLoaded', function() {
+function init() {
   if (isDebug) {
     document.getElementById('debugInfo').classList.add('visible');
   }
 
-  // Character counter for company name with autofill detection
+  // Password toggles
+  const toggle1 = document.getElementById('togglePassword1');
+  if (toggle1) {
+    toggle1.addEventListener('click', function() {
+      const pw = document.getElementById('password');
+      const isPassword = pw.type === 'password';
+      pw.type = isPassword ? 'text' : 'password';
+      this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
+    });
+  }
+
+  const toggle2 = document.getElementById('togglePassword2');
+  if (toggle2) {
+    toggle2.addEventListener('click', function() {
+      const pw = document.getElementById('signupPassword');
+      const isPassword = pw.type === 'password';
+      pw.type = isPassword ? 'text' : 'password';
+      this.querySelector('.toggle-text').textContent = isPassword ? 'Hide' : 'Show';
+    });
+  }
+
   const nameInput = document.getElementById('companyNameInput');
   const charCounter = document.getElementById('charCounter');
   if (nameInput && charCounter) {
@@ -576,7 +678,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     nameInput.addEventListener('input', updateCounter);
     
-    // Autofill detection with time-based limit
     const startTime = Date.now();
     function checkAutofill() {
       if (nameInput.value.length > 0 || Date.now() - startTime > 1000) {
@@ -626,9 +727,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // =====================================================
-  // FORM SUBMISSION HANDLERS
-  // =====================================================
   document.getElementById('step1').addEventListener('submit', function(e) {
     e.preventDefault();
     document.getElementById('signinBtn').click();
@@ -639,9 +737,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('signupBtn').click();
   });
 
-  // =====================================================
-  // ROLE PICKER ENTER KEY HANDLER
-  // =====================================================
   document.getElementById('roleContinueBtn').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !this.disabled) {
       e.preventDefault();
@@ -669,6 +764,9 @@ document.addEventListener('DOMContentLoaded', function() {
         el.removeAttribute('aria-invalid');
         el.removeAttribute('aria-describedby');
       });
+
+      const banner = document.getElementById('continueBanner');
+      if (banner) banner.remove();
 
       if (!isOnline()) {
         showError('You are offline. Please check your internet connection.');
@@ -728,18 +826,10 @@ document.addEventListener('DOMContentLoaded', function() {
         throw error;
       }
 
-      // Reset rate limit on success
       signInRateLimit.reset();
 
-      // Check cached role first
-      const cachedRole = localStorage.getItem('tradeaux_role');
-      if (cachedRole && DASHBOARDS[cachedRole]) {
-        redirectToDashboard(cachedRole);
-        clearTimeout(timeoutId);
-        return;
-      }
+      localStorage.removeItem('tradeaux_role');
 
-      // Fetch profile
       const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('role')
@@ -756,7 +846,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       if (!profile || !profile.role || !DASHBOARDS[profile.role]) {
-        // No role set — show role picker
         signInButtonLocked = false;
         btn.disabled = false;
         btn.textContent = 'Sign In';
@@ -765,10 +854,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      // Cache the role and redirect
       localStorage.setItem('tradeaux_role', profile.role);
-      redirectToDashboard(profile.role);
       clearTimeout(timeoutId);
+      redirectToDashboard(profile.role);
 
     } catch (error) {
       if (error.message.includes('Invalid login credentials')) {
@@ -905,7 +993,6 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
-        // ✅ Profile created — show role picker for first-time user
         btn.disabled = false;
         btn.textContent = 'Create Account';
         signUpRateLimit.reset();
@@ -935,7 +1022,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         selectRole(this);
-        // If Enter on a role option, submit immediately if selected
         if (this.classList.contains('selected')) {
           document.getElementById('roleContinueBtn').click();
         }
@@ -999,7 +1085,6 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
         
-        // Cache the role immediately
         localStorage.setItem('tradeaux_role', selectedRole);
         redirectToDashboard(selectedRole);
       } catch (e) {
@@ -1064,8 +1149,9 @@ document.addEventListener('DOMContentLoaded', function() {
     link.textContent = 'Sending...';
 
     try {
+      const redirectTo = getRedirectUrl();
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: redirectTo
       });
       if (error) throw error;
       showSuccess('Password reset email sent!');
@@ -1078,10 +1164,18 @@ document.addEventListener('DOMContentLoaded', function() {
       forgotPasswordLocked = false;
     }
   });
+}
 
-  // =====================================================
-  // KEYBOARD SUPPORT
-  // =====================================================
-  // No global Enter handler — form submit handlers handle Enter in inputs
-  // and mobile "Go" buttons. Role picker has its own Enter handler.
-});
+// =====================================================
+// ✅ BUG 1 FIX: Safe DOM ready — handles both states
+// =====================================================
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+// =====================================================
+// ✅ BUG 2 FIX: Attach catch directly to the IIFE
+// =====================================================
+})().catch(() => {}); // end of async IIFE with error suppression
