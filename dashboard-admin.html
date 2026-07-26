@@ -535,14 +535,12 @@ if (!window.supabase) {
   throw new Error('Supabase not loaded');
 }
 
-// Use var to prevent "already declared" error when navigating from signin.html
-// Also handles case where supabase already exists in the global scope
+// Only declare if not already defined
 if (typeof supabase === 'undefined') {
   var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
   console.log('✅ Supabase already initialized, using existing instance');
 }
-  }
   supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
   console.log('Supabase already initialized');
