@@ -524,14 +524,24 @@
   </div>
 </div></div>
 
-<div class="toast" id="toast">Action completed</div>
+// ============================================================
+// SUPABASE CONFIGURATION
+// ============================================================
+const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-// Check if supabase already exists to avoid duplicate declaration
-let supabase;
+if (!window.supabase) {
+  document.body.innerHTML = '<div style="text-align:center;padding:40px;color:#ff3b3b;font-family:Inter,sans-serif;">❌ Failed to load required libraries. Please check your internet connection and refresh.</div>';
+  throw new Error('Supabase not loaded');
+}
+
+// Use var to prevent "already declared" error when navigating from signin.html
+// Also handles case where supabase already exists in the global scope
 if (typeof supabase === 'undefined') {
-  if (!window.supabase) {
-    document.body.innerHTML = '<div style="text-align:center;padding:40px;color:#ff3b3b;font-family:Inter,sans-serif;">❌ Failed to load required libraries. Please check your internet connection and refresh.</div>';
-    throw new Error('Supabase not loaded');
+  var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  console.log('✅ Supabase already initialized, using existing instance');
+}
   }
   supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
