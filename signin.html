@@ -3,194 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<!-- ===== PRODUCTION CSP ===== -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://pfutaovwbygefummienf.supabase.co https://cdn.jsdelivr.net; base-uri 'self';">
-
 <title>Sign In — TradeAux</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* ===== FALLBACK FONTS ===== */
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
 
+<style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   background: #020617;
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #e5e7eb;
-  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 .container {
   max-width: 450px;
+  width: 100%;
   margin: 0 auto;
-  padding: 40px 24px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow-x: hidden;
-}
-
-/* ===== 3D LOGO ===== */
-.gem-logo-corner {
-  position: relative;
-  margin: 0 auto 20px auto;
-  filter: drop-shadow(0 30px 50px rgba(124,252,0,0.5));
-  transform-style: preserve-3d;
-  perspective: 1000px;
-  width: fit-content;
-  max-width: 100%;
-}
-
-.gem-text {
-  font-size: 56px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  position: relative;
-  display: flex;
-  text-transform: uppercase;
-  line-height: 0.9;
-  font-family: 'Orbitron', sans-serif;
-  transform-style: preserve-3d;
-  gap: 2px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.gem-letter {
-  display: inline-block;
-  position: relative;
-  transform-style: preserve-3d;
-  animation: letterFloat 6s ease-in-out infinite;
-  filter: brightness(1.2);
-  font-size: 56px;
-  font-weight: 900;
-}
-
-.gem-letter:nth-child(1) { animation-delay: 0s; }
-.gem-letter:nth-child(2) { animation-delay: 0.2s; }
-.gem-letter:nth-child(3) { animation-delay: 0.4s; }
-.gem-letter:nth-child(4) { animation-delay: 0.6s; }
-.gem-letter:nth-child(5) { animation-delay: 0.8s; }
-.gem-letter:nth-child(6) { animation-delay: 1.0s; }
-.gem-letter:nth-child(7) { animation-delay: 1.2s; }
-.gem-letter:nth-child(8) { animation-delay: 1.4s; }
-
-@keyframes letterFloat {
-  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
-  50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
-}
-
-.gem-letter[data-letter="T"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="R"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="A"] {
-  background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="D"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="E"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="U"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="X"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-
-.gem-letter .edge-top {
-  position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
-  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
-}
-.gem-letter .edge-right {
-  position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
-  background: linear-gradient(270deg, rgba(255,255,255,0.3) 0%, transparent 100%);
-  mix-blend-mode: overlay; pointer-events: none; z-index: 5;
-}
-.gem-letter .edge-bottom {
-  position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
-  background: linear-gradient(0deg, rgba(0,50,0,0.3) 0%, transparent 100%);
-  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
-}
-.gem-letter .edge-left {
-  position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
-  background: linear-gradient(90deg, rgba(0,50,0,0.2) 0%, transparent 100%);
-  mix-blend-mode: multiply; pointer-events: none; z-index: 5;
-}
-
-.light-source {
-  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(124,252,0,0.1) 30%, transparent 70%);
-  animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay;
-}
-
-@keyframes rotateLight {
-  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
-  50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
-  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
-}
-
-.sparkle {
-  position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
-  box-shadow: 0 0 15px 3px white, 0 0 25px 6px #7CFC00;
-  animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
-}
-
-@keyframes sparkleFlash {
-  0% { opacity: 0; transform: scale(0.5); }
-  10% { opacity: 1; transform: scale(1.2); }
-  20% { opacity: 0.6; transform: scale(0.9); }
-  30% { opacity: 1; transform: scale(1.1); }
-  40% { opacity: 0; transform: scale(0.5); }
-  100% { opacity: 0; transform: scale(0.5); }
-}
-
-.depth-shadow {
-  position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
-  background: radial-gradient(ellipse at center, rgba(124,252,0,0.3) 0%, transparent 80%);
-  filter: blur(20px); z-index: -1;
-}
-
-.sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
-.sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
-.sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
-.sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
-.sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
-.sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
-.sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
-.sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
-.sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
-.sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
-
-.subtitle {
-  text-align: center;
-  color: #9ca3af;
-  margin-bottom: 40px;
-  font-size: 14px;
 }
 .auth-card {
   background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
   border: 1px solid rgba(0, 206, 209, 0.3);
   border-radius: 20px;
   padding: 40px;
+}
+.logo {
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 30px;
+  font-size: 14px;
 }
 input {
   width: 100%;
@@ -203,14 +58,11 @@ input {
   margin-bottom: 16px;
   font-size: 14px;
 }
-input:focus-visible {
+input:focus {
   outline: 2px solid #7CFC00;
   outline-offset: 2px;
 }
 input.error-field {
-  border-color: #ff6b6b;
-}
-input[aria-invalid="true"] {
   border-color: #ff6b6b;
 }
 button {
@@ -219,10 +71,9 @@ button {
   background: linear-gradient(135deg, #00ced1, #00ff7f);
   border: none;
   border-radius: 10px;
-  font-family: 'Orbitron', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Orbitron', sans-serif;
   font-weight: 800;
   cursor: pointer;
-  margin-top: 8px;
   font-size: 14px;
   color: #000;
   transition: all 0.3s ease;
@@ -234,34 +85,31 @@ button:hover:not(:disabled) {
 button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
-}
-button:focus-visible {
-  outline: 2px solid #7CFC00;
-  outline-offset: 2px;
-}
-button:active {
-  transform: scale(0.97);
 }
 .step-container {
+  display: none;
   opacity: 0;
   transition: opacity 0.25s ease;
 }
 .step-container.visible {
+  display: block;
   opacity: 1;
 }
 .step-container.hidden {
   display: none !important;
 }
 .loading-container {
-  text-align: center;
-  padding: 40px 0;
   display: none;
+  text-align: center;
+  padding: 20px 0;
 }
-.loading-container .spinner {
+.loading-container.visible {
+  display: block;
+}
+.spinner {
   display: inline-block;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border: 3px solid rgba(0,206,209,0.2);
   border-top-color: #00ced1;
   border-radius: 50%;
@@ -270,25 +118,22 @@ button:active {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-.loading-container.visible {
-  display: block;
-}
 .error {
-  color: #ff6b6b;
+  display: none;
   background: rgba(217,43,43,0.2);
+  color: #ff6b6b;
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 16px;
-  display: none;
   font-size: 13px;
 }
 .success {
-  color: #7CFC00;
+  display: none;
   background: rgba(124,252,0,0.1);
+  color: #7CFC00;
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 16px;
-  display: none;
   font-size: 13px;
 }
 .toggle {
@@ -302,16 +147,25 @@ button:active {
   cursor: pointer;
   text-decoration: underline;
 }
-.role-label {
-  font-size: 11px;
-  color: #FFD966;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-  display: block;
+.password-wrapper {
+  position: relative;
 }
-.role-picker {
-  margin-bottom: 20px;
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  width: auto;
+  padding: 4px 8px;
+  margin: 0;
+}
+.password-toggle:hover {
+  color: #e5e7eb;
 }
 .role-option {
   display: flex;
@@ -329,75 +183,24 @@ button:active {
   border-color: #00ced1;
   background: rgba(0,206,209,0.08);
 }
-.role-option:focus-visible {
-  outline: 2px solid #7CFC00;
-  outline-offset: 2px;
-}
 .role-option.selected {
   border-color: #7CFC00;
   background: rgba(124,252,0,0.1);
-  box-shadow: 0 0 30px rgba(124,252,0,0.08);
 }
 .role-option .emoji {
   font-size: 28px;
-  flex-shrink: 0;
 }
 .role-option .text {
   font-size: 16px;
   font-weight: 600;
 }
-.debug-info {
-  display: none;
-  font-size: 10px;
-  color: #6b7280;
-  text-align: center;
-  margin-top: 12px;
-  font-family: monospace;
-  border-top: 1px solid rgba(255,255,255,0.05);
-  padding-top: 12px;
-}
-.debug-info.visible { display: block; }
-.password-wrapper {
-  position: relative;
-}
-.password-toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  font-size: 18px;
-  width: auto;
-  padding: 4px 8px;
-  margin: 0;
-}
-.password-toggle:hover {
-  color: #e5e7eb;
-}
-.password-toggle .toggle-text {
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 0.5px;
-}
-.form-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.char-counter {
-  font-size: 10px;
-  color: #6b7280;
-  text-align: right;
-  margin-top: 2px;
-}
-.char-counter.warning {
+.role-label {
+  font-size: 11px;
   color: #FFD966;
-}
-.char-counter.danger {
-  color: #ff6b6b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  display: block;
 }
 #continueBanner {
   background: rgba(0, 206, 209, 0.08);
@@ -415,7 +218,6 @@ button:active {
   color: #e5e7eb;
   font-size: 14px;
   font-family: monospace;
-  word-break: break-all;
 }
 #continueBanner .banner-label {
   color: #7CFC00;
@@ -425,7 +227,6 @@ button:active {
 #continueBanner .banner-actions {
   display: flex;
   gap: 8px;
-  align-items: center;
   flex-wrap: wrap;
 }
 #continueBanner .btn-continue {
@@ -438,17 +239,7 @@ button:active {
   font-size: 12px;
   color: #000;
   cursor: pointer;
-  transition: all 0.3s ease;
   width: auto;
-  flex-shrink: 0;
-}
-#continueBanner .btn-continue:hover:not(:disabled) {
-  transform: scale(1.02);
-  box-shadow: 0 4px 15px rgba(0, 206, 209, 0.3);
-}
-#continueBanner .btn-continue:disabled {
-  opacity: 0.6;
-  cursor: wait;
 }
 #continueBanner .btn-signout-banner {
   background: transparent;
@@ -460,97 +251,58 @@ button:active {
   font-size: 12px;
   color: #ff6b6b;
   cursor: pointer;
-  transition: all 0.3s ease;
   width: auto;
-  flex-shrink: 0;
 }
-#continueBanner .btn-signout-banner:hover:not(:disabled) {
-  background: rgba(255, 107, 107, 0.1);
+.debug-info {
+  display: none;
+  font-size: 10px;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 12px;
+  font-family: monospace;
 }
-#continueBanner .btn-signout-banner:disabled {
-  opacity: 0.5;
-  cursor: wait;
-}
-@media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.01ms !important; }
-  .role-option { transition: none; }
-}
+.debug-info.visible { display: block; }
 </style>
 </head>
 <body>
-<noscript>
-  <div style="background:#ff3b3b; color:white; padding:20px; text-align:center; position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-    <h2>JavaScript Required</h2>
-    <p>TradeAux requires JavaScript to function. Please enable JavaScript in your browser.</p>
-  </div>
-</noscript>
-<div class="container">
-  
-  <!-- ===== 3D LOGO ===== -->
-  <div class="gem-logo-corner">
-    <div class="gem-text">
-      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    </div>
-    <div class="light-source"></div>
-    <div class="sparkle sparkle-1"></div>
-    <div class="sparkle sparkle-2"></div>
-    <div class="sparkle sparkle-3"></div>
-    <div class="sparkle sparkle-4"></div>
-    <div class="sparkle sparkle-5"></div>
-    <div class="sparkle sparkle-6"></div>
-    <div class="sparkle sparkle-7"></div>
-    <div class="sparkle sparkle-8"></div>
-    <div class="sparkle sparkle-9"></div>
-    <div class="sparkle sparkle-10"></div>
-    <div class="depth-shadow"></div>
-  </div>
 
+<div class="container">
+  <div class="logo">TRADEAUX</div>
   <div class="subtitle" id="subtitle">Sign in to your account</div>
+  
   <div class="auth-card">
+    <!-- Loading -->
     <div id="loadingIndicator" class="loading-container">
       <div class="spinner"></div>
-      <p id="loadingText" style="color:#9ca3af; margin-top:12px; font-size:13px;">Checking authentication...</p>
+      <p id="loadingText" style="color:#9ca3af; margin-top:12px; font-size:13px;">Loading...</p>
     </div>
 
-    <div id="errorMsg" class="error" role="alert" aria-live="polite"></div>
-    <div id="successMsg" class="success" role="status" aria-live="polite"></div>
+    <!-- Messages -->
+    <div id="errorMsg" class="error" role="alert"></div>
+    <div id="successMsg" class="success" role="status"></div>
 
-    <!-- STEP 1: SIGN IN FORM -->
-    <form id="step1" class="step-container visible" autocomplete="on" novalidate>
-      <input type="email" id="email" placeholder="Email address" autocomplete="email" aria-label="Email address">
+    <!-- STEP 1: SIGN IN -->
+    <form id="step1" class="step-container visible" novalidate>
+      <input type="email" id="email" placeholder="Email address" autocomplete="email">
       <div class="password-wrapper">
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password" aria-label="Password">
-        <button type="button" class="password-toggle" id="togglePassword1" aria-label="Show password">
-          <span class="toggle-text">Show</span>
-        </button>
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <button type="button" class="password-toggle" id="togglePassword1">Show</button>
       </div>
-      <div class="form-actions">
-        <button type="submit" id="signinBtn">Sign In</button>
-        <div style="text-align:center; margin-top:4px;">
-          <a href="#" id="forgotLink" tabindex="0" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a>
-        </div>
+      <button type="submit" id="signinBtn">Sign In</button>
+      <div style="text-align:center; margin-top:8px;">
+        <a href="#" id="forgotLink" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a>
       </div>
       <div class="toggle">No account? <a href="#" id="showSignup">Create one</a></div>
     </form>
 
-    <!-- STEP 2: SIGN UP FORM -->
-    <form id="step2" class="step-container hidden" autocomplete="on" novalidate>
-      <input type="email" id="signupEmail" placeholder="Email address" autocomplete="email" aria-label="Email address">
+    <!-- STEP 2: SIGN UP -->
+    <form id="step2" class="step-container hidden" novalidate>
+      <input type="email" id="signupEmail" placeholder="Email address" autocomplete="email">
       <div class="password-wrapper">
-        <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password" aria-label="Password">
-        <button type="button" class="password-toggle" id="togglePassword2" aria-label="Show password">
-          <span class="toggle-text">Show</span>
-        </button>
+        <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="togglePassword2">Show</button>
       </div>
-      <input type="text" id="companyNameInput" placeholder="Company / Organization Name" autocomplete="organization" aria-label="Company or organization name" maxlength="100">
-      <div class="char-counter" id="charCounter">0 / 100</div>
+      <input type="text" id="companyNameInput" placeholder="Company / Organization Name" maxlength="100">
       <button type="submit" id="signupBtn">Create Account</button>
       <div class="toggle">Already have an account? <a href="#" id="showSignin">Sign in</a></div>
     </form>
@@ -563,13 +315,13 @@ button:active {
         <div style="font-size:13px; color:#9ca3af;">Select your dashboard to continue</div>
       </div>
       <div class="role-label">Choose Your Dashboard</div>
-      <div class="role-picker" role="radiogroup" aria-label="Dashboard roles">
-        <div class="role-option" data-role="buyer" role="radio" aria-checked="false" tabindex="0"><span class="emoji" role="img" aria-label="Shopping cart">🛒</span><span class="text">Buyer</span></div>
-        <div class="role-option" data-role="seller" role="radio" aria-checked="false" tabindex="0"><span class="emoji" role="img" aria-label="Factory">🏭</span><span class="text">Seller</span></div>
-        <div class="role-option" data-role="carrier" role="radio" aria-checked="false" tabindex="0"><span class="emoji" role="img" aria-label="Truck">🚛</span><span class="text">Carrier</span></div>
-        <div class="role-option" data-role="insurer" role="radio" aria-checked="false" tabindex="0"><span class="emoji" role="img" aria-label="Shield">🛡️</span><span class="text">Insurer</span></div>
-        <div class="role-option" data-role="banker" role="radio" aria-checked="false" tabindex="0"><span class="emoji" role="img" aria-label="Bank">🏦</span><span class="text">Banker</span></div>
-        <div class="role-option" data-role="admin" role="radio" aria-checked="false" tabindex="0"><span class="emoji" role="img" aria-label="Gear">⚙️</span><span class="text">Admin</span></div>
+      <div class="role-picker">
+        <div class="role-option" data-role="buyer"><span class="emoji">🛒</span><span class="text">Buyer</span></div>
+        <div class="role-option" data-role="seller"><span class="emoji">🏭</span><span class="text">Seller</span></div>
+        <div class="role-option" data-role="carrier"><span class="emoji">🚛</span><span class="text">Carrier</span></div>
+        <div class="role-option" data-role="insurer"><span class="emoji">🛡️</span><span class="text">Insurer</span></div>
+        <div class="role-option" data-role="banker"><span class="emoji">🏦</span><span class="text">Banker</span></div>
+        <div class="role-option" data-role="admin"><span class="emoji">⚙️</span><span class="text">Admin</span></div>
       </div>
       <button type="button" id="roleContinueBtn" disabled>Select a role first</button>
       <div style="text-align:center; margin-top:12px;">
@@ -577,47 +329,16 @@ button:active {
       </div>
     </div>
 
-    <div class="debug-info" id="debugInfo">Sign in to your account</div>
+    <div class="debug-info" id="debugInfo"></div>
   </div>
 </div>
 
 <!-- ===================================================== -->
-<!-- ALL JAVASCRIPT EMBEDDED HERE -->
+<!-- PRODUCTION JAVASCRIPT - NO TEST ALERTS -->
 <!-- ===================================================== -->
 <script>
-// =====================================================
-// SAFETY CHECK: Supabase CDN loaded
-// =====================================================
-function waitForSupabase(retries = 10, delay = 300) {
-  return new Promise((resolve, reject) => {
-    function check() {
-      if (window.supabase) {
-        resolve();
-        return;
-      }
-      if (retries <= 0) {
-        document.body.innerHTML = '<div style="color:#ff6b6b;text-align:center;padding:40px;font-family:sans-serif;max-width:600px;margin:auto;"><h2>⚠️ Failed to Load</h2><p>Could not load Supabase. Please check your internet connection and refresh the page.</p><button onclick="location.reload()" style="padding:10px 20px;margin-top:20px;cursor:pointer;border:1px solid #ff6b6b;background:#fff;color:#ff6b6b;border-radius:6px;">Refresh</button></div>';
-        reject(new Error('Supabase CDN not loaded after retries'));
-        return;
-      }
-      retries--;
-      setTimeout(check, delay);
-    }
-    check();
-  });
-}
-
-// =====================================================
-// WRAP EVERYTHING IN ASYNC IIFE WITH ERROR HANDLING
-// =====================================================
-(async function() {
-
-  try {
-    await waitForSupabase();
-  } catch (err) {
-    console.error('[Supabase Load Error]', err);
-    return;
-  }
+(function() {
+  'use strict';
 
   // =====================================================
   // SUPABASE CONFIGURATION
@@ -625,25 +346,6 @@ function waitForSupabase(retries = 10, delay = 300) {
   const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-  let supabaseClient;
-
-  try {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-      }
-    });
-  } catch (err) {
-    console.error('[Supabase Init Error]', err);
-    document.body.innerHTML = '<div style="color:#ff6b6b;text-align:center;padding:40px;font-family:sans-serif;max-width:600px;margin:auto;"><h2>⚠️ Configuration Error</h2><p>Failed to initialize Supabase. Please refresh the page.</p><button onclick="location.reload()" style="padding:10px 20px;margin-top:20px;cursor:pointer;border:1px solid #ff6b6b;background:#fff;color:#ff6b6b;border-radius:6px;">Refresh</button></div>';
-    return;
-  }
-
-  // =====================================================
-  // DASHBOARD MAPPING
-  // =====================================================
   const DASHBOARDS = {
     'buyer': 'dashboard-buyer.html',
     'seller': 'dashboard-seller.html',
@@ -654,1043 +356,248 @@ function waitForSupabase(retries = 10, delay = 300) {
   };
 
   // =====================================================
-  // URL PARAMS & STATE
+  // STATE
   // =====================================================
-  const urlParams = new URLSearchParams(window.location.search);
-  const isLogout = urlParams.get('logout') === '1';
-  const isBlocked = urlParams.get('blocked') === '1';
-  const isExpired = urlParams.get('expired') === '1';
-  const isDebug = urlParams.get('debug') === '1';
-
+  let supabaseClient = null;
   let selectedRole = null;
   let currentUser = null;
-  let authCheckComplete = false;
   let signInButtonLocked = false;
-  let currentStep = 'step1';
-  let isRedirecting = false;
   let forgotPasswordLocked = false;
+  let isInitialized = false;
 
   // =====================================================
-  // SAFE ELEMENT ACCESS
+  // DOM HELPERS
   // =====================================================
-  function safeGetElement(id) {
-    const el = document.getElementById(id);
-    if (!el && isDebug) {
-      console.warn(`[SafeGet] Element #${id} not found`);
-    }
-    return el;
+  function getEl(id) {
+    return document.getElementById(id);
   }
 
-  function safeAddListener(id, event, handler) {
-    const el = safeGetElement(id);
+  function showError(msg) {
+    const el = getEl('errorMsg');
     if (el) {
-      el.addEventListener(event, handler);
-      return true;
+      el.textContent = msg;
+      el.style.display = 'block';
+      const success = getEl('successMsg');
+      if (success) success.style.display = 'none';
     }
-    return false;
-  }
-
-  function debugLog(message, data) {
-    if (!isDebug) return;
-    const el = safeGetElement('debugInfo');
-    if (el) {
-      const timestamp = new Date().toLocaleTimeString();
-      el.textContent = `[${timestamp}] ${message}` + (data ? ` ${JSON.stringify(data)}` : '');
-      el.classList.add('visible');
-    } else {
-      console.log('[Debug]', message, data || '');
-    }
-  }
-
-  // =====================================================
-  // RATE LIMITERS
-  // =====================================================
-  function createRateLimiter(maxAttempts = 5, windowMs = 60000) {
-    let attempts = 0;
-    let resetTime = null;
-    return {
-      isBlocked() {
-        if (!resetTime) return false;
-        if (Date.now() > resetTime) {
-          attempts = 0;
-          resetTime = null;
-          return false;
-        }
-        return attempts >= maxAttempts;
-      },
-      recordAttempt() {
-        if (!resetTime) {
-          resetTime = Date.now() + windowMs;
-        }
-        attempts++;
-      },
-      getRemainingTime() {
-        if (!resetTime) return 0;
-        return Math.max(0, Math.ceil((resetTime - Date.now()) / 1000));
-      },
-      reset() {
-        attempts = 0;
-        resetTime = null;
-      }
-    };
-  }
-
-  const signInRateLimit = createRateLimiter();
-  const signUpRateLimit = createRateLimiter();
-
-  // =====================================================
-  // BULLETPROOF SIGN OUT
-  // =====================================================
-  async function fullSignOut() {
-    authCheckComplete = false;
-    debugLog('Signing out...');
-
-    try {
-      await supabaseClient.auth.signOut({ scope: 'global' });
-    } catch (e) {
-      console.warn('[SignOut] Error from Supabase:', e.message);
-    }
-
-    await new Promise(r => setTimeout(r, 500));
-
-    const knownKeys = [
-      'supabase.auth.token',
-      'sb-pfutaovwbygefummienf-auth-token',
-      'sb-pfutaovwbygefummienf-auth-token-code-verifier',
-      'tradeaux_user',
-      'tradeaux_role',
-      'tradeaux_user_email'
-    ];
-    knownKeys.forEach(key => {
-      if (localStorage.getItem(key) !== null) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    const lsKeys = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) lsKeys.push(key);
-    }
-    lsKeys.forEach(key => {
-      if (key && (key.includes('supabase') || key.startsWith('sb-'))) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    sessionStorage.clear();
-    localStorage.setItem('logoutProcessed', '1');
-    debugLog('Sign out complete');
-  }
-
-  // =====================================================
-  // UI HELPERS
-  // =====================================================
-  let errorTimeout = null;
-  let successTimeout = null;
-
-  function getLoadingTextEl() {
-    return safeGetElement('loadingText');
-  }
-
-  function showError(msg, fieldId) {
-    const el = safeGetElement('errorMsg');
-    if (!el) return;
-    el.textContent = msg;
-    el.style.display = 'block';
-    const successEl = safeGetElement('successMsg');
-    if (successEl) successEl.style.display = 'none';
-
-    if (fieldId) {
-      const field = safeGetElement(fieldId);
-      if (field) {
-        field.classList.add('error-field');
-        field.setAttribute('aria-invalid', 'true');
-        field.setAttribute('aria-describedby', 'errorMsg');
-      }
-    }
-
-    clearTimeout(errorTimeout);
-    errorTimeout = setTimeout(() => {
-      el.style.display = 'none';
-      if (fieldId) {
-        const field = safeGetElement(fieldId);
-        if (field) {
-          field.classList.remove('error-field');
-          field.removeAttribute('aria-invalid');
-          field.removeAttribute('aria-describedby');
-        }
-      }
-    }, 12000);
-
-    debugLog('Error: ' + msg);
   }
 
   function showSuccess(msg) {
-    const el = safeGetElement('successMsg');
-    if (!el) return;
-    el.textContent = msg;
-    el.style.display = 'block';
-    const errorEl = safeGetElement('errorMsg');
-    if (errorEl) errorEl.style.display = 'none';
-    clearTimeout(successTimeout);
-    successTimeout = setTimeout(() => { el.style.display = 'none'; }, 12000);
-    debugLog('Success: ' + msg);
+    const el = getEl('successMsg');
+    if (el) {
+      el.textContent = msg;
+      el.style.display = 'block';
+      const error = getEl('errorMsg');
+      if (error) error.style.display = 'none';
+    }
   }
 
   function showLoading(show, text) {
-    const loader = safeGetElement('loadingIndicator');
-    const loadingTextEl = getLoadingTextEl();
+    const loader = getEl('loadingIndicator');
     if (loader) {
       loader.style.display = show ? 'block' : 'none';
       if (show) loader.classList.add('visible');
       else loader.classList.remove('visible');
-      if (text && loadingTextEl) {
-        loadingTextEl.textContent = text;
-      }
     }
+    const textEl = getEl('loadingText');
+    if (textEl && text) textEl.textContent = text;
   }
 
   function showStep(stepId) {
-    const errorMsg = safeGetElement('errorMsg');
-    if (errorMsg) errorMsg.style.display = 'none';
-    const successMsg = safeGetElement('successMsg');
-    if (successMsg) successMsg.style.display = 'none';
-
-    document.querySelectorAll('.error-field, [aria-invalid="true"]').forEach(el => {
-      el.classList.remove('error-field');
-      el.removeAttribute('aria-invalid');
-      el.removeAttribute('aria-describedby');
-    });
-
-    if (currentStep === 'step3' && stepId !== 'step3') {
-      selectedRole = null;
-      document.querySelectorAll('.role-option').forEach(function(opt) {
-        opt.classList.remove('selected');
-        opt.setAttribute('aria-checked', 'false');
-      });
-      const btn = safeGetElement('roleContinueBtn');
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Select a role first';
-      }
-    }
-
     document.querySelectorAll('.step-container').forEach(el => {
-      el.classList.add('hidden');
       el.classList.remove('visible');
+      el.classList.add('hidden');
     });
-    showLoading(false);
-
-    const step = safeGetElement(stepId);
+    const step = getEl(stepId);
     if (step) {
-      currentStep = stepId;
       step.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        step.classList.add('visible');
-      });
-
-      // Find first focusable element
-      const focusables = step.querySelectorAll('input, button, [tabindex="0"]');
-      let focusTarget = null;
-      for (const el of focusables) {
-        if (el.offsetParent !== null && !el.disabled) {
-          focusTarget = el;
-          break;
-        }
-      }
-      if (focusTarget) {
-        setTimeout(() => focusTarget.focus(), 150);
-      }
-    } else {
-      console.warn(`[showStep] Step "${stepId}" not found`);
+      requestAnimationFrame(() => step.classList.add('visible'));
     }
-
-    debugLog('Current step: ' + stepId);
   }
 
   function redirectToDashboard(role) {
-    isRedirecting = true;
     const url = DASHBOARDS[role];
     if (!url) {
-      showError('Unknown role. Redirecting to buyer.');
-      setTimeout(() => { window.location.href = 'dashboard-buyer.html'; }, 2000);
+      showError('Unknown role');
       return;
     }
-    debugLog('Redirecting to: ' + url);
-
-    document.querySelectorAll('.step-container').forEach(el => {
-      el.classList.add('hidden');
-      el.classList.remove('visible');
-    });
     showLoading(true, 'Redirecting...');
+    setTimeout(() => {
+      window.location.href = url;
+    }, 500);
+  }
 
-    sessionStorage.setItem('auth_redirect_done', Date.now().toString());
-
-    window.location.href = url;
+  // =====================================================
+  // AUTH FUNCTIONS
+  // =====================================================
+  async function fullSignOut() {
+    if (supabaseClient) {
+      try { await supabaseClient.auth.signOut(); } catch(e) {}
+    }
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = 'signin.html?logout=1';
   }
 
   async function showRolePicker(user) {
     currentUser = user;
     showStep('step3');
-    const subtitle = safeGetElement('subtitle');
-    if (subtitle) subtitle.textContent = 'Choose your dashboard';
-    debugLog('Showing role picker for: ' + user.email);
-
-    let displayName = user.email;
-    try {
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('full_name, company_name')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (profile) {
-        displayName = profile.full_name || profile.company_name || user.email;
-      }
-    } catch (e) {
-      // Fallback to email
-    }
-
-    const userDisplay = safeGetElement('userEmailDisplay');
-    if (userDisplay) {
-      userDisplay.textContent = 'Welcome, ' + displayName;
-    }
-    localStorage.setItem('tradeaux_user_email', displayName);
-
-    setTimeout(() => {
-      const firstOption = document.querySelector('.role-option');
-      if (firstOption) firstOption.focus();
-    }, 150);
+    const display = getEl('userEmailDisplay');
+    if (display) display.textContent = 'Welcome, ' + (user.email || 'User');
   }
 
   // =====================================================
-  // CONTINUE BANNER
-  // =====================================================
-  function showContinueBanner(email) {
-    const step1 = safeGetElement('step1');
-    if (!step1) {
-      console.error('[ContinueBanner] Step1 not found');
-      return;
-    }
-
-    const existingBanner = document.getElementById('continueBanner');
-    if (existingBanner) existingBanner.remove();
-
-    const displayEmail = email || 'Unknown';
-
-    const banner = document.createElement('div');
-    banner.id = 'continueBanner';
-    banner.innerHTML = `
-      <div>
-        <div class="banner-label">✅ Signed in as</div>
-        <div class="banner-user">${displayEmail}</div>
-      </div>
-      <div class="banner-actions">
-        <button type="button" id="continueBtn" class="btn-continue">Continue →</button>
-        <button type="button" id="signOutBannerBtn" class="btn-signout-banner">Sign out</button>
-      </div>
-    `;
-
-    // Safe insertion
-    const formActions = step1.querySelector('.form-actions');
-    if (formActions) {
-      step1.insertBefore(banner, formActions);
-    } else {
-      const signinBtn = safeGetElement('signinBtn');
-      if (signinBtn && signinBtn.parentNode) {
-        step1.insertBefore(banner, signinBtn.parentNode);
-      } else {
-        step1.appendChild(banner);
-      }
-    }
-
-    // Continue button with full error handling
-    const continueBtn = document.getElementById('continueBtn');
-    if (continueBtn) {
-      continueBtn.addEventListener('click', async function() {
-        this.disabled = true;
-        this.textContent = 'Loading...';
-        this.style.opacity = '0.7';
-        this.style.cursor = 'wait';
-
-        try {
-          const { data, error } = await supabaseClient.auth.getSession();
-
-          if (error) {
-            throw new Error(error.message);
-          }
-
-          const session = data?.session;
-          if (!session) {
-            showError('Session expired. Please sign in again.');
-            const bannerEl = document.getElementById('continueBanner');
-            if (bannerEl) bannerEl.remove();
-            return;
-          }
-
-          const { data: profile, error: profileError } = await supabaseClient
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .maybeSingle();
-
-          if (profileError) {
-            throw new Error(profileError.message);
-          }
-
-          if (profile && profile.role && DASHBOARDS[profile.role]) {
-            localStorage.setItem('tradeaux_role', profile.role);
-            redirectToDashboard(profile.role);
-          } else {
-            showRolePicker(session.user);
-          }
-        } catch (err) {
-          console.error('[Continue Error]', err);
-          showError(err.message || 'Failed to continue. Please try signing in again.');
-          const bannerEl = document.getElementById('continueBanner');
-          if (bannerEl) bannerEl.remove();
-        } finally {
-          this.disabled = false;
-          this.textContent = 'Continue →';
-          this.style.opacity = '1';
-          this.style.cursor = 'pointer';
-        }
-      });
-    }
-
-    // Sign out button
-    const signOutBtn = document.getElementById('signOutBannerBtn');
-    if (signOutBtn) {
-      signOutBtn.addEventListener('click', async function() {
-        this.disabled = true;
-        this.textContent = 'Signing out...';
-        this.style.opacity = '0.7';
-        this.style.cursor = 'wait';
-        await fullSignOut();
-        window.location.href = 'signin.html?logout=1&_t=' + Date.now();
-      });
-    }
-
-    debugLog('Continue banner shown for: ' + displayEmail);
-  }
-
-  // =====================================================
-  // STRIP QUERY PARAMS WITH ERROR HANDLING
-  // =====================================================
-  function stripQueryParams() {
-    try {
-      const currentUrl = window.location.href;
-      const url = new URL(currentUrl);
-      const paramsToRemove = ['logout', 'blocked', 'expired', 'debug'];
-      let changed = false;
-      paramsToRemove.forEach(param => {
-        if (url.searchParams.has(param)) {
-          url.searchParams.delete(param);
-          changed = true;
-        }
-      });
-      if (changed) {
-        window.history.replaceState({}, document.title, url.toString());
-      }
-    } catch (e) {
-      // Silent fail in file:// or restricted contexts
-      console.debug('[stripQueryParams] Could not strip params:', e.message);
-    }
-  }
-
-  // =====================================================
-  // VALIDATE SESSION
-  // =====================================================
-  function isSessionValid(session) {
-    if (!session) return false;
-    if (!session.expires_at) return true;
-
-    let expiresAt = session.expires_at;
-    if (typeof expiresAt === 'string') {
-      const asInt = parseInt(expiresAt, 10);
-      expiresAt = isNaN(asInt) ? Math.floor(new Date(expiresAt).getTime() / 1000) : asInt;
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    return expiresAt > now;
-  }
-
-  function isValidEmail(email) {
-    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-  }
-
-  function isOnline() {
-    return navigator.onLine !== false;
-  }
-
-  // =====================================================
-  // COMPUTE REDIRECT URL
-  // =====================================================
-  function getRedirectUrl() {
-    const origin = window.location.origin;
-    if (!origin || origin === 'null' || origin === 'file://') {
-      return 'https://tradeaux.com' + window.location.pathname;
-    }
-    return origin + window.location.pathname;
-  }
-
-  // =====================================================
-  // CREATE PROFILE
-  // =====================================================
-  async function createProfile(user, companyName, retries = 3) {
-    let lastError = null;
-    for (let attempt = 0; attempt < retries; attempt++) {
-      try {
-        if (!isOnline()) {
-          return { success: false, error: new Error('Offline') };
-        }
-        const { error } = await supabaseClient.from('profiles').insert({
-          id: user.id,
-          email: user.email,
-          full_name: companyName,
-          company_name: companyName,
-          role: '',
-          wallet_balance: 0,
-          created_at: new Date().toISOString()
-        });
-
-        if (!error) {
-          return { success: true };
-        }
-
-        if (error.code === '23505' || error.code === '409' || error.status === 409 ||
-            (error.message && error.message.toLowerCase().includes('duplicate')) ||
-            (error.details && error.details.toLowerCase().includes('already exists'))) {
-          return { success: true };
-        }
-
-        if (error.code === '42501' || (error.message && error.message.toLowerCase().includes('permission denied'))) {
-          return { success: false, error: error, isRlsError: true };
-        }
-
-        lastError = error;
-        if (attempt < retries - 1) {
-          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
-        }
-      } catch (e) {
-        lastError = e;
-        if (attempt < retries - 1) {
-          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
-        }
-      }
-    }
-    return { success: false, error: lastError };
-  }
-
-  // =====================================================
-  // MAIN AUTH CHECK
-  // =====================================================
-  async function checkAuth() {
-    // Reset state to allow re-checks
-    authCheckComplete = false;
-
-    stripQueryParams();
-
-    showLoading(true, 'Checking authentication...');
-    document.querySelectorAll('.step-container').forEach(el => {
-      el.classList.add('hidden');
-      el.classList.remove('visible');
-    });
-    isRedirecting = false;
-
-    if (localStorage.getItem('logoutProcessed')) {
-      localStorage.removeItem('logoutProcessed');
-    }
-
-    if (isLogout) {
-      await fullSignOut();
-      showSuccess('You have been signed out.');
-      debugLog('Signed out via logout param');
-      showStep('step1');
-      showLoading(false);
-      authCheckComplete = true;
-      return;
-    }
-
-    if (isBlocked) {
-      await fullSignOut();
-      showError('Access denied. Your account is not registered on this platform.');
-      debugLog('Access denied via blocked param');
-      showStep('step1');
-      showLoading(false);
-      authCheckComplete = true;
-      return;
-    }
-
-    if (isExpired) {
-      await fullSignOut();
-      showError('Your session expired. Please sign in again.');
-      debugLog('Session expired via expired param');
-      showStep('step1');
-      showLoading(false);
-      authCheckComplete = true;
-      return;
-    }
-
-    if (!isOnline()) {
-      showError('You are offline. Please check your internet connection.');
-      showStep('step1');
-      showLoading(false);
-      authCheckComplete = true;
-      return;
-    }
-
-    const redirectDone = sessionStorage.getItem('auth_redirect_done');
-    if (redirectDone) {
-      const elapsed = Date.now() - parseInt(redirectDone, 10);
-      if (elapsed < 5000) {
-        showStep('step1');
-        showLoading(false);
-        authCheckComplete = true;
-        return;
-      } else {
-        sessionStorage.removeItem('auth_redirect_done');
-      }
-    }
-
-    try {
-      const { data, error } = await supabaseClient.auth.getSession();
-
-      if (error) {
-        debugLog('Session error: ' + error.message);
-        showStep('step1');
-        showLoading(false);
-        authCheckComplete = true;
-        return;
-      }
-
-      if (!data || !data.session) {
-        debugLog('No session found');
-        showStep('step1');
-        showLoading(false);
-        authCheckComplete = true;
-        return;
-      }
-
-      if (!isSessionValid(data.session)) {
-        showError('Your session expired. Please sign in again.');
-        await fullSignOut();
-        window.location.href = 'signin.html?expired=1';
-        return;
-      }
-
-      // Show the sign-in form with continue banner
-      showStep('step1');
-      showContinueBanner(data.session.user.email);
-      showLoading(false);
-      authCheckComplete = true;
-
-    } catch (err) {
-      console.error('[checkAuth] Error:', err);
-      showError('Could not verify account. Please sign in again.');
-      showStep('step1');
-      showLoading(false);
-      authCheckComplete = true;
-    }
-  }
-
-  // =====================================================
-  // AUTH STATE LISTENER
-  // =====================================================
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    debugLog('Auth state change: ' + event, session?.user?.email);
-
-    if (event === 'SIGNED_OUT') {
-      localStorage.removeItem('tradeaux_role');
-      localStorage.removeItem('tradeaux_user_email');
-      if (!window.location.pathname.includes('signin.html')) {
-        window.location.href = 'signin.html?logout=1&_t=' + Date.now();
-      }
-    }
-
-    if (event === 'TOKEN_REFRESHED' && session) {
-      const banner = document.getElementById('continueBanner');
-      if (banner) {
-        const userDisplay = banner.querySelector('.banner-user');
-        if (userDisplay && session.user) {
-          userDisplay.textContent = session.user.email;
-        }
-      }
-    }
-  });
-
-  // =====================================================
-  // HANDLERS
+  // EVENT HANDLERS
   // =====================================================
 
-  // ---- SIGN IN HANDLER ----
+  // ---- SIGN IN ----
   async function handleSignIn(e) {
     e.preventDefault();
-    
     if (signInButtonLocked) return;
     signInButtonLocked = true;
 
-    const btn = safeGetElement('signinBtn');
-    if (!btn) {
+    const btn = getEl('signinBtn');
+    if (!btn) { signInButtonLocked = false; return; }
+
+    const email = getEl('email');
+    const password = getEl('password');
+    if (!email || !password) {
+      showError('Please enter email and password');
       signInButtonLocked = false;
       return;
     }
 
-    let timeoutId = setTimeout(() => {
-      if (signInButtonLocked) {
-        signInButtonLocked = false;
-        btn.disabled = false;
-        btn.textContent = 'Sign In';
-        showError('Request timed out. Please try again.');
-      }
-    }, 15000);
+    const emailValue = email.value.trim();
+    const passwordValue = password.value;
+
+    if (!emailValue || !passwordValue) {
+      showError('Please fill in all fields');
+      signInButtonLocked = false;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
 
     try {
-      document.querySelectorAll('.error-field, [aria-invalid="true"]').forEach(el => {
-        el.classList.remove('error-field');
-        el.removeAttribute('aria-invalid');
-        el.removeAttribute('aria-describedby');
-      });
-
-      const banner = document.getElementById('continueBanner');
-      if (banner) banner.remove();
-
-      if (!isOnline()) {
-        showError('You are offline. Please check your internet connection.');
-        clearTimeout(timeoutId);
-        signInButtonLocked = false;
-        return;
-      }
-
-      const email = safeGetElement('email');
-      const password = safeGetElement('password');
-
-      if (!email || !password) {
-        showError('Please enter email and password');
-        clearTimeout(timeoutId);
-        signInButtonLocked = false;
-        return;
-      }
-
-      const emailValue = email.value.trim();
-      const passwordValue = password.value;
-
-      if (!emailValue || !passwordValue) {
-        if (!emailValue) {
-          email.classList.add('error-field');
-          email.setAttribute('aria-invalid', 'true');
-          email.setAttribute('aria-describedby', 'errorMsg');
-        }
-        if (!passwordValue) {
-          password.classList.add('error-field');
-          password.setAttribute('aria-invalid', 'true');
-          password.setAttribute('aria-describedby', 'errorMsg');
-        }
-        showError('Please enter email and password');
-        clearTimeout(timeoutId);
-        signInButtonLocked = false;
-        return;
-      }
-
-      if (!isValidEmail(emailValue)) {
-        email.classList.add('error-field');
-        email.setAttribute('aria-invalid', 'true');
-        email.setAttribute('aria-describedby', 'errorMsg');
-        showError('Please enter a valid email address');
-        clearTimeout(timeoutId);
-        signInButtonLocked = false;
-        return;
-      }
-
-      if (signInRateLimit.isBlocked()) {
-        const remaining = signInRateLimit.getRemainingTime();
-        showError(`Too many attempts. Please wait ${remaining} seconds.`);
-        clearTimeout(timeoutId);
-        signInButtonLocked = false;
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'Signing in...';
-
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: emailValue,
         password: passwordValue
       });
 
-      if (error) {
-        signInRateLimit.recordAttempt();
-        throw error;
-      }
+      if (error) throw error;
 
-      signInRateLimit.reset();
-      localStorage.removeItem('tradeaux_role');
-
-      const { data: profile, error: profileError } = await supabaseClient
+      const { data: profile } = await supabaseClient
         .from('profiles')
         .select('role')
         .eq('id', data.user.id)
         .maybeSingle();
 
-      if (profileError) {
-        showError('Could not verify account. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Sign In';
-        signInButtonLocked = false;
-        clearTimeout(timeoutId);
-        return;
-      }
-
-      clearTimeout(timeoutId);
-
-      if (!profile || !profile.role || !DASHBOARDS[profile.role]) {
-        signInButtonLocked = false;
-        btn.disabled = false;
-        btn.textContent = 'Sign In';
+      if (profile?.role && DASHBOARDS[profile.role]) {
+        localStorage.setItem('tradeaux_role', profile.role);
+        redirectToDashboard(profile.role);
+      } else {
         showRolePicker(data.user);
-        return;
       }
-
-      localStorage.setItem('tradeaux_role', profile.role);
-      redirectToDashboard(profile.role);
 
     } catch (error) {
-      clearTimeout(timeoutId);
       if (error.message.includes('Invalid login credentials')) {
         showError('Invalid email or password.');
-      } else if (error.message.includes('Email not confirmed')) {
-        showError('Please confirm your email before signing in.');
-      } else if (error.message.includes('Network') || error.message.includes('fetch')) {
-        showError('Network error. Please try again.');
       } else {
         showError(error.message);
       }
+    } finally {
       btn.disabled = false;
       btn.textContent = 'Sign In';
       signInButtonLocked = false;
     }
   }
 
-  // ---- SIGN UP HANDLER ----
+  // ---- SIGN UP ----
   async function handleSignUp(e) {
     e.preventDefault();
-    
-    if (signUpRateLimit.isBlocked()) {
-      const remaining = signUpRateLimit.getRemainingTime();
-      showError(`Too many attempts. Please wait ${remaining} seconds.`);
-      return;
-    }
 
-    if (!isOnline()) {
-      showError('You are offline. Please check your internet connection.');
-      return;
-    }
+    const btn = getEl('signupBtn');
+    if (!btn) return;
 
-    const email = safeGetElement('signupEmail');
-    const password = safeGetElement('signupPassword');
-    const companyName = safeGetElement('companyNameInput');
+    const email = getEl('signupEmail');
+    const password = getEl('signupPassword');
+    const company = getEl('companyNameInput');
 
-    if (!email || !password || !companyName) {
+    if (!email || !password || !company) {
       showError('Please fill in all fields');
       return;
     }
 
     const emailValue = email.value.trim();
     const passwordValue = password.value;
-    const companyNameValue = companyName.value.trim();
+    const companyValue = company.value.trim();
 
-    document.querySelectorAll('.error-field, [aria-invalid="true"]').forEach(el => {
-      el.classList.remove('error-field');
-      el.removeAttribute('aria-invalid');
-      el.removeAttribute('aria-describedby');
-    });
-
-    if (!emailValue || !passwordValue || !companyNameValue) {
-      if (!emailValue) {
-        email.classList.add('error-field');
-        email.setAttribute('aria-invalid', 'true');
-        email.setAttribute('aria-describedby', 'errorMsg');
-      }
-      if (!passwordValue) {
-        password.classList.add('error-field');
-        password.setAttribute('aria-invalid', 'true');
-        password.setAttribute('aria-describedby', 'errorMsg');
-      }
-      if (!companyNameValue) {
-        companyName.classList.add('error-field');
-        companyName.setAttribute('aria-invalid', 'true');
-        companyName.setAttribute('aria-describedby', 'errorMsg');
-      }
+    if (!emailValue || !passwordValue || !companyValue) {
       showError('Please fill in all fields');
       return;
     }
 
-    if (!isValidEmail(emailValue)) {
-      email.classList.add('error-field');
-      email.setAttribute('aria-invalid', 'true');
-      email.setAttribute('aria-describedby', 'errorMsg');
-      showError('Please enter a valid email address');
-      return;
-    }
-
     if (passwordValue.length < 6) {
-      password.classList.add('error-field');
-      password.setAttribute('aria-invalid', 'true');
-      password.setAttribute('aria-describedby', 'errorMsg');
       showError('Password must be at least 6 characters');
       return;
     }
 
-    const sanitizedCompany = companyNameValue
-      .replace(/[<>]/g, '')
-      .replace(/[&"']/g, '')
-      .trim();
-
-    const btn = safeGetElement('signupBtn');
-    if (!btn) return;
-
     btn.disabled = true;
-    btn.textContent = 'Creating account...';
-
-    signUpRateLimit.recordAttempt();
+    btn.textContent = 'Creating...';
 
     try {
       const { data, error } = await supabaseClient.auth.signUp({
         email: emailValue,
         password: passwordValue,
         options: {
-          data: {
-            full_name: sanitizedCompany,
-            company: sanitizedCompany
-          }
+          data: { full_name: companyValue, company: companyValue }
         }
       });
 
-      if (error) {
-        throw error;
-      }
-
-      if (!data.user) {
-        showError('Sign-up failed. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Create Account';
-        return;
-      }
+      if (error) throw error;
 
       if (data.user && !data.session) {
         showSuccess('Account created! Check your email to confirm.');
-        signUpRateLimit.reset();
         showStep('step1');
-        const subtitle = safeGetElement('subtitle');
-        if (subtitle) subtitle.textContent = 'Sign in to your account';
-        btn.disabled = false;
-        btn.textContent = 'Create Account';
         return;
       }
 
       if (data.user && data.session) {
-        const result = await createProfile(data.user, sanitizedCompany);
-        if (!result.success) {
-          if (result.isRlsError) {
-            await fullSignOut();
-            showError('Account created but permission denied. Please contact support.');
-          } else {
-            showError('Account created but profile setup failed. Please sign in and contact support.');
-          }
-          btn.disabled = false;
-          btn.textContent = 'Create Account';
-          return;
-        }
-
-        btn.disabled = false;
-        btn.textContent = 'Create Account';
-        signUpRateLimit.reset();
+        await supabaseClient.from('profiles').insert({
+          id: data.user.id,
+          email: emailValue,
+          full_name: companyValue,
+          company_name: companyValue,
+          role: ''
+        });
         showRolePicker(data.user);
       }
 
     } catch (error) {
       if (error.message.includes('User already registered')) {
-        showError('An account with this email already exists. Please sign in.');
+        showError('An account with this email already exists.');
       } else {
         showError(error.message);
       }
+    } finally {
       btn.disabled = false;
       btn.textContent = 'Create Account';
     }
   }
 
-  // ---- ROLE CONTINUE HANDLER ----
-  async function handleRoleContinue() {
-    if (!selectedRole) {
-      showError('Please select a role first');
-      return;
-    }
-
-    const btn = safeGetElement('roleContinueBtn');
-    if (!btn) return;
-
-    btn.disabled = true;
-    btn.textContent = 'Saving...';
-
-    if (currentUser) {
-      try {
-        const { error } = await supabaseClient
-          .from('profiles')
-          .update({ role: selectedRole })
-          .eq('id', currentUser.id);
-
-        if (error) {
-          console.error('[Role save error]', error.message);
-          showError('Could not save role. Please try again.');
-          btn.disabled = false;
-          btn.textContent = 'Go to Dashboard →';
-          return;
-        }
-
-        localStorage.setItem('tradeaux_role', selectedRole);
-        redirectToDashboard(selectedRole);
-      } catch (e) {
-        console.error('[Role save exception]', e.message);
-        showError('Could not save role. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Go to Dashboard →';
-      }
-    } else {
-      btn.disabled = false;
-      btn.textContent = 'Go to Dashboard →';
-      showError('Please sign in again.');
-    }
-  }
-
-  // ---- FORGOT PASSWORD HANDLER ----
+  // ---- FORGOT PASSWORD ----
   async function handleForgotPassword(e) {
     e.preventDefault();
     if (forgotPasswordLocked) return;
 
-    const email = safeGetElement('email');
+    const email = getEl('email');
     if (!email) return;
 
     const emailValue = email.value.trim();
-
-    document.querySelectorAll('.error-field, [aria-invalid="true"]').forEach(el => {
-      el.classList.remove('error-field');
-      el.removeAttribute('aria-invalid');
-      el.removeAttribute('aria-describedby');
-    });
-
     if (!emailValue) {
-      showError('Enter your email first');
+      showError('Please enter your email address');
       email.classList.add('error-field');
-      email.setAttribute('aria-invalid', 'true');
-      email.setAttribute('aria-describedby', 'errorMsg');
-      return;
-    }
-
-    if (!isValidEmail(emailValue)) {
-      showError('Please enter a valid email address');
-      email.classList.add('error-field');
-      email.setAttribute('aria-invalid', 'true');
-      email.setAttribute('aria-describedby', 'errorMsg');
       return;
     }
 
@@ -1700,217 +607,212 @@ function waitForSupabase(retries = 10, delay = 300) {
     link.textContent = 'Sending...';
 
     try {
-      const redirectTo = getRedirectUrl();
       const { error } = await supabaseClient.auth.resetPasswordForEmail(emailValue, {
-        redirectTo: redirectTo
+        redirectTo: window.location.origin + '/signin.html'
       });
+
       if (error) throw error;
-      showSuccess('Password reset email sent!');
+
+      showSuccess('Password reset email sent! Check your inbox.');
       link.textContent = '✓ Sent!';
       setTimeout(() => { link.textContent = originalText; }, 3000);
-    } catch (err) {
-      showError(err.message);
+
+    } catch (error) {
+      showError(error.message || 'Failed to send reset email');
       link.textContent = originalText;
     } finally {
       forgotPasswordLocked = false;
     }
   }
 
-  // ---- ROLE SELECTOR ----
-  function selectRole(element) {
-    document.querySelectorAll('.role-option').forEach(function(opt) {
+  // ---- ROLE SELECTION ----
+  function handleRoleSelect(e) {
+    const element = e.currentTarget;
+    document.querySelectorAll('.role-option').forEach(opt => {
       opt.classList.remove('selected');
-      opt.setAttribute('aria-checked', 'false');
     });
     element.classList.add('selected');
-    element.setAttribute('aria-checked', 'true');
     selectedRole = element.dataset.role;
 
-    const btn = safeGetElement('roleContinueBtn');
+    const btn = getEl('roleContinueBtn');
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Go to Dashboard →';
     }
+  }
 
-    debugLog('Selected role: ' + selectedRole);
+  async function handleRoleContinue() {
+    if (!selectedRole) {
+      showError('Please select a role');
+      return;
+    }
+
+    const btn = getEl('roleContinueBtn');
+    if (!btn) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      if (currentUser) {
+        await supabaseClient
+          .from('profiles')
+          .update({ role: selectedRole })
+          .eq('id', currentUser.id);
+      }
+
+      localStorage.setItem('tradeaux_role', selectedRole);
+      redirectToDashboard(selectedRole);
+
+    } catch (error) {
+      showError('Could not save role. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Go to Dashboard →';
+    }
   }
 
   // =====================================================
   // INITIALIZATION
   // =====================================================
-  function init() {
-    debugLog('Initializing...');
-
-    // Password toggles
-    const toggle1 = safeGetElement('togglePassword1');
-    if (toggle1) {
-      toggle1.addEventListener('click', function() {
-        const pw = safeGetElement('password');
-        if (pw) {
-          const isPassword = pw.type === 'password';
-          pw.type = isPassword ? 'text' : 'password';
-          const textEl = this.querySelector('.toggle-text');
-          if (textEl) textEl.textContent = isPassword ? 'Hide' : 'Show';
-        }
-      });
+  async function init() {
+    if (isInitialized) return;
+    
+    // Check Supabase
+    if (!window.supabase) {
+      showError('Supabase failed to load. Please refresh.');
+      return;
     }
 
-    const toggle2 = safeGetElement('togglePassword2');
-    if (toggle2) {
-      toggle2.addEventListener('click', function() {
-        const pw = safeGetElement('signupPassword');
-        if (pw) {
-          const isPassword = pw.type === 'password';
-          pw.type = isPassword ? 'text' : 'password';
-          const textEl = this.querySelector('.toggle-text');
-          if (textEl) textEl.textContent = isPassword ? 'Hide' : 'Show';
-        }
-      });
+    // Initialize Supabase
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (err) {
+      showError('Failed to initialize. Please refresh.');
+      return;
     }
 
-    // Character counter
-    const nameInput = safeGetElement('companyNameInput');
-    const charCounter = safeGetElement('charCounter');
-    if (nameInput && charCounter) {
-      function updateCounter() {
-        const len = nameInput.value.length;
-        charCounter.textContent = len + ' / 100';
-        charCounter.className = 'char-counter';
-        if (len > 80) charCounter.classList.add('warning');
-        if (len > 95) charCounter.classList.add('danger');
-      }
-      nameInput.addEventListener('input', updateCounter);
+    // Check for existing session
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      if (data?.session) {
+        // Show continue banner or redirect
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', data.session.user.id)
+          .maybeSingle();
 
-      const startTime = Date.now();
-      function checkAutofill() {
-        if (nameInput.value.length > 0 || Date.now() - startTime > 1000) {
-          updateCounter();
+        if (profile?.role && DASHBOARDS[profile.role]) {
+          localStorage.setItem('tradeaux_role', profile.role);
+          redirectToDashboard(profile.role);
           return;
         }
-        requestAnimationFrame(checkAutofill);
       }
-      setTimeout(checkAutofill, 50);
-
-      nameInput.addEventListener('change', updateCounter);
+    } catch (err) {
+      // Session check failed, show sign-in
     }
 
-    // Check auth
-    checkAuth();
+    showStep('step1');
+    showLoading(false);
+    isInitialized = true;
+  }
+
+  // =====================================================
+  // WIRE EVENTS
+  // =====================================================
+  function wireEvents() {
+    // Sign In
+    const signinForm = getEl('step1');
+    if (signinForm) signinForm.addEventListener('submit', handleSignIn);
+
+    // Sign Up
+    const signupForm = getEl('step2');
+    if (signupForm) signupForm.addEventListener('submit', handleSignUp);
 
     // Navigation
-    safeAddListener('showSignup', 'click', function(e) {
-      e.preventDefault();
-      showStep('step2');
-      const subtitle = safeGetElement('subtitle');
-      if (subtitle) subtitle.textContent = 'Create your account';
-      debugLog('Navigated to sign up');
-    });
-
-    safeAddListener('showSignin', 'click', function(e) {
-      e.preventDefault();
-      showStep('step1');
-      const subtitle = safeGetElement('subtitle');
-      if (subtitle) subtitle.textContent = 'Sign in to your account';
-      const errorMsg = safeGetElement('errorMsg');
-      if (errorMsg) errorMsg.style.display = 'none';
-      const successMsg = safeGetElement('successMsg');
-      if (successMsg) successMsg.style.display = 'none';
-      debugLog('Navigated to sign in');
-    });
-
-    // Form submissions - USE THE HANDLERS
-    const step1Form = safeGetElement('step1');
-    if (step1Form) {
-      step1Form.addEventListener('submit', handleSignIn);
-    }
-
-    const step2Form = safeGetElement('step2');
-    if (step2Form) {
-      step2Form.addEventListener('submit', handleSignUp);
-    }
-
-    // Role continue keydown
-    safeAddListener('roleContinueBtn', 'keydown', function(e) {
-      if (e.key === 'Enter' && !this.disabled) {
+    const showSignup = getEl('showSignup');
+    if (showSignup) {
+      showSignup.addEventListener('click', (e) => {
         e.preventDefault();
-        this.click();
-      }
-    });
-
-    // Role continue button
-    safeAddListener('roleContinueBtn', 'click', handleRoleContinue);
-
-    // Logout after login
-    safeAddListener('logoutAfterLogin', 'click', async function(e) {
-      e.preventDefault();
-      await fullSignOut();
-      window.location.href = 'signin.html?logout=1&_t=' + Date.now();
-    });
-
-    // Forgot password
-    safeAddListener('forgotLink', 'click', handleForgotPassword);
-
-    // Role selector
-    document.querySelectorAll('.role-option').forEach(function(option) {
-      option.addEventListener('click', function() {
-        selectRole(this);
+        showStep('step2');
+        const subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Create your account';
       });
+    }
 
-      option.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          selectRole(this);
-          if (this.classList.contains('selected')) {
-            const btn = safeGetElement('roleContinueBtn');
-            if (btn) btn.click();
-          }
-          return;
-        }
-        const options = Array.from(document.querySelectorAll('.role-option'));
-        const currentIndex = options.indexOf(this);
-        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-          e.preventDefault();
-          const next = options[(currentIndex + 1) % options.length];
-          if (next) next.focus();
-        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-          e.preventDefault();
-          const prev = options[(currentIndex - 1 + options.length) % options.length];
-          if (prev) prev.focus();
-        }
+    const showSignin = getEl('showSignin');
+    if (showSignin) {
+      showSignin.addEventListener('click', (e) => {
+        e.preventDefault();
+        showStep('step1');
+        const subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Sign in to your account';
       });
+    }
+
+    // Forgot Password
+    const forgotLink = getEl('forgotLink');
+    if (forgotLink) forgotLink.addEventListener('click', handleForgotPassword);
+
+    // Logout
+    const logoutBtn = getEl('logoutAfterLogin');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await fullSignOut();
+      });
+    }
+
+    // Role options
+    document.querySelectorAll('.role-option').forEach(el => {
+      el.addEventListener('click', handleRoleSelect);
     });
 
-    debugLog('Initialization complete');
+    // Role continue
+    const roleContinue = getEl('roleContinueBtn');
+    if (roleContinue) roleContinue.addEventListener('click', handleRoleContinue);
+
+    // Password toggles
+    const toggle1 = getEl('togglePassword1');
+    if (toggle1) {
+      toggle1.addEventListener('click', function() {
+        const pw = getEl('password');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
+
+    const toggle2 = getEl('togglePassword2');
+    if (toggle2) {
+      toggle2.addEventListener('click', function() {
+        const pw = getEl('signupPassword');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
   }
 
   // =====================================================
-  // SAFE DOM READY
+  // START
   // =====================================================
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', async function() {
+      await init();
+      wireEvents();
+    });
   } else {
-    init();
+    (async function() {
+      await init();
+      wireEvents();
+    })();
   }
 
-// =====================================================
-// CATCH UNHANDLED ERRORS
-// =====================================================
-})().catch(err => {
-  console.error('🚨 Startup error:', err);
-  // Show fallback error message
-  const body = document.body;
-  if (body) {
-    body.innerHTML = `
-      <div style="color:#ff6b6b;text-align:center;padding:40px;font-family:sans-serif;max-width:600px;margin:auto;">
-        <h2>⚠️ Application Error</h2>
-        <p>${err.message || 'Failed to load the application. Please refresh the page.'}</p>
-        <button onclick="location.reload()" style="padding:10px 20px;margin-top:20px;cursor:pointer;border:1px solid #ff6b6b;background:#fff;color:#ff6b6b;border-radius:6px;">
-          Refresh Page
-        </button>
-      </div>
-    `;
-  }
-});
+})();
 </script>
+
 </body>
 </html>
