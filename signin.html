@@ -329,13 +329,30 @@ button:disabled {
       </div>
     </div>
 
+    <!-- STEP 4: RESET PASSWORD (NEW!) -->
+    <div id="step4" class="step-container hidden">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="font-size:16px; color:#7CFC00; margin-bottom:8px;">🔐 Reset Your Password</div>
+        <div style="font-size:13px; color:#9ca3af;">Enter your new password below</div>
+      </div>
+      <div class="password-wrapper">
+        <input type="password" id="resetPassword" placeholder="New password (min 6 chars)" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="toggleResetPassword">Show</button>
+      </div>
+      <div class="password-wrapper">
+        <input type="password" id="resetPasswordConfirm" placeholder="Confirm new password" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="toggleResetPasswordConfirm">Show</button>
+      </div>
+      <button type="button" id="resetPasswordBtn">Update Password</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" id="backToSignin" style="font-size:12px; color:#9ca3af; text-decoration:none;">← Back to sign in</a>
+      </div>
+    </div>
+
     <div class="debug-info" id="debugInfo"></div>
   </div>
 </div>
 
-<!-- ===================================================== -->
-<!-- PRODUCTION JAVASCRIPT - NO TEST ALERTS -->
-<!-- ===================================================== -->
 <script>
 (function() {
   'use strict';
@@ -364,6 +381,7 @@ button:disabled {
   let signInButtonLocked = false;
   let forgotPasswordLocked = false;
   let isInitialized = false;
+  let resetToken = null;
 
   // =====================================================
   // DOM HELPERS
@@ -444,6 +462,125 @@ button:disabled {
     showStep('step3');
     const display = getEl('userEmailDisplay');
     if (display) display.textContent = 'Welcome, ' + (user.email || 'User');
+  }
+
+  // =====================================================
+  // CHECK FOR PASSWORD RESET TOKEN
+  // =====================================================
+  function checkForResetToken() {
+    // Check URL hash for access_token
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      console.log('🔑 Password reset token detected');
+      
+      // Extract token from hash
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      const type = params.get('type');
+      
+      if (accessToken && type === 'recovery') {
+        resetToken = accessToken;
+        showStep('step4');
+        const subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Reset Your Password';
+        showSuccess('Please enter your new password below.');
+        
+        // Clean the URL to remove the token (for security)
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // =====================================================
+  // HANDLE PASSWORD RESET
+  // =====================================================
+  async function handlePasswordReset() {
+    const password = getEl('resetPassword');
+    const confirm = getEl('resetPasswordConfirm');
+    
+    if (!password || !confirm) {
+      showError('Please enter your new password');
+      return;
+    }
+
+    const passwordValue = password.value;
+    const confirmValue = confirm.value;
+
+    if (!passwordValue || !confirmValue) {
+      showError('Please fill in both password fields');
+      return;
+    }
+
+    if (passwordValue.length < 6) {
+      showError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (passwordValue !== confirmValue) {
+      showError('Passwords do not match');
+      return;
+    }
+
+    const btn = getEl('resetPasswordBtn');
+    if (!btn) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+
+    try {
+      // Use the token to set the new password
+      const { data, error } = await supabaseClient.auth.updateUser({
+        password: passwordValue
+      });
+
+      if (error) {
+        // If updateUser fails with the current session, try using the token
+        if (resetToken) {
+          // Set the session with the reset token
+          const { error: sessionError } = await supabaseClient.auth.setSession({
+            access_token: resetToken,
+            refresh_token: ''
+          });
+          
+          if (sessionError) throw sessionError;
+          
+          // Try again with the new session
+          const { error: updateError } = await supabaseClient.auth.updateUser({
+            password: passwordValue
+          });
+          
+          if (updateError) throw updateError;
+        } else {
+          throw error;
+        }
+      }
+
+      showSuccess('✅ Password updated successfully! Please sign in with your new password.');
+      
+      // Clear the reset state
+      resetToken = null;
+      
+      // Show sign in form after a delay
+      setTimeout(() => {
+        showStep('step1');
+        const subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Sign in to your account';
+        // Clear password fields
+        if (password) password.value = '';
+        if (confirm) confirm.value = '';
+      }, 2000);
+
+    } catch (error) {
+      console.error('Password reset error:', error);
+      showError(error.message || 'Failed to update password. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Update Password';
+    }
   }
 
   // =====================================================
@@ -608,7 +745,7 @@ button:disabled {
 
     try {
       const { error } = await supabaseClient.auth.resetPasswordForEmail(emailValue, {
-        redirectTo: window.location.origin + '/signin.html'
+        redirectTo: window.location.origin + window.location.pathname
       });
 
       if (error) throw error;
@@ -691,11 +828,17 @@ button:disabled {
       return;
     }
 
+    // Check for password reset token FIRST
+    if (checkForResetToken()) {
+      isInitialized = true;
+      showLoading(false);
+      return;
+    }
+
     // Check for existing session
     try {
       const { data } = await supabaseClient.auth.getSession();
       if (data?.session) {
-        // Show continue banner or redirect
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('role')
@@ -792,6 +935,50 @@ button:disabled {
           pw.type = pw.type === 'password' ? 'text' : 'password';
           this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
         }
+      });
+    }
+
+    // Reset password toggle
+    const toggleReset = getEl('toggleResetPassword');
+    if (toggleReset) {
+      toggleReset.addEventListener('click', function() {
+        const pw = getEl('resetPassword');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
+
+    const toggleResetConfirm = getEl('toggleResetPasswordConfirm');
+    if (toggleResetConfirm) {
+      toggleResetConfirm.addEventListener('click', function() {
+        const pw = getEl('resetPasswordConfirm');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
+
+    // Reset password button
+    const resetBtn = getEl('resetPasswordBtn');
+    if (resetBtn) resetBtn.addEventListener('click', handlePasswordReset);
+
+    // Back to sign in from reset
+    const backToSignin = getEl('backToSignin');
+    if (backToSignin) {
+      backToSignin.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetToken = null;
+        showStep('step1');
+        const subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Sign in to your account';
+        // Clear reset fields
+        const resetPw = getEl('resetPassword');
+        const resetConfirm = getEl('resetPasswordConfirm');
+        if (resetPw) resetPw.value = '';
+        if (resetConfirm) resetConfirm.value = '';
       });
     }
   }
