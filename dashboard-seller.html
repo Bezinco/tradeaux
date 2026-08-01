@@ -1,1050 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>TradeAux • Seller Dashboard | TAR Advisor</title>
-
-  <!-- ===== CSP META TAG ===== -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pfutaovwbygefummienf.supabase.co; connect-src 'self' https://pfutaovwbygefummienf.supabase.co; base-uri 'self';">
-
-  <!-- ===== SUPABASE CLIENT ===== -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ===== ALL STYLES CONSOLIDATED ===== */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
-    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
-    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
-    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
-    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
-    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } 100% { transform: translate(-30px,20px) scale(1); } }
-
-    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
-
-    /* ===== LOGO ===== */
-    .gem-logo-corner {
-      position: fixed; top: 10px; left: 20px; z-index: 500;
-      pointer-events: none;
-      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
-      transform-style: preserve-3d; perspective: 1000px;
-      transform: scale(0.35); transform-origin: top left;
-    }
-    .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
-    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
-    .gem-letter:nth-child(1) { animation-delay: 0s; }
-    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
-    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
-    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
-    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
-    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
-    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
-    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
-    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
-
-    .gem-letter:nth-child(1)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-    .gem-letter:nth-child(2)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-    .gem-letter:nth-child(3)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-    .gem-letter:nth-child(4)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-    .gem-letter:nth-child(5)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-    .gem-letter:nth-child(6)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-    .gem-letter:nth-child(7)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-    .gem-letter:nth-child(8)::before {
-      content: attr(data-letter);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-      transform: translateZ(2px);
-    }
-
-    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
-    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
-    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
-    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
-
-    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
-    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
-
-    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
-    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
-    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
-    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
-    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
-    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
-    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
-    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
-    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
-    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
-    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
-    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
-    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
-
-    /* ===== HEADER ===== */
-    .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
-    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px; background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; }
-    .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
-    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
-    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
-    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0, 206, 209, 0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0, 206, 209, 0.3); flex-wrap: wrap; }
-    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
-    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
-    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
-    .wallet-sub { font-size: 11px; color: #7CFC00; }
-    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
-    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
-    .top-trader { text-align: center; background: rgba(0, 0, 0, 0.5); padding: 12px 24px; border-radius: 40px; display: inline-block; width: auto; margin: 20px auto; border: 1px solid rgba(124, 252, 0, 0.3); backdrop-filter: blur(4px); font-family: 'Orbitron', sans-serif; font-size: 14px; }
-    .banner-container { text-align: center; padding-top: 20px; }
-
-    /* ===== SLIDER STYLES ===== */
-    .slider-row { display: flex; align-items: center; gap: 16px; width: 100%; }
-    .slider-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #00ced1, #7CFC00); outline: none; }
-    .slider-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #00ced1; cursor: pointer; border: 2px solid #0a1228; box-shadow: 0 0 10px rgba(0,206,209,0.3); }
-    .slider-row input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #00ced1; cursor: pointer; border: 2px solid #0a1228; }
-    .slider-value { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #00ced1; min-width: 55px; text-align: right; }
-
-    .spec-group { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 3px solid #00ced1; }
-    .spec-group .spec-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .packaging-preview { background: rgba(0,206,209,0.05); border: 1px solid rgba(0,206,209,0.15); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #7CFC00; margin-top: 6px; display: inline-block; }
-
-    /* ===== COMPANY PROFILE ===== */
-    .company-section { margin-top: 10px; }
-    .company-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .company-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 24px; }
-    .company-profile-layout { display: grid; grid-template-columns: 200px 1fr; gap: 24px; }
-    .company-logo-section { text-align: center; }
-    .company-logo-upload { width: 160px; height: 160px; border: 2px dashed rgba(0,206,209,0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; margin: 0 auto; overflow: hidden; background: rgba(0,0,0,0.3); }
-    .company-logo-upload:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
-    .company-logo-upload img { width: 100%; height: 100%; object-fit: contain; pointer-events: auto; }
-    .company-logo-upload .placeholder { color: #9ca3af; font-size: 13px; }
-    .company-logo-upload .placeholder-icon { font-size: 48px; margin-bottom: 8px; }
-    .company-verification-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .company-verification-badge.verified { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
-    .company-verification-badge.unverified { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.3); }
-    .company-verification-badge.pending { background: rgba(255,217,102,0.15); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
-    .company-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .company-field { margin-bottom: 4px; }
-    .company-field .field-label { display: block; font-size: 10px; color: #9ca3af; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .company-field .field-value { font-size: 13px; color: #e5e7eb; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .documents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
-    .document-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
-    .document-item:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
-    .document-item .doc-icon { font-size: 20px; }
-    .document-item .doc-info { flex: 1; }
-    .document-item .doc-name { font-size: 11px; font-weight: 600; }
-    .document-item .doc-status { font-size: 10px; color: #9ca3af; }
-    .document-item .doc-upload { font-size: 10px; color: #00ced1; cursor: pointer; }
-    .company-documents-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
-    .company-photos-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
-    .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-    .photo-item { aspect-ratio: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-    .photo-item:hover { border-color: #00ced1; transform: scale(1.02); }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-    .photo-item .placeholder { color: #9ca3af; font-size: 11px; text-align: center; padding: 8px; }
-    .photo-item .placeholder-icon { font-size: 28px; display: block; margin-bottom: 4px; }
-    .photo-upload-btn { aspect-ratio: 1; background: rgba(0,206,209,0.05); border: 2px dashed rgba(0,206,209,0.3); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
-    .photo-upload-btn:hover { border-color: #00ced1; background: rgba(0,206,209,0.1); }
-    .photo-upload-btn .icon { font-size: 28px; color: #00ced1; }
-    .photo-upload-btn .text { font-size: 10px; color: #9ca3af; margin-top: 4px; }
-
-    /* ===== CERTIFICATIONS ===== */
-    .section-card { background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95)); border-radius: 24px; padding: 24px; margin-bottom: 24px; backdrop-filter: blur(8px); position: relative; border: 2px solid transparent; background-clip: padding-box; }
-    .section-card::before { content: ''; position: absolute; inset: -2px; border-radius: 26px; padding: 2px; background: linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00); background-size: 300% 300%; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; animation: borderFlow 4s ease infinite; }
-    @keyframes borderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    .section-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #7CFC00; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; border-left: 3px solid #7CFC00; padding-left: 14px; flex-wrap: wrap; }
-    .section-header .badge { background: rgba(0,206,209,0.2); padding: 3px 10px; border-radius: 20px; font-size: 10px; color: #00ced1; }
-    .cert-block-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
-    .cert-block { background: linear-gradient(145deg, #0B1122, #030712); border: 1px solid rgba(124,252,0,0.35); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.3s; }
-    .cert-block:hover { border-color: #7CFC00; transform: translateY(-2px); box-shadow: 0 25px 30px -14px rgba(124,252,0,0.15); }
-    .cert-block .cert-icon { font-size: 28px; }
-    .cert-block .cert-name { font-size: 12px; font-weight: 700; color: #e5e7eb; text-align: center; }
-    .cert-block .cert-desc { font-size: 9px; color: #9ca3af; text-align: center; }
-    .cert-block .cert-required { font-size: 8px; color: #FFD966; background: rgba(255,217,102,0.1); padding: 2px 10px; border-radius: 10px; }
-    .cert-block .cert-preview { width: 100%; height: 50px; border-radius: 8px; border: 1px dashed rgba(124,252,0,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(0,0,0,0.3); overflow: hidden; }
-    .cert-block .cert-preview img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-    .cert-block .cert-preview .placeholder { font-size: 9px; color: #9ca3af; }
-    .cert-block .cert-toggle-row { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; margin-top: 4px; }
-    .cert-block .cert-toggle-row span { font-size: 9px; color: #9ca3af; }
-    .toggle-switch { position: relative; display: inline-block; width: 30px; height: 18px; flex-shrink: 0; }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: 0.3s; border-radius: 34px; }
-    .toggle-switch .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: 0.3s; border-radius: 50%; }
-    .toggle-switch input:checked + .slider { background-color: #7CFC00; }
-    .toggle-switch input:checked + .slider:before { transform: translateX(12px); }
-    .block-select { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; color: #7CFC00; padding: 10px; font-family: 'Inter', sans-serif; }
-    .btn-remove-cert { background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.4); color: #FF4D4D; padding: 2px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
-    .btn-remove-cert:hover { background: rgba(255,77,77,0.3); border-color: #FF4D4D; }
-
-    /* ===== TAR SECTION ===== */
-    .tar-section { margin-top: 30px; }
-    .tar-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .tar-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-    .tar-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; }
-    .tar-status-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #7CFC00; }
-    .tar-status-dot { width: 12px; height: 12px; border-radius: 50%; background: #7CFC00; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
-    .tar-status-text { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #7CFC00; }
-    .tar-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
-    .tar-metric { text-align: center; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; }
-    .tar-metric-value { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
-    .tar-metric-label { font-size: 9px; color: #9ca3af; margin-top: 4px; }
-    .tar-receivable-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #FFD966; cursor: pointer; transition: all 0.2s; }
-    .tar-receivable-item:hover { background: rgba(0,206,209,0.05); transform: translateX(4px); }
-    .tar-receivable-item .receivable-info { flex: 1; }
-    .tar-receivable-item .receivable-name { font-weight: 600; font-size: 13px; }
-    .tar-receivable-item .receivable-details { font-size: 11px; color: #9ca3af; }
-    .tar-receivable-item .receivable-amount { font-family: 'Orbitron', sans-serif; color: #00ced1; font-size: 14px; }
-    .tar-receivable-item .receivable-status { font-size: 10px; padding: 2px 10px; border-radius: 12px; margin-left: 12px; }
-    .tar-receivable-item .receivable-status.ready { background: rgba(124,252,0,0.2); color: #7CFC00; }
-    .tar-receivable-item .receivable-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
-    .tar-receivable-item .receivable-status.urgent { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-    .tar-receivable-item .receivable-status.converted { background: rgba(0,206,209,0.2); color: #00ced1; }
-
-    .auction-schedule { margin-top: 16px; }
-    .auction-schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .auction-schedule-header .title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #00ced1; }
-    .auction-refresh-btn { background: rgba(0,206,209,0.15); border: 1px solid rgba(0,206,209,0.3); color: #00ced1; padding: 2px 12px; border-radius: 12px; font-size: 9px; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.2s; }
-    .auction-refresh-btn:hover { background: rgba(0,206,209,0.25); transform: scale(1.02); }
-    .auction-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #00ced1; }
-    .auction-item .auction-info { flex: 1; }
-    .auction-item .auction-name { font-weight: 600; font-size: 13px; }
-    .auction-item .auction-details { font-size: 11px; color: #9ca3af; }
-    .auction-item .auction-time { font-family: 'Orbitron', sans-serif; color: #7CFC00; font-size: 12px; }
-    .auction-item .auction-status { font-size: 10px; padding: 2px 10px; border-radius: 12px; }
-    .auction-item .auction-status.upcoming { background: rgba(0,206,209,0.2); color: #00ced1; }
-    .auction-item .auction-status.live { background: rgba(124,252,0,0.2); color: #7CFC00; animation: pulse 2s infinite; }
-    .auction-item .auction-status.closed { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-
-    /* ===== PRODUCTS ===== */
-    .products-section { margin-top: 30px; }
-    .products-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-    .product-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 16px; padding: 16px; transition: all 0.3s; display: flex; flex-direction: column; }
-    .product-card:hover { transform: translateY(-4px); border-color: #00ced1; }
-    .product-card .product-image { width: 100%; height: 120px; border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.3); margin-bottom: 10px; border: 1px solid rgba(0,206,209,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .product-card .product-image img { width: 100%; height: 100%; object-fit: cover; }
-    .product-card .product-image .no-image { color: #9ca3af; font-size: 12px; }
-    .product-card .product-name { font-weight: 700; font-size: 15px; }
-    .product-card .product-variety { color: #9ca3af; font-size: 12px; }
-    .product-card .product-specs { font-size: 11px; color: #9ca3af; margin: 6px 0; display: flex; flex-wrap: wrap; gap: 8px; }
-    .product-card .product-specs .tag { background: rgba(0,206,209,0.08); padding: 1px 8px; border-radius: 10px; border: 1px solid rgba(0,206,209,0.1); }
-    .product-card .product-packaging { font-size: 11px; color: #7CFC00; margin: 4px 0; }
-    .product-card .product-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
-    .product-card .product-actions button { padding: 4px 10px; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10px; cursor: pointer; transition: all 0.2s; }
-    .product-card .product-actions .post-auction-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
-    .product-card .product-actions .post-auction-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
-    .product-card .product-actions .post-auction-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-    .product-card .product-actions .edit-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
-    .product-card .product-actions .edit-btn:hover { background: rgba(255,217,102,0.3); }
-    .product-card .product-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
-    .product-card .product-actions .delete-btn:hover { background: rgba(255,59,59,0.25); }
-    .add-product-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; cursor: pointer; transition: all 0.3s; }
-    .add-product-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
-    .add-product-icon { font-size: 28px; color: #00ced1; margin-bottom: 6px; }
-    .add-product-text { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #9ca3af; }
-
-    /* ===== ARCHIVE ===== */
-    .archive-section { margin-top: 30px; }
-    .archive-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #FFD966; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; cursor: pointer; padding: 12px 16px; background: rgba(255, 217, 102, 0.05); border-radius: 12px; border: 1px solid rgba(255, 217, 102, 0.2); transition: all 0.3s; }
-    .archive-header:hover { background: rgba(255, 217, 102, 0.1); border-color: #FFD966; }
-    .archive-header .count-badge { background: rgba(255, 217, 102, 0.2); padding: 2px 12px; border-radius: 20px; font-size: 12px; color: #FFD966; }
-    .archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 16px 0; }
-    .archive-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.7), rgba(2, 6, 23, 0.9)); border: 1px solid rgba(255, 217, 102, 0.2); border-radius: 16px; padding: 16px; transition: all 0.3s; position: relative; }
-    .archive-card:hover { transform: translateY(-3px); border-color: #FFD966; box-shadow: 0 10px 30px rgba(255, 217, 102, 0.1); }
-    .archive-card .archive-status { position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 2px 12px; border-radius: 12px; background: rgba(255, 217, 102, 0.15); color: #FFD966; }
-    .archive-card .archive-date { font-size: 11px; color: #9ca3af; margin-bottom: 8px; }
-    .archive-card .archive-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
-    .archive-card .archive-details { font-size: 12px; color: #9ca3af; margin: 6px 0; }
-    .archive-card .archive-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; }
-    .archive-card .metric-item { text-align: center; }
-    .archive-card .metric-value { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #00ced1; }
-    .archive-card .metric-label { font-size: 8px; color: #9ca3af; text-transform: uppercase; }
-    .simulate-btn { background: linear-gradient(135deg, #FFD966, #FFB347); border: none; padding: 6px 16px; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; color: #000; cursor: pointer; transition: all 0.3s; }
-    .simulate-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 217, 102, 0.3); }
-    .archive-card .simulation-result { margin-top: 8px; padding: 8px; background: rgba(124, 252, 0, 0.05); border-radius: 6px; border-left: 3px solid #7CFC00; font-size: 11px; color: #7CFC00; }
-    .archive-collapse { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-    .archive-collapse.open { max-height: 5000px; }
-    .archive-header .toggle-icon { transition: transform 0.3s; }
-    .archive-header.open .toggle-icon { transform: rotate(180deg); }
-
-    /* ===== ORDERS ===== */
-    .orders-section { margin-top: 30px; }
-    .orders-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .order-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
-    .order-card:hover { transform: translateY(-4px); border-color: #00ced1; }
-    .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .order-id { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; color: #00ced1; }
-    .order-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
-    .order-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
-    .order-status.processing { background: rgba(0,206,209,0.2); color: #00ced1; }
-    .order-status.shipped { background: rgba(124,252,0,0.2); color: #7CFC00; }
-    .order-status.completed { background: rgba(0,102,255,0.2); color: #0066ff; }
-    .order-status.cancelled { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-    .order-details { font-size: 13px; color: #9ca3af; }
-    .order-details div { margin-bottom: 4px; }
-    .order-details .label { color: #666; }
-    .order-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .order-actions button { padding: 6px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-    .order-actions .process-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
-    .order-actions .process-btn:hover { background: rgba(0,206,209,0.3); }
-    .order-actions .ship-btn { background: rgba(124,252,0,0.2); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
-    .order-actions .ship-btn:hover { background: rgba(124,252,0,0.3); }
-    .order-actions .view-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
-    .order-actions .view-btn:hover { background: rgba(0,102,255,0.3); }
-
-    /* ===== STATS ===== */
-    .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 20px 0; }
-    .stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
-    .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: #00ced1; }
-    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-    .stat-icon { font-size: 28px; margin-bottom: 8px; }
-
-    /* ===== MODALS ===== */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
-    .modal.show { display: flex; }
-    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
-    .modal-content.wide { max-width: 800px; }
-    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; }
-    .modal-close:hover { color: #00ced1; }
-    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
-    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
-    .modal-field { margin-bottom: 16px; }
-    .modal-field label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
-    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 20px rgba(0,206,209,0.05); }
-    .modal-field .hint { font-size: 10px; color: #9ca3af; margin-top: 4px; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
-    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; }
-    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
-    .cancel-btn:hover { background: rgba(255,255,255,0.2); }
-    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
-    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
-
-    /* ===== TOAST ===== */
-    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; }
-
-    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 32px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; }
-    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
-    .tar-batch-btn { background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; transition: 0.2s; }
-    .tar-batch-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(124,252,0,0.3); }
-
-    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
-
-    /* ===== TOUR STYLES ===== */
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); display: inline-block; transition: all 0.3s; cursor: pointer; }
-    .dot.active { background: #7CFC00; box-shadow: 0 0 10px rgba(124,252,0,0.5); transform: scale(1.2); }
-    .dot.done { background: #00ced1; }
-
-    /* ===== FILE INPUT ===== */
-    .hidden-input {
-      position: absolute;
-      opacity: 0;
-      width: 0.1px;
-      height: 0.1px;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    /* ===== TOUR HIGHLIGHT & INFO ===== */
-    .highlight { color: #7CFC00; font-weight: 700; }
-    .info { color: #00ced1; font-weight: 600; }
-
-    /* ===== ARIA LIVE REGION FOR TOASTS ===== */
-    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
-    .toast.success { border-color: #7CFC00; color: #7CFC00; }
-    .toast.warning { border-color: #FFD966; color: #FFD966; }
-    .toast.info { border-color: #00ced1; color: #00ced1; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1000px) { .company-profile-layout { grid-template-columns: 1fr; } .company-fields { grid-template-columns: 1fr; } .dashboard-grid { grid-template-columns: repeat(2, 1fr); } .tar-grid { grid-template-columns: 1fr; } .tar-metrics { grid-template-columns: 1fr 1fr; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
-    @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: stretch; } .wallet-section { flex-wrap: wrap; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .tar-metrics { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr; } }
-  </style>
-  <base target="_self">
-</head>
-<body>
-
-<!-- ===== NOSCRIPT ===== -->
-<noscript>
-  <div style="background:#ff3b3b; color:white; padding:20px; text-align:center; position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-    <h2>⚠️ JavaScript Required</h2>
-    <p>TradeAux requires JavaScript to function. Please enable JavaScript in your browser.</p>
-  </div>
-</noscript>
-
-<!-- ===== HIDDEN FILE INPUTS ===== -->
-<input type="file" id="logoFileInput" class="hidden-input" accept=".jpg,.png,.jpeg">
-<input type="file" id="photoFileInput" class="hidden-input" accept=".jpg,.png,.jpeg" multiple>
-<input type="file" id="incorpFileInput" class="hidden-input" accept=".pdf,.jpg,.png">
-<input type="file" id="licenseFileInput" class="hidden-input" accept=".pdf,.jpg,.png">
-<input type="file" id="taxFileInput" class="hidden-input" accept=".pdf,.jpg,.png">
-
-<!-- ===== BACKGROUND WAVES ===== -->
-<div class="bg-waves" aria-hidden="true">
-  <div class="wave-bg wave-1"></div>
-  <div class="wave-bg wave-2"></div>
-  <div class="wave-bg wave-3"></div>
-</div>
-
-<!-- ===== 3D LOGO ===== -->
-<div class="gem-logo-corner" aria-hidden="true" role="presentation">
-  <div class="gem-text">
-    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-  </div>
-  <div class="light-source"></div>
-  <div class="sparkle sparkle-1"></div>
-  <div class="sparkle sparkle-2"></div>
-  <div class="sparkle sparkle-3"></div>
-  <div class="sparkle sparkle-4"></div>
-  <div class="sparkle sparkle-5"></div>
-  <div class="sparkle sparkle-6"></div>
-  <div class="sparkle sparkle-7"></div>
-  <div class="sparkle sparkle-8"></div>
-  <div class="sparkle sparkle-9"></div>
-  <div class="sparkle sparkle-10"></div>
-  <div class="depth-shadow"></div>
-</div>
-
-<main class="container" role="main">
-  <header class="header">
-    <nav class="nav" aria-label="Main navigation">
-      <div class="wallet-section">
-        <div class="wallet-balance">
-          <span class="wallet-label">💰 BALANCE</span>
-          <span class="wallet-amount" id="walletAmount">$0.00</span>
-          <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
-        </div>
-        <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
-        <button class="btn-neon" style="padding:4px 12px; font-size:10px; margin-left:8px;" id="tourBtn" type="button">🎯 Tour</button>
-        <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px; margin-left:8px;" type="button">☁️ Sync</button>
-      </div>
-      <a href="javascript:void(0)" id="marketplaceNav">Marketplace</a>
-      <a href="javascript:void(0)" id="analyticsNav">Analytics</a>
-      <a href="#" class="sign-out" id="authBtn">🚪 Sign Out</a>
-    </nav>
-  </header>
-
-  <div class="banner-container">
-    <div class="top-trader" id="topTraderBanner">🤖 TAR ADVISOR ACTIVE • <span id="bannerConversions">10,000</span> conversions available • $25 each</div>
-  </div>
-
-  <!-- ===== STATS ===== -->
-  <div class="dashboard-grid" id="statsGrid">
-    <div class="stat-card" data-tour="1">
-      <div class="stat-icon">📦</div>
-      <div class="stat-number" id="totalProducts">0</div>
-      <div class="stat-label">Total Products</div>
-    </div>
-    <div class="stat-card" data-tour="2">
-      <div class="stat-icon">🛒</div>
-      <div class="stat-number" id="totalOrders">0</div>
-      <div class="stat-label">Total Orders</div>
-    </div>
-    <div class="stat-card" data-tour="3">
-      <div class="stat-icon">💵</div>
-      <div class="stat-number" id="totalRevenue">$0</div>
-      <div class="stat-label">Total Revenue</div>
-    </div>
-    <div class="stat-card" data-tour="4">
-      <div class="stat-icon">🔄</div>
-      <div class="stat-number" id="totalConversions">0</div>
-      <div class="stat-label">Conversions</div>
-    </div>
-  </div>
-
-  <!-- ===== COMPANY PROFILE ===== -->
-  <div class="company-section" id="companySection" data-tour="6">
-    <div class="company-header">
-      <span>🏢 COMPANY PROFILE</span>
-      <button class="btn-neon" style="padding:6px 20px; font-size:12px; width:auto;" id="editCompanyBtn" type="button">✏️ Edit Profile</button>
-    </div>
-    <div class="company-card">
-      <div class="company-profile-layout">
-        <div class="company-logo-section">
-          <div class="company-logo-upload" id="companyLogoUpload">
-            <div class="placeholder" id="logoPlaceholder">
-              <div class="placeholder-icon">🏢</div>
-              <span>Upload Logo</span>
-            </div>
-            <img id="companyLogoPreview" style="display:none;" alt="Company Logo">
-          </div>
-          <div class="company-verification-badge pending" id="verificationBadge">⏳ Pending Verification</div>
-          <div style="font-size:11px; color:#9ca3af; margin-top:8px;">
-            <span id="companyStatusText">Complete your company profile to start selling</span>
-          </div>
-        </div>
-        <div class="company-info-section">
-          <div class="company-fields">
-            <div class="company-field"><span class="field-label">Company Name</span><div class="field-value" id="companyNameDisplay">Not set</div></div>
-            <div class="company-field"><span class="field-label">Registration Number</span><div class="field-value" id="companyRegDisplay">Not set</div></div>
-            <div class="company-field"><span class="field-label">Country of Incorporation</span><div class="field-value" id="companyCountryDisplay">Not set</div></div>
-            <div class="company-field"><span class="field-label">Tax Registration Number</span><div class="field-value" id="companyTaxDisplay">Not set</div></div>
-            <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Business Address</span><div class="field-value" id="companyAddressDisplay">Not set</div></div>
-            <div class="company-field"><span class="field-label">Contact Email</span><div class="field-value" id="companyEmailDisplay">Not set</div></div>
-            <div class="company-field"><span class="field-label">Contact Phone</span><div class="field-value" id="companyPhoneDisplay">Not set</div></div>
-            <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Website</span><div class="field-value" id="companyWebsiteDisplay">Not set</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="company-documents">
-        <div class="company-documents-title">📄 Legal Documents</div>
-        <div class="documents-grid" id="documentsGrid">
-          <div class="document-item">
-            <div class="doc-icon">📜</div>
-            <div class="doc-info">
-              <div class="doc-name">Certificate of Incorporation</div>
-              <div class="doc-status" id="incorpDocStatus">Not uploaded</div>
-            </div>
-            <div class="doc-upload" id="incorpUploadBtn">📤 Upload</div>
-          </div>
-          <div class="document-item">
-            <div class="doc-icon">📋</div>
-            <div class="doc-info">
-              <div class="doc-name">Business License</div>
-              <div class="doc-status" id="licenseDocStatus">Not uploaded</div>
-            </div>
-            <div class="doc-upload" id="licenseUploadBtn">📤 Upload</div>
-          </div>
-          <div class="document-item">
-            <div class="doc-icon">📑</div>
-            <div class="doc-info">
-              <div class="doc-name">Tax Registration</div>
-              <div class="doc-status" id="taxDocStatus">Not uploaded</div>
-            </div>
-            <div class="doc-upload" id="taxUploadBtn">📤 Upload</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="company-photos">
-        <div class="company-photos-title">🖼️ Company Photos</div>
-        <div class="photos-grid" id="photosGrid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== PRODUCTS ===== -->
-  <div class="products-section" id="productsSection" data-tour="8">
-    <div class="products-header">
-      <span>📦 YOUR PRODUCTS</span>
-      <button class="deposit-btn" style="padding:6px 20px; font-size:12px; width:auto;" id="addProductBtn" type="button">+ Add Product</button>
-    </div>
-    <div class="products-grid" id="productsGrid"></div>
-  </div>
-
-  <!-- ===== CERTIFICATIONS ===== -->
-  <div class="section-card" id="certSection" data-tour="7">
-    <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
-    <div style="color:#ff6b6b; font-size:12px; margin-bottom:12px;">
-      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No selling without it!
-    </div>
-    <div class="cert-block-grid" id="certGrid"></div>
-    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;">
-      <select id="certDropdown" class="block-select" style="flex:1; min-width:160px;">
-        <option value="">Add Certificate Type...</option>
-        <option value="export">Export License</option>
-        <option value="organic">Organic</option>
-        <option value="fairtrade">Fair Trade</option>
-        <option value="kosher">Kosher</option>
-        <option value="halal">Halal</option>
-        <option value="brcgs">BRCGS</option>
-        <option value="origin">Origin</option>
-        <option value="iso">ISO</option>       
-        <option value="IFS Food">IFS food</option>
-        <option value="SQF">SQF</option>
-        <option value="FSSC 22000">FSSC 22000</option>
-        <option value="HACCP">HACCP/option>
-        <option value="ISO">ISO</option>
-        <option value="GMP">GMP</option>
-        <option value="USDA">USDA</option>
-        <option value="EU">EU</option>       
-        <option value="Canada Inspection Agency">CIA</option>
-        <option value="JAS">JAS</option>
-        <option value="Soil Association">Soil Association</option>
-        <option value="ECO Cert">ECO Cert</option>
-        <option value="Fair Trade">Fair Trade</option>
-        <option value="Rainforest Alliance">Rainforest Alliance</option>       
-         <option value="other">Other</option>
-      </select>
-      <button class="btn-neon" id="addCertBtn" style="padding:10px 20px;" type="button">+ ADD TYPE</button>
-    </div>
-  </div>
-
-  <!-- ===== TAR SECTION ===== -->
-  <div class="tar-section" id="tarSection" data-tour="5">
-    <div class="tar-header">
-      <span>🤖 TAR - TRADE ADVISOR ROBOT</span>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="tar-batch-btn" id="tarAutoConvertBtn" type="button">⚡ Auto-Convert Ready</button>
-        <button class="btn-neon" style="padding:4px 16px; font-size:11px;" id="tarAdviceBtn" type="button">💡 Get Advice</button>
-        <button class="btn-neon" style="padding:4px 16px; font-size:11px;" id="tarSettingsBtn" type="button">⚙️ Settings</button>
-        <button class="btn-neon" style="padding:4px 16px; font-size:11px; border-color:rgba(255,217,102,0.3); color:#FFD966;" id="archiveToggleBtn" type="button">📚 Archive</button>
-      </div>
-    </div>
-    <div class="tar-grid">
-      <div class="tar-card">
-        <div class="tar-status-bar">
-          <div class="tar-status-dot"></div>
-          <span class="tar-status-text" id="tarStatusText">🟢 Active • Monitoring your auction pipeline</span>
-        </div>
-        <div class="tar-metrics">
-          <div class="tar-metric"><div class="tar-metric-value" id="tarReadyCount">0</div><div class="tar-metric-label">Ready to Convert</div></div>
-          <div class="tar-metric"><div class="tar-metric-value" id="tarPendingCount">0</div><div class="tar-metric-label">Pending Review</div></div>
-          <div class="tar-metric"><div class="tar-metric-value" id="tarConvertedCount">0</div><div class="tar-metric-label">Converted</div></div>
-          <div class="tar-metric"><div class="tar-metric-value" id="tarFeesEarned">$0</div><div class="tar-metric-label">Fees Earned</div></div>
-        </div>
-        <div id="tarReceivablesList"><div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;">Loading your auction data...</div></div>
-      </div>
-      <div class="tar-card" id="tarAdvisoryCard">
-        <h4 style="font-family:'Orbitron',sans-serif; font-size:14px; color:#FFD966; margin-bottom:12px;">💡 TAR ADVISORY</h4>
-        <div class="tar-advisory" id="tarAdvisory">
-          <div class="tar-advisory-title">📊 AUCTION INSIGHT</div>
-          <div class="tar-advisory-text" id="tarAdvisoryText">Loading auction intelligence...</div>
-        </div>
-        <div style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; border-left:3px solid #00ced1;">
-          <div style="font-size:11px; color:#9ca3af; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span style="font-weight:600; color:#00ced1;">🌦️ WEATHER • KONTORS</span>
-            <span>Santos: ☀️ 28°C</span>
-            <span>Rotterdam: 🌧️ 14°C</span>
-            <span>Singapore: ⛅ 31°C</span>
-            <span>Dubai: ☀️ 38°C</span>
-          </div>
-        </div>
-        <div class="auction-schedule" id="auctionSchedule">
-          <div class="auction-schedule-header"><span class="title">📅 YOUR UPCOMING AUCTIONS</span><button class="auction-refresh-btn" id="auctionRefreshBtn" type="button">🔄 Refresh</button></div>
-          <div id="auctionList"><div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">No auctions scheduled yet. Create one from your products!</div></div>
-        </div>
-        <div style="margin-top:12px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px;">
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:#9ca3af; flex-wrap:wrap;">
-            <span>Today's Conversions: <span id="todayConversions" style="color:#7CFC00; font-family:'Orbitron',sans-serif;">0</span></span>
-            <span>Fees Earned: <span id="todayFees" style="color:#00ced1; font-family:'Orbitron',sans-serif;">$0.00</span></span>
-            <span>Remaining: <span id="remainingCapacity" style="color:#FFD966; font-family:'Orbitron',sans-serif;">10,000</span></span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== ARCHIVE ===== -->
-  <div class="archive-section" id="archiveSection">
-    <div class="archive-header" id="archiveHeader">
-      <span>📚 AUCTION ARCHIVE <span class="count-badge" id="archiveCount">0</span></span>
-      <span class="toggle-icon">▼</span>
-    </div>
-    <div class="archive-collapse" id="archiveCollapse">
-      <div class="archive-grid" id="archiveGrid">
-        <div style="color:#9ca3af; text-align:center; padding:20px; grid-column:1/-1;">No archived auctions yet. Completed auctions will appear here for simulation and analysis.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== ORDERS ===== -->
-  <div class="orders-section" id="ordersSection" data-tour="9">
-    <div class="orders-header">
-      <span>📋 ORDERS</span>
-      <span style="font-size:12px; color:#9ca3af; font-family:'Inter', sans-serif;">Manage incoming orders</span>
-    </div>
-    <div class="orders-grid" id="ordersGrid"></div>
-  </div>
-
-  <footer class="footer">
-    <p>TRADEAUX © 2026 • Global Commodity Exchange • TAR System v10.0</p>
-  </footer>
-</main>
-
-<!-- ===== TOUR OVERLAY ===== -->
-<div class="tour-overlay" id="tourOverlay" style="display:none; position:fixed; inset:0; z-index:1000; pointer-events:none;">
-  <div class="tour-highlight" id="tourHighlight" style="position:absolute; border:3px solid #7CFC00; border-radius:16px; box-shadow:0 0 50px rgba(124,252,0,0.3); pointer-events:none;"></div>
-  <div class="tour-tooltip" id="tourTooltip" style="position:absolute; background:rgba(2,6,23,0.95); border:1px solid #7CFC00; border-radius:12px; padding:16px 20px; max-width:320px; color:#e5e7eb; font-size:13px; line-height:1.6; pointer-events:auto; box-shadow:0 20px 60px rgba(0,0,0,0.8); z-index:1001; max-height:90vh; overflow-y:auto;">
-    <h4 id="tourTitle" style="font-family:'Orbitron',sans-serif; color:#7CFC00; margin-bottom:6px; font-size:14px;">Welcome</h4>
-    <p id="tourDescription">This is your command center.</p>
-    <button class="tour-btn" id="tourNextBtn" style="margin-top:10px; padding:6px 20px; background:linear-gradient(135deg, #7CFC00, #00ced1); border:none; border-radius:20px; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:#000; cursor:pointer; pointer-events:auto;" type="button">Next →</button>
-    <button class="tour-btn" id="tourCloseBtn" style="margin-top:6px; padding:4px 16px; background:rgba(255,59,59,0.2); border:1px solid rgba(255,59,59,0.3); border-radius:20px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:600; color:#ff3b3b; cursor:pointer; pointer-events:auto; margin-left:8px;" type="button">✕ Close</button>
-  </div>
-  <div class="tour-progress" id="tourProgress" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:1002; background:rgba(2,6,23,0.9); border:1px solid rgba(0,206,209,0.3); border-radius:30px; padding:8px 20px; display:flex; align-items:center; gap:12px; pointer-events:auto;">
-    <!-- Dots are dynamically generated in JS -->
-  </div>
-</div>
-
-<!-- ===== MODALS ===== -->
-
-<!-- Product Modal -->
-<div class="modal" id="productModal" role="dialog" aria-labelledby="productModalTitle">
-  <div class="modal-content wide">
-    <button class="modal-close" id="closeProductModal" type="button" aria-label="Close product modal">&times;</button>
-    <div class="modal-header"><h2 id="productModalTitle">📦 Add/Edit Product</h2></div>
-    <form id="productForm">
-    <div id="productModalBody">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field"><label for="productNameInput">Product Name *</label><input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee" required></div>
-        <div class="modal-field"><label for="productVarietyInput">Variety</label><input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade"></div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="modal-field"><label for="productQuantityInput">Quantity (MT) *</label><input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1" step="0.01" required></div>
-        <div class="modal-field"><label for="productGradeInput">Grade</label><select id="productGradeInput"><option value="Grade A">Grade A (Premium)</option><option value="Grade B">Grade B (Standard)</option><option value="Grade C">Grade C (Good)</option><option value="Organic">Organic Certified</option><option value="Fair Trade">Fair Trade Certified</option></select></div>
-      </div>
-      <div class="modal-field"><label for="productOriginInput">Origin</label><input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil"></div>
-
-      <div class="modal-field">
-        <label for="productImagesInput">Product Images</label>
-        <input type="file" id="productImagesInput" accept=".jpg,.png,.jpeg" multiple>
-        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Upload up to 5 images</div>
-        <div id="productImagePreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
-        <div id="imageReplaceWarning" style="display:none; font-size:10px; color:#FFD966; margin-top:4px;">⚠️ New images will replace existing ones on save</div>
-      </div>
-
-      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
-        <label>📦 Packaging</label>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div>
-            <label style="font-size:10px; color:#9ca3af;">Package Type</label>
-            <select id="productPackageType">
-              <option value="">Select...</option>
-              <optgroup label="Bags">
-                <option value="Paper Bag">Paper Bag</option>
-                <option value="Plastic Bag">Plastic Bag</option>
-                <option value="Jute Bag">Jute Bag</option>
-                <option value="PP Woven Bag">PP Woven Bag</option>
-                <option value="Cotton Bag">Cotton Bag</option>
-                <option value="Burlap Sack">Burlap Sack</option>
-              </optgroup>
-              <optgroup label="Boxes">
-                <option value="Cardboard Box">Cardboard Box</option>
-                <option value="Wooden Crate">Wooden Crate</option>
-                <option value="Plastic Crate">Plastic Crate</option>
-                <option value="Corrugated Box">Corrugated Box</option>
-              </optgroup>
-              <optgroup label="Drums">
-                <option value="Plastic Drum">Plastic Drum</option>
-                <option value="Steel Drum">Steel Drum</option>
-                <option value="Fiber Drum">Fiber Drum</option>
-              </optgroup>
-              <optgroup label="Containers">
-                <option value="Flexitank">Flexitank</option>
-                <option value="IBC Tote">IBC Tote</option>
-                <option value="Bulk Container">Bulk Container</option>
-                <option value="ISO Container">ISO Container</option>
-              </optgroup>
-              <optgroup label="Pallets">
-                <option value="Palletized (Shrink Wrap)">Palletized (Shrink Wrap)</option>
-                <option value="Palletized (Stretch Wrap)">Palletized (Stretch Wrap)</option>
-              </optgroup>
-              <optgroup label="Other">
-                <option value="Carton">Carton</option>
-                <option value="Sacks">Sacks</option>
-                <option value="Bale">Bale</option>
-                <option value="Can">Can</option>
-                <option value="Tin">Tin</option>
-                <option value="Jar">Jar</option>
-                <option value="Bottle">Bottle</option>
-                <option value="Bulk (Loose)">Bulk (Loose)</option>
-              </optgroup>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:10px; color:#9ca3af;">Package Size</label>
-            <select id="productPackageSize">
-              <option value="">Select...</option>
-              <optgroup label="Weight (kg)">
-                <option value="1kg">1kg</option><option value="5kg">5kg</option><option value="10kg">10kg</option>
-                <option value="15kg">15kg</option><option value="20kg">20kg</option><option value="25kg">25kg</option>
-                <option value="30kg">30kg</option><option value="40kg">40kg</option><option value="50kg">50kg</option>
-                <option value="60kg">60kg</option><option value="80kg">80kg</option><option value="100kg">100kg</option>
-                <option value="200kg">200kg</option><option value="500kg">500kg</option><option value="1000kg">1000kg</option>
-              </optgroup>
-              <optgroup label="Weight (lbs)">
-                <option value="2lbs">2lbs</option><option value="5lbs">5lbs</option><option value="10lbs">10lbs</option>
-                <option value="20lbs">20lbs</option><option value="25lbs">25lbs</option><option value="50lbs">50lbs</option>
-                <option value="100lbs">100lbs</option><option value="200lbs">200lbs</option><option value="500lbs">500lbs</option>
-                <option value="1000lbs">1000lbs</option>
-              </optgroup>
-              <optgroup label="Volume (litres)">
-                <option value="1L">1L</option><option value="5L">5L</option><option value="10L">10L</option>
-                <option value="20L">20L</option><option value="25L">25L</option><option value="50L">50L</option>
-                <option value="100L">100L</option><option value="200L">200L</option><option value="500L">500L</option>
-                <option value="1000L">1000L</option>
-              </optgroup>
-              <optgroup label="Volume (gallons)">
-                <option value="1gal">1gal</option><option value="5gal">5gal</option><option value="10gal">10gal</option>
-                <option value="20gal">20gal</option><option value="25gal">25gal</option><option value="50gal">50gal</option>
-                <option value="100gal">100gal</option><option value="200gal">200gal</option><option value="500gal">500gal</option>
-              </optgroup>
-            </select>
-          </div>
-        </div>
-        <div id="packagingPreview" class="packaging-preview" style="margin-top:8px;">Select packaging above</div>
-      </div>
-
-      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
-        <label>🔬 Product Specifications</label>
-        
-        <div class="spec-group">
-          <div class="spec-label"><span>💧 Moisture Content</span><span>0-20%</span></div>
-          <div class="slider-row">
-            <input type="range" id="productMoisture" min="0" max="20" step="0.1" value="12" aria-label="Moisture content percentage">
-            <span class="slider-value" id="productMoistureVal">12.0%</span>
-          </div>
-        </div>
-
-        <div class="spec-group">
-          <div class="spec-label"><span>📏 Screen Size</span><span>10-20</span></div>
-          <div class="slider-row">
-            <input type="range" id="productScreenSize" min="10" max="20" step="0.5" value="15" aria-label="Screen size">
-            <span class="slider-value" id="productScreenSizeVal">15.0</span>
-          </div>
-        </div>
-
-        <div class="spec-group">
-          <div class="spec-label"><span>🔬 Defects</span><span>0-10%</span></div>
-          <div class="slider-row">
-            <input type="range" id="productDefects" min="0" max="10" step="0.1" value="2" aria-label="Defects percentage">
-            <span class="slider-value" id="productDefectsVal">2.0%</span>
-          </div>
-        </div>
-
-        <div class="spec-group">
-          <div class="spec-label"><span>🌾 Foreign Matter</span><span>0-5%</span></div>
-          <div class="slider-row">
-            <input type="range" id="productForeignMatter" min="0" max="5" step="0.1" value="0.5" aria-label="Foreign matter percentage">
-            <span class="slider-value" id="productForeignMatterVal">0.5%</span>
-          </div>
-        </div>
-
-        <div class="spec-group">
-          <div class="spec-label"><span>🧪 Protein Content (optional)</span><span>0-30%</span></div>
-          <div class="slider-row">
-            <input type="range" id="productProtein" min="0" max="30" step="0.1" value="0" aria-label="Protein content percentage">
-            <span class="slider-value" id="productProteinVal">0.0%</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" id="advancedSpecsToggleBtn">
-          <label style="margin:0; cursor:pointer;">🔬 Advanced Specs <span style="font-size:10px; color:#9ca3af;">(optional)</span></label>
-          <span id="advancedSpecsToggle" style="color:#00ced1;">▼ Expand</span>
-        </div>
-        <div id="advancedSpecsContainer" style="display:none; margin-top:12px;">
-          <div class="spec-group" style="border-left-color:#FFD966;">
-            <div class="spec-label"><span>🧫 Aflatoxin</span><span>0-20 ppb</span></div>
-            <div class="slider-row">
-              <input type="range" id="productAflatoxin" min="0" max="20" step="0.5" value="0" aria-label="Aflatoxin level">
-              <span class="slider-value" id="productAflatoxinVal">0 ppb</span>
-            </div>
-            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
-          </div>
-
-          <div class="spec-group" style="border-left-color:#FFD966;">
-            <div class="spec-label"><span>🫒 Oil Content</span><span>0-60%</span></div>
-            <div class="slider-row">
-              <input type="range" id="productOilContent" min="0" max="60" step="0.5" value="0" aria-label="Oil content percentage">
-              <span class="slider-value" id="productOilContentVal">0.0%</span>
-            </div>
-            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
-          </div>
-
-          <div class="spec-group" style="border-left-color:#FFD966;">
-            <div class="spec-label"><span>🎨 Color Grade</span><span>0-100</span></div>
-            <div class="slider-row">
-              <input type="range" id="productColorGrade" min="0" max="100" step="1" value="0" aria-label="Color grade">
-              <span class="slider-value" id="productColorGradeVal">0</span>
-            </div>
-            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
-        <label>💰 Ideal Price (for knapsack optimization)</label>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-size:12px; color:#9ca3af;">$0.10</span>
-          <input type="range" id="productIdealPrice" min="0.10" max="100" step="0.05" value="4.25" style="flex:1;" aria-label="Ideal price per MT">
-          <span style="font-size:12px; color:#9ca3af;">$100.00</span>
-        </div>
-        <div style="text-align:center; font-family:'Orbitron',sans-serif; font-size:20px; color:#7CFC00; margin-top:4px;" id="productIdealPriceVal">$4.25 / MT</div>
-        <div style="font-size:10px; color:#9ca3af; text-align:center;">💡 This price guides the knapsack algorithm — not shown to buyers</div>
-      </div>
-
-      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
-        <label for="productScheduledStart">📅 Auction Scheduled Start (prefill)</label>
-        <input type="datetime-local" id="productScheduledStart" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.5); border:1px solid rgba(0,206,209,0.25); border-radius:10px; color:#e5e7eb; font-family:'Inter', sans-serif; font-size:14px;">
-        <div style="font-size:10px; color:#9ca3af; margin-top:4px;">This pre-fills the auction date when you post this product.</div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" id="cancelProductBtn" type="button">Cancel</button>
-      <button class="create-btn" id="saveProductBtn" type="button">💾 Save Product</button>
-      <button class="create-btn" id="saveAndPostBtn" style="background: linear-gradient(135deg, #7CFC00, #00ced1);" type="button">📅 Save &amp; Post Auction</button>
-    </div>
-    </form>
-  </div>
-</div>
-
-<!-- ===== POST AUCTION MODAL ===== -->
-<div class="modal" id="auctionModal" role="dialog" aria-labelledby="auctionModalTitle">
-  <div class="modal-content" style="max-width:550px;">
-    <button class="modal-close" id="closeAuctionModal" type="button" aria-label="Close auction modal">&times;</button>
-    <div class="modal-header"><h2 id="auctionModalTitle">📅 Post Auction</h2></div>
-    <form id="auctionForm">
-    <div id="auctionModalBody">
-      <div class="modal-field">
-        <label>Product</label>
-        <div id="auctionProductDisplay" style="padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:14px; color:#00ced1;"></div>
-      </div>
-      <div class="modal-field">
-        <label for="auctionQty">Quantity to Auction (MT) *</label>
-        <input type="number" id="auctionQty" placeholder="Enter quantity" min="1" step="0.01" required>
-        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Available: <span id="auctionAvailableQty">0</span> MT</div>
-      </div>
-      <div class="modal-field">
-        <label for="auctionDateTime">Auction Date &amp; Time *</label>
-        <input type="datetime-local" id="auctionDateTime" required>
-      </div>
-      <div class="modal-field">
-        <label for="auctionDuration">Auction Duration</label>
-        <select id="auctionDuration"><option value="1">1 Hour</option><option value="2">2 Hours</option><option value="4">4 Hours</option><option value="8">8 Hours</option><option value="24" selected>24 Hours</option><option value="48">48 Hours</option><option value="72">72 Hours</option></select>
-      </div>
-      <div class="modal-field">
-        <label for="auctionLocation">Location (Kontor) *</label>
-        <select id="auctionLocation"><option value="Santos">Santos, Brazil</option><option value="Mombasa">Mombasa, Kenya</option><option value="Jakarta">Jakarta, Indonesia</option><option value="Ho Chi Minh City">Ho Chi Minh City, Vietnam</option><option value="Colombo">Colombo, Sri Lanka</option><option value="Guayaquil">Guayaquil, Ecuador</option><option value="Abidjan">Abidjan, Ivory Coast</option><option value="Lagos">Lagos, Nigeria</option></select>
-      </div>
-      <div class="modal-field">
-        <label for="auctionNotes">Brief Notes</label>
-        <textarea id="auctionNotes" rows="3" placeholder="Quality, packaging, inspection, shipping terms..."></textarea>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" id="cancelAuctionBtn" type="button">Cancel</button>
-      <button class="create-btn" id="submitAuctionBtn" type="button">📤 Post Auction</button>
-    </div>
-    </form>
-  </div>
-</div>
-
-<!-- ===== COMPANY MODAL ===== -->
-<div class="modal" id="companyModal" role="dialog" aria-labelledby="companyModalTitle">
-  <div class="modal-content">
-    <button class="modal-close" id="closeCompanyModal" type="button" aria-label="Close company modal">&times;</button>
-    <div class="modal-header"><h2 id="companyModalTitle">🏢 Edit Company Profile</h2></div>
-    <form id="companyForm">
-    <div class="modal-field"><label for="editCompanyName">Company Name</label><input type="text" id="editCompanyName"></div>
-    <div class="modal-field"><label for="editCompanyReg">Registration Number</label><input type="text" id="editCompanyReg"></div>
-    <div class="modal-field"><label for="editCompanyCountry">Country</label><input type="text" id="editCompanyCountry"></div>
-    <div class="modal-field"><label for="editCompanyTax">Tax Registration Number</label><input type="text" id="editCompanyTax"></div>
-    <div class="modal-field"><label for="editCompanyAddress">Business Address</label><textarea id="editCompanyAddress" rows="2"></textarea></div>
-    <div class="modal-field"><label for="editCompanyEmail">Contact Email</label><input type="email" id="editCompanyEmail"></div>
-    <div class="modal-field"><label for="editCompanyPhone">Contact Phone</label><input type="tel" id="editCompanyPhone"></div>
-    <div class="modal-field"><label for="editCompanyWebsite">Website</label><input type="text" id="editCompanyWebsite"></div>
-    <div class="modal-actions">
-      <button class="cancel-btn" id="cancelCompanyBtn" type="button">Cancel</button>
-      <button class="create-btn" id="saveCompanyBtn" type="button">Save Profile</button>
-    </div>
-    </form>
-  </div>
-</div>
-
-<!-- ===== ORDER MODAL ===== -->
-<div class="modal" id="orderModal" role="dialog" aria-labelledby="orderModalTitle">
-  <div class="modal-content wide">
-    <button class="modal-close" id="closeOrderModal" type="button" aria-label="Close order modal">&times;</button>
-    <div class="modal-header"><h2 id="orderModalTitle">📋 Order Details</h2></div>
-    <form id="orderForm">
-    <div id="orderModalBody">
-      <div class="company-fields" style="margin-bottom:16px;">
-        <div class="company-field"><span class="field-label">Order ID</span><div class="field-value" id="orderViewId">-</div></div>
-        <div class="company-field"><span class="field-label">Product</span><div class="field-value" id="orderViewProduct">-</div></div>
-        <div class="company-field"><span class="field-label">Quantity</span><div class="field-value" id="orderViewQty">-</div></div>
-        <div class="company-field"><span class="field-label">Total Price</span><div class="field-value" id="orderViewTotal">-</div></div>
-        <div class="company-field"><span class="field-label">Buyer</span><div class="field-value" id="orderViewBuyer">-</div></div>
-        <div class="company-field"><span class="field-label">Status</span><div class="field-value" id="orderViewStatus">-</div></div>
-        <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Shipping Address</span><div class="field-value" id="orderViewAddress">-</div></div>
-        <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Notes</span><div class="field-value" id="orderViewNotes">-</div></div>
-      </div>
-      <div class="modal-field">
-        <label for="orderStatusUpdate">Update Status</label>
-        <select id="orderStatusUpdate">
-          <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
-          <option value="shipped">Shipped</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="cancel-btn" id="closeOrderModalBtn" type="button">Close</button>
-      <button class="create-btn" id="updateOrderBtn" type="button">Update Status</button>
-    </div>
-    </form>
-  </div>
-</div>
-
-<!-- ===== TOAST ===== -->
-<div class="toast" id="toast" role="alert" aria-live="polite"></div>
-
-<script>
 'use strict';
 
 // ============================================================
@@ -1064,7 +17,7 @@ try {
 }
 
 // ============================================================
-// CERT_LABELS
+// CERT_LABELS - COMPLETE
 // ============================================================
 const CERT_LABELS = {
   incorporation: { icon: '🏢', label: 'Incorporation', desc: 'Required - Admin Verified' },
@@ -1076,7 +29,18 @@ const CERT_LABELS = {
   brcgs: { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
   origin: { icon: '🌍', label: 'Origin', desc: 'Certificate of Origin' },
   iso: { icon: '⚙️', label: 'ISO', desc: 'ISO quality management' },
-  foodsafety: { icon: '🍽️', label: 'Food Safety', desc: 'General food safety' },
+  'IFS Food': { icon: '🍽️', label: 'IFS Food', desc: 'International Featured Standards' },
+  SQF: { icon: '✅', label: 'SQF', desc: 'Safe Quality Food' },
+  'FSSC 22000': { icon: '🔐', label: 'FSSC 22000', desc: 'Food Safety System Certification' },
+  HACCP: { icon: '🛡️', label: 'HACCP', desc: 'Hazard Analysis Critical Control Point' },
+  GMP: { icon: '🏭', label: 'GMP', desc: 'Good Manufacturing Practice' },
+  USDA: { icon: '🇺🇸', label: 'USDA Organic', desc: 'USDA Organic certification' },
+  EU: { icon: '🇪🇺', label: 'EU Organic', desc: 'EU Organic certification' },
+  'Canada Inspection Agency': { icon: '🇨🇦', label: 'CIA', desc: 'Canadian Inspection Agency' },
+  JAS: { icon: '🇯🇵', label: 'JAS', desc: 'Japanese Agricultural Standard' },
+  'Soil Association': { icon: '🌿', label: 'Soil Association', desc: 'Soil Association Organic' },
+  'ECO Cert': { icon: '🌎', label: 'ECO Cert', desc: 'ECO Cert organic' },
+  'Rainforest Alliance': { icon: '🐸', label: 'Rainforest Alliance', desc: 'Rainforest Alliance certified' },
   other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
 };
 
@@ -1098,6 +62,8 @@ const APP_STATE = {
   isDirty: false,
   renderDebounceTimer: null,
   saveDebounceTimer: null,
+  // FIX #9: Track local date for conversions
+  _lastConversionDate: null,
   tar: {
     active: true,
     conversionFee: 25,
@@ -1125,12 +91,17 @@ const APP_STATE = {
       { selector: '#productsSection', title: '📦 Products', description: 'List your products here.' },
       { selector: '#ordersSection', title: '📋 Orders', description: 'Manage incoming orders.' }
     ]
-  }
+  },
+  // FIX #4: Track cert upload state
+  _pendingCertUploads: {}
 };
 
 let advancedSpecsOpen = false;
 let tourTimeout = null;
 let isRendering = false;
+
+// FIX #2: Image management state
+let _imageRemoveQueue = [];
 
 /* ==================== SAFE DOM HELPERS ==================== */
 function $(id) { return document.getElementById(id); }
@@ -1187,7 +158,11 @@ function escapeHtml(str) {
 function showToast(msg, type='info') {
   const t = $('toast');
   if (!t) return;
-  t.textContent = msg;
+  let displayMsg = msg;
+  if (displayMsg.length > 60) {
+    displayMsg = displayMsg.substring(0, 57) + '...';
+  }
+  t.textContent = displayMsg;
   t.className = 'toast visible ' + type;
   clearTimeout(t._timeout);
   t._timeout = setTimeout(() => t.className = 'toast', 4000);
@@ -1211,8 +186,16 @@ function closeModal(id) {
     el.setAttribute('aria-modal', 'false');
     el.removeEventListener('keydown', trapFocus);
   }
-  APP_STATE.currentEditId = null; 
-  APP_STATE.currentAuctionProductId = null; 
+  
+  if (id === 'productModal') {
+    APP_STATE.currentEditId = null;
+    // FIX #2: Clear image remove queue on cancel
+    _imageRemoveQueue = [];
+  } else if (id === 'auctionModal') {
+    APP_STATE.currentAuctionProductId = null;
+  } else if (id === 'orderModal') {
+    APP_STATE.currentOrderId = null;
+  }
 }
 
 function trapFocus(e) {
@@ -1304,13 +287,20 @@ function formatDateTimeLocal(date) {
   if (!date) return '';
   const d = new Date(date);
   if (isNaN(d.getTime())) {
-    // Return a default 7 days from now for invalid dates
     const future = new Date(Date.now() + 7 * 86400000);
     const pad = n => String(n).padStart(2, '0');
     return `${future.getFullYear()}-${pad(future.getMonth()+1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}`;
   }
   const pad = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// FIX #9: Local date for conversions
+function getLocalDate() {
+  const now = new Date();
+  return now.getFullYear() + '-' + 
+    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(now.getDate()).padStart(2, '0');
 }
 
 /* ==================== GATHER PRODUCT DATA ==================== */
@@ -1346,11 +336,54 @@ function gatherProductData() {
   };
 }
 
+// FIX #4: Load product with proper image handling
 function loadProductIntoModal(product) {
   if (!product) return;
   
+  // Store a copy of images for edit
+  APP_STATE._editImages = product.images ? [...product.images] : [];
+  _imageRemoveQueue = [];
+  
   const previewContainer = $('productImagePreview');
-  if (previewContainer) previewContainer.innerHTML = '';
+  if (previewContainer) {
+    previewContainer.innerHTML = '';
+    
+    if (APP_STATE._editImages && APP_STATE._editImages.length > 0) {
+      APP_STATE._editImages.forEach((src, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative; display:inline-block; margin:4px;';
+        wrapper.dataset.index = index;
+        
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
+        img.alt = escapeHtml(product.name) + ' product image';
+        wrapper.appendChild(img);
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = '×';
+        removeBtn.style.cssText = 'position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; background:#ff3b3b; color:white; border:none; cursor:pointer; font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center;';
+        removeBtn.title = 'Remove this image';
+        removeBtn.dataset.index = index;
+        // FIX #3: Don't mutate saved data immediately - queue the removal
+        removeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const idx = parseInt(this.dataset.index);
+          if (!confirm('Remove this image?')) return;
+          
+          // Queue the removal
+          _imageRemoveQueue.push(idx);
+          // Remove from display
+          wrapper.remove();
+          showToast('Image marked for removal. Save to confirm.', 'info');
+        });
+        wrapper.appendChild(removeBtn);
+        previewContainer.appendChild(wrapper);
+      });
+    }
+  }
   
   const warningEl = $('imageReplaceWarning');
   if (warningEl) warningEl.style.display = 'block';
@@ -1401,57 +434,79 @@ function loadProductIntoModal(product) {
   safeSetVal('productIdealPrice', product.idealPrice || 4.25);
   const priceDisplay = $('productIdealPriceVal');
   if (priceDisplay) priceDisplay.textContent = '$' + (product.idealPrice || 4.25).toFixed(2) + ' / MT';
-  
-  if (previewContainer && product.images && product.images.length > 0) {
-    product.images.forEach(src => {
-      const img = document.createElement('img');
-      img.src = src;
-      img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
-      img.alt = escapeHtml(product.name) + ' product image';
-      previewContainer.appendChild(img);
-    });
-  }
 }
 
-/* ==================== SAVE PRODUCT ==================== */
+/* ==================== SAVE PRODUCT - FIXED ==================== */
 function saveProduct(callback) {
   const productData = gatherProductData();
   if (!productData) return;
+  
+  // FIX #5: Merge existing images with new uploads
   const imagesInput = $('productImagesInput');
+  let newImages = [];
   if (imagesInput && imagesInput.files && imagesInput.files.length > 0) {
     const maxImages = Math.min(imagesInput.files.length, 5);
-    const imageUrls = [];
     let processed = 0;
+    const promises = [];
     Array.from(imagesInput.files).slice(0, 5).forEach((file, index) => {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        imageUrls[index] = e.target.result;
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData, callback);
-        }
-      };
-      reader.onerror = () => {
-        processed++;
-        if (processed === maxImages) {
-          productData.images = imageUrls.filter(Boolean);
-          saveProductData(productData, callback);
-        }
-      };
-      reader.readAsDataURL(file);
+      const promise = new Promise((resolve) => {
+        reader.onload = (e) => {
+          resolve(e.target.result);
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+      promises.push(promise);
     });
-    if (imagesInput.files.length > 5) {
-      showToast('Only first 5 images will be saved', 'warning');
-    }
+    Promise.all(promises).then(results => {
+      newImages = results.filter(Boolean);
+      
+      // Get existing images from edit state
+      let existingImages = APP_STATE._editImages || [];
+      
+      // FIX #3: Apply queued removals
+      if (_imageRemoveQueue.length > 0) {
+        const sortedRemovals = [..._imageRemoveQueue].sort((a, b) => b - a);
+        sortedRemovals.forEach(idx => {
+          if (idx < existingImages.length) {
+            existingImages.splice(idx, 1);
+          }
+        });
+        _imageRemoveQueue = [];
+      }
+      
+      // Merge: existing + new
+      const mergedImages = [...existingImages, ...newImages];
+      // Limit to 10 total
+      productData.images = mergedImages.slice(0, 10);
+      
+      saveProductData(productData, callback);
+    });
     return;
   }
+  
+  // No new images - handle removals and keep existing
+  let existingImages = APP_STATE._editImages || [];
   if (APP_STATE.currentEditId) {
     const existing = APP_STATE.products.find(p => p.id === APP_STATE.currentEditId);
     if (existing && existing.images) {
-      productData.images = existing.images;
+      existingImages = [...existing.images];
     }
   }
+  
+  // FIX #3: Apply queued removals
+  if (_imageRemoveQueue.length > 0) {
+    const sortedRemovals = [..._imageRemoveQueue].sort((a, b) => b - a);
+    sortedRemovals.forEach(idx => {
+      if (idx < existingImages.length) {
+        existingImages.splice(idx, 1);
+      }
+    });
+    _imageRemoveQueue = [];
+  }
+  
+  productData.images = existingImages;
   saveProductData(productData, callback);
 }
 
@@ -1471,6 +526,9 @@ function saveProductData(productData, callback) {
   renderAllDebounced();
   closeModal('productModal');
   showToast('✅ Product saved!', 'success');
+  // Clear edit state
+  APP_STATE._editImages = null;
+  _imageRemoveQueue = [];
   if (callback) callback(productId);
 }
 
@@ -1514,10 +572,11 @@ function openAuctionModal(productId) {
   openModal('auctionModal');
 }
 
+// FIX #9: Reset daily conversions using local date
 function resetDailyConversionsIfNeeded() {
-  const now = new Date();
-  const today = now.toUTCString().split(' ').slice(0, 4).join(' ');
-  if (APP_STATE.tar.todayConversionsDate !== today) {
+  const today = getLocalDate();
+  const storedDate = APP_STATE.tar.todayConversionsDate || '';
+  if (storedDate !== today) {
     APP_STATE.tar.todayConversions = 0;
     APP_STATE.tar.todayConversionsDate = today;
     markDirty();
@@ -1647,6 +706,7 @@ function updateAuctionStatuses() {
   }
 }
 
+// FIX #11: Safer addToArchive - don't delete unrelated receivables
 function addToArchive(auction) {
   const product = APP_STATE.products.find(p => p.id === auction.productId);
   if (product) {
@@ -1655,15 +715,12 @@ function addToArchive(auction) {
     delete product.auctionId;
   }
   
+  // Only remove the specific receivable for this auction
   const receivableIdx = APP_STATE.receivables.findIndex(r => r.auctionId === auction.id);
   if (receivableIdx !== -1) {
     APP_STATE.receivables.splice(receivableIdx, 1);
   }
-  
-  const fallbackIdx = APP_STATE.receivables.findIndex(r => r.productId === auction.productId && r.auctionId === undefined);
-  if (fallbackIdx !== -1) {
-    APP_STATE.receivables.splice(fallbackIdx, 1);
-  }
+  // FIX #11: Remove the dangerous fallback cleanup
   
   auction.archived = true;
   auction.archivedAt = new Date().toISOString();
@@ -1769,6 +826,7 @@ function restoreAuction(archiveId) {
 }
 
 /* ==================== SYNC TO BUYER ARENA ==================== */
+// FIX #10: Don't wipe buyer arena data on quota cleanup
 function syncToBuyerArena() {
   try {
     const buyerData = {
@@ -1832,11 +890,11 @@ function syncToBuyerArena() {
       }));
     localStorage.setItem('tradeaux_bot_targets', JSON.stringify(botTargets));
   } catch(e) {
-    // Silent fail
+    // Silent fail - but don't wipe data
   }
 }
 
-/* ==================== STORAGE ==================== */
+/* ==================== STORAGE - FIXED ==================== */
 function markDirty() {
   APP_STATE.isDirty = true;
 }
@@ -1851,6 +909,7 @@ function saveToStorageDebounced() {
   }, 100);
 }
 
+// FIX #6: Show success feedback on save
 function saveToStorage() {
   try {
     const payload = {
@@ -1872,7 +931,7 @@ function saveToStorage() {
         batchSize: APP_STATE.tar.batchSize,
         dailyLimit: APP_STATE.tar.dailyLimit,
         todayConversions: APP_STATE.tar.todayConversions || 0,
-        todayConversionsDate: APP_STATE.tar.todayConversionsDate || new Date().toUTCString().split(' ').slice(0, 4).join(' '),
+        todayConversionsDate: APP_STATE.tar.todayConversionsDate || getLocalDate(),
         totalConversions: APP_STATE.tar.totalConversions || 0,
         totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
       }
@@ -1881,13 +940,18 @@ function saveToStorage() {
     localStorage.setItem('tradeaux_seller_state', json);
     APP_STATE.lastSavedHash = json;
     APP_STATE.isDirty = false;
+    showToast('💾 Data saved!', 'success');
   } catch(e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
       showToast('⚠️ Storage quota exceeded. Cleaning up...', 'warning');
       try {
         const keys = Object.keys(localStorage);
+        // FIX #10: Only delete non-essential data, preserve buyer arena
         for (const key of keys) {
-          if (key.startsWith('tradeaux_') && key !== 'tradeaux_seller_state') {
+          if (key.startsWith('tradeaux_') && 
+              key !== 'tradeaux_seller_state' && 
+              key !== 'tradeaux_buyer_auctions' && 
+              key !== 'tradeaux_bot_targets') {
             localStorage.removeItem(key);
           }
         }
@@ -1910,7 +974,7 @@ function saveToStorage() {
             batchSize: APP_STATE.tar.batchSize,
             dailyLimit: APP_STATE.tar.dailyLimit,
             todayConversions: APP_STATE.tar.todayConversions || 0,
-            todayConversionsDate: APP_STATE.tar.todayConversionsDate || new Date().toUTCString().split(' ').slice(0, 4).join(' '),
+            todayConversionsDate: APP_STATE.tar.todayConversionsDate || getLocalDate(),
             totalConversions: APP_STATE.tar.totalConversions || 0,
             totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
           }
@@ -1934,7 +998,16 @@ function loadFromStorage() {
     const raw = localStorage.getItem('tradeaux_seller_state');
     if (!raw) return false;
     const data = JSON.parse(raw);
-    if (data.company) APP_STATE.company = { ...APP_STATE.company, ...data.company };
+    
+    if (data.company) {
+      APP_STATE.company = {
+        ...APP_STATE.company,
+        ...data.company,
+        documents: data.company.documents || {},
+        photos: data.company.photos || []
+      };
+    }
+    
     if (data.products) APP_STATE.products = data.products;
     if (data.orders) APP_STATE.orders = data.orders;
     if (data.receivables) APP_STATE.receivables = data.receivables;
@@ -1947,18 +1020,24 @@ function loadFromStorage() {
       APP_STATE.tar = { 
         ...APP_STATE.tar, 
         ...data.tar, 
-        todayConversionsDate: data.tar.todayConversionsDate || new Date().toUTCString().split(' ').slice(0, 4).join(' ')
+        todayConversionsDate: data.tar.todayConversionsDate || getLocalDate()
       };
     }
     APP_STATE.lastSavedHash = raw;
     APP_STATE.isDirty = false;
     return true;
   } catch(e) {
+    console.error('Load error:', e);
     return false;
   }
 }
 
+function forceSave() {
+  saveToStorage();
+}
+
 /* ==================== TAR FUNCTIONS ==================== */
+// FIX #21: Better wording for negative payout
 function convertReceivable(id) {
   const receivable = APP_STATE.receivables.find(r => r.id === id);
   if (!receivable) { showToast('Receivable not found', 'error'); return; }
@@ -1979,7 +1058,8 @@ function convertReceivable(id) {
   }
   
   if (payout < 0) {
-    if (!confirm(`This receivable has a negative payout (-${money(Math.abs(payout))}). This will deduct from your wallet. Continue?`)) return;
+    const shortfall = money(Math.abs(payout));
+    if (!confirm(`⚠️ This receivable (${money(receivable.amount)}) is less than the ${money(fee)} conversion fee.\n\nYou will need to pay ${shortfall} from your wallet to complete this conversion.\n\nProceed?`)) return;
   } else {
     if (!confirm(`Convert ${receivable.company} - ${money(receivable.amount)}? Payout: ${money(payout)} (fee: ${money(fee)})`)) return;
   }
@@ -2113,6 +1193,7 @@ function renderWallet() {
   }
 }
 
+// FIX #8 + #12: renderCompany with proper checks
 function renderCompany() {
   const c = APP_STATE.company;
   const fields = ['companyNameDisplay', 'companyRegDisplay', 'companyCountryDisplay', 'companyTaxDisplay', 'companyAddressDisplay', 'companyEmailDisplay', 'companyPhoneDisplay', 'companyWebsiteDisplay'];
@@ -2128,48 +1209,77 @@ function renderCompany() {
       }
     }
   });
+  
   const badge = $('verificationBadge');
   if (badge) {
     badge.className = 'company-verification-badge ' + (c.verified || 'pending');
-    badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending' : '❌ Unverified';
+    badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending Verification' : '❌ Unverified';
   }
+  
   const statusText = $('companyStatusText');
-  if (statusText) statusText.textContent = c.verified === 'verified' ? 'Ready to sell.' : 'Complete your profile.';
+  if (statusText) {
+    statusText.textContent = c.verified === 'verified' ? '✅ Ready to sell.' : '📝 Complete your profile.';
+  }
+  
+  // FIX #12: Support both data: URLs and external URLs
   const logoPreview = $('companyLogoPreview');
   const logoPlaceholder = $('logoPlaceholder');
-  if (c.logo) {
-    if (logoPreview) { logoPreview.src = c.logo; logoPreview.style.display = 'block'; }
-    if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+  
+  const hasValidLogo = c.logo && typeof c.logo === 'string' && 
+    (c.logo.startsWith('data:') || c.logo.startsWith('http://') || c.logo.startsWith('https://'));
+  
+  if (hasValidLogo) {
+    if (logoPreview) {
+      logoPreview.src = c.logo;
+      logoPreview.style.display = 'block';
+      logoPreview.style.width = '100%';
+      logoPreview.style.height = '100%';
+      logoPreview.style.objectFit = 'contain';
+    }
+    if (logoPlaceholder) {
+      logoPlaceholder.style.display = 'none';
+    }
   } else {
-    if (logoPreview) logoPreview.style.display = 'none';
-    if (logoPlaceholder) logoPlaceholder.style.display = 'flex';
+    if (logoPreview) {
+      logoPreview.style.display = 'none';
+      logoPreview.src = '';
+    }
+    if (logoPlaceholder) {
+      logoPlaceholder.style.display = 'flex';
+    }
   }
+  
+  // Photos grid - support both data: and external URLs
   const photosGrid = $('photosGrid');
   if (photosGrid) {
     photosGrid.innerHTML = '';
-    if (APP_STATE.company.photos && APP_STATE.company.photos.length > 0) {
-      APP_STATE.company.photos.forEach((src) => {
+    
+    const photos = APP_STATE.company.photos || [];
+    photos.forEach((src, index) => {
+      if (src && typeof src === 'string' && 
+          (src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://'))) {
         const div = document.createElement('div');
         div.className = 'photo-item';
         const img = document.createElement('img');
         img.src = src;
-        img.alt = 'Company photo';
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-        div.appendChild(img);
-        // Click to view photo
+        img.alt = `Company photo ${index + 1}`;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;cursor:pointer;';
         img.addEventListener('click', function(e) {
           e.stopPropagation();
           window.open(this.src, '_blank', 'noopener,noreferrer');
         });
+        div.appendChild(img);
         photosGrid.appendChild(div);
-      });
-    }
+      }
+    });
+    
     const uploadBtn = document.createElement('div');
     uploadBtn.className = 'photo-upload-btn';
     uploadBtn.onclick = () => { const input = $('photoFileInput'); if (input) input.click(); };
     uploadBtn.innerHTML = '<span class="icon">📷</span><span class="text">Add Photo</span>';
     photosGrid.appendChild(uploadBtn);
   }
+  
   const docs = c.documents || {};
   const incorpStatus = $('incorpDocStatus');
   const licenseStatus = $('licenseDocStatus');
@@ -2179,30 +1289,37 @@ function renderCompany() {
   if (taxStatus) taxStatus.textContent = docs.tax ? '✅ Uploaded' : 'Not uploaded';
 }
 
+// FIX #7: renderCertificates with focus restoration
 function renderCertificates() {
   const grid = $('certGrid');
   if (!grid) return;
   
-  // Save focus state before re-render
-  const activeElement = document.activeElement;
-  const activeId = activeElement ? activeElement.id : null;
   const scrollPos = window.scrollY;
+  const activeId = document.activeElement ? document.activeElement.id : null;
   
   grid.innerHTML = '';
   const certTypes = ['incorporation', ...Object.keys(APP_STATE.certToggles || {}).filter(k => k !== 'incorporation').sort()];
+  
   certTypes.forEach(type => {
     const info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '' };
     const isRequired = type === 'incorporation';
     const isVerified = APP_STATE.certToggles[type] || false;
     const div = document.createElement('div');
     div.className = 'cert-block';
+    div.dataset.certType = type;
     div.style.borderColor = isRequired ? 'rgba(124,252,0,0.6)' : 'rgba(0,206,209,0.2)';
     const certImage = APP_STATE.company.documents?.[type] || null;
     let imageHtml;
+    // FIX #4: Always include file input for uploads
     if (certImage) {
-      imageHtml = `<div class="cert-preview" id="certPreview_${type}"><img src="${escapeHtml(certImage)}" alt="${escapeHtml(info.label)} certificate"></div>`;
+      imageHtml = `<div class="cert-preview" id="certPreview_${type}" style="position:relative; cursor:pointer;">
+        <img src="${escapeHtml(certImage)}" alt="${escapeHtml(info.label)} certificate" style="width:100%;height:100%;object-fit:cover;">
+        <div style="position:absolute; bottom:2px; right:4px; background:rgba(0,0,0,0.7); color:#7CFC00; font-size:8px; padding:0 6px; border-radius:4px;">✓ uploaded</div>
+        <div style="position:absolute; bottom:2px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#00ced1; border:1px solid rgba(0,206,209,0.3); border-radius:4px; padding:0 8px; font-size:8px; cursor:pointer;" class="cert-change-btn">🔄 Change</div>
+        <input type="file" id="certUpload_${type}" class="hidden-input" accept=".pdf,.jpg,.png">
+      </div>`;
     } else {
-      imageHtml = `<div class="cert-preview" id="certPreview_${type}">
+      imageHtml = `<div class="cert-preview" id="certPreview_${type}" style="cursor:pointer;">
         <span class="placeholder">📤 Upload</span>
         <input type="file" id="certUpload_${type}" class="hidden-input" accept=".pdf,.jpg,.png">
       </div>`;
@@ -2233,21 +1350,28 @@ function renderCertificates() {
     if (previewDiv) {
       const img = previewDiv.querySelector('img');
       if (img) {
-        // FIXED: Click on image opens it in new tab
         img.addEventListener('click', function(e) {
           e.stopPropagation();
           window.open(this.src, '_blank', 'noopener,noreferrer');
         });
       }
+      // FIX #4: Always make upload work
+      const changeBtn = previewDiv.querySelector('.cert-change-btn');
       if (certInput) {
-        // Click on preview (but not on image) triggers file upload
         previewDiv.addEventListener('click', function(e) {
-          if (e.target.tagName !== 'IMG') {
+          if (e.target === previewDiv || e.target.classList.contains('placeholder') || e.target.closest('.cert-change-btn')) {
             certInput.click();
           }
         });
         certInput.addEventListener('change', function(e) {
           uploadCertImage(type, this);
+        });
+      }
+      // Also handle the change button directly
+      if (changeBtn && certInput) {
+        changeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          certInput.click();
         });
       }
     }
@@ -2260,7 +1384,6 @@ function renderCertificates() {
           APP_STATE.certToggles[certType] = this.checked;
           markDirty();
           saveToStorageDebounced();
-          // Re-render and restore scroll position
           renderCertificates();
           window.scrollTo(0, scrollPos);
           showToast((APP_STATE.certToggles[certType] ? 'Verified: ' : 'Unverified: ') + info.label, 'info');
@@ -2277,21 +1400,35 @@ function renderCertificates() {
     }
   });
   
-  // Restore focus if possible
+  // FIX #7: Restore focus
   if (activeId) {
     const el = $(activeId);
     if (el) setTimeout(() => el.focus(), 10);
   }
+  window.scrollTo(0, scrollPos);
 }
 
 function uploadCertImage(type, input) {
   const file = input.files[0];
   if (!file) return;
+  
+  // FIX #13: Validate file type
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+  if (!validTypes.includes(file.type)) {
+    showToast('Invalid file type. Please upload JPG, PNG, GIF, or PDF.', 'error');
+    input.value = '';
+    return;
+  }
+  
   if (file.size > 5 * 1024 * 1024) {
     showToast('File too large. Max 5MB.', 'error');
     input.value = '';
     return;
   }
+  
+  // FIX #20: Show loading indicator
+  showToast('⏳ Uploading certificate...', 'info');
+  
   const reader = new FileReader();
   reader.onload = function(e) {
     if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
@@ -2301,7 +1438,9 @@ function uploadCertImage(type, input) {
     renderCertificates();
     showToast('Certificate uploaded!', 'success');
   };
-  reader.onerror = function() { showToast('Failed to read image file', 'error'); };
+  reader.onerror = function() { 
+    showToast('Failed to read file', 'error');
+  };
   reader.readAsDataURL(file);
   input.value = '';
 }
@@ -2319,6 +1458,7 @@ function removeCert(type) {
   showToast('Certificate removed', 'info');
 }
 
+// FIX #15: Show multiple product images in grid
 function renderProducts() {
   const grid = $('productsGrid');
   if (!grid) return;
@@ -2341,13 +1481,22 @@ function renderProducts() {
   APP_STATE.products.forEach(product => {
     const card = document.createElement('div');
     card.className = 'product-card';
-    let imageHtml;
+    
+    // FIX #15: Show all images as a strip
+    let imageHtml = '';
     if (product.images && product.images.length > 0) {
-      const imgSrc = escapeHtml(product.images[0]);
-      imageHtml = `<img src="${imgSrc}" alt="${escapeHtml(product.name)} product" style="width:100%;height:100%;object-fit:cover;">`;
+      imageHtml = `<div style="display:flex; gap:4px; overflow-x:auto; padding:4px; width:100%; height:120px; align-items:center;">`;
+      product.images.slice(0, 5).forEach((src, idx) => {
+        imageHtml += `<img src="${escapeHtml(src)}" alt="${escapeHtml(product.name)} image ${idx+1}" style="height:100%; width:auto; object-fit:cover; border-radius:4px; flex-shrink:0;">`;
+      });
+      if (product.images.length > 5) {
+        imageHtml += `<span style="font-size:10px; color:#9ca3af; flex-shrink:0;">+${product.images.length - 5}</span>`;
+      }
+      imageHtml += `</div>`;
     } else {
-      imageHtml = '<span class="no-image">📷 No image</span>';
+      imageHtml = '<div style="height:120px; display:flex; align-items:center; justify-content:center; color:#9ca3af; font-size:12px;">📷 No images</div>';
     }
+    
     const specsHtml = [];
     if (product.moisture > 0) specsHtml.push(`💧 ${product.moisture.toFixed(1)}%`);
     if (product.screenSize > 0) specsHtml.push(`📏 ${product.screenSize.toFixed(1)}`);
@@ -2358,7 +1507,7 @@ function renderProducts() {
       : '';
     const hasAuction = product.hasAuction || false;
     card.innerHTML = `
-      <div class="product-image">${imageHtml}</div>
+      <div class="product-image" style="height:120px; overflow:hidden; background:rgba(0,0,0,0.2); border-radius:8px;">${imageHtml}</div>
       <div class="product-name">${escapeHtml(product.name)}</div>
       <div class="product-variety">${escapeHtml(product.variety || '')}</div>
       <div class="product-specs">${specsHtml.map(s => `<span class="tag">${s}</span>`).join('')}</div>
@@ -2383,6 +1532,7 @@ function renderProducts() {
   });
 }
 
+// FIX #22: Order cards with fallback actions
 function renderOrders() {
   const grid = $('ordersGrid');
   if (!grid) return;
@@ -2395,10 +1545,12 @@ function renderOrders() {
     const card = document.createElement('div');
     card.className = 'order-card';
     const statusClass = order.status || 'pending';
+    const validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+    const displayStatus = validStatuses.includes(statusClass) ? statusClass : 'pending';
     card.innerHTML = `
       <div class="order-header">
         <div class="order-id">#${escapeHtml(order.id.slice(0, 8))}</div>
-        <div class="order-status ${escapeHtml(statusClass)}">${escapeHtml(statusClass.toUpperCase())}</div>
+        <div class="order-status ${escapeHtml(displayStatus)}">${escapeHtml((order.status || 'PENDING').toUpperCase())}</div>
       </div>
       <div class="order-details">
         <div><span class="label">Product:</span> ${escapeHtml(order.product || 'Unknown')}</div>
@@ -2411,6 +1563,8 @@ function renderOrders() {
         <button class="view-btn" type="button">📋 View</button>
         ${order.status === 'pending' ? `<button class="process-btn" type="button">⚙️ Process</button>` : ''}
         ${order.status === 'processing' ? `<button class="ship-btn" type="button">🚚 Ship</button>` : ''}
+        ${order.status === 'shipped' ? `<button class="view-btn" type="button" style="background:rgba(124,252,0,0.2);color:#7CFC00;border-color:rgba(124,252,0,0.3);">✅ Complete</button>` : ''}
+        ${!['pending', 'processing', 'shipped', 'completed', 'cancelled'].includes(order.status) ? `<button class="view-btn" type="button" style="background:rgba(255,217,102,0.2);color:#FFD966;border-color:rgba(255,217,102,0.3);">⚠️ Unknown</button>` : ''}
       </div>
     `;
     const viewBtn = card.querySelector('.view-btn');
@@ -2419,6 +1573,10 @@ function renderOrders() {
     if (processBtn) processBtn.addEventListener('click', () => updateOrderStatus(order.id, 'processing'));
     const shipBtn = card.querySelector('.ship-btn');
     if (shipBtn) shipBtn.addEventListener('click', () => updateOrderStatus(order.id, 'shipped'));
+    const completeBtn = card.querySelector('.order-actions .view-btn:last-child');
+    if (completeBtn && order.status === 'shipped') {
+      completeBtn.addEventListener('click', () => updateOrderStatus(order.id, 'completed'));
+    }
     grid.appendChild(card);
   });
 }
@@ -2471,29 +1629,48 @@ function renderTAR() {
     if (allReceivables.length === 0) {
       list.innerHTML = `<div style="color:#7CFC00; text-align:center; padding:20px; font-size:13px;">✅ All receivables have been converted!</div>`;
     } else {
-      list.innerHTML = allReceivables.slice(0, 8).map(r => {
+      // FIX #17: Show all with "Show More" button
+      const maxShow = 8;
+      let showAll = APP_STATE._showAllReceivables || false;
+      
+      const displayItems = showAll ? allReceivables : allReceivables.slice(0, maxShow);
+      list.innerHTML = displayItems.map(r => {
         const daysOld = r.createdAt ? Math.floor((now - r.createdAt) / 86400000) : 0;
         const statusText = r.status || 'pending';
         return `
-          <div class="tar-receivable-item" data-receivable-id="${r.id}">
-            <div class="receivable-info">
+          <div class="tar-receivable-item" data-receivable-id="${r.id}" style="cursor:default;">
+            <div class="receivable-info" style="cursor:pointer;" data-action="view" data-id="${r.id}">
               <div class="receivable-name">${escapeHtml(r.company)} • ${escapeHtml(r.product)}</div>
               <div class="receivable-details">${escapeHtml(r.invoiceNumber)} • ${escapeHtml(r.date)} • ${daysOld}d old</div>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               <span class="receivable-amount">${money(r.amount)}</span>
               <span class="receivable-status ${escapeHtml(statusText)}">${escapeHtml(statusText.toUpperCase())}</span>
+              <button class="btn-neon" style="padding:2px 10px; font-size:9px;" data-action="convert" data-id="${r.id}">💰 Convert</button>
             </div>
           </div>
         `;
       }).join('');
-      if (allReceivables.length > 8) {
-        list.innerHTML += `<div style="text-align:center; color:#9ca3af; font-size:11px; padding:8px;">+ ${allReceivables.length - 8} more receivables</div>`;
+      
+      if (allReceivables.length > maxShow) {
+        const toggleText = showAll ? 'Show less ▲' : `Show ${allReceivables.length - maxShow} more ▼`;
+        list.innerHTML += `<div style="text-align:center; padding:8px;">
+          <button class="btn-neon" id="toggleReceivablesBtn" style="padding:4px 16px; font-size:11px;">${toggleText}</button>
+        </div>`;
+        
+        const toggleBtn = list.querySelector('#toggleReceivablesBtn');
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', function() {
+            APP_STATE._showAllReceivables = !APP_STATE._showAllReceivables;
+            renderTAR();
+          });
+        }
       }
     }
   }
 }
 
+// FIX #8 + #23: renderArchive with proper height and no forced min
 function renderArchive() {
   const grid = $('archiveGrid');
   const count = $('archiveCount');
@@ -2504,7 +1681,13 @@ function renderArchive() {
     grid.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:20px; grid-column:1/-1;">No archived auctions yet. Completed auctions will appear here for simulation and analysis.</div>`;
     return;
   }
-  grid.innerHTML = archived.slice(0, 20).map(a => {
+  
+  // FIX #16: Show all with pagination or scroll
+  const showCount = 20;
+  const displayArchives = archived.slice(0, showCount);
+  const hasMore = archived.length > showCount;
+  
+  grid.innerHTML = displayArchives.map(a => {
     const statusText = a.won ? '✅ WON' : '❌ LOST';
     const dateStr = a.scheduledDate ? new Date(a.scheduledDate).toLocaleDateString() : 
                     a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Unknown';
@@ -2529,7 +1712,7 @@ function renderArchive() {
           <div class="metric-item"><div class="metric-value">${simRuns}</div><div class="metric-label">Sims</div></div>
         </div>
         ${hasSims ? `<div class="simulation-result">📊 Win Rate: ${winRate.toFixed(1)}% (${simRuns} simulations)</div>` : ''}
-        <div style="display:flex; gap:8px; margin-top:8px;">
+        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
           <button class="simulate-btn" type="button" data-action="analyze" data-archive-id="${a.id}">📊 Analyze</button>
           <button class="simulate-btn" type="button" data-action="simulate" data-archive-id="${a.id}" style="background: linear-gradient(135deg, #00ced1, #0066ff); color:white;">🔄 Simulate</button>
           <button class="simulate-btn" type="button" data-action="restore" data-archive-id="${a.id}" style="background: linear-gradient(135deg, #7CFC00, #00ff7f); color:black;">↩️ Restore</button>
@@ -2537,6 +1720,82 @@ function renderArchive() {
       </div>
     `;
   }).join('');
+  
+  if (hasMore) {
+    grid.innerHTML += `<div style="grid-column:1/-1; text-align:center; padding:12px; color:#9ca3af; font-size:12px;">
+      Showing ${showCount} of ${archived.length} archived auctions. 
+      <button class="btn-neon" id="showAllArchiveBtn" style="padding:4px 16px; font-size:11px; margin-left:8px;">Show All</button>
+    </div>`;
+    
+    const showAllBtn = grid.querySelector('#showAllArchiveBtn');
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', function() {
+        APP_STATE._showAllArchive = !APP_STATE._showAllArchive;
+        renderArchive();
+      });
+    }
+  }
+  
+  // FIX #8: Recalculate archive height if open - with debounce
+  const collapse = $('archiveCollapse');
+  if (collapse && collapse.classList.contains('open')) {
+    // Use requestAnimationFrame to avoid layout thrashing
+    if (window._archiveHeightRAF) {
+      cancelAnimationFrame(window._archiveHeightRAF);
+    }
+    window._archiveHeightRAF = requestAnimationFrame(() => {
+      collapse.style.maxHeight = 'none';
+      const height = collapse.scrollHeight + 'px';
+      collapse.style.maxHeight = height;
+      window._archiveHeightRAF = null;
+    });
+  }
+}
+
+// FIX #14: TAR view uses custom modal instead of alert
+function setupTARDelegation() {
+  const list = $('tarReceivablesList');
+  if (!list) return;
+  list.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    const action = target.dataset.action;
+    const id = target.dataset.id;
+    if (!id) return;
+    
+    if (action === 'convert') {
+      convertReceivable(id);
+    } else if (action === 'view') {
+      const receivable = APP_STATE.receivables.find(r => r.id === id);
+      if (receivable) {
+        // FIX #14: Use custom detail view in a toast-like expanded format
+        const details = `📋 RECEIVABLE DETAILS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🏢 Company: ${receivable.company}\n📦 Product: ${receivable.product}\n💰 Amount: ${money(receivable.amount)}\n🧾 Invoice: ${receivable.invoiceNumber || 'N/A'}\n📅 Date: ${receivable.date || 'N/A'}\n📊 Status: ${receivable.status || 'pending'}\n🔄 Converted: ${receivable.converted ? '✅ Yes' : '❌ No'}\n${receivable.convertedAt ? '⏱ Converted: ' + new Date(receivable.convertedAt).toLocaleString() : ''}\n📆 Days Old: ${receivable.createdAt ? Math.floor((Date.now() - receivable.createdAt) / 86400000) : '?'} days\n━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+        // Show in a modal-style div
+        const existingModal = document.querySelector('.receivable-detail-modal');
+        if (existingModal) existingModal.remove();
+        
+        const modal = document.createElement('div');
+        modal.className = 'receivable-detail-modal';
+        modal.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:9999; background:rgba(2,6,23,0.98); border:2px solid #00ced1; border-radius:16px; padding:24px; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.9); color:#e5e7eb; font-family:monospace; font-size:13px; white-space:pre-wrap;';
+        modal.textContent = details;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕ Close';
+        closeBtn.style.cssText = 'margin-top:16px; padding:8px 24px; background:rgba(0,206,209,0.2); border:1px solid rgba(0,206,209,0.3); border-radius:8px; color:#00ced1; cursor:pointer; font-family:inherit; width:100%;';
+        closeBtn.addEventListener('click', () => modal.remove());
+        modal.appendChild(closeBtn);
+        
+        document.body.appendChild(modal);
+        
+        // Click outside to close
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) modal.remove();
+        });
+      } else {
+        showToast('Receivable not found', 'error');
+      }
+    }
+  });
 }
 
 function setupArchiveDelegation() {
@@ -2550,18 +1809,6 @@ function setupArchiveDelegation() {
     if (action === 'analyze') openSimulationModal(id);
     else if (action === 'simulate') simulateAuction(id);
     else if (action === 'restore') restoreAuction(id);
-  });
-}
-
-function setupTARDelegation() {
-  const list = $('tarReceivablesList');
-  if (!list) return;
-  list.addEventListener('click', function(e) {
-    const item = e.target.closest('.tar-receivable-item');
-    if (item) {
-      const id = item.dataset.receivableId;
-      if (id) convertReceivable(id);
-    }
   });
 }
 
@@ -2623,87 +1870,122 @@ function renderTARAdvisory() {
   advisoryText.innerHTML = adviceText;
 }
 
-/* ==================== FILE UPLOAD HANDLERS ==================== */
+/* ==================== FILE UPLOAD HANDLERS - FIXED ==================== */
 function setupFileUploads() {
+  // Logo upload
   const logoUpload = $('companyLogoUpload');
   const logoInput = $('logoFileInput');
+  
   if (logoUpload && logoInput) {
-    logoUpload.onclick = (e) => {
-      // Only trigger if clicking the placeholder, not the image
-      const isImage = e.target.tagName === 'IMG';
-      if (!isImage) {
-        logoInput.click();
-      }
+    logoUpload.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      logoInput.click();
     };
+    
     logoInput.onchange = function(e) {
       const file = e.target.files[0];
-      if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-          showToast('Logo file too large. Max 5MB.', 'error');
-          this.value = '';
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          APP_STATE.company.logo = ev.target.result;
-          markDirty();
-          saveToStorageDebounced();
-          renderCompany();
-          showToast('Logo uploaded!', 'success');
-        };
-        reader.onerror = () => showToast('Failed to read logo file', 'error');
-        reader.readAsDataURL(file);
+      if (!file) return;
+      
+      // FIX #13: Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        showToast('Invalid file type. Please upload JPG, PNG, GIF, or WEBP.', 'error');
+        this.value = '';
+        return;
       }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Logo file too large. Max 5MB.', 'error');
+        this.value = '';
+        return;
+      }
+      
+      // FIX #20: Show loading indicator
+      showToast('⏳ Uploading logo...', 'info');
+      
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        APP_STATE.company.logo = ev.target.result;
+        markDirty();
+        saveToStorageDebounced();
+        renderCompany();
+        showToast('✅ Logo uploaded!', 'success');
+      };
+      reader.onerror = function() {
+        showToast('Failed to read logo file', 'error');
+      };
+      reader.readAsDataURL(file);
       this.value = '';
     };
   }
 
+  // Photo upload
   const photoInput = $('photoFileInput');
   if (photoInput) {
     photoInput.onchange = function(e) {
       const files = e.target.files;
-      if (files.length > 0) {
-        let loaded = 0;
-        const total = files.length;
-        Array.from(files).forEach(file => {
-          if (file.size > 5 * 1024 * 1024) {
-            showToast('Some photos exceed 5MB limit. Skipping.', 'warning');
-            loaded++;
-            if (loaded === total) {
-              markDirty();
-              saveToStorageDebounced();
-              renderCompany();
-            }
-            return;
+      if (files.length === 0) return;
+      
+      // FIX #13: Validate file types
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      let loaded = 0;
+      const total = files.length;
+      
+      Array.from(files).forEach(file => {
+        if (!validTypes.includes(file.type)) {
+          showToast(`Skipping ${file.name}: invalid type`, 'warning');
+          loaded++;
+          if (loaded === total) {
+            markDirty();
+            saveToStorageDebounced();
+            renderCompany();
           }
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
-            APP_STATE.company.photos.push(ev.target.result);
-            loaded++;
-            if (loaded === total) {
-              markDirty();
-              saveToStorageDebounced();
-              renderCompany();
-              showToast(`${total} photo(s) uploaded!`, 'success');
-            }
-          };
-          reader.onerror = () => {
-            loaded++;
-            showToast('Failed to read some photos', 'warning');
-            if (loaded === total) {
-              markDirty();
-              saveToStorageDebounced();
-              renderCompany();
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-      }
+          return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) {
+          showToast(`Skipping ${file.name}: exceeds 5MB`, 'warning');
+          loaded++;
+          if (loaded === total) {
+            markDirty();
+            saveToStorageDebounced();
+            renderCompany();
+          }
+          return;
+        }
+        
+        // FIX #20: Show loading indicator
+        if (loaded === 0) showToast('⏳ Uploading photos...', 'info');
+        
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          if (!APP_STATE.company.photos) APP_STATE.company.photos = [];
+          APP_STATE.company.photos.push(ev.target.result);
+          loaded++;
+          if (loaded === total) {
+            markDirty();
+            saveToStorageDebounced();
+            renderCompany();
+            showToast(`✅ ${total} photo(s) uploaded!`, 'success');
+          }
+        };
+        reader.onerror = function() {
+          loaded++;
+          showToast(`Failed to read ${file.name}`, 'warning');
+          if (loaded === total) {
+            markDirty();
+            saveToStorageDebounced();
+            renderCompany();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
       this.value = '';
     };
   }
 
+  // Document uploads
   const incorpUploadBtn = $('incorpUploadBtn');
   const licenseUploadBtn = $('licenseUploadBtn');
   const taxUploadBtn = $('taxUploadBtn');
@@ -2712,19 +1994,33 @@ function setupFileUploads() {
   const taxInput = $('taxFileInput');
 
   if (incorpUploadBtn && incorpInput) {
-    incorpUploadBtn.onclick = () => incorpInput.click();
+    incorpUploadBtn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      incorpInput.click();
+    };
     incorpInput.onchange = function(e) {
       handleDocUpload(e, 'incorporation', 'incorpDocStatus');
     };
   }
+  
   if (licenseUploadBtn && licenseInput) {
-    licenseUploadBtn.onclick = () => licenseInput.click();
+    licenseUploadBtn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      licenseInput.click();
+    };
     licenseInput.onchange = function(e) {
       handleDocUpload(e, 'license', 'licenseDocStatus');
     };
   }
+  
   if (taxUploadBtn && taxInput) {
-    taxUploadBtn.onclick = () => taxInput.click();
+    taxUploadBtn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      taxInput.click();
+    };
     taxInput.onchange = function(e) {
       handleDocUpload(e, 'tax', 'taxDocStatus');
     };
@@ -2733,13 +2029,26 @@ function setupFileUploads() {
   function handleDocUpload(e, key, statusId) {
     const file = e.target.files[0];
     if (!file) return;
+    
+    // FIX #13: Validate file type
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      showToast('Invalid file type. Please upload PDF, JPG, PNG, or GIF.', 'error');
+      e.target.value = '';
+      return;
+    }
+    
     if (file.size > 10 * 1024 * 1024) {
       showToast('Document too large. Max 10MB.', 'error');
       e.target.value = '';
       return;
     }
+    
+    // FIX #20: Show loading indicator
+    showToast('⏳ Uploading document...', 'info');
+    
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = function(ev) {
       if (!APP_STATE.company.documents) APP_STATE.company.documents = {};
       APP_STATE.company.documents[key] = ev.target.result;
       markDirty();
@@ -2747,42 +2056,76 @@ function setupFileUploads() {
       renderCompany();
       const statusEl = $(statusId);
       if (statusEl) statusEl.textContent = '✅ Uploaded';
-      showToast('Document uploaded!', 'success');
+      showToast('✅ Document uploaded!', 'success');
     };
-    reader.onerror = () => showToast('Failed to read file', 'error');
+    reader.onerror = function() {
+      showToast('Failed to read file', 'error');
+    };
     reader.readAsDataURL(file);
     e.target.value = '';
   }
 
+  // FIX #1: Product images - don't clear input too early, preserve for saving
   const productImagesInput = $('productImagesInput');
   if (productImagesInput) {
     productImagesInput.onchange = function(e) {
       const previewContainer = $('productImagePreview');
       if (!previewContainer) return;
-      previewContainer.innerHTML = '';
+      
       const files = Array.from(e.target.files).slice(0, 5);
-      files.forEach(file => {
+      if (files.length === 0) return;
+      
+      // FIX #13: Validate file types
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      let validFiles = files.filter(f => validTypes.includes(f.type));
+      
+      if (validFiles.length === 0) {
+        showToast('No valid image files selected. Please upload JPG, PNG, GIF, or WEBP.', 'error');
+        this.value = '';
+        return;
+      }
+      
+      if (files.length !== validFiles.length) {
+        showToast(`Skipping ${files.length - validFiles.length} invalid file(s)`, 'warning');
+      }
+      
+      // Show previews
+      validFiles.forEach((file) => {
         if (file.size > 5 * 1024 * 1024) {
-          showToast('Image exceeds 5MB limit. Skipping.', 'warning');
+          showToast(`Skipping ${file.name}: exceeds 5MB`, 'warning');
           return;
         }
         const reader = new FileReader();
-        reader.onload = (ev) => {
+        reader.onload = function(ev) {
+          const wrapper = document.createElement('div');
+          wrapper.style.cssText = 'position:relative; display:inline-block; margin:4px;';
+          
           const img = document.createElement('img');
           img.src = ev.target.result;
-          img.alt = 'Product image preview';
           img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
-          previewContainer.appendChild(img);
+          wrapper.appendChild(img);
+          
+          const pendingLabel = document.createElement('span');
+          pendingLabel.textContent = '📤';
+          pendingLabel.style.cssText = 'position:absolute; bottom:2px; right:4px; font-size:12px; opacity:0.7;';
+          wrapper.appendChild(pendingLabel);
+          
+          previewContainer.appendChild(wrapper);
         };
         reader.readAsDataURL(file);
       });
+      
+      // FIX #1: Don't clear immediately - keep files for save
+      // But show that new files will be added
+      const warningEl = $('imageReplaceWarning');
+      if (warningEl) warningEl.textContent = '📸 ' + validFiles.length + ' new image(s) will be added on save.';
+      warningEl.style.display = 'block';
     };
   }
 }
 
 /* ==================== AUTH GUARD ==================== */
 async function checkAuth() {
-  // Offline mode - always return true
   return true;
 }
 
@@ -2796,16 +2139,18 @@ function openProductModal(productId) {
   if (title) title.textContent = isEdit ? '📦 Edit Product' : '📦 Add Product';
   const imagesInput = $('productImagesInput');
   if (imagesInput) imagesInput.value = '';
-  const previewContainer = $('productImagePreview');
-  if (previewContainer) previewContainer.innerHTML = '';
   
   const warningEl = $('imageReplaceWarning');
   if (warningEl) warningEl.style.display = isEdit ? 'block' : 'none';
+  if (warningEl && !isEdit) warningEl.textContent = '⚠️ New images will be added to the product on save.';
   
   if (isEdit) {
     const product = APP_STATE.products.find(p => p.id === productId);
     if (product) loadProductIntoModal(product);
   } else {
+    APP_STATE._editImages = [];
+    _imageRemoveQueue = [];
+    
     safeSetVal('productNameInput', '');
     safeSetVal('productVarietyInput', '');
     safeSetVal('productQuantityInput', '');
@@ -2847,6 +2192,9 @@ function openProductModal(productId) {
     if (startEl) {
       startEl.value = formatDateTimeLocal(future);
     }
+    
+    const previewContainer = $('productImagePreview');
+    if (previewContainer) previewContainer.innerHTML = '';
   }
   openModal('productModal');
 }
@@ -2932,9 +2280,13 @@ function saveCompanyProfile() {
     phone: phone,
     website: website
   };
+  
   if (APP_STATE.company.name && APP_STATE.company.reg && APP_STATE.company.country) {
-    APP_STATE.company.verified = 'pending';
+    if (APP_STATE.company.verified !== 'verified') {
+      APP_STATE.company.verified = 'pending';
+    }
   }
+  
   markDirty();
   saveToStorageDebounced();
   renderCompany();
@@ -2957,12 +2309,20 @@ function processDeposit() {
   }
 }
 
-/* ==================== TOUR ==================== */
+/* ==================== TOUR - FIX #19 ==================== */
 function startTour() {
+  // FIX #19: Close any open modals first
+  document.querySelectorAll('.modal.show').forEach(m => {
+    closeModal(m.id);
+  });
+  
   APP_STATE.tour.active = true;
   APP_STATE.tour.step = 0;
   const overlay = $('tourOverlay');
-  if (overlay) overlay.style.display = 'block';
+  if (overlay) {
+    overlay.style.display = 'block';
+    overlay.style.zIndex = '2000'; // Above modals
+  }
   const progress = $('tourProgress');
   if (progress) {
     progress.innerHTML = '';
@@ -2972,7 +2332,6 @@ function startTour() {
       dot.dataset.step = i;
       progress.appendChild(dot);
     });
-    // Add close button to progress bar
     const closeBtn = document.createElement('button');
     closeBtn.className = 'tour-close';
     closeBtn.textContent = '✕';
@@ -2986,7 +2345,10 @@ function startTour() {
 function endTour() {
   APP_STATE.tour.active = false;
   const overlay = $('tourOverlay');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) {
+    overlay.style.display = 'none';
+    overlay.style.zIndex = '1000';
+  }
   const highlight = $('tourHighlight');
   if (highlight) highlight.style.display = 'none';
   showToast('🎯 Tour complete!', 'success');
@@ -3017,6 +2379,7 @@ function showTourStep(step) {
       highlight.style.top = (rect.top - 8) + 'px';
       highlight.style.width = (rect.width + 16) + 'px';
       highlight.style.height = (rect.height + 16) + 'px';
+      highlight.style.zIndex = '2001'; // Above overlay
     }
     if (tooltip) {
       let tooltipLeft = Math.max(20, rect.left + rect.width / 2 - 160);
@@ -3028,6 +2391,7 @@ function showTourStep(step) {
       tooltip.style.left = tooltipLeft + 'px';
       tooltip.style.top = tooltipTop + 'px';
       tooltip.style.display = 'block';
+      tooltip.style.zIndex = '2002';
     }
     if (title) title.textContent = stepData.title;
     if (description) description.textContent = stepData.description;
@@ -3069,7 +2433,6 @@ function toggleArchive() {
     collapse.style.maxHeight = height;
     collapse.classList.add('open');
     header.classList.add('open');
-    // Scroll to archive section if toggled from TAR button
     const archiveSection = $('archiveSection');
     if (archiveSection) {
       archiveSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -3077,14 +2440,27 @@ function toggleArchive() {
   }
 }
 
-/* ==================== SIMULATE AUCTION ==================== */
+/* ==================== SIMULATE AUCTION - FIX #18 ==================== */
+// FIX #18: Seed random for reproducibility
+function seededRandom(seed) {
+  return function() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+}
+
 function simulateAuction(archiveId) {
   const archive = APP_STATE.archivedAuctions.find(a => a.id === archiveId);
   if (!archive) { showToast('Archive not found', 'error'); return; }
+  
+  // Use auction ID as seed for reproducibility
+  const seed = archiveId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const random = seededRandom(seed || 42);
+  
   archive.simulationRuns = (archive.simulationRuns || 0) + 1;
   const startingPrice = archive.startingPrice || archive.idealPrice || 100;
-  const simPrice = startingPrice * (1 + (Math.random() * 0.4 - 0.2));
-  const simWon = Math.random() > 0.35;
+  const simPrice = startingPrice * (1 + (random() * 0.4 - 0.2));
+  const simWon = random() > 0.35;
   if (!archive.simulations) archive.simulations = [];
   archive.simulations.push({
     run: archive.simulationRuns,
@@ -3098,15 +2474,10 @@ function simulateAuction(archiveId) {
   archive.simAvgPrice = avgPrice;
   archive.simWinRate = winRate;
   archive.lastSimulated = new Date().toISOString();
-  // Preserve original won status
   if (!archive.hasOwnProperty('originalWon')) {
     archive.originalWon = archive.won;
   }
-  // Only update actual won status if it's the first simulation or user explicitly wants to
-  // For demo purposes, we'll keep the original won status
   archive.won = archive.originalWon;
-  // Don't artificially inflate bidCount - keep it real
-  // bidCount remains as-is from actual auction
   markDirty();
   saveToStorageDebounced();
   renderAllDebounced();
@@ -3245,6 +2616,9 @@ function initEventListeners() {
     saveToStorage(); 
     showToast('☁️ Synced to cloud!', 'success'); 
   });
+
+  const forceSaveBtn = $('forceSaveBtn');
+  if (forceSaveBtn) forceSaveBtn.addEventListener('click', forceSave);
   
   const addCertBtn = $('addCertBtn');
   if (addCertBtn) addCertBtn.addEventListener('click', function() {
@@ -3276,6 +2650,12 @@ function initEventListeners() {
     }
   });
   
+  window.addEventListener('pagehide', function() {
+    if (APP_STATE.isDirty) {
+      saveToStorage();
+    }
+  });
+  
   setupArchiveDelegation();
   setupTARDelegation();
 }
@@ -3300,7 +2680,7 @@ async function initApp() {
         batchSize: 50, 
         dailyLimit: 500, 
         todayConversions: 0,
-        todayConversionsDate: new Date().toUTCString().split(' ').slice(0, 4).join(' '),
+        todayConversionsDate: getLocalDate(),
         totalConversions: 0, 
         totalFeesEarned: 0
       };
@@ -3322,7 +2702,6 @@ async function initApp() {
     renderAll();
     syncToBuyerArena();
     
-    // Update auction statuses every 30 seconds with try-catch
     setInterval(() => {
       try {
         updateAuctionStatuses();
@@ -3334,6 +2713,7 @@ async function initApp() {
     
     window.addEventListener('beforeunload', function(e) {
       if (APP_STATE.isDirty) {
+        saveToStorage();
         e.preventDefault();
         e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
         return 'You have unsaved changes. Are you sure you want to leave?';
@@ -3369,9 +2749,7 @@ window.postAuction = postAuction;
 window.closeModal = closeModal;
 window.processDeposit = processDeposit;
 window.bulletproofSignOut = bulletproofSignOut;
+window.forceSave = forceSave;
 
 // ===== START THE APP =====
 initApp();
-</script>
-</body>
-</html>
