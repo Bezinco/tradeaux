@@ -3084,6 +3084,3412 @@ function openSimulationModal(archiveId) {
 }
 
 function bulletproofSignOut() {
+  // FIX: Do NOT delete data on sign-out
+  // Just redirect to the index page
+  window.location.href = 'index.html';
+}
+function setupTARDelegation() {
+  var list = $('tarReceivablesList');
+  if(!list) return;
+  list.addEventListener('click', function(e) {
+    var target = e.target.closest('[data-action]');
+    if(!target) return;
+    var action = target.dataset.action;
+    var id = target.dataset.id;
+    if(!id) return;
+    if(action === 'convert') { convertReceivable(id); } else if(action === 'view') {
+      var r = APP_STATE.receivables.find(function(x) { return x.id === id; });
+      if(r) {
+        var details = '📋 RECEIVABLE DETAILS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🏢 Company: ' + r.company + '\n📦 Product: ' + r.product + '\n💰 Amount: ' + money(r.amount) + '\n🧾 Invoice: ' + (r.invoiceNumber || 'N/A') + '\n📅 Date: ' + (r.date || 'N/A') + '\n📊 Status: ' + (r.status || 'pending') + '\n🔄 Converted: ' + (r.converted ? '✅ Yes' : '❌ No') + (r.convertedAt ? '\n⏱ Converted: ' + new Date(r.convertedAt).toLocaleString() : '') + '\n📆 Days Old: ' + (r.createdAt ? Math.floor((Date.now() - r.createdAt) / 86400000) : '?') + ' days\n━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+        var modal = document.createElement('div');
+        modal.className = 'receivable-detail-modal';
+        modal.textContent = details;
+        var btn = document.createElement('button');
+        btn.textContent = '✕ Close';
+        btn.addEventListener('click', function() { modal.remove(); });
+        modal.appendChild(btn);
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(e) { if(e.target === this) this.remove(); });
+      } else { showToast('Receivable not found', 'error'); }
+    }
+  });
+}
+
+function setupArchiveDelegation() {
+  var grid = $('archiveGrid');
+  if(!grid) return;
+  grid.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-archive-id]');
+    if(!btn) return;
+    var id = btn.dataset.archiveId;
+    var action = btn.dataset.action;
+    if(!action) return;
+    if(action === 'analyze') openSimulationModal(id);
+    else if(action === 'simulate') simulateAuction(id);
+    else if(action === 'restore') restoreAuction(id);
+  });
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+function initEventListeners() {
+  setupFormSubmit('productForm', saveProduct);
+  setupFormSubmit('auctionForm', postAuction);
+  setupFormSubmit('companyForm', saveCompanyProfile);
+  setupFormSubmit('orderForm', function() { updateOrderStatus(null, null); });
+  var add = $('addProductBtn');
+  if(add) add.addEventListener('click', function() { openProductModal(); });
+  var save = $('saveProductBtn');
+  if(save) save.addEventListener('click', function() { saveProduct(); });
+  var savePost = $('saveAndPostBtn');
+  if(savePost) savePost.addEventListener('click', function() { saveProduct(function(id) { setTimeout(function() { openAuctionModal(id); }, 300); }); });
+  var closeProd = $('closeProductModal');
+  if(closeProd) closeProd.addEventListener('click', function() { closeModal('productModal'); });
+  var cancelProd = $('cancelProductBtn');
+  if(cancelProd) cancelProd.addEventListener('click', function() { closeModal('productModal'); });
+  var submitAuc = $('submitAuctionBtn');
+  if(submitAuc) submitAuc.addEventListener('click', postAuction);
+  var closeAuc = $('closeAuctionModal');
+  if(closeAuc) closeAuc.addEventListener('click', function() { closeModal('auctionModal'); });
+  var cancelAuc = $('cancelAuctionBtn');
+  if(cancelAuc) cancelAuc.addEventListener('click', function() { closeModal('auctionModal'); });
+  var editComp = $('editCompanyBtn');
+  if(editComp) editComp.addEventListener('click', openCompanyModal);
+  var saveComp = $('saveCompanyBtn');
+  if(saveComp) saveComp.addEventListener('click', saveCompanyProfile);
+  var closeComp = $('closeCompanyModal');
+  if(closeComp) closeComp.addEventListener('click', function() { closeModal('companyModal'); });
+  var cancelComp = $('cancelCompanyBtn');
+  if(cancelComp) cancelComp.addEventListener('click', function() { closeModal('companyModal'); });
+  var updateOrd = $('updateOrderBtn');
+  if(updateOrd) updateOrd.addEventListener('click', function() { updateOrderStatus(null, null); });
+  var closeOrd = $('closeOrderModal');
+  if(closeOrd) closeOrd.addEventListener('click', function() { closeModal('orderModal'); });
+  var closeOrdBtn = $('closeOrderModalBtn');
+  if(closeOrdBtn) closeOrdBtn.addEventListener('click', function() { closeModal('orderModal'); });
+  var deposit = $('depositBtn');
+  if(deposit) deposit.addEventListener('click', processDeposit);
+  var auth = $('authBtn');
+  if(auth) auth.addEventListener('click', function(e) { e.preventDefault(); if(confirm('Sign out?')) bulletproofSignOut(); });
+  var market = $('marketplaceNav');
+  if(market) market.addEventListener('click', function(e) { e.preventDefault(); showToast('🌐 Marketplace coming soon!', 'info'); });
+  var analytics = $('analyticsNav');
+  if(analytics) analytics.addEventListener('click', function(e) { e.preventDefault(); showToast('📊 Analytics coming soon!', 'info'); });
+  var auto = $('tarAutoConvertBtn');
+  if(auto) auto.addEventListener('click', autoConvertReady);
+  var advice = $('tarAdviceBtn');
+  if(advice) advice.addEventListener('click', function() { showToast('💡 TAR Advisory: Check your receivables and auctions!', 'info'); });
+  var settings = $('tarSettingsBtn');
+  if(settings) settings.addEventListener('click', function() { showToast('⚙️ TAR Settings: Fee $25 • Batch 50 • Auto-Convert ON', 'info'); });
+  var tour = $('tourBtn');
+  if(tour) tour.addEventListener('click', startTour);
+  var archiveToggle = $('archiveToggleBtn');
+  if(archiveToggle) archiveToggle.addEventListener('click', toggleArchive);
+  var archiveHead = $('archiveHeader');
+  if(archiveHead) archiveHead.addEventListener('click', toggleArchive);
+  var refresh = $('auctionRefreshBtn');
+  if(refresh) refresh.addEventListener('click', function() { updateAuctionStatuses(); renderAllDebounced(); showToast('🔄 Auctions refreshed!', 'info'); });
+  var sync = $('syncCloudBtn');
+  if(sync) sync.addEventListener('click', function() { saveToStorageImmediate(); showToast('☁️ Synced!', 'success'); });
+  var force = $('forceSaveBtn');
+  if(force) force.addEventListener('click', forceSave);
+  
+  // Export/Import buttons
+  var exportBtn = $('exportBtn');
+  if(exportBtn) exportBtn.addEventListener('click', exportData);
+  var diagBtn = $('diagBtn');
+  if(diagBtn) diagBtn.addEventListener('click', runDiagnostics);
+  var closeDiag = $('closeDiagModal');
+  if(closeDiag) closeDiag.addEventListener('click', function() { closeModal('diagModal'); });
+  var closeDiagBtn = $('closeDiagBtn');
+  if(closeDiagBtn) closeDiagBtn.addEventListener('click', function() { closeModal('diagModal'); });
+  var runDiagBtn = $('runDiagBtn');
+  if(runDiagBtn) runDiagBtn.addEventListener('click', runDiagnostics);
+  var importBtn = $('importBtn');
+  if(importBtn) importBtn.addEventListener('click', importData);
+  
+  var addCert = $('addCertBtn');
+  if(addCert) addCert.addEventListener('click', function() {
+    var drop = $('certDropdown');
+    if(!drop) { showToast('Certificate dropdown not found', 'error'); return; }
+    var type = drop.value;
+    if(!type) { showToast('Select a certificate type', 'error'); return; }
+    if(APP_STATE.certToggles[type] !== undefined) { showToast('Certificate already added', 'warning'); return; }
+    APP_STATE.certToggles[type] = false;
+    markDirty();
+    saveToStorageDebounced();
+    renderCertificates();
+    drop.value = '';
+    showToast('Certificate type added!', 'success');
+  });
+  var advToggle = $('advancedSpecsToggleBtn');
+  if(advToggle) advToggle.addEventListener('click', toggleAdvancedSpecs);
+  document.querySelectorAll('.modal').forEach(function(m) {
+    m.addEventListener('click', function(e) { if(e.target === m) closeModal(m.id); });
+  });
+  document.addEventListener('keydown', function(e) {
+    if(e.key === 'Escape') {
+      document.querySelectorAll('.modal').forEach(function(m) {
+        if(m.classList.contains('show')) closeModal(m.id);
+      });
+    }
+  });
+  window.addEventListener('pagehide', function() { if(APP_STATE.isDirty) saveToStorageImmediate(); });
+  window.addEventListener('beforeunload', function(e) {
+    if(APP_STATE.isDirty) { saveToStorageImmediate(); e.preventDefault(); e.returnValue = 'You have unsaved changes.'; return 'You have unsaved changes.'; }
+  });
+  setupArchiveDelegation();
+  setupTARDelegation();
+  
+  // Diagnostic toggle
+  var diagToggle = $('diagToggle');
+  if(diagToggle) diagToggle.addEventListener('click', toggleDiagnostic);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+function runDiagnostics() {
+  var out = [];
+  out.push('=== TRADEAUX STORAGE DIAGNOSTICS ===\n');
+
+  // localStorage
+  var lsRaw = localStorage.getItem('tradeaux_seller_state');
+  out.push('localStorage.tradeaux_seller_state:');
+  if(lsRaw) {
+    try {
+      var ls = JSON.parse(lsRaw);
+      out.push('  ✓ EXISTS (' + lsRaw.length + ' bytes)');
+      out.push('  Products: ' + (ls.products ? ls.products.length : 0));
+      out.push('  Company name: ' + (ls.company && ls.company.name ? ls.company.name : 'NOT SET'));
+      out.push('  Has logo: ' + (ls.company && ls.company.logo ? 'YES' : 'NO'));
+      out.push('  Orders: ' + (ls.orders ? ls.orders.length : 0));
+      out.push('  Receivables: ' + (ls.receivables ? ls.receivables.length : 0));
+    } catch(e) {
+      out.push('  ✗ CORRUPTED');
+    }
+  } else {
+    out.push('  ✗ EMPTY');
+  }
+  out.push('');
+
+  // sessionStorage
+  var ssRaw = sessionStorage.getItem('tradeaux_seller_state_backup');
+  out.push('sessionStorage.tradeaux_seller_state_backup:');
+  if(ssRaw) {
+    out.push('  ✓ EXISTS (' + ssRaw.length + ' bytes)');
+  } else {
+    out.push('  ✗ EMPTY');
+  }
+  out.push('');
+
+  // IndexedDB
+  out.push('IndexedDB (async check running...)');
+  STORAGE.loadIndexedDB(function(dbData) {
+    var idxOut = [];
+    if(dbData) {
+      idxOut.push('  ✓ EXISTS');
+      idxOut.push('  Products: ' + (dbData.products ? dbData.products.length : 0));
+      idxOut.push('  Company name: ' + (dbData.company && dbData.company.name ? dbData.company.name : 'NOT SET'));
+      idxOut.push('  Has logo: ' + (dbData.company && dbData.company.logo ? 'YES' : 'NO'));
+    } else {
+      idxOut.push('  ✗ EMPTY');
+    }
+
+    // Memory state
+    idxOut.push('');
+    idxOut.push('=== CURRENT MEMORY STATE ===');
+    idxOut.push('Products: ' + APP_STATE.products.length);
+    idxOut.push('Company name: ' + (APP_STATE.company.name || 'NOT SET'));
+    idxOut.push('Has logo: ' + (APP_STATE.company.logo ? 'YES' : 'NO'));
+    idxOut.push('Wallet: ' + money(APP_STATE.wallet.balance));
+    idxOut.push('isDirty: ' + APP_STATE.isDirty);
+
+    var body = $('diagBody');
+    if(body) body.textContent = out.join('\n') + '\n' + idxOut.join('\n');
+  });
+
+  var body = $('diagModal');
+  if(body) body.classList.add('show');
+}
+function initApp() {
+  try {
+    showToast('🔐 Loading dashboard...', 'info');
+    
+    // Load from storage (localStorage + sessionStorage)
+    var result = loadFromStorage();
+    
+    if(!result.hasData && !result.corrupted) {
+      // First run - no data exists
+      APP_STATE.products = [];
+      APP_STATE.wallet = { balance: 0 };
+      APP_STATE.receivables = [];
+      APP_STATE.tar = { active: true, conversionFee: 25, minReceivable: 100, maxReceivable: 50000, autoConvert: true, batchSize: 50, dailyLimit: 500, todayConversions: 0, todayConversionsDate: getLocalDate(), totalConversions: 0, totalFeesEarned: 0 };
+      saveToStorageImmediate();
+    } else if(result.corrupted) {
+      showToast('⚠️ Saved data is corrupted. Attempting IndexedDB recovery...', 'warning');
+      // Try IndexedDB fallback
+      loadIndexedDBFallback();
+    } else if(result.source && result.source !== 'none') {
+      showToast('📦 Loaded from ' + result.source, 'info');
+    }
+    
+    // Async IndexedDB load (if localStorage was empty but IndexedDB has data)
+    setTimeout(function() {
+      loadIndexedDBFallback();
+    }, 500);
+    
+    setupSlider('productMoisture', 'productMoistureVal', '%', 1);
+    setupSlider('productScreenSize', 'productScreenSizeVal', '', 1);
+    setupSlider('productDefects', 'productDefectsVal', '%', 1);
+    setupSlider('productForeignMatter', 'productForeignMatterVal', '%', 1);
+    setupSlider('productProtein', 'productProteinVal', '%', 1);
+    setupSlider('productAflatoxin', 'productAflatoxinVal', ' ppb', 1);
+    setupSlider('productOilContent', 'productOilContentVal', '%', 1);
+    setupSlider('productColorGrade', 'productColorGradeVal', '', 0);
+    setupIdealPriceSlider();
+    setupPackagingPreview();
+    setupFileUploads();
+    initEventListeners();
+    renderAll();
+    syncToBuyerArena();
+    
+    setInterval(function() {
+      try { updateAuctionStatuses(); renderAllDebounced(); } catch(e) { console.warn('Interval update error:', e); }
+    }, 30000);
+    
+    showToast('✅ Dashboard ready!', 'success');
+  } catch(e) {
+    console.error('Init error:', e);
+    showToast('❌ Failed to load dashboard. Please refresh.', 'error');
+  }
+}
+
+// ============================================================
+// EXPOSE FUNCTIONS
+// ============================================================
+window.openCompanyModal = openCompanyModal;
+window.saveCompanyProfile = saveCompanyProfile;
+window.simulateAuction = simulateAuction;
+window.openSimulationModal = openSimulationModal;
+window.restoreAuction = restoreAuction;
+window.toggleArchive = toggleArchive;
+window.openOrderModal = openOrderModal;
+window.updateOrderStatus = updateOrderStatus;
+window.convertReceivable = convertReceivable;
+window.autoConvertReady = autoConvertReady;
+window.startTour = startTour;
+window.endTour = endTour;
+window.uploadCertImage = uploadCertImage;
+window.removeCert = removeCert;
+window.saveProduct = saveProduct;
+window.openProductModal = openProductModal;
+window.deleteProduct = deleteProduct;
+window.openAuctionModal = openAuctionModal;
+window.postAuction = postAuction;
+window.closeModal = closeModal;
+window.processDeposit = processDeposit;
+window.bulletproofSignOut = bulletproofSignOut;
+window.forceSave = forceSave;
+window.exportData = exportData;
+window.importData = importData;
+window.runDiagnostics = runDiagnostics;
+window.toggleDiagnostic = toggleDiagnostic;
+
+// ============================================================
+// START
+// ============================================================
+initApp();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Seller Dashboard | TAR Advisor</title>
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: *; base-uri 'self';">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.15; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
+    .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } 100% { transform: translate(-30px,20px) scale(1); } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
+
+    .gem-logo-corner {
+      position: fixed; top: 20px; left: 20px; z-index: 9999;
+      pointer-events: none;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d; perspective: 1000px;
+      transform: scale(0.35); transform-origin: top left;
+    }
+    .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
+    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+
+    .gem-letter:nth-child(1)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(4)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(5)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 8px; background: rgba(15, 32, 64, 0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; }
+    .nav a:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0, 206, 209, 0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0, 206, 209, 0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 6px 16px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .top-trader { text-align: center; background: rgba(0, 0, 0, 0.5); padding: 12px 24px; border-radius: 40px; display: inline-block; width: auto; margin: 20px auto; border: 1px solid rgba(124, 252, 0, 0.3); backdrop-filter: blur(4px); font-family: 'Orbitron', sans-serif; font-size: 14px; }
+    .banner-container { text-align: center; padding-top: 20px; }
+
+    .slider-row { display: flex; align-items: center; gap: 16px; width: 100%; }
+    .slider-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #00ced1, #7CFC00); outline: none; }
+    .slider-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #00ced1; cursor: pointer; border: 2px solid #0a1228; box-shadow: 0 0 10px rgba(0,206,209,0.3); }
+    .slider-row input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #00ced1; cursor: pointer; border: 2px solid #0a1228; }
+    .slider-value { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #00ced1; min-width: 55px; text-align: right; }
+
+    .spec-group { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 3px solid #00ced1; }
+    .spec-group .spec-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .packaging-preview { background: rgba(0,206,209,0.05); border: 1px solid rgba(0,206,209,0.15); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #7CFC00; margin-top: 6px; display: inline-block; }
+
+    .company-section { margin-top: 10px; }
+    .company-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .company-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 24px; }
+    .company-profile-layout { display: grid; grid-template-columns: 200px 1fr; gap: 24px; }
+    .company-logo-section { text-align: center; }
+    .company-logo-upload { width: 160px; height: 160px; border: 2px dashed rgba(0,206,209,0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; margin: 0 auto; overflow: hidden; background: rgba(0,0,0,0.3); }
+    .company-logo-upload:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+    .company-logo-upload img { width: 100%; height: 100%; object-fit: contain; pointer-events: auto; }
+    .company-logo-upload .placeholder { color: #9ca3af; font-size: 13px; }
+    .company-logo-upload .placeholder-icon { font-size: 48px; margin-bottom: 8px; }
+    .company-verification-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .company-verification-badge.verified { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+    .company-verification-badge.unverified { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.3); }
+    .company-verification-badge.pending { background: rgba(255,217,102,0.15); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
+    .company-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .company-field { margin-bottom: 4px; }
+    .company-field .field-label { display: block; font-size: 10px; color: #9ca3af; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .company-field .field-value { font-size: 13px; color: #e5e7eb; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .documents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
+    .document-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
+    .document-item:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+    .document-item .doc-icon { font-size: 20px; }
+    .document-item .doc-info { flex: 1; }
+    .document-item .doc-name { font-size: 11px; font-weight: 600; }
+    .document-item .doc-status { font-size: 10px; color: #9ca3af; }
+    .document-item .doc-upload { font-size: 10px; color: #00ced1; cursor: pointer; }
+    .company-documents-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
+    .company-photos-title { font-size: 13px; font-weight: 600; color: #00ced1; margin: 16px 0 12px; }
+    .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .photo-item { aspect-ratio: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .photo-item:hover { border-color: #00ced1; transform: scale(1.02); }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .photo-item .placeholder { color: #9ca3af; font-size: 11px; text-align: center; padding: 8px; }
+    .photo-item .placeholder-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+    .photo-upload-btn { aspect-ratio: 1; background: rgba(0,206,209,0.05); border: 2px dashed rgba(0,206,209,0.3); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
+    .photo-upload-btn:hover { border-color: #00ced1; background: rgba(0,206,209,0.1); }
+    .photo-upload-btn .icon { font-size: 28px; color: #00ced1; }
+    .photo-upload-btn .text { font-size: 10px; color: #9ca3af; margin-top: 4px; }
+
+    .section-card { background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95)); border-radius: 24px; padding: 24px; margin-bottom: 24px; backdrop-filter: blur(8px); position: relative; border: 2px solid transparent; background-clip: padding-box; }
+    .section-card::before { content: ''; position: absolute; inset: -2px; border-radius: 26px; padding: 2px; background: linear-gradient(135deg, #7CFC00, #00ced1, #FFD966, #ea4a4a, #7CFC00); background-size: 300% 300%; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; animation: borderFlow 4s ease infinite; }
+    @keyframes borderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .section-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #7CFC00; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; border-left: 3px solid #7CFC00; padding-left: 14px; flex-wrap: wrap; }
+    .section-header .badge { background: rgba(0,206,209,0.2); padding: 3px 10px; border-radius: 20px; font-size: 10px; color: #00ced1; }
+    .cert-block-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .cert-block { background: linear-gradient(145deg, #0B1122, #030712); border: 1px solid rgba(124,252,0,0.35); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.3s; }
+    .cert-block:hover { border-color: #7CFC00; transform: translateY(-2px); box-shadow: 0 25px 30px -14px rgba(124,252,0,0.15); }
+    .cert-block .cert-icon { font-size: 28px; }
+    .cert-block .cert-name { font-size: 12px; font-weight: 700; color: #e5e7eb; text-align: center; }
+    .cert-block .cert-desc { font-size: 9px; color: #9ca3af; text-align: center; }
+    .cert-block .cert-required { font-size: 8px; color: #FFD966; background: rgba(255,217,102,0.1); padding: 2px 10px; border-radius: 10px; }
+    .cert-block .cert-preview { width: 100%; height: 50px; border-radius: 8px; border: 1px dashed rgba(124,252,0,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(0,0,0,0.3); overflow: hidden; position:relative; }
+    .cert-block .cert-preview img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .cert-block .cert-preview .placeholder { font-size: 9px; color: #9ca3af; }
+    .cert-block .cert-toggle-row { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; margin-top: 4px; }
+    .cert-block .cert-toggle-row span { font-size: 9px; color: #9ca3af; }
+    .toggle-switch { position: relative; display: inline-block; width: 30px; height: 18px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: 0.3s; border-radius: 34px; }
+    .toggle-switch .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: 0.3s; border-radius: 50%; }
+    .toggle-switch input:checked + .slider { background-color: #7CFC00; }
+    .toggle-switch input:checked + .slider:before { transform: translateX(12px); }
+    .block-select { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; color: #7CFC00; padding: 10px; font-family: 'Inter', sans-serif; }
+    .btn-remove-cert { background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.4); color: #FF4D4D; padding: 2px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-remove-cert:hover { background: rgba(255,77,77,0.3); border-color: #FF4D4D; }
+
+    .tar-section { margin-top: 30px; }
+    .tar-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .tar-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .tar-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; }
+    .tar-status-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #7CFC00; }
+    .tar-status-dot { width: 12px; height: 12px; border-radius: 50%; background: #7CFC00; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+    .tar-status-text { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #7CFC00; }
+    .tar-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+    .tar-metric { text-align: center; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; }
+    .tar-metric-value { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .tar-metric-label { font-size: 9px; color: #9ca3af; margin-top: 4px; }
+    .tar-receivable-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #FFD966; cursor: default; }
+    .tar-receivable-item:hover { background: rgba(0,206,209,0.05); }
+    .tar-receivable-item .receivable-info { flex: 1; cursor: pointer; }
+    .tar-receivable-item .receivable-name { font-weight: 600; font-size: 13px; }
+    .tar-receivable-item .receivable-details { font-size: 11px; color: #9ca3af; }
+    .tar-receivable-item .receivable-amount { font-family: 'Orbitron', sans-serif; color: #00ced1; font-size: 14px; }
+    .tar-receivable-item .receivable-status { font-size: 10px; padding: 2px 10px; border-radius: 12px; margin-left: 12px; }
+    .tar-receivable-item .receivable-status.ready { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .tar-receivable-item .receivable-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .tar-receivable-item .receivable-status.urgent { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .tar-receivable-item .receivable-status.converted { background: rgba(0,206,209,0.2); color: #00ced1; }
+
+    .auction-schedule { margin-top: 16px; }
+    .auction-schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .auction-schedule-header .title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #00ced1; }
+    .auction-refresh-btn { background: rgba(0,206,209,0.15); border: 1px solid rgba(0,206,209,0.3); color: #00ced1; padding: 2px 12px; border-radius: 12px; font-size: 9px; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.2s; }
+    .auction-refresh-btn:hover { background: rgba(0,206,209,0.25); transform: scale(1.02); }
+    .auction-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #00ced1; }
+    .auction-item .auction-info { flex: 1; }
+    .auction-item .auction-name { font-weight: 600; font-size: 13px; }
+    .auction-item .auction-details { font-size: 11px; color: #9ca3af; }
+    .auction-item .auction-time { font-family: 'Orbitron', sans-serif; color: #7CFC00; font-size: 12px; }
+    .auction-item .auction-status { font-size: 10px; padding: 2px 10px; border-radius: 12px; }
+    .auction-item .auction-status.upcoming { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .auction-item .auction-status.live { background: rgba(124,252,0,0.2); color: #7CFC00; animation: pulse 2s infinite; }
+    .auction-item .auction-status.closed { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+
+    .products-section { margin-top: 30px; }
+    .products-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .product-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 16px; padding: 16px; transition: all 0.3s; display: flex; flex-direction: column; }
+    .product-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .product-card .product-image { width: 100%; height: 120px; border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.3); margin-bottom: 10px; border: 1px solid rgba(0,206,209,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .product-card .product-image img { height: 100%; width: auto; object-fit: cover; }
+    .product-card .product-image .no-image { color: #9ca3af; font-size: 12px; }
+    .product-card .product-name { font-weight: 700; font-size: 15px; }
+    .product-card .product-variety { color: #9ca3af; font-size: 12px; }
+    .product-card .product-specs { font-size: 11px; color: #9ca3af; margin: 6px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+    .product-card .product-specs .tag { background: rgba(0,206,209,0.08); padding: 1px 8px; border-radius: 10px; border: 1px solid rgba(0,206,209,0.1); }
+    .product-card .product-packaging { font-size: 11px; color: #7CFC00; margin: 4px 0; }
+    .product-card .product-actions { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+    .product-card .product-actions button { padding: 4px 10px; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10px; cursor: pointer; transition: all 0.2s; }
+    .product-card .product-actions .post-auction-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .product-card .product-actions .post-auction-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+    .product-card .product-actions .post-auction-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .product-card .product-actions .edit-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
+    .product-card .product-actions .edit-btn:hover { background: rgba(255,217,102,0.3); }
+    .product-card .product-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
+    .product-card .product-actions .delete-btn:hover { background: rgba(255,59,59,0.25); }
+    .add-product-card { background: rgba(15, 32, 64, 0.4); border: 2px dashed rgba(0, 206, 209, 0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 240px; cursor: pointer; transition: all 0.3s; }
+    .add-product-card:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); transform: translateY(-4px); }
+    .add-product-icon { font-size: 28px; color: #00ced1; margin-bottom: 6px; }
+    .add-product-text { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #9ca3af; }
+
+    .archive-section { margin-top: 30px; }
+    .archive-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #FFD966; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; cursor: pointer; padding: 12px 16px; background: rgba(255, 217, 102, 0.05); border-radius: 12px; border: 1px solid rgba(255, 217, 102, 0.2); transition: all 0.3s; }
+    .archive-header:hover { background: rgba(255, 217, 102, 0.1); border-color: #FFD966; }
+    .archive-header .count-badge { background: rgba(255, 217, 102, 0.2); padding: 2px 12px; border-radius: 20px; font-size: 12px; color: #FFD966; }
+    .archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 16px 0; }
+    .archive-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.7), rgba(2, 6, 23, 0.9)); border: 1px solid rgba(255, 217, 102, 0.2); border-radius: 16px; padding: 16px; transition: all 0.3s; position: relative; }
+    .archive-card:hover { transform: translateY(-3px); border-color: #FFD966; box-shadow: 0 10px 30px rgba(255, 217, 102, 0.1); }
+    .archive-card .archive-status { position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 2px 12px; border-radius: 12px; background: rgba(255, 217, 102, 0.15); color: #FFD966; }
+    .archive-card .archive-date { font-size: 11px; color: #9ca3af; margin-bottom: 8px; }
+    .archive-card .archive-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .archive-card .archive-details { font-size: 12px; color: #9ca3af; margin: 6px 0; }
+    .archive-card .archive-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+    .archive-card .metric-item { text-align: center; }
+    .archive-card .metric-value { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #00ced1; }
+    .archive-card .metric-label { font-size: 8px; color: #9ca3af; text-transform: uppercase; }
+    .simulate-btn { background: linear-gradient(135deg, #FFD966, #FFB347); border: none; padding: 6px 16px; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; color: #000; cursor: pointer; transition: all 0.3s; }
+    .simulate-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 217, 102, 0.3); }
+    .archive-card .simulation-result { margin-top: 8px; padding: 8px; background: rgba(124, 252, 0, 0.05); border-radius: 6px; border-left: 3px solid #7CFC00; font-size: 11px; color: #7CFC00; }
+    .archive-collapse { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .archive-collapse.open { max-height: 5000px; }
+    .archive-header .toggle-icon { transition: transform 0.3s; }
+    .archive-header.open .toggle-icon { transform: rotate(180deg); }
+
+    .orders-section { margin-top: 30px; }
+    .orders-header { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #00ced1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .order-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; transition: all 0.3s; }
+    .order-card:hover { transform: translateY(-4px); border-color: #00ced1; }
+    .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .order-id { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; color: #00ced1; }
+    .order-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+    .order-status.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .order-status.processing { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .order-status.shipped { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .order-status.completed { background: rgba(0,102,255,0.2); color: #0066ff; }
+    .order-status.cancelled { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .order-details { font-size: 13px; color: #9ca3af; }
+    .order-details div { margin-bottom: 4px; }
+    .order-details .label { color: #666; }
+    .order-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .order-actions button { padding: 6px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .order-actions .process-btn { background: rgba(0,206,209,0.2); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
+    .order-actions .process-btn:hover { background: rgba(0,206,209,0.3); }
+    .order-actions .ship-btn { background: rgba(124,252,0,0.2); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+    .order-actions .ship-btn:hover { background: rgba(124,252,0,0.3); }
+    .order-actions .view-btn { background: rgba(0,102,255,0.2); color: #0066ff; border: 1px solid rgba(0,102,255,0.3); }
+    .order-actions .view-btn:hover { background: rgba(0,102,255,0.3); }
+    .order-actions .complete-btn { background: rgba(124,252,0,0.2); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+    .order-actions .complete-btn:hover { background: rgba(124,252,0,0.3); }
+
+    .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 20px 0; }
+    .stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
+    .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: #00ced1; }
+    .stat-label { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-content.wide { max-width: 800px; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; }
+    .modal-close:hover { color: #00ced1; }
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
+    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 20px rgba(0,206,209,0.05); }
+    .modal-field .hint { font-size: 10px; color: #9ca3af; margin-top: 4px; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; }
+    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .cancel-btn:hover { background: rgba(255,255,255,0.2); }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; max-width: 90vw; text-align: center; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 32px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
+    .tar-batch-btn { background: linear-gradient(135deg, #7CFC00, #00ced1); border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; transition: 0.2s; }
+    .tar-batch-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(124,252,0,0.3); }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); display: inline-block; transition: all 0.3s; cursor: pointer; }
+    .dot.active { background: #7CFC00; box-shadow: 0 0 10px rgba(124,252,0,0.5); transform: scale(1.2); }
+    .dot.done { background: #00ced1; }
+
+    .hidden-input {
+      position: absolute;
+      opacity: 0;
+      width: 0.1px;
+      height: 0.1px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .highlight { color: #7CFC00; font-weight: 700; }
+    .info { color: #00ced1; font-weight: 600; }
+
+    .receivable-detail-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      background: rgba(2,6,23,0.98);
+      border: 2px solid #00ced1;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+      color: #e5e7eb;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .receivable-detail-modal button {
+      margin-top: 16px;
+      padding: 8px 24px;
+      background: rgba(0,206,209,0.2);
+      border: 1px solid rgba(0,206,209,0.3);
+      border-radius: 8px;
+      color: #00ced1;
+      cursor: pointer;
+      font-family: inherit;
+      width: 100%;
+    }
+    .receivable-detail-modal button:hover {
+      background: rgba(0,206,209,0.3);
+    }
+
+    .diagnostic-panel {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 9998;
+      background: rgba(2,6,23,0.95);
+      border: 1px solid rgba(0,206,209,0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      max-width: 320px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #7CFC00;
+      display: none;
+      pointer-events: auto;
+    }
+    .diagnostic-panel .diag-title {
+      color: #00ced1;
+      font-weight: 700;
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+    .diagnostic-panel .diag-line {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .diagnostic-panel .diag-line .label { color: #9ca3af; }
+    .diagnostic-panel .diag-line .value { color: #7CFC00; }
+    .diagnostic-panel .diag-line .value.error { color: #ff3b3b; }
+    .diagnostic-panel .diag-line .value.warning { color: #FFD966; }
+    .diag-toggle {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 9999;
+      background: rgba(0,206,209,0.15);
+      border: 1px solid rgba(0,206,209,0.3);
+      border-radius: 30px;
+      padding: 4px 12px;
+      color: #00ced1;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .diag-toggle:hover {
+      background: rgba(0,206,209,0.25);
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 1000px) { .company-profile-layout { grid-template-columns: 1fr; } .company-fields { grid-template-columns: 1fr; } .dashboard-grid { grid-template-columns: repeat(2, 1fr); } .tar-grid { grid-template-columns: 1fr; } .tar-metrics { grid-template-columns: 1fr 1fr; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+    @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: stretch; } .wallet-section { flex-wrap: wrap; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .tar-metrics { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr; } }
+  </style>
+  <base target="_self">
+<base target="_blank">
+</head>
+<body>
+
+<noscript>
+  <div style="background:#ff3b3b; color:white; padding:20px; text-align:center; position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+    <h2>⚠️ JavaScript Required</h2>
+    <p>TradeAux requires JavaScript to function. Please enable JavaScript in your browser.</p>
+  </div>
+</noscript>
+
+<input type="file" id="logoFileInput" class="hidden-input" accept=".jpg,.png,.jpeg,.webp,.gif">
+<input type="file" id="photoFileInput" class="hidden-input" accept=".jpg,.png,.jpeg,.webp,.gif" multiple>
+<input type="file" id="incorpFileInput" class="hidden-input" accept=".pdf,.jpg,.png,.gif">
+<input type="file" id="licenseFileInput" class="hidden-input" accept=".pdf,.jpg,.png,.gif">
+<input type="file" id="taxFileInput" class="hidden-input" accept=".pdf,.jpg,.png,.gif">
+
+<div class="bg-waves" aria-hidden="true">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="gem-logo-corner" aria-hidden="true" role="presentation">
+  <div class="gem-text">
+    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  </div>
+  <div class="light-source"></div>
+  <div class="sparkle sparkle-1"></div>
+  <div class="sparkle sparkle-2"></div>
+  <div class="sparkle sparkle-3"></div>
+  <div class="sparkle sparkle-4"></div>
+  <div class="sparkle sparkle-5"></div>
+  <div class="sparkle sparkle-6"></div>
+  <div class="sparkle sparkle-7"></div>
+  <div class="sparkle sparkle-8"></div>
+  <div class="sparkle sparkle-9"></div>
+  <div class="sparkle sparkle-10"></div>
+  <div class="depth-shadow"></div>
+</div>
+
+<main class="container" role="main">
+  <header class="header">
+    <nav class="nav" aria-label="Main navigation">
+      <div class="wallet-section">
+        <div class="wallet-balance">
+          <span class="wallet-label">💰 BALANCE</span>
+          <span class="wallet-amount" id="walletAmount">$0.00</span>
+          <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
+        </div>
+        <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
+        <button class="btn-neon" style="padding:4px 12px; font-size:10px; margin-left:8px;" id="tourBtn" type="button">🎯 Tour</button>
+        <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px; margin-left:8px;" type="button">☁️ Sync</button>
+        <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; margin-left:8px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        <button class="btn-neon" id="exportBtn" style="padding:4px 12px; font-size:10px; margin-left:8px; border-color:#FFD966; color:#FFD966;" type="button">📤 Export</button>
+        <button class="btn-neon" id="importBtn" style="padding:4px 12px; font-size:10px; margin-left:8px; border-color:#FFD966; color:#FFD966;" type="button">📥 Import</button>
+      </div>
+      <a href="javascript:void(0)" id="marketplaceNav">Marketplace</a>
+      <a href="javascript:void(0)" id="analyticsNav">Analytics</a>
+      <a href="#" class="sign-out" id="authBtn">🚪 Sign Out</a>
+    </nav>
+  </header>
+
+  <div class="banner-container">
+    <div class="top-trader" id="topTraderBanner">🤖 TAR ADVISOR ACTIVE • <span id="bannerConversions">10,000</span> conversions available • $25 each</div>
+  </div>
+
+  <div class="dashboard-grid" id="statsGrid">
+    <div class="stat-card" data-tour="1">
+      <div class="stat-icon">📦</div>
+      <div class="stat-number" id="totalProducts">0</div>
+      <div class="stat-label">Total Products</div>
+    </div>
+    <div class="stat-card" data-tour="2">
+      <div class="stat-icon">🛒</div>
+      <div class="stat-number" id="totalOrders">0</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card" data-tour="3">
+      <div class="stat-icon">💵</div>
+      <div class="stat-number" id="totalRevenue">$0</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card" data-tour="4">
+      <div class="stat-icon">🔄</div>
+      <div class="stat-number" id="totalConversions">0</div>
+      <div class="stat-label">Conversions</div>
+    </div>
+  </div>
+
+  <div class="company-section" id="companySection" data-tour="6">
+    <div class="company-header">
+      <span>🏢 COMPANY PROFILE</span>
+      <button class="btn-neon" style="padding:6px 20px; font-size:12px; width:auto;" id="editCompanyBtn" type="button">✏️ Edit Profile</button>
+    </div>
+    <div class="company-card">
+      <div class="company-profile-layout">
+        <div class="company-logo-section">
+          <div class="company-logo-upload" id="companyLogoUpload">
+            <div class="placeholder" id="logoPlaceholder">
+              <div class="placeholder-icon">🏢</div>
+              <span>Upload Logo</span>
+            </div>
+            <img id="companyLogoPreview" style="display:none;" alt="Company Logo">
+          </div>
+          <div class="company-verification-badge pending" id="verificationBadge">⏳ Pending Verification</div>
+          <div style="font-size:11px; color:#9ca3af; margin-top:8px;">
+            <span id="companyStatusText">Complete your company profile to start selling</span>
+          </div>
+        </div>
+        <div class="company-info-section">
+          <div class="company-fields">
+            <div class="company-field"><span class="field-label">Company Name</span><div class="field-value" id="companyNameDisplay">Not set</div></div>
+            <div class="company-field"><span class="field-label">Registration Number</span><div class="field-value" id="companyRegDisplay">Not set</div></div>
+            <div class="company-field"><span class="field-label">Country of Incorporation</span><div class="field-value" id="companyCountryDisplay">Not set</div></div>
+            <div class="company-field"><span class="field-label">Tax Registration Number</span><div class="field-value" id="companyTaxDisplay">Not set</div></div>
+            <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Business Address</span><div class="field-value" id="companyAddressDisplay">Not set</div></div>
+            <div class="company-field"><span class="field-label">Contact Email</span><div class="field-value" id="companyEmailDisplay">Not set</div></div>
+            <div class="company-field"><span class="field-label">Contact Phone</span><div class="field-value" id="companyPhoneDisplay">Not set</div></div>
+            <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Website</span><div class="field-value" id="companyWebsiteDisplay">Not set</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="company-documents">
+        <div class="company-documents-title">📄 Legal Documents</div>
+        <div class="documents-grid" id="documentsGrid">
+          <div class="document-item">
+            <div class="doc-icon">📜</div>
+            <div class="doc-info">
+              <div class="doc-name">Certificate of Incorporation</div>
+              <div class="doc-status" id="incorpDocStatus">Not uploaded</div>
+            </div>
+            <div class="doc-upload" id="incorpUploadBtn">📤 Upload</div>
+          </div>
+          <div class="document-item">
+            <div class="doc-icon">📋</div>
+            <div class="doc-info">
+              <div class="doc-name">Business License</div>
+              <div class="doc-status" id="licenseDocStatus">Not uploaded</div>
+            </div>
+            <div class="doc-upload" id="licenseUploadBtn">📤 Upload</div>
+          </div>
+          <div class="document-item">
+            <div class="doc-icon">📑</div>
+            <div class="doc-info">
+              <div class="doc-name">Tax Registration</div>
+              <div class="doc-status" id="taxDocStatus">Not uploaded</div>
+            </div>
+            <div class="doc-upload" id="taxUploadBtn">📤 Upload</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="company-photos">
+        <div class="company-photos-title">🖼️ Company Photos</div>
+        <div class="photos-grid" id="photosGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="products-section" id="productsSection" data-tour="8">
+    <div class="products-header">
+      <span>📦 YOUR PRODUCTS</span>
+      <button class="deposit-btn" style="padding:6px 20px; font-size:12px; width:auto;" id="addProductBtn" type="button">+ Add Product</button>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+
+  <div class="section-card" id="certSection" data-tour="7">
+    <div class="section-header">📜 CERTIFICATIONS <span class="badge">More certs = Better ranking</span></div>
+    <div style="color:#ff6b6b; font-size:12px; margin-bottom:12px;">
+      ⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No selling without it!
+    </div>
+    <div class="cert-block-grid" id="certGrid"></div>
+    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;">
+      <select id="certDropdown" class="block-select" style="flex:1; min-width:160px;">
+        <option value="">Add Certificate Type...</option>
+        <option value="export">Export License</option>
+        <option value="organic">Organic</option>
+        <option value="fairtrade">Fair Trade</option>
+        <option value="kosher">Kosher</option>
+        <option value="halal">Halal</option>
+        <option value="brcgs">BRCGS</option>
+        <option value="origin">Origin</option>
+        <option value="IFS Food">IFS Food</option>
+        <option value="SQF">SQF</option>
+        <option value="FSSC 22000">FSSC 22000</option>
+        <option value="HACCP">HACCP</option>
+        <option value="GMP">GMP</option>
+        <option value="USDA">USDA</option>
+        <option value="EU">EU</option>
+        <option value="Canada Inspection Agency">CIA</option>
+        <option value="JAS">JAS</option>
+        <option value="Soil Association">Soil Association</option>
+        <option value="ECO Cert">ECO Cert</option>
+        <option value="Rainforest Alliance">Rainforest Alliance</option>
+        <option value="other">Other</option>
+      </select>
+      <button class="btn-neon" id="addCertBtn" style="padding:10px 20px;" type="button">+ ADD TYPE</button>
+    </div>
+  </div>
+
+  <div class="tar-section" id="tarSection" data-tour="5">
+    <div class="tar-header">
+      <span>🤖 TAR - TRADE ADVISOR ROBOT</span>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="tar-batch-btn" id="tarAutoConvertBtn" type="button">⚡ Auto-Convert Ready</button>
+        <button class="btn-neon" style="padding:4px 16px; font-size:11px;" id="tarAdviceBtn" type="button">💡 Get Advice</button>
+        <button class="btn-neon" style="padding:4px 16px; font-size:11px;" id="tarSettingsBtn" type="button">⚙️ Settings</button>
+        <button class="btn-neon" style="padding:4px 16px; font-size:11px; border-color:rgba(255,217,102,0.3); color:#FFD966;" id="archiveToggleBtn" type="button">📚 Archive</button>
+      </div>
+    </div>
+    <div class="tar-grid">
+      <div class="tar-card">
+        <div class="tar-status-bar">
+          <div class="tar-status-dot"></div>
+          <span class="tar-status-text" id="tarStatusText">🟢 Active • Monitoring your auction pipeline</span>
+        </div>
+        <div class="tar-metrics">
+          <div class="tar-metric"><div class="tar-metric-value" id="tarReadyCount">0</div><div class="tar-metric-label">Ready to Convert</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarPendingCount">0</div><div class="tar-metric-label">Pending Review</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarConvertedCount">0</div><div class="tar-metric-label">Converted</div></div>
+          <div class="tar-metric"><div class="tar-metric-value" id="tarFeesEarned">$0</div><div class="tar-metric-label">Fees Earned</div></div>
+        </div>
+        <div id="tarReceivablesList"><div style="color:#9ca3af; text-align:center; padding:20px; font-size:12px;">Loading your auction data...</div></div>
+      </div>
+      <div class="tar-card" id="tarAdvisoryCard">
+        <h4 style="font-family:'Orbitron',sans-serif; font-size:14px; color:#FFD966; margin-bottom:12px;">💡 TAR ADVISORY</h4>
+        <div class="tar-advisory" id="tarAdvisory">
+          <div class="tar-advisory-title">📊 AUCTION INSIGHT</div>
+          <div class="tar-advisory-text" id="tarAdvisoryText">Loading auction intelligence...</div>
+        </div>
+        <div style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; border-left:3px solid #00ced1;">
+          <div style="font-size:11px; color:#9ca3af; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-weight:600; color:#00ced1;">🌦️ WEATHER • KONTORS</span>
+            <span>Santos: ☀️ 28°C</span>
+            <span>Rotterdam: 🌧️ 14°C</span>
+            <span>Singapore: ⛅ 31°C</span>
+            <span>Dubai: ☀️ 38°C</span>
+          </div>
+        </div>
+        <div class="auction-schedule" id="auctionSchedule">
+          <div class="auction-schedule-header"><span class="title">📅 YOUR UPCOMING AUCTIONS</span><button class="auction-refresh-btn" id="auctionRefreshBtn" type="button">🔄 Refresh</button></div>
+          <div id="auctionList"><div style="color:#9ca3af; text-align:center; padding:10px; font-size:11px;">No auctions scheduled yet. Create one from your products!</div></div>
+        </div>
+        <div style="margin-top:12px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px;">
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:#9ca3af; flex-wrap:wrap;">
+            <span>Today's Conversions: <span id="todayConversions" style="color:#7CFC00; font-family:'Orbitron',sans-serif;">0</span></span>
+            <span>Fees Earned: <span id="todayFees" style="color:#00ced1; font-family:'Orbitron',sans-serif;">$0.00</span></span>
+            <span>Remaining: <span id="remainingCapacity" style="color:#FFD966; font-family:'Orbitron',sans-serif;">10,000</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="archive-section" id="archiveSection">
+    <div class="archive-header" id="archiveHeader">
+      <span>📚 AUCTION ARCHIVE <span class="count-badge" id="archiveCount">0</span></span>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="archive-collapse" id="archiveCollapse">
+      <div class="archive-grid" id="archiveGrid">
+        <div style="color:#9ca3af; text-align:center; padding:20px; grid-column:1/-1;">No archived auctions yet. Completed auctions will appear here for simulation and analysis.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="orders-section" id="ordersSection" data-tour="9">
+    <div class="orders-header">
+      <span>📋 ORDERS</span>
+      <span style="font-size:12px; color:#9ca3af; font-family:'Inter', sans-serif;">Manage incoming orders</span>
+    </div>
+    <div class="orders-grid" id="ordersGrid"></div>
+  </div>
+
+  <footer class="footer">
+    <p>TRADEAUX © 2026 • Global Commodity Exchange • TAR System v10.0</p>
+  </footer>
+
+<div class="modal" id="diagModal" role="dialog" aria-labelledby="diagModalTitle">
+  <div class="modal-content" style="max-width:500px;">
+    <button class="modal-close" id="closeDiagModal" type="button" aria-label="Close diagnostics">&times;</button>
+    <div class="modal-header"><h2 id="diagModalTitle">🔍 Storage Diagnostics</h2></div>
+    <div id="diagBody" style="font-family:monospace; font-size:12px; line-height:1.6; white-space:pre-wrap; color:#7CFC00;"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="cancel-btn" id="closeDiagBtn" type="button">Close</button>
+      <button class="create-btn" id="runDiagBtn" type="button">🔄 Run Check</button>
+    </div>
+  </div>
+</div>
+</main>
+
+<div class="tour-overlay" id="tourOverlay" style="display:none; position:fixed; inset:0; z-index:2000; pointer-events:none;">
+  <div class="tour-highlight" id="tourHighlight" style="position:absolute; border:3px solid #7CFC00; border-radius:16px; box-shadow:0 0 50px rgba(124,252,0,0.3); pointer-events:none; z-index:2001;"></div>
+  <div class="tour-tooltip" id="tourTooltip" style="position:absolute; background:rgba(2,6,23,0.95); border:1px solid #7CFC00; border-radius:12px; padding:16px 20px; max-width:320px; color:#e5e7eb; font-size:13px; line-height:1.6; pointer-events:auto; box-shadow:0 20px 60px rgba(0,0,0,0.8); z-index:2002; max-height:90vh; overflow-y:auto;">
+    <h4 id="tourTitle" style="font-family:'Orbitron',sans-serif; color:#7CFC00; margin-bottom:6px; font-size:14px;">Welcome</h4>
+    <p id="tourDescription">This is your command center.</p>
+    <button class="tour-btn" id="tourNextBtn" style="margin-top:10px; padding:6px 20px; background:linear-gradient(135deg, #7CFC00, #00ced1); border:none; border-radius:20px; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:#000; cursor:pointer; pointer-events:auto;" type="button">Next →</button>
+    <button class="tour-btn" id="tourCloseBtn" style="margin-top:6px; padding:4px 16px; background:rgba(255,59,59,0.2); border:1px solid rgba(255,59,59,0.3); border-radius:20px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:600; color:#ff3b3b; cursor:pointer; pointer-events:auto; margin-left:8px;" type="button">✕ Close</button>
+  </div>
+  <div class="tour-progress" id="tourProgress" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); z-index:2003; background:rgba(2,6,23,0.9); border:1px solid rgba(0,206,209,0.3); border-radius:30px; padding:8px 20px; display:flex; align-items:center; gap:12px; pointer-events:auto;">
+  </div>
+</div>
+
+<div class="modal" id="productModal" role="dialog" aria-labelledby="productModalTitle">
+  <div class="modal-content wide">
+    <button class="modal-close" id="closeProductModal" type="button" aria-label="Close product modal">&times;</button>
+    <div class="modal-header"><h2 id="productModalTitle">📦 Add/Edit Product</h2></div>
+    <form id="productForm">
+    <div id="productModalBody">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="modal-field"><label for="productNameInput">Product Name *</label><input type="text" id="productNameInput" placeholder="e.g., Arabica Coffee" required></div>
+        <div class="modal-field"><label for="productVarietyInput">Variety</label><input type="text" id="productVarietyInput" placeholder="e.g., Specialty Grade"></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="modal-field"><label for="productQuantityInput">Quantity (MT) *</label><input type="number" id="productQuantityInput" placeholder="e.g., 5000" min="1" step="0.01" required></div>
+        <div class="modal-field"><label for="productGradeInput">Grade</label><select id="productGradeInput"><option value="Grade A">Grade A (Premium)</option><option value="Grade B">Grade B (Standard)</option><option value="Grade C">Grade C (Good)</option><option value="Organic">Organic Certified</option><option value="Fair Trade">Fair Trade Certified</option></select></div>
+      </div>
+      <div class="modal-field"><label for="productOriginInput">Origin</label><input type="text" id="productOriginInput" placeholder="e.g., Santos, Brazil"></div>
+
+      <div class="modal-field">
+        <label for="productImagesInput">Product Images</label>
+        <input type="file" id="productImagesInput" accept=".jpg,.png,.jpeg,.webp,.gif" multiple>
+        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Upload up to 5 images</div>
+        <div id="productImagePreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
+        <div id="imageReplaceWarning" style="display:none; font-size:10px; color:#FFD966; margin-top:4px;">⚠️ New images will be added on save</div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label>📦 Packaging</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div>
+            <label style="font-size:10px; color:#9ca3af;">Package Type</label>
+            <select id="productPackageType">
+              <option value="">Select...</option>
+              <optgroup label="Bags">
+                <option value="Paper Bag">Paper Bag</option>
+                <option value="Plastic Bag">Plastic Bag</option>
+                <option value="Jute Bag">Jute Bag</option>
+                <option value="PP Woven Bag">PP Woven Bag</option>
+                <option value="Cotton Bag">Cotton Bag</option>
+                <option value="Burlap Sack">Burlap Sack</option>
+              </optgroup>
+              <optgroup label="Boxes">
+                <option value="Cardboard Box">Cardboard Box</option>
+                <option value="Wooden Crate">Wooden Crate</option>
+                <option value="Plastic Crate">Plastic Crate</option>
+                <option value="Corrugated Box">Corrugated Box</option>
+              </optgroup>
+              <optgroup label="Drums">
+                <option value="Plastic Drum">Plastic Drum</option>
+                <option value="Steel Drum">Steel Drum</option>
+                <option value="Fiber Drum">Fiber Drum</option>
+              </optgroup>
+              <optgroup label="Containers">
+                <option value="Flexitank">Flexitank</option>
+                <option value="IBC Tote">IBC Tote</option>
+                <option value="Bulk Container">Bulk Container</option>
+                <option value="ISO Container">ISO Container</option>
+              </optgroup>
+              <optgroup label="Pallets">
+                <option value="Palletized (Shrink Wrap)">Palletized (Shrink Wrap)</option>
+                <option value="Palletized (Stretch Wrap)">Palletized (Stretch Wrap)</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="Carton">Carton</option>
+                <option value="Sacks">Sacks</option>
+                <option value="Bale">Bale</option>
+                <option value="Can">Can</option>
+                <option value="Tin">Tin</option>
+                <option value="Jar">Jar</option>
+                <option value="Bottle">Bottle</option>
+                <option value="Bulk (Loose)">Bulk (Loose)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px; color:#9ca3af;">Package Size</label>
+            <select id="productPackageSize">
+              <option value="">Select...</option>
+              <optgroup label="Weight (kg)">
+                <option value="1kg">1kg</option><option value="5kg">5kg</option><option value="10kg">10kg</option>
+                <option value="15kg">15kg</option><option value="20kg">20kg</option><option value="25kg">25kg</option>
+                <option value="30kg">30kg</option><option value="40kg">40kg</option><option value="50kg">50kg</option>
+                <option value="60kg">60kg</option><option value="80kg">80kg</option><option value="100kg">100kg</option>
+                <option value="200kg">200kg</option><option value="500kg">500kg</option><option value="1000kg">1000kg</option>
+              </optgroup>
+              <optgroup label="Weight (lbs)">
+                <option value="2lbs">2lbs</option><option value="5lbs">5lbs</option><option value="10lbs">10lbs</option>
+                <option value="20lbs">20lbs</option><option value="25lbs">25lbs</option><option value="50lbs">50lbs</option>
+                <option value="100lbs">100lbs</option><option value="200lbs">200lbs</option><option value="500lbs">500lbs</option>
+                <option value="1000lbs">1000lbs</option>
+              </optgroup>
+              <optgroup label="Volume (litres)">
+                <option value="1L">1L</option><option value="5L">5L</option><option value="10L">10L</option>
+                <option value="20L">20L</option><option value="25L">25L</option><option value="50L">50L</option>
+                <option value="100L">100L</option><option value="200L">200L</option><option value="500L">500L</option>
+                <option value="1000L">1000L</option>
+              </optgroup>
+              <optgroup label="Volume (gallons)">
+                <option value="1gal">1gal</option><option value="5gal">5gal</option><option value="10gal">10gal</option>
+                <option value="20gal">20gal</option><option value="25gal">25gal</option><option value="50gal">50gal</option>
+                <option value="100gal">100gal</option><option value="200gal">200gal</option><option value="500gal">500gal</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div id="packagingPreview" class="packaging-preview" style="margin-top:8px;">Select packaging above</div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label>🔬 Product Specifications</label>
+        
+        <div class="spec-group">
+          <div class="spec-label"><span>💧 Moisture Content</span><span>0-20%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productMoisture" min="0" max="20" step="0.1" value="12" aria-label="Moisture content percentage">
+            <span class="slider-value" id="productMoistureVal">12.0%</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>📏 Screen Size</span><span>10-20</span></div>
+          <div class="slider-row">
+            <input type="range" id="productScreenSize" min="10" max="20" step="0.5" value="15" aria-label="Screen size">
+            <span class="slider-value" id="productScreenSizeVal">15.0</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>🔬 Defects</span><span>0-10%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productDefects" min="0" max="10" step="0.1" value="2" aria-label="Defects percentage">
+            <span class="slider-value" id="productDefectsVal">2.0%</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>🌾 Foreign Matter</span><span>0-5%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productForeignMatter" min="0" max="5" step="0.1" value="0.5" aria-label="Foreign matter percentage">
+            <span class="slider-value" id="productForeignMatterVal">0.5%</span>
+          </div>
+        </div>
+
+        <div class="spec-group">
+          <div class="spec-label"><span>🧪 Protein Content (optional)</span><span>0-30%</span></div>
+          <div class="slider-row">
+            <input type="range" id="productProtein" min="0" max="30" step="0.1" value="0" aria-label="Protein content percentage">
+            <span class="slider-value" id="productProteinVal">0.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" id="advancedSpecsToggleBtn">
+          <label style="margin:0; cursor:pointer;">🔬 Advanced Specs <span style="font-size:10px; color:#9ca3af;">(optional)</span></label>
+          <span id="advancedSpecsToggle" style="color:#00ced1;">▼ Expand</span>
+        </div>
+        <div id="advancedSpecsContainer" style="display:none; margin-top:12px;">
+          <div class="spec-group" style="border-left-color:#FFD966;">
+            <div class="spec-label"><span>🧫 Aflatoxin</span><span>0-20 ppb</span></div>
+            <div class="slider-row">
+              <input type="range" id="productAflatoxin" min="0" max="20" step="0.5" value="0" aria-label="Aflatoxin level">
+              <span class="slider-value" id="productAflatoxinVal">0 ppb</span>
+            </div>
+            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
+          </div>
+
+          <div class="spec-group" style="border-left-color:#FFD966;">
+            <div class="spec-label"><span>🫒 Oil Content</span><span>0-60%</span></div>
+            <div class="slider-row">
+              <input type="range" id="productOilContent" min="0" max="60" step="0.5" value="0" aria-label="Oil content percentage">
+              <span class="slider-value" id="productOilContentVal">0.0%</span>
+            </div>
+            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
+          </div>
+
+          <div class="spec-group" style="border-left-color:#FFD966;">
+            <div class="spec-label"><span>🎨 Color Grade</span><span>0-100</span></div>
+            <div class="slider-row">
+              <input type="range" id="productColorGrade" min="0" max="100" step="1" value="0" aria-label="Color grade">
+              <span class="slider-value" id="productColorGradeVal">0</span>
+            </div>
+            <div style="font-size:9px; color:#666; margin-top:2px;">0 = N/A</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label>💰 Ideal Price (for knapsack optimization)</label>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:12px; color:#9ca3af;">$0.10</span>
+          <input type="range" id="productIdealPrice" min="0.10" max="100" step="0.05" value="4.25" style="flex:1;" aria-label="Ideal price per MT">
+          <span style="font-size:12px; color:#9ca3af;">$100.00</span>
+        </div>
+        <div style="text-align:center; font-family:'Orbitron',sans-serif; font-size:20px; color:#7CFC00; margin-top:4px;" id="productIdealPriceVal">$4.25 / MT</div>
+        <div style="font-size:10px; color:#9ca3af; text-align:center;">💡 This price guides the knapsack algorithm — not shown to buyers</div>
+      </div>
+
+      <div class="modal-field" style="border-top:1px solid rgba(0,206,209,0.15); padding-top:16px; margin-top:8px;">
+        <label for="productScheduledStart">📅 Auction Scheduled Start (prefill)</label>
+        <input type="datetime-local" id="productScheduledStart" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.5); border:1px solid rgba(0,206,209,0.25); border-radius:10px; color:#e5e7eb; font-family:'Inter', sans-serif; font-size:14px;">
+        <div style="font-size:10px; color:#9ca3af; margin-top:4px;">This pre-fills the auction date when you post this product.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelProductBtn" type="button">Cancel</button>
+      <button class="create-btn" id="saveProductBtn" type="button">💾 Save Product</button>
+      <button class="create-btn" id="saveAndPostBtn" style="background: linear-gradient(135deg, #7CFC00, #00ced1);" type="button">📅 Save &amp; Post Auction</button>
+    </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="auctionModal" role="dialog" aria-labelledby="auctionModalTitle">
+  <div class="modal-content" style="max-width:550px;">
+    <button class="modal-close" id="closeAuctionModal" type="button" aria-label="Close auction modal">&times;</button>
+    <div class="modal-header"><h2 id="auctionModalTitle">📅 Post Auction</h2></div>
+    <form id="auctionForm">
+    <div id="auctionModalBody">
+      <div class="modal-field">
+        <label>Product</label>
+        <div id="auctionProductDisplay" style="padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:14px; color:#00ced1;"></div>
+      </div>
+      <div class="modal-field">
+        <label for="auctionQty">Quantity to Auction (MT) *</label>
+        <input type="number" id="auctionQty" placeholder="Enter quantity" min="1" step="0.01" required>
+        <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Available: <span id="auctionAvailableQty">0</span> MT</div>
+      </div>
+      <div class="modal-field">
+        <label for="auctionDateTime">Auction Date &amp; Time *</label>
+        <input type="datetime-local" id="auctionDateTime" required>
+      </div>
+      <div class="modal-field">
+        <label for="auctionDuration">Auction Duration</label>
+        <select id="auctionDuration"><option value="1">1 Hour</option><option value="2">2 Hours</option><option value="4">4 Hours</option><option value="8">8 Hours</option><option value="24" selected>24 Hours</option><option value="48">48 Hours</option><option value="72">72 Hours</option></select>
+      </div>
+      <div class="modal-field">
+        <label for="auctionLocation">Location (Kontor) *</label>
+        <select id="auctionLocation"><option value="Santos">Santos, Brazil</option><option value="Mombasa">Mombasa, Kenya</option><option value="Jakarta">Jakarta, Indonesia</option><option value="Ho Chi Minh City">Ho Chi Minh City, Vietnam</option><option value="Colombo">Colombo, Sri Lanka</option><option value="Guayaquil">Guayaquil, Ecuador</option><option value="Abidjan">Abidjan, Ivory Coast</option><option value="Lagos">Lagos, Nigeria</option></select>
+      </div>
+      <div class="modal-field">
+        <label for="auctionNotes">Brief Notes</label>
+        <textarea id="auctionNotes" rows="3" placeholder="Quality, packaging, inspection, shipping terms..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelAuctionBtn" type="button">Cancel</button>
+      <button class="create-btn" id="submitAuctionBtn" type="button">📤 Post Auction</button>
+    </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="companyModal" role="dialog" aria-labelledby="companyModalTitle">
+  <div class="modal-content">
+    <button class="modal-close" id="closeCompanyModal" type="button" aria-label="Close company modal">&times;</button>
+    <div class="modal-header"><h2 id="companyModalTitle">🏢 Edit Company Profile</h2></div>
+    <form id="companyForm">
+    <div class="modal-field"><label for="editCompanyName">Company Name</label><input type="text" id="editCompanyName"></div>
+    <div class="modal-field"><label for="editCompanyReg">Registration Number</label><input type="text" id="editCompanyReg"></div>
+    <div class="modal-field"><label for="editCompanyCountry">Country</label><input type="text" id="editCompanyCountry"></div>
+    <div class="modal-field"><label for="editCompanyTax">Tax Registration Number</label><input type="text" id="editCompanyTax"></div>
+    <div class="modal-field"><label for="editCompanyAddress">Business Address</label><textarea id="editCompanyAddress" rows="2"></textarea></div>
+    <div class="modal-field"><label for="editCompanyEmail">Contact Email</label><input type="email" id="editCompanyEmail"></div>
+    <div class="modal-field"><label for="editCompanyPhone">Contact Phone</label><input type="tel" id="editCompanyPhone"></div>
+    <div class="modal-field"><label for="editCompanyWebsite">Website</label><input type="text" id="editCompanyWebsite"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelCompanyBtn" type="button">Cancel</button>
+      <button class="create-btn" id="saveCompanyBtn" type="button">Save Profile</button>
+    </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="orderModal" role="dialog" aria-labelledby="orderModalTitle">
+  <div class="modal-content wide">
+    <button class="modal-close" id="closeOrderModal" type="button" aria-label="Close order modal">&times;</button>
+    <div class="modal-header"><h2 id="orderModalTitle">📋 Order Details</h2></div>
+    <form id="orderForm">
+    <div id="orderModalBody">
+      <div class="company-fields" style="margin-bottom:16px;">
+        <div class="company-field"><span class="field-label">Order ID</span><div class="field-value" id="orderViewId">-</div></div>
+        <div class="company-field"><span class="field-label">Product</span><div class="field-value" id="orderViewProduct">-</div></div>
+        <div class="company-field"><span class="field-label">Quantity</span><div class="field-value" id="orderViewQty">-</div></div>
+        <div class="company-field"><span class="field-label">Total Price</span><div class="field-value" id="orderViewTotal">-</div></div>
+        <div class="company-field"><span class="field-label">Buyer</span><div class="field-value" id="orderViewBuyer">-</div></div>
+        <div class="company-field"><span class="field-label">Status</span><div class="field-value" id="orderViewStatus">-</div></div>
+        <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Shipping Address</span><div class="field-value" id="orderViewAddress">-</div></div>
+        <div class="company-field" style="grid-column:1/-1;"><span class="field-label">Notes</span><div class="field-value" id="orderViewNotes">-</div></div>
+      </div>
+      <div class="modal-field">
+        <label for="orderStatusUpdate">Update Status</label>
+        <select id="orderStatusUpdate">
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="closeOrderModalBtn" type="button">Close</button>
+      <button class="create-btn" id="updateOrderBtn" type="button">Update Status</button>
+    </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<div class="diagnostic-panel" id="diagnosticPanel">
+  <div class="diag-title">🔍 DATA DIAGNOSTIC</div>
+  <div id="diagContent"></div>
+</div>
+<div class="diag-toggle" id="diagToggle">🔍 DIAG</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// STORAGE LAYER - 3 TIERS
+// ============================================================
+const STORAGE = {
+  KEY: 'tradeaux_seller_state',
+  SESSION_KEY: 'tradeaux_seller_state_session',
+  INDEXED_DB_NAME: 'TradeAuxDB',
+  INDEXED_DB_STORE: 'sellerData',
+  INDEXED_DB_VERSION: 1,
+  
+  _db: null,
+  _dbReady: false,
+  _pendingWrites: 0,
+  
+  // ========== LOCALSTORAGE ==========
+  saveLocal: function(data) {
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(data));
+      return true;
+    } catch(e) {
+      console.warn('localStorage save failed:', e);
+      return false;
+    }
+  },
+  
+  loadLocal: function() {
+    try {
+      var raw = localStorage.getItem(this.KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    } catch(e) {
+      console.warn('localStorage load failed:', e);
+      return null;
+    }
+  },
+  
+  // ========== SESSIONSTORAGE MIRROR ==========
+  saveSession: function(data) {
+    try {
+      sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(data));
+      return true;
+    } catch(e) {
+      return false;
+    }
+  },
+  
+  loadSession: function() {
+    try {
+      var raw = sessionStorage.getItem(this.SESSION_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    } catch(e) {
+      return null;
+    }
+  },
+  
+  // ========== INDEXEDDB ==========
+  openDB: function() {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      if(self._dbReady && self._db) { resolve(self._db); return; }
+      var request = indexedDB.open(self.INDEXED_DB_NAME, self.INDEXED_DB_VERSION);
+      request.onupgradeneeded = function(e) {
+        var db = e.target.result;
+        if(!db.objectStoreNames.contains(self.INDEXED_DB_STORE)) {
+          db.createObjectStore(self.INDEXED_DB_STORE, { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = function(e) {
+        self._db = e.target.result;
+        self._dbReady = true;
+        resolve(self._db);
+      };
+      request.onerror = function(e) {
+        console.warn('IndexedDB open failed:', e);
+        self._dbReady = false;
+        resolve(null);
+      };
+    });
+  },
+  
+  saveIndexedDB: function(data) {
+    var self = this;
+    return this.openDB().then(function(db) {
+      if(!db) return false;
+      return new Promise(function(resolve) {
+        try {
+          var tx = db.transaction([self.INDEXED_DB_STORE], 'readwrite');
+          var store = tx.objectStore(self.INDEXED_DB_STORE);
+          var record = { id: 'master', data: data, updated: Date.now() };
+          var request = store.put(record);
+          request.onsuccess = function() { resolve(true); };
+          request.onerror = function() { resolve(false); };
+          tx.onerror = function() { resolve(false); };
+        } catch(e) {
+          resolve(false);
+        }
+      });
+    });
+  },
+  
+  loadIndexedDB: function() {
+    var self = this;
+    return this.openDB().then(function(db) {
+      if(!db) return null;
+      return new Promise(function(resolve) {
+        try {
+          var tx = db.transaction([self.INDEXED_DB_STORE], 'readonly');
+          var store = tx.objectStore(self.INDEXED_DB_STORE);
+          var request = store.get('master');
+          request.onsuccess = function() {
+            if(request.result && request.result.data) {
+              resolve(request.result.data);
+            } else {
+              resolve(null);
+            }
+          };
+          request.onerror = function() { resolve(null); };
+          tx.onerror = function() { resolve(null); };
+        } catch(e) {
+          resolve(null);
+        }
+      });
+    });
+  },
+  
+  // ========== EXPORT / IMPORT ==========
+  exportData: function() {
+    var data = this.loadLocal();
+    if(!data) return null;
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'tradeaux_backup_' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    return data;
+  },
+  
+  importData: function(file) {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var data = JSON.parse(e.target.result);
+          if(data && typeof data === 'object') {
+            // Validate minimal structure
+            if(data.company || data.products || data.wallet) {
+              resolve(data);
+            } else {
+              reject(new Error('Invalid data structure: missing company, products, or wallet'));
+            }
+          } else {
+            reject(new Error('Invalid JSON data'));
+          }
+        } catch(err) {
+          reject(err);
+        }
+      };
+      reader.onerror = function() { reject(new Error('Failed to read file')); };
+      reader.readAsText(file);
+    });
+  },
+  
+  // ========== SMART LOAD (tries all tiers) ==========
+  loadSmart: function() {
+    var self = this;
+    return new Promise(function(resolve) {
+      // Try localStorage first
+      var local = self.loadLocal();
+      if(local) { resolve({ source: 'localStorage', data: local }); return; }
+      
+      // Try sessionStorage
+      var session = self.loadSession();
+      if(session) { resolve({ source: 'sessionStorage', data: session }); return; }
+      
+      // Try IndexedDB
+      self.loadIndexedDB().then(function(ix) {
+        if(ix) { resolve({ source: 'indexedDB', data: ix }); return; }
+        resolve({ source: null, data: null });
+      }).catch(function() {
+        resolve({ source: null, data: null });
+      });
+    });
+  },
+  
+  // ========== SMART SAVE (saves to all tiers) ==========
+  saveSmart: function(data) {
+    var self = this;
+    var results = { local: false, session: false, indexed: false };
+    
+    // Save to localStorage
+    results.local = self.saveLocal(data);
+    
+    // Save to sessionStorage
+    results.session = self.saveSession(data);
+    
+    // Save to IndexedDB (async)
+    self.saveIndexedDB(data).then(function(success) {
+      results.indexed = success;
+    }).catch(function() { results.indexed = false; });
+    
+    return results;
+  }
+};
+
+// ============================================================
+// DIAGNOSTIC PANEL
+// ============================================================
+function updateDiagnostic() {
+  var content = document.getElementById('diagContent');
+  if(!content) return;
+  
+  var local = localStorage.getItem(STORAGE.KEY);
+  var session = sessionStorage.getItem(STORAGE.SESSION_KEY);
+  var localSize = local ? (local.length / 1024).toFixed(1) : 0;
+  var sessionSize = session ? (session.length / 1024).toFixed(1) : 0;
+  
+  var html = '';
+  html += '<div class="diag-line"><span class="label">localStorage:</span> <span class="value">' + (local ? '✅ ' + localSize + 'KB' : '❌ empty') + '</span></div>';
+  html += '<div class="diag-line"><span class="label">sessionStorage:</span> <span class="value">' + (session ? '✅ ' + sessionSize + 'KB' : '❌ empty') + '</span></div>';
+  
+  var products = APP_STATE ? APP_STATE.products : [];
+  var orders = APP_STATE ? APP_STATE.orders : [];
+  var receivables = APP_STATE ? APP_STATE.receivables : [];
+  var briefs = APP_STATE ? APP_STATE.briefs : [];
+  
+  html += '<div class="diag-line"><span class="label">Products:</span> <span class="value">' + products.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Orders:</span> <span class="value">' + orders.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Receivables:</span> <span class="value">' + receivables.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Auctions:</span> <span class="value">' + briefs.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Wallet:</span> <span class="value">' + (APP_STATE && APP_STATE.wallet ? money(APP_STATE.wallet.balance) : '$0.00') + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Dirty:</span> <span class="value">' + (APP_STATE && APP_STATE.isDirty ? '⚠️ yes' : '✅ no') + '</span></div>';
+  
+  content.innerHTML = html;
+}
+
+var diagPanelVisible = false;
+
+function toggleDiagnostic() {
+  var panel = document.getElementById('diagnosticPanel');
+  if(!panel) return;
+  diagPanelVisible = !diagPanelVisible;
+  panel.style.display = diagPanelVisible ? 'block' : 'none';
+  if(diagPanelVisible) updateDiagnostic();
+}
+
+// ============================================================
+// CERT_LABELS
+// ============================================================
+const CERT_LABELS = {
+  incorporation: { icon: '🏢', label: 'Incorporation', desc: 'Required - Admin Verified' },
+  export: { icon: '📄', label: 'Export License', desc: 'Government export capacity' },
+  organic: { icon: '🌱', label: 'Organic', desc: 'Organic certification' },
+  fairtrade: { icon: '🤝', label: 'Fair Trade', desc: 'Fair Trade certified' },
+  kosher: { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
+  halal: { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
+  brcgs: { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
+  origin: { icon: '🌍', label: 'Origin', desc: 'Certificate of Origin' },
+  'IFS Food': { icon: '🍽️', label: 'IFS Food', desc: 'International Featured Standards' },
+  SQF: { icon: '✅', label: 'SQF', desc: 'Safe Quality Food' },
+  'FSSC 22000': { icon: '🔐', label: 'FSSC 22000', desc: 'Food Safety System Certification' },
+  HACCP: { icon: '🛡️', label: 'HACCP', desc: 'Hazard Analysis Critical Control Point' },
+  GMP: { icon: '🏭', label: 'GMP', desc: 'Good Manufacturing Practice' },
+  USDA: { icon: '🇺🇸', label: 'USDA Organic', desc: 'USDA Organic certification' },
+  EU: { icon: '🇪🇺', label: 'EU Organic', desc: 'EU Organic certification' },
+  'Canada Inspection Agency': { icon: '🇨🇦', label: 'CIA', desc: 'Canadian Inspection Agency' },
+  JAS: { icon: '🇯🇵', label: 'JAS', desc: 'Japanese Agricultural Standard' },
+  'Soil Association': { icon: '🌿', label: 'Soil Association', desc: 'Soil Association Organic' },
+  'ECO Cert': { icon: '🌎', label: 'ECO Cert', desc: 'ECO Cert organic' },
+  'Rainforest Alliance': { icon: '🐸', label: 'Rainforest Alliance', desc: 'Rainforest Alliance certified' },
+  other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
+};
+
+// ============================================================
+// APP STATE
+// ============================================================
+const APP_STATE = {
+  wallet: { balance: 0 },
+  company: { name: '', reg: '', country: '', tax: '', address: '', email: '', phone: '', website: '', verified: 'pending', logo: null, documents: {}, photos: [] },
+  products: [],
+  orders: [],
+  receivables: [],
+  conversions: [],
+  briefs: [],
+  archivedAuctions: [],
+  currentEditId: null,
+  currentOrderId: null,
+  currentAuctionProductId: null,
+  certToggles: { incorporation: true },
+  isDirty: false,
+  renderDebounceTimer: null,
+  saveDebounceTimer: null,
+  _editImages: [],
+  _imageRemoveQueue: [],
+  _showAllReceivables: false,
+  _showAllArchive: false,
+  tar: {
+    active: true,
+    conversionFee: 25,
+    minReceivable: 100,
+    maxReceivable: 50000,
+    autoConvert: true,
+    batchSize: 50,
+    dailyLimit: 500,
+    todayConversions: 0,
+    todayConversionsDate: '',
+    totalConversions: 0,
+    totalFeesEarned: 0
+  },
+  tour: {
+    active: false,
+    step: 0,
+    steps: [
+      { selector: '[data-tour="1"]', title: '📊 Stats Dashboard', description: 'Your key metrics at a glance.' },
+      { selector: '[data-tour="2"]', title: '📊 Orders Count', description: 'Total orders received.' },
+      { selector: '[data-tour="3"]', title: '💰 Revenue Tracker', description: 'Total revenue from completed sales.' },
+      { selector: '[data-tour="4"]', title: '🔄 Conversion Counter', description: 'Receivables converted to cash.' },
+      { selector: '#tarSection', title: '🤖 TAR', description: 'Trade Advisor Robot monitors receivables.' },
+      { selector: '#companySection', title: '🏢 Company Profile', description: 'Your business identity.' },
+      { selector: '#certSection', title: '📜 Certifications', description: 'More certs = better trust.' },
+      { selector: '#productsSection', title: '📦 Products', description: 'List your products here.' },
+      { selector: '#ordersSection', title: '📋 Orders', description: 'Manage incoming orders.' }
+    ]
+  }
+};
+
+let advancedSpecsOpen = false;
+let tourTimeout = null;
+let isRendering = false;
+
+// ============================================================
+// DOM HELPERS
+// ============================================================
+function $(id) { return document.getElementById(id); }
+function safeVal(id, d) { d = d || ''; var el = $(id); return el ? el.value : d; }
+function safeSet(id, v) { var el = $(id); if(el) { el.textContent = (v === undefined || v === null || v === '' || v === 'undefined' || v === 'null') ? 'Not set' : String(v); } return el; }
+function safeSetVal(id, v) { var el = $(id); if(el) el.value = v; return el; }
+function uuid() { return window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); }); }
+function money(n) { return (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function escapeHtml(s) { if(!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/`/g, '&#96;'); }
+
+function showToast(msg, type) {
+  type = type || 'info';
+  var t = $('toast');
+  if(!t) return;
+  var display = msg.length > 60 ? msg.substring(0, 57) + '...' : msg;
+  t.textContent = display;
+  t.className = 'toast visible ' + type;
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(function() { t.className = 'toast'; }, 4000);
+}
+
+function openModal(id) { var el = $(id); if(el) { el.classList.add('show'); el.setAttribute('aria-modal', 'true'); var f = el.querySelector('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'); if(f) setTimeout(function() { f.focus(); }, 50); el.addEventListener('keydown', trapFocus); } }
+
+function closeModal(id) {
+  var el = $(id);
+  if(el) { el.classList.remove('show'); el.setAttribute('aria-modal', 'false'); el.removeEventListener('keydown', trapFocus); }
+  if(id === 'productModal') { APP_STATE.currentEditId = null; APP_STATE._imageRemoveQueue = []; }
+  else if(id === 'auctionModal') APP_STATE.currentAuctionProductId = null;
+  else if(id === 'orderModal') APP_STATE.currentOrderId = null;
+}
+
+function trapFocus(e) {
+  var modal = e.currentTarget;
+  var f = modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+  var first = f[0], last = f[f.length - 1];
+  if(e.key === 'Tab') {
+    if(e.shiftKey) { if(document.activeElement === first) { e.preventDefault(); last.focus(); } }
+    else { if(document.activeElement === last) { e.preventDefault(); first.focus(); } }
+  }
+}
+
+function toggleAdvancedSpecs() {
+  advancedSpecsOpen = !advancedSpecsOpen;
+  var c = $('advancedSpecsContainer'), t = $('advancedSpecsToggle');
+  if(c) c.style.display = advancedSpecsOpen ? 'block' : 'none';
+  if(t) t.textContent = advancedSpecsOpen ? '▲ Collapse' : '▼ Expand';
+}
+
+function setupSlider(id, valId, suffix, decimals) {
+  decimals = decimals || 1;
+  var input = $(id), display = $(valId);
+  if(!input || !display) return;
+  input.addEventListener('input', function() { var v = parseFloat(this.value); display.textContent = v.toFixed(decimals) + suffix; });
+  display.textContent = parseFloat(input.value).toFixed(decimals) + suffix;
+}
+
+function setupIdealPriceSlider() {
+  var input = $('productIdealPrice'), display = $('productIdealPriceVal');
+  if(!input || !display) return;
+  input.addEventListener('input', function() { var v = parseFloat(this.value); display.textContent = '$' + v.toFixed(2) + ' / MT'; });
+}
+
+function setupPackagingPreview() {
+  var type = $('productPackageType'), size = $('productPackageSize'), preview = $('packagingPreview');
+  if(!type || !size || !preview) return;
+  function update() { var t = type.value || '?', s = size.value || '?'; preview.textContent = t + ' — ' + s; preview.style.color = (t && s) ? '#7CFC00' : '#9ca3af'; }
+  type.addEventListener('change', update);
+  size.addEventListener('change', update);
+  update();
+}
+
+function setupFormSubmit(formId, fn) {
+  var form = $(formId);
+  if(!form) return;
+  form.addEventListener('submit', function(e) { e.preventDefault(); fn(); });
+  form.addEventListener('keydown', function(e) { if(e.key === 'Enter') { var t = e.target; if(t.tagName === 'INPUT' || t.tagName === 'SELECT') { e.preventDefault(); fn(); } } });
+}
+
+function formatDateTimeLocal(date) {
+  if(!date) return '';
+  var d = new Date(date);
+  if(isNaN(d.getTime())) { var f = new Date(Date.now() + 7 * 86400000); var p = function(n) { return String(n).padStart(2, '0'); }; return f.getFullYear() + '-' + p(f.getMonth() + 1) + '-' + p(f.getDate()) + 'T' + p(f.getHours()) + ':' + p(f.getMinutes()); }
+  var p = function(n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function getLocalDate() {
+  var n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+}
+
+function isValidImageSrc(src) {
+  return src && typeof src === 'string' && src.trim().length > 0;
+}
+
+// ============================================================
+// PRODUCT FUNCTIONS
+// ============================================================
+function gatherProductData() {
+  var name = safeVal('productNameInput', '').trim();
+  var variety = safeVal('productVarietyInput', '').trim();
+  var quantity = parseFloat(safeVal('productQuantityInput', ''));
+  var grade = safeVal('productGradeInput', 'Grade A');
+  var origin = safeVal('productOriginInput', '').trim();
+  var scheduledStart = safeVal('productScheduledStart', '');
+  if(!name) { showToast('Product name is required', 'error'); return null; }
+  if(!quantity || quantity <= 0) { showToast('Enter a valid quantity', 'error'); return null; }
+  return {
+    name: name,
+    variety: variety || '',
+    quantity: quantity,
+    grade: grade,
+    origin: origin || 'Not specified',
+    packageType: safeVal('productPackageType', ''),
+    packageSize: safeVal('productPackageSize', ''),
+    moisture: parseFloat(safeVal('productMoisture', '0')) || 0,
+    screenSize: parseFloat(safeVal('productScreenSize', '0')) || 0,
+    defects: parseFloat(safeVal('productDefects', '0')) || 0,
+    foreignMatter: parseFloat(safeVal('productForeignMatter', '0')) || 0,
+    protein: parseFloat(safeVal('productProtein', '0')) || 0,
+    aflatoxin: parseFloat(safeVal('productAflatoxin', '0')) || 0,
+    oilContent: parseFloat(safeVal('productOilContent', '0')) || 0,
+    colorGrade: parseFloat(safeVal('productColorGrade', '0')) || 0,
+    idealPrice: parseFloat(safeVal('productIdealPrice', '0')) || 0,
+    scheduledStart: scheduledStart || null
+  };
+}
+
+function loadProductIntoModal(product) {
+  if(!product) return;
+  APP_STATE._editImages = product.images ? [].slice.call(product.images) : [];
+  APP_STATE._imageRemoveQueue = [];
+  var preview = $('productImagePreview');
+  if(preview) {
+    preview.innerHTML = '';
+    if(APP_STATE._editImages && APP_STATE._editImages.length > 0) {
+      APP_STATE._editImages.forEach(function(src, idx) {
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative; display:inline-block; margin:4px;';
+        wrapper.dataset.index = idx;
+        var img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,206,209,0.2);';
+        img.alt = escapeHtml(product.name) + ' product image';
+        wrapper.appendChild(img);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '×';
+        btn.style.cssText = 'position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; background:#ff3b3b; color:white; border:none; cursor:pointer; font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center;';
+        btn.title = 'Remove this image';
+        btn.dataset.index = idx;
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var i = parseInt(this.dataset.index);
+          if(!confirm('Remove this image?')) return;
+          APP_STATE._imageRemoveQueue.push(i);
+          wrapper.remove();
+          showToast('Image marked for removal. Save to confirm.', 'info');
+        });
+        wrapper.appendChild(btn);
+        preview.appendChild(wrapper);
+      });
+    }
+  }
+  var warn = $('imageReplaceWarning');
+  if(warn) warn.style.display = 'block';
+  safeSetVal('productNameInput', product.name || '');
+  safeSetVal('productVarietyInput', product.variety || '');
+  safeSetVal('productQuantityInput', product.quantity || '');
+  safeSetVal('productGradeInput', product.grade || 'Grade A');
+  safeSetVal('productOriginInput', product.origin || '');
+  safeSetVal('productPackageType', product.packageType || '');
+  safeSetVal('productPackageSize', product.packageSize || '');
+  var start = $('productScheduledStart');
+  if(start) start.value = formatDateTimeLocal(product.scheduledStart);
+  var pv = $('packagingPreview');
+  if(pv) { pv.textContent = (product.packageType && product.packageSize) ? product.packageType + ' — ' + product.packageSize : 'Select packaging above'; pv.style.color = (product.packageType && product.packageSize) ? '#7CFC00' : '#9ca3af'; }
+  safeSetVal('productMoisture', product.moisture || 12);
+  var md = $('productMoistureVal'); if(md) md.textContent = (product.moisture || 12).toFixed(1) + '%';
+  safeSetVal('productScreenSize', product.screenSize || 15);
+  var sd = $('productScreenSizeVal'); if(sd) sd.textContent = (product.screenSize || 15).toFixed(1);
+  safeSetVal('productDefects', product.defects || 2);
+  var dd = $('productDefectsVal'); if(dd) dd.textContent = (product.defects || 2).toFixed(1) + '%';
+  safeSetVal('productForeignMatter', product.foreignMatter || 0.5);
+  var fd = $('productForeignMatterVal'); if(fd) fd.textContent = (product.foreignMatter || 0.5).toFixed(1) + '%';
+  safeSetVal('productProtein', product.protein || 0);
+  var pd = $('productProteinVal'); if(pd) pd.textContent = (product.protein || 0).toFixed(1) + '%';
+  safeSetVal('productAflatoxin', product.aflatoxin || 0);
+  var ad = $('productAflatoxinVal'); if(ad) ad.textContent = (product.aflatoxin || 0).toFixed(1) + ' ppb';
+  safeSetVal('productOilContent', product.oilContent || 0);
+  var od = $('productOilContentVal'); if(od) od.textContent = (product.oilContent || 0).toFixed(1) + '%';
+  safeSetVal('productColorGrade', product.colorGrade || 0);
+  var cd = $('productColorGradeVal'); if(cd) cd.textContent = (product.colorGrade || 0);
+  safeSetVal('productIdealPrice', product.idealPrice || 4.25);
+  var prd = $('productIdealPriceVal'); if(prd) prd.textContent = '$' + (product.idealPrice || 4.25).toFixed(2) + ' / MT';
+}
+
+function saveProduct(callback) {
+  var data = gatherProductData();
+  if(!data) return;
+  var input = $('productImagesInput');
+  if(input && input.files && input.files.length > 0) {
+    var promises = [];
+    var files = Array.from(input.files).slice(0, 5);
+    files.forEach(function(file) {
+      var r = new FileReader();
+      var p = new Promise(function(resolve) {
+        r.onload = function(e) { resolve(e.target.result); };
+        r.onerror = function() { resolve(null); };
+        r.readAsDataURL(file);
+      });
+      promises.push(p);
+    });
+    Promise.all(promises).then(function(results) {
+      var newImages = results.filter(function(x) { return x; });
+      var existing = APP_STATE._editImages || [];
+      var sorted = [].slice.call(APP_STATE._imageRemoveQueue).sort(function(a, b) { return b - a; });
+      sorted.forEach(function(i) { if(i < existing.length) existing.splice(i, 1); });
+      APP_STATE._imageRemoveQueue = [];
+      data.images = [].concat(existing, newImages).slice(0, 10);
+      saveProductData(data, callback);
+    });
+    return;
+  }
+  var existing = APP_STATE._editImages || [];
+  if(APP_STATE.currentEditId) {
+    var p = APP_STATE.products.find(function(x) { return x.id === APP_STATE.currentEditId; });
+    if(p && p.images) existing = [].slice.call(p.images);
+  }
+  var sorted = [].slice.call(APP_STATE._imageRemoveQueue).sort(function(a, b) { return b - a; });
+  sorted.forEach(function(i) { if(i < existing.length) existing.splice(i, 1); });
+  APP_STATE._imageRemoveQueue = [];
+  data.images = existing;
+  saveProductData(data, callback);
+}
+
+function saveProductData(data, callback) {
+  var id = APP_STATE.currentEditId;
+  if(id) {
+    var idx = APP_STATE.products.findIndex(function(p) { return p.id === id; });
+    if(idx > -1) APP_STATE.products[idx] = Object.assign({}, APP_STATE.products[idx], data);
+  } else {
+    id = uuid();
+    APP_STATE.products.push(Object.assign({ id: id }, data, { createdAt: Date.now() }));
+  }
+  markDirty();
+  saveToStorageDebounced();
+  renderAllDebounced();
+  closeModal('productModal');
+  showToast('✅ Product saved!', 'success');
+  APP_STATE._editImages = [];
+  APP_STATE._imageRemoveQueue = [];
+  if(callback) callback(id);
+}
+
+// ============================================================
+// AUCTION FUNCTIONS
+// ============================================================
+function openAuctionModal(productId) {
+  APP_STATE.currentAuctionProductId = productId;
+  var product = APP_STATE.products.find(function(p) { return p.id === productId; });
+  if(!product) { showToast('Product not found', 'error'); return; }
+  if(product.hasAuction && APP_STATE.briefs.some(function(b) { return b.productId === productId && !b.archived; })) {
+    showToast('This product already has an active auction', 'error');
+    return;
+  }
+  var display = $('auctionProductDisplay');
+  if(display) {
+    var img = '';
+    if(product.images && product.images.length > 0) img = '<img src="' + escapeHtml(product.images[0]) + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;margin-right:12px;border:1px solid rgba(0,206,209,0.2);" alt="' + escapeHtml(product.name) + ' auction image">';
+    display.innerHTML = '<div style="display:flex;align-items:center;">' + img + '<div><div style="font-weight:600;">' + escapeHtml(product.name) + (product.variety ? ' - ' + escapeHtml(product.variety) : '') + '</div><div style="font-size:12px;color:#9ca3af;">📦 ' + escapeHtml(product.quantity) + ' MT • ' + escapeHtml(product.grade || 'Standard') + ' • 📍 ' + escapeHtml(product.origin || '') + '</div>' + (product.packageType && product.packageSize ? '<div style="font-size:11px;color:#7CFC00;">📦 ' + escapeHtml(product.packageType) + ' — ' + escapeHtml(product.packageSize) + '</div>' : '') + '</div></div>';
+  }
+  var avail = $('auctionAvailableQty'); if(avail) avail.textContent = product.quantity;
+  var qty = $('auctionQty'); if(qty) qty.value = Math.min(500, Math.floor(product.quantity * 0.5));
+  var dt = $('auctionDateTime'); if(dt) dt.value = formatDateTimeLocal(product.scheduledStart);
+  openModal('auctionModal');
+}
+
+function resetDailyConversionsIfNeeded() {
+  var today = getLocalDate();
+  if(APP_STATE.tar.todayConversionsDate !== today) {
+    APP_STATE.tar.todayConversions = 0;
+    APP_STATE.tar.todayConversionsDate = today;
+    markDirty();
+    saveToStorageDebounced();
+  }
+}
+
+function postAuction() {
+  var pid = APP_STATE.currentAuctionProductId;
+  var product = APP_STATE.products.find(function(p) { return p.id === pid; });
+  if(!product) { showToast('Product not found', 'error'); return; }
+  if(product.hasAuction && APP_STATE.briefs.some(function(b) { return b.productId === pid && !b.archived; })) {
+    showToast('This product already has an active auction', 'error');
+    closeModal('auctionModal');
+    return;
+  }
+  var quantity = parseFloat(safeVal('auctionQty', ''));
+  var dateTime = safeVal('auctionDateTime', '');
+  var duration = parseInt(safeVal('auctionDuration', '24')) || 24;
+  var location = safeVal('auctionLocation', 'Santos');
+  var notes = safeVal('auctionNotes', '').trim();
+  if(!quantity || quantity <= 0) { showToast('Please enter a valid quantity', 'error'); return; }
+  if(quantity > product.quantity) { showToast('Only ' + product.quantity + ' MT available', 'error'); return; }
+  if(!dateTime) { showToast('Please select an auction date and time', 'error'); return; }
+  var auctionTime = new Date(dateTime).getTime();
+  if(auctionTime <= Date.now()) { showToast('Auction time must be in the future', 'error'); return; }
+  var auction = {
+    id: uuid(),
+    productId: product.id,
+    product: product.name,
+    variety: product.variety || '',
+    quantity: quantity,
+    grade: product.grade || 'Standard',
+    origin: product.origin || '',
+    images: product.images || [],
+    packageType: product.packageType || '',
+    packageSize: product.packageSize || '',
+    moisture: product.moisture || 0,
+    screenSize: product.screenSize || 0,
+    defects: product.defects || 0,
+    foreignMatter: product.foreignMatter || 0,
+    protein: product.protein || 0,
+    aflatoxin: product.aflatoxin || 0,
+    oilContent: product.oilContent || 0,
+    colorGrade: product.colorGrade || 0,
+    idealPrice: product.idealPrice || 0,
+    location: location,
+    seller: APP_STATE.company.name || 'TradeAux Seller',
+    notes: notes,
+    auctionTime: auctionTime,
+    duration: duration,
+    status: 'scheduled',
+    createdAt: Date.now(),
+    scheduledStart: dateTime
+  };
+  APP_STATE.briefs.push(auction);
+  product.quantity -= quantity;
+  product.hasAuction = true;
+  product.auctionId = auction.id;
+  var receivableAmount = (auction.idealPrice || 0) * (auction.quantity || 0);
+  var receivable = {
+    id: uuid(),
+    company: auction.seller || 'Unknown',
+    product: auction.product || 'Commodity',
+    amount: receivableAmount,
+    status: 'ready',
+    date: new Date(auction.auctionTime || Date.now()).toISOString().split('T')[0],
+    invoiceNumber: 'AUCTION-' + auction.id.slice(0, 6),
+    converted: false,
+    daysOld: 0,
+    createdAt: Date.now(),
+    auctionId: auction.id,
+    productId: auction.productId
+  };
+  APP_STATE.receivables.push(receivable);
+  markDirty();
+  saveToStorageDebounced();
+  syncToBuyerArena();
+  renderAllDebounced();
+  closeModal('auctionModal');
+  showToast('✅ Auction posted! ' + auction.product + ' ' + auction.quantity + ' MT', 'success');
+}
+
+function updateAuctionStatuses() {
+  try {
+    var now = Date.now();
+    var changed = false;
+    var toArchive = [];
+    for(var i = APP_STATE.briefs.length - 1; i >= 0; i--) {
+      var a = APP_STATE.briefs[i];
+      if(a.archived) continue;
+      if(a.status === 'scheduled' && a.auctionTime <= now) { a.status = 'live'; changed = true; }
+      if(a.status === 'live' && (now - a.auctionTime) > (a.duration || 24) * 3600000) { a.status = 'closed'; changed = true; toArchive.push(i); }
+    }
+    toArchive.forEach(function(idx) {
+      var a = APP_STATE.briefs[idx];
+      if(a && !a.archived) { APP_STATE.briefs.splice(idx, 1); addToArchive(a); }
+    });
+    if(changed || toArchive.length > 0) { markDirty(); saveToStorageDebounced(); }
+  } catch(e) { console.warn('updateAuctionStatuses error:', e); }
+}
+
+function addToArchive(auction) {
+  var product = APP_STATE.products.find(function(p) { return p.id === auction.productId; });
+  if(product) { product.quantity += auction.quantity || 0; product.hasAuction = false; delete product.auctionId; }
+  var idx = APP_STATE.receivables.findIndex(function(r) { return r.auctionId === auction.id; });
+  if(idx !== -1) APP_STATE.receivables.splice(idx, 1);
+  auction.archived = true;
+  auction.archivedAt = new Date().toISOString();
+  auction.won = (auction.bidCount || 0) > 0;
+  auction.finalPrice = auction.idealPrice || 0;
+  auction.bidCount = auction.bidCount || 0;
+  auction.productName = auction.product || 'Unnamed Auction';
+  auction.productVariety = auction.variety || '';
+  auction.scheduledDate = auction.scheduledStart || auction.auctionTime || Date.now();
+  auction.startingPrice = auction.idealPrice || 0;
+  auction.unit = 'MT';
+  APP_STATE.archivedAuctions.push(auction);
+}
+
+function deleteProduct(id) {
+  if(!confirm('Delete this product? This will also remove any associated auctions.')) return;
+  var auctionIds = [];
+  APP_STATE.briefs.forEach(function(b) { if(b.productId === id) auctionIds.push(b.id); });
+  var toRemove = [];
+  APP_STATE.briefs.forEach(function(b, i) { if(b.productId === id) toRemove.push(i); });
+  toRemove.sort(function(a, b) { return b - a; }).forEach(function(i) { APP_STATE.briefs.splice(i, 1); });
+  var toArchiveRemove = [];
+  APP_STATE.archivedAuctions.forEach(function(a, i) { if(a.productId === id) toArchiveRemove.push(i); });
+  toArchiveRemove.sort(function(a, b) { return b - a; }).forEach(function(i) { APP_STATE.archivedAuctions.splice(i, 1); });
+  var receivablesToRemove = [];
+  APP_STATE.receivables.forEach(function(r, i) { if(r.productId === id || auctionIds.indexOf(r.auctionId) !== -1) receivablesToRemove.push(i); });
+  receivablesToRemove.sort(function(a, b) { return b - a; }).forEach(function(i) { APP_STATE.receivables.splice(i, 1); });
+  APP_STATE.products = APP_STATE.products.filter(function(p) { return p.id !== id; });
+  markDirty();
+  saveToStorageDebounced();
+  renderAllDebounced();
+  showToast('Product and associated auctions deleted', 'info');
+}
+
+function restoreAuction(archiveId) {
+  var index = APP_STATE.archivedAuctions.findIndex(function(a) { return a.id === archiveId; });
+  if(index === -1) { showToast('Archive not found', 'error'); return; }
+  var archive = APP_STATE.archivedAuctions[index];
+  var product = APP_STATE.products.find(function(p) { return p.id === archive.productId; });
+  if(product) { product.hasAuction = false; delete product.auctionId; }
+  var restored = Object.assign({}, archive, { archived: false, status: 'scheduled', auctionTime: Date.now() + 86400000 * 7, scheduledStart: new Date(Date.now() + 86400000 * 7).toISOString() });
+  delete restored.archivedAt;
+  delete restored.finalPrice;
+  delete restored.bidCount;
+  delete restored.won;
+  delete restored.winner;
+  delete restored.conversionResult;
+  delete restored.simulationRuns;
+  delete restored.simulations;
+  delete restored.simAvgPrice;
+  delete restored.simWinRate;
+  delete restored.lastSimulated;
+  delete restored.productName;
+  delete restored.productVariety;
+  delete restored.scheduledDate;
+  delete restored.startingPrice;
+  delete restored.unit;
+  APP_STATE.briefs.push(restored);
+  APP_STATE.archivedAuctions.splice(index, 1);
+  markDirty();
+  saveToStorageDebounced();
+  renderAllDebounced();
+  showToast('↩️ Auction restored to active!', 'success');
+}
+
+var _syncToBuyerArenaTimer = null;
+
+function syncToBuyerArena() {
+  if(_syncToBuyerArenaTimer) { clearTimeout(_syncToBuyerArenaTimer); }
+  _syncToBuyerArenaTimer = setTimeout(function() {
+    try {
+      var data = {
+        version: '1.0',
+        auctions: APP_STATE.briefs.filter(function(b) { return !b.archived; }).map(function(a) {
+          return {
+            id: a.id,
+            product: a.product,
+            variety: a.variety || '',
+            quantity: a.quantity || 0,
+            grade: a.grade || 'Standard',
+            origin: a.origin || '',
+            images: a.images || [],
+            packageType: a.packageType || '',
+            packageSize: a.packageSize || '',
+            moisture: a.moisture || 0,
+            screenSize: a.screenSize || 0,
+            defects: a.defects || 0,
+            foreignMatter: a.foreignMatter || 0,
+            protein: a.protein || 0,
+            aflatoxin: a.aflatoxin || 0,
+            oilContent: a.oilContent || 0,
+            colorGrade: a.colorGrade || 0,
+            location: a.location || 'Santos',
+            seller: a.seller || 'TradeAux Seller',
+            notes: a.notes || '',
+            auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
+            duration: a.duration || 24,
+            status: a.status || 'scheduled',
+            scheduledStart: a.scheduledStart || a.auctionTime || Date.now() + 86400000 * 7
+          };
+        })
+      };
+      localStorage.setItem('tradeaux_buyer_auctions', JSON.stringify(data));
+      var targets = APP_STATE.briefs.filter(function(a) { return a.status === 'scheduled' || a.status === 'live'; }).map(function(a) {
+        return {
+          id: a.id,
+          product: a.product,
+          variety: a.variety || '',
+          seller: a.seller || 'TradeAux Seller',
+          location: a.location || 'Santos',
+          quantity: a.quantity || 0,
+          idealPrice: a.idealPrice || 0,
+          auctionTime: a.auctionTime || Date.now() + 86400000 * 7,
+          productId: a.productId,
+          scheduledStart: a.scheduledStart || a.auctionTime || Date.now() + 86400000 * 7,
+          specs: {
+            moisture: a.moisture || 0,
+            screenSize: a.screenSize || 0,
+            defects: a.defects || 0,
+            foreignMatter: a.foreignMatter || 0,
+            protein: a.protein || 0,
+            aflatoxin: a.aflatoxin || 0,
+            oilContent: a.oilContent || 0,
+            colorGrade: a.colorGrade || 0
+          },
+          packaging: { type: a.packageType || '', size: a.packageSize || '' }
+        };
+      });
+      localStorage.setItem('tradeaux_bot_targets', JSON.stringify(targets));
+      _syncToBuyerArenaTimer = null;
+    } catch(e) {}
+  }, 500);
+}
+
+// ============================================================
+// STORAGE - 3 TIER WITH DEBOUNCE
+// ============================================================
+function markDirty() { APP_STATE.isDirty = true; }
+
+function saveToStorageDebounced() {
+  if(APP_STATE.saveDebounceTimer) { clearTimeout(APP_STATE.saveDebounceTimer); }
+  APP_STATE.saveDebounceTimer = setTimeout(function() {
+    saveToStorageImmediate();
+    APP_STATE.saveDebounceTimer = null;
+  }, 300);
+}
+
+function saveToStorageImmediate() {
+  try {
+    var payload = {
+      company: APP_STATE.company,
+      products: APP_STATE.products,
+      orders: APP_STATE.orders,
+      receivables: APP_STATE.receivables,
+      conversions: APP_STATE.conversions,
+      wallet: APP_STATE.wallet,
+      certToggles: APP_STATE.certToggles || {},
+      briefs: APP_STATE.briefs,
+      archivedAuctions: APP_STATE.archivedAuctions,
+      tar: {
+        active: APP_STATE.tar.active,
+        conversionFee: APP_STATE.tar.conversionFee,
+        minReceivable: APP_STATE.tar.minReceivable,
+        maxReceivable: APP_STATE.tar.maxReceivable,
+        autoConvert: APP_STATE.tar.autoConvert,
+        batchSize: APP_STATE.tar.batchSize,
+        dailyLimit: APP_STATE.tar.dailyLimit,
+        todayConversions: APP_STATE.tar.todayConversions || 0,
+        todayConversionsDate: APP_STATE.tar.todayConversionsDate || getLocalDate(),
+        totalConversions: APP_STATE.tar.totalConversions || 0,
+        totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
+      }
+    };
+    
+    // Save to all 3 tiers
+    STORAGE.saveSmart(payload);
+    
+    APP_STATE.isDirty = false;
+    
+    // Update diagnostic if visible
+    if(diagPanelVisible) updateDiagnostic();
+    
+  } catch(e) {
+    if(e.name === 'QuotaExceededError' || e.code === 22) {
+      showToast('⚠️ Storage quota exceeded. Cleaning up...', 'warning');
+      try {
+        // Try to save with reduced data
+        var reducedPayload = {
+          company: APP_STATE.company,
+          products: APP_STATE.products.slice(0, 50),
+          orders: APP_STATE.orders.slice(0, 50),
+          receivables: APP_STATE.receivables.slice(0, 100),
+          conversions: APP_STATE.conversions.slice(0, 200),
+          wallet: APP_STATE.wallet,
+          certToggles: APP_STATE.certToggles || {},
+          briefs: APP_STATE.briefs.slice(0, 50),
+          archivedAuctions: APP_STATE.archivedAuctions.slice(0, 100),
+          tar: {
+            active: APP_STATE.tar.active,
+            conversionFee: APP_STATE.tar.conversionFee,
+            minReceivable: APP_STATE.tar.minReceivable,
+            maxReceivable: APP_STATE.tar.maxReceivable,
+            autoConvert: APP_STATE.tar.autoConvert,
+            batchSize: APP_STATE.tar.batchSize,
+            dailyLimit: APP_STATE.tar.dailyLimit,
+            todayConversions: APP_STATE.tar.todayConversions || 0,
+            todayConversionsDate: APP_STATE.tar.todayConversionsDate || getLocalDate(),
+            totalConversions: APP_STATE.tar.totalConversions || 0,
+            totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
+          }
+        };
+        STORAGE.saveSmart(reducedPayload);
+        APP_STATE.isDirty = false;
+        showToast('✅ Data saved after cleanup', 'success');
+      } catch(e2) { showToast('❌ Unable to save data.', 'error'); }
+    } else { showToast('⚠️ Error saving data', 'error'); }
+  }
+}
+
+function loadFromStorage() {
+  try {
+    // Try all 3 tiers
+    var result = null;
+    var source = 'none';
+    
+    // Try localStorage first
+    var local = STORAGE.loadLocal();
+    if(local) { result = local; source = 'localStorage'; }
+    
+    // If no local, try session
+    if(!result) {
+      var session = STORAGE.loadSession();
+      if(session) { result = session; source = 'sessionStorage'; }
+    }
+    
+    // If still no, try IndexedDB (sync - will be loaded async separately)
+    if(!result) {
+      // We'll load IndexedDB asynchronously later
+      // For now, return null and let the async load handle it
+      return { hasData: false, corrupted: false, source: null };
+    }
+    
+    // Parse and validate
+    if(!result || typeof result !== 'object') {
+      return { hasData: false, corrupted: true, source: null };
+    }
+    
+    // Apply data
+    if(result.company && typeof result.company === 'object') {
+      APP_STATE.company = Object.assign({}, APP_STATE.company, result.company, { documents: result.company.documents || {}, photos: result.company.photos || [] });
+    }
+    if(Array.isArray(result.products)) APP_STATE.products = result.products;
+    if(Array.isArray(result.orders)) APP_STATE.orders = result.orders;
+    if(Array.isArray(result.receivables)) APP_STATE.receivables = result.receivables;
+    if(Array.isArray(result.conversions)) APP_STATE.conversions = result.conversions;
+    if(result.wallet && typeof result.wallet === 'object') APP_STATE.wallet = result.wallet;
+    if(result.certToggles && typeof result.certToggles === 'object') APP_STATE.certToggles = result.certToggles;
+    if(Array.isArray(result.briefs)) APP_STATE.briefs = result.briefs;
+    if(Array.isArray(result.archivedAuctions)) APP_STATE.archivedAuctions = result.archivedAuctions;
+    if(result.tar && typeof result.tar === 'object') {
+      APP_STATE.tar = Object.assign({}, APP_STATE.tar, result.tar, { todayConversionsDate: result.tar.todayConversionsDate || getLocalDate() });
+    }
+    APP_STATE.isDirty = false;
+    
+    // Also save to session and IndexedDB as backup
+    STORAGE.saveSession(result);
+    STORAGE.saveIndexedDB(result);
+    
+    return { hasData: true, corrupted: false, source: source };
+    
+  } catch(e) {
+    console.error('Load error (corrupted data):', e);
+    return { hasData: false, corrupted: true, source: null };
+  }
+}
+
+// Async IndexedDB load fallback
+function loadIndexedDBFallback() {
+  STORAGE.loadIndexedDB().then(function(data) {
+    if(data) {
+      // We have data from IndexedDB - apply it if state is empty
+      var isEmpty = APP_STATE.products.length === 0 && 
+                    APP_STATE.company.name === '' && 
+                    APP_STATE.wallet.balance === 0;
+      if(isEmpty) {
+        if(data.company && typeof data.company === 'object') {
+          APP_STATE.company = Object.assign({}, APP_STATE.company, data.company, { documents: data.company.documents || {}, photos: data.company.photos || [] });
+        }
+        if(Array.isArray(data.products)) APP_STATE.products = data.products;
+        if(Array.isArray(data.orders)) APP_STATE.orders = data.orders;
+        if(Array.isArray(data.receivables)) APP_STATE.receivables = data.receivables;
+        if(Array.isArray(data.conversions)) APP_STATE.conversions = data.conversions;
+        if(data.wallet && typeof data.wallet === 'object') APP_STATE.wallet = data.wallet;
+        if(data.certToggles && typeof data.certToggles === 'object') APP_STATE.certToggles = data.certToggles;
+        if(Array.isArray(data.briefs)) APP_STATE.briefs = data.briefs;
+        if(Array.isArray(data.archivedAuctions)) APP_STATE.archivedAuctions = data.archivedAuctions;
+        if(data.tar && typeof data.tar === 'object') {
+          APP_STATE.tar = Object.assign({}, APP_STATE.tar, data.tar, { todayConversionsDate: data.tar.todayConversionsDate || getLocalDate() });
+        }
+        APP_STATE.isDirty = false;
+        renderAllDebounced();
+        showToast('📦 Restored from IndexedDB backup', 'info');
+      }
+    }
+  }).catch(function() {});
+}
+
+function forceSave() {
+  saveToStorageImmediate();
+  showToast('💾 Data saved!', 'success');
+}
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportData() {
+  var data = STORAGE.exportData();
+  if(data) {
+    showToast('📤 Data exported successfully!', 'success');
+  } else {
+    showToast('❌ No data to export', 'error');
+  }
+}
+
+function importData() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if(!file) return;
+    STORAGE.importData(file).then(function(data) {
+      // Apply imported data
+      if(data.company) {
+        APP_STATE.company = Object.assign({}, APP_STATE.company, data.company, { documents: data.company.documents || {}, photos: data.company.photos || [] });
+      }
+      if(Array.isArray(data.products)) APP_STATE.products = data.products;
+      if(Array.isArray(data.orders)) APP_STATE.orders = data.orders;
+      if(Array.isArray(data.receivables)) APP_STATE.receivables = data.receivables;
+      if(Array.isArray(data.conversions)) APP_STATE.conversions = data.conversions;
+      if(data.wallet) APP_STATE.wallet = data.wallet;
+      if(data.certToggles) APP_STATE.certToggles = data.certToggles;
+      if(Array.isArray(data.briefs)) APP_STATE.briefs = data.briefs;
+      if(Array.isArray(data.archivedAuctions)) APP_STATE.archivedAuctions = data.archivedAuctions;
+      if(data.tar) {
+        APP_STATE.tar = Object.assign({}, APP_STATE.tar, data.tar, { todayConversionsDate: data.tar.todayConversionsDate || getLocalDate() });
+      }
+      markDirty();
+      saveToStorageImmediate();
+      renderAllDebounced();
+      showToast('📥 Data imported successfully!', 'success');
+    }).catch(function(err) {
+      showToast('❌ Import failed: ' + err.message, 'error');
+    });
+    this.value = '';
+  };
+  input.click();
+}
+
+// ============================================================
+// REST OF FUNCTIONS (compressed for space - same as before)
+// ============================================================
+function convertReceivable(id) {
+  var r = APP_STATE.receivables.find(function(x) { return x.id === id; });
+  if(!r) { showToast('Receivable not found', 'error'); return; }
+  if(r.converted) { showToast('Already converted', 'warning'); return; }
+  resetDailyConversionsIfNeeded();
+  if(APP_STATE.tar.todayConversions >= APP_STATE.tar.dailyLimit) { showToast('Daily limit of ' + APP_STATE.tar.dailyLimit + ' conversions reached', 'warning'); return; }
+  var fee = APP_STATE.tar.conversionFee;
+  var payout = r.amount - fee;
+  if(payout < 0 && APP_STATE.wallet.balance < Math.abs(payout)) { showToast('Insufficient balance to cover fee', 'error'); return; }
+  if(payout < 0) {
+    if(!confirm('⚠️ This receivable (' + money(r.amount) + ') is less than the ' + money(fee) + ' conversion fee.\n\nYou will need to pay ' + money(Math.abs(payout)) + ' from your wallet.\n\nProceed?')) return;
+  } else {
+    if(!confirm('Convert ' + r.company + ' - ' + money(r.amount) + '? Payout: ' + money(payout) + ' (fee: ' + money(fee) + ')')) return;
+  }
+  r.converted = true;
+  r.convertedAt = new Date().toISOString();
+  APP_STATE.wallet.balance = Number(APP_STATE.wallet.balance) + payout;
+  APP_STATE.tar.totalConversions = (APP_STATE.tar.totalConversions || 0) + 1;
+  APP_STATE.tar.todayConversions = (APP_STATE.tar.todayConversions || 0) + 1;
+  APP_STATE.tar.totalFeesEarned = (APP_STATE.tar.totalFeesEarned || 0) + fee;
+  if(!APP_STATE.conversions) APP_STATE.conversions = [];
+  APP_STATE.conversions.push({ id: uuid(), receivableId: r.id, company: r.company, product: r.product, amount: r.amount, fee: fee, payout: payout, convertedAt: new Date().toISOString() });
+  markDirty();
+  saveToStorageDebounced();
+  renderAllDebounced();
+  showToast('✅ Converted ' + r.company + ' - Payout: ' + money(payout) + ' (fee: ' + money(fee) + ')', 'success');
+}
+
+function autoConvertReady() {
+  resetDailyConversionsIfNeeded();
+  var ready = APP_STATE.receivables.filter(function(r) { return r.status === 'ready' && !r.converted; });
+  if(ready.length === 0) { showToast('No ready receivables to convert', 'warning'); return; }
+  var batchSize = Math.min(APP_STATE.tar.batchSize, ready.length);
+  var batch = ready.slice(0, batchSize);
+  var totalFee = batch.length * APP_STATE.tar.conversionFee;
+  var totalPayout = batch.reduce(function(s, r) { return s + r.amount; }, 0) - totalFee;
+  if(totalPayout < 0 && APP_STATE.wallet.balance < Math.abs(totalPayout)) { showToast('Insufficient balance to cover fees', 'error'); return; }
+  if(APP_STATE.tar.dailyLimit && APP_STATE.tar.todayConversions + batch.length > APP_STATE.tar.dailyLimit) { showToast('Daily limit of ' + APP_STATE.tar.dailyLimit + ' conversions reached', 'warning'); return; }
+  if(!confirm('Convert ' + batch.length + ' receivables? Total payout: ' + money(totalPayout) + ' (fee: ' + money(totalFee) + ')')) return;
+  var count = 0;
+  batch.forEach(function(r) { r.converted = true; r.convertedAt = new Date().toISOString(); count++; });
+  APP_STATE.wallet.balance = Number(APP_STATE.wallet.balance) + totalPayout;
+  APP_STATE.tar.totalConversions = (APP_STATE.tar.totalConversions || 0) + count;
+  APP_STATE.tar.todayConversions = (APP_STATE.tar.todayConversions || 0) + count;
+  APP_STATE.tar.totalFeesEarned = (APP_STATE.tar.totalFeesEarned || 0) + totalFee;
+  if(!APP_STATE.conversions) APP_STATE.conversions = [];
+  batch.forEach(function(r) {
+    APP_STATE.conversions.push({ id: uuid(), receivableId: r.id, company: r.company, product: r.product, amount: r.amount, fee: APP_STATE.tar.conversionFee, payout: r.amount - APP_STATE.tar.conversionFee, convertedAt: new Date().toISOString() });
+  });
+  markDirty();
+  saveToStorageDebounced();
+  renderAllDebounced();
+  showToast('✅ Auto-converted ' + count + ' receivables! Total payout: ' + money(totalPayout), 'success');
+}
+
+function renderAllDebounced() {
+  if(APP_STATE.renderDebounceTimer) { clearTimeout(APP_STATE.renderDebounceTimer); }
+  APP_STATE.renderDebounceTimer = setTimeout(function() { renderAll(); APP_STATE.renderDebounceTimer = null; }, 50);
+}
+
+function renderAll() {
+  if(isRendering) return;
+  isRendering = true;
+  try {
+    resetDailyConversionsIfNeeded();
+    updateAuctionStatuses();
+    var banner = $('bannerConversions');
+    if(banner) { var remaining = Math.max(0, 10000 - (APP_STATE.tar.totalConversions || 0)); banner.textContent = remaining.toLocaleString(); }
+    renderWallet();
+    renderCompany();
+    renderCertificates();
+    renderProducts();
+    renderOrders();
+    renderStats();
+    renderTAR();
+    renderArchive();
+    renderAuctionSchedule();
+    renderTARAdvisory();
+    if(diagPanelVisible) updateDiagnostic();
+  } finally { isRendering = false; }
+}
+
+function renderWallet() {
+  var w = $('walletAmount');
+  if(w) w.textContent = money(APP_STATE.wallet.balance);
+  var cap = $('conversionCapacity');
+  if(cap) { var c = Math.floor(APP_STATE.wallet.balance / APP_STATE.tar.conversionFee); cap.textContent = c + ' conversions'; }
+}
+
+function renderCompany() {
+  var c = APP_STATE.company;
+  var fields = ['companyNameDisplay', 'companyRegDisplay', 'companyCountryDisplay', 'companyTaxDisplay', 'companyAddressDisplay', 'companyEmailDisplay', 'companyPhoneDisplay', 'companyWebsiteDisplay'];
+  var vals = [c.name, c.reg, c.country, c.tax, c.address, c.email, c.phone, c.website];
+  fields.forEach(function(id, i) {
+    var el = $(id);
+    if(el) {
+      var v = vals[i];
+      el.textContent = (v === undefined || v === null || v === '' || v === 'undefined' || v === 'null') ? 'Not set' : escapeHtml(String(v));
+    }
+  });
+  var badge = $('verificationBadge');
+  if(badge) { badge.className = 'company-verification-badge ' + (c.verified || 'pending'); badge.textContent = c.verified === 'verified' ? '✅ Verified' : c.verified === 'pending' ? '⏳ Pending Verification' : '❌ Unverified'; }
+  var status = $('companyStatusText');
+  if(status) status.textContent = c.verified === 'verified' ? '✅ Ready to sell.' : '📝 Complete your profile.';
+  var preview = $('companyLogoPreview');
+  var placeholder = $('logoPlaceholder');
+  if(isValidImageSrc(c.logo)) {
+    if(preview) { preview.src = c.logo; preview.style.display = 'block'; preview.style.width = '100%'; preview.style.height = '100%'; preview.style.objectFit = 'contain'; }
+    if(placeholder) placeholder.style.display = 'none';
+  } else {
+    if(preview) { preview.style.display = 'none'; preview.removeAttribute('src'); }
+    if(placeholder) placeholder.style.display = 'flex';
+  }
+  var photos = $('photosGrid');
+  if(photos) {
+    photos.innerHTML = '';
+    var p = APP_STATE.company.photos || [];
+    p.forEach(function(src, i) {
+      if(isValidImageSrc(src)) {
+        var div = document.createElement('div');
+        div.className = 'photo-item';
+        var img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Company photo ' + (i + 1);
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;cursor:pointer;';
+        img.addEventListener('click', function(e) { e.stopPropagation(); window.open(this.src, '_blank', 'noopener,noreferrer'); });
+        div.appendChild(img);
+        photos.appendChild(div);
+      }
+    });
+    var upload = document.createElement('div');
+    upload.className = 'photo-upload-btn';
+    upload.onclick = function() { var input = $('photoFileInput'); if(input) input.click(); };
+    upload.innerHTML = '<span class="icon">📷</span><span class="text">Add Photo</span>';
+    photos.appendChild(upload);
+  }
+  var docs = c.documents || {};
+  var incorp = $('incorpDocStatus');
+  var lic = $('licenseDocStatus');
+  var tax = $('taxDocStatus');
+  if(incorp) incorp.textContent = docs.incorporation ? '✅ Uploaded' : 'Not uploaded';
+  if(lic) lic.textContent = docs.license ? '✅ Uploaded' : 'Not uploaded';
+  if(tax) tax.textContent = docs.tax ? '✅ Uploaded' : 'Not uploaded';
+}
+
+function renderCertificates() {
+  var grid = $('certGrid');
+  if(!grid) return;
+  var scroll = window.scrollY;
+  grid.innerHTML = '';
+  var types = ['incorporation'].concat(Object.keys(APP_STATE.certToggles || {}).filter(function(k) { return k !== 'incorporation'; }).sort());
+  types.forEach(function(type) {
+    var info = CERT_LABELS[type] || { icon: '📄', label: type, desc: '' };
+    var required = type === 'incorporation';
+    var verified = APP_STATE.certToggles[type] || false;
+    var div = document.createElement('div');
+    div.className = 'cert-block';
+    div.dataset.certType = type;
+    div.style.borderColor = required ? 'rgba(124,252,0,0.6)' : 'rgba(0,206,209,0.2)';
+    var img = APP_STATE.company.documents ? APP_STATE.company.documents[type] : null;
+    var html;
+    if(img) {
+      var isPdf = img.startsWith('data:application/pdf');
+      if(isPdf) {
+        html = '<div class="cert-preview" id="certPreview_' + type + '" style="position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);">' +
+          '<span style="font-size:24px;">📄</span>' +
+          '<span style="font-size:9px;color:#7CFC00;margin-left:4px;">PDF uploaded</span>' +
+          '<div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#00ced1;border:1px solid rgba(0,206,209,0.3);border-radius:4px;padding:0 8px;font-size:8px;cursor:pointer;" class="cert-change-btn">🔄 Change</div>' +
+          '<input type="file" id="certUpload_' + type + '" class="hidden-input" accept=".pdf,.jpg,.png">' +
+          '</div>';
+      } else {
+        html = '<div class="cert-preview" id="certPreview_' + type + '" style="position:relative;cursor:pointer;">' +
+          '<img src="' + escapeHtml(img) + '" alt="' + escapeHtml(info.label) + ' certificate" style="width:100%;height:100%;object-fit:cover;">' +
+          '<div style="position:absolute;bottom:2px;right:4px;background:rgba(0,0,0,0.7);color:#7CFC00;font-size:8px;padding:0 6px;border-radius:4px;">✓ uploaded</div>' +
+          '<div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#00ced1;border:1px solid rgba(0,206,209,0.3);border-radius:4px;padding:0 8px;font-size:8px;cursor:pointer;" class="cert-change-btn">🔄 Change</div>' +
+          '<input type="file" id="certUpload_' + type + '" class="hidden-input" accept=".pdf,.jpg,.png">' +
+          '</div>';
+      }
+    } else {
+      html = '<div class="cert-preview" id="certPreview_' + type + '" style="cursor:pointer;">' +
+        '<span class="placeholder">📤 Upload</span>' +
+        '<input type="file" id="certUpload_' + type + '" class="hidden-input" accept=".pdf,.jpg,.png">' +
+        '</div>';
+    }
+    var toggle = required ? '<span style="font-size:9px;color:#7CFC00;">🔒 Admin Verified</span>' :
+      '<div class="cert-toggle-row"><span>' + (verified ? '✅ Verified' : '⏳ Pending') + '</span><label class="toggle-switch"><input type="checkbox" data-cert="' + type + '" ' + (verified ? 'checked' : '') + '><span class="slider"></span></label></div>';
+    div.innerHTML = '<div class="cert-icon">' + info.icon + '</div><div class="cert-name">' + escapeHtml(info.label) + '</div><div class="cert-desc">' + escapeHtml(info.desc) + '</div>' + (required ? '<div class="cert-required">★ REQUIRED</div>' : '') + html + toggle + (required ? '' : '<button class="btn-remove-cert" data-cert-type="' + type + '">🗑 Remove</button>');
+    grid.appendChild(div);
+    var previewDiv = div.querySelector('.cert-preview');
+    var input = $('certUpload_' + type);
+    if(previewDiv) {
+      var imgEl = previewDiv.querySelector('img');
+      if(imgEl) {
+        imgEl.addEventListener('click', function(e) { e.stopPropagation(); window.open(this.src, '_blank', 'noopener,noreferrer'); });
+      }
+      var changeBtn = previewDiv.querySelector('.cert-change-btn');
+      if(input) {
+        previewDiv.addEventListener('click', function(e) {
+          if(e.target === this || e.target.classList.contains('placeholder') || e.target.closest('.cert-change-btn')) { input.click(); }
+        });
+        input.addEventListener('change', function(e) { uploadCertImage(type, this); });
+      }
+      if(changeBtn && input) {
+        changeBtn.addEventListener('click', function(e) { e.stopPropagation(); input.click(); });
+      }
+    }
+    if(!required) {
+      var toggleEl = div.querySelector('input[data-cert]');
+      if(toggleEl) {
+        toggleEl.addEventListener('change', function(e) {
+          var t = this.dataset.cert;
+          APP_STATE.certToggles[t] = this.checked;
+          markDirty();
+          saveToStorageDebounced();
+          renderCertificates();
+          window.scrollTo(0, scroll);
+          showToast((APP_STATE.certToggles[t] ? 'Verified: ' : 'Unverified: ') + info.label, 'info');
+        });
+      }
+      var removeBtn = div.querySelector('.btn-remove-cert');
+      if(removeBtn) {
+        removeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var t = this.dataset.certType;
+          removeCert(t);
+        });
+      }
+    }
+  });
+  window.scrollTo(0, scroll);
+}
+
+function uploadCertImage(type, input) {
+  var file = input.files[0];
+  if(!file) return;
+  var valid = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+  if(valid.indexOf(file.type) === -1) { showToast('Invalid file type. Please upload JPG, PNG, GIF, or PDF.', 'error'); input.value = ''; return; }
+  if(file.size > 5 * 1024 * 1024) { showToast('File too large. Max 5MB.', 'error'); input.value = ''; return; }
+  showToast('⏳ Uploading certificate...', 'info');
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    if(!APP_STATE.company.documents) APP_STATE.company.documents = {};
+    APP_STATE.company.documents[type] = e.target.result;
+    markDirty();
+    saveToStorageDebounced();
+    renderCertificates();
+    showToast('Certificate uploaded!', 'success');
+  };
+  reader.onerror = function() { showToast('Failed to read file', 'error'); };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function removeCert(type) {
+  if(type === 'incorporation') { showToast('Incorporation cannot be removed', 'warning'); return; }
+  if(!confirm('Remove "' + (CERT_LABELS[type] ? CERT_LABELS[type].label : type) + '" certificate?')) return;
+  delete APP_STATE.certToggles[type];
+  if(APP_STATE.company.documents) delete APP_STATE.company.documents[type];
+  markDirty();
+  saveToStorageDebounced();
+  renderCertificates();
+  showToast('Certificate removed', 'info');
+}
+
+function renderProducts() {
+  var grid = $('productsGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  var add = document.createElement('div');
+  add.className = 'add-product-card';
+  add.innerHTML = '<div class="add-product-icon">+</div><div class="add-product-text">Add Product</div>';
+  add.addEventListener('click', function() { openProductModal(); });
+  grid.appendChild(add);
+  if(!APP_STATE.products || APP_STATE.products.length === 0) {
+    var m = document.createElement('div');
+    m.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;color:#666;font-size:12px;';
+    m.textContent = 'No products yet. Click "Add Product" to get started.';
+    grid.appendChild(m);
+    return;
+  }
+  APP_STATE.products.forEach(function(p) {
+    var card = document.createElement('div');
+    card.className = 'product-card';
+    var imgHtml = '';
+    if(p.images && p.images.length > 0) {
+      imgHtml = '<div style="display:flex;gap:4px;overflow-x:auto;padding:4px;width:100%;height:120px;align-items:center;">';
+      p.images.slice(0, 5).forEach(function(src, i) {
+        if(isValidImageSrc(src)) {
+          imgHtml += '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(p.name) + ' image ' + (i + 1) + '" style="height:100%;width:auto;object-fit:cover;border-radius:4px;flex-shrink:0;">';
+        }
+      });
+      if(p.images.length > 5) imgHtml += '<span style="font-size:10px;color:#9ca3af;flex-shrink:0;">+' + (p.images.length - 5) + '</span>';
+      imgHtml += '</div>';
+    } else { imgHtml = '<div style="height:120px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:12px;">📷 No images</div>'; }
+    var specs = [];
+    if(p.moisture > 0) specs.push('💧 ' + p.moisture.toFixed(1) + '%');
+    if(p.screenSize > 0) specs.push('📏 ' + p.screenSize.toFixed(1));
+    if(p.defects > 0) specs.push('🔬 ' + p.defects.toFixed(1) + '%');
+    if(p.protein > 0) specs.push('🧪 ' + p.protein.toFixed(1) + '%');
+    var pack = (p.packageType && p.packageSize) ? '📦 ' + escapeHtml(p.packageType) + ' — ' + escapeHtml(p.packageSize) : '';
+    var hasAuction = p.hasAuction || false;
+    card.innerHTML = '<div class="product-image" style="height:120px;overflow:hidden;background:rgba(0,0,0,0.2);border-radius:8px;">' + imgHtml + '</div>' +
+      '<div class="product-name">' + escapeHtml(p.name) + '</div><div class="product-variety">' + escapeHtml(p.variety || '') + '</div>' +
+      '<div class="product-specs">' + specs.map(function(s) { return '<span class="tag">' + s + '</span>'; }).join('') + '</div>' +
+      (pack ? '<div class="product-packaging">' + pack + '</div>' : '') +
+      '<div style="font-size:11px;color:#9ca3af;margin:4px 0;">📦 ' + escapeHtml(p.quantity || 0) + ' MT • ' + escapeHtml(p.grade || 'Standard') + '</div>' +
+      (hasAuction ? '<div style="color:#7CFC00;font-size:10px;">✅ Auction active</div>' : '') +
+      '<div class="product-actions"><button class="post-auction-btn" type="button" ' + (hasAuction ? 'disabled style="opacity:0.4;"' : '') + '>' + (hasAuction ? '⏳ Active' : '📤 Post Auction') + '</button><button class="edit-btn" type="button">✏️ Edit</button><button class="delete-btn" type="button">🗑</button></div>';
+    var post = card.querySelector('.post-auction-btn');
+    if(post && !hasAuction) post.addEventListener('click', function() { openAuctionModal(p.id); });
+    var edit = card.querySelector('.edit-btn');
+    if(edit) edit.addEventListener('click', function() { openProductModal(p.id); });
+    var del = card.querySelector('.delete-btn');
+    if(del) del.addEventListener('click', function() { deleteProduct(p.id); });
+    grid.appendChild(card);
+  });
+}
+
+function renderOrders() {
+  var grid = $('ordersGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  if(!APP_STATE.orders || APP_STATE.orders.length === 0) { grid.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:40px;grid-column:1/-1;">No orders yet.</div>'; return; }
+  APP_STATE.orders.forEach(function(o) {
+    var card = document.createElement('div');
+    card.className = 'order-card';
+    var status = o.status || 'pending';
+    var valid = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+    var display = valid.indexOf(status) !== -1 ? status : 'pending';
+    card.innerHTML = '<div class="order-header"><div class="order-id">#' + escapeHtml(o.id.slice(0, 8)) + '</div><div class="order-status ' + escapeHtml(display) + '">' + escapeHtml((o.status || 'PENDING').toUpperCase()) + '</div></div>' +
+      '<div class="order-details"><div><span class="label">Product:</span> ' + escapeHtml(o.product || 'Unknown') + '</div><div><span class="label">Quantity:</span> ' + escapeHtml((o.quantity || 0).toLocaleString()) + ' ' + escapeHtml(o.unit || 'MT') + '</div><div><span class="label">Total:</span> ' + money(o.total || 0) + '</div><div><span class="label">Buyer:</span> ' + escapeHtml(o.buyer || 'Unknown') + '</div><div><span class="label">Date:</span> ' + escapeHtml(o.date || 'N/A') + '</div></div>' +
+      '<div class="order-actions"><button class="view-btn" type="button">📋 View</button>' +
+      (o.status === 'pending' ? '<button class="process-btn" type="button">⚙️ Process</button>' : '') +
+      (o.status === 'processing' ? '<button class="ship-btn" type="button">🚚 Ship</button>' : '') +
+      (o.status === 'shipped' ? '<button class="complete-btn" type="button">✅ Complete</button>' : '') +
+      (valid.indexOf(o.status) === -1 ? '<button class="view-btn" type="button" style="background:rgba(255,217,102,0.2);color:#FFD966;border-color:rgba(255,217,102,0.3);">⚠️ Unknown</button>' : '') +
+      '</div>';
+    var view = card.querySelector('.view-btn');
+    if(view) view.addEventListener('click', function() { openOrderModal(o.id); });
+    var process = card.querySelector('.process-btn');
+    if(process) process.addEventListener('click', function() { updateOrderStatus(o.id, 'processing'); });
+    var ship = card.querySelector('.ship-btn');
+    if(ship) ship.addEventListener('click', function() { updateOrderStatus(o.id, 'shipped'); });
+    var complete = card.querySelector('.complete-btn');
+    if(complete) complete.addEventListener('click', function() { updateOrderStatus(o.id, 'completed'); });
+    grid.appendChild(card);
+  });
+}
+
+function renderStats() {
+  var tp = $('totalProducts');
+  var to = $('totalOrders');
+  var tr = $('totalRevenue');
+  var tc = $('totalConversions');
+  if(tp) tp.textContent = APP_STATE.products ? APP_STATE.products.length : 0;
+  if(to) to.textContent = APP_STATE.orders ? APP_STATE.orders.length : 0;
+  var rev = 0;
+  if(APP_STATE.orders) {
+    APP_STATE.orders.forEach(function(o) {
+      if(o.status === 'completed' || o.status === 'shipped') rev += Number(o.total) || 0;
+    });
+  }
+  if(tr) tr.textContent = money(rev);
+  if(tc) tc.textContent = APP_STATE.tar.totalConversions || 0;
+}
+
+function renderTAR() {
+  var now = Date.now();
+  var readyCount = $('tarReadyCount');
+  var pendingCount = $('tarPendingCount');
+  var convertedCount = $('tarConvertedCount');
+  var feesEarned = $('tarFeesEarned');
+  var todayConversions = $('todayConversions');
+  var todayFees = $('todayFees');
+  var remainingCapacity = $('remainingCapacity');
+  var receivables = APP_STATE.receivables || [];
+  var ready = receivables.filter(function(r) { return r.status === 'ready' && !r.converted; }).length;
+  var pending = receivables.filter(function(r) { return r.status === 'pending' && !r.converted; }).length;
+  var converted = receivables.filter(function(r) { return r.converted; }).length;
+  if(readyCount) readyCount.textContent = ready;
+  if(pendingCount) pendingCount.textContent = pending;
+  if(convertedCount) convertedCount.textContent = converted;
+  if(feesEarned) feesEarned.textContent = money(APP_STATE.tar.totalFeesEarned || 0);
+  if(todayConversions) todayConversions.textContent = APP_STATE.tar.todayConversions || 0;
+  if(todayFees) todayFees.textContent = money((APP_STATE.tar.todayConversions || 0) * APP_STATE.tar.conversionFee);
+  if(remainingCapacity) remainingCapacity.textContent = Math.max(0, 10000 - (APP_STATE.tar.totalConversions || 0));
+  var list = $('tarReceivablesList');
+  if(list) {
+    var all = [].slice.call(receivables).filter(function(r) { return !r.converted; }).sort(function(a, b) {
+      var order = { urgent: 0, ready: 1, pending: 2 };
+      return (order[a.status] || 3) - (order[b.status] || 3);
+    });
+    if(all.length === 0) { list.innerHTML = '<div style="color:#7CFC00;text-align:center;padding:20px;font-size:13px;">✅ All receivables have been converted!</div>'; } else {
+      var showAll = APP_STATE._showAllReceivables || false;
+      var maxShow = 8;
+      var display = showAll ? all : all.slice(0, maxShow);
+      var html = display.map(function(r) {
+        var days = r.createdAt ? Math.floor((now - r.createdAt) / 86400000) : 0;
+        var st = r.status || 'pending';
+        return '<div class="tar-receivable-item" data-receivable-id="' + r.id + '" style="cursor:default;">' +
+          '<div class="receivable-info" style="cursor:pointer;" data-action="view" data-id="' + r.id + '">' +
+          '<div class="receivable-name">' + escapeHtml(r.company) + ' • ' + escapeHtml(r.product) + '</div>' +
+          '<div class="receivable-details">' + escapeHtml(r.invoiceNumber) + ' • ' + escapeHtml(r.date) + ' • ' + days + 'd old</div></div>' +
+          '<div style="display:flex;align-items:center;gap:8px;"><span class="receivable-amount">' + money(r.amount) + '</span>' +
+          '<span class="receivable-status ' + escapeHtml(st) + '">' + escapeHtml(st.toUpperCase()) + '</span>' +
+          '<button class="btn-neon" style="padding:2px 10px;font-size:9px;" data-action="convert" data-id="' + r.id + '">💰 Convert</button></div></div>';
+      }).join('');
+      if(all.length > maxShow) {
+        var toggleText = showAll ? 'Show less ▲' : 'Show ' + (all.length - maxShow) + ' more ▼';
+        html += '<div style="text-align:center;padding:8px;"><button class="btn-neon" id="toggleReceivablesBtn" style="padding:4px 16px;font-size:11px;">' + toggleText + '</button></div>';
+      }
+      list.innerHTML = html;
+      var btn = list.querySelector('#toggleReceivablesBtn');
+      if(btn) {
+        btn.addEventListener('click', function() { APP_STATE._showAllReceivables = !APP_STATE._showAllReceivables; renderTAR(); });
+      }
+    }
+  }
+}
+
+function renderArchive() {
+  var grid = $('archiveGrid');
+  var count = $('archiveCount');
+  if(!grid) return;
+  var archived = APP_STATE.archivedAuctions || [];
+  if(count) count.textContent = archived.length;
+  if(archived.length === 0) {
+    grid.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:20px;grid-column:1/-1;">No archived auctions yet. Completed auctions will appear here for simulation and analysis.</div>';
+    var collapse = $('archiveCollapse');
+    if(collapse && collapse.classList.contains('open')) {
+      collapse.style.maxHeight = '0';
+      collapse.classList.remove('open');
+      var header = $('archiveHeader');
+      if(header) header.classList.remove('open');
+    }
+    return;
+  }
+  var showAll = APP_STATE._showAllArchive || false;
+  var showCount = showAll ? archived.length : 20;
+  var display = archived.slice(0, showCount);
+  var hasMore = archived.length > showCount;
+  var html = display.map(function(a) {
+    var status = a.won ? '✅ WON' : '❌ LOST';
+    var date = a.scheduledDate ? new Date(a.scheduledDate).toLocaleDateString() : a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Unknown';
+    var name = a.productName || a.product || 'Unnamed Auction';
+    var variety = a.productVariety || a.variety || '';
+    var qty = a.quantity || 0;
+    var unit = a.unit || 'MT';
+    var price = a.finalPrice || a.startingPrice || a.idealPrice || 0;
+    var bids = a.bidCount || 0;
+    var sims = a.simulationRuns || 0;
+    var win = a.simWinRate !== undefined ? a.simWinRate : (a.won ? 100 : 0);
+    var hasSims = sims > 0;
+    return '<div class="archive-card" data-archive-id="' + a.id + '">' +
+      '<div class="archive-status">' + status + '</div>' +
+      '<div class="archive-date">' + date + '</div>' +
+      '<div class="archive-name">' + escapeHtml(name) + '</div>' +
+      '<div class="archive-details">' + escapeHtml(variety) + ' • ' + escapeHtml(qty.toLocaleString()) + ' ' + escapeHtml(unit) + '</div>' +
+      '<div class="archive-metrics"><div class="metric-item"><div class="metric-value">' + money(price) + '</div><div class="metric-label">Final Price</div></div>' +
+      '<div class="metric-item"><div class="metric-value">' + bids + '</div><div class="metric-label">Bids</div></div>' +
+      '<div class="metric-item"><div class="metric-value">' + sims + '</div><div class="metric-label">Sims</div></div></div>' +
+      (hasSims ? '<div class="simulation-result">📊 Win Rate: ' + win.toFixed(1) + '% (' + sims + ' simulations)</div>' : '') +
+      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">' +
+      '<button class="simulate-btn" type="button" data-action="analyze" data-archive-id="' + a.id + '">📊 Analyze</button>' +
+      '<button class="simulate-btn" type="button" data-action="simulate" data-archive-id="' + a.id + '" style="background:linear-gradient(135deg,#00ced1,#0066ff);color:white;">🔄 Simulate</button>' +
+      '<button class="simulate-btn" type="button" data-action="restore" data-archive-id="' + a.id + '" style="background:linear-gradient(135deg,#7CFC00,#00ff7f);color:black;">↩️ Restore</button></div></div>';
+  }).join('');
+  if(hasMore) {
+    var toggleText = showAll ? 'Show Less' : 'Show All';
+    html += '<div style="grid-column:1/-1;text-align:center;padding:12px;color:#9ca3af;font-size:12px;">Showing ' + (showAll ? archived.length : showCount) + ' of ' + archived.length + ' archived auctions. <button class="btn-neon" id="showAllArchiveBtn" style="padding:4px 16px;font-size:11px;margin-left:8px;">' + toggleText + '</button></div>';
+  }
+  grid.innerHTML = html;
+  var btn = grid.querySelector('#showAllArchiveBtn');
+  if(btn) {
+    btn.addEventListener('click', function() { APP_STATE._showAllArchive = !APP_STATE._showAllArchive; renderArchive(); });
+  }
+  var collapse = $('archiveCollapse');
+  if(collapse && collapse.classList.contains('open') && archived.length > 0) {
+    if(window._archiveHeightRAF) cancelAnimationFrame(window._archiveHeightRAF);
+    window._archiveHeightRAF = requestAnimationFrame(function() {
+      if(collapse) {
+        collapse.style.maxHeight = 'none';
+        collapse.style.maxHeight = collapse.scrollHeight + 'px';
+      }
+      window._archiveHeightRAF = null;
+    });
+  }
+}
+
+function renderAuctionSchedule() {
+  var list = $('auctionList');
+  if(!list) return;
+  var briefs = APP_STATE.briefs || [];
+  var upcoming = briefs.filter(function(b) { return !b.archived && (b.status === 'scheduled' || b.status === 'live'); });
+  if(upcoming.length === 0) { list.innerHTML = '<div style="color:#9ca3af;text-align:center;padding:10px;font-size:11px;">No active auctions. Create one from your products!</div>'; return; }
+  list.innerHTML = upcoming.slice(0, 5).map(function(b) {
+    var d = new Date(b.auctionTime || Date.now());
+    var date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    var time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    var cls = b.status === 'live' ? 'live' : 'upcoming';
+    return '<div class="auction-item"><div class="auction-info"><div class="auction-name">' + escapeHtml(b.product || 'Unnamed Auction') + '</div><div class="auction-details">' + escapeHtml(b.variety || '') + ' • ' + (b.quantity || 0) + ' MT</div></div><div style="text-align:right;"><div class="auction-time">' + date + ' ' + time + '</div><div class="auction-status ' + cls + '">' + escapeHtml((b.status || 'scheduled').toUpperCase()) + '</div></div></div>';
+  }).join('');
+}
+
+function renderTARAdvisory() {
+  var text = $('tarAdvisoryText');
+  if(!text) return;
+  var briefs = APP_STATE.briefs || [];
+  var archived = APP_STATE.archivedAuctions || [];
+  var total = briefs.length;
+  var upcoming = briefs.filter(function(b) { return b.status === 'scheduled'; }).length;
+  var live = briefs.filter(function(b) { return b.status === 'live'; }).length;
+  var archivedCount = archived.length;
+  var msg = 'You have <span class="highlight">' + total + '</span> active auctions and <span class="highlight">' + archivedCount + '</span> archived. ';
+  if(upcoming > 0) msg += '<span class="info">' + upcoming + ' upcoming</span> and ';
+  if(live > 0) msg += '<span class="highlight">' + live + ' live</span> right now! ';
+  if(total === 0 && archivedCount === 0) { msg = 'No auctions yet. <span class="highlight">Create your first auction</span> from the Products section to start trading!'; } else if(total === 0 && archivedCount > 0) { msg += 'Check your archive for simulation insights. <span class="highlight">Create new auctions</span> based on your archived performance.'; } else { msg += 'Monitor your active auctions and archive completed ones for simulation and analysis.'; }
+  text.innerHTML = msg;
+}
+
+// ============================================================
+// FILE UPLOADS
+// ============================================================
+function setupFileUploads() {
+  var logoUpload = $('companyLogoUpload');
+  var logoInput = $('logoFileInput');
+  if(logoUpload && logoInput) {
+    logoUpload.onclick = function(e) { e.preventDefault(); e.stopPropagation(); logoInput.click(); };
+    logoInput.onchange = function(e) {
+      var file = e.target.files[0];
+      if(!file) return;
+      var valid = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if(valid.indexOf(file.type) === -1) { showToast('Invalid file type. Please upload JPG, PNG, GIF, or WEBP.', 'error'); this.value = ''; return; }
+      if(file.size > 5 * 1024 * 1024) { showToast('Logo file too large. Max 5MB.', 'error'); this.value = ''; return; }
+      showToast('⏳ Uploading logo...', 'info');
+      var reader = new FileReader();
+      reader.onload = function(ev) { APP_STATE.company.logo = ev.target.result; markDirty(); saveToStorageDebounced(); renderCompany(); showToast('✅ Logo uploaded!', 'success'); };
+      reader.onerror = function() { showToast('Failed to read logo file', 'error'); };
+      reader.readAsDataURL(file);
+      this.value = '';
+    };
+  }
+  var photoInput = $('photoFileInput');
+  if(photoInput) {
+    photoInput.onchange = function(e) {
+      var files = e.target.files;
+      if(files.length === 0) return;
+      var valid = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      var loaded = 0;
+      var total = files.length;
+      Array.from(files).forEach(function(file) {
+        if(valid.indexOf(file.type) === -1) { showToast('Skipping ' + file.name + ': invalid type', 'warning'); loaded++; if(loaded === total) { markDirty(); saveToStorageDebounced(); renderCompany(); } return; }
+        if(file.size > 5 * 1024 * 1024) { showToast('Skipping ' + file.name + ': exceeds 5MB', 'warning'); loaded++; if(loaded === total) { markDirty(); saveToStorageDebounced(); renderCompany(); } return; }
+        if(loaded === 0) showToast('⏳ Uploading photos...', 'info');
+        var reader = new FileReader();
+        reader.onload = function(ev) { if(!APP_STATE.company.photos) APP_STATE.company.photos = []; APP_STATE.company.photos.push(ev.target.result); loaded++; if(loaded === total) { markDirty(); saveToStorageDebounced(); renderCompany(); showToast('✅ ' + total + ' photo(s) uploaded!', 'success'); } };
+        reader.onerror = function() { loaded++; showToast('Failed to read ' + file.name, 'warning'); if(loaded === total) { markDirty(); saveToStorageDebounced(); renderCompany(); } };
+        reader.readAsDataURL(file);
+      });
+      this.value = '';
+    };
+  }
+  var incorpBtn = $('incorpUploadBtn');
+  var licBtn = $('licenseUploadBtn');
+  var taxBtn = $('taxUploadBtn');
+  var incorpInput = $('incorpFileInput');
+  var licInput = $('licenseFileInput');
+  var taxInput = $('taxFileInput');
+  if(incorpBtn && incorpInput) { incorpBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); incorpInput.click(); }; incorpInput.onchange = function(e) { handleDocUpload(e, 'incorporation', 'incorpDocStatus'); }; }
+  if(licBtn && licInput) { licBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); licInput.click(); }; licInput.onchange = function(e) { handleDocUpload(e, 'license', 'licenseDocStatus'); }; }
+  if(taxBtn && taxInput) { taxBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); taxInput.click(); }; taxInput.onchange = function(e) { handleDocUpload(e, 'tax', 'taxDocStatus'); }; }
+  function handleDocUpload(e, key, statusId) {
+    var file = e.target.files[0];
+    if(!file) return;
+    var valid = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
+    if(valid.indexOf(file.type) === -1) { showToast('Invalid file type. Please upload PDF, JPG, PNG, or GIF.', 'error'); e.target.value = ''; return; }
+    if(file.size > 10 * 1024 * 1024) { showToast('Document too large. Max 10MB.', 'error'); e.target.value = ''; return; }
+    showToast('⏳ Uploading document...', 'info');
+    var reader = new FileReader();
+    reader.onload = function(ev) { if(!APP_STATE.company.documents) APP_STATE.company.documents = {}; APP_STATE.company.documents[key] = ev.target.result; markDirty(); saveToStorageDebounced(); renderCompany(); var el = $(statusId); if(el) el.textContent = '✅ Uploaded'; showToast('✅ Document uploaded!', 'success'); };
+    reader.onerror = function() { showToast('Failed to read file', 'error'); };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+  var prodInput = $('productImagesInput');
+  if(prodInput) {
+    prodInput.onchange = function(e) {
+      var preview = $('productImagePreview');
+      if(!preview) return;
+      var files = Array.from(e.target.files).slice(0, 5);
+      if(files.length === 0) return;
+      var valid = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      var validFiles = files.filter(function(f) { return valid.indexOf(f.type) !== -1; });
+      if(validFiles.length === 0) { showToast('No valid image files selected. Please upload JPG, PNG, GIF, or WEBP.', 'error'); this.value = ''; return; }
+      if(files.length !== validFiles.length) showToast('Skipping ' + (files.length - validFiles.length) + ' invalid file(s)', 'warning');
+      validFiles.forEach(function(file) {
+        if(file.size > 5 * 1024 * 1024) { showToast('Skipping ' + file.name + ': exceeds 5MB', 'warning'); return; }
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var wrapper = document.createElement('div');
+          wrapper.style.cssText = 'position:relative;display:inline-block;margin:4px;';
+          var img = document.createElement('img');
+          img.src = ev.target.result;
+          img.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,206,209,0.2);';
+          wrapper.appendChild(img);
+          var label = document.createElement('span');
+          label.textContent = '📤';
+          label.style.cssText = 'position:absolute;bottom:2px;right:4px;font-size:12px;opacity:0.7;';
+          wrapper.appendChild(label);
+          preview.appendChild(wrapper);
+        };
+        reader.readAsDataURL(file);
+      });
+      var warn = $('imageReplaceWarning');
+      if(warn) { warn.textContent = '📸 ' + validFiles.length + ' new image(s) will be added on save.'; warn.style.display = 'block'; }
+    };
+  }
+}
+
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
+function openProductModal(productId) {
+  if(advancedSpecsOpen) toggleAdvancedSpecs();
+  APP_STATE.currentEditId = productId || null;
+  var isEdit = !!productId;
+  var title = $('productModalTitle');
+  if(title) title.textContent = isEdit ? '📦 Edit Product' : '📦 Add Product';
+  var input = $('productImagesInput');
+  if(input) input.value = '';
+  var warn = $('imageReplaceWarning');
+  if(warn) { warn.style.display = isEdit ? 'block' : 'none'; if(!isEdit) warn.textContent = '⚠️ New images will be added to the product on save.'; }
+  if(isEdit) {
+    var product = APP_STATE.products.find(function(p) { return p.id === productId; });
+    if(product) loadProductIntoModal(product);
+  } else {
+    APP_STATE._editImages = [];
+    APP_STATE._imageRemoveQueue = [];
+    safeSetVal('productNameInput', '');
+    safeSetVal('productVarietyInput', '');
+    safeSetVal('productQuantityInput', '');
+    safeSetVal('productGradeInput', 'Grade A');
+    safeSetVal('productOriginInput', '');
+    safeSetVal('productPackageType', '');
+    safeSetVal('productPackageSize', '');
+    var pv = $('packagingPreview');
+    if(pv) { pv.textContent = 'Select packaging above'; pv.style.color = '#9ca3af'; }
+    safeSetVal('productMoisture', 12);
+    var md = $('productMoistureVal'); if(md) md.textContent = '12.0%';
+    safeSetVal('productScreenSize', 15);
+    var sd = $('productScreenSizeVal'); if(sd) sd.textContent = '15.0';
+    safeSetVal('productDefects', 2);
+    var dd = $('productDefectsVal'); if(dd) dd.textContent = '2.0%';
+    safeSetVal('productForeignMatter', 0.5);
+    var fd = $('productForeignMatterVal'); if(fd) fd.textContent = '0.5%';
+    safeSetVal('productProtein', 0);
+    var pd = $('productProteinVal'); if(pd) pd.textContent = '0.0%';
+    safeSetVal('productAflatoxin', 0);
+    var ad = $('productAflatoxinVal'); if(ad) ad.textContent = '0 ppb';
+    safeSetVal('productOilContent', 0);
+    var od = $('productOilContentVal'); if(od) od.textContent = '0.0%';
+    safeSetVal('productColorGrade', 0);
+    var cd = $('productColorGradeVal'); if(cd) cd.textContent = '0';
+    safeSetVal('productIdealPrice', 4.25);
+    var prd = $('productIdealPriceVal'); if(prd) prd.textContent = '$4.25 / MT';
+    var future = new Date(Date.now() + 7 * 86400000);
+    var start = $('productScheduledStart');
+    if(start) start.value = formatDateTimeLocal(future);
+    var preview = $('productImagePreview');
+    if(preview) preview.innerHTML = '';
+  }
+  openModal('productModal');
+}
+
+function openOrderModal(orderId) {
+  APP_STATE.currentOrderId = orderId;
+  var order = APP_STATE.orders.find(function(o) { return o.id === orderId; });
+  if(!order) { showToast('Order not found', 'error'); return; }
+  var id = $('orderViewId');
+  var prod = $('orderViewProduct');
+  var qty = $('orderViewQty');
+  var total = $('orderViewTotal');
+  var buyer = $('orderViewBuyer');
+  var status = $('orderViewStatus');
+  var addr = $('orderViewAddress');
+  var notes = $('orderViewNotes');
+  var update = $('orderStatusUpdate');
+  if(id) id.textContent = order.id.slice(0, 8);
+  if(prod) prod.textContent = order.product || '-';
+  if(qty) qty.textContent = (order.quantity || 0).toLocaleString() + ' ' + (order.unit || 'MT');
+  if(total) total.textContent = money(order.total || 0);
+  if(buyer) buyer.textContent = order.buyer || '-';
+  if(status) status.textContent = (order.status || 'pending').toUpperCase();
+  if(addr) addr.textContent = order.address || '-';
+  if(notes) notes.textContent = order.notes || '-';
+  if(update) update.value = order.status || 'pending';
+  openModal('orderModal');
+}
+
+function updateOrderStatus(orderId, newStatus) {
+  if(!orderId) { orderId = APP_STATE.currentOrderId; var update = $('orderStatusUpdate'); if(update) newStatus = update.value; }
+  var order = APP_STATE.orders.find(function(o) { return o.id === orderId; });
+  if(!order) { showToast('Order not found', 'error'); return; }
+  order.status = newStatus;
+  if(newStatus === 'shipped') order.shippedAt = new Date().toISOString();
+  if(newStatus === 'completed') order.completedAt = new Date().toISOString();
+  markDirty();
+  saveToStorageDebounced();
+  renderAllDebounced();
+  closeModal('orderModal');
+  showToast('Order status updated to ' + newStatus, 'success');
+}
+
+function openCompanyModal() {
+  safeSetVal('editCompanyName', APP_STATE.company.name || '');
+  safeSetVal('editCompanyReg', APP_STATE.company.reg || '');
+  safeSetVal('editCompanyCountry', APP_STATE.company.country || '');
+  safeSetVal('editCompanyTax', APP_STATE.company.tax || '');
+  safeSetVal('editCompanyAddress', APP_STATE.company.address || '');
+  safeSetVal('editCompanyEmail', APP_STATE.company.email || '');
+  safeSetVal('editCompanyPhone', APP_STATE.company.phone || '');
+  safeSetVal('editCompanyWebsite', APP_STATE.company.website || '');
+  openModal('companyModal');
+}
+
+function saveCompanyProfile() {
+  var email = safeVal('editCompanyEmail', '').trim();
+  var phone = safeVal('editCompanyPhone', '').trim();
+  var website = safeVal('editCompanyWebsite', '').trim();
+  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(email && !emailRegex.test(email)) { showToast('Please enter a valid email address', 'error'); return; }
+  if(website && !website.startsWith('http://') && !website.startsWith('https://')) { showToast('Website should start with http:// or https://', 'warning'); }
+  APP_STATE.company = Object.assign({}, APP_STATE.company, {
+    name: safeVal('editCompanyName', '').trim(),
+    reg: safeVal('editCompanyReg', '').trim(),
+    country: safeVal('editCompanyCountry', '').trim(),
+    tax: safeVal('editCompanyTax', '').trim(),
+    address: safeVal('editCompanyAddress', '').trim(),
+    email: email,
+    phone: phone,
+    website: website
+  });
+  if(APP_STATE.company.name && APP_STATE.company.reg && APP_STATE.company.country) {
+    if(APP_STATE.company.verified !== 'verified') APP_STATE.company.verified = 'pending';
+  }
+  markDirty();
+  saveToStorageDebounced();
+  renderCompany();
+  closeModal('companyModal');
+  showToast('Company profile updated & saved', 'success');
+}
+
+function processDeposit() {
+  var amt = prompt('Enter deposit amount ($):', '1000');
+  if(amt) { var v = parseFloat(amt); if(v > 0) { APP_STATE.wallet.balance = Number(APP_STATE.wallet.balance) + v; markDirty(); saveToStorageDebounced(); renderAllDebounced(); showToast('Deposited ' + money(v), 'success'); } }
+}
+
+// ============================================================
+// TOUR FUNCTIONS
+// ============================================================
+function startTour() {
+  document.querySelectorAll('.modal.show').forEach(function(m) { closeModal(m.id); });
+  APP_STATE.tour.active = true;
+  APP_STATE.tour.step = 0;
+  var overlay = $('tourOverlay');
+  if(overlay) { overlay.style.display = 'block'; overlay.style.zIndex = '2000'; }
+  var progress = $('tourProgress');
+  if(progress) {
+    progress.innerHTML = '';
+    APP_STATE.tour.steps.forEach(function(_, i) {
+      var dot = document.createElement('span');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.dataset.step = i;
+      progress.appendChild(dot);
+    });
+    var close = document.createElement('button');
+    close.className = 'tour-close';
+    close.textContent = '✕';
+    close.style.cssText = 'background:none;border:none;color:#9ca3af;cursor:pointer;font-size:16px;padding:0 8px;';
+    close.addEventListener('click', endTour);
+    progress.appendChild(close);
+  }
+  showTourStep(0);
+}
+
+function endTour() {
+  if(tourTimeout) { clearTimeout(tourTimeout); tourTimeout = null; }
+  APP_STATE.tour.active = false;
+  var overlay = $('tourOverlay');
+  if(overlay) { overlay.style.display = 'none'; overlay.style.zIndex = '1000'; }
+  var highlight = $('tourHighlight');
+  if(highlight) highlight.style.display = 'none';
+  showToast('🎯 Tour complete!', 'success');
+}
+
+function showTourStep(step) {
+  var steps = APP_STATE.tour.steps;
+  if(step >= steps.length) { endTour(); return; }
+  var data = steps[step];
+  var el = document.querySelector(data.selector);
+  if(!el) { showTourStep(step + 1); return; }
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if(tourTimeout) clearTimeout(tourTimeout);
+  tourTimeout = setTimeout(function() {
+    var rect = el.getBoundingClientRect();
+    var highlight = $('tourHighlight');
+    var tooltip = $('tourTooltip');
+    var title = $('tourTitle');
+    var desc = $('tourDescription');
+    var next = $('tourNextBtn');
+    var close = $('tourCloseBtn');
+    if(highlight) { highlight.style.display = 'block'; highlight.style.left = (rect.left - 8) + 'px'; highlight.style.top = (rect.top - 8) + 'px'; highlight.style.width = (rect.width + 16) + 'px'; highlight.style.height = (rect.height + 16) + 'px'; highlight.style.zIndex = '2001'; }
+    if(tooltip) { var left = Math.max(20, rect.left + rect.width / 2 - 160); var top = Math.max(20, rect.top - 120); if(top < 20) top = rect.bottom + 20; if(left + 340 > window.innerWidth) left = window.innerWidth - 360; tooltip.style.left = left + 'px'; tooltip.style.top = top + 'px'; tooltip.style.display = 'block'; tooltip.style.zIndex = '2002'; }
+    if(title) title.textContent = data.title;
+    if(desc) desc.textContent = data.description;
+    if(next) { next.textContent = step === steps.length - 1 ? '✅ Finish' : 'Next →'; next.onclick = function() { showTourStep(step + 1); }; }
+    if(close) close.onclick = endTour;
+    var progress = $('tourProgress');
+    if(progress) { var dots = progress.querySelectorAll('.dot'); dots.forEach(function(dot, i) { dot.className = 'dot'; if(i < step) dot.classList.add('done'); if(i === step) dot.classList.add('active'); }); }
+    APP_STATE.tour.step = step;
+  }, 400);
+}
+
+function toggleArchive() {
+  var collapse = $('archiveCollapse');
+  var header = $('archiveHeader');
+  if(!collapse || !header) return;
+  if(collapse.classList.contains('open')) {
+    collapse.style.maxHeight = '0';
+    collapse.classList.remove('open');
+    header.classList.remove('open');
+  } else {
+    collapse.style.maxHeight = 'none';
+    var h = collapse.scrollHeight + 'px';
+    collapse.style.maxHeight = '0';
+    void collapse.offsetHeight;
+    collapse.style.maxHeight = h;
+    collapse.classList.add('open');
+    header.classList.add('open');
+    var section = $('archiveSection');
+    if(section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function seededRandom(seed) {
+  return function() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+}
+
+function simulateAuction(archiveId) {
+  var archive = APP_STATE.archivedAuctions.find(function(a) { return a.id === archiveId; });
+  if(!archive) { showToast('Archive not found', 'error'); return; }
+  var seed = archiveId.split('').reduce(function(acc, c) { return acc + c.charCodeAt(0); }, 0);
+  var rand = seededRandom(seed || 42);
+  archive.simulationRuns = (archive.simulationRuns || 0) + 1;
+  var start = archive.startingPrice || archive.idealPrice || 100;
+  var price = start * (1 + (rand() * 0.4 - 0.2));
+  var won = rand() > 0.35;
+  if(!archive.simulations) archive.simulations = [];
+  archive.simulations.push({ run: archive.simulationRuns, price: price, won: won, timestamp: new Date().toISOString() });
+  if(archive.simulations.length > 100) { archive.simulations = archive.simulations.slice(-100); }
+  var all = archive.simulations || [];
+  var avg = all.reduce(function(s, x) { return s + x.price; }, 0) / all.length;
+  var rate = all.filter(function(x) { return x.won; }).length / all.length * 100;
+  archive.simAvgPrice = avg;
+  archive.simWinRate = rate;
+  archive.lastSimulated = new Date().toISOString();
+  if(!archive.hasOwnProperty('originalWon')) archive.originalWon = archive.won;
+  archive.won = archive.originalWon;
+  markDirty();
+  saveToStorageDebounced();
+  renderAllDebounced();
+  showToast('🔄 Simulation #' + archive.simulationRuns + ' complete!', 'success');
+}
+
+function openSimulationModal(archiveId) {
+  var archive = APP_STATE.archivedAuctions.find(function(a) { return a.id === archiveId; });
+  if(!archive) { showToast('Archive not found', 'error'); return; }
+  var sims = archive.simulationRuns || 0;
+  var rate = archive.simWinRate !== undefined ? archive.simWinRate.toFixed(1) : 'N/A';
+  var avg = archive.simAvgPrice !== undefined ? money(archive.simAvgPrice) : 'N/A';
+  var outcome = archive.originalWon !== undefined ? (archive.originalWon ? '✅ WON' : '❌ LOST') : (archive.won ? '✅ WON' : '❌ LOST');
+  showToast('📊 Analysis: ' + (archive.productName || 'Auction') + ' - ' + sims + ' sims, Win Rate: ' + rate + '%, Avg: ' + avg + ' | Actual: ' + outcome, 'info');
+}
+
+function bulletproofSignOut() {
   // FIX #1: Do NOT delete data on sign-out
   // Just redirect to the sign-in page
   window.location.href = 'signin.html';
