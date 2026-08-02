@@ -426,10 +426,63 @@
       background: rgba(0,206,209,0.3);
     }
 
+    .diagnostic-panel {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 9998;
+      background: rgba(2,6,23,0.95);
+      border: 1px solid rgba(0,206,209,0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      max-width: 320px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #7CFC00;
+      display: none;
+      pointer-events: auto;
+    }
+    .diagnostic-panel .diag-title {
+      color: #00ced1;
+      font-weight: 700;
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+    .diagnostic-panel .diag-line {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .diagnostic-panel .diag-line .label { color: #9ca3af; }
+    .diagnostic-panel .diag-line .value { color: #7CFC00; }
+    .diagnostic-panel .diag-line .value.error { color: #ff3b3b; }
+    .diagnostic-panel .diag-line .value.warning { color: #FFD966; }
+    .diag-toggle {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 9999;
+      background: rgba(0,206,209,0.15);
+      border: 1px solid rgba(0,206,209,0.3);
+      border-radius: 30px;
+      padding: 4px 12px;
+      color: #00ced1;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .diag-toggle:hover {
+      background: rgba(0,206,209,0.25);
+      transform: scale(1.05);
+    }
+
     @media (max-width: 1000px) { .company-profile-layout { grid-template-columns: 1fr; } .company-fields { grid-template-columns: 1fr; } .dashboard-grid { grid-template-columns: repeat(2, 1fr); } .tar-grid { grid-template-columns: 1fr; } .tar-metrics { grid-template-columns: 1fr 1fr; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
     @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } .header { flex-direction: column; align-items: stretch; } .wallet-section { flex-wrap: wrap; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .tar-metrics { grid-template-columns: 1fr; } .products-grid { grid-template-columns: 1fr; } }
   </style>
   <base target="_self">
+<base target="_blank">
 </head>
 <body>
 
@@ -490,6 +543,8 @@
         <button class="btn-neon" style="padding:4px 12px; font-size:10px; margin-left:8px;" id="tourBtn" type="button">🎯 Tour</button>
         <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px; margin-left:8px;" type="button">☁️ Sync</button>
         <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; margin-left:8px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        <button class="btn-neon" id="exportBtn" style="padding:4px 12px; font-size:10px; margin-left:8px; border-color:#FFD966; color:#FFD966;" type="button">📤 Export</button>
+        <button class="btn-neon" id="importBtn" style="padding:4px 12px; font-size:10px; margin-left:8px; border-color:#FFD966; color:#FFD966;" type="button">📥 Import</button>
       </div>
       <a href="javascript:void(0)" id="marketplaceNav">Marketplace</a>
       <a href="javascript:void(0)" id="analyticsNav">Analytics</a>
@@ -714,6 +769,18 @@
   <footer class="footer">
     <p>TRADEAUX © 2026 • Global Commodity Exchange • TAR System v10.0</p>
   </footer>
+
+<div class="modal" id="diagModal" role="dialog" aria-labelledby="diagModalTitle">
+  <div class="modal-content" style="max-width:500px;">
+    <button class="modal-close" id="closeDiagModal" type="button" aria-label="Close diagnostics">&times;</button>
+    <div class="modal-header"><h2 id="diagModalTitle">🔍 Storage Diagnostics</h2></div>
+    <div id="diagBody" style="font-family:monospace; font-size:12px; line-height:1.6; white-space:pre-wrap; color:#7CFC00;"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="cancel-btn" id="closeDiagBtn" type="button">Close</button>
+      <button class="create-btn" id="runDiagBtn" type="button">🔄 Run Check</button>
+    </div>
+  </div>
+</div>
 </main>
 
 <div class="tour-overlay" id="tourOverlay" style="display:none; position:fixed; inset:0; z-index:2000; pointer-events:none;">
@@ -1037,8 +1104,265 @@
 
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
+<div class="diagnostic-panel" id="diagnosticPanel">
+  <div class="diag-title">🔍 DATA DIAGNOSTIC</div>
+  <div id="diagContent"></div>
+</div>
+<div class="diag-toggle" id="diagToggle">🔍 DIAG</div>
+
 <script>
 'use strict';
+
+// ============================================================
+// STORAGE LAYER - 3 TIERS
+// ============================================================
+const STORAGE = {
+  KEY: 'tradeaux_seller_state',
+  SESSION_KEY: 'tradeaux_seller_state_session',
+  INDEXED_DB_NAME: 'TradeAuxDB',
+  INDEXED_DB_STORE: 'sellerData',
+  INDEXED_DB_VERSION: 1,
+  
+  _db: null,
+  _dbReady: false,
+  _pendingWrites: 0,
+  
+  // ========== LOCALSTORAGE ==========
+  saveLocal: function(data) {
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(data));
+      return true;
+    } catch(e) {
+      console.warn('localStorage save failed:', e);
+      return false;
+    }
+  },
+  
+  loadLocal: function() {
+    try {
+      var raw = localStorage.getItem(this.KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    } catch(e) {
+      console.warn('localStorage load failed:', e);
+      return null;
+    }
+  },
+  
+  // ========== SESSIONSTORAGE MIRROR ==========
+  saveSession: function(data) {
+    try {
+      sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(data));
+      return true;
+    } catch(e) {
+      return false;
+    }
+  },
+  
+  loadSession: function() {
+    try {
+      var raw = sessionStorage.getItem(this.SESSION_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    } catch(e) {
+      return null;
+    }
+  },
+  
+  // ========== INDEXEDDB ==========
+  openDB: function() {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      if(self._dbReady && self._db) { resolve(self._db); return; }
+      var request = indexedDB.open(self.INDEXED_DB_NAME, self.INDEXED_DB_VERSION);
+      request.onupgradeneeded = function(e) {
+        var db = e.target.result;
+        if(!db.objectStoreNames.contains(self.INDEXED_DB_STORE)) {
+          db.createObjectStore(self.INDEXED_DB_STORE, { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = function(e) {
+        self._db = e.target.result;
+        self._dbReady = true;
+        resolve(self._db);
+      };
+      request.onerror = function(e) {
+        console.warn('IndexedDB open failed:', e);
+        self._dbReady = false;
+        resolve(null);
+      };
+    });
+  },
+  
+  saveIndexedDB: function(data) {
+    var self = this;
+    return this.openDB().then(function(db) {
+      if(!db) return false;
+      return new Promise(function(resolve) {
+        try {
+          var tx = db.transaction([self.INDEXED_DB_STORE], 'readwrite');
+          var store = tx.objectStore(self.INDEXED_DB_STORE);
+          var record = { id: 'master', data: data, updated: Date.now() };
+          var request = store.put(record);
+          request.onsuccess = function() { resolve(true); };
+          request.onerror = function() { resolve(false); };
+          tx.onerror = function() { resolve(false); };
+        } catch(e) {
+          resolve(false);
+        }
+      });
+    });
+  },
+  
+  loadIndexedDB: function() {
+    var self = this;
+    return this.openDB().then(function(db) {
+      if(!db) return null;
+      return new Promise(function(resolve) {
+        try {
+          var tx = db.transaction([self.INDEXED_DB_STORE], 'readonly');
+          var store = tx.objectStore(self.INDEXED_DB_STORE);
+          var request = store.get('master');
+          request.onsuccess = function() {
+            if(request.result && request.result.data) {
+              resolve(request.result.data);
+            } else {
+              resolve(null);
+            }
+          };
+          request.onerror = function() { resolve(null); };
+          tx.onerror = function() { resolve(null); };
+        } catch(e) {
+          resolve(null);
+        }
+      });
+    });
+  },
+  
+  // ========== EXPORT / IMPORT ==========
+  exportData: function() {
+    var data = this.loadLocal();
+    if(!data) return null;
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'tradeaux_backup_' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    return data;
+  },
+  
+  importData: function(file) {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var data = JSON.parse(e.target.result);
+          if(data && typeof data === 'object') {
+            // Validate minimal structure
+            if(data.company || data.products || data.wallet) {
+              resolve(data);
+            } else {
+              reject(new Error('Invalid data structure: missing company, products, or wallet'));
+            }
+          } else {
+            reject(new Error('Invalid JSON data'));
+          }
+        } catch(err) {
+          reject(err);
+        }
+      };
+      reader.onerror = function() { reject(new Error('Failed to read file')); };
+      reader.readAsText(file);
+    });
+  },
+  
+  // ========== SMART LOAD (tries all tiers) ==========
+  loadSmart: function() {
+    var self = this;
+    return new Promise(function(resolve) {
+      // Try localStorage first
+      var local = self.loadLocal();
+      if(local) { resolve({ source: 'localStorage', data: local }); return; }
+      
+      // Try sessionStorage
+      var session = self.loadSession();
+      if(session) { resolve({ source: 'sessionStorage', data: session }); return; }
+      
+      // Try IndexedDB
+      self.loadIndexedDB().then(function(ix) {
+        if(ix) { resolve({ source: 'indexedDB', data: ix }); return; }
+        resolve({ source: null, data: null });
+      }).catch(function() {
+        resolve({ source: null, data: null });
+      });
+    });
+  },
+  
+  // ========== SMART SAVE (saves to all tiers) ==========
+  saveSmart: function(data) {
+    var self = this;
+    var results = { local: false, session: false, indexed: false };
+    
+    // Save to localStorage
+    results.local = self.saveLocal(data);
+    
+    // Save to sessionStorage
+    results.session = self.saveSession(data);
+    
+    // Save to IndexedDB (async)
+    self.saveIndexedDB(data).then(function(success) {
+      results.indexed = success;
+    }).catch(function() { results.indexed = false; });
+    
+    return results;
+  }
+};
+
+// ============================================================
+// DIAGNOSTIC PANEL
+// ============================================================
+function updateDiagnostic() {
+  var content = document.getElementById('diagContent');
+  if(!content) return;
+  
+  var local = localStorage.getItem(STORAGE.KEY);
+  var session = sessionStorage.getItem(STORAGE.SESSION_KEY);
+  var localSize = local ? (local.length / 1024).toFixed(1) : 0;
+  var sessionSize = session ? (session.length / 1024).toFixed(1) : 0;
+  
+  var html = '';
+  html += '<div class="diag-line"><span class="label">localStorage:</span> <span class="value">' + (local ? '✅ ' + localSize + 'KB' : '❌ empty') + '</span></div>';
+  html += '<div class="diag-line"><span class="label">sessionStorage:</span> <span class="value">' + (session ? '✅ ' + sessionSize + 'KB' : '❌ empty') + '</span></div>';
+  
+  var products = APP_STATE ? APP_STATE.products : [];
+  var orders = APP_STATE ? APP_STATE.orders : [];
+  var receivables = APP_STATE ? APP_STATE.receivables : [];
+  var briefs = APP_STATE ? APP_STATE.briefs : [];
+  
+  html += '<div class="diag-line"><span class="label">Products:</span> <span class="value">' + products.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Orders:</span> <span class="value">' + orders.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Receivables:</span> <span class="value">' + receivables.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Auctions:</span> <span class="value">' + briefs.length + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Wallet:</span> <span class="value">' + (APP_STATE && APP_STATE.wallet ? money(APP_STATE.wallet.balance) : '$0.00') + '</span></div>';
+  html += '<div class="diag-line"><span class="label">Dirty:</span> <span class="value">' + (APP_STATE && APP_STATE.isDirty ? '⚠️ yes' : '✅ no') + '</span></div>';
+  
+  content.innerHTML = html;
+}
+
+var diagPanelVisible = false;
+
+function toggleDiagnostic() {
+  var panel = document.getElementById('diagnosticPanel');
+  if(!panel) return;
+  diagPanelVisible = !diagPanelVisible;
+  panel.style.display = diagPanelVisible ? 'block' : 'none';
+  if(diagPanelVisible) updateDiagnostic();
+}
 
 // ============================================================
 // CERT_LABELS
@@ -1128,9 +1452,9 @@ let isRendering = false;
 // DOM HELPERS
 // ============================================================
 function $(id) { return document.getElementById(id); }
-function safeVal(id, d) { d = d || ''; const el = $(id); return el ? el.value : d; }
-function safeSet(id, v) { const el = $(id); if(el) { el.textContent = (v === undefined || v === null || v === '' || v === 'undefined' || v === 'null') ? 'Not set' : String(v); } return el; }
-function safeSetVal(id, v) { const el = $(id); if(el) el.value = v; return el; }
+function safeVal(id, d) { d = d || ''; var el = $(id); return el ? el.value : d; }
+function safeSet(id, v) { var el = $(id); if(el) { el.textContent = (v === undefined || v === null || v === '' || v === 'undefined' || v === 'null') ? 'Not set' : String(v); } return el; }
+function safeSetVal(id, v) { var el = $(id); if(el) el.value = v; return el; }
 function uuid() { return window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); }); }
 function money(n) { return (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function escapeHtml(s) { if(!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/`/g, '&#96;'); }
@@ -1220,6 +1544,9 @@ function isValidImageSrc(src) {
   return src && typeof src === 'string' && src.trim().length > 0;
 }
 
+// ============================================================
+// PRODUCT FUNCTIONS
+// ============================================================
 function gatherProductData() {
   var name = safeVal('productNameInput', '').trim();
   var variety = safeVal('productVarietyInput', '').trim();
@@ -1378,6 +1705,9 @@ function saveProductData(data, callback) {
   if(callback) callback(id);
 }
 
+// ============================================================
+// AUCTION FUNCTIONS
+// ============================================================
 function openAuctionModal(productId) {
   APP_STATE.currentAuctionProductId = productId;
   var product = APP_STATE.products.find(function(p) { return p.id === productId; });
@@ -1641,6 +1971,9 @@ function syncToBuyerArena() {
   }, 500);
 }
 
+// ============================================================
+// STORAGE - 3 TIER WITH DEBOUNCE
+// ============================================================
 function markDirty() { APP_STATE.isDirty = true; }
 
 function saveToStorageDebounced() {
@@ -1677,21 +2010,21 @@ function saveToStorageImmediate() {
         totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
       }
     };
-    var json = JSON.stringify(payload);
-    localStorage.setItem('tradeaux_seller_state', json);
+    
+    // Save to all 3 tiers
+    STORAGE.saveSmart(payload);
+    
     APP_STATE.isDirty = false;
+    
+    // Update diagnostic if visible
+    if(diagPanelVisible) updateDiagnostic();
+    
   } catch(e) {
     if(e.name === 'QuotaExceededError' || e.code === 22) {
       showToast('⚠️ Storage quota exceeded. Cleaning up...', 'warning');
       try {
-        var keys = Object.keys(localStorage);
-        for(var i = 0; i < keys.length; i++) {
-          var key = keys[i];
-          if(key.startsWith('tradeaux_') && key !== 'tradeaux_seller_state' && key !== 'tradeaux_buyer_auctions' && key !== 'tradeaux_bot_targets') {
-            localStorage.removeItem(key);
-          }
-        }
-        var payload = {
+        // Try to save with reduced data
+        var reducedPayload = {
           company: APP_STATE.company,
           products: APP_STATE.products.slice(0, 50),
           orders: APP_STATE.orders.slice(0, 50),
@@ -1715,8 +2048,7 @@ function saveToStorageImmediate() {
             totalFeesEarned: APP_STATE.tar.totalFeesEarned || 0
           }
         };
-        var json = JSON.stringify(payload);
-        localStorage.setItem('tradeaux_seller_state', json);
+        STORAGE.saveSmart(reducedPayload);
         APP_STATE.isDirty = false;
         showToast('✅ Data saved after cleanup', 'success');
       } catch(e2) { showToast('❌ Unable to save data.', 'error'); }
@@ -1726,29 +2058,90 @@ function saveToStorageImmediate() {
 
 function loadFromStorage() {
   try {
-    var raw = localStorage.getItem('tradeaux_seller_state');
-    if(raw === null) return { hasData: false, corrupted: false };
-    var data = JSON.parse(raw);
-    if(data.company && typeof data.company === 'object') {
-      APP_STATE.company = Object.assign({}, APP_STATE.company, data.company, { documents: data.company.documents || {}, photos: data.company.photos || [] });
+    // Try all 3 tiers
+    var result = null;
+    var source = 'none';
+    
+    // Try localStorage first
+    var local = STORAGE.loadLocal();
+    if(local) { result = local; source = 'localStorage'; }
+    
+    // If no local, try session
+    if(!result) {
+      var session = STORAGE.loadSession();
+      if(session) { result = session; source = 'sessionStorage'; }
     }
-    if(Array.isArray(data.products)) APP_STATE.products = data.products;
-    if(Array.isArray(data.orders)) APP_STATE.orders = data.orders;
-    if(Array.isArray(data.receivables)) APP_STATE.receivables = data.receivables;
-    if(Array.isArray(data.conversions)) APP_STATE.conversions = data.conversions;
-    if(data.wallet && typeof data.wallet === 'object') APP_STATE.wallet = data.wallet;
-    if(data.certToggles && typeof data.certToggles === 'object') APP_STATE.certToggles = data.certToggles;
-    if(Array.isArray(data.briefs)) APP_STATE.briefs = data.briefs;
-    if(Array.isArray(data.archivedAuctions)) APP_STATE.archivedAuctions = data.archivedAuctions;
-    if(data.tar && typeof data.tar === 'object') {
-      APP_STATE.tar = Object.assign({}, APP_STATE.tar, data.tar, { todayConversionsDate: data.tar.todayConversionsDate || getLocalDate() });
+    
+    // If still no, try IndexedDB (sync - will be loaded async separately)
+    if(!result) {
+      // We'll load IndexedDB asynchronously later
+      // For now, return null and let the async load handle it
+      return { hasData: false, corrupted: false, source: null };
+    }
+    
+    // Parse and validate
+    if(!result || typeof result !== 'object') {
+      return { hasData: false, corrupted: true, source: null };
+    }
+    
+    // Apply data
+    if(result.company && typeof result.company === 'object') {
+      APP_STATE.company = Object.assign({}, APP_STATE.company, result.company, { documents: result.company.documents || {}, photos: result.company.photos || [] });
+    }
+    if(Array.isArray(result.products)) APP_STATE.products = result.products;
+    if(Array.isArray(result.orders)) APP_STATE.orders = result.orders;
+    if(Array.isArray(result.receivables)) APP_STATE.receivables = result.receivables;
+    if(Array.isArray(result.conversions)) APP_STATE.conversions = result.conversions;
+    if(result.wallet && typeof result.wallet === 'object') APP_STATE.wallet = result.wallet;
+    if(result.certToggles && typeof result.certToggles === 'object') APP_STATE.certToggles = result.certToggles;
+    if(Array.isArray(result.briefs)) APP_STATE.briefs = result.briefs;
+    if(Array.isArray(result.archivedAuctions)) APP_STATE.archivedAuctions = result.archivedAuctions;
+    if(result.tar && typeof result.tar === 'object') {
+      APP_STATE.tar = Object.assign({}, APP_STATE.tar, result.tar, { todayConversionsDate: result.tar.todayConversionsDate || getLocalDate() });
     }
     APP_STATE.isDirty = false;
-    return { hasData: true, corrupted: false };
+    
+    // Also save to session and IndexedDB as backup
+    STORAGE.saveSession(result);
+    STORAGE.saveIndexedDB(result);
+    
+    return { hasData: true, corrupted: false, source: source };
+    
   } catch(e) {
     console.error('Load error (corrupted data):', e);
-    return { hasData: false, corrupted: true };
+    return { hasData: false, corrupted: true, source: null };
   }
+}
+
+// Async IndexedDB load fallback
+function loadIndexedDBFallback() {
+  STORAGE.loadIndexedDB().then(function(data) {
+    if(data) {
+      // We have data from IndexedDB - apply it if state is empty
+      var isEmpty = APP_STATE.products.length === 0 && 
+                    APP_STATE.company.name === '' && 
+                    APP_STATE.wallet.balance === 0;
+      if(isEmpty) {
+        if(data.company && typeof data.company === 'object') {
+          APP_STATE.company = Object.assign({}, APP_STATE.company, data.company, { documents: data.company.documents || {}, photos: data.company.photos || [] });
+        }
+        if(Array.isArray(data.products)) APP_STATE.products = data.products;
+        if(Array.isArray(data.orders)) APP_STATE.orders = data.orders;
+        if(Array.isArray(data.receivables)) APP_STATE.receivables = data.receivables;
+        if(Array.isArray(data.conversions)) APP_STATE.conversions = data.conversions;
+        if(data.wallet && typeof data.wallet === 'object') APP_STATE.wallet = data.wallet;
+        if(data.certToggles && typeof data.certToggles === 'object') APP_STATE.certToggles = data.certToggles;
+        if(Array.isArray(data.briefs)) APP_STATE.briefs = data.briefs;
+        if(Array.isArray(data.archivedAuctions)) APP_STATE.archivedAuctions = data.archivedAuctions;
+        if(data.tar && typeof data.tar === 'object') {
+          APP_STATE.tar = Object.assign({}, APP_STATE.tar, data.tar, { todayConversionsDate: data.tar.todayConversionsDate || getLocalDate() });
+        }
+        APP_STATE.isDirty = false;
+        renderAllDebounced();
+        showToast('📦 Restored from IndexedDB backup', 'info');
+      }
+    }
+  }).catch(function() {});
 }
 
 function forceSave() {
@@ -1756,6 +2149,56 @@ function forceSave() {
   showToast('💾 Data saved!', 'success');
 }
 
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportData() {
+  var data = STORAGE.exportData();
+  if(data) {
+    showToast('📤 Data exported successfully!', 'success');
+  } else {
+    showToast('❌ No data to export', 'error');
+  }
+}
+
+function importData() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if(!file) return;
+    STORAGE.importData(file).then(function(data) {
+      // Apply imported data
+      if(data.company) {
+        APP_STATE.company = Object.assign({}, APP_STATE.company, data.company, { documents: data.company.documents || {}, photos: data.company.photos || [] });
+      }
+      if(Array.isArray(data.products)) APP_STATE.products = data.products;
+      if(Array.isArray(data.orders)) APP_STATE.orders = data.orders;
+      if(Array.isArray(data.receivables)) APP_STATE.receivables = data.receivables;
+      if(Array.isArray(data.conversions)) APP_STATE.conversions = data.conversions;
+      if(data.wallet) APP_STATE.wallet = data.wallet;
+      if(data.certToggles) APP_STATE.certToggles = data.certToggles;
+      if(Array.isArray(data.briefs)) APP_STATE.briefs = data.briefs;
+      if(Array.isArray(data.archivedAuctions)) APP_STATE.archivedAuctions = data.archivedAuctions;
+      if(data.tar) {
+        APP_STATE.tar = Object.assign({}, APP_STATE.tar, data.tar, { todayConversionsDate: data.tar.todayConversionsDate || getLocalDate() });
+      }
+      markDirty();
+      saveToStorageImmediate();
+      renderAllDebounced();
+      showToast('📥 Data imported successfully!', 'success');
+    }).catch(function(err) {
+      showToast('❌ Import failed: ' + err.message, 'error');
+    });
+    this.value = '';
+  };
+  input.click();
+}
+
+// ============================================================
+// REST OF FUNCTIONS (compressed for space - same as before)
+// ============================================================
 function convertReceivable(id) {
   var r = APP_STATE.receivables.find(function(x) { return x.id === id; });
   if(!r) { showToast('Receivable not found', 'error'); return; }
@@ -1834,6 +2277,7 @@ function renderAll() {
     renderArchive();
     renderAuctionSchedule();
     renderTARAdvisory();
+    if(diagPanelVisible) updateDiagnostic();
   } finally { isRendering = false; }
 }
 
@@ -2275,6 +2719,9 @@ function renderTARAdvisory() {
   text.innerHTML = msg;
 }
 
+// ============================================================
+// FILE UPLOADS
+// ============================================================
 function setupFileUploads() {
   var logoUpload = $('companyLogoUpload');
   var logoInput = $('logoFileInput');
@@ -2371,6 +2818,9 @@ function setupFileUploads() {
   }
 }
 
+// ============================================================
+// MODAL FUNCTIONS
+// ============================================================
 function openProductModal(productId) {
   if(advancedSpecsOpen) toggleAdvancedSpecs();
   APP_STATE.currentEditId = productId || null;
@@ -2506,6 +2956,9 @@ function processDeposit() {
   if(amt) { var v = parseFloat(amt); if(v > 0) { APP_STATE.wallet.balance = Number(APP_STATE.wallet.balance) + v; markDirty(); saveToStorageDebounced(); renderAllDebounced(); showToast('Deposited ' + money(v), 'success'); } }
 }
 
+// ============================================================
+// TOUR FUNCTIONS
+// ============================================================
 function startTour() {
   document.querySelectorAll('.modal.show').forEach(function(m) { closeModal(m.id); });
   APP_STATE.tour.active = true;
@@ -2631,7 +3084,9 @@ function openSimulationModal(archiveId) {
 }
 
 function bulletproofSignOut() {
-  window.location.href = './';
+  // FIX #1: Do NOT delete data on sign-out
+  // Just redirect to the sign-in page
+  window.location.href = 'signin.html';
 }
 
 function setupTARDelegation() {
@@ -2676,6 +3131,9 @@ function setupArchiveDelegation() {
   });
 }
 
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
 function initEventListeners() {
   setupFormSubmit('productForm', saveProduct);
   setupFormSubmit('auctionForm', postAuction);
@@ -2737,6 +3195,21 @@ function initEventListeners() {
   if(sync) sync.addEventListener('click', function() { saveToStorageImmediate(); showToast('☁️ Synced!', 'success'); });
   var force = $('forceSaveBtn');
   if(force) force.addEventListener('click', forceSave);
+  
+  // Export/Import buttons
+  var exportBtn = $('exportBtn');
+  if(exportBtn) exportBtn.addEventListener('click', exportData);
+  var diagBtn = $('diagBtn');
+  if(diagBtn) diagBtn.addEventListener('click', runDiagnostics);
+  var closeDiag = $('closeDiagModal');
+  if(closeDiag) closeDiag.addEventListener('click', function() { closeModal('diagModal'); });
+  var closeDiagBtn = $('closeDiagBtn');
+  if(closeDiagBtn) closeDiagBtn.addEventListener('click', function() { closeModal('diagModal'); });
+  var runDiagBtn = $('runDiagBtn');
+  if(runDiagBtn) runDiagBtn.addEventListener('click', runDiagnostics);
+  var importBtn = $('importBtn');
+  if(importBtn) importBtn.addEventListener('click', importData);
+  
   var addCert = $('addCertBtn');
   if(addCert) addCert.addEventListener('click', function() {
     var drop = $('certDropdown');
@@ -2769,21 +3242,106 @@ function initEventListeners() {
   });
   setupArchiveDelegation();
   setupTARDelegation();
+  
+  // Diagnostic toggle
+  var diagToggle = $('diagToggle');
+  if(diagToggle) diagToggle.addEventListener('click', toggleDiagnostic);
 }
 
+// ============================================================
+// INIT
+// ============================================================
+
+function runDiagnostics() {
+  var out = [];
+  out.push('=== TRADEAUX STORAGE DIAGNOSTICS ===\n');
+
+  // localStorage
+  var lsRaw = localStorage.getItem('tradeaux_seller_state');
+  out.push('localStorage.tradeaux_seller_state:');
+  if(lsRaw) {
+    try {
+      var ls = JSON.parse(lsRaw);
+      out.push('  ✓ EXISTS (' + lsRaw.length + ' bytes)');
+      out.push('  Products: ' + (ls.products ? ls.products.length : 0));
+      out.push('  Company name: ' + (ls.company && ls.company.name ? ls.company.name : 'NOT SET'));
+      out.push('  Has logo: ' + (ls.company && ls.company.logo ? 'YES' : 'NO'));
+      out.push('  Orders: ' + (ls.orders ? ls.orders.length : 0));
+      out.push('  Receivables: ' + (ls.receivables ? ls.receivables.length : 0));
+    } catch(e) {
+      out.push('  ✗ CORRUPTED');
+    }
+  } else {
+    out.push('  ✗ EMPTY');
+  }
+  out.push('');
+
+  // sessionStorage
+  var ssRaw = sessionStorage.getItem('tradeaux_seller_state_backup');
+  out.push('sessionStorage.tradeaux_seller_state_backup:');
+  if(ssRaw) {
+    out.push('  ✓ EXISTS (' + ssRaw.length + ' bytes)');
+  } else {
+    out.push('  ✗ EMPTY');
+  }
+  out.push('');
+
+  // IndexedDB
+  out.push('IndexedDB (async check running...)');
+  STORAGE.loadIndexedDB(function(dbData) {
+    var idxOut = [];
+    if(dbData) {
+      idxOut.push('  ✓ EXISTS');
+      idxOut.push('  Products: ' + (dbData.products ? dbData.products.length : 0));
+      idxOut.push('  Company name: ' + (dbData.company && dbData.company.name ? dbData.company.name : 'NOT SET'));
+      idxOut.push('  Has logo: ' + (dbData.company && dbData.company.logo ? 'YES' : 'NO'));
+    } else {
+      idxOut.push('  ✗ EMPTY');
+    }
+
+    // Memory state
+    idxOut.push('');
+    idxOut.push('=== CURRENT MEMORY STATE ===');
+    idxOut.push('Products: ' + APP_STATE.products.length);
+    idxOut.push('Company name: ' + (APP_STATE.company.name || 'NOT SET'));
+    idxOut.push('Has logo: ' + (APP_STATE.company.logo ? 'YES' : 'NO'));
+    idxOut.push('Wallet: ' + money(APP_STATE.wallet.balance));
+    idxOut.push('isDirty: ' + APP_STATE.isDirty);
+
+    var body = $('diagBody');
+    if(body) body.textContent = out.join('\n') + '\n' + idxOut.join('\n');
+  });
+
+  var body = $('diagModal');
+  if(body) body.classList.add('show');
+}
 function initApp() {
   try {
     showToast('🔐 Loading dashboard...', 'info');
+    
+    // Load from storage (localStorage + sessionStorage)
     var result = loadFromStorage();
+    
     if(!result.hasData && !result.corrupted) {
+      // First run - no data exists
       APP_STATE.products = [];
       APP_STATE.wallet = { balance: 0 };
       APP_STATE.receivables = [];
       APP_STATE.tar = { active: true, conversionFee: 25, minReceivable: 100, maxReceivable: 50000, autoConvert: true, batchSize: 50, dailyLimit: 500, todayConversions: 0, todayConversionsDate: getLocalDate(), totalConversions: 0, totalFeesEarned: 0 };
       saveToStorageImmediate();
     } else if(result.corrupted) {
-      showToast('⚠️ Saved data is corrupted. Please contact support.', 'error');
+      showToast('⚠️ Saved data is corrupted. Attempting IndexedDB recovery...', 'warning');
+      // Try IndexedDB fallback
+      loadIndexedDBFallback();
+    } else if(result.source && result.source !== 'none') {
+      showToast('📦 Loaded from ' + result.source, 'info');
     }
+    
+    // Async IndexedDB load (if localStorage was empty but IndexedDB has data)
+    setTimeout(function() {
+      loadIndexedDBFallback();
+    }, 500);
+    
     setupSlider('productMoisture', 'productMoistureVal', '%', 1);
     setupSlider('productScreenSize', 'productScreenSizeVal', '', 1);
     setupSlider('productDefects', 'productDefectsVal', '%', 1);
@@ -2798,9 +3356,11 @@ function initApp() {
     initEventListeners();
     renderAll();
     syncToBuyerArena();
+    
     setInterval(function() {
       try { updateAuctionStatuses(); renderAllDebounced(); } catch(e) { console.warn('Interval update error:', e); }
     }, 30000);
+    
     showToast('✅ Dashboard ready!', 'success');
   } catch(e) {
     console.error('Init error:', e);
@@ -2808,6 +3368,9 @@ function initApp() {
   }
 }
 
+// ============================================================
+// EXPOSE FUNCTIONS
+// ============================================================
 window.openCompanyModal = openCompanyModal;
 window.saveCompanyProfile = saveCompanyProfile;
 window.simulateAuction = simulateAuction;
@@ -2831,7 +3394,14 @@ window.closeModal = closeModal;
 window.processDeposit = processDeposit;
 window.bulletproofSignOut = bulletproofSignOut;
 window.forceSave = forceSave;
+window.exportData = exportData;
+window.importData = importData;
+window.runDiagnostics = runDiagnostics;
+window.toggleDiagnostic = toggleDiagnostic;
 
+// ============================================================
+// START
+// ============================================================
 initApp();
 </script>
 </body>
