@@ -263,6 +263,7 @@ button:disabled {
 }
 .debug-info.visible { display: block; }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -329,7 +330,7 @@ button:disabled {
       </div>
     </div>
 
-    <!-- STEP 4: RESET PASSWORD (NEW!) -->
+    <!-- STEP 4: RESET PASSWORD -->
     <div id="step4" class="step-container hidden">
       <div style="text-align:center; margin-bottom:20px;">
         <div style="font-size:16px; color:#7CFC00; margin-bottom:8px;">🔐 Reset Your Password</div>
@@ -360,10 +361,11 @@ button:disabled {
   // =====================================================
   // SUPABASE CONFIGURATION
   // =====================================================
-  const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+  var SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-  const DASHBOARDS = {
+  // FIX #3: Correct dashboard mappings
+  var DASHBOARDS = {
     'buyer': 'dashboard-buyer.html',
     'seller': 'dashboard-seller.html',
     'carrier': 'dashboard-transport.html',
@@ -375,13 +377,13 @@ button:disabled {
   // =====================================================
   // STATE
   // =====================================================
-  let supabaseClient = null;
-  let selectedRole = null;
-  let currentUser = null;
-  let signInButtonLocked = false;
-  let forgotPasswordLocked = false;
-  let isInitialized = false;
-  let resetToken = null;
+  var supabaseClient = null;
+  var selectedRole = null;
+  var currentUser = null;
+  var signInButtonLocked = false;
+  var forgotPasswordLocked = false;
+  var isInitialized = false;
+  var resetToken = null;
 
   // =====================================================
   // DOM HELPERS
@@ -391,56 +393,59 @@ button:disabled {
   }
 
   function showError(msg) {
-    const el = getEl('errorMsg');
+    var el = getEl('errorMsg');
     if (el) {
       el.textContent = msg;
       el.style.display = 'block';
-      const success = getEl('successMsg');
+      var success = getEl('successMsg');
       if (success) success.style.display = 'none';
     }
   }
 
   function showSuccess(msg) {
-    const el = getEl('successMsg');
+    var el = getEl('successMsg');
     if (el) {
       el.textContent = msg;
       el.style.display = 'block';
-      const error = getEl('errorMsg');
+      var error = getEl('errorMsg');
       if (error) error.style.display = 'none';
     }
   }
 
   function showLoading(show, text) {
-    const loader = getEl('loadingIndicator');
+    var loader = getEl('loadingIndicator');
     if (loader) {
       loader.style.display = show ? 'block' : 'none';
       if (show) loader.classList.add('visible');
       else loader.classList.remove('visible');
     }
-    const textEl = getEl('loadingText');
+    var textEl = getEl('loadingText');
     if (textEl && text) textEl.textContent = text;
   }
 
   function showStep(stepId) {
-    document.querySelectorAll('.step-container').forEach(el => {
-      el.classList.remove('visible');
-      el.classList.add('hidden');
-    });
-    const step = getEl(stepId);
+    var steps = document.querySelectorAll('.step-container');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].classList.remove('visible');
+      steps[i].classList.add('hidden');
+    }
+    var step = getEl(stepId);
     if (step) {
       step.classList.remove('hidden');
-      requestAnimationFrame(() => step.classList.add('visible'));
+      setTimeout(function() {
+        step.classList.add('visible');
+      }, 10);
     }
   }
 
   function redirectToDashboard(role) {
-    const url = DASHBOARDS[role];
+    var url = DASHBOARDS[role];
     if (!url) {
       showError('Unknown role');
       return;
     }
     showLoading(true, 'Redirecting...');
-    setTimeout(() => {
+    setTimeout(function() {
       window.location.href = url;
     }, 500);
   }
@@ -448,19 +453,48 @@ button:disabled {
   // =====================================================
   // AUTH FUNCTIONS
   // =====================================================
+  // FIX #5: Preserve tradeaux data during sign-out
   async function fullSignOut() {
     if (supabaseClient) {
       try { await supabaseClient.auth.signOut(); } catch(e) {}
     }
-    localStorage.clear();
-    sessionStorage.clear();
+    
+    // ONLY remove Supabase auth keys — NEVER wipe tradeaux data
+    var keysToRemove = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key && key.indexOf('supabase') !== -1) {
+          keysToRemove.push(key);
+        }
+        if (key && key.indexOf('sb-') === 0) {
+          keysToRemove.push(key);
+        }
+      }
+      for (var j = 0; j < keysToRemove.length; j++) {
+        localStorage.removeItem(keysToRemove[j]);
+      }
+      // Clear sessionStorage for supabase
+      var sessKeys = [];
+      for (var k = 0; k < sessionStorage.length; k++) {
+        var sKey = sessionStorage.key(k);
+        if (sKey && (sKey.indexOf('supabase') !== -1 || sKey.indexOf('sb-') === 0)) {
+          sessKeys.push(sKey);
+        }
+      }
+      for (var l = 0; l < sessKeys.length; l++) {
+        sessionStorage.removeItem(sessKeys[l]);
+      }
+    } catch(e) {}
+    
+    // Redirect to sign-in with logout param
     window.location.href = 'signin.html?logout=1';
   }
 
   async function showRolePicker(user) {
     currentUser = user;
     showStep('step3');
-    const display = getEl('userEmailDisplay');
+    var display = getEl('userEmailDisplay');
     if (display) display.textContent = 'Welcome, ' + (user.email || 'User');
   }
 
@@ -468,24 +502,21 @@ button:disabled {
   // CHECK FOR PASSWORD RESET TOKEN
   // =====================================================
   function checkForResetToken() {
-    // Check URL hash for access_token
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf('access_token') !== -1) {
       console.log('🔑 Password reset token detected');
       
-      // Extract token from hash
-      const params = new URLSearchParams(hash.substring(1));
-      const accessToken = params.get('access_token');
-      const type = params.get('type');
+      var params = new URLSearchParams(hash.substring(1));
+      var accessToken = params.get('access_token');
+      var type = params.get('type');
       
       if (accessToken && type === 'recovery') {
         resetToken = accessToken;
         showStep('step4');
-        const subtitle = getEl('subtitle');
+        var subtitle = getEl('subtitle');
         if (subtitle) subtitle.textContent = 'Reset Your Password';
         showSuccess('Please enter your new password below.');
         
-        // Clean the URL to remove the token (for security)
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
@@ -499,16 +530,16 @@ button:disabled {
   // HANDLE PASSWORD RESET
   // =====================================================
   async function handlePasswordReset() {
-    const password = getEl('resetPassword');
-    const confirm = getEl('resetPasswordConfirm');
+    var password = getEl('resetPassword');
+    var confirm = getEl('resetPasswordConfirm');
     
     if (!password || !confirm) {
       showError('Please enter your new password');
       return;
     }
 
-    const passwordValue = password.value;
-    const confirmValue = confirm.value;
+    var passwordValue = password.value;
+    var confirmValue = confirm.value;
 
     if (!passwordValue || !confirmValue) {
       showError('Please fill in both password fields');
@@ -525,31 +556,27 @@ button:disabled {
       return;
     }
 
-    const btn = getEl('resetPasswordBtn');
+    var btn = getEl('resetPasswordBtn');
     if (!btn) return;
 
     btn.disabled = true;
     btn.textContent = 'Updating...';
 
     try {
-      // Use the token to set the new password
-      const { data, error } = await supabaseClient.auth.updateUser({
+      var { data, error } = await supabaseClient.auth.updateUser({
         password: passwordValue
       });
 
       if (error) {
-        // If updateUser fails with the current session, try using the token
         if (resetToken) {
-          // Set the session with the reset token
-          const { error: sessionError } = await supabaseClient.auth.setSession({
+          var { error: sessionError } = await supabaseClient.auth.setSession({
             access_token: resetToken,
             refresh_token: ''
           });
           
           if (sessionError) throw sessionError;
           
-          // Try again with the new session
-          const { error: updateError } = await supabaseClient.auth.updateUser({
+          var { error: updateError } = await supabaseClient.auth.updateUser({
             password: passwordValue
           });
           
@@ -561,15 +588,12 @@ button:disabled {
 
       showSuccess('✅ Password updated successfully! Please sign in with your new password.');
       
-      // Clear the reset state
       resetToken = null;
       
-      // Show sign in form after a delay
-      setTimeout(() => {
+      setTimeout(function() {
         showStep('step1');
-        const subtitle = getEl('subtitle');
+        var subtitle = getEl('subtitle');
         if (subtitle) subtitle.textContent = 'Sign in to your account';
-        // Clear password fields
         if (password) password.value = '';
         if (confirm) confirm.value = '';
       }, 2000);
@@ -593,19 +617,19 @@ button:disabled {
     if (signInButtonLocked) return;
     signInButtonLocked = true;
 
-    const btn = getEl('signinBtn');
+    var btn = getEl('signinBtn');
     if (!btn) { signInButtonLocked = false; return; }
 
-    const email = getEl('email');
-    const password = getEl('password');
+    var email = getEl('email');
+    var password = getEl('password');
     if (!email || !password) {
       showError('Please enter email and password');
       signInButtonLocked = false;
       return;
     }
 
-    const emailValue = email.value.trim();
-    const passwordValue = password.value;
+    var emailValue = email.value.trim();
+    var passwordValue = password.value;
 
     if (!emailValue || !passwordValue) {
       showError('Please fill in all fields');
@@ -617,28 +641,28 @@ button:disabled {
     btn.textContent = 'Signing in...';
 
     try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
+      var { data, error } = await supabaseClient.auth.signInWithPassword({
         email: emailValue,
         password: passwordValue
       });
 
       if (error) throw error;
 
-      const { data: profile } = await supabaseClient
+      var { data: profile } = await supabaseClient
         .from('profiles')
         .select('role')
         .eq('id', data.user.id)
         .maybeSingle();
 
-      if (profile?.role && DASHBOARDS[profile.role]) {
-        localStorage.setItem('tradeaux_role', profile.role);
+      if (profile && profile.role && DASHBOARDS[profile.role]) {
+        try { localStorage.setItem('tradeaux_role', profile.role); } catch(e) {}
         redirectToDashboard(profile.role);
       } else {
         showRolePicker(data.user);
       }
 
     } catch (error) {
-      if (error.message.includes('Invalid login credentials')) {
+      if (error.message.indexOf('Invalid login credentials') !== -1) {
         showError('Invalid email or password.');
       } else {
         showError(error.message);
@@ -654,21 +678,21 @@ button:disabled {
   async function handleSignUp(e) {
     e.preventDefault();
 
-    const btn = getEl('signupBtn');
+    var btn = getEl('signupBtn');
     if (!btn) return;
 
-    const email = getEl('signupEmail');
-    const password = getEl('signupPassword');
-    const company = getEl('companyNameInput');
+    var email = getEl('signupEmail');
+    var password = getEl('signupPassword');
+    var company = getEl('companyNameInput');
 
     if (!email || !password || !company) {
       showError('Please fill in all fields');
       return;
     }
 
-    const emailValue = email.value.trim();
-    const passwordValue = password.value;
-    const companyValue = company.value.trim();
+    var emailValue = email.value.trim();
+    var passwordValue = password.value;
+    var companyValue = company.value.trim();
 
     if (!emailValue || !passwordValue || !companyValue) {
       showError('Please fill in all fields');
@@ -684,7 +708,7 @@ button:disabled {
     btn.textContent = 'Creating...';
 
     try {
-      const { data, error } = await supabaseClient.auth.signUp({
+      var { data, error } = await supabaseClient.auth.signUp({
         email: emailValue,
         password: passwordValue,
         options: {
@@ -712,7 +736,7 @@ button:disabled {
       }
 
     } catch (error) {
-      if (error.message.includes('User already registered')) {
+      if (error.message.indexOf('User already registered') !== -1) {
         showError('An account with this email already exists.');
       } else {
         showError(error.message);
@@ -728,10 +752,10 @@ button:disabled {
     e.preventDefault();
     if (forgotPasswordLocked) return;
 
-    const email = getEl('email');
+    var email = getEl('email');
     if (!email) return;
 
-    const emailValue = email.value.trim();
+    var emailValue = email.value.trim();
     if (!emailValue) {
       showError('Please enter your email address');
       email.classList.add('error-field');
@@ -739,12 +763,12 @@ button:disabled {
     }
 
     forgotPasswordLocked = true;
-    const link = e.currentTarget;
-    const originalText = link.textContent;
+    var link = e.currentTarget;
+    var originalText = link.textContent;
     link.textContent = 'Sending...';
 
     try {
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(emailValue, {
+      var { error } = await supabaseClient.auth.resetPasswordForEmail(emailValue, {
         redirectTo: window.location.origin + window.location.pathname
       });
 
@@ -752,7 +776,7 @@ button:disabled {
 
       showSuccess('Password reset email sent! Check your inbox.');
       link.textContent = '✓ Sent!';
-      setTimeout(() => { link.textContent = originalText; }, 3000);
+      setTimeout(function() { link.textContent = originalText; }, 3000);
 
     } catch (error) {
       showError(error.message || 'Failed to send reset email');
@@ -764,14 +788,15 @@ button:disabled {
 
   // ---- ROLE SELECTION ----
   function handleRoleSelect(e) {
-    const element = e.currentTarget;
-    document.querySelectorAll('.role-option').forEach(opt => {
-      opt.classList.remove('selected');
-    });
+    var element = e.currentTarget;
+    var options = document.querySelectorAll('.role-option');
+    for (var i = 0; i < options.length; i++) {
+      options[i].classList.remove('selected');
+    }
     element.classList.add('selected');
     selectedRole = element.dataset.role;
 
-    const btn = getEl('roleContinueBtn');
+    var btn = getEl('roleContinueBtn');
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Go to Dashboard →';
@@ -784,7 +809,7 @@ button:disabled {
       return;
     }
 
-    const btn = getEl('roleContinueBtn');
+    var btn = getEl('roleContinueBtn');
     if (!btn) return;
 
     btn.disabled = true;
@@ -798,7 +823,7 @@ button:disabled {
           .eq('id', currentUser.id);
       }
 
-      localStorage.setItem('tradeaux_role', selectedRole);
+      try { localStorage.setItem('tradeaux_role', selectedRole); } catch(e) {}
       redirectToDashboard(selectedRole);
 
     } catch (error) {
@@ -814,13 +839,11 @@ button:disabled {
   async function init() {
     if (isInitialized) return;
     
-    // Check Supabase
     if (!window.supabase) {
       showError('Supabase failed to load. Please refresh.');
       return;
     }
 
-    // Initialize Supabase
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (err) {
@@ -837,16 +860,16 @@ button:disabled {
 
     // Check for existing session
     try {
-      const { data } = await supabaseClient.auth.getSession();
-      if (data?.session) {
-        const { data: profile } = await supabaseClient
+      var { data } = await supabaseClient.auth.getSession();
+      if (data && data.session) {
+        var { data: profile } = await supabaseClient
           .from('profiles')
           .select('role')
           .eq('id', data.session.user.id)
           .maybeSingle();
 
-        if (profile?.role && DASHBOARDS[profile.role]) {
-          localStorage.setItem('tradeaux_role', profile.role);
+        if (profile && profile.role && DASHBOARDS[profile.role]) {
+          try { localStorage.setItem('tradeaux_role', profile.role); } catch(e) {}
           redirectToDashboard(profile.role);
           return;
         }
@@ -858,68 +881,71 @@ button:disabled {
     showStep('step1');
     showLoading(false);
     isInitialized = true;
+
+    // Protect tradeaux data during page transitions
+    window.addEventListener('beforeunload', function() {
+      try {
+        var raw = localStorage.getItem('tradeaux_seller_state');
+        if (raw) {
+          sessionStorage.setItem('tradeaux_seller_state_backup', raw);
+        }
+      } catch(e) {}
+    });
   }
 
   // =====================================================
   // WIRE EVENTS
   // =====================================================
   function wireEvents() {
-    // Sign In
-    const signinForm = getEl('step1');
+    var signinForm = getEl('step1');
     if (signinForm) signinForm.addEventListener('submit', handleSignIn);
 
-    // Sign Up
-    const signupForm = getEl('step2');
+    var signupForm = getEl('step2');
     if (signupForm) signupForm.addEventListener('submit', handleSignUp);
 
-    // Navigation
-    const showSignup = getEl('showSignup');
+    var showSignup = getEl('showSignup');
     if (showSignup) {
-      showSignup.addEventListener('click', (e) => {
+      showSignup.addEventListener('click', function(e) {
         e.preventDefault();
         showStep('step2');
-        const subtitle = getEl('subtitle');
+        var subtitle = getEl('subtitle');
         if (subtitle) subtitle.textContent = 'Create your account';
       });
     }
 
-    const showSignin = getEl('showSignin');
+    var showSignin = getEl('showSignin');
     if (showSignin) {
-      showSignin.addEventListener('click', (e) => {
+      showSignin.addEventListener('click', function(e) {
         e.preventDefault();
         showStep('step1');
-        const subtitle = getEl('subtitle');
+        var subtitle = getEl('subtitle');
         if (subtitle) subtitle.textContent = 'Sign in to your account';
       });
     }
 
-    // Forgot Password
-    const forgotLink = getEl('forgotLink');
+    var forgotLink = getEl('forgotLink');
     if (forgotLink) forgotLink.addEventListener('click', handleForgotPassword);
 
-    // Logout
-    const logoutBtn = getEl('logoutAfterLogin');
+    var logoutBtn = getEl('logoutAfterLogin');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', async (e) => {
+      logoutBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        await fullSignOut();
+        fullSignOut();
       });
     }
 
-    // Role options
-    document.querySelectorAll('.role-option').forEach(el => {
-      el.addEventListener('click', handleRoleSelect);
-    });
+    var roleOptions = document.querySelectorAll('.role-option');
+    for (var i = 0; i < roleOptions.length; i++) {
+      roleOptions[i].addEventListener('click', handleRoleSelect);
+    }
 
-    // Role continue
-    const roleContinue = getEl('roleContinueBtn');
+    var roleContinue = getEl('roleContinueBtn');
     if (roleContinue) roleContinue.addEventListener('click', handleRoleContinue);
 
-    // Password toggles
-    const toggle1 = getEl('togglePassword1');
+    var toggle1 = getEl('togglePassword1');
     if (toggle1) {
       toggle1.addEventListener('click', function() {
-        const pw = getEl('password');
+        var pw = getEl('password');
         if (pw) {
           pw.type = pw.type === 'password' ? 'text' : 'password';
           this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
@@ -927,10 +953,10 @@ button:disabled {
       });
     }
 
-    const toggle2 = getEl('togglePassword2');
+    var toggle2 = getEl('togglePassword2');
     if (toggle2) {
       toggle2.addEventListener('click', function() {
-        const pw = getEl('signupPassword');
+        var pw = getEl('signupPassword');
         if (pw) {
           pw.type = pw.type === 'password' ? 'text' : 'password';
           this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
@@ -938,11 +964,10 @@ button:disabled {
       });
     }
 
-    // Reset password toggle
-    const toggleReset = getEl('toggleResetPassword');
+    var toggleReset = getEl('toggleResetPassword');
     if (toggleReset) {
       toggleReset.addEventListener('click', function() {
-        const pw = getEl('resetPassword');
+        var pw = getEl('resetPassword');
         if (pw) {
           pw.type = pw.type === 'password' ? 'text' : 'password';
           this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
@@ -950,10 +975,10 @@ button:disabled {
       });
     }
 
-    const toggleResetConfirm = getEl('toggleResetPasswordConfirm');
+    var toggleResetConfirm = getEl('toggleResetPasswordConfirm');
     if (toggleResetConfirm) {
       toggleResetConfirm.addEventListener('click', function() {
-        const pw = getEl('resetPasswordConfirm');
+        var pw = getEl('resetPasswordConfirm');
         if (pw) {
           pw.type = pw.type === 'password' ? 'text' : 'password';
           this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
@@ -961,22 +986,19 @@ button:disabled {
       });
     }
 
-    // Reset password button
-    const resetBtn = getEl('resetPasswordBtn');
+    var resetBtn = getEl('resetPasswordBtn');
     if (resetBtn) resetBtn.addEventListener('click', handlePasswordReset);
 
-    // Back to sign in from reset
-    const backToSignin = getEl('backToSignin');
+    var backToSignin = getEl('backToSignin');
     if (backToSignin) {
-      backToSignin.addEventListener('click', (e) => {
+      backToSignin.addEventListener('click', function(e) {
         e.preventDefault();
         resetToken = null;
         showStep('step1');
-        const subtitle = getEl('subtitle');
+        var subtitle = getEl('subtitle');
         if (subtitle) subtitle.textContent = 'Sign in to your account';
-        // Clear reset fields
-        const resetPw = getEl('resetPassword');
-        const resetConfirm = getEl('resetPasswordConfirm');
+        var resetPw = getEl('resetPassword');
+        var resetConfirm = getEl('resetPasswordConfirm');
         if (resetPw) resetPw.value = '';
         if (resetConfirm) resetConfirm.value = '';
       });
@@ -987,15 +1009,13 @@ button:disabled {
   // START
   // =====================================================
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', async function() {
-      await init();
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
       wireEvents();
     });
   } else {
-    (async function() {
-      await init();
-      wireEvents();
-    })();
+    init();
+    wireEvents();
   }
 
 })();
