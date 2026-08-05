@@ -710,7 +710,7 @@
 <button class="diag-toggle" id="diagToggle" type="button" aria-label="Toggle diagnostic panel">🔍 DIAG</button>
 
 <!-- ============================================================ -->
-<!-- PRODUCT MODAL - COMPLETE FIXED VERSION -->
+<!-- PRODUCT MODAL - COMPLETE -->
 <!-- ============================================================ -->
 <div class="modal" id="productModal" role="dialog" aria-labelledby="productModalTitle">
   <div class="modal-content wide">
@@ -1118,7 +1118,7 @@ function setupCompanyName() {
 }
 
 // ============================================================
-// SELECT AUCTION TYPE
+// SELECT AUCTION TYPE - FIXED
 // ============================================================
 function selectAuctionType(type) {
   APP.selectedAuctionType = type;
@@ -1138,6 +1138,24 @@ function selectAuctionType(type) {
   if(std) std.classList.toggle('hidden', type !== 'standard');
   if(pal) pal.classList.toggle('hidden', type !== 'pallet');
   if(sam) sam.classList.toggle('hidden', type !== 'sample');
+}
+
+// ============================================================
+// REMOVE CERTIFICATE - FIXED (NEW FUNCTION)
+// ============================================================
+function removeCertificate(type) {
+  if (type === 'incorporation') {
+    showToast('Incorporation certificate is required and cannot be removed', 'warning');
+    return;
+  }
+  if (!confirm('Remove "' + type + '" certificate?')) return;
+  delete APP.certToggles[type];
+  if (APP.company.documents) {
+    delete APP.company.documents[type];
+  }
+  saveData(APP);
+  renderCertificates();
+  showToast('✅ Certificate removed', 'success');
 }
 
 // ============================================================
@@ -1387,6 +1405,114 @@ function openProductModal(productId) {
 }
 
 // ============================================================
+// RENDER CERTIFICATES - FIXED WITH REMOVE BUTTON
+// ============================================================
+function renderCertificates() {
+  var grid = $('certGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  var types = ['incorporation'].concat(Object.keys(APP.certToggles || {}).filter(function(k) { return k !== 'incorporation'; }).sort());
+  types.forEach(function(type) {
+    var info = {
+      incorporation: { icon: '🏢', label: 'Incorporation', desc: 'Required - Admin Verified' },
+      export: { icon: '📄', label: 'Export License', desc: 'Government export capacity' },
+      organic: { icon: '🌱', label: 'Organic', desc: 'Organic certification' },
+      fairtrade: { icon: '🤝', label: 'Fair Trade', desc: 'Fair Trade certified' },
+      kosher: { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
+      halal: { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
+      brcgs: { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
+      origin: { icon: '🌍', label: 'Origin', desc: 'Certificate of Origin' },
+      'IFS Food': { icon: '🍽️', label: 'IFS Food', desc: 'International Featured Standards' },
+      SQF: { icon: '✅', label: 'SQF', desc: 'Safe Quality Food' },
+      'FSSC 22000': { icon: '🔐', label: 'FSSC 22000', desc: 'Food Safety System Certification' },
+      HACCP: { icon: '🛡️', label: 'HACCP', desc: 'Hazard Analysis Critical Control Point' },
+      GMP: { icon: '🏭', label: 'GMP', desc: 'Good Manufacturing Practice' },
+      USDA: { icon: '🇺🇸', label: 'USDA Organic', desc: 'USDA Organic certification' },
+      EU: { icon: '🇪🇺', label: 'EU Organic', desc: 'EU Organic certification' },
+      'Canada Inspection Agency': { icon: '🇨🇦', label: 'CIA (Canada)', desc: 'Canadian Inspection Agency' },
+      JAS: { icon: '🇯🇵', label: 'JAS', desc: 'Japanese Agricultural Standard' },
+      'Soil Association': { icon: '🌿', label: 'Soil Association', desc: 'Soil Association Organic' },
+      'ECO Cert': { icon: '🌎', label: 'ECO Cert', desc: 'ECO Cert organic' },
+      'Rainforest Alliance': { icon: '🐸', label: 'Rainforest Alliance', desc: 'Rainforest Alliance certified' },
+      other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
+    }[type] || { icon: '📄', label: type, desc: '' };
+    
+    var required = type === 'incorporation';
+    var verified = APP.certToggles[type] || false;
+    var div = document.createElement('div');
+    div.className = 'cert-block';
+    div.dataset.certType = type;
+    
+    var img = APP.company.documents ? APP.company.documents[type] : null;
+    var html;
+    if(img && typeof img === 'string' && img.startsWith('data:')) {
+      var isPdf = img.startsWith('data:application/pdf');
+      if(isPdf) {
+        html = '<div class="cert-preview" role="button" tabindex="0"><span style="font-size:24px;">📄</span><span style="font-size:9px;color:#7CFC00;margin-left:4px;">PDF uploaded</span></div>';
+      } else {
+        html = '<div class="cert-preview" role="button" tabindex="0"><img src="' + escapeHtml(img) + '" alt="' + escapeHtml(info.label) + ' certificate" style="width:100%;height:100%;object-fit:cover;"></div>';
+      }
+    } else {
+      html = '<div class="cert-preview" role="button" tabindex="0"><span class="placeholder">📤 Upload</span></div>';
+    }
+    
+    var toggle = required ? '<span style="font-size:9px;color:#7CFC00;">🔒 Admin Verified</span>' :
+      '<div class="cert-toggle-row"><span>' + (verified ? '✅ Verified' : '⏳ Pending') + '</span><label class="toggle-switch"><input type="checkbox" data-cert="' + type + '" ' + (verified ? 'checked' : '') + '><span class="slider"></span></label></div>';
+    
+    // Add remove button for non-required certs
+    var removeBtn = '';
+    if (!required) {
+      removeBtn = '<button class="btn-remove-cert" data-cert-type="' + type + '" onclick="removeCertificate(\'' + type + '\')" aria-label="Remove certificate">🗑 Remove</button>';
+    }
+    
+    div.innerHTML = '<div class="cert-icon">' + info.icon + '</div><div class="cert-name">' + escapeHtml(info.label) + '</div><div class="cert-desc">' + escapeHtml(info.desc) + '</div>' + (required ? '<div class="cert-required">★ REQUIRED</div>' : '') + html + toggle + removeBtn;
+    grid.appendChild(div);
+    
+    // Add upload functionality to certificate preview
+    var previewDiv = div.querySelector('.cert-preview');
+    if(previewDiv) {
+      previewDiv.style.cursor = 'pointer';
+      previewDiv.addEventListener('click', function(e) {
+        var parentBlock = this.closest('.cert-block');
+        if(!parentBlock) return;
+        var certType = parentBlock.dataset.certType;
+        if(!certType) return;
+        
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.pdf,.jpg,.png,.gif,.webp';
+        input.onchange = function(e) {
+          var file = e.target.files[0];
+          if(!file) return;
+          var valid = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+          if(valid.indexOf(file.type) === -1) {
+            showToast('Invalid file type. Please upload PDF, JPG, PNG, GIF, or WEBP.', 'error');
+            this.value = '';
+            return;
+          }
+          if(file.size > 10 * 1024 * 1024) {
+            showToast('File too large. Max 10MB.', 'error');
+            this.value = '';
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            if(!APP.company.documents) APP.company.documents = {};
+            APP.company.documents[certType] = ev.target.result;
+            saveData(APP);
+            renderCertificates();
+            showToast('✅ Certificate uploaded!', 'success');
+          };
+          reader.readAsDataURL(file);
+          this.value = '';
+        };
+        input.click();
+      });
+    }
+  });
+}
+
+// ============================================================
 // RENDER FUNCTIONS
 // ============================================================
 function renderCompany() {
@@ -1493,104 +1619,6 @@ function renderProducts() {
       '<div class="product-actions"><button class="post-auction-btn" type="button" ' + postBtnDisabled + ' data-product-id="' + p.id + '">' + postBtnText + '</button><button class="edit-btn" type="button" data-product-id="' + p.id + '">✏️ Edit</button><button class="delete-btn" type="button" data-product-id="' + p.id + '">🗑</button></div>';
     
     grid.appendChild(card);
-  });
-}
-
-function renderCertificates() {
-  var grid = $('certGrid');
-  if(!grid) return;
-  grid.innerHTML = '';
-  var types = ['incorporation'].concat(Object.keys(APP.certToggles || {}).filter(function(k) { return k !== 'incorporation'; }).sort());
-  types.forEach(function(type) {
-    var info = {
-      incorporation: { icon: '🏢', label: 'Incorporation', desc: 'Required - Admin Verified' },
-      export: { icon: '📄', label: 'Export License', desc: 'Government export capacity' },
-      organic: { icon: '🌱', label: 'Organic', desc: 'Organic certification' },
-      fairtrade: { icon: '🤝', label: 'Fair Trade', desc: 'Fair Trade certified' },
-      kosher: { icon: '✡️', label: 'Kosher', desc: 'Kosher certified' },
-      halal: { icon: '☪️', label: 'Halal', desc: 'Halal certified' },
-      brcgs: { icon: '🔒', label: 'BRCGS', desc: 'BRC Global Standards' },
-      origin: { icon: '🌍', label: 'Origin', desc: 'Certificate of Origin' },
-      'IFS Food': { icon: '🍽️', label: 'IFS Food', desc: 'International Featured Standards' },
-      SQF: { icon: '✅', label: 'SQF', desc: 'Safe Quality Food' },
-      'FSSC 22000': { icon: '🔐', label: 'FSSC 22000', desc: 'Food Safety System Certification' },
-      HACCP: { icon: '🛡️', label: 'HACCP', desc: 'Hazard Analysis Critical Control Point' },
-      GMP: { icon: '🏭', label: 'GMP', desc: 'Good Manufacturing Practice' },
-      USDA: { icon: '🇺🇸', label: 'USDA Organic', desc: 'USDA Organic certification' },
-      EU: { icon: '🇪🇺', label: 'EU Organic', desc: 'EU Organic certification' },
-      'Canada Inspection Agency': { icon: '🇨🇦', label: 'CIA (Canada)', desc: 'Canadian Inspection Agency' },
-      JAS: { icon: '🇯🇵', label: 'JAS', desc: 'Japanese Agricultural Standard' },
-      'Soil Association': { icon: '🌿', label: 'Soil Association', desc: 'Soil Association Organic' },
-      'ECO Cert': { icon: '🌎', label: 'ECO Cert', desc: 'ECO Cert organic' },
-      'Rainforest Alliance': { icon: '🐸', label: 'Rainforest Alliance', desc: 'Rainforest Alliance certified' },
-      other: { icon: '📎', label: 'Other', desc: 'Additional certification' }
-    }[type] || { icon: '📄', label: type, desc: '' };
-    
-    var required = type === 'incorporation';
-    var verified = APP.certToggles[type] || false;
-    var div = document.createElement('div');
-    div.className = 'cert-block';
-    div.dataset.certType = type;
-    
-    var img = APP.company.documents ? APP.company.documents[type] : null;
-    var html;
-    if(img && typeof img === 'string' && img.startsWith('data:')) {
-      var isPdf = img.startsWith('data:application/pdf');
-      if(isPdf) {
-        html = '<div class="cert-preview" role="button" tabindex="0"><span style="font-size:24px;">📄</span><span style="font-size:9px;color:#7CFC00;margin-left:4px;">PDF uploaded</span></div>';
-      } else {
-        html = '<div class="cert-preview" role="button" tabindex="0"><img src="' + escapeHtml(img) + '" alt="' + escapeHtml(info.label) + ' certificate" style="width:100%;height:100%;object-fit:cover;"></div>';
-      }
-    } else {
-      html = '<div class="cert-preview" role="button" tabindex="0"><span class="placeholder">📤 Upload</span></div>';
-    }
-    
-    var toggle = required ? '<span style="font-size:9px;color:#7CFC00;">🔒 Admin Verified</span>' :
-      '<div class="cert-toggle-row"><span>' + (verified ? '✅ Verified' : '⏳ Pending') + '</span><label class="toggle-switch"><input type="checkbox" data-cert="' + type + '" ' + (verified ? 'checked' : '') + '><span class="slider"></span></label></div>';
-    div.innerHTML = '<div class="cert-icon">' + info.icon + '</div><div class="cert-name">' + escapeHtml(info.label) + '</div><div class="cert-desc">' + escapeHtml(info.desc) + '</div>' + (required ? '<div class="cert-required">★ REQUIRED</div>' : '') + html + toggle;
-    grid.appendChild(div);
-    
-    // Add upload functionality to certificate preview
-    var previewDiv = div.querySelector('.cert-preview');
-    if(previewDiv) {
-      previewDiv.style.cursor = 'pointer';
-      previewDiv.addEventListener('click', function(e) {
-        var parentBlock = this.closest('.cert-block');
-        if(!parentBlock) return;
-        var certType = parentBlock.dataset.certType;
-        if(!certType) return;
-        
-        var input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.pdf,.jpg,.png,.gif,.webp';
-        input.onchange = function(e) {
-          var file = e.target.files[0];
-          if(!file) return;
-          var valid = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-          if(valid.indexOf(file.type) === -1) {
-            showToast('Invalid file type. Please upload PDF, JPG, PNG, GIF, or WEBP.', 'error');
-            this.value = '';
-            return;
-          }
-          if(file.size > 10 * 1024 * 1024) {
-            showToast('File too large. Max 10MB.', 'error');
-            this.value = '';
-            return;
-          }
-          var reader = new FileReader();
-          reader.onload = function(ev) {
-            if(!APP.company.documents) APP.company.documents = {};
-            APP.company.documents[certType] = ev.target.result;
-            saveData(APP);
-            renderCertificates();
-            showToast('✅ Certificate uploaded!', 'success');
-          };
-          reader.readAsDataURL(file);
-          this.value = '';
-        };
-        input.click();
-      });
-    }
   });
 }
 
@@ -1993,7 +2021,7 @@ function init() {
     });
   }
   
-  // Auction type buttons
+  // Auction type buttons - FIXED
   document.querySelectorAll('.auction-type-option').forEach(function(btn) {
     btn.addEventListener('click', function() {
       selectAuctionType(this.dataset.type);
