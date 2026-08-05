@@ -49,7 +49,7 @@
 
     .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
 
-    /* ===== 3D LOGO - TRADEAUX (from About page) ===== */
+    /* ===== 3D LOGO - TRADEAUX ===== */
     .gem-logo-corner {
       position: fixed;
       top: 20px;
@@ -241,7 +241,7 @@
       filter: blur(20px); z-index: -1;
     }
 
-    /* ===== DASHBOARD HEADER WITH LOGO PLACEHOLDERS ===== */
+    /* ===== GRADIENT DASHBOARD HEADER - MULTI-COLOR ===== */
     .dashboard-header {
       display: flex;
       align-items: center;
@@ -307,25 +307,37 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 28px;
       font-weight: 700;
-      background: linear-gradient(135deg, #00ced1, #7CFC00);
+      background: linear-gradient(135deg, #FF6B35, #FFD966, #7CFC00, #00ced1, #0066ff, #7CFC00);
+      background-size: 300% 300%;
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
       text-align: center;
       letter-spacing: 1px;
+      animation: gradientFlow 6s ease-in-out infinite;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .dashboard-title .company-name {
-      color: #FFD966;
-      -webkit-text-fill-color: #FFD966;
-      background: none;
+      background: linear-gradient(135deg, #FFD966, #FF6B35, #FFD966);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gradientFlow 4s ease-in-out infinite;
+      -webkit-text-fill-color: transparent;
     }
 
     .dashboard-title .editable-hint {
       font-size: 12px;
       font-family: 'Inter', sans-serif;
-      color: #4a5a7a;
-      -webkit-text-fill-color: #4a5a7a;
+      color: rgba(255,255,255,0.3);
+      -webkit-text-fill-color: rgba(255,255,255,0.3);
       background: none;
       display: block;
       font-weight: 400;
@@ -723,7 +735,7 @@
   <div class="wave-bg wave-ruby-bg"></div>
 </div>
 
-<!-- ===== 3D LOGO - TRADEAUX (from About page) ===== -->
+<!-- ===== 3D LOGO - TRADEAUX ===== -->
 <div class="gem-logo-corner" aria-hidden="true" role="presentation">
   <div class="gem-text">
     <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
@@ -1095,7 +1107,6 @@ function setupHeaderLogoUploads() {
     }
     var reader = new FileReader();
     reader.onload = function(e) {
-      // Store in localStorage
       var key = placeholderElement.id === 'headerLogoLeft' ? 'headerLogoLeftData' : 'headerLogoRightData';
       try {
         localStorage.setItem(key, e.target.result);
@@ -1103,7 +1114,6 @@ function setupHeaderLogoUploads() {
         showToast('Failed to save logo', 'error');
         return;
       }
-      // Display the image
       placeholderElement.innerHTML = '';
       var img = document.createElement('img');
       img.src = e.target.result;
@@ -1116,7 +1126,6 @@ function setupHeaderLogoUploads() {
     input.value = '';
   }
 
-  // Left logo upload
   if (leftLogo && leftInput) {
     setupKeyboardClickable(leftLogo);
     leftLogo.onclick = function(e) {
@@ -1124,10 +1133,7 @@ function setupHeaderLogoUploads() {
       e.stopPropagation();
       leftInput.click();
     };
-    leftInput.onchange = function(e) {
-      handleLogoUpload(this, leftLogo);
-    };
-    // Load saved logo
+    leftInput.onchange = function(e) { handleLogoUpload(this, leftLogo); };
     try {
       var savedLeft = localStorage.getItem('headerLogoLeftData');
       if (savedLeft) {
@@ -1140,7 +1146,6 @@ function setupHeaderLogoUploads() {
     } catch(e) {}
   }
 
-  // Right logo upload
   if (rightLogo && rightInput) {
     setupKeyboardClickable(rightLogo);
     rightLogo.onclick = function(e) {
@@ -1148,10 +1153,7 @@ function setupHeaderLogoUploads() {
       e.stopPropagation();
       rightInput.click();
     };
-    rightInput.onchange = function(e) {
-      handleLogoUpload(this, rightLogo);
-    };
-    // Load saved logo
+    rightInput.onchange = function(e) { handleLogoUpload(this, rightLogo); };
     try {
       var savedRight = localStorage.getItem('headerLogoRightData');
       if (savedRight) {
@@ -1169,7 +1171,6 @@ function setupHeaderLogoUploads() {
 // COMPANY NAME EDITING
 // ============================================================
 function setupCompanyNameEditing() {
-  var titleEl = document.getElementById('dashboardTitle');
   var nameSpan = document.getElementById('companyNameDisplay');
   var fullNameDisplay = document.getElementById('companyNameDisplayFull');
 
@@ -1182,7 +1183,6 @@ function setupCompanyNameEditing() {
     }
   } catch(e) {}
 
-  // Make the company name editable on click
   if (nameSpan) {
     nameSpan.style.cursor = 'pointer';
     nameSpan.title = 'Click to edit company name';
@@ -1198,7 +1198,6 @@ function setupCompanyNameEditing() {
           localStorage.setItem('companyDisplayName', trimmed);
         } catch(err) {}
         showToast('✅ Company name updated!', 'success');
-        // Also update the company profile if it exists
         if (APP_STATE && APP_STATE.company) {
           APP_STATE.company.name = trimmed;
           markDirty();
@@ -1548,7 +1547,7 @@ const STORAGE = {
 };
 
 // ============================================================
-// APP STATE
+// APP STATE - FIXED LOADING
 // ============================================================
 const APP_STATE = {
   wallet: { balance: 0 },
@@ -1790,6 +1789,56 @@ function saveToStorageImmediate() {
 
 function loadFromStorage() {
   return new Promise(function(resolve) {
+    // First try to load from localStorage directly
+    var localData = STORAGE.loadLocal();
+    if (localData) {
+      // Merge data properly
+      if (localData.company && typeof localData.company === 'object') {
+        APP_STATE.company = Object.assign({}, APP_STATE.company, localData.company, { 
+          documents: localData.company.documents || {}, 
+          photos: localData.company.photos || [] 
+        });
+      }
+      if (Array.isArray(localData.products)) APP_STATE.products = localData.products;
+      if (Array.isArray(localData.orders)) APP_STATE.orders = localData.orders;
+      if (Array.isArray(localData.receivables)) APP_STATE.receivables = localData.receivables;
+      if (Array.isArray(localData.conversions)) APP_STATE.conversions = localData.conversions;
+      if (localData.wallet && typeof localData.wallet === 'object') APP_STATE.wallet = localData.wallet;
+      if (localData.certToggles && typeof localData.certToggles === 'object') APP_STATE.certToggles = localData.certToggles;
+      if (Array.isArray(localData.briefs)) APP_STATE.briefs = localData.briefs;
+      if (Array.isArray(localData.archivedAuctions)) APP_STATE.archivedAuctions = localData.archivedAuctions;
+      if (localData.selectedAuctionType) APP_STATE.selectedAuctionType = localData.selectedAuctionType;
+      if (localData.tar && typeof localData.tar === 'object') {
+        APP_STATE.tar = Object.assign({}, APP_STATE.tar, localData.tar, { 
+          todayConversionsDate: localData.tar.todayConversionsDate || getLocalDate() 
+        });
+      }
+      APP_STATE.isDirty = false;
+      
+      // Also check for full backup
+      try {
+        var backupRaw = sessionStorage.getItem('tradeaux_full_backup');
+        if (backupRaw) {
+          var fullBackup = JSON.parse(backupRaw);
+          if (fullBackup && fullBackup.company && fullBackup.company.logo) {
+            if (!APP_STATE.company.logo && fullBackup.company.logo) {
+              APP_STATE.company.logo = fullBackup.company.logo;
+            }
+            if ((!APP_STATE.company.photos || APP_STATE.company.photos.length === 0) && fullBackup.company.photos) {
+              APP_STATE.company.photos = fullBackup.company.photos;
+            }
+            if ((!APP_STATE.company.documents || Object.keys(APP_STATE.company.documents).length === 0) && fullBackup.company.documents) {
+              APP_STATE.company.documents = fullBackup.company.documents;
+            }
+          }
+        }
+      } catch(e) {}
+      
+      resolve({ success: true, source: 'localStorage' });
+      return;
+    }
+    
+    // Fallback to smart load
     STORAGE.loadSmart().then(function(result) {
       if(result && result.data) {
         var data = result.data;
@@ -1930,7 +1979,6 @@ function renderCompany() {
       el.textContent = (v === undefined || v === null || v === '' || v === 'undefined' || v === 'null') ? 'Not set' : escapeHtml(String(v));
     }
   });
-  // Update dashboard header name
   var nameSpan = document.getElementById('companyNameDisplay');
   if (nameSpan && c.name) {
     nameSpan.textContent = c.name;
@@ -2143,16 +2191,21 @@ function removeCert(type) {
   showToast('Certificate removed', 'info');
 }
 
-function renderProducts() { /* ... full product rendering ... */ }
-function renderOrders() { /* ... full order rendering ... */ }
-function renderStats() { /* ... full stats rendering ... */ }
-function renderTAR() { /* ... full TAR rendering ... */ }
-function renderArchive() { /* ... full archive rendering ... */ }
-function renderAuctionSchedule() { /* ... full auction schedule rendering ... */ }
-function renderTARAdvisory() { /* ... full advisory rendering ... */ }
+// ============================================================
+// PLACEHOLDER FUNCTIONS
+// ============================================================
+function renderProducts() { /* Full implementation in original */ }
+function renderOrders() { /* Full implementation in original */ }
+function renderStats() { /* Full implementation in original */ }
+function renderTAR() { /* Full implementation in original */ }
+function renderArchive() { /* Full implementation in original */ }
+function renderAuctionSchedule() { /* Full implementation in original */ }
+function renderTARAdvisory() { /* Full implementation in original */ }
+function updateAuctionStatuses() { /* Full implementation in original */ }
+function syncToBuyerArena() { /* Full implementation in original */ }
 
 // ============================================================
-// SIMPLIFIED INIT
+// SIMPLIFIED INIT - FIXED
 // ============================================================
 function initApp() {
   if(TRADEAUX._appInitialized) return;
@@ -2162,8 +2215,6 @@ function initApp() {
     
     // Setup header logo uploads
     setupHeaderLogoUploads();
-    
-    // Setup company name editing
     setupCompanyNameEditing();
     
     // Load company name from storage into header
@@ -2177,6 +2228,7 @@ function initApp() {
     
     loadFromStorage().then(function(result) {
       if(!result.success) {
+        // Initialize empty state
         APP_STATE.products = [];
         APP_STATE.wallet = { balance: 0 };
         APP_STATE.receivables = [];
@@ -2188,6 +2240,13 @@ function initApp() {
         };
         APP_STATE.selectedAuctionType = 'standard';
         saveToStorageImmediate();
+      }
+      
+      // Re-apply header name from loaded data
+      if (APP_STATE.company && APP_STATE.company.name) {
+        var nameSpan = document.getElementById('companyNameDisplay');
+        if (nameSpan) nameSpan.textContent = APP_STATE.company.name;
+        try { localStorage.setItem('companyDisplayName', APP_STATE.company.name); } catch(e) {}
       }
       
       // Setup sliders
@@ -2408,7 +2467,7 @@ function initEventListeners() {
   var closeOrd = $('closeOrderModal');
   if(closeOrd) closeOrd.addEventListener('click', function() { closeModal('orderModal'); });
   
-  // Sign out
+  // Sign out - goes to index.html
   var auth = $('authBtn');
   if(auth) auth.addEventListener('click', function(e) { e.preventDefault(); if(confirm('Sign out?')) window.location.href = 'index.html'; });
   
@@ -2416,7 +2475,7 @@ function initEventListeners() {
   var tour = $('tourBtn');
   if(tour) tour.addEventListener('click', startTour);
   
-  // Toast for marketplace/analytics
+  // Marketplace and Analytics
   var market = $('marketplaceNav');
   if(market) market.addEventListener('click', function(e) { e.preventDefault(); showToast('🌐 Marketplace coming soon!', 'info'); });
   var analytics = $('analyticsNav');
@@ -2598,12 +2657,6 @@ function updateDiagnostic() {
   html += '<div class="diag-line"><span class="label">Dirty:</span> <span class="value">' + (APP_STATE && APP_STATE.isDirty ? '⚠️ yes' : '✅ no') + '</span></div>';
   content.innerHTML = html;
 }
-
-// ============================================================
-// PLACEHOLDER FUNCTIONS FOR COMPLETENESS
-// ============================================================
-function updateAuctionStatuses() { /* Placeholder */ }
-function syncToBuyerArena() { /* Placeholder */ }
 
 // ============================================================
 // START
