@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
+    /* ... all the CSS stays exactly the same ... */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
     
@@ -22,7 +23,7 @@
 
     .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
 
-    /* 3D LOGO - EXACT FROM ABOUT PAGE */
+    /* 3D LOGO */
     .gem-logo-corner { position: fixed; top: 20px; left: 20px; z-index: 9999; filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4)); transform-style: preserve-3d; perspective: 1000px; transform: scale(0.35); transform-origin: top left; pointer-events: none; }
     .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
     .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
@@ -709,9 +710,7 @@
 </div>
 <button class="diag-toggle" id="diagToggle" type="button" aria-label="Toggle diagnostic panel">🔍 DIAG</button>
 
-<!-- ============================================================ -->
-<!-- PRODUCT MODAL - COMPLETE -->
-<!-- ============================================================ -->
+<!-- PRODUCT MODAL -->
 <div class="modal" id="productModal" role="dialog" aria-labelledby="productModalTitle">
   <div class="modal-content wide">
     <button class="modal-close" id="closeProductModal" type="button" aria-label="Close product modal">&times;</button>
@@ -1141,7 +1140,7 @@ function selectAuctionType(type) {
 }
 
 // ============================================================
-// REMOVE CERTIFICATE - FIXED (NEW FUNCTION)
+// REMOVE CERTIFICATE - FIXED
 // ============================================================
 function removeCertificate(type) {
   if (type === 'incorporation') {
@@ -1157,6 +1156,8 @@ function removeCertificate(type) {
   renderCertificates();
   showToast('✅ Certificate removed', 'success');
 }
+// Make it globally accessible for onclick
+window.removeCertificate = removeCertificate;
 
 // ============================================================
 // PRODUCT FUNCTIONS
@@ -1844,7 +1845,7 @@ function setupFileUploads() {
 }
 
 // ============================================================
-// INIT
+// INIT - WITH FIXED AUCTION TYPE BUTTONS
 // ============================================================
 function init() {
   setupHeaderLogos();
@@ -2021,10 +2022,26 @@ function init() {
     });
   }
   
-  // Auction type buttons - FIXED
+  // ============================================================
+  // FIXED: Auction type buttons - properly handle clicks
+  // ============================================================
   document.querySelectorAll('.auction-type-option').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      selectAuctionType(this.dataset.type);
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var type = this.dataset.type;
+      if (type) {
+        selectAuctionType(type);
+      }
+    });
+    // Also handle keyboard
+    btn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        var type = this.dataset.type;
+        if (type) {
+          selectAuctionType(type);
+        }
+      }
     });
   });
   
