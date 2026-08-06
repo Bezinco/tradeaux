@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* ... all the CSS stays exactly the same ... */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
     
@@ -710,7 +709,9 @@
 </div>
 <button class="diag-toggle" id="diagToggle" type="button" aria-label="Toggle diagnostic panel">🔍 DIAG</button>
 
-<!-- PRODUCT MODAL -->
+<!-- ============================================================ -->
+<!-- PRODUCT MODAL - WITH FIXED AUCTION TYPE BUTTONS -->
+<!-- ============================================================ -->
 <div class="modal" id="productModal" role="dialog" aria-labelledby="productModalTitle">
   <div class="modal-content wide">
     <button class="modal-close" id="closeProductModal" type="button" aria-label="Close product modal">&times;</button>
@@ -722,18 +723,19 @@
         <div class="modal-field"><label for="productVarietyInput">Description</label><textarea id="productVarietyInput" rows="4" placeholder="Describe your product in detail..." maxlength="2000"></textarea></div>
       </div>
 
+      <!-- FIXED: Auction type buttons with direct onclick -->
       <div class="modal-field">
         <label id="auctionTypeLabel">Auction Type</label>
         <div class="auction-type-selector" id="auctionTypeSelector" role="radiogroup" aria-labelledby="auctionTypeLabel">
-          <button class="auction-type-option selected-standard" data-type="standard" role="radio" aria-checked="true" aria-label="Standard Auction">
+          <button class="auction-type-option selected-standard" data-type="standard" role="radio" aria-checked="true" aria-label="Standard Auction" onclick="selectAuctionType('standard')">
             <span class="icon">📦</span>
             Standard (MT)
           </button>
-          <button class="auction-type-option" data-type="pallet" role="radio" aria-checked="false" aria-label="Pallet Auction">
+          <button class="auction-type-option" data-type="pallet" role="radio" aria-checked="false" aria-label="Pallet Auction" onclick="selectAuctionType('pallet')">
             <span class="icon">🎯</span>
             Pallet
           </button>
-          <button class="auction-type-option" data-type="sample" role="radio" aria-checked="false" aria-label="Sample Auction">
+          <button class="auction-type-option" data-type="sample" role="radio" aria-checked="false" aria-label="Sample Auction" onclick="selectAuctionType('sample')">
             <span class="icon">🧪</span>
             Sample
           </button>
@@ -855,7 +857,7 @@
   </div>
 </div>
 
-<!-- AUCTION MODAL -->
+<!-- AUCTION MODAL - WITH FIXED POST AUCTION -->
 <div class="modal" id="auctionModal" role="dialog" aria-labelledby="auctionModalTitle">
   <div class="modal-content" style="max-width:550px;">
     <button class="modal-close" id="closeAuctionModal" type="button" aria-label="Close auction modal">&times;</button>
@@ -871,7 +873,7 @@
     </div>
     <div class="modal-actions">
       <button class="cancel-btn" id="cancelAuctionBtn" type="button">Cancel</button>
-      <button class="create-btn" id="submitAuctionBtn" type="button">📤 Post Auction</button>
+      <button class="create-btn" id="submitAuctionBtn" type="button" onclick="postAuction()">📤 Post Auction</button>
     </div>
     </form>
   </div>
@@ -1117,7 +1119,7 @@ function setupCompanyName() {
 }
 
 // ============================================================
-// SELECT AUCTION TYPE - FIXED
+// SELECT AUCTION TYPE
 // ============================================================
 function selectAuctionType(type) {
   APP.selectedAuctionType = type;
@@ -1140,7 +1142,7 @@ function selectAuctionType(type) {
 }
 
 // ============================================================
-// REMOVE CERTIFICATE - FIXED
+// REMOVE CERTIFICATE
 // ============================================================
 function removeCertificate(type) {
   if (type === 'incorporation') {
@@ -1156,8 +1158,99 @@ function removeCertificate(type) {
   renderCertificates();
   showToast('✅ Certificate removed', 'success');
 }
-// Make it globally accessible for onclick
 window.removeCertificate = removeCertificate;
+
+// ============================================================
+// POST AUCTION - FIXED
+// ============================================================
+function postAuction() {
+  var pid = APP.currentAuctionProductId;
+  var product = APP.products.find(function(p) { return p.id === pid; });
+  if(!product) { showToast('Product not found', 'error'); return; }
+  
+  var quantity = parseFloat($('auctionQty').value);
+  var dateTime = $('auctionDateTime').value;
+  var duration = parseInt($('auctionDuration').value) || 24;
+  var location = $('auctionLocation').value;
+  var notes = $('auctionNotes').value.trim();
+  
+  if(!quantity || quantity <= 0) { showToast('Please enter a valid quantity', 'error'); return; }
+  if(quantity > product.quantity) { showToast('Only ' + product.quantity + ' available', 'error'); return; }
+  if(!dateTime) { showToast('Please select an auction date and time', 'error'); return; }
+  
+  var auctionTime = new Date(dateTime).getTime();
+  if(auctionTime <= Date.now()) { showToast('Auction time must be in the future', 'error'); return; }
+  
+  var auction = {
+    id: uuid(),
+    productId: product.id,
+    product: product.name,
+    description: product.description || '',
+    quantity: quantity,
+    grade: product.grade || 'Standard',
+    origin: product.origin || '',
+    images: product.images || [],
+    packageType: product.packageType || '',
+    packageSize: product.packageSize || '',
+    moisture: product.moisture || 0,
+    screenSize: product.screenSize || 0,
+    defects: product.defects || 0,
+    foreignMatter: product.foreignMatter || 0,
+    protein: product.protein || 0,
+    aflatoxin: product.aflatoxin || 0,
+    oilContent: product.oilContent || 0,
+    colorGrade: product.colorGrade || 0,
+    idealPrice: product.idealPrice || 0,
+    location: location,
+    seller: APP.company.name || 'TradeAux Seller',
+    notes: notes,
+    auctionTime: auctionTime,
+    duration: duration,
+    status: 'scheduled',
+    createdAt: Date.now(),
+    scheduledStart: dateTime,
+    auctionType: product.auctionType || 'standard',
+    palletCount: product.palletCount || null,
+    palletWeight: product.palletWeight || null,
+    palletType: product.palletType || null,
+    palletMinIncrement: product.palletMinIncrement || null,
+    sampleSize: product.sampleSize || null,
+    sampleCount: product.sampleCount || null,
+    sampleMinIncrement: product.sampleMinIncrement || null
+  };
+  
+  APP.briefs.push(auction);
+  product.quantity -= quantity;
+  product.hasAuction = true;
+  product.auctionId = auction.id;
+  
+  var receivableAmount = (auction.idealPrice || 0) * (auction.quantity || 0);
+  if (receivableAmount > 0.50) {
+    var receivable = {
+      id: uuid(),
+      company: auction.seller || 'Unknown',
+      product: auction.product || 'Commodity',
+      amount: receivableAmount,
+      status: 'ready',
+      date: new Date(auction.auctionTime || Date.now()).toISOString().split('T')[0],
+      invoiceNumber: 'AUCTION-' + auction.id.slice(0, 6),
+      converted: false,
+      daysOld: 0,
+      createdAt: Date.now(),
+      auctionId: auction.id,
+      productId: auction.productId
+    };
+    APP.receivables.push(receivable);
+  }
+  
+  markDirty();
+  saveData(APP);
+  renderAll();
+  closeModal('auctionModal');
+  showToast('✅ Auction posted! ' + auction.product + ' ' + auction.quantity + ' units', 'success');
+}
+
+function markDirty() { APP.isDirty = true; }
 
 // ============================================================
 // PRODUCT FUNCTIONS
@@ -1406,7 +1499,41 @@ function openProductModal(productId) {
 }
 
 // ============================================================
-// RENDER CERTIFICATES - FIXED WITH REMOVE BUTTON
+// OPEN AUCTION MODAL
+// ============================================================
+function openAuctionModal(productId) {
+  APP.currentAuctionProductId = productId;
+  var product = APP.products.find(function(p) { return p.id === productId; });
+  if(!product) { showToast('Product not found', 'error'); return; }
+  if(product.hasAuction && APP.briefs.some(function(b) { return b.productId === productId && !b.archived; })) {
+    showToast('This product already has an active auction', 'error');
+    return;
+  }
+  var display = $('auctionProductDisplay');
+  if(display) {
+    var img = '';
+    if(product.images && product.images.length > 0) img = '<img src="' + escapeHtml(product.images[0]) + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;margin-right:12px;border:1px solid rgba(0,206,209,0.2);" alt="' + escapeHtml(product.name) + ' auction image">';
+    display.innerHTML = '<div style="display:flex;align-items:center;">' + img + '<div><div style="font-weight:600;">' + escapeHtml(product.name) + (product.description ? ' - ' + escapeHtml(product.description) : '') + '</div><div style="font-size:12px;color:#9ca3af;">📦 ' + escapeHtml(product.quantity) + ' • ' + escapeHtml(product.grade || 'Standard') + ' • 📍 ' + escapeHtml(product.origin || '') + '</div>' + (product.packageType && product.packageSize ? '<div style="font-size:11px;color:#7CFC00;">📦 ' + escapeHtml(product.packageType) + ' — ' + escapeHtml(product.packageSize) + '</div>' : '') + '</div></div>';
+  }
+  var avail = $('auctionAvailableQty'); if(avail) avail.textContent = product.quantity;
+  var qty = $('auctionQty'); if(qty) qty.value = Math.min(500, Math.floor(product.quantity * 0.5));
+  var dt = $('auctionDateTime'); if(dt) dt.value = formatDateTimeLocal(product.scheduledStart);
+  openModal('auctionModal');
+}
+
+function formatDateTimeLocal(date) {
+  if(!date) return '';
+  var d = new Date(date);
+  function pad(n) { return String(n).padStart(2, '0'); }
+  if(isNaN(d.getTime())) { 
+    var f = new Date(Date.now() + 7 * 86400000); 
+    return f.getFullYear() + '-' + pad(f.getMonth() + 1) + '-' + pad(f.getDate()) + 'T' + pad(f.getHours()) + ':' + pad(f.getMinutes()); 
+  }
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+// ============================================================
+// RENDER CERTIFICATES
 // ============================================================
 function renderCertificates() {
   var grid = $('certGrid');
@@ -1460,7 +1587,6 @@ function renderCertificates() {
     var toggle = required ? '<span style="font-size:9px;color:#7CFC00;">🔒 Admin Verified</span>' :
       '<div class="cert-toggle-row"><span>' + (verified ? '✅ Verified' : '⏳ Pending') + '</span><label class="toggle-switch"><input type="checkbox" data-cert="' + type + '" ' + (verified ? 'checked' : '') + '><span class="slider"></span></label></div>';
     
-    // Add remove button for non-required certs
     var removeBtn = '';
     if (!required) {
       removeBtn = '<button class="btn-remove-cert" data-cert-type="' + type + '" onclick="removeCertificate(\'' + type + '\')" aria-label="Remove certificate">🗑 Remove</button>';
@@ -1469,7 +1595,6 @@ function renderCertificates() {
     div.innerHTML = '<div class="cert-icon">' + info.icon + '</div><div class="cert-name">' + escapeHtml(info.label) + '</div><div class="cert-desc">' + escapeHtml(info.desc) + '</div>' + (required ? '<div class="cert-required">★ REQUIRED</div>' : '') + html + toggle + removeBtn;
     grid.appendChild(div);
     
-    // Add upload functionality to certificate preview
     var previewDiv = div.querySelector('.cert-preview');
     if(previewDiv) {
       previewDiv.style.cursor = 'pointer';
@@ -1603,7 +1728,6 @@ function renderProducts() {
     var postBtnDisabled = hasAuction ? 'disabled style="opacity:0.4;"' : '';
     var postBtnText = hasAuction ? '⏳ Active' : '📤 Post Auction';
     
-    // Build image HTML
     var imgHtml = '';
     if (p.images && p.images.length > 0 && p.images[0] && p.images[0].startsWith('data:')) {
       imgHtml = '<img src="' + escapeHtml(p.images[0]) + '" alt="' + escapeHtml(p.name) + '">';
@@ -1617,7 +1741,7 @@ function renderProducts() {
       '<div class="product-variety">' + escapeHtml(p.description || '') + '</div>' +
       '<div style="font-size:11px;color:#9ca3af;margin:4px 0;">📦 ' + escapeHtml(p.quantity || 0) + ' MT • ' + escapeHtml(p.grade || 'Standard') + '</div>' +
       (hasAuction ? '<div style="color:#7CFC00;font-size:10px;">✅ Auction active</div>' : '') +
-      '<div class="product-actions"><button class="post-auction-btn" type="button" ' + postBtnDisabled + ' data-product-id="' + p.id + '">' + postBtnText + '</button><button class="edit-btn" type="button" data-product-id="' + p.id + '">✏️ Edit</button><button class="delete-btn" type="button" data-product-id="' + p.id + '">🗑</button></div>';
+      '<div class="product-actions"><button class="post-auction-btn" type="button" ' + postBtnDisabled + ' data-product-id="' + p.id + '" onclick="openAuctionModal(\'' + p.id + '\')">' + postBtnText + '</button><button class="edit-btn" type="button" data-product-id="' + p.id + '" onclick="openProductModal(\'' + p.id + '\')">✏️ Edit</button><button class="delete-btn" type="button" data-product-id="' + p.id + '" onclick="deleteProduct(\'' + p.id + '\')">🗑</button></div>';
     
     grid.appendChild(card);
   });
@@ -1845,7 +1969,7 @@ function setupFileUploads() {
 }
 
 // ============================================================
-// INIT - WITH FIXED AUCTION TYPE BUTTONS
+// INIT
 // ============================================================
 function init() {
   setupHeaderLogos();
@@ -1863,17 +1987,13 @@ function init() {
   var closeBtn = $('closeProductModal');
   if(closeBtn) closeBtn.addEventListener('click', function() { closeModal('productModal'); });
   
-  // Product delegation
-  var prodGrid = $('productsGrid');
-  if(prodGrid) {
-    prodGrid.addEventListener('click', function(e) {
-      var btn = e.target.closest('button[data-product-id]');
-      if(!btn) return;
-      var id = btn.dataset.productId;
-      if(btn.classList.contains('edit-btn')) { openProductModal(id); }
-      else if(btn.classList.contains('delete-btn')) { deleteProduct(id); }
-    });
-  }
+  // Auction modal
+  var submitAuc = $('submitAuctionBtn');
+  if(submitAuc) submitAuc.addEventListener('click', postAuction);
+  var closeAuc = $('closeAuctionModal');
+  if(closeAuc) closeAuc.addEventListener('click', function() { closeModal('auctionModal'); });
+  var cancelAuc = $('cancelAuctionBtn');
+  if(cancelAuc) cancelAuc.addEventListener('click', function() { closeModal('auctionModal'); });
   
   // Edit company
   var editComp = $('editCompanyBtn');
@@ -1888,6 +2008,33 @@ function init() {
       }
     });
   }
+  
+  // Company modal
+  var saveComp = $('saveCompanyBtn');
+  if(saveComp) saveComp.addEventListener('click', function() {
+    var name = $('editCompanyName').value.trim();
+    var reg = $('editCompanyReg').value.trim();
+    var country = $('editCompanyCountry').value.trim();
+    if(!name || !reg || !country) { showToast('Company Name, Registration Number, and Country are required', 'error'); return; }
+    APP.company.name = name;
+    APP.company.reg = reg;
+    APP.company.country = country;
+    APP.company.tax = $('editCompanyTax').value.trim();
+    APP.company.address = $('editCompanyAddress').value.trim();
+    APP.company.email = $('editCompanyEmail').value.trim();
+    APP.company.phone = $('editCompanyPhone').value.trim();
+    APP.company.website = $('editCompanyWebsite').value.trim();
+    if(APP.company.verified !== 'verified') APP.company.verified = 'pending';
+    saveData(APP);
+    renderCompany();
+    closeModal('companyModal');
+    showToast('Company profile updated!', 'success');
+  });
+  
+  var closeComp = $('closeCompanyModal');
+  if(closeComp) closeComp.addEventListener('click', function() { closeModal('companyModal'); });
+  var cancelComp = $('cancelCompanyBtn');
+  if(cancelComp) cancelComp.addEventListener('click', function() { closeModal('companyModal'); });
   
   // Deposit
   var depositBtn = $('depositBtn');
@@ -2021,29 +2168,6 @@ function init() {
       if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
     });
   }
-  
-  // ============================================================
-  // FIXED: Auction type buttons - properly handle clicks
-  // ============================================================
-  document.querySelectorAll('.auction-type-option').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      var type = this.dataset.type;
-      if (type) {
-        selectAuctionType(type);
-      }
-    });
-    // Also handle keyboard
-    btn.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        var type = this.dataset.type;
-        if (type) {
-          selectAuctionType(type);
-        }
-      }
-    });
-  });
   
   // Sliders
   ['productMoisture', 'productScreenSize', 'productDefects', 'productForeignMatter', 'productProtein', 'productAflatoxin', 'productOilContent', 'productColorGrade'].forEach(function(id) {
