@@ -2205,7 +2205,7 @@
     <div class="modal-field"><label>Website</label><input type="text" id="editCompanyWebsite"></div>
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('companyModal')">Cancel</button>
-      <button class="create-btn" onclick="saveCompanyProfile()">Save Profile</button>
+      <button class="create-btn" id="saveCompanyBtn">Save Profile</button>
     </div>
   </div>
 </div>
@@ -3367,7 +3367,7 @@ if (saveContractBtn) {
   };
 }
 
-/* ==================== COMPANY FUNCTIONS ==================== */
+/* ==================== COMPANY FUNCTIONS (FIXED) ==================== */
 const editCompanyBtn = $('editCompanyBtn');
 if (editCompanyBtn) {
   editCompanyBtn.onclick = () => {
@@ -3380,31 +3380,38 @@ if (editCompanyBtn) {
     const phone = $('editCompanyPhone');
     const website = $('editCompanyWebsite');
     
-    if (name) name.value = APP_STATE.company.name;
-    if (reg) reg.value = APP_STATE.company.reg;
-    if (country) country.value = APP_STATE.company.country;
-    if (tax) tax.value = APP_STATE.company.tax;
-    if (address) address.value = APP_STATE.company.address;
-    if (email) email.value = APP_STATE.company.email;
-    if (phone) phone.value = APP_STATE.company.phone;
-    if (website) website.value = APP_STATE.company.website;
+    if (name) name.value = APP_STATE.company.name || '';
+    if (reg) reg.value = APP_STATE.company.reg || '';
+    if (country) country.value = APP_STATE.company.country || '';
+    if (tax) tax.value = APP_STATE.company.tax || '';
+    if (address) address.value = APP_STATE.company.address || '';
+    if (email) email.value = APP_STATE.company.email || '';
+    if (phone) phone.value = APP_STATE.company.phone || '';
+    if (website) website.value = APP_STATE.company.website || '';
     
     openModal('companyModal');
   };
 }
 
 function saveCompanyProfile() {
-  APP_STATE.company = {
-    ...APP_STATE.company,
-    name: $('editCompanyName')?.value?.trim() || '',
-    reg: $('editCompanyReg')?.value?.trim() || '',
-    country: $('editCompanyCountry')?.value?.trim() || '',
-    tax: $('editCompanyTax')?.value?.trim() || '',
-    address: $('editCompanyAddress')?.value?.trim() || '',
-    email: $('editCompanyEmail')?.value?.trim() || '',
-    phone: $('editCompanyPhone')?.value?.trim() || '',
-    website: $('editCompanyWebsite')?.value?.trim() || ''
-  };
+  const name = $('editCompanyName')?.value?.trim() || '';
+  const reg = $('editCompanyReg')?.value?.trim() || '';
+  const country = $('editCompanyCountry')?.value?.trim() || '';
+  const tax = $('editCompanyTax')?.value?.trim() || '';
+  const address = $('editCompanyAddress')?.value?.trim() || '';
+  const email = $('editCompanyEmail')?.value?.trim() || '';
+  const phone = $('editCompanyPhone')?.value?.trim() || '';
+  const website = $('editCompanyWebsite')?.value?.trim() || '';
+
+  APP_STATE.company.name = name;
+  APP_STATE.company.reg = reg;
+  APP_STATE.company.country = country;
+  APP_STATE.company.tax = tax;
+  APP_STATE.company.address = address;
+  APP_STATE.company.email = email;
+  APP_STATE.company.phone = phone;
+  APP_STATE.company.website = website;
+
   saveToStorage();
   renderCompany();
   closeModal('companyModal');
