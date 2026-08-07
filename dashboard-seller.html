@@ -2216,7 +2216,7 @@
   </div>
 </div>
 
-<!-- Product Edit Modal -->
+<!-- Product Edit Modal with 5 Image Uploads -->
 <div class="modal" id="productModal">
   <div class="modal-content">
     <span class="modal-close" onclick="closeModal('productModal')">&times;</span>
@@ -2228,6 +2228,30 @@
     <div class="modal-field"><label>Seller</label><input type="text" id="editProductSeller"></div>
     <div class="modal-field"><label>Location</label><input type="text" id="editProductLocation"></div>
     <div class="modal-field"><label>Expires At</label><input type="datetime-local" id="editProductExpires"></div>
+    
+    <!-- 5 Image Upload Fields -->
+    <div class="modal-field">
+      <label>Product Images (up to 5)</label>
+      <div id="imageUploadContainer">
+        <div class="image-upload-row" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <input type="text" id="editProductImage1" placeholder="Image URL 1" style="flex:1;">
+        </div>
+        <div class="image-upload-row" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <input type="text" id="editProductImage2" placeholder="Image URL 2" style="flex:1;">
+        </div>
+        <div class="image-upload-row" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <input type="text" id="editProductImage3" placeholder="Image URL 3" style="flex:1;">
+        </div>
+        <div class="image-upload-row" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <input type="text" id="editProductImage4" placeholder="Image URL 4" style="flex:1;">
+        </div>
+        <div class="image-upload-row" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <input type="text" id="editProductImage5" placeholder="Image URL 5" style="flex:1;">
+        </div>
+      </div>
+      <span class="tooltip">💡 Paste direct image URLs (e.g., https://example.com/product.jpg)</span>
+    </div>
+
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('productModal')">Cancel</button>
       <button class="create-btn" id="saveProductBtn">Save Product</button>
@@ -2435,12 +2459,12 @@ function seedDemoData() {
     { id: 'w1', product: 'Coffee', variety: 'Robusta', quantity: 6000, price: 2.80, seller: 'Cooperminas', date: '2026-06-20' }
   ];
   APP_STATE.auctions = [
-    { id: 'a1', product: 'Coffee', variety: 'Arabica Mogiana', quantity: 5000, price: 4.20, seller: 'Fazenda Nova', sellerRating: 4.8, sellerVerification: 'premium', location: 'Santos', expiresAt: '2026-06-28T18:00:00Z' },
-    { id: 'a2', product: 'Coffee', variety: 'Conilon', quantity: 4000, price: 2.60, seller: 'Espirito Santo Coop', sellerRating: 3.2, sellerVerification: 'basic', location: 'Santos', expiresAt: '2026-06-29T18:00:00Z' },
-    { id: 'a3', product: 'Tea', variety: 'Green Gunpowder', quantity: 3000, price: 5.10, seller: 'Highlands Tea', sellerRating: 4.1, sellerVerification: 'verified', location: 'Mombasa', expiresAt: '2026-06-27T18:00:00Z' },
-    { id: 'a4', product: 'Cocoa', variety: 'Criollo', quantity: 6000, price: 4500, seller: 'Premium Cacao', sellerRating: 4.9, sellerVerification: 'premium', location: 'Guayaquil', expiresAt: '2026-06-30T18:00:00Z' },
-    { id: 'a5', product: 'Coffee', variety: 'Peaberry', quantity: 3500, price: 5.50, seller: 'Kilimanjaro Beans', sellerRating: 4.3, sellerVerification: 'verified', location: 'Mombasa', expiresAt: '2026-06-28T18:00:00Z' },
-    { id: 'a6', product: 'Palm Oil', variety: 'RBD', quantity: 20000, price: 850, seller: 'AgroIndonesia', sellerRating: 3.5, sellerVerification: 'basic', location: 'Jakarta', expiresAt: '2026-06-29T18:00:00Z' }
+    { id: 'a1', product: 'Coffee', variety: 'Arabica Mogiana', quantity: 5000, price: 4.20, seller: 'Fazenda Nova', sellerRating: 4.8, sellerVerification: 'premium', location: 'Santos', expiresAt: '2026-06-28T18:00:00Z', images: [] },
+    { id: 'a2', product: 'Coffee', variety: 'Conilon', quantity: 4000, price: 2.60, seller: 'Espirito Santo Coop', sellerRating: 3.2, sellerVerification: 'basic', location: 'Santos', expiresAt: '2026-06-29T18:00:00Z', images: [] },
+    { id: 'a3', product: 'Tea', variety: 'Green Gunpowder', quantity: 3000, price: 5.10, seller: 'Highlands Tea', sellerRating: 4.1, sellerVerification: 'verified', location: 'Mombasa', expiresAt: '2026-06-27T18:00:00Z', images: [] },
+    { id: 'a4', product: 'Cocoa', variety: 'Criollo', quantity: 6000, price: 4500, seller: 'Premium Cacao', sellerRating: 4.9, sellerVerification: 'premium', location: 'Guayaquil', expiresAt: '2026-06-30T18:00:00Z', images: [] },
+    { id: 'a5', product: 'Coffee', variety: 'Peaberry', quantity: 3500, price: 5.50, seller: 'Kilimanjaro Beans', sellerRating: 4.3, sellerVerification: 'verified', location: 'Mombasa', expiresAt: '2026-06-28T18:00:00Z', images: [] },
+    { id: 'a6', product: 'Palm Oil', variety: 'RBD', quantity: 20000, price: 850, seller: 'AgroIndonesia', sellerRating: 3.5, sellerVerification: 'basic', location: 'Jakarta', expiresAt: '2026-06-29T18:00:00Z', images: [] }
   ];
   APP_STATE.botLog = [
     { id: uuid(), botName: 'Coffee Hunter', action: 'Scanned Santos region — 2 auctions found', status: 'scan', timestamp: new Date(Date.now()-3600000).toISOString() },
@@ -2669,7 +2693,21 @@ function renderAuctions() {
     const card = document.createElement('div');
     card.className = 'bot-card';
     card.onclick = () => openProductModal(auction.id);
+    
+    // Build image gallery HTML
+    let imagesHtml = '';
+    if (auction.images && auction.images.length > 0) {
+      imagesHtml = '<div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">';
+      auction.images.forEach(img => {
+        if (img) {
+          imagesHtml += `<img src="${escapeHtml(img)}" alt="${escapeHtml(auction.product)}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid rgba(0,206,209,0.2);">`;
+        }
+      });
+      imagesHtml += '</div>';
+    }
+    
     card.innerHTML = `
+      ${imagesHtml}
       <div class="bot-emoji">📦</div>
       <div class="bot-name">${escapeHtml(auction.product)}</div>
       <div class="bot-status" style="color:#00ced1;">${escapeHtml(auction.variety)}</div>
@@ -3480,7 +3518,7 @@ function saveCompanyProfile() {
   showToast('Company profile updated', 'success');
 }
 
-/* ==================== PRODUCT FUNCTIONS (NEW) ==================== */
+/* ==================== PRODUCT FUNCTIONS (FIXED) ==================== */
 function openProductModal(productId) {
   const product = APP_STATE.auctions.find(p => p.id === productId);
   if (!product) {
@@ -3505,6 +3543,15 @@ function openProductModal(productId) {
   if (sellerInput) sellerInput.value = product.seller || '';
   if (locationInput) locationInput.value = product.location || '';
   if (expiresInput) expiresInput.value = product.expiresAt || '';
+  
+  // Load up to 5 images
+  const images = product.images || [];
+  for (let i = 1; i <= 5; i++) {
+    const imgInput = document.getElementById('editProductImage' + i);
+    if (imgInput) {
+      imgInput.value = images[i-1] || '';
+    }
+  }
   
   openModal('productModal');
 }
@@ -3532,6 +3579,15 @@ if (saveProductBtn) {
     const location = $('editProductLocation')?.value?.trim() || '';
     const expiresAt = $('editProductExpires')?.value || '';
     
+    // Collect up to 5 images
+    const images = [];
+    for (let i = 1; i <= 5; i++) {
+      const imgInput = document.getElementById('editProductImage' + i);
+      if (imgInput && imgInput.value.trim()) {
+        images.push(imgInput.value.trim());
+      }
+    }
+    
     if (!name) {
       showToast('Product name is required', 'error');
       return;
@@ -3545,7 +3601,8 @@ if (saveProductBtn) {
       price: price,
       seller: seller,
       location: location,
-      expiresAt: expiresAt
+      expiresAt: expiresAt,
+      images: images
     };
     
     saveToStorage();
