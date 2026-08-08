@@ -1904,17 +1904,22 @@ function init() {
   // ============================================================
   // FIXED: Wire the Save button in the Company Modal
   // ============================================================
-  var saveCompanyBtn = $('saveCompanyBtn');
+  var saveCompanyBtn = document.getElementById('saveCompanyBtn');
   if (saveCompanyBtn) {
+    // Remove any existing listeners to prevent duplicates
+    var newSaveBtn = saveCompanyBtn.cloneNode(true);
+    saveCompanyBtn.parentNode.replaceChild(newSaveBtn, saveCompanyBtn);
+    saveCompanyBtn = newSaveBtn;
+    
     saveCompanyBtn.addEventListener('click', function() {
-      var name = $('editCompanyName') ? $('editCompanyName').value.trim() : '';
-      var reg = $('editCompanyReg') ? $('editCompanyReg').value.trim() : '';
-      var country = $('editCompanyCountry') ? $('editCompanyCountry').value.trim() : '';
-      var tax = $('editCompanyTax') ? $('editCompanyTax').value.trim() : '';
-      var address = $('editCompanyAddress') ? $('editCompanyAddress').value.trim() : '';
-      var email = $('editCompanyEmail') ? $('editCompanyEmail').value.trim() : '';
-      var phone = $('editCompanyPhone') ? $('editCompanyPhone').value.trim() : '';
-      var website = $('editCompanyWebsite') ? $('editCompanyWebsite').value.trim() : '';
+      var name = document.getElementById('editCompanyName') ? document.getElementById('editCompanyName').value.trim() : '';
+      var reg = document.getElementById('editCompanyReg') ? document.getElementById('editCompanyReg').value.trim() : '';
+      var country = document.getElementById('editCompanyCountry') ? document.getElementById('editCompanyCountry').value.trim() : '';
+      var tax = document.getElementById('editCompanyTax') ? document.getElementById('editCompanyTax').value.trim() : '';
+      var address = document.getElementById('editCompanyAddress') ? document.getElementById('editCompanyAddress').value.trim() : '';
+      var email = document.getElementById('editCompanyEmail') ? document.getElementById('editCompanyEmail').value.trim() : '';
+      var phone = document.getElementById('editCompanyPhone') ? document.getElementById('editCompanyPhone').value.trim() : '';
+      var website = document.getElementById('editCompanyWebsite') ? document.getElementById('editCompanyWebsite').value.trim() : '';
       
       if (!name) { showToast('Company name is required', 'error'); return; }
       if (!reg) { showToast('Registration number is required', 'error'); return; }
@@ -1934,16 +1939,23 @@ function init() {
       closeModal('companyModal');
       showToast('✅ Company profile saved!', 'success');
     });
+  } else {
+    console.warn('saveCompanyBtn not found');
   }
   
   // Close modal buttons
-  var closeCompanyBtn = $('closeCompanyModal');
+  var closeCompanyBtn = document.getElementById('closeCompanyModal');
   if (closeCompanyBtn) {
-    closeCompanyBtn.addEventListener('click', function() { closeModal('companyModal'); });
+    var newCloseBtn = closeCompanyBtn.cloneNode(true);
+    closeCompanyBtn.parentNode.replaceChild(newCloseBtn, closeCompanyBtn);
+    newCloseBtn.addEventListener('click', function() { closeModal('companyModal'); });
   }
-  var cancelCompanyBtn = $('cancelCompanyBtn');
+  
+  var cancelCompanyBtn = document.getElementById('cancelCompanyBtn');
   if (cancelCompanyBtn) {
-    cancelCompanyBtn.addEventListener('click', function() { closeModal('companyModal'); });
+    var newCancelBtn = cancelCompanyBtn.cloneNode(true);
+    cancelCompanyBtn.parentNode.replaceChild(newCancelBtn, cancelCompanyBtn);
+    newCancelBtn.addEventListener('click', function() { closeModal('companyModal'); });
   }
   
   // Deposit
