@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* ... all the CSS stays exactly the same ... */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
     
@@ -23,7 +22,6 @@
 
     .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
 
-    /* 3D LOGO */
     .gem-logo-corner { position: fixed; top: 20px; left: 20px; z-index: 9999; filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4)); transform-style: preserve-3d; perspective: 1000px; transform: scale(0.35); transform-origin: top left; pointer-events: none; }
     .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
     .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
@@ -55,7 +53,6 @@
     .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; } .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; } .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; } .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; } .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; } .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; } .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; } .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; } .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; } .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
     .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
 
-    /* Dashboard header */
     .dashboard-header { display: flex; align-items: center; justify-content: center; gap: 30px; padding: 20px 0 30px; flex-wrap: wrap; border-bottom: 2px solid rgba(0, 206, 209, 0.15); margin-bottom: 10px; }
     .dashboard-header .logo-placeholder { width: 60px; height: 60px; border-radius: 12px; border: 2px dashed rgba(0, 206, 209, 0.3); display: flex; align-items: center; justify-content: center; font-size: 28px; color: #4a5a7a; background: rgba(0,0,0,0.3); transition: all 0.3s; flex-shrink: 0; cursor: pointer; position: relative; overflow: hidden; }
     .dashboard-header .logo-placeholder:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
@@ -1845,7 +1842,7 @@ function setupFileUploads() {
 }
 
 // ============================================================
-// INIT - WITH FIXED AUCTION TYPE BUTTONS
+// INIT - WITH FIXED COMPANY PROFILE EDITING
 // ============================================================
 function init() {
   setupHeaderLogos();
@@ -1875,18 +1872,78 @@ function init() {
     });
   }
   
-  // Edit company
+  // ============================================================
+  // FIXED: Edit company - opens the modal instead of using prompt
+  // ============================================================
   var editComp = $('editCompanyBtn');
   if(editComp) {
     editComp.addEventListener('click', function() {
-      var name = prompt('Enter company name:', APP.company.name || '');
-      if(name !== null && name.trim() !== '') {
-        APP.company.name = name.trim();
-        saveData(APP);
-        renderAll();
-        showToast('✅ Company name updated!', 'success');
-      }
+      // Populate modal fields with current data
+      var name = $('editCompanyName');
+      var reg = $('editCompanyReg');
+      var country = $('editCompanyCountry');
+      var tax = $('editCompanyTax');
+      var address = $('editCompanyAddress');
+      var email = $('editCompanyEmail');
+      var phone = $('editCompanyPhone');
+      var website = $('editCompanyWebsite');
+      
+      if (name) name.value = APP.company.name || '';
+      if (reg) reg.value = APP.company.reg || '';
+      if (country) country.value = APP.company.country || '';
+      if (tax) tax.value = APP.company.tax || '';
+      if (address) address.value = APP.company.address || '';
+      if (email) email.value = APP.company.email || '';
+      if (phone) phone.value = APP.company.phone || '';
+      if (website) website.value = APP.company.website || '';
+      
+      openModal('companyModal');
     });
+  }
+  
+  // ============================================================
+  // FIXED: Wire the Save button in the Company Modal
+  // ============================================================
+  var saveCompanyBtn = $('saveCompanyBtn');
+  if (saveCompanyBtn) {
+    saveCompanyBtn.addEventListener('click', function() {
+      var name = $('editCompanyName') ? $('editCompanyName').value.trim() : '';
+      var reg = $('editCompanyReg') ? $('editCompanyReg').value.trim() : '';
+      var country = $('editCompanyCountry') ? $('editCompanyCountry').value.trim() : '';
+      var tax = $('editCompanyTax') ? $('editCompanyTax').value.trim() : '';
+      var address = $('editCompanyAddress') ? $('editCompanyAddress').value.trim() : '';
+      var email = $('editCompanyEmail') ? $('editCompanyEmail').value.trim() : '';
+      var phone = $('editCompanyPhone') ? $('editCompanyPhone').value.trim() : '';
+      var website = $('editCompanyWebsite') ? $('editCompanyWebsite').value.trim() : '';
+      
+      if (!name) { showToast('Company name is required', 'error'); return; }
+      if (!reg) { showToast('Registration number is required', 'error'); return; }
+      if (!country) { showToast('Country is required', 'error'); return; }
+      
+      APP.company.name = name;
+      APP.company.reg = reg;
+      APP.company.country = country;
+      APP.company.tax = tax;
+      APP.company.address = address;
+      APP.company.email = email;
+      APP.company.phone = phone;
+      APP.company.website = website;
+      
+      saveData(APP);
+      renderAll();
+      closeModal('companyModal');
+      showToast('✅ Company profile saved!', 'success');
+    });
+  }
+  
+  // Close modal buttons
+  var closeCompanyBtn = $('closeCompanyModal');
+  if (closeCompanyBtn) {
+    closeCompanyBtn.addEventListener('click', function() { closeModal('companyModal'); });
+  }
+  var cancelCompanyBtn = $('cancelCompanyBtn');
+  if (cancelCompanyBtn) {
+    cancelCompanyBtn.addEventListener('click', function() { closeModal('companyModal'); });
   }
   
   // Deposit
