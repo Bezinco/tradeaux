@@ -1,75 +1,337 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Seller Dashboard</title>
- <link rel="stylesheet" href="/tradeaux/shared/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeAux • Seller Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-    .stat-card { background: var(--bg-card); border: 1px solid rgba(0,206,209,0.3); border-radius: var(--radius); padding: 20px; text-align: center; transition: all 0.3s; }
-    .stat-card:hover { transform: translateY(-4px); border-color: var(--accent-secondary); }
-    .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: var(--accent-secondary); }
-    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    .stat-icon { font-size: 28px; margin-bottom: 8px; }
-    .banner { text-align: center; background: rgba(124,252,0,0.08); padding: 14px; border-radius: 40px; margin-bottom: 24px; border: 1px solid var(--border-color); font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--accent); }
-    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 32px; color: var(--accent-secondary); }
-    .wallet-meta { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
-    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+    .shell {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .macro-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(2,6,23,0.92);
+      border-bottom: 2px solid rgba(0,206,209,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      flex-wrap: wrap;
+      gap: 12px;
+      backdrop-filter: blur(12px);
+    }
+    .macro-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #00ced1, #7CFC00, #FFD966);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gradientFlow 6s ease-in-out infinite;
+      filter: drop-shadow(0 0 8px rgba(0,206,209,0.3));
+    }
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .macro-header-center {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .macro-company {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      color: var(--accent-secondary);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .macro-company:hover { color: var(--accent); }
+    .macro-wallet {
+      background: rgba(0,206,209,0.1);
+      border: 1px solid rgba(0,206,209,0.3);
+      padding: 6px 18px;
+      border-radius: 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      color: var(--accent-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .macro-wallet:hover {
+      border-color: var(--accent-secondary);
+      box-shadow: 0 0 15px rgba(0,206,209,0.2);
+    }
+    .macro-signout {
+      background: rgba(255,59,59,0.15);
+      border: 1px solid rgba(255,59,59,0.4);
+      color: var(--danger);
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .macro-signout:hover { background: rgba(255,59,59,0.3); border-color: var(--danger); }
+
+    .macro-nav {
+      display: flex;
+      gap: 4px;
+      padding: 8px 24px;
+      background: rgba(10,18,40,0.85);
+      border-bottom: 1px solid rgba(0,206,209,0.1);
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      backdrop-filter: blur(4px);
+      padding-left: 120px;
+    }
+    .macro-nav button {
+      background: rgba(15,32,64,0.7);
+      border: 1px solid rgba(0,206,209,0.3);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      white-space: nowrap;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(4px);
+    }
+    .macro-nav button:hover {
+      border-color: var(--accent-secondary);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+    .macro-nav button.active {
+      background: rgba(0,206,209,0.15);
+      color: var(--accent-secondary);
+      border-color: rgba(0,206,209,0.5);
+      box-shadow: 0 0 12px rgba(0,206,209,0.1);
+    }
+
+    .macro-container {
+      flex: 1;
+      position: relative;
+      padding: 100px 24px 40px;
+      z-index: 2;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .app-loading {
+      display: none;
+      position: absolute;
+      inset: 0;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--bg-primary);
+      z-index: 50;
+    }
+    .app-loading.active { display: flex; }
+
+    .gem-logo-corner {
+      z-index: 9999 !important;
+    }
+    .bg-waves {
+      z-index: 0 !important;
+    }
+
+    @media (max-width: 768px) {
+      .macro-container { padding: 80px 16px 40px; }
+      .macro-nav { padding: 8px 12px; padding-left: 12px; }
+      .macro-nav button { font-size: 11px; padding: 6px 10px; }
+      .macro-logo { font-size: 18px; }
+    }
   </style>
 </head>
 <body>
-  <div class="banner">🤖 TAR ADVISOR ACTIVE • <span id="bannerConversions">10,000</span> conversions available • $25 each</div>
 
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-number" id="dTotalProducts">0</div><div class="stat-label">Total Products</div></div>
-    <div class="stat-card"><div class="stat-icon">🛒</div><div class="stat-number" id="dTotalOrders">0</div><div class="stat-label">Total Orders</div></div>
-    <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-number" id="dTotalRevenue">$0</div><div class="stat-label">Total Revenue</div></div>
-    <div class="stat-card"><div class="stat-icon">🔄</div><div class="stat-number" id="dTotalConversions">0</div><div class="stat-label">Conversions</div></div>
+  <!-- ===== BACKGROUND WAVES ===== -->
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
   </div>
 
-  <div class="card">
-    <h3 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);">💰 Wallet Balance</h3>
-    <div class="wallet-amount" id="dWalletAmount">$0.00</div>
-    <div class="wallet-meta" id="dConvCapacity">0 conversions available</div>
-    <button class="btn btn-primary" style="margin-top:16px;" id="dDepositBtn">+ Deposit</button>
+  <!-- ===== 3D GEM LOGO ===== -->
+  <div class="gem-logo-corner" aria-hidden="true">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div>
+    <div class="sparkle sparkle-2"></div>
+    <div class="sparkle sparkle-3"></div>
+    <div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div>
+    <div class="sparkle sparkle-6"></div>
+    <div class="sparkle sparkle-7"></div>
+    <div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div>
+    <div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
   </div>
 
-  <script src="/tradeaux/shared/utils.js"></script>
-  <script src="/tradeaux/shared/state.js"></script>
+  <!-- ===== OFFLINE BADGE ===== -->
+  <div class="offline-badge" id="offlineBadge">📴 Offline Mode</div>
+
+  <!-- ===== SHELL ===== -->
+  <div class="shell">
+    <header class="macro-header">
+      <div class="macro-logo">TRADEAUX</div>
+      <div class="macro-header-center">
+        <span class="macro-company" id="shellCompanyName" title="Open Company Profile">🏢 Loading...</span>
+        <span class="macro-wallet" id="shellWallet" title="Open Dashboard">💰 $0.00</span>
+      </div>
+      <button class="macro-signout" id="shellSignOut">🚪 Sign Out</button>
+    </header>
+
+    <nav class="macro-nav" id="mainNav">
+      <button data-app="dashboard" class="active">📊 Dashboard</button>
+      <button data-app="company">🏢 Company</button>
+      <button data-app="products">📦 Products</button>
+      <button data-app="orders">📋 Orders</button>
+      <button data-app="tar">🤖 TAR</button>
+      <button data-app="certificates">📜 Certs</button>
+      <button data-app="archive">📚 Archive</button>
+    </nav>
+
+    <main class="macro-container">
+      <div class="app-loading" id="appLoading">
+        <div class="spinner"></div>
+        <div style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);font-size:14px;letter-spacing:2px;">Loading TradeAux...</div>
+      </div>
+      <div id="appViewport"></div>
+    </main>
+  </div>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div id="toastContainer"></div>
+
+  <script src="shared/utils.js"></script>
+  <script src="shared/state.js"></script>
+  <script src="shared/auth.js"></script>
   <script>
-    function render() {
-      var s = loadState();
-      var products = s.products || [];
-      var orders = s.orders || [];
-      var revenue = orders.reduce(function(sum, o) { return sum + (o.total || 0); }, 0);
-      var tar = s.tar || {};
-      var wallet = s.wallet || {};
-      var fee = getFee();
+    var currentApp = 'dashboard';
+    var appCache = {};
 
-      $('dTotalProducts').textContent = products.length;
-      $('dTotalOrders').textContent = orders.length;
-      $('dTotalRevenue').textContent = money(revenue);
-      $('dTotalConversions').textContent = tar.totalConversions || 0;
-      $('dWalletAmount').textContent = money(wallet.balance || 0);
-      $('dConvCapacity').textContent = Math.floor((wallet.balance || 0) / fee) + ' conversions available';
-      $('bannerConversions').textContent = Math.max(0, getGlobalLimit() - (tar.totalConversions || 0)).toLocaleString();
+    window.__showToast = function(msg, type) { showToast(msg, type); };
+
+    async function loadApp(name) {
+      if (appCache[name]) { mountApp(name, appCache[name]); return; }
+      $('appLoading').classList.add('active');
+      try {
+        var res = await fetch('micro-apps/seller/' + name + '.html');
+        if (!res.ok) throw new Error('Failed to load ' + name);
+        var html = await res.text();
+        var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+        var content = bodyMatch ? bodyMatch[1] : html;
+        var scripts = [];
+        content = content.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, function(m, code) {
+          scripts.push(code); return '';
+        });
+        appCache[name] = { html: content, scripts: scripts };
+        mountApp(name, appCache[name]);
+      } catch(e) {
+        $('appViewport').innerHTML = '<div class="card" style="text-align:center;color:var(--danger);padding:40px;">⚠️ Failed to load ' + name + '. Try refreshing.</div>';
+        console.error(e);
+      } finally {
+        $('appLoading').classList.remove('active');
+      }
     }
 
-    $('dDepositBtn').addEventListener('click', function() {
-      var amt = prompt('Deposit amount ($):', '1000');
-      if (!amt) return;
-      var v = parseFloat(amt);
-      if (isNaN(v) || v <= 0) { showToast('Invalid amount', 'error'); return; }
-      var s = loadState();
-      s.wallet.balance = (s.wallet.balance || 0) + v;
-      saveState(s);
-      render();
-      showToast('Deposited ' + money(v), 'success');
+    function mountApp(name, app) {
+      var vp = $('appViewport');
+      vp.innerHTML = app.html;
+      app.scripts.forEach(function(code) {
+        try {
+          var fn = new Function('with(this){' + code + '}');
+          fn.call(window);
+        } catch(e) { console.error('Script error in ' + name + ':', e); }
+      });
+      document.querySelectorAll('.macro-nav button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.app === name);
+      });
+      currentApp = name;
+      history.pushState({ app: name }, '', '#/' + name);
+      window.dispatchEvent(new CustomEvent('tradeaux:mount', { detail: { app: name } }));
+    }
+
+    document.getElementById('mainNav').addEventListener('click', function(e) {
+      var btn = e.target.closest('button[data-app]');
+      if (!btn) return;
+      var app = btn.dataset.app;
+      if (app === currentApp) return;
+      loadApp(app);
     });
 
-    listenState(render);
-    render();
+    $('shellCompanyName').addEventListener('click', function() {
+      document.querySelector('button[data-app="company"]').click();
+    });
+    $('shellWallet').addEventListener('click', function() {
+      document.querySelector('button[data-app="dashboard"]').click();
+    });
+    $('shellSignOut').addEventListener('click', function() {
+      if (confirm('Sign out? Local data is preserved.')) {
+        signOut();
+        location.reload();
+      }
+    });
+
+    function updateHeader() {
+      var state = loadState();
+      var c = state.company || {};
+      $('shellCompanyName').textContent = (c.name || 'YOUR COMPANY');
+      $('shellWallet').textContent = '💰 ' + money(state.wallet && state.wallet.balance || 0);
+      var badge = $('offlineBadge');
+      if (!currentUserId) badge.classList.add('visible');
+      else badge.classList.remove('visible');
+    }
+    listenState(function() { updateHeader(); });
+    window.addEventListener('tradeaux:auth', function() { updateHeader(); });
+
+    window.addEventListener('popstate', function(e) {
+      if (e.state && e.state.app && e.state.app !== currentApp) {
+        loadApp(e.state.app);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth().then(function() {
+        updateHeader();
+        var hash = location.hash.replace('#/', '');
+        var valid = ['dashboard','company','products','orders','tar','certificates','archive'];
+        loadApp(valid.indexOf(hash) > -1 ? hash : 'dashboard');
+      });
+    });
   </script>
 </body>
 </html>
-
