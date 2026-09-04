@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Bids</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .bid-item {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid var(--warning);
+    }
+    .bid-item:hover { background: rgba(0,206,209,0.1); transform: translateX(4px); }
+    .bid-title {
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .bid-details {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .bid-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(255,217,102,0.2);
+      color: var(--warning);
+    }
+    .bid-empty {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 40px;
+    }
+    .modal-body .field {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .modal-body .field .label { color: var(--text-muted); font-size: 12px; }
+    .modal-body .field .value { font-weight: 600; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div id="bidsList">
+    <div class="bid-empty">No active bids</div>
+  </div>
+
+  <!-- Bid Detail Modal -->
+  <div class="modal-overlay" id="bidModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeBidModal">&times;</button>
+      <h3 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);margin-bottom:16px;">📋 Bid Details</h3>
+      <div class="modal-body" id="bidDetailBody"></div>
+      <div style="margin-top:16px;display:flex;gap:12px;">
+        <button class="btn" id="closeBidBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var bidData = [];
+
+    function renderBids() {
+      var container = $('bidsList');
+      if (!bidData.length) {
+        container.innerHTML = '<div class="bid-empty">📝 No active bids</div>';
+        return;
+      }
+      container.innerHTML = bidData.map(function(bid) {
+        return '<div class="bid-item" data-bid-id="' + escapeAttr(bid.id) + '">' +
+          '<div class="bid-title">' +
+            '<span>' + escapeHtml(bid.product || 'Unknown') + ' - ' + escapeHtml(bid.variety || '') + '</span>' +
+            '<span class="bid-status">⏱️ ' + (bid.timeLeft || '2:34') + '</span>' +
+          '</div>' +
+          '<div class="bid-details">' +
+            '<span>📦 ' + (bid.quantity || 0) + ' MT</span>' +
+            '<span>💰 $' + (bid.price || 0).toFixed(2) + '/MT</span>' +
+            '<span>🏷️ ' + escapeHtml(bid.seller || 'Unknown') + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function showBidDetail(id) {
+      var bid = bidData.find(function(b) { return b.id === id; });
+      if (!bid) return;
+      var body = $('bidDetailBody');
+      body.innerHTML =
+        '<div class="field"><span class="label">Product</span><span class="value">' + escapeHtml(bid.product || 'Unknown') + ' - ' + escapeHtml(bid.variety || '') + '</span></div>' +
+        '<div class="field"><span class="label">Quantity</span><span class="value">' + (bid.quantity || 0) + ' MT</span></div>' +
+        '<div class="field"><span class="label">Your Bid</span><span class="value" style="color:var(--warning);">$' + (bid.price || 0).toFixed(2) + '/MT</span></div>' +
+        '<div class="field"><span class="label">Seller</span><span class="value">' + escapeHtml(bid.seller || 'Unknown') + '</span></div>' +
+        '<div class="field"><span class="label">Contact</span><span class="value">' + escapeHtml(bid.sellerContact || 'N/A') + '</span></div>';
+      $('bidModal').classList.add('active');
+    }
+
+    $('bidsList').addEventListener('click', function(e) {
+      var item = e.target.closest('[data-bid-id]');
+      if (item) showBidDetail(item.dataset.bidId);
+    });
+
+    $('closeBidModal').addEventListener('click', function() { $('bidModal').classList.remove('active'); });
+    $('closeBidBtn').addEventListener('click', function() { $('bidModal').classList.remove('active'); });
+    $('bidModal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('active');
+    });
+
+    function loadBids() {
+      var state = loadState();
+      bidData = state.bids || [];
+      renderBids();
+    }
+
+    listenState(function(state) {
+      bidData = state.bids || [];
+      renderBids();
+    });
+
+    loadBids();
+  </script>
+</body>
+</html>

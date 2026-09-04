@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Seller Dashboard</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+    .stat-card { background: var(--bg-card); border: 1px solid rgba(0,206,209,0.3); border-radius: var(--radius); padding: 20px; text-align: center; transition: all 0.3s; }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--accent-secondary); }
+    .stat-number { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; color: var(--accent-secondary); }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+    .banner { text-align: center; background: rgba(124,252,0,0.08); padding: 14px; border-radius: 40px; margin-bottom: 24px; border: 1px solid var(--border-color); font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--accent); }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 32px; color: var(--accent-secondary); }
+    .wallet-meta { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="banner">🤖 TAR ADVISOR ACTIVE • <span id="bannerConversions">10,000</span> conversions available • $25 each</div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-number" id="dTotalProducts">0</div><div class="stat-label">Total Products</div></div>
+    <div class="stat-card"><div class="stat-icon">🛒</div><div class="stat-number" id="dTotalOrders">0</div><div class="stat-label">Total Orders</div></div>
+    <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-number" id="dTotalRevenue">$0</div><div class="stat-label">Total Revenue</div></div>
+    <div class="stat-card"><div class="stat-icon">🔄</div><div class="stat-number" id="dTotalConversions">0</div><div class="stat-label">Conversions</div></div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);">💰 Wallet Balance</h3>
+    <div class="wallet-amount" id="dWalletAmount">$0.00</div>
+    <div class="wallet-meta" id="dConvCapacity">0 conversions available</div>
+    <button class="btn btn-primary" style="margin-top:16px;" id="dDepositBtn">+ Deposit</button>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    function render() {
+      var s = loadState();
+      var products = s.products || [];
+      var orders = s.orders || [];
+      var revenue = orders.reduce(function(sum, o) { return sum + (o.total || 0); }, 0);
+      var tar = s.tar || {};
+      var wallet = s.wallet || {};
+      var fee = getFee();
+
+      $('dTotalProducts').textContent = products.length;
+      $('dTotalOrders').textContent = orders.length;
+      $('dTotalRevenue').textContent = money(revenue);
+      $('dTotalConversions').textContent = tar.totalConversions || 0;
+      $('dWalletAmount').textContent = money(wallet.balance || 0);
+      $('dConvCapacity').textContent = Math.floor((wallet.balance || 0) / fee) + ' conversions available';
+      $('bannerConversions').textContent = Math.max(0, getGlobalLimit() - (tar.totalConversions || 0)).toLocaleString();
+    }
+
+    $('dDepositBtn').addEventListener('click', function() {
+      var amt = prompt('Deposit amount ($):', '1000');
+      if (!amt) return;
+      var v = parseFloat(amt);
+      if (isNaN(v) || v <= 0) { showToast('Invalid amount', 'error'); return; }
+      var s = loadState();
+      s.wallet.balance = (s.wallet.balance || 0) + v;
+      saveState(s);
+      render();
+      showToast('Deposited ' + money(v), 'success');
+    });
+
+    listenState(render);
+    render();
+  </script>
+</body>
+</html>

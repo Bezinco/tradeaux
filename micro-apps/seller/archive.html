@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Archive</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .a-card { background: var(--bg-card); border: 1px solid rgba(255,217,102,0.2); border-radius: var(--radius); padding: 16px; transition: 0.3s; }
+    .a-card:hover { transform: translateY(-3px); border-color: var(--warning); }
+    .a-status { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 10px; }
+    .a-won { background: rgba(124,252,0,0.2); color: var(--accent); }
+    .a-lost { background: rgba(255,77,77,0.2); color: var(--danger); }
+    .a-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+    .sim-result { margin-top: 8px; padding: 8px; background: rgba(124,252,0,0.05); border-radius: 6px; border-left: 3px solid var(--accent); font-size: 11px; color: var(--accent); display: none; }
+    .simulate-btn { background: linear-gradient(135deg, var(--warning), #FFB347); border: none; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 10px; color: #000; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h2 style="font-family:'Orbitron',sans-serif;color:var(--warning);">📚 Auction Archive</h2>
+    <span style="color:var(--text-muted);font-size:12px;" id="aCount">0 items</span>
+  </div>
+  <div class="archive-grid" id="aGrid"></div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    function render() {
+      var s = loadState();
+      var archives = s.archivedAuctions || [];
+      $('aCount').textContent = archives.length + ' items';
+      var grid = $('aGrid');
+      if (!archives.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);">No archived auctions yet</div>';
+        return;
+      }
+      grid.innerHTML = archives.map(function(a) {
+        var won = a.won;
+        return '<div class="a-card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+          '<span class="a-status ' + (won ? 'a-won' : 'a-lost') + '">' + (won ? '🏆 Won' : '📉 Lost') + '</span>' +
+          '<span style="font-size:11px;color:var(--text-muted);">📅 ' + safeDate(a.archived_at) + '</span></div>' +
+          '<div style="font-weight:700;font-size:15px;margin-bottom:4px;">' + escapeHtml(a.product || 'Unknown') + '</div>' +
+          '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">' + escapeHtml(a.details || 'No details') + '</div>' +
+          '<div class="a-metrics">' +
+          '<div style="text-align:center;"><div style="font-family:Orbitron,sans-serif;font-size:14px;color:var(--accent-secondary);">' + money(a.final_price || 0) + '</div><div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;">Final Price</div></div>' +
+          '<div style="text-align:center;"><div style="font-family:Orbitron,sans-serif;font-size:14px;color:var(--accent-secondary);">' + (a.bids || 0) + '</div><div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;">Bids</div></div>' +
+          '<div style="text-align:center;"><div style="font-family:Orbitron,sans-serif;font-size:14px;color:var(--accent-secondary);">' + (a.buyers || 0) + '</div><div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;">Buyers</div></div>' +
+          '</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">' +
+          '<button class="simulate-btn" data-id="' + a.id + '">📊 Simulate</button>' +
+          (!won ? '<button class="btn" style="padding:4px 12px;font-size:10px;" data-action="won" data-id="' + a.id + '">🏆 Mark Won</button>' : '') +
+          '</div>' +
+          '<div class="sim-result" id="sim_' + a.id + '"></div>' +
+          '</div>';
+      }).join('');
+    }
+
+    $('aGrid').addEventListener('click', function(e) {
+      var btn = e.target.closest('button'); if (!btn) return;
+      var id = btn.dataset.id;
+      if (btn.classList.contains('simulate-btn')) {
+        var div = $('sim_' + id);
+        if (div) { div.textContent = '📊 Sim: Sale price ~$' + (Math.floor(Math.random() * 1000) + 200) + ', margin ~' + (Math.floor(Math.random() * 30) + 10) + '%'; div.style.display = 'block'; showToast('Simulation complete', 'success'); }
+      }
+      if (btn.dataset.action === 'won') {
+        var s = loadState();
+        var a = s.archivedAuctions.find(function(x) { return x.id === id; });
+        if (a) { a.won = true; saveState(s); render(); showToast('🏆 Marked as won', 'success'); }
+      }
+    });
+
+    listenState(render);
+    render();
+  </script>
+</body>
+</html>

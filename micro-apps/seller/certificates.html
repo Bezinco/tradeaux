@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Certificates</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .c-block { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.3s; }
+    .c-block:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .c-icon { font-size: 28px; }
+    .c-name { font-size: 12px; font-weight: 700; text-align: center; }
+    .c-desc { font-size: 9px; color: var(--text-muted); text-align: center; }
+    .c-req { font-size: 8px; color: var(--warning); background: rgba(255,217,102,0.1); padding: 2px 10px; border-radius: 10px; }
+    .c-preview { width: 100%; height: 50px; border-radius: 8px; border: 1px dashed var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(0,0,0,0.3); overflow: hidden; }
+    .c-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .c-toggle { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .c-remove { background: rgba(255,77,77,0.15); border: 1px solid rgba(255,77,77,0.4); color: var(--danger); padding: 2px 12px; border-radius: 10px; font-size: 9px; cursor: pointer; }
+    .add-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  </style>
+</head>
+<body>
+  <div style="color:var(--danger);font-size:12px;margin-bottom:16px;">⚠️ <strong>Incorporation Certificate is MANDATORY</strong> — No selling without it!</div>
+
+  <div class="cert-grid" id="cGrid"></div>
+
+  <div class="add-row">
+    <select id="cSelect" style="flex:1;min-width:160px;">
+      <option value="">Add Certificate Type...</option>
+      <option value="export">Export License</option>
+      <option value="organic">Organic</option>
+      <option value="fairtrade">Fair Trade</option>
+      <option value="kosher">Kosher</option>
+      <option value="halal">Halal</option>
+      <option value="brcgs">BRCGS</option>
+      <option value="origin">Origin</option>
+      <option value="HACCP">HACCP</option>
+      <option value="GMP">GMP</option>
+      <option value="USDA">USDA</option>
+      <option value="EU">EU</option>
+      <option value="other">Other</option>
+    </select>
+    <button class="btn btn-primary" id="cAdd">+ Add</button>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var certTypes = {
+      incorporation: { icon: '📜', name: 'Incorporation', desc: 'MANDATORY', required: true },
+      export: { icon: '📋', name: 'Export License', desc: 'International sales' },
+      organic: { icon: '🌱', name: 'Organic', desc: 'USDA/EU certified' },
+      fairtrade: { icon: '🤝', name: 'Fair Trade', desc: 'Fair Trade certified' },
+      kosher: { icon: '✡️', name: 'Kosher', desc: 'Kosher certified' },
+      halal: { icon: '☪️', name: 'Halal', desc: 'Halal certified' },
+      brcgs: { icon: '📊', name: 'BRCGS', desc: 'Food safety standard' },
+      origin: { icon: '🌍', name: 'Origin', desc: 'Country of origin' },
+      HACCP: { icon: '🔬', name: 'HACCP', desc: 'Hazard analysis' },
+      GMP: { icon: '💊', name: 'GMP', desc: 'Good manufacturing' },
+      USDA: { icon: '🇺🇸', name: 'USDA', desc: 'USDA certified' },
+      EU: { icon: '🇪🇺', name: 'EU', desc: 'EU certified' }
+    };
+
+    function render() {
+      var s = loadState();
+      var toggles = s.company && s.company.cert_toggles ? s.company.cert_toggles : { incorporation: true };
+      var docs = s.company && s.company.documents ? s.company.documents : {};
+      var keys = Object.keys(toggles);
+      var grid = $('cGrid');
+      if (!keys.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);">No certificates added</div>'; return; }
+      grid.innerHTML = keys.map(function(key) {
+        var info = certTypes[key] || { icon: '📄', name: key, desc: 'Custom certificate' };
+        var checked = toggles[key] === true;
+        var hasDoc = !!docs[key];
+        return '<div class="c-block" data-cert="' + key + '">' +
+          '<div class="c-icon">' + info.icon + '</div>' +
+          '<div class="c-name">' + info.name + '</div>' +
+          '<div class="c-desc">' + info.desc + '</div>' +
+          (info.required ? '<div class="c-req">⭐ REQUIRED</div>' : '') +
+          '<div class="c-preview" data-cert="' + key + '">' + (hasDoc ? '<img src="' + escapeAttr(docs[key]) + '" alt="">' : '<span style="font-size:9px;color:var(--text-muted);">📤 Click to upload</span>') + '</div>' +
+          '<div class="c-toggle"><span>' + (checked ? '✅' : '⏳') + '</span><input type="checkbox" data-cert="' + key + '" ' + (checked ? 'checked' : '') + '></div>' +
+          (key !== 'incorporation' ? '<button class="c-remove" data-cert="' + key + '">✕ Remove</button>' : '') +
+          '</div>';
+      }).join('');
+    }
+
+    $('cAdd').addEventListener('click', function() {
+      var type = $('cSelect').value;
+      if (!type) { showToast('Select a certificate type', 'warning'); return; }
+      var s = loadState();
+      if (!s.company.cert_toggles) s.company.cert_toggles = { incorporation: true };
+      if (s.company.cert_toggles[type]) { showToast('Already added', 'warning'); return; }
+      s.company.cert_toggles[type] = false;
+      saveState(s);
+      render();
+      $('cSelect').value = '';
+      showToast('✅ Certificate added', 'success');
+    });
+
+    $('cGrid').addEventListener('change', function(e) {
+      var cb = e.target.closest('input[type="checkbox"][data-cert]'); if (!cb) return;
+      var s = loadState(); s.company.cert_toggles[cb.dataset.cert] = cb.checked; saveState(s);
+      showToast('✅ Status updated', 'success'); render();
+    });
+
+    $('cGrid').addEventListener('click', function(e) {
+      var btn = e.target.closest('.c-remove');
+      if (btn) {
+        var key = btn.dataset.cert; if (key === 'incorporation') return;
+        if (!confirm('Remove ' + key + '?')) return;
+        var s = loadState(); delete s.company.cert_toggles[key]; delete s.company.documents[key]; saveState(s); render();
+        showToast('Certificate removed', 'info'); return;
+      }
+      var preview = e.target.closest('.c-preview');
+      if (preview && !e.target.closest('.c-remove') && !e.target.closest('input')) {
+        var key = preview.dataset.cert; if (!key) return;
+        var input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*,.pdf';
+        input.onchange = function(ev) {
+          var file = ev.target.files[0]; if (!file) return;
+          if (file.size > 5 * 1024 * 1024) { showToast('Max 5MB', 'error'); return; }
+          var reader = new FileReader();
+          reader.onload = function(evr) { var s = loadState(); if (!s.company.documents) s.company.documents = {}; s.company.documents[key] = evr.target.result; saveState(s); render(); showToast('Uploaded (local)', 'warning'); };
+          reader.readAsDataURL(file);
+        }; input.click();
+      }
+    });
+
+    listenState(render);
+    render();
+  </script>
+</body>
+</html>

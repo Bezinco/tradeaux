@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Company Profile</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .company-layout { display: grid; grid-template-columns: 200px 1fr; gap: 24px; }
+    .logo-box { width: 160px; height: 160px; border: 2px dashed rgba(0,206,209,0.3); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; overflow: hidden; background: rgba(0,0,0,0.3); }
+    .logo-box:hover { border-color: var(--accent-secondary); background: rgba(0,206,209,0.05); }
+    .logo-box img { width: 100%; height: 100%; object-fit: contain; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field label { display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .field .value { font-size: 14px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 28px; }
+    .badge { display: inline-block; padding: 4px 16px; border-radius: 20px; font-size: 12px; margin-top: 12px; }
+    .badge-pending { background: rgba(255,217,102,0.15); color: var(--warning); border: 1px solid rgba(255,217,102,0.3); }
+    .badge-verified { background: rgba(124,252,0,0.15); color: var(--accent); border: 1px solid rgba(124,252,0,0.3); }
+    .badge-unverified { background: rgba(255,77,77,0.15); color: var(--danger); border: 1px solid rgba(255,77,77,0.3); }
+    .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 12px; }
+    .doc-item { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,206,209,0.15); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+    @media (max-width: 768px) { .company-layout { grid-template-columns: 1fr; } .fields { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+    <h2 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);">🏢 Company Profile</h2>
+    <button class="btn btn-primary" id="editBtn">✏️ Edit</button>
+  </div>
+
+  <div class="card">
+    <div class="company-layout">
+      <div style="text-align:center;">
+        <div class="logo-box" id="logoBox">
+          <div id="logoPlaceholder">🏢<br><span style="font-size:12px;color:var(--text-muted);">Upload Logo</span></div>
+          <img id="logoImg" style="display:none;" alt="Logo">
+        </div>
+        <div id="verifBadge" class="badge badge-pending">⏳ Pending Verification</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;" id="statusText">Complete your profile to start selling</div>
+      </div>
+      <div class="fields">
+        <div class="field"><label>Company Name</label><div class="value" id="fName">Not set</div></div>
+        <div class="field"><label>Registration</label><div class="value" id="fReg">Not set</div></div>
+        <div class="field"><label>Country</label><div class="value" id="fCountry">Not set</div></div>
+        <div class="field"><label>Tax Reg</label><div class="value" id="fTax">Not set</div></div>
+        <div class="field" style="grid-column:1/-1;"><label>Address</label><div class="value" id="fAddress">Not set</div></div>
+        <div class="field"><label>Email</label><div class="value" id="fEmail">Not set</div></div>
+        <div class="field"><label>Phone</label><div class="value" id="fPhone">Not set</div></div>
+        <div class="field" style="grid-column:1/-1;"><label>Website</label><div class="value" id="fWebsite">Not set</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:12px;font-family:'Orbitron',sans-serif;">📄 Legal Documents</h3>
+    <div class="doc-grid" id="docGrid"></div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeModal">&times;</button>
+      <h3 style="margin-bottom:16px;font-family:'Orbitron',sans-serif;">Edit Company Profile</h3>
+      <div class="grid-2">
+        <div class="form-group"><label>Company Name *</label><input id="mName" placeholder="e.g. AG Nutraceuticals"></div>
+        <div class="form-group"><label>Registration Number *</label><input id="mReg" placeholder="e.g. 9876543210"></div>
+        <div class="form-group"><label>Country *</label><input id="mCountry" placeholder="e.g. USA"></div>
+        <div class="form-group"><label>Tax Reg</label><input id="mTax" placeholder="e.g. TX-123456"></div>
+        <div class="form-group" style="grid-column:1/-1;"><label>Address</label><input id="mAddress" placeholder="Business address"></div>
+        <div class="form-group"><label>Email</label><input id="mEmail" type="email" placeholder="info@company.com"></div>
+        <div class="form-group"><label>Phone</label><input id="mPhone" placeholder="+1 234 567 890"></div>
+        <div class="form-group" style="grid-column:1/-1;"><label>Website</label><input id="mWebsite" placeholder="https://company.com"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        <button class="btn" id="cancelEdit" style="flex:1;">Cancel</button>
+        <button class="btn btn-primary" id="saveEdit" style="flex:1;">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="logoInput" accept="image/*" style="display:none;">
+  <input type="file" id="docInput" accept="image/*,.pdf" style="display:none;">
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var docTypes = [
+      { key: 'incorporation', label: 'Certificate of Incorporation', icon: '📜' },
+      { key: 'license', label: 'Business License', icon: '📋' },
+      { key: 'tax', label: 'Tax Registration', icon: '📑' }
+    ];
+    var pendingDocType = null;
+
+    function render() {
+      var s = loadState();
+      var c = s.company || {};
+      $('fName').textContent = c.name || 'Not set';
+      $('fReg').textContent = c.reg || 'Not set';
+      $('fCountry').textContent = c.country || 'Not set';
+      $('fTax').textContent = c.tax || 'Not set';
+      $('fAddress').textContent = c.address || 'Not set';
+      $('fEmail').textContent = c.email || 'Not set';
+      $('fPhone').textContent = c.phone || 'Not set';
+      $('fWebsite').textContent = c.website || 'Not set';
+
+      if (c.logo) { $('logoImg').src = c.logo; $('logoImg').style.display = 'block'; $('logoPlaceholder').style.display = 'none'; }
+      else { $('logoImg').style.display = 'none'; $('logoPlaceholder').style.display = 'flex'; }
+
+      var v = c.verified === true || c.verified === 'verified' ? 'verified' : c.verified === 'pending' ? 'pending' : 'unverified';
+      var badge = $('verifBadge');
+      badge.className = 'badge badge-' + v;
+      badge.textContent = v === 'verified' ? '✅ Verified' : v === 'pending' ? '⏳ Pending Verification' : '❌ Unverified';
+
+      var complete = !!(c.reg && c.country);
+      $('statusText').textContent = complete ? '✅ Profile complete — ready to sell!' : '⚠️ Complete your company profile to start selling';
+
+      var docs = c.documents || {};
+      $('docGrid').innerHTML = docTypes.map(function(d) {
+        return '<div class="doc-item">' +
+          '<span>' + d.icon + ' ' + d.label + '</span>' +
+          '<span style="font-size:12px;color:' + (docs[d.key] ? 'var(--accent)' : 'var(--text-muted)') + ';">' +
+          (docs[d.key] ? '✅ Uploaded' : 'Not uploaded') + '</span>' +
+          '<button class="btn" style="padding:2px 10px;font-size:10px;" data-doc="' + d.key + '">📤</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    $('editBtn').addEventListener('click', function() {
+      var c = loadState().company || {};
+      $('mName').value = c.name || ''; $('mReg').value = c.reg || ''; $('mCountry').value = c.country || '';
+      $('mTax').value = c.tax || ''; $('mAddress').value = c.address || ''; $('mEmail').value = c.email || '';
+      $('mPhone').value = c.phone || ''; $('mWebsite').value = c.website || '';
+      $('editModal').classList.add('active');
+    });
+    $('closeModal').addEventListener('click', function() { $('editModal').classList.remove('active'); });
+    $('cancelEdit').addEventListener('click', function() { $('editModal').classList.remove('active'); });
+    $('saveEdit').addEventListener('click', function() {
+      var name = stripHtml($('mName').value.trim()), reg = stripHtml($('mReg').value.trim()), country = stripHtml($('mCountry').value.trim());
+      if (!name || !reg || !country) { showToast('Name, Reg, and Country are required', 'error'); return; }
+      var s = loadState();
+      Object.assign(s.company, {
+        name: name, reg: reg, country: country, tax: stripHtml($('mTax').value.trim()),
+        address: stripHtml($('mAddress').value.trim()), email: stripHtml($('mEmail').value.trim()),
+        phone: stripHtml($('mPhone').value.trim()), website: stripHtml($('mWebsite').value.trim())
+      });
+      saveState(s);
+      $('editModal').classList.remove('active');
+      render();
+      showToast('✅ Company profile saved', 'success');
+    });
+
+    $('logoBox').addEventListener('click', function() { $('logoInput').click(); });
+    $('logoInput').addEventListener('change', function(e) {
+      var file = e.target.files[0]; if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev) { var s = loadState(); s.company.logo = ev.target.result; saveState(s); render(); showToast('Logo updated (local)', 'warning'); };
+      reader.readAsDataURL(file); this.value = '';
+    });
+
+    $('docGrid').addEventListener('click', function(e) {
+      var btn = e.target.closest('button[data-doc]'); if (!btn) return;
+      pendingDocType = btn.dataset.doc; $('docInput').click();
+    });
+    $('docInput').addEventListener('change', function(e) {
+      var file = e.target.files[0]; if (!file || !pendingDocType) return;
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        var s = loadState(); if (!s.company.documents) s.company.documents = {};
+        s.company.documents[pendingDocType] = ev.target.result; saveState(s); render();
+        showToast('Document uploaded (local)', 'warning'); pendingDocType = null;
+      };
+      reader.readAsDataURL(file); this.value = '';
+    });
+
+    listenState(render);
+    render();
+  </script>
+</body>
+</html>

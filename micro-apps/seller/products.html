@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Products</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .product-card {
+      background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95));
+      border: 1px solid rgba(0,206,209,0.3); border-radius: var(--radius); padding: 16px;
+      transition: all 0.3s; position: relative; overflow: hidden; min-height: 260px;
+      display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-4px); border-color: var(--accent-secondary); }
+    .cartouche { position: absolute; top: 0; right: 0; padding: 3px 14px; border-radius: 0 12px 0 12px; font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700; text-transform: uppercase; }
+    .cartouche-standard { background: #E5E4E2; color: #1a1a2e; }
+    .cartouche-pallet { background: #CD7F32; color: #1a1a2e; }
+    .cartouche-sample { background: #D4AF37; color: #1a1a2e; }
+    .p-img { width: 100%; height: 100px; border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.3); margin-bottom: 10px; border: 1px solid rgba(0,206,209,0.15); display: flex; align-items: center; justify-content: center; }
+    .p-img img { width: 100%; height: 100%; object-fit: cover; }
+    .p-img .no-img { color: #4a5a7a; font-size: 11px; }
+    .p-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .p-desc { color: var(--text-muted); font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .p-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; font-size: 11px; }
+    .p-tags span { background: rgba(0,206,209,0.08); padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(0,206,209,0.1); }
+    .p-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .p-actions .btn { padding: 4px 10px; font-size: 10px; }
+    .add-card { border: 2px dashed rgba(0,206,209,0.3); border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 260px; cursor: pointer; transition: 0.3s; color: var(--text-muted); }
+    .add-card:hover { border-color: var(--accent-secondary); background: rgba(0,206,209,0.05); }
+    .add-card .icon { font-size: 32px; margin-bottom: 8px; }
+    .image-previews { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .image-previews .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); position: relative; }
+  </style>
+</head>
+<body>
+  <div class="header-row">
+    <h2 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);">📦 Products</h2>
+    <button class="btn btn-primary" id="addBtn">+ Add Product</button>
+  </div>
+  <div class="products-grid" id="grid"></div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="pModal">
+    <div class="modal-box" style="max-width: 600px;">
+      <button class="modal-close" id="pClose">&times;</button>
+      <h3 style="font-family:'Orbitron',sans-serif;margin-bottom:16px;" id="pTitle">Add Product</h3>
+      <div style="display:grid;gap:12px;">
+        <div><label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Product Name *</label><input id="pName" placeholder="Premium Arabica Coffee"></div>
+        <div><label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Description</label><input id="pDesc" placeholder="Grade 1, Washed"></div>
+        <div class="grid-2">
+          <div><label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Quantity *</label><input id="pQty" type="number" min="1" placeholder="1000"></div>
+          <div><label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Origin</label><input id="pOrigin" placeholder="Colombia"></div>
+        </div>
+        <div><label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Images (max 5)</label><input type="file" id="pFiles" accept="image/*" multiple></div>
+        <div class="image-previews" id="pPreviews"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        <button class="btn" id="pCancel" style="flex:1;">Cancel</button>
+        <button class="btn btn-primary" id="pSave" style="flex:1;">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var products = [];
+    var editingId = null;
+    var pendingImages = [];
+
+    function render() {
+      var s = loadState();
+      products = s.products || [];
+      var grid = $('grid');
+      if (!products.length) {
+        grid.innerHTML = '<div class="add-card" id="emptyAdd"><div class="icon">➕</div><span>Add Product</span></div>';
+        $('emptyAdd').addEventListener('click', openModal);
+        return;
+      }
+      var html = products.map(function(p) {
+        var img = (p.images && p.images.length) ? '<img src="' + escapeAttr(p.images[0]) + '" alt="">' : '<div class="no-img">📷 No image</div>';
+        var type = p.auction_type || 'standard';
+        return '<div class="product-card ' + type + '">' +
+          '<div class="cartouche cartouche-' + type + '">' + type + '</div>' +
+          '<div class="p-img">' + img + '</div>' +
+          '<div class="p-name">' + escapeHtml(p.name) + '</div>' +
+          '<div class="p-desc">' + escapeHtml(p.description || 'No description') + '</div>' +
+          '<div class="p-tags"><span>📦 ' + (p.quantity || 0) + ' units</span><span>📍 ' + escapeHtml(p.origin || 'Unknown') + '</span></div>' +
+          '<div class="p-actions">' +
+          '<button class="btn" data-action="edit" data-id="' + p.id + '">✏️ Edit</button>' +
+          '<button class="btn btn-danger" data-action="delete" data-id="' + p.id + '">🗑️ Delete</button>' +
+          '</div></div>';
+      }).join('');
+      html += '<div class="add-card" id="gridAdd"><div class="icon">➕</div><span>Add Product</span></div>';
+      grid.innerHTML = html;
+      $('gridAdd').addEventListener('click', openModal);
+    }
+
+    function openModal(id) {
+      editingId = id || null;
+      $('pTitle').textContent = id ? 'Edit Product' : 'Add Product';
+      pendingImages = [];
+      $('pPreviews').innerHTML = '';
+      $('pFiles').value = '';
+      if (id) {
+        var p = products.find(function(x) { return x.id === id; });
+        if (p) {
+          $('pName').value = p.name || ''; $('pDesc').value = p.description || '';
+          $('pQty').value = p.quantity || ''; $('pOrigin').value = p.origin || '';
+          if (p.images) {
+            pendingImages = p.images.slice();
+            renderPreviews();
+          }
+        }
+      } else {
+        $('pName').value = ''; $('pDesc').value = ''; $('pQty').value = ''; $('pOrigin').value = '';
+      }
+      $('pModal').classList.add('active');
+    }
+
+    function renderPreviews() {
+      $('pPreviews').innerHTML = pendingImages.map(function(src, i) {
+        return '<div class="thumb"><img src="' + escapeAttr(src) + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><button data-idx="' + i + '" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:10px;">✕</button></div>';
+      }).join('');
+    }
+
+    function saveProduct() {
+      var name = stripHtml($('pName').value.trim()), desc = stripHtml($('pDesc').value.trim());
+      var qty = parseFloat($('pQty').value), origin = stripHtml($('pOrigin').value.trim());
+      if (!name) { showToast('Product name required', 'error'); return; }
+      if (!qty || qty <= 0) { showToast('Valid quantity required', 'error'); return; }
+      var id = editingId || uuid();
+      var existing = products.find(function(p) { return p.id === id; });
+      var data = {
+        id: id, name: name, description: desc, quantity: qty, origin: origin || 'Not specified',
+        images: pendingImages.slice(0, 5), has_auction: existing ? existing.has_auction : false,
+        auction_type: existing ? existing.auction_type : 'standard'
+      };
+      var s = loadState();
+      if (existing) {
+        var idx = s.products.findIndex(function(p) { return p.id === id; });
+        if (idx > -1) s.products[idx] = data; else s.products.push(data);
+      } else {
+        s.products.push(data);
+      }
+      saveState(s);
+      $('pModal').classList.remove('active');
+      render();
+      showToast('✅ Product saved', 'success');
+    }
+
+    function deleteProduct(id) {
+      if (!confirm('Delete this product?')) return;
+      var s = loadState();
+      s.products = s.products.filter(function(p) { return p.id !== id; });
+      saveState(s);
+      render();
+      showToast('Product deleted', 'info');
+    }
+
+    $('addBtn').addEventListener('click', function() { openModal(); });
+    $('pClose').addEventListener('click', function() { $('pModal').classList.remove('active'); });
+    $('pCancel').addEventListener('click', function() { $('pModal').classList.remove('active'); });
+    $('pSave').addEventListener('click', saveProduct);
+    $('pFiles').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files);
+      if (!files.length) return;
+      Promise.all(files.map(function(file) {
+        return new Promise(function(res) { var r = new FileReader(); r.onload = function(ev) { res(ev.target.result); }; r.readAsDataURL(file); });
+      })).then(function(imgs) {
+        pendingImages = pendingImages.concat(imgs).slice(0, 5);
+        renderPreviews();
+        $('pFiles').value = '';
+      });
+    });
+    $('pPreviews').addEventListener('click', function(e) {
+      var btn = e.target.closest('button[data-idx]'); if (!btn) return;
+      pendingImages.splice(parseInt(btn.dataset.idx), 1); renderPreviews();
+    });
+    $('grid').addEventListener('click', function(e) {
+      var btn = e.target.closest('button[data-action]'); if (!btn) return;
+      var action = btn.dataset.action, id = btn.dataset.id;
+      if (action === 'edit') openModal(id);
+      if (action === 'delete') deleteProduct(id);
+    });
+
+    listenState(render);
+    render();
+  </script>
+</body>
+</html>

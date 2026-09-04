@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Won</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .won-item {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid var(--accent);
+    }
+    .won-item:hover { background: rgba(124,252,0,0.05); transform: translateX(4px); }
+    .won-title {
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .won-details {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .won-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(124,252,0,0.2);
+      color: var(--accent);
+    }
+    .won-empty {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div id="wonList">
+    <div class="won-empty">🏆 No won auctions yet</div>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var wonData = [];
+
+    function renderWon() {
+      var container = $('wonList');
+      if (!wonData.length) {
+        container.innerHTML = '<div class="won-empty">🏆 No won auctions yet</div>';
+        return;
+      }
+      container.innerHTML = wonData.map(function(w) {
+        return '<div class="won-item" data-won-id="' + escapeAttr(w.id) + '">' +
+          '<div class="won-title">' +
+            '<span>' + escapeHtml(w.product || 'Unknown') + ' - ' + escapeHtml(w.variety || '') + '</span>' +
+            '<span class="won-status">' + escapeHtml(w.status || 'Delivery pending') + '</span>' +
+          '</div>' +
+          '<div class="won-details">' +
+            '<span>📦 ' + (w.quantity || 0) + ' MT</span>' +
+            '<span>💰 $' + (w.price || 0).toFixed(2) + '/MT</span>' +
+            '<span>🏷️ ' + escapeHtml(w.seller || 'Unknown') + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function loadWon() {
+      var state = loadState();
+      wonData = state.wonAuctions || [];
+      renderWon();
+    }
+
+    listenState(function(state) {
+      wonData = state.wonAuctions || [];
+      renderWon();
+    });
+
+    loadWon();
+  </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Orders</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .order-card { background: var(--bg-card); border: 1px solid rgba(0,206,209,0.3); border-radius: var(--radius); padding: 20px; transition: 0.3s; }
+    .order-card:hover { transform: translateY(-3px); border-color: var(--accent-secondary); }
+    .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .order-id { font-family: 'Orbitron', sans-serif; color: var(--accent-secondary); font-weight: 700; }
+    .status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+    .status-pending { background: rgba(255,217,102,0.2); color: var(--warning); }
+    .status-processing { background: rgba(0,206,209,0.2); color: var(--accent-secondary); }
+    .status-shipped { background: rgba(124,252,0,0.2); color: var(--accent); }
+    .status-completed { background: rgba(0,102,255,0.2); color: #0066ff; }
+    .order-meta { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .order-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+    <h2 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);">📋 Orders</h2>
+    <span style="color:var(--text-muted);font-size:12px;">Manage incoming orders</span>
+  </div>
+  <div class="orders-grid" id="ordersGrid"></div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var statusFlow = { pending: 'processing', processing: 'shipped', shipped: 'completed' };
+    var statusLabels = { pending: 'Pending', processing: 'Processing', shipped: 'Shipped', completed: 'Completed', cancelled: 'Cancelled' };
+
+    function render() {
+      var s = loadState();
+      var orders = s.orders || [];
+      var grid = $('ordersGrid');
+      if (!orders.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">📋 No orders yet. Orders appear when customers purchase your products.</div>';
+        return;
+      }
+      grid.innerHTML = orders.map(function(o) {
+        var st = o.status || 'pending';
+        var next = statusFlow[st];
+        return '<div class="order-card">' +
+          '<div class="order-header"><span class="order-id">#' + escapeHtml(o.id) + '</span><span class="status status-' + st + '">' + statusLabels[st] + '</span></div>' +
+          '<div class="order-meta">' +
+          '<div>Product: ' + escapeHtml(o.product || 'Unknown') + '</div>' +
+          '<div>Quantity: ' + (o.quantity || 0) + '</div>' +
+          '<div>Total: ' + money(o.total) + '</div>' +
+          '<div>Date: ' + safeDate(o.created_at) + '</div>' +
+          '</div>' +
+          '<div class="order-actions">' +
+          '<button class="btn" data-action="view" data-id="' + o.id + '">👁️ View</button>' +
+          (next ? '<button class="btn btn-primary" data-action="advance" data-id="' + o.id + '">➡️ Mark ' + statusLabels[next] + '</button>' : '') +
+          '</div></div>';
+      }).join('');
+    }
+
+    $('ordersGrid').addEventListener('click', function(e) {
+      var btn = e.target.closest('button[data-action]'); if (!btn) return;
+      var id = btn.dataset.id, action = btn.dataset.action;
+      var s = loadState();
+      var order = s.orders.find(function(o) { return o.id === id; });
+      if (!order) return;
+      if (action === 'advance') {
+        order.status = statusFlow[order.status] || order.status;
+        saveState(s);
+        render();
+        showToast('Order updated to ' + statusLabels[order.status], 'success');
+      }
+      if (action === 'view') {
+        alert('Order #' + order.id + '\nProduct: ' + (order.product || 'Unknown') + '\nTotal: ' + money(order.total) + '\nStatus: ' + statusLabels[order.status]);
+      }
+    });
+
+    listenState(render);
+    render();
+  </script>
+</body>
+</html>

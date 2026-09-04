@@ -3,25 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TradeAux • Buyer Dashboard</title>
+  <title>TradeAux • Seller Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared/styles.css">
   <style>
-    .shell { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; }
+    .shell {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
     .macro-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 24px; background: rgba(2,6,23,0.92);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(2,6,23,0.92);
       border-bottom: 2px solid rgba(0,206,209,0.15);
-      position: sticky; top: 0; z-index: 1000;
-      flex-wrap: wrap; gap: 12px; backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      flex-wrap: wrap;
+      gap: 12px;
+      backdrop-filter: blur(12px);
     }
     .macro-logo {
-      font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
       background: linear-gradient(135deg, #00ced1, #7CFC00, #FFD966);
       background-size: 300% 300%;
-      -webkit-background-clip: text; background-clip: text; color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
       animation: gradientFlow 6s ease-in-out infinite;
       filter: drop-shadow(0 0 8px rgba(0,206,209,0.3));
     }
@@ -30,77 +47,115 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-    .macro-header-center { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-    .macro-wallet {
-      background: rgba(0,206,209,0.1); border: 1px solid rgba(0,206,209,0.3);
-      padding: 6px 18px; border-radius: 30px;
-      font-family: 'Orbitron', sans-serif; font-size: 14px;
-      color: var(--accent-secondary); cursor: pointer; transition: all 0.3s;
+    .macro-header-center {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
     }
-    .macro-wallet:hover { border-color: var(--accent-secondary); box-shadow: 0 0 15px rgba(0,206,209,0.2); }
-    .macro-deposit {
-      background: linear-gradient(135deg, #00ced1, #00ff7f);
-      border: none; padding: 6px 16px; border-radius: 30px;
-      font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700;
-      cursor: pointer; color: #000;
+    .macro-company {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      color: var(--accent-secondary);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .macro-company:hover { color: var(--accent); }
+    .macro-wallet {
+      background: rgba(0,206,209,0.1);
+      border: 1px solid rgba(0,206,209,0.3);
+      padding: 6px 18px;
+      border-radius: 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      color: var(--accent-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .macro-wallet:hover {
+      border-color: var(--accent-secondary);
+      box-shadow: 0 0 15px rgba(0,206,209,0.2);
     }
     .macro-signout {
-      background: rgba(255,59,59,0.15); border: 1px solid rgba(255,59,59,0.4);
-      color: var(--danger); padding: 6px 16px; border-radius: 8px;
-      font-family: 'Orbitron', sans-serif; font-size: 12px; cursor: pointer;
+      background: rgba(255,59,59,0.15);
+      border: 1px solid rgba(255,59,59,0.4);
+      color: var(--danger);
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
       transition: all 0.2s;
     }
     .macro-signout:hover { background: rgba(255,59,59,0.3); border-color: var(--danger); }
 
     .macro-nav {
-      display: flex; gap: 4px; padding: 8px 24px;
+      display: flex;
+      gap: 4px;
+      padding: 8px 24px;
       background: rgba(10,18,40,0.85);
       border-bottom: 1px solid rgba(0,206,209,0.1);
-      overflow-x: auto; flex-wrap: nowrap;
+      overflow-x: auto;
+      flex-wrap: nowrap;
       backdrop-filter: blur(4px);
       padding-left: 120px;
     }
     .macro-nav button {
-      background: rgba(15,32,64,0.7); border: 1px solid rgba(0,206,209,0.3);
-      color: var(--text-muted); padding: 8px 16px; border-radius: 8px;
-      cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 13px;
-      white-space: nowrap; transition: all 0.3s;
-      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(15,32,64,0.7);
+      border: 1px solid rgba(0,206,209,0.3);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      white-space: nowrap;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       backdrop-filter: blur(4px);
     }
-    .macro-nav button:hover { border-color: var(--accent-secondary); color: var(--text-primary); transform: translateY(-2px); }
+    .macro-nav button:hover {
+      border-color: var(--accent-secondary);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
     .macro-nav button.active {
-      background: rgba(0,206,209,0.15); color: var(--accent-secondary);
-      border-color: rgba(0,206,209,0.5); box-shadow: 0 0 12px rgba(0,206,209,0.1);
+      background: rgba(0,206,209,0.15);
+      color: var(--accent-secondary);
+      border-color: rgba(0,206,209,0.5);
+      box-shadow: 0 0 12px rgba(0,206,209,0.1);
     }
 
-    .macro-container { flex: 1; position: relative; padding: 100px 24px 40px; z-index: 2; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .macro-container {
+      flex: 1;
+      position: relative;
+      padding: 100px 24px 40px;
+      z-index: 2;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
     .app-loading {
-      display: none; position: absolute; inset: 0;
-      justify-content: center; align-items: center; flex-direction: column; gap: 16px;
-      background: var(--bg-primary); z-index: 50;
+      display: none;
+      position: absolute;
+      inset: 0;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--bg-primary);
+      z-index: 50;
     }
     .app-loading.active { display: flex; }
 
-    .buyer-ticker {
-      background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px 16px;
-      margin-bottom: 20px; border: 1px solid rgba(0,206,209,0.15);
-      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-      overflow-x: auto;
+    .gem-logo-corner {
+      z-index: 9999 !important;
     }
-    .ticker-label { font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--text-muted); letter-spacing: 1px; }
-    .ticker-items { display: flex; gap: 16px; flex-wrap: wrap; }
-    .ticker-item {
-      background: rgba(0,0,0,0.3); padding: 4px 14px; border-radius: 20px;
-      font-size: 12px; display: flex; align-items: center; gap: 8px;
-      border: 1px solid rgba(0,206,209,0.1);
+    .bg-waves {
+      z-index: 0 !important;
     }
-    .ticker-item .price { font-family: 'Orbitron', sans-serif; color: var(--accent-secondary); }
-    .ticker-item .change.up { color: var(--accent); }
-    .ticker-item .change.down { color: var(--danger); }
-
-    .gem-logo-corner { z-index: 9999 !important; }
-    .bg-waves { z-index: 0 !important; }
 
     @media (max-width: 768px) {
       .macro-container { padding: 80px 16px 40px; }
@@ -153,31 +208,26 @@
     <header class="macro-header">
       <div class="macro-logo">TRADEAUX</div>
       <div class="macro-header-center">
-        <span class="macro-wallet" id="shellWallet">💰 $0.00</span>
-        <button class="macro-deposit" id="shellDeposit">+ Deposit</button>
+        <span class="macro-company" id="shellCompanyName" title="Open Company Profile">🏢 Loading...</span>
+        <span class="macro-wallet" id="shellWallet" title="Open Dashboard">💰 $0.00</span>
       </div>
       <button class="macro-signout" id="shellSignOut">🚪 Sign Out</button>
     </header>
 
     <nav class="macro-nav" id="mainNav">
-      <button data-app="stats" class="active">📊 Dashboard</button>
-      <button data-app="bids">📝 Bids</button>
-      <button data-app="won">🏆 Won</button>
-      <button data-app="bots">🤖 Bots</button>
+      <button data-app="dashboard" class="active">📊 Dashboard</button>
+      <button data-app="company">🏢 Company</button>
+      <button data-app="products">📦 Products</button>
+      <button data-app="orders">📋 Orders</button>
+      <button data-app="tar">🤖 TAR</button>
+      <button data-app="certificates">📜 Certs</button>
+      <button data-app="archive">📚 Archive</button>
     </nav>
 
     <main class="macro-container">
-      <!-- Ticker -->
-      <div class="buyer-ticker" id="tickerContainer">
-        <span class="ticker-label">🔴 LIVE</span>
-        <div class="ticker-items" id="tickerItems">
-          <span style="color:var(--text-muted);font-size:12px;">Loading prices...</span>
-        </div>
-      </div>
-
       <div class="app-loading" id="appLoading">
         <div class="spinner"></div>
-        <div style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);font-size:14px;letter-spacing:2px;">Loading...</div>
+        <div style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);font-size:14px;letter-spacing:2px;">Loading TradeAux...</div>
       </div>
       <div id="appViewport"></div>
     </main>
@@ -190,60 +240,16 @@
   <script src="shared/state.js"></script>
   <script src="shared/auth.js"></script>
   <script>
-    var currentApp = 'stats';
+    var currentApp = 'dashboard';
     var appCache = {};
-    var priceInterval = null;
 
     window.__showToast = function(msg, type) { showToast(msg, type); };
-
-    var commodityPrices = {
-      Apples: { price: 1.24, change: 2.1, emoji: '🍎' },
-      Bananas: { price: 0.52, change: -0.5, emoji: '🍌' },
-      Coconuts: { price: 0.85, change: 1.5, emoji: '🥥' },
-      Potatoes: { price: 0.44, change: 1.2, emoji: '🥔' },
-      Almonds: { price: 6.48, change: 0.3, emoji: '🌰' },
-      Coffee: { price: 4.85, change: 0.9, emoji: '☕' },
-      Mangoes: { price: 2.10, change: -0.8, emoji: '🥭' },
-      Rice: { price: 0.62, change: 0.5, emoji: '🍚' }
-    };
-
-    function updateTicker() {
-      var container = $('tickerItems');
-      if (!container) return;
-      var html = '';
-      for (var key in commodityPrices) {
-        var data = commodityPrices[key];
-        var changeClass = data.change >= 0 ? 'up' : 'down';
-        var changeSign = data.change >= 0 ? '▲' : '▼';
-        html += '<div class="ticker-item">' +
-          '<span>' + data.emoji + ' ' + key + '</span>' +
-          '<span class="price">$' + data.price.toFixed(2) + '</span>' +
-          '<span class="change ' + changeClass + '">' + changeSign + ' ' + Math.abs(data.change).toFixed(1) + '%</span>' +
-          '</div>';
-      }
-      container.innerHTML = html;
-    }
-
-    function startPriceSimulation() {
-      if (priceInterval) clearInterval(priceInterval);
-      priceInterval = setInterval(function() {
-        for (var key in commodityPrices) {
-          var volatility = (Math.random() - 0.5) * 3;
-          var newPrice = commodityPrices[key].price * (1 + volatility / 100);
-          newPrice = Math.max(0.20, Math.min(8.00, newPrice));
-          var oldPrice = commodityPrices[key].price;
-          commodityPrices[key].price = parseFloat(newPrice.toFixed(2));
-          commodityPrices[key].change = ((commodityPrices[key].price - oldPrice) / oldPrice) * 100;
-        }
-        updateTicker();
-      }, 5000);
-    }
 
     async function loadApp(name) {
       if (appCache[name]) { mountApp(name, appCache[name]); return; }
       $('appLoading').classList.add('active');
       try {
-        var res = await fetch('micro-apps/buyer/' + name + '.html');
+        var res = await fetch('micro-apps/seller/' + name + '.html');
         if (!res.ok) throw new Error('Failed to load ' + name);
         var html = await res.text();
         var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
@@ -279,15 +285,6 @@
       window.dispatchEvent(new CustomEvent('tradeaux:mount', { detail: { app: name } }));
     }
 
-    function updateHeader() {
-      var state = loadState();
-      var wallet = state.wallet || {};
-      $('shellWallet').textContent = '💰 ' + money(wallet.balance || 0);
-      var badge = $('offlineBadge');
-      if (!currentUserId) badge.classList.add('visible');
-      else badge.classList.remove('visible');
-    }
-
     document.getElementById('mainNav').addEventListener('click', function(e) {
       var btn = e.target.closest('button[data-app]');
       if (!btn) return;
@@ -296,15 +293,12 @@
       loadApp(app);
     });
 
+    $('shellCompanyName').addEventListener('click', function() {
+      document.querySelector('button[data-app="company"]').click();
+    });
     $('shellWallet').addEventListener('click', function() {
-      document.querySelector('button[data-app="stats"]').click();
+      document.querySelector('button[data-app="dashboard"]').click();
     });
-
-    $('shellDeposit').addEventListener('click', function() {
-      var event = new CustomEvent('tradeaux:deposit-requested');
-      window.dispatchEvent(event);
-    });
-
     $('shellSignOut').addEventListener('click', function() {
       if (confirm('Sign out? Local data is preserved.')) {
         signOut();
@@ -312,6 +306,15 @@
       }
     });
 
+    function updateHeader() {
+      var state = loadState();
+      var c = state.company || {};
+      $('shellCompanyName').textContent = (c.name || 'YOUR COMPANY');
+      $('shellWallet').textContent = '💰 ' + money(state.wallet && state.wallet.balance || 0);
+      var badge = $('offlineBadge');
+      if (!currentUserId) badge.classList.add('visible');
+      else badge.classList.remove('visible');
+    }
     listenState(function() { updateHeader(); });
     window.addEventListener('tradeaux:auth', function() { updateHeader(); });
 
@@ -324,10 +327,9 @@
     document.addEventListener('DOMContentLoaded', function() {
       initAuth().then(function() {
         updateHeader();
-        startPriceSimulation();
         var hash = location.hash.replace('#/', '');
-        var valid = ['stats','bids','won','bots'];
-        loadApp(valid.indexOf(hash) > -1 ? hash : 'stats');
+        var valid = ['dashboard','company','products','orders','tar','certificates','archive'];
+        loadApp(valid.indexOf(hash) > -1 ? hash : 'dashboard');
       });
     });
   </script>

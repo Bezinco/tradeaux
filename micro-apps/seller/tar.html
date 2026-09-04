@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>TAR</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .tar-metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0; }
+    .t-metric { background: rgba(0,0,0,0.3); padding: 14px; border-radius: 12px; text-align: center; }
+    .t-metric .val { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent-secondary); }
+    .t-metric .lbl { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .receivable { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid var(--warning); }
+    .receivable .info { flex: 1; }
+    .receivable .amount { font-family: 'Orbitron', sans-serif; color: var(--accent-secondary); font-size: 14px; }
+    .tag-ready { background: rgba(124,252,0,0.2); color: var(--accent); padding: 2px 10px; border-radius: 12px; font-size: 10px; }
+    .tag-converted { background: rgba(0,206,209,0.2); color: var(--accent-secondary); padding: 2px 10px; border-radius: 12px; font-size: 10px; }
+    .tag-expired { background: rgba(255,77,77,0.2); color: var(--danger); padding: 2px 10px; border-radius: 12px; font-size: 10px; }
+    .advisory { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 16px; border-left: 3px solid var(--warning); }
+    @media (max-width: 768px) { .tar-metrics { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+    <h2 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);">🤖 TAR — Trade Advisor Robot</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="autoBtn">⚡ Auto-Convert</button>
+      <button class="btn" id="setBtn">⚙️ Settings</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(0,0,0,0.2);border-radius:10px;margin-bottom:12px;border-left:4px solid var(--accent);">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;"></div>
+      <span style="color:var(--accent);font-size:12px;font-family:'Orbitron',sans-serif;">🟢 Active • Monitoring auction pipeline</span>
+    </div>
+    <div class="tar-metrics">
+      <div class="t-metric"><div class="val" id="mReady">0</div><div class="lbl">Ready</div></div>
+      <div class="t-metric"><div class="val" id="mLow">0</div><div class="lbl">Low Value</div></div>
+      <div class="t-metric"><div class="val" id="mConv">0</div><div class="lbl">Converted</div></div>
+      <div class="t-metric"><div class="val" id="mFees">$0</div><div class="lbl">Fees Paid</div></div>
+      <div class="t-metric"><div class="val" id="mExp" style="color:var(--danger);">0</div><div class="lbl">Expired</div></div>
+    </div>
+    <div id="recList"><div style="color:var(--text-muted);text-align:center;padding:20px;">No receivables found</div></div>
+  </div>
+
+  <div class="card advisory">
+    <h4 style="color:var(--warning);margin-bottom:8px;font-family:'Orbitron',sans-serif;">💡 TAR Advisory</h4>
+    <div id="advText" style="font-size:13px;color:var(--text-muted);line-height:1.6;">Loading...</div>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    function render() {
+      var s = loadState();
+      var recs = s.receivables || [];
+      var fee = getFee();
+      var ready = recs.filter(function(r) { return r.status === 'pending' && !r.converted && r.amount > fee; });
+      var low = recs.filter(function(r) { return r.status === 'pending' && !r.converted && r.amount <= fee; });
+      var converted = recs.filter(function(r) { return r.converted; });
+      var expired = recs.filter(function(r) { return r.status === 'expired' || r.status === 'cancelled'; });
+      var tar = s.tar || {};
+
+      $('mReady').textContent = ready.length;
+      $('mLow').textContent = low.length;
+      $('mConv').textContent = converted.length;
+      $('mFees').textContent = money(tar.totalFeesPaid || 0);
+      $('mExp').textContent = expired.length;
+
+      var list = $('recList');
+      if (!recs.length) { list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">No receivables found</div>'; }
+      else {
+        list.innerHTML = recs.map(function(r) {
+          var cls = 'tag-ready', txt = '✅ Ready';
+          if (r.converted) { cls = 'tag-converted'; txt = '✅ Converted'; }
+          else if (r.status === 'expired') { cls = 'tag-expired'; txt = '⏰ Expired'; }
+          else if (r.amount <= fee) { txt = '⏳ Low Value'; }
+          return '<div class="receivable"><div class="info"><div style="font-weight:600;font-size:13px;">' + escapeHtml(r.product || 'Unknown') + '</div><div style="font-size:11px;color:var(--text-muted);">' + escapeHtml(r.buyer || 'Anonymous') + ' • ' + (r.quantity || 0) + ' units</div></div><span class="amount">' + money(r.amount) + '</span><span class="' + cls + '">' + txt + '</span></div>';
+        }).join('');
+      }
+
+      var msg = '';
+      if (ready.length) msg = '🚀 You have <strong>' + ready.length + '</strong> receivables ready to convert! Total value: <strong>' + money(ready.reduce(function(s, r) { return s + r.amount; }, 0)) + '</strong>.';
+      else if (recs.length) msg = '⏳ You have ' + recs.length + ' pending receivables. Some are below the $' + fee + ' fee threshold.';
+      else msg = '💡 No receivables yet. Post products to auction to generate receivables!';
+      $('advText').innerHTML = msg;
+    }
+
+    $('autoBtn').addEventListener('click', function() {
+      var fee = getFee();
+      var s = loadState();
+      var ready = s.receivables.filter(function(r) { return r.status === 'pending' && !r.converted && r.amount > fee; });
+      if (!ready.length) { showToast('No receivables ready to convert', 'warning'); return; }
+      var count = 0;
+      ready.forEach(function(r) {
+        r.converted = true; s.wallet.balance = (s.wallet.balance || 0) + (r.amount - fee);
+        s.tar.totalConversions = (s.tar.totalConversions || 0) + 1;
+        s.tar.totalFeesPaid = (s.tar.totalFeesPaid || 0) + fee;
+        count++;
+      });
+      saveState(s);
+      render();
+      showToast('✅ Converted ' + count + ' receivables', 'success');
+    });
+
+    $('setBtn').addEventListener('click', function() {
+      var fee = prompt('Conversion fee ($):', getFee());
+      if (!fee) return;
+      var v = parseFloat(fee);
+      if (v > 0) { var s = loadState(); s.tar.conversionFee = v; saveState(s); render(); showToast('Fee set to $' + v, 'success'); }
+    });
+
+    listenState(render);
+    render();
+  </script>
+</body>
+</html>

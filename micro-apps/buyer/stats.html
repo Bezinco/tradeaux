@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Stats</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+    .stat-card { background: var(--bg-card); border: 1px solid rgba(0,206,209,0.3); border-radius: var(--radius); padding: 20px; text-align: center; transition: all 0.3s; }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--accent-secondary); }
+    .stat-value { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent-secondary); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+    .wallet-card { background: var(--bg-card); border: 1px solid rgba(0,206,209,0.3); border-radius: var(--radius); padding: 24px; text-align: center; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 36px; color: var(--accent-secondary); }
+    .wallet-sub { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="sDeposits">$0</div><div class="stat-label">Total Deposits</div></div>
+    <div class="stat-card"><div class="stat-value" id="sBids">0</div><div class="stat-label">Bids Placed</div></div>
+    <div class="stat-card"><div class="stat-value" id="sWinRate">0%</div><div class="stat-label">Win Rate</div></div>
+    <div class="stat-card"><div class="stat-value" id="sActiveBots">0</div><div class="stat-label">Active Bots</div></div>
+  </div>
+
+  <div class="wallet-card">
+    <div class="wallet-amount" id="sWallet">$0.00</div>
+    <div class="wallet-sub" id="sBidCount">0 bids available</div>
+    <button class="btn btn-primary" style="margin-top:16px;" id="sDepositBtn">+ Deposit</button>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var statsState = { deposits: 0, bids: 0, won: 0, activeBots: 0 };
+
+    function render() {
+      var s = loadState();
+      var wallet = s.wallet || {};
+
+      var bidCount = statsState.bids || 0;
+      var wonCount = statsState.won || 0;
+      var winRate = bidCount + wonCount > 0 ? Math.round((wonCount / (bidCount + wonCount)) * 100) : 0;
+
+      $('sDeposits').textContent = money(statsState.deposits || 0);
+      $('sBids').textContent = bidCount;
+      $('sWinRate').textContent = winRate + '%';
+      $('sActiveBots').textContent = statsState.activeBots || 0;
+      $('sWallet').textContent = money(wallet.balance || 0);
+
+      var fee = 25;
+      var maxBids = Math.floor((wallet.balance || 0) / fee);
+      $('sBidCount').textContent = maxBids + ' bids available';
+    }
+
+    listenState(function() { render(); });
+
+    window.addEventListener('tradeaux:deposit-requested', function() {
+      var amt = prompt('Deposit amount ($):', '500');
+      if (!amt) return;
+      var v = parseFloat(amt);
+      if (isNaN(v) || v <= 0) { showToast('Invalid amount', 'error'); return; }
+      var s = loadState();
+      if (!s.wallet) s.wallet = { balance: 0 };
+      s.wallet.balance = (s.wallet.balance || 0) + v;
+      statsState.deposits = (statsState.deposits || 0) + v;
+      saveState(s);
+      render();
+      showToast('Deposited ' + money(v), 'success');
+    });
+
+    $('sDepositBtn').addEventListener('click', function() {
+      window.dispatchEvent(new CustomEvent('tradeaux:deposit-requested'));
+    });
+
+    window.addEventListener('tradeaux:bid-placed', function(e) {
+      statsState.bids = (statsState.bids || 0) + 1;
+      if (e.detail && e.detail.won) {
+        statsState.won = (statsState.won || 0) + 1;
+      }
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

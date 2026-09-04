@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Bots</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <style>
+    .bots-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .bot-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,206,209,0.3);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .bot-card:hover { transform: translateY(-4px); border-color: var(--accent-secondary); }
+    .bot-emoji { font-size: 32px; margin-bottom: 8px; }
+    .bot-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+    .bot-status { font-size: 10px; color: var(--accent); margin-bottom: 8px; }
+    .bot-target { font-size: 10px; color: var(--warning); margin-bottom: 8px; }
+    .bot-stats {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .add-bot-card {
+      background: rgba(15,32,64,0.4);
+      border: 2px dashed rgba(0,206,209,0.3);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .add-bot-card:hover { border-color: var(--accent-secondary); background: rgba(0,206,209,0.05); transform: translateY(-4px); }
+    .add-bot-icon { font-size: 32px; color: var(--accent-secondary); margin-bottom: 8px; }
+    .add-bot-text { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-muted); }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: linear-gradient(145deg, #0a1228, #020617);
+      border: 2px solid var(--accent-secondary);
+      border-radius: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 28px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+    }
+    .modal-close:hover { color: var(--accent-secondary); }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .modal-field input, .modal-field select {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,206,209,0.25);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+    }
+    .modal-field input:focus, .modal-field select:focus {
+      outline: none;
+      border-color: var(--accent-secondary);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+    .btn-cancel { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text-primary); }
+    .btn-cancel:hover { background: rgba(255,255,255,0.2); }
+    .btn-save { background: linear-gradient(135deg, var(--accent-secondary), #00ff7f); color: #000; }
+    .btn-save:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+
+    @media (max-width: 768px) {
+      .bots-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .bots-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bots-grid" id="botsGrid"></div>
+
+  <!-- Bot Config Modal -->
+  <div class="modal-overlay" id="botModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeBotModal">&times;</button>
+      <h3 style="font-family:'Orbitron',sans-serif;color:var(--accent-secondary);margin-bottom:16px;" id="botModalTitle">🤖 Bot Configuration</h3>
+      <div class="modal-field">
+        <label>Bot Name</label>
+        <input type="text" id="editBotName" placeholder="e.g., Coconut Sniper">
+      </div>
+      <div class="modal-field">
+        <label>Commodity</label>
+        <select id="editBotCommodity">
+          <option value="Apples">Apples</option>
+          <option value="Bananas">Bananas</option>
+          <option value="Coconuts">Coconuts</option>
+          <option value="Mangoes">Mangoes</option>
+          <option value="Oranges">Oranges</option>
+          <option value="Pineapples">Pineapples</option>
+          <option value="Potatoes">Potatoes</option>
+          <option value="Tomatoes">Tomatoes</option>
+          <option value="Onions">Onions</option>
+          <option value="Carrots">Carrots</option>
+          <option value="Broccoli">Broccoli</option>
+          <option value="Corn">Corn</option>
+          <option value="Rice">Rice</option>
+          <option value="Wheat">Wheat</option>
+          <option value="Soybeans">Soybeans</option>
+          <option value="Coffee">Coffee</option>
+          <option value="Cocoa">Cocoa</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Max Price (USD/MT)</label>
+        <input type="number" id="editMaxPrice" step="0.01" min="0.01" value="0.60">
+      </div>
+      <div class="modal-field">
+        <label>Daily Budget (USD)</label>
+        <input type="number" id="editBudget" step="100" min="100" value="500">
+      </div>
+      <div class="modal-field">
+        <label>Strategy</label>
+        <select id="editStrategy">
+          <option value="Sniper">Sniper (bid at last second)</option>
+          <option value="Aggressive">Aggressive (bid early and often)</option>
+          <option value="Balanced">Balanced (moderate)</option>
+          <option value="Conservative">Conservative (only good deals)</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelBotBtn">Cancel</button>
+        <button class="btn-save" id="saveBotBtn">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../shared/utils.js"></script>
+  <script src="../../shared/state.js"></script>
+  <script>
+    var botData = [];
+    var editingBot = null;
+
+    var emojis = {
+      Apples: '🍎', Bananas: '🍌', Coconuts: '🥥', Mangoes: '🥭',
+      Oranges: '🍊', Pineapples: '🍍', Potatoes: '🥔', Tomatoes: '🍅',
+      Onions: '🧅', Carrots: '🥕', Broccoli: '🥦', Corn: '🌽',
+      Rice: '🍚', Wheat: '🌾', Soybeans: '🫘', Coffee: '☕', Cocoa: '🍫'
+    };
+
+    function renderBots() {
+      var container = $('botsGrid');
+      if (!botData.length) {
+        container.innerHTML = '<div class="add-bot-card" id="addBotCard"><div class="add-bot-icon">+</div><div class="add-bot-text">Add New Bot</div></div>';
+        $('addBotCard').addEventListener('click', function() { openBotConfig(null); });
+        return;
+      }
+
+      var html = '';
+      botData.forEach(function(bot) {
+        var emoji = emojis[bot.commodity] || '🤖';
+        var statusText = bot.status === 'active' ? '● ACTIVE' : '○ IDLE';
+        html +=
+          '<div class="bot-card" data-bot-id="' + escapeAttr(bot.id) + '">' +
+            '<div class="bot-emoji">' + emoji + '</div>' +
+            '<div class="bot-name">' + escapeHtml(bot.name || 'Unnamed Bot') + '</div>' +
+            '<div class="bot-status">' + statusText + '</div>' +
+            '<div class="bot-target">🎯 $' + (bot.maxPrice || 0.60).toFixed(2) + '/MT</div>' +
+            '<div class="bot-stats">' +
+              '<span>Trades: ' + (bot.trades || 0) + '</span>' +
+              '<span>PnL: $' + (bot.pnl || 0).toFixed(0) + '</span>' +
+              '<span>WR: ' + (bot.winRate || 0) + '%</span>' +
+            '</div>' +
+          '</div>';
+      });
+      html += '<div class="add-bot-card" id="addBotCard"><div class="add-bot-icon">+</div><div class="add-bot-text">Add New Bot</div></div>';
+      container.innerHTML = html;
+
+      $('addBotCard').addEventListener('click', function() { openBotConfig(null); });
+    }
+
+    function openBotConfig(bot) {
+      editingBot = bot;
+      if (bot) {
+        $('botModalTitle').textContent = '🤖 ' + escapeHtml(bot.name);
+        $('editBotName').value = bot.name || '';
+        $('editBotCommodity').value = bot.commodity || 'Coconuts';
+        $('editMaxPrice').value = bot.maxPrice || 0.60;
+        $('editBudget').value = bot.budget || 500;
+        $('editStrategy').value = bot.strategy || 'Balanced';
+      } else {
+        $('botModalTitle').textContent = '🤖 New Bot';
+        $('editBotName').value = '';
+        $('editBotCommodity').value = 'Coconuts';
+        $('editMaxPrice').value = 0.60;
+        $('editBudget').value = 500;
+        $('editStrategy').value = 'Balanced';
+      }
+      $('botModal').classList.add('active');
+    }
+
+    function saveBot() {
+      var name = $('editBotName').value.trim() || 'Unnamed Bot';
+      var commodity = $('editBotCommodity').value;
+      var maxPrice = parseFloat($('editMaxPrice').value) || 0.60;
+      var budget = parseInt($('editBudget').value) || 500;
+      var strategy = $('editStrategy').value;
+
+      var state = loadState();
+      if (!state.bots) state.bots = [];
+
+      if (editingBot) {
+        var existing = state.bots.find(function(b) { return b.id === editingBot.id; });
+        if (existing) {
+          existing.name = name;
+          existing.commodity = commodity;
+          existing.maxPrice = maxPrice;
+          existing.budget = budget;
+          existing.strategy = strategy;
+          existing.updated_at = new Date().toISOString();
+        }
+      } else {
+        state.bots.push({
+          id: 'bot_' + Date.now() + '_' + Math.random().toString(36).substr(2,6),
+          name: name,
+          commodity: commodity,
+          maxPrice: maxPrice,
+          budget: budget,
+          strategy: strategy,
+          status: 'active',
+          trades: 0,
+          pnl: 0,
+          winRate: 0,
+          created_at: new Date().toISOString()
+        });
+      }
+
+      saveState(state);
+      botData = state.bots || [];
+      renderBots();
+      $('botModal').classList.remove('active');
+      showToast('Bot "' + name + '" saved!', 'success');
+    }
+
+    $('botsGrid').addEventListener('click', function(e) {
+      var card = e.target.closest('.bot-card');
+      if (!card) return;
+      var id = card.dataset.botId;
+      var bot = botData.find(function(b) { return b.id === id; });
+      if (bot) openBotConfig(bot);
+    });
+
+    $('closeBotModal').addEventListener('click', function() { $('botModal').classList.remove('active'); });
+    $('cancelBotBtn').addEventListener('click', function() { $('botModal').classList.remove('active'); });
+    $('saveBotBtn').addEventListener('click', saveBot);
+    $('botModal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('active');
+    });
+
+    function loadBots() {
+      var state = loadState();
+      botData = state.bots || [];
+      renderBots();
+    }
+
+    listenState(function(state) {
+      botData = state.bots || [];
+      renderBots();
+    });
+
+    loadBots();
+  </script>
+</body>
+</html>
