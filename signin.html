@@ -1,53 +1,51 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>Sign In — TradeAux</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   background: #020617;
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 .container {
   max-width: 450px;
+  width: 100%;
   margin: 0 auto;
-  padding: 40px 24px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.gem-text {
-  font-size: 64px;
-  font-weight: 900;
-  text-align: center;
-  font-family: 'Orbitron', sans-serif;
-  background: linear-gradient(135deg, #00ced1, #7CFC00);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin-bottom: 20px;
-}
-.subtitle {
-  text-align: center;
-  color: #9ca3af;
-  margin-bottom: 40px;
-  font-size: 14px;
 }
 .auth-card {
   background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
   border: 1px solid rgba(0, 206, 209, 0.3);
   border-radius: 20px;
   padding: 40px;
+}
+.logo {
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 30px;
+  font-size: 14px;
 }
 input {
   width: 100%;
@@ -60,6 +58,13 @@ input {
   margin-bottom: 16px;
   font-size: 14px;
 }
+input:focus {
+  outline: 2px solid #7CFC00;
+  outline-offset: 2px;
+}
+input.error-field {
+  border-color: #ff6b6b;
+}
 button {
   width: 100%;
   padding: 14px;
@@ -69,7 +74,6 @@ button {
   font-family: 'Orbitron', sans-serif;
   font-weight: 800;
   cursor: pointer;
-  margin-top: 8px;
   font-size: 14px;
   color: #000;
   transition: all 0.3s ease;
@@ -81,24 +85,55 @@ button:hover:not(:disabled) {
 button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
+}
+.step-container {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.step-container.visible {
+  display: block;
+  opacity: 1;
+}
+.step-container.hidden {
+  display: none !important;
+}
+.loading-container {
+  display: none;
+  text-align: center;
+  padding: 20px 0;
+}
+.loading-container.visible {
+  display: block;
+}
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0,206,209,0.2);
+  border-top-color: #00ced1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 .error {
-  color: #ff6b6b;
+  display: none;
   background: rgba(217,43,43,0.2);
+  color: #ff6b6b;
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 16px;
-  display: none;
   font-size: 13px;
 }
 .success {
-  color: #7CFC00;
+  display: none;
   background: rgba(124,252,0,0.1);
+  color: #7CFC00;
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 16px;
-  display: none;
   font-size: 13px;
 }
 .toggle {
@@ -112,16 +147,25 @@ button:disabled {
   cursor: pointer;
   text-decoration: underline;
 }
-.role-label {
-  font-size: 11px;
-  color: #FFD966;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-  display: block;
+.password-wrapper {
+  position: relative;
 }
-.role-picker {
-  margin-bottom: 20px;
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  width: auto;
+  padding: 4px 8px;
+  margin: 0;
+}
+.password-toggle:hover {
+  color: #e5e7eb;
 }
 .role-option {
   display: flex;
@@ -138,12 +182,10 @@ button:disabled {
 .role-option:hover {
   border-color: #00ced1;
   background: rgba(0,206,209,0.08);
-  transform: translateX(4px);
 }
 .role-option.selected {
   border-color: #7CFC00;
   background: rgba(124,252,0,0.1);
-  box-shadow: 0 0 30px rgba(124,252,0,0.08);
 }
 .role-option .emoji {
   font-size: 28px;
@@ -152,48 +194,122 @@ button:disabled {
   font-size: 16px;
   font-weight: 600;
 }
+.role-label {
+  font-size: 11px;
+  color: #FFD966;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  display: block;
+}
+#continueBanner {
+  background: rgba(0, 206, 209, 0.08);
+  border: 1px solid rgba(0, 206, 209, 0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+#continueBanner .banner-user {
+  color: #e5e7eb;
+  font-size: 14px;
+  font-family: monospace;
+}
+#continueBanner .banner-label {
+  color: #7CFC00;
+  font-size: 13px;
+  font-weight: 600;
+}
+#continueBanner .banner-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#continueBanner .btn-continue {
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: #000;
+  cursor: pointer;
+  width: auto;
+}
+#continueBanner .btn-signout-banner {
+  background: transparent;
+  border: 1px solid #ff6b6b;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #ff6b6b;
+  cursor: pointer;
+  width: auto;
+}
 .debug-info {
+  display: none;
   font-size: 10px;
-  color: #9ca3af;
+  color: #6b7280;
   text-align: center;
   margin-top: 12px;
   font-family: monospace;
-  border-top: 1px solid rgba(255,255,255,0.05);
-  padding-top: 12px;
 }
-.hidden { display: none !important; }
+.debug-info.visible { display: block; }
 </style>
+<base target="_blank">
 </head>
 <body>
-<div class="container">
-  <div class="gem-text">TRADEAUX</div>
-  <div class="subtitle" id="subtitle">Sign in to your account</div>
-  <div class="auth-card">
-    <div class="error" id="errorMsg"></div>
-    <div class="success" id="successMsg"></div>
 
-    <!-- STEP 1: SIGN IN FORM -->
-    <div id="step1">
+<div class="container">
+  <div class="logo">TRADEAUX</div>
+  <div class="subtitle" id="subtitle">Sign in to your account</div>
+  
+  <div class="auth-card">
+    <!-- Loading -->
+    <div id="loadingIndicator" class="loading-container">
+      <div class="spinner"></div>
+      <p id="loadingText" style="color:#9ca3af; margin-top:12px; font-size:13px;">Loading...</p>
+    </div>
+
+    <!-- Messages -->
+    <div id="errorMsg" class="error" role="alert"></div>
+    <div id="successMsg" class="success" role="status"></div>
+
+    <!-- STEP 1: SIGN IN -->
+    <form id="step1" class="step-container visible" novalidate>
       <input type="email" id="email" placeholder="Email address" autocomplete="email">
-      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-      <button id="signinBtn">Sign In</button>
-      <div style="text-align:center; margin-top:12px;">
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <button type="button" class="password-toggle" id="togglePassword1">Show</button>
+      </div>
+      <button type="submit" id="signinBtn">Sign In</button>
+      <div style="text-align:center; margin-top:8px;">
         <a href="#" id="forgotLink" style="font-size:12px; color:#00ced1; text-decoration:none;">Forgot password?</a>
       </div>
-      <div class="toggle">No account? <a id="showSignup">Create one</a></div>
-    </div>
+      <div class="toggle">No account? <a href="#" id="showSignup">Create one</a></div>
+    </form>
 
-    <!-- STEP 2: SIGN UP FORM -->
-    <div id="step2" class="hidden">
+    <!-- STEP 2: SIGN UP -->
+    <form id="step2" class="step-container hidden" novalidate>
       <input type="email" id="signupEmail" placeholder="Email address" autocomplete="email">
-      <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
-      <input type="text" id="signupName" placeholder="Company / Organization Name">
-      <button id="signupBtn">Create Account</button>
-      <div class="toggle">Already have an account? <a id="showSignin">Sign in</a></div>
-    </div>
+      <div class="password-wrapper">
+        <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="togglePassword2">Show</button>
+      </div>
+      <input type="text" id="companyNameInput" placeholder="Company / Organization Name" maxlength="100">
+      <button type="submit" id="signupBtn">Create Account</button>
+      <div class="toggle">Already have an account? <a href="#" id="showSignin">Sign in</a></div>
+    </form>
 
-    <!-- STEP 3: ROLE SELECTOR (SHOWS AFTER LOGIN) -->
-    <div id="step3" class="hidden">
+    <!-- STEP 3: ROLE SELECTOR -->
+    <div id="step3" class="step-container hidden">
       <div style="text-align:center; margin-bottom:16px;">
         <div style="font-size:13px; color:#9ca3af;">Welcome!</div>
         <div style="font-size:16px; color:#7CFC00; margin-bottom:8px;" id="userEmailDisplay">user@example.com</div>
@@ -206,507 +322,704 @@ button:disabled {
         <div class="role-option" data-role="carrier"><span class="emoji">🚛</span><span class="text">Carrier</span></div>
         <div class="role-option" data-role="insurer"><span class="emoji">🛡️</span><span class="text">Insurer</span></div>
         <div class="role-option" data-role="banker"><span class="emoji">🏦</span><span class="text">Banker</span></div>
+        <div class="role-option" data-role="admin"><span class="emoji">⚙️</span><span class="text">Admin</span></div>
       </div>
-      <button id="roleContinueBtn" disabled>Select a role first</button>
+      <button type="button" id="roleContinueBtn" disabled>Select a role first</button>
       <div style="text-align:center; margin-top:12px;">
         <a href="#" id="logoutAfterLogin" style="font-size:12px; color:#ff6b6b; text-decoration:none;">← Sign out</a>
       </div>
     </div>
 
-    <div class="debug-info" id="debugInfo">Sign in first, then choose your role</div>
+    <!-- STEP 4: RESET PASSWORD -->
+    <div id="step4" class="step-container hidden">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="font-size:16px; color:#7CFC00; margin-bottom:8px;">🔐 Reset Your Password</div>
+        <div style="font-size:13px; color:#9ca3af;">Enter your new password below</div>
+      </div>
+      <div class="password-wrapper">
+        <input type="password" id="resetPassword" placeholder="New password (min 6 chars)" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="toggleResetPassword">Show</button>
+      </div>
+      <div class="password-wrapper">
+        <input type="password" id="resetPasswordConfirm" placeholder="Confirm new password" autocomplete="new-password">
+        <button type="button" class="password-toggle" id="toggleResetPasswordConfirm">Show</button>
+      </div>
+      <button type="button" id="resetPasswordBtn">Update Password</button>
+      <div style="text-align:center; margin-top:12px;">
+        <a href="#" id="backToSignin" style="font-size:12px; color:#9ca3af; text-decoration:none;">← Back to sign in</a>
+      </div>
+    </div>
+
+    <div class="debug-info" id="debugInfo"></div>
   </div>
 </div>
 
 <script>
-// =====================================================
-// SUPABASE CONFIGURATION
-// =====================================================
-const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+(function() {
+  'use strict';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // =====================================================
+  // SUPABASE CONFIGURATION
+  // =====================================================
+  var SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-// =====================================================
-// DASHBOARD MAPPING
-// =====================================================
-const DASHBOARDS = {
-  'buyer': 'dashboard-buyer.html',
-  'seller': 'dashboard-seller.html',
-  'carrier': 'dashboard-transport.html',
-  'insurer': 'dashboard-insurer.html',
-  'banker': 'dashboard-banker.html',
-  'admin': 'dashboard-admin.html'
-};
+  // FIX #3: Correct dashboard mappings
+  var DASHBOARDS = {
+    'buyer': 'dashboard-buyer.html',
+    'seller': 'dashboard-seller.html',
+    'carrier': 'dashboard-transport.html',
+    'insurer': 'dashboard-insurer.html',
+    'banker': 'dashboard-banker.html',
+    'admin': 'dashboard-admin.html'
+  };
 
-// =====================================================
-// URL PARAMS & STATE
-// =====================================================
-const urlParams = new URLSearchParams(window.location.search);
-const isLogout = urlParams.get('logout') === '1';
+  // =====================================================
+  // STATE
+  // =====================================================
+  var supabaseClient = null;
+  var selectedRole = null;
+  var currentUser = null;
+  var signInButtonLocked = false;
+  var forgotPasswordLocked = false;
+  var isInitialized = false;
+  var resetToken = null;
 
-let selectedRole = null;
-let currentUser = null;
-let authCheckComplete = false;
-
-// =====================================================
-// BULLETPROOF LOGOUT - CLEARS EVERYTHING
-// =====================================================
-async function bulletproofSignOut() {
-  console.log('🔒 Starting bulletproof sign out...');
-
-  // 1. Tell Supabase to sign out (global = all devices/tabs)
-  try {
-    await supabaseClient.auth.signOut({ scope: 'global' });
-    console.log('✅ Supabase signOut completed');
-  } catch (e) {
-    console.log('⚠️ Supabase signOut error (ignoring):', e.message);
+  // =====================================================
+  // DOM HELPERS
+  // =====================================================
+  function getEl(id) {
+    return document.getElementById(id);
   }
 
-  // 2. Wait a moment for Supabase to clean up its internal state
-  await new Promise(r => setTimeout(r, 300));
-
-  // 3. Remove ALL Supabase-related keys from localStorage
-  const lsKeys = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    lsKeys.push(localStorage.key(i));
-  }
-  lsKeys.forEach(key => {
-    if (key && (key.includes('supabase') || key.startsWith('sb-'))) {
-      localStorage.removeItem(key);
-      console.log('🗑️ Removed localStorage key:', key);
+  function showError(msg) {
+    var el = getEl('errorMsg');
+    if (el) {
+      el.textContent = msg;
+      el.style.display = 'block';
+      var success = getEl('successMsg');
+      if (success) success.style.display = 'none';
     }
-  });
-
-  // 4. Clear sessionStorage entirely
-  sessionStorage.clear();
-  console.log('🗑️ sessionStorage cleared');
-
-  // 5. Also clear any non-Supabase keys that might cache auth state
-  localStorage.removeItem('tradeaux_user');
-  localStorage.removeItem('tradeaux_role');
-
-  console.log('🔒 Bulletproof sign out complete');
-}
-
-// =====================================================
-// UI HELPERS
-// =====================================================
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
-  document.getElementById('successMsg').style.display = 'none';
-  setTimeout(() => { el.style.display = 'none'; }, 5000);
-}
-
-function showSuccess(msg) {
-  const el = document.getElementById('successMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
-  document.getElementById('errorMsg').style.display = 'none';
-  setTimeout(() => { el.style.display = 'none'; }, 5000);
-}
-
-function redirectToDashboard(role) {
-  const url = DASHBOARDS[role];
-  if (!url) {
-    showError('Unknown role. Redirecting to buyer.');
-    setTimeout(() => { window.location.href = 'dashboard-buyer.html'; }, 2000);
-    return;
   }
-  document.getElementById('debugInfo').textContent = 'Redirecting to: ' + url;
-  setTimeout(() => { window.location.href = url; }, 300);
-}
 
-async function showRolePicker(user) {
-  currentUser = user;
-  document.getElementById('step1').classList.add('hidden');
-  document.getElementById('step2').classList.add('hidden');
-  document.getElementById('step3').classList.remove('hidden');
-  document.getElementById('subtitle').textContent = 'Choose your dashboard';
-
-  // Fetch display name from profile
-  let displayName = user.email;
-  try {
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('full_name, company_name')
-      .eq('id', user.id)
-      .single();
-    if (profile) {
-      displayName = profile.full_name || profile.company_name || user.email;
+  function showSuccess(msg) {
+    var el = getEl('successMsg');
+    if (el) {
+      el.textContent = msg;
+      el.style.display = 'block';
+      var error = getEl('errorMsg');
+      if (error) error.style.display = 'none';
     }
-  } catch (e) {
-    console.log('Could not fetch profile for display name:', e);
   }
 
-  document.getElementById('userEmailDisplay').textContent = 'Welcome, ' + displayName;
-  document.getElementById('debugInfo').textContent = 'Logged in as: ' + displayName;
-}
-
-// =====================================================
-// VALIDATE SESSION (check expiry)
-// =====================================================
-function isSessionValid(session) {
-  if (!session) return false;
-  if (!session.expires_at) return true; // no expiry = assume valid
-  const now = Math.floor(Date.now() / 1000);
-  const valid = session.expires_at > now;
-  if (!valid) {
-    console.log('⏰ Session expired at', session.expires_at, ', now is', now);
-  }
-  return valid;
-}
-
-// =====================================================
-// MAIN AUTH CHECK
-// =====================================================
-async function checkAuth() {
-  if (authCheckComplete) return;
-  authCheckComplete = true;
-
-  console.log('🚀 TradeAux Signin v6.0 - Auth check starting');
-
-  // === CASE 1: LOGOUT FLAG ===
-  if (isLogout) {
-    console.log('🔓 Logout detected - performing full cleanup');
-    await bulletproofSignOut();
-    showSuccess('You have been signed out.');
-    document.getElementById('debugInfo').textContent = 'Signed out. You can sign in again.';
-    // Remove logout flag from URL without reloading
-    const newUrl = window.location.pathname;
-    window.history.replaceState({}, document.title, newUrl);
-    return;
-  }
-
-  // === CASE 2: CHECK EXISTING SESSION ===
-  console.log('🔍 Checking for existing session...');
-
-  try {
-    const { data, error } = await supabaseClient.auth.getSession();
-
-    if (error) {
-      console.log('⚠️ getSession error:', error.message);
-      return; // Stay on sign-in form
+  function showLoading(show, text) {
+    var loader = getEl('loadingIndicator');
+    if (loader) {
+      loader.style.display = show ? 'block' : 'none';
+      if (show) loader.classList.add('visible');
+      else loader.classList.remove('visible');
     }
+    var textEl = getEl('loadingText');
+    if (textEl && text) textEl.textContent = text;
+  }
 
-    if (!data || !data.session) {
-      console.log('ℹ️ No session found - showing sign-in form');
-      return; // Stay on sign-in form
+  function showStep(stepId) {
+    var steps = document.querySelectorAll('.step-container');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].classList.remove('visible');
+      steps[i].classList.add('hidden');
     }
+    var step = getEl(stepId);
+    if (step) {
+      step.classList.remove('hidden');
+      setTimeout(function() {
+        step.classList.add('visible');
+      }, 10);
+    }
+  }
 
-    // Validate session expiry
-    if (!isSessionValid(data.session)) {
-      console.log('⏰ Session expired - clearing and staying on form');
-      await bulletproofSignOut();
-      showError('Your session expired. Please sign in again.');
+  function redirectToDashboard(role) {
+    var url = DASHBOARDS[role];
+    if (!url) {
+      showError('Unknown role');
+      return;
+    }
+    showLoading(true, 'Redirecting...');
+    setTimeout(function() {
+      window.location.href = url;
+    }, 500);
+  }
+
+  // =====================================================
+  // AUTH FUNCTIONS
+  // =====================================================
+  // FIX #5: Preserve tradeaux data during sign-out
+  async function fullSignOut() {
+    if (supabaseClient) {
+      try { await supabaseClient.auth.signOut(); } catch(e) {}
+    }
+    
+    // ONLY remove Supabase auth keys — NEVER wipe tradeaux data
+    var keysToRemove = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key && key.indexOf('supabase') !== -1) {
+          keysToRemove.push(key);
+        }
+        if (key && key.indexOf('sb-') === 0) {
+          keysToRemove.push(key);
+        }
+      }
+      for (var j = 0; j < keysToRemove.length; j++) {
+        localStorage.removeItem(keysToRemove[j]);
+      }
+      // Clear sessionStorage for supabase
+      var sessKeys = [];
+      for (var k = 0; k < sessionStorage.length; k++) {
+        var sKey = sessionStorage.key(k);
+        if (sKey && (sKey.indexOf('supabase') !== -1 || sKey.indexOf('sb-') === 0)) {
+          sessKeys.push(sKey);
+        }
+      }
+      for (var l = 0; l < sessKeys.length; l++) {
+        sessionStorage.removeItem(sessKeys[l]);
+      }
+    } catch(e) {}
+    
+    // Redirect to sign-in with logout param
+    window.location.href = 'signin.html?logout=1';
+  }
+
+  async function showRolePicker(user) {
+    currentUser = user;
+    showStep('step3');
+    var display = getEl('userEmailDisplay');
+    if (display) display.textContent = 'Welcome, ' + (user.email || 'User');
+  }
+
+  // =====================================================
+  // CHECK FOR PASSWORD RESET TOKEN
+  // =====================================================
+  function checkForResetToken() {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf('access_token') !== -1) {
+      console.log('🔑 Password reset token detected');
+      
+      var params = new URLSearchParams(hash.substring(1));
+      var accessToken = params.get('access_token');
+      var type = params.get('type');
+      
+      if (accessToken && type === 'recovery') {
+        resetToken = accessToken;
+        showStep('step4');
+        var subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Reset Your Password';
+        showSuccess('Please enter your new password below.');
+        
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // =====================================================
+  // HANDLE PASSWORD RESET
+  // =====================================================
+  async function handlePasswordReset() {
+    var password = getEl('resetPassword');
+    var confirm = getEl('resetPasswordConfirm');
+    
+    if (!password || !confirm) {
+      showError('Please enter your new password');
       return;
     }
 
-    const user = data.session.user;
-    console.log('✅ Valid session found for:', user.email);
+    var passwordValue = password.value;
+    var confirmValue = confirm.value;
 
-    // Check if user already has a saved role
-    let role = null;
+    if (!passwordValue || !confirmValue) {
+      showError('Please fill in both password fields');
+      return;
+    }
+
+    if (passwordValue.length < 6) {
+      showError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (passwordValue !== confirmValue) {
+      showError('Passwords do not match');
+      return;
+    }
+
+    var btn = getEl('resetPasswordBtn');
+    if (!btn) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+
     try {
-      const { data: profile, error: profileError } = await supabaseClient
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+      var { data, error } = await supabaseClient.auth.updateUser({
+        password: passwordValue
+      });
 
-      if (profileError) {
-        console.log('Profile query error:', profileError.message);
+      if (error) {
+        if (resetToken) {
+          var { error: sessionError } = await supabaseClient.auth.setSession({
+            access_token: resetToken,
+            refresh_token: ''
+          });
+          
+          if (sessionError) throw sessionError;
+          
+          var { error: updateError } = await supabaseClient.auth.updateUser({
+            password: passwordValue
+          });
+          
+          if (updateError) throw updateError;
+        } else {
+          throw error;
+        }
       }
 
-      if (profile && profile.role && DASHBOARDS[profile.role]) {
-        role = profile.role;
-      }
-    } catch (e) {
-      console.error('Error checking saved role:', e);
-    }
+      showSuccess('✅ Password updated successfully! Please sign in with your new password.');
+      
+      resetToken = null;
+      
+      setTimeout(function() {
+        showStep('step1');
+        var subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Sign in to your account';
+        if (password) password.value = '';
+        if (confirm) confirm.value = '';
+      }, 2000);
 
-    if (role) {
-      // User has a saved role - redirect immediately, NO role picker
-      console.log('✅ Saved role found:', role, '→ redirecting immediately');
-      document.getElementById('debugInfo').textContent = 'Redirecting to ' + DASHBOARDS[role] + '...';
-      redirectToDashboard(role);
-    } else {
-      // No saved role - show role picker (first time only)
-      console.log('ℹ️ No saved role — showing role picker (first time)');
-      showRolePicker(user);
+    } catch (error) {
+      console.error('Password reset error:', error);
+      showError(error.message || 'Failed to update password. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Update Password';
     }
-
-  } catch (err) {
-    console.error('❌ Auth check failed:', err);
-    showError('Authentication check failed. Please try again.');
   }
-}
-
-// =====================================================
-// PAGE LOAD
-// =====================================================
-document.addEventListener('DOMContentLoaded', function() {
-  checkAuth();
 
   // =====================================================
-  // TOGGLE SIGNUP / SIGNIN
+  // EVENT HANDLERS
   // =====================================================
-  document.getElementById('showSignup').addEventListener('click', function(e) {
+
+  // ---- SIGN IN ----
+  async function handleSignIn(e) {
     e.preventDefault();
-    document.getElementById('step1').classList.add('hidden');
-    document.getElementById('step2').classList.remove('hidden');
-    document.getElementById('subtitle').textContent = 'Create your account';
-  });
+    if (signInButtonLocked) return;
+    signInButtonLocked = true;
 
-  document.getElementById('showSignin').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('step2').classList.add('hidden');
-    document.getElementById('step1').classList.remove('hidden');
-    document.getElementById('subtitle').textContent = 'Sign in to your account';
-    document.getElementById('errorMsg').style.display = 'none';
-    document.getElementById('successMsg').style.display = 'none';
-  });
+    var btn = getEl('signinBtn');
+    if (!btn) { signInButtonLocked = false; return; }
 
-  // =====================================================
-  // SIGN IN - STEP 1
-  // =====================================================
-  document.getElementById('signinBtn').addEventListener('click', async function() {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-
+    var email = getEl('email');
+    var password = getEl('password');
     if (!email || !password) {
       showError('Please enter email and password');
+      signInButtonLocked = false;
       return;
     }
 
-    const btn = document.getElementById('signinBtn');
+    var emailValue = email.value.trim();
+    var passwordValue = password.value;
+
+    if (!emailValue || !passwordValue) {
+      showError('Please fill in all fields');
+      signInButtonLocked = false;
+      return;
+    }
+
     btn.disabled = true;
     btn.textContent = 'Signing in...';
 
     try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ 
-        email: email, 
-        password: password 
+      var { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: emailValue,
+        password: passwordValue
       });
 
       if (error) throw error;
 
-      showSuccess('✅ Signed in successfully!');
+      var { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .maybeSingle();
 
-      // Check for saved role and redirect or show picker
-      let role = null;
-      try {
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
-        if (profile && profile.role && DASHBOARDS[profile.role]) {
-          role = profile.role;
-        }
-      } catch (e) {
-        console.log('Could not fetch role after signin:', e);
-      }
-
-      if (role) {
-        redirectToDashboard(role);
+      if (profile && profile.role && DASHBOARDS[profile.role]) {
+        try { localStorage.setItem('tradeaux_role', profile.role); } catch(e) {}
+        redirectToDashboard(profile.role);
       } else {
         showRolePicker(data.user);
       }
 
     } catch (error) {
-      showError(error.message);
+      if (error.message.indexOf('Invalid login credentials') !== -1) {
+        showError('Invalid email or password.');
+      } else {
+        showError(error.message);
+      }
+    } finally {
       btn.disabled = false;
       btn.textContent = 'Sign In';
+      signInButtonLocked = false;
     }
-  });
+  }
 
-  // =====================================================
-  // SIGN UP - STEP 2
-  // =====================================================
-  document.getElementById('signupBtn').addEventListener('click', async function() {
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const companyName = document.getElementById('signupName').value.trim();
+  // ---- SIGN UP ----
+  async function handleSignUp(e) {
+    e.preventDefault();
 
-    if (!email || !password) {
-      showError('Please enter email and password');
+    var btn = getEl('signupBtn');
+    if (!btn) return;
+
+    var email = getEl('signupEmail');
+    var password = getEl('signupPassword');
+    var company = getEl('companyNameInput');
+
+    if (!email || !password || !company) {
+      showError('Please fill in all fields');
       return;
     }
 
-    if (password.length < 6) {
+    var emailValue = email.value.trim();
+    var passwordValue = password.value;
+    var companyValue = company.value.trim();
+
+    if (!emailValue || !passwordValue || !companyValue) {
+      showError('Please fill in all fields');
+      return;
+    }
+
+    if (passwordValue.length < 6) {
       showError('Password must be at least 6 characters');
       return;
     }
 
-    if (!companyName) {
-      showError('Please enter your Company / Organization name');
-      return;
-    }
-
-    const btn = document.getElementById('signupBtn');
     btn.disabled = true;
-    btn.textContent = 'Creating account...';
+    btn.textContent = 'Creating...';
 
     try {
-      const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
+      var { data, error } = await supabaseClient.auth.signUp({
+        email: emailValue,
+        password: passwordValue,
         options: {
-          data: {
-            full_name: companyName,
-            company: companyName,
-            role: 'buyer'
-          }
+          data: { full_name: companyValue, company: companyValue }
         }
       });
 
       if (error) throw error;
 
-      // If session is null, email confirmation is required
       if (data.user && !data.session) {
-        showSuccess('✅ Account created! Check your email to confirm.');
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step1').classList.remove('hidden');
-        document.getElementById('subtitle').textContent = 'Sign in to your account';
-        btn.disabled = false;
-        btn.textContent = 'Create Account';
+        showSuccess('Account created! Check your email to confirm.');
+        showStep('step1');
         return;
       }
 
-      // Email confirmation is disabled — auto sign-in
       if (data.user && data.session) {
-        // Create profile
-        const { error: profileError } = await supabaseClient.from('profiles').insert({
+        await supabaseClient.from('profiles').insert({
           id: data.user.id,
-          email: email,
-          full_name: companyName,
-          company_name: companyName,
-          role: 'buyer',
-          wallet_balance: 0,
-          created_at: new Date().toISOString()
+          email: emailValue,
+          full_name: companyValue,
+          company_name: companyValue,
+          role: ''
         });
-
-        if (profileError) {
-          console.error('Profile creation failed:', profileError);
-        }
-
-        showSuccess('✅ Account created successfully!');
         showRolePicker(data.user);
       }
 
     } catch (error) {
-      showError(error.message);
+      if (error.message.indexOf('User already registered') !== -1) {
+        showError('An account with this email already exists.');
+      } else {
+        showError(error.message);
+      }
+    } finally {
       btn.disabled = false;
       btn.textContent = 'Create Account';
     }
-  });
+  }
 
-  // =====================================================
-  // ROLE SELECTOR - STEP 3
-  // =====================================================
-  document.querySelectorAll('.role-option').forEach(function(option) {
-    option.addEventListener('click', function() {
-      document.querySelectorAll('.role-option').forEach(function(opt) { 
-        opt.classList.remove('selected'); 
-      });
-      this.classList.add('selected');
-      selectedRole = this.dataset.role;
+  // ---- FORGOT PASSWORD ----
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    if (forgotPasswordLocked) return;
 
-      const btn = document.getElementById('roleContinueBtn');
-      btn.disabled = false;
-      btn.textContent = 'Go to Dashboard →';
+    var email = getEl('email');
+    if (!email) return;
 
-      document.getElementById('debugInfo').textContent = 'Selected: ' + selectedRole;
-    });
-  });
-
-  document.getElementById('roleContinueBtn').addEventListener('click', async function() {
-    if (!selectedRole) {
-      showError('Please select a role first');
+    var emailValue = email.value.trim();
+    if (!emailValue) {
+      showError('Please enter your email address');
+      email.classList.add('error-field');
       return;
     }
 
-    const btn = document.getElementById('roleContinueBtn');
+    forgotPasswordLocked = true;
+    var link = e.currentTarget;
+    var originalText = link.textContent;
+    link.textContent = 'Sending...';
+
+    try {
+      var { error } = await supabaseClient.auth.resetPasswordForEmail(emailValue, {
+        redirectTo: window.location.origin + window.location.pathname
+      });
+
+      if (error) throw error;
+
+      showSuccess('Password reset email sent! Check your inbox.');
+      link.textContent = '✓ Sent!';
+      setTimeout(function() { link.textContent = originalText; }, 3000);
+
+    } catch (error) {
+      showError(error.message || 'Failed to send reset email');
+      link.textContent = originalText;
+    } finally {
+      forgotPasswordLocked = false;
+    }
+  }
+
+  // ---- ROLE SELECTION ----
+  function handleRoleSelect(e) {
+    var element = e.currentTarget;
+    var options = document.querySelectorAll('.role-option');
+    for (var i = 0; i < options.length; i++) {
+      options[i].classList.remove('selected');
+    }
+    element.classList.add('selected');
+    selectedRole = element.dataset.role;
+
+    var btn = getEl('roleContinueBtn');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Go to Dashboard →';
+    }
+  }
+
+  async function handleRoleContinue() {
+    if (!selectedRole) {
+      showError('Please select a role');
+      return;
+    }
+
+    var btn = getEl('roleContinueBtn');
+    if (!btn) return;
+
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
-    // Save the role to the user's profile
-    if (currentUser) {
-      try {
-        const { error } = await supabaseClient
+    try {
+      if (currentUser) {
+        await supabaseClient
           .from('profiles')
           .update({ role: selectedRole })
           .eq('id', currentUser.id);
-
-        if (error) {
-          console.warn('Could not save role:', error);
-          showError('Could not save role. Please try again.');
-          btn.disabled = false;
-          btn.textContent = 'Go to Dashboard →';
-          return;
-        }
-        console.log('✅ Role saved:', selectedRole);
-      } catch (e) {
-        console.error('Error saving role:', e);
       }
+
+      try { localStorage.setItem('tradeaux_role', selectedRole); } catch(e) {}
+      redirectToDashboard(selectedRole);
+
+    } catch (error) {
+      showError('Could not save role. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Go to Dashboard →';
     }
-
-    redirectToDashboard(selectedRole);
-  });
+  }
 
   // =====================================================
-  // LOGOUT (from role picker)
+  // INITIALIZATION
   // =====================================================
-  document.getElementById('logoutAfterLogin').addEventListener('click', async function(e) {
-    e.preventDefault();
-    await bulletproofSignOut();
-    window.location.href = 'signin.html?logout=1&_t=' + Date.now();
-  });
-
-  // =====================================================
-  // FORGOT PASSWORD
-  // =====================================================
-  document.getElementById('forgotLink').addEventListener('click', async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-
-    if (!email) {
-      showError('Enter your email first');
+  async function init() {
+    if (isInitialized) return;
+    
+    if (!window.supabase) {
+      showError('Supabase failed to load. Please refresh.');
       return;
     }
 
     try {
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/signin.html'
-      });
-      if (error) throw error;
-      showSuccess('Password reset email sent!');
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (err) {
-      showError(err.message);
+      showError('Failed to initialize. Please refresh.');
+      return;
     }
-  });
 
-  // =====================================================
-  // KEYBOARD SUPPORT
-  // =====================================================
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      if (!document.getElementById('step1').classList.contains('hidden')) {
-        document.getElementById('signinBtn').click();
-      } else if (!document.getElementById('step2').classList.contains('hidden')) {
-        document.getElementById('signupBtn').click();
-      } else if (!document.getElementById('step3').classList.contains('hidden')) {
-        if (!document.getElementById('roleContinueBtn').disabled) {
-          document.getElementById('roleContinueBtn').click();
+    // Check for password reset token FIRST
+    if (checkForResetToken()) {
+      isInitialized = true;
+      showLoading(false);
+      return;
+    }
+
+    // Check for existing session
+    try {
+      var { data } = await supabaseClient.auth.getSession();
+      if (data && data.session) {
+        var { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', data.session.user.id)
+          .maybeSingle();
+
+        if (profile && profile.role && DASHBOARDS[profile.role]) {
+          try { localStorage.setItem('tradeaux_role', profile.role); } catch(e) {}
+          redirectToDashboard(profile.role);
+          return;
         }
       }
+    } catch (err) {
+      // Session check failed, show sign-in
     }
-  });
 
-  console.log('✅ Ready - signin v6.0 with bulletproof auth');
-});
+    showStep('step1');
+    showLoading(false);
+    isInitialized = true;
+
+    // Protect tradeaux data during page transitions
+    window.addEventListener('beforeunload', function() {
+      try {
+        var raw = localStorage.getItem('tradeaux_seller_state');
+        if (raw) {
+          sessionStorage.setItem('tradeaux_seller_state_backup', raw);
+        }
+      } catch(e) {}
+    });
+  }
+
+  // =====================================================
+  // WIRE EVENTS
+  // =====================================================
+  function wireEvents() {
+    var signinForm = getEl('step1');
+    if (signinForm) signinForm.addEventListener('submit', handleSignIn);
+
+    var signupForm = getEl('step2');
+    if (signupForm) signupForm.addEventListener('submit', handleSignUp);
+
+    var showSignup = getEl('showSignup');
+    if (showSignup) {
+      showSignup.addEventListener('click', function(e) {
+        e.preventDefault();
+        showStep('step2');
+        var subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Create your account';
+      });
+    }
+
+    var showSignin = getEl('showSignin');
+    if (showSignin) {
+      showSignin.addEventListener('click', function(e) {
+        e.preventDefault();
+        showStep('step1');
+        var subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Sign in to your account';
+      });
+    }
+
+    var forgotLink = getEl('forgotLink');
+    if (forgotLink) forgotLink.addEventListener('click', handleForgotPassword);
+
+    var logoutBtn = getEl('logoutAfterLogin');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        fullSignOut();
+      });
+    }
+
+    var roleOptions = document.querySelectorAll('.role-option');
+    for (var i = 0; i < roleOptions.length; i++) {
+      roleOptions[i].addEventListener('click', handleRoleSelect);
+    }
+
+    var roleContinue = getEl('roleContinueBtn');
+    if (roleContinue) roleContinue.addEventListener('click', handleRoleContinue);
+
+    var toggle1 = getEl('togglePassword1');
+    if (toggle1) {
+      toggle1.addEventListener('click', function() {
+        var pw = getEl('password');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
+
+    var toggle2 = getEl('togglePassword2');
+    if (toggle2) {
+      toggle2.addEventListener('click', function() {
+        var pw = getEl('signupPassword');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
+
+    var toggleReset = getEl('toggleResetPassword');
+    if (toggleReset) {
+      toggleReset.addEventListener('click', function() {
+        var pw = getEl('resetPassword');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
+
+    var toggleResetConfirm = getEl('toggleResetPasswordConfirm');
+    if (toggleResetConfirm) {
+      toggleResetConfirm.addEventListener('click', function() {
+        var pw = getEl('resetPasswordConfirm');
+        if (pw) {
+          pw.type = pw.type === 'password' ? 'text' : 'password';
+          this.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        }
+      });
+    }
+
+    var resetBtn = getEl('resetPasswordBtn');
+    if (resetBtn) resetBtn.addEventListener('click', handlePasswordReset);
+
+    var backToSignin = getEl('backToSignin');
+    if (backToSignin) {
+      backToSignin.addEventListener('click', function(e) {
+        e.preventDefault();
+        resetToken = null;
+        showStep('step1');
+        var subtitle = getEl('subtitle');
+        if (subtitle) subtitle.textContent = 'Sign in to your account';
+        var resetPw = getEl('resetPassword');
+        var resetConfirm = getEl('resetPasswordConfirm');
+        if (resetPw) resetPw.value = '';
+        if (resetConfirm) resetConfirm.value = '';
+      });
+    }
+  }
+
+  // =====================================================
+  // START
+  // =====================================================
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
+      wireEvents();
+    });
+  } else {
+    init();
+    wireEvents();
+  }
+
+})();
 </script>
+
 </body>
 </html>

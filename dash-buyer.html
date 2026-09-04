@@ -418,6 +418,22 @@
     .bot-status { font-size: 10px; color: #7CFC00; margin-bottom: 8px; }
     .bot-target { font-size: 10px; color: #FFD966; margin-bottom: 8px; }
     .bot-stats { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; margin-top: 8px; }
+    .bot-designation {
+      font-size: 9px;
+      background: rgba(0,206,209,0.15);
+      padding: 2px 10px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-bottom: 4px;
+      color: #00ced1;
+      letter-spacing: 0.5px;
+    }
+    .bot-strategy-style {
+      font-size: 9px;
+      color: #FFD966;
+      display: inline-block;
+      margin-left: 6px;
+    }
     .add-bot-card {
       background: rgba(15, 32, 64, 0.4);
       border: 2px dashed rgba(0, 206, 209, 0.3);
@@ -457,7 +473,7 @@
       background: linear-gradient(145deg, #0a1228, #020617);
       border: 2px solid #00ced1;
       border-radius: 24px;
-      max-width: 550px;
+      max-width: 700px;
       width: 90%;
       max-height: 85vh;
       overflow-y: auto;
@@ -491,24 +507,12 @@
       font-family: 'Inter', sans-serif;
       font-size: 14px;
     }
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 8px;
+    .modal-field .tooltip {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 6px;
+      font-style: italic;
     }
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0,0,0,0.3);
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(0,206,209,0.2);
-      cursor: pointer;
-    }
-    .checkbox-item:hover { border-color: #00ced1; }
-    .checkbox-item.selected { background: rgba(0,206,209,0.2); border-color: #00ced1; }
     .slider-row { display: flex; align-items: center; gap: 16px; }
     .slider-row input { flex: 1; }
     .slider-value { font-family: 'Orbitron', sans-serif; color: #00ced1; min-width: 60px; }
@@ -735,71 +739,92 @@
   </div>
 </div>
 
-<!-- Bot Config Modal -->
+<!-- Bot Config Modal - Enhanced -->
 <div id="botConfigModal" class="modal">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width: 700px;">
     <span class="modal-close" id="closeBotModal">&times;</span>
-    <div class="modal-header"><h2 id="botModalTitle">Bot Configuration</h2></div>
+    <div class="modal-header"><h2 id="botModalTitle">🤖 Bot Configuration</h2></div>
+    
     <div class="modal-field">
       <label>Bot Name</label>
-      <input type="text" id="editBotName">
-      <div class="tooltip">💡 Name your bot to identify it in your fleet</div>
+      <input type="text" id="editBotName" placeholder="e.g., BrewMaster">
+      <div class="tooltip">💡 Give your bot a unique name</div>
     </div>
+
+    <div class="modal-field">
+      <label>Designation</label>
+      <select id="editDesignation">
+        <option value="core">🎯 Core Product</option>
+        <option value="filler">📦 Filler Product</option>
+        <option value="sampler">🔬 Sampler</option>
+        <option value="pallet">🧩 Pallet Puller</option>
+      </select>
+      <div class="tooltip">💡 Core = Main trading focus | Filler = Fill containers | Sampler = Test new products | Pallet = Pallet-level trading</div>
+    </div>
+
     <div class="modal-field">
       <label>Commodity</label>
       <select id="editBotCommodity">
-        <option value="Apples">Apples</option>
-        <option value="Bananas">Bananas</option>
-        <option value="Coconuts">Coconuts</option>
-        <option value="Mangoes">Mangoes</option>
-        <option value="Oranges">Oranges</option>
-        <option value="Pineapples">Pineapples</option>
-        <option value="Potatoes">Potatoes</option>
-        <option value="Tomatoes">Tomatoes</option>
-        <option value="Onions">Onions</option>
-        <option value="Carrots">Carrots</option>
-        <option value="Broccoli">Broccoli</option>
-        <option value="Corn">Corn</option>
-        <option value="Rice">Rice</option>
-        <option value="Wheat">Wheat</option>
-        <option value="Soybeans">Soybeans</option>
+        <option value="Coffee">☕ Coffee</option>
+        <option value="Cocoa">🍫 Cocoa</option>
+        <option value="Coconuts">🥥 Coconuts</option>
+        <option value="Grains">🌾 Grains</option>
+        <option value="Sugar">🍬 Sugar</option>
+        <option value="Cotton">🧵 Cotton</option>
+        <option value="Metals">⚙️ Metals</option>
       </select>
-      <div class="tooltip">💡 The bot will only bid on this commodity</div>
+      <div class="tooltip">💡 The bot will focus on this commodity</div>
     </div>
+
     <div class="modal-field">
-      <label>Target Varieties (select all that apply)</label>
-      <div class="checkbox-group" id="varietyCheckboxes"></div>
-      <div class="tooltip">💡 The bot will only bid on these specific varieties. Leave unchecked to bid on all varieties.</div>
+      <label>Strategy (Natural Language)</label>
+      <textarea id="editStrategyText" rows="4" placeholder="e.g., 16.75 MT keystone with 10-day terms. Defend if copied. Use $0.05 increments."></textarea>
+      <div class="tooltip">💡 Describe your strategy in plain English. The bot will interpret it.</div>
     </div>
+
     <div class="modal-field">
-      <label>Max Price (USD/MT)</label>
-      <div class="slider-row">
-        <input type="range" id="editMaxPrice" min="0.10" max="10.00" step="0.01" value="0.60">
-        <span class="slider-value" id="editMaxPriceDisplay">$0.60</span>
+      <label>Advanced Strategy Levers</label>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <label style="font-size:10px; color:#9ca3af;">Keystone Quantity (MT)</label>
+          <input type="number" id="editKeystoneQty" value="16.75" step="0.25" min="0.25">
+        </div>
+        <div>
+          <label style="font-size:10px; color:#9ca3af;">Base Price ($/MT)</label>
+          <input type="number" id="editBasePrice" value="4.25" step="0.05" min="0.10">
+        </div>
+        <div>
+          <label style="font-size:10px; color:#9ca3af;">Terms (Days)</label>
+          <input type="number" id="editTerms" value="10" step="5" min="1">
+          <div style="font-size:9px; color:#7CFC00;">Lower = faster payment = better for seller</div>
+        </div>
+        <div>
+          <label style="font-size:10px; color:#9ca3af;">EXW Toggle</label>
+          <select id="editExw">
+            <option value="true">✅ ON (Free price boost)</option>
+            <option value="false">❌ OFF</option>
+          </select>
+          <div style="font-size:9px; color:#7CFC00;">EXW reduces seller cost → you can bid lower</div>
+        </div>
       </div>
-      <div class="tooltip">💡 Bot will never bid above this price</div>
+      <div class="tooltip">💡 Keystone = Your anchor quantity. The solver builds around it.</div>
     </div>
+
     <div class="modal-field">
-      <label>Daily Budget (USD)</label>
-      <div class="slider-row">
-        <input type="range" id="editBudget" min="100" max="5000" step="100" value="500">
-        <span class="slider-value" id="editBudgetDisplay">$500</span>
-      </div>
-      <div class="tooltip">💡 Bot will stop bidding after spending this amount per day</div>
-    </div>
-    <div class="modal-field">
-      <label>Strategy</label>
-      <select id="editStrategy">
-        <option value="Sniper">Sniper (bid at last second)</option>
-        <option value="Aggressive">Aggressive (bid early and often)</option>
-        <option value="Balanced">Balanced (moderate)</option>
-        <option value="Conservative">Conservative (only good deals)</option>
+      <label>Strategy Style</label>
+      <select id="editStrategyStyle">
+        <option value="keystone">🔑 Keystone (Be the anchor)</option>
+        <option value="counter">🎯 Counter-Keystone (Copy and snipe)</option>
+        <option value="complement">🧩 Complement (Fill the gap)</option>
+        <option value="nuclear">💥 Nuclear (Own half the lot)</option>
+        <option value="sniper">🎯 Sniper (Wait for the gap)</option>
       </select>
-      <div class="tooltip">💡 Sniper waits for end; Aggressive bids immediately; Balanced is in-between; Conservative only bids on deep discounts</div>
+      <div class="tooltip">💡 Keystone = Be the main piece | Counter = Copy and bid them up | Complement = Fill the remainder | Nuclear = Go big</div>
     </div>
+
     <div class="modal-actions">
       <button class="cancel-btn" id="cancelBotBtn">Cancel</button>
-      <button class="create-btn" id="saveBotBtn">Save Changes</button>
+      <button class="create-btn" id="saveBotBtn">💾 Save Bot</button>
     </div>
   </div>
 </div>
@@ -925,7 +950,14 @@ async function loadBots() {
     id: b.id, name: b.name, commodity: b.commodity, varieties: b.varieties || [],
     emoji: b.emoji || '🤖', status: b.status || 'idle', trades: b.trades || 0,
     pnl: b.pnl || 0, winRate: b.win_rate || 0, strategy: b.strategy || 'Balanced',
-    maxPrice: b.max_price || 0.60, budget: b.budget || 500
+    maxPrice: b.max_price || 0.60, budget: b.budget || 500,
+    designation: b.designation || 'core',
+    strategyText: b.strategy_text || '',
+    keystoneQty: b.keystone_qty || 16.75,
+    basePrice: b.base_price || 4.25,
+    terms: b.terms || 10,
+    exw: b.exw || true,
+    strategyStyle: b.strategy_style || 'keystone'
   }));
   renderBots();
   updateStats();
@@ -964,10 +996,27 @@ async function loadWonAuctions() {
 async function saveBotToSupabase(bot) {
   if (!currentUser) return;
   const { error } = await supabase.from('buyer_bots').upsert({
-    id: bot.id, user_id: currentUser.id, name: bot.name, commodity: bot.commodity,
-    varieties: bot.varieties, emoji: bot.emoji, status: bot.status, trades: bot.trades,
-    pnl: bot.pnl, win_rate: bot.winRate, strategy: bot.strategy, max_price: bot.maxPrice,
-    budget: bot.budget, updated_at: new Date().toISOString()
+    id: bot.id, 
+    user_id: currentUser.id, 
+    name: bot.name, 
+    commodity: bot.commodity,
+    varieties: bot.varieties || [], 
+    emoji: bot.emoji, 
+    status: bot.status, 
+    trades: bot.trades || 0,
+    pnl: bot.pnl || 0, 
+    win_rate: bot.winRate || 0, 
+    strategy: bot.strategy || 'Balanced', 
+    max_price: bot.maxPrice || 0.60, 
+    budget: bot.budget || 500,
+    designation: bot.designation || 'core',
+    strategy_text: bot.strategyText || '',
+    keystone_qty: bot.keystoneQty || 16.75,
+    base_price: bot.basePrice || 4.25,
+    terms: bot.terms || 10,
+    exw: bot.exw || true,
+    strategy_style: bot.strategyStyle || 'keystone',
+    updated_at: new Date().toISOString()
   });
   if (error) console.error('Failed to save bot:', error);
 }
@@ -1007,11 +1056,37 @@ function startPriceSimulation() {
 function renderBots() {
   const container = document.getElementById('botsGrid');
   if (!container) return;
+  
+  const designationLabels = {
+    core: '🎯 Core',
+    filler: '📦 Filler',
+    sampler: '🔬 Sampler',
+    pallet: '🧩 Pallet'
+  };
+  
+  const styleEmojis = {
+    keystone: '🔑',
+    counter: '🎯',
+    complement: '🧩',
+    nuclear: '💥',
+    sniper: '🎯'
+  };
+
   container.innerHTML = bots.map(bot => {
-    const selectedCount = bot.varieties.length;
-    const totalVarieties = productVarieties[bot.commodity]?.length || 0;
-    return `<div class="bot-card" data-bot-id="${bot.id}"><div class="bot-emoji">${bot.emoji}</div><div class="bot-name">${bot.name}</div><div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div><div class="bot-target">🎯 ${selectedCount > 0 ? selectedCount + '/' + totalVarieties + ' varieties' : 'All varieties'}</div><div class="bot-stats"><span>Trades: ${bot.trades}</span><span>PnL: $${bot.pnl}</span><span>WR: ${bot.winRate}%</span></div></div>`;
+    const designationLabel = designationLabels[bot.designation] || '🎯 Core';
+    const styleEmoji = styleEmojis[bot.strategyStyle] || '🔑';
+    const styleName = bot.strategyStyle || 'keystone';
+    
+    return `<div class="bot-card" data-bot-id="${bot.id}">
+      <div class="bot-emoji">${bot.emoji || '🤖'}</div>
+      <div class="bot-name">${bot.name}</div>
+      <div class="bot-status">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div>
+      <div class="bot-designation">${designationLabel}</div>
+      <div class="bot-target">${styleEmoji} ${styleName.charAt(0).toUpperCase() + styleName.slice(1)} • 📦 ${bot.keystoneQty || 16.75} MT • 📅 ${bot.terms || 10}d</div>
+      <div class="bot-stats"><span>Trades: ${bot.trades || 0}</span><span>PnL: $${bot.pnl || 0}</span><span>WR: ${bot.winRate || 0}%</span></div>
+    </div>`;
   }).join('');
+
   const addCard = document.createElement('div');
   addCard.className = 'add-bot-card';
   addCard.id = 'addBotCard';
@@ -1049,42 +1124,65 @@ function updateVarietyDropdownForBrief(commodity) {
   });
 }
 
-function updateBotVarietyCheckboxes() {
-  const commodity = document.getElementById('editBotCommodity').value;
-  const varieties = productVarieties[commodity] || [];
-  const container = document.getElementById('varietyCheckboxes');
-  const selectedVarieties = currentEditingBot ? currentEditingBot.varieties : [];
-  container.innerHTML = varieties.map(v => `<label class="checkbox-item ${selectedVarieties.includes(v) ? 'selected' : ''}"><input type="checkbox" value="${v}" ${selectedVarieties.includes(v) ? 'checked' : ''}> ${v}</label>`).join('');
-}
-
 function openBotConfig(bot) {
   currentEditingBot = bot;
   document.getElementById('botModalTitle').textContent = `🤖 ${bot.name}`;
   document.getElementById('editBotName').value = bot.name;
+  document.getElementById('editDesignation').value = bot.designation || 'core';
   document.getElementById('editBotCommodity').value = bot.commodity;
-  updateBotVarietyCheckboxes();
-  document.getElementById('editMaxPrice').value = bot.maxPrice;
-  document.getElementById('editMaxPriceDisplay').textContent = `$${bot.maxPrice.toFixed(2)}`;
-  document.getElementById('editBudget').value = bot.budget;
-  document.getElementById('editBudgetDisplay').textContent = `$${bot.budget}`;
-  document.getElementById('editStrategy').value = bot.strategy;
+  document.getElementById('editStrategyText').value = bot.strategyText || '';
+  document.getElementById('editKeystoneQty').value = bot.keystoneQty || 16.75;
+  document.getElementById('editBasePrice').value = bot.basePrice || 4.25;
+  document.getElementById('editTerms').value = bot.terms || 10;
+  document.getElementById('editExw').value = bot.exw ? 'true' : 'false';
+  document.getElementById('editStrategyStyle').value = bot.strategyStyle || 'keystone';
   document.getElementById('botConfigModal').style.display = 'flex';
 }
 
 async function saveBotConfig() {
   if (!currentEditingBot) return;
-  const selectedVarieties = Array.from(document.querySelectorAll('#varietyCheckboxes input:checked')).map(cb => cb.value);
-  currentEditingBot.name = document.getElementById('editBotName').value;
-  currentEditingBot.commodity = document.getElementById('editBotCommodity').value;
-  currentEditingBot.varieties = selectedVarieties;
-  currentEditingBot.maxPrice = parseFloat(document.getElementById('editMaxPrice').value);
-  currentEditingBot.budget = parseInt(document.getElementById('editBudget').value);
-  currentEditingBot.strategy = document.getElementById('editStrategy').value;
-  currentEditingBot.emoji = commodityPrices[currentEditingBot.commodity]?.emoji || '🤖';
-  await saveBotToSupabase(currentEditingBot);
+
+  const botData = {
+    id: currentEditingBot.id,
+    name: document.getElementById('editBotName').value.trim(),
+    designation: document.getElementById('editDesignation').value,
+    commodity: document.getElementById('editBotCommodity').value,
+    strategy_text: document.getElementById('editStrategyText').value.trim(),
+    keystone_qty: parseFloat(document.getElementById('editKeystoneQty').value),
+    base_price: parseFloat(document.getElementById('editBasePrice').value),
+    terms: parseInt(document.getElementById('editTerms').value),
+    exw: document.getElementById('editExw').value === 'true',
+    strategy_style: document.getElementById('editStrategyStyle').value,
+    strategy: {
+      quantity: parseFloat(document.getElementById('editKeystoneQty').value),
+      price: parseFloat(document.getElementById('editBasePrice').value),
+      terms: parseInt(document.getElementById('editTerms').value),
+      exw: document.getElementById('editExw').value === 'true',
+      style: document.getElementById('editStrategyStyle').value
+    },
+    user_id: currentUser.id,
+    status: currentEditingBot.status || 'active',
+    emoji: commodityPrices[document.getElementById('editBotCommodity').value]?.emoji || '🤖',
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await supabase
+    .from('buyer_bots')
+    .upsert(botData)
+    .select();
+
+  if (error) {
+    console.error('Error saving bot:', error);
+    showToast('Failed to save bot: ' + error.message, true);
+    return;
+  }
+
+  Object.assign(currentEditingBot, botData);
+  
+  await loadBots();
   renderBots();
   renderTicker();
-  showToast(`${currentEditingBot.name} saved`);
+  showToast(`✅ ${currentEditingBot.name} saved!`);
   document.getElementById('botConfigModal').style.display = 'none';
   currentEditingBot = null;
 }
@@ -1116,7 +1214,6 @@ async function submitBrief() {
   if (walletBalance < 25) { showToast('Insufficient funds. Need $25.', true); return; }
   walletBalance -= 25; updateWalletDisplay();
   
-  // Save to Supabase
   const { error } = await supabase.from('buyer_briefs').insert({
     user_id: currentUser.id, 
     commodity, 
@@ -1136,7 +1233,6 @@ async function submitBrief() {
   } else { 
     showToast(`Brief filed: ${quantity}MT ${commodity} (${variety})`); 
     document.getElementById('fileBriefModal').style.display = 'none';
-    // Reset form
     document.getElementById('briefCommodity').value = 'Apples';
     document.getElementById('briefVariety').innerHTML = '<option value="">Select variety...</option>';
     document.getElementById('briefQuantity').value = '100';
@@ -1203,12 +1299,12 @@ document.getElementById('cancelBriefBtn').onclick = () => document.getElementByI
 document.getElementById('submitBriefBtn').onclick = submitBrief;
 document.getElementById('briefCommodity').onchange = function() { updateVarietyDropdownForBrief(this.value); };
 updateVarietyDropdownForBrief('Apples');
-document.getElementById('editMaxPrice').oninput = (e) => document.getElementById('editMaxPriceDisplay').textContent = `$${parseFloat(e.target.value).toFixed(2)}`;
-document.getElementById('editBudget').oninput = (e) => document.getElementById('editBudgetDisplay').textContent = `$${parseInt(e.target.value)}`;
+
 document.getElementById('closeBotModal').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
 document.getElementById('cancelBotBtn').onclick = () => document.getElementById('botConfigModal').style.display = 'none';
 document.getElementById('saveBotBtn').onclick = saveBotConfig;
-document.getElementById('editBotCommodity').onchange = updateBotVarietyCheckboxes;
+document.getElementById('editBotCommodity').onchange = () => {};
+
 document.getElementById('closeBidModal').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
 document.getElementById('cancelBidBtn').onclick = () => document.getElementById('bidDetailModal').style.display = 'none';
 document.getElementById('closeWonModal').onclick = () => document.getElementById('wonDetailModal').style.display = 'none';
@@ -1219,7 +1315,7 @@ document.getElementById('botsGrid').addEventListener('click', async (e) => {
   const card = e.target.closest('.bot-card');
   if (!card) return;
   if (card.id === 'addBotCard') {
-    const newBot = { id: 'bot_' + Date.now(), name: 'New Buyer Bot', commodity: 'Apples', varieties: [], emoji: '🍎', status: 'active', trades: 0, pnl: 0, winRate: 0, strategy: 'Balanced', maxPrice: 0.60, budget: 500 };
+    const newBot = { id: 'bot_' + Date.now(), name: 'New Buyer Bot', commodity: 'Coffee', varieties: [], emoji: '☕', status: 'active', trades: 0, pnl: 0, winRate: 0, strategy: 'Balanced', maxPrice: 4.25, budget: 500, designation: 'core', strategyText: '', keystoneQty: 16.75, basePrice: 4.25, terms: 10, exw: true, strategyStyle: 'keystone' };
     bots.push(newBot); await saveBotToSupabase(newBot); renderBots(); openBotConfig(newBot); return;
   }
   const botId = card.getAttribute('data-bot-id');

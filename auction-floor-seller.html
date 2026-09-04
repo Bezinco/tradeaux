@@ -7,33 +7,28 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>TradeAux • Seller Auction | DUHE + Bot Bids</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+  </script>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     :root {
       --neon-green: #7CFC00;
       --gold: #FFD966;
-      --silver: #C0C7D9;
-      --bronze: #CD7F32;
       --card-bg: linear-gradient(145deg, #0B1122, #030712);
     }
-
     body {
       min-height: 100vh;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       color: #F0F3FA;
       background: #020617;
       position: relative;
       overflow-x: hidden;
     }
 
-    /* ===== BACKGROUND WAVES ===== */
     .bg-waves {
       position: fixed;
       inset: 0;
@@ -41,7 +36,6 @@
       overflow: hidden;
       pointer-events: none;
     }
-
     .wave-bg {
       position: absolute;
       width: 200%;
@@ -50,39 +44,52 @@
       opacity: 0.2;
       animation: waveBgDrift 24s ease-in-out infinite;
     }
-
-    .wave-emerald-bg { 
-      background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.4), transparent 70%); 
-      top: -40%; left: -20%; animation-delay: 0s; 
+    .wave-emerald-bg {
+      background: radial-gradient(circle at 30% 40%, rgba(124, 252, 0, 0.4), transparent 70%);
+      top: -40%;
+      left: -20%;
+      animation-delay: 0s;
     }
-    .wave-sapphire-bg { 
-      background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%); 
-      top: -30%; left: -10%; animation-delay: 8s; 
+    .wave-sapphire-bg {
+      background: radial-gradient(circle at 50% 50%, rgba(0, 206, 209, 0.4), transparent 70%);
+      top: -30%;
+      left: -10%;
+      animation-delay: 8s;
     }
-    .wave-ruby-bg { 
-      background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%); 
-      top: -20%; left: 0%; animation-delay: 16s; 
+    .wave-ruby-bg {
+      background: radial-gradient(circle at 70% 60%, rgba(158, 74, 74, 0.4), transparent 70%);
+      top: -20%;
+      left: 0%;
+      animation-delay: 16s;
     }
-
     @keyframes waveBgDrift {
-      0% { transform: translate(0px, 0px) scale(1); opacity: 0.15; }
-      50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.25; }
-      100% { transform: translate(-30px, 20px) scale(1); opacity: 0.15; }
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.15;
+      }
+      50% {
+        transform: translate(40px, -30px) scale(1.05);
+        opacity: 0.25;
+      }
+      100% {
+        transform: translate(-30px, 20px) scale(1);
+        opacity: 0.15;
+      }
     }
 
-    /* ===== 3D LOGO - TRADEAUX (FIXED) ===== */
+    /* ===== 3D LOGO ===== */
     .gem-logo-corner {
       position: fixed;
       top: 20px;
       left: 20px;
-      z-index: 9999;
+      z-index: 150;
       filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
       transform-style: preserve-3d;
       perspective: 1000px;
       transform: scale(0.35);
       transform-origin: top left;
+      pointer-events: none;
     }
-
     .gem-text {
       font-size: 160px;
       font-weight: 900;
@@ -95,7 +102,6 @@
       transform-style: preserve-3d;
       gap: 2px;
     }
-
     .gem-letter {
       display: inline-block;
       position: relative;
@@ -104,196 +110,323 @@
       filter: brightness(1.2);
       color: transparent;
     }
-
-    .gem-letter:nth-child(1) { animation-delay: 0s; }
-    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
-    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
-    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
-    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
-    .gem-letter:nth-child(6) { animation-delay: 0.10s; }
-    .gem-letter:nth-child(7) { animation-delay: 0.30s; }
-    .gem-letter:nth-child(8) { animation-delay: 0.50s; }
-
-    @keyframes letterFloat {
-      0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
-      50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
+    .gem-letter:nth-child(1) {
+      animation-delay: 0s;
     }
-
-    /* Letter 1 - T (Blue) */
+    .gem-letter:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .gem-letter:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    .gem-letter:nth-child(4) {
+      animation-delay: 0.6s;
+    }
+    .gem-letter:nth-child(5) {
+      animation-delay: 0.8s;
+    }
+    .gem-letter:nth-child(6) {
+      animation-delay: 1.0s;
+    }
+    .gem-letter:nth-child(7) {
+      animation-delay: 1.2s;
+    }
+    .gem-letter:nth-child(8) {
+      animation-delay: 1.4s;
+    }
+    @keyframes letterFloat {
+      0%,
+      100% {
+        transform: translateY(0px) rotateX(2deg) rotateY(2deg);
+      }
+      50% {
+        transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
+      }
+    }
     .gem-letter:nth-child(1)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #001a4a, #002a6e, #0040a0, #0055cc, #0066ff, #0055cc, #002a6e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
-    /* Letter 2 - R (Green) */
     .gem-letter:nth-child(2)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #004d1a, #006622, #009933, #00b33c, #00cc44, #00b33c, #006622);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
-    /* Letter 3 - A (Red) */
     .gem-letter:nth-child(3)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #2a0000, #4a0000, #7a0b0b, #a61a1a, #d92b2b, #a61a1a, #4a0000);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
-    /* Letter 4 - D (Blue) */
     .gem-letter:nth-child(4)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #001a4a, #002a6e, #0040a0, #0055cc, #0066ff, #0055cc, #002a6e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
-    /* Letter 5 - E (Green) */
     .gem-letter:nth-child(5)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #004d1a, #006622, #009933, #00b33c, #00cc44, #00b33c, #006622);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
-    /* Letter 6 - A (Red) */
     .gem-letter:nth-child(6)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #2a0000, #4a0000, #7a0b0b, #a61a1a, #d92b2b, #a61a1a, #4a0000);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
-    /* Letter 7 - U (Blue) */
     .gem-letter:nth-child(7)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #001a4a, #002a6e, #0040a0, #0055cc, #0066ff, #0055cc, #002a6e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
-    /* Letter 8 - X (Green) */
     .gem-letter:nth-child(8)::before {
       content: attr(data-letter);
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #004d1a, #006622, #009933, #00b33c, #00cc44, #00b33c, #006622);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0, 0, 0, 0.3);
       transform: translateZ(2px);
     }
-
     .gem-letter .edge-top {
-      position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
-      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+      position: absolute;
+      top: -2px;
+      left: 0;
+      width: 100%;
+      height: 20%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      z-index: 5;
     }
     .gem-letter .edge-right {
-      position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
-      background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
-      mix-blend-mode: overlay; pointer-events: none; z-index: 5;
+      position: absolute;
+      top: 0;
+      right: -2px;
+      width: 10%;
+      height: 100%;
+      background: linear-gradient(270deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      z-index: 5;
     }
     .gem-letter .edge-bottom {
-      position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
-      background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
-      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 20%;
+      background: linear-gradient(0deg, rgba(50, 0, 0, 0.4) 0%, transparent 100%);
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      z-index: 5;
     }
     .gem-letter .edge-left {
-      position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
-      background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
-      mix-blend-mode: multiply; pointer-events: none; z-index: 5;
+      position: absolute;
+      top: 0;
+      left: -2px;
+      width: 10%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(50, 0, 0, 0.3) 0%, transparent 100%);
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      z-index: 5;
     }
-
     .light-source {
-      position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 206, 209, 0.1) 30%, transparent 70%);
       animation: rotateLight 15s linear infinite;
-      pointer-events: none; mix-blend-mode: overlay;
+      pointer-events: none;
+      mix-blend-mode: overlay;
     }
-
     @keyframes rotateLight {
-      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
-      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
-      100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+      0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: rotate(180deg) scale(1.2);
+        opacity: 0.6;
+      }
+      100% {
+        transform: rotate(360deg) scale(1);
+        opacity: 0.3;
+      }
     }
-
     .sparkle {
-      position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
       box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
-      animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none;
+      animation: sparkleFlash 4s ease-in-out infinite;
+      opacity: 0;
+      pointer-events: none;
     }
-
     @keyframes sparkleFlash {
-      0% { opacity: 0; transform: scale(0.5); }
-      10% { opacity: 1; transform: scale(1.2); }
-      20% { opacity: 0.6; transform: scale(0.9); }
-      30% { opacity: 1; transform: scale(1.1); }
-      40% { opacity: 0; transform: scale(0.5); }
-      100% { opacity: 0; transform: scale(0.5); }
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      10% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+      20% {
+        opacity: 0.6;
+        transform: scale(0.9);
+      }
+      30% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+      40% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
     }
-
-    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
-    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
-    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
-    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
-    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
-    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
-    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
-    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
-    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
-    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
-
+    .sparkle-1 {
+      top: 15%;
+      left: 12%;
+      animation-delay: 0s;
+    }
+    .sparkle-2 {
+      top: 25%;
+      left: 28%;
+      animation-delay: 0.7s;
+    }
+    .sparkle-3 {
+      top: 70%;
+      left: 22%;
+      animation-delay: 1.4s;
+    }
+    .sparkle-4 {
+      top: 35%;
+      left: 48%;
+      animation-delay: 2.1s;
+    }
+    .sparkle-5 {
+      top: 80%;
+      left: 42%;
+      animation-delay: 2.8s;
+    }
+    .sparkle-6 {
+      top: 20%;
+      left: 68%;
+      animation-delay: 3.5s;
+    }
+    .sparkle-7 {
+      top: 55%;
+      left: 78%;
+      animation-delay: 4.2s;
+    }
+    .sparkle-8 {
+      top: 75%;
+      left: 88%;
+      animation-delay: 4.9s;
+    }
+    .sparkle-9 {
+      top: 45%;
+      left: 15%;
+      animation-delay: 5.6s;
+    }
+    .sparkle-10 {
+      top: 65%;
+      left: 58%;
+      animation-delay: 6.3s;
+    }
     .depth-shadow {
-      position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
-      background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
-      filter: blur(20px); z-index: -1;
+      position: absolute;
+      bottom: -30px;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: radial-gradient(ellipse at center, rgba(0, 206, 209, 0.3) 0%, transparent 80%);
+      filter: blur(20px);
+      z-index: -1;
     }
 
     /* ===== HEADER ===== */
     .glass-header {
       backdrop-filter: blur(14px);
       background: rgba(3, 5, 12, 0.7);
-      border-bottom: 1px solid rgba(124,252,0,0.35);
+      border-bottom: 1px solid rgba(124, 252, 0, 0.35);
       padding: 12px 28px;
       display: flex;
       justify-content: flex-end;
@@ -301,12 +434,10 @@
       position: relative;
       z-index: 12;
     }
-
     .nav-links {
       display: flex;
       gap: 20px;
     }
-
     .nav-links a {
       font-size: 0.75rem;
       font-weight: 600;
@@ -314,25 +445,24 @@
       text-decoration: none;
       padding: 6px 18px;
       border-radius: 40px;
-      border: 1px solid rgba(124,252,0,0.3);
+      border: 1px solid rgba(124, 252, 0, 0.3);
       transition: 0.2s;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
     }
-
     .nav-links a:hover {
       border-color: var(--neon-green);
       color: var(--neon-green);
-      box-shadow: 0 0 12px rgba(124,252,0,0.3);
+      box-shadow: 0 0 12px rgba(124, 252, 0, 0.3);
     }
 
     .seller-info-bar {
       max-width: 1100px;
       margin: 20px auto 10px;
       padding: 16px 24px;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(12px);
       border-radius: 60px;
-      border: 1px solid rgba(255,217,102,0.4);
+      border: 1px solid rgba(255, 217, 102, 0.4);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -341,7 +471,6 @@
       z-index: 10;
       position: relative;
     }
-
     .seller-avatar {
       display: flex;
       align-items: center;
@@ -356,7 +485,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(124,252,0,0.3);
+      border: 1px solid rgba(124, 252, 0, 0.3);
     }
     .crop-image-placeholder {
       font-size: 32px;
@@ -366,15 +495,33 @@
       color: #9ca6bb;
       margin-top: 4px;
     }
-    .seller-name h3 { font-size: 1.2rem; letter-spacing: 1px; }
-    .seller-name p { font-size: 0.7rem; color: #9ca6bb; margin: 2px 0; }
-    .fob-line { font-size: 0.7rem; color: #7CFC00; margin-top: 4px; font-weight: 500; }
-
+    .seller-name h3 {
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+    }
+    .seller-name p {
+      font-size: 0.7rem;
+      color: #9ca6bb;
+      margin: 2px 0;
+    }
+    .fob-line {
+      font-size: 0.7rem;
+      color: #7CFC00;
+      margin-top: 4px;
+      font-weight: 500;
+    }
     .inventory-stats {
       text-align: right;
     }
-    .remaining-qty { font-size: 1.8rem; font-weight: 800; color: var(--neon-green); }
-    .total-qty { font-size: 0.7rem; color: #9ca6bb; }
+    .remaining-qty {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--neon-green);
+    }
+    .total-qty {
+      font-size: 0.7rem;
+      color: #9ca6bb;
+    }
 
     .auction-cockpit {
       max-width: 1100px;
@@ -388,46 +535,56 @@
       position: relative;
       z-index: 10;
     }
-
     .timer-panel {
       background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(12px);
       border-radius: 48px;
       padding: 8px 28px;
       text-align: center;
-      border: 1px solid rgba(124,252,0,0.5);
+      border: 1px solid rgba(124, 252, 0, 0.5);
     }
-
     .timer-digits {
       font-family: monospace;
       font-size: 2.4rem;
       font-weight: 800;
       color: var(--neon-green);
-      text-shadow: 0 0 8px rgba(124,252,0,0.5);
+      text-shadow: 0 0 8px rgba(124, 252, 0, 0.5);
     }
-
     .timer-digits.warning {
       color: #FF4D4D;
       animation: pulseRed 0.7s infinite;
     }
-
     @keyframes pulseRed {
-      0% { opacity: 1; text-shadow: 0 0 0px red; }
-      100% { opacity: 0.9; text-shadow: 0 0 8px #ff4d4d; }
+      0% {
+        opacity: 1;
+        text-shadow: 0 0 0px red;
+      }
+      100% {
+        opacity: 0.9;
+        text-shadow: 0 0 8px #ff4d4d;
+      }
     }
-
     .stats-group {
       display: flex;
       gap: 28px;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       padding: 8px 28px;
       border-radius: 60px;
       backdrop-filter: blur(6px);
     }
-
-    .stat { text-align: center; }
-    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94A3B8; }
-    .stat-value { font-weight: 800; font-size: 1.3rem; color: var(--neon-green); }
+    .stat {
+      text-align: center;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: #94A3B8;
+    }
+    .stat-value {
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--neon-green);
+    }
 
     .controls {
       display: flex;
@@ -437,7 +594,6 @@
       z-index: 10;
       position: relative;
     }
-
     .btn {
       border: none;
       font-family: 'Inter', sans-serif;
@@ -451,14 +607,20 @@
       color: white;
       backdrop-filter: blur(4px);
     }
-
     .btn-primary {
       background: linear-gradient(105deg, #10b981, #2dd4bf);
       color: #010101;
-      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
-
-    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,252,0,0.4); }
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(124, 252, 0, 0.4);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     .cards-grid {
       display: grid;
@@ -471,33 +633,48 @@
       position: relative;
       z-index: 8;
     }
-
-    @media (max-width: 920px) { .cards-grid { grid-template-columns: repeat(4, minmax(0, 175px)); max-width: 740px; } }
-    @media (max-width: 720px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 190px)); gap: 20px; } }
-    @media (max-width: 460px) { .cards-grid { grid-template-columns: repeat(1, 200px); } }
+    @media (max-width: 920px) {
+      .cards-grid {
+        grid-template-columns: repeat(4, minmax(0, 175px));
+        max-width: 740px;
+      }
+    }
+    @media (max-width: 720px) {
+      .cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 190px));
+        gap: 20px;
+      }
+    }
+    @media (max-width: 460px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
     .market-card {
-      background: linear-gradient(145deg, #0B1122, #030712);
+      background: var(--card-bg);
       border-radius: 24px;
-      border: 1px solid rgba(124,252,0,0.35);
-      padding: 14px 10px 14px;
+      border: 1px solid rgba(124, 252, 0, 0.35);
+      padding: 14px 10px;
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
       position: relative;
       backdrop-filter: blur(4px);
       box-shadow: 0 12px 20px -12px black;
     }
-
     .market-card:hover {
       border-color: var(--neon-green);
       transform: translateY(-5px);
-      box-shadow: 0 25px 30px -14px rgba(124,252,0,0.25);
+      box-shadow: 0 25px 30px -14px rgba(124, 252, 0, 0.25);
     }
-
     .market-card.accepted {
       opacity: 0.4;
       filter: grayscale(0.3);
       pointer-events: none;
+    }
+    .market-card .accept-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .rank-flag {
@@ -511,15 +688,29 @@
       z-index: 3;
       backdrop-filter: blur(4px);
     }
-    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; box-shadow: 0 0 8px gold; }
-    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
-    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+    .rank-1 {
+      background: linear-gradient(135deg, #FFD966, #F5A623);
+      color: #0A0C15;
+      box-shadow: 0 0 8px gold;
+    }
+    .rank-2 {
+      background: linear-gradient(135deg, #C0C7D9, #A0AABA);
+      color: #111;
+    }
+    .rank-3 {
+      background: linear-gradient(135deg, #CD7F32, #B5632C);
+      color: white;
+    }
+    .rank-other {
+      background: #1e293b;
+      color: #94A3B8;
+    }
 
     .verified-badge {
       position: absolute;
       top: -6px;
       right: 10px;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0, 0, 0, 0.85);
       border-radius: 30px;
       padding: 3px 10px;
       font-size: 0.6rem;
@@ -529,26 +720,78 @@
       backdrop-filter: blur(4px);
       z-index: 3;
     }
-
-    .product-visual { text-align: center; margin-bottom: 10px; background: rgba(0, 0, 0, 0.25); border-radius: 40px; padding: 8px 6px; }
-    .product-emoji { font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
-    .card-title { font-weight: 800; font-size: 0.9rem; text-align: center; }
+    .product-visual {
+      text-align: center;
+      margin-bottom: 10px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 40px;
+      padding: 8px 6px;
+    }
+    .product-emoji {
+      font-size: 2.5rem;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+    }
+    .card-title {
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-align: center;
+      word-break: break-word;
+    }
     .contact-name {
       font-size: 0.6rem;
       text-align: center;
       color: #7CFC00;
       margin-top: 4px;
       font-weight: 500;
+      word-break: break-word;
     }
-    .price-row { display: flex; justify-content: center; gap: 8px; align-items: baseline; margin: 6px 0 5px; }
-    .current-price { font-weight: 800; font-size: 1.2rem; color: #FFE484; }
-    .change-badge { font-size: 0.65rem; font-weight: 600; }
-    .up { color: #7CFC00; }
-    .down { color: #FF5E5E; }
-    .bid-quantity { font-size: 0.65rem; color: #a0aec0; text-align: center; margin-top: 4px; }
-    .heat-bar-container { margin: 8px 0 6px; background: #1e293b; border-radius: 12px; height: 4px; overflow: hidden; }
-    .heat-fill { height: 100%; background: linear-gradient(90deg, #7CFC00, #FFD966); border-radius: 12px; }
-    .card-meta { display: flex; justify-content: space-between; font-size: 0.6rem; margin-top: 8px; color: #a0aec0; }
+    .price-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      align-items: baseline;
+      margin: 6px 0 5px;
+    }
+    .current-price {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #FFE484;
+    }
+    .change-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+    .up {
+      color: #7CFC00;
+    }
+    .down {
+      color: #FF5E5E;
+    }
+    .bid-quantity {
+      font-size: 0.65rem;
+      color: #a0aec0;
+      text-align: center;
+      margin-top: 4px;
+    }
+    .heat-bar-container {
+      margin: 8px 0 6px;
+      background: #1e293b;
+      border-radius: 12px;
+      height: 4px;
+      overflow: hidden;
+    }
+    .heat-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7CFC00, #FFD966);
+      border-radius: 12px;
+    }
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.6rem;
+      margin-top: 8px;
+      color: #a0aec0;
+    }
 
     .accept-btn {
       width: 100%;
@@ -563,13 +806,19 @@
       transition: 0.2s;
       color: #010101;
     }
-    .accept-btn:hover { transform: scale(1.02); box-shadow: 0 0 12px rgba(124,252,0,0.5); }
-    .accept-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .accept-btn:hover:not(:disabled) {
+      transform: scale(1.02);
+      box-shadow: 0 0 12px rgba(124, 252, 0, 0.5);
+    }
+    .accept-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.88);
+      background: rgba(0, 0, 0, 0.88);
       backdrop-filter: blur(14px);
       display: flex;
       align-items: center;
@@ -579,7 +828,10 @@
       opacity: 0;
       transition: 0.2s;
     }
-    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
     .modal-card {
       background: #0B1122;
       max-width: 500px;
@@ -589,6 +841,8 @@
       padding: 28px 24px;
       position: relative;
       box-shadow: 0 40px 70px black;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .modal-close {
       position: absolute;
@@ -600,11 +854,34 @@
       color: #ccc;
       cursor: pointer;
     }
-    .modal-header { text-align: center; margin-bottom: 20px; }
-    .modal-emoji { font-size: 56px; margin-bottom: 4px; }
-    .modal-title-xl { font-size: 26px; font-weight: 800; }
-    .contact-block { background: #03050C; border-radius: 24px; padding: 14px 18px; margin: 16px 0; font-size: 0.8rem; }
-    .contact-row { display: flex; gap: 10px; margin: 8px 0; align-items: center; flex-wrap: wrap; }
+    .modal-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .modal-emoji {
+      font-size: 56px;
+      margin-bottom: 4px;
+    }
+    .modal-title-xl {
+      font-size: 26px;
+      font-weight: 800;
+      word-break: break-word;
+    }
+    .contact-block {
+      background: #03050C;
+      border-radius: 24px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.8rem;
+    }
+    .contact-row {
+      display: flex;
+      gap: 10px;
+      margin: 8px 0;
+      align-items: center;
+      flex-wrap: wrap;
+      word-break: break-word;
+    }
     .accept-modal-btn {
       width: 100%;
       padding: 12px;
@@ -617,6 +894,7 @@
       margin-top: 16px;
       color: #010101;
     }
+
     .toast-msg {
       position: fixed;
       bottom: 30px;
@@ -624,884 +902,1907 @@
       transform: translateX(-50%) translateY(70px);
       background: #0a1424cc;
       backdrop-filter: blur(12px);
-      padding: 10px 24px;
+      padding: 12px 24px;
       border-radius: 60px;
       font-size: 0.8rem;
       border-left: 4px solid #7CFC00;
       transition: 0.2s;
       opacity: 0;
       z-index: 200;
-      white-space: nowrap;
+      max-width: 90%;
+      white-space: normal;
+      word-wrap: break-word;
+      text-align: center;
+      line-height: 1.4;
     }
-    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
-    footer { text-align: center; padding: 20px; font-size: 10px; color: #5c6b8a; border-top: 1px solid rgba(124,252,0,0.15); margin-top: 20px; position: relative; z-index: 5; }
+    .toast-msg.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0px);
+    }
+    .toast-msg.error {
+      border-left-color: #FF4D4D;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 10px;
+      color: #5c6b8a;
+      border-top: 1px solid rgba(124, 252, 0, 0.15);
+      margin-top: 20px;
+      position: relative;
+      z-index: 5;
+    }
 
     @media (max-width: 800px) {
-      .gem-logo-corner { transform: scale(0.25); }
+      .gem-logo-corner {
+        transform: scale(0.25);
+      }
     }
   </style>
+<base target="_blank">
 </head>
 <body>
 
-<div class="bg-waves">
-  <div class="wave-bg wave-emerald-bg"></div>
-  <div class="wave-bg wave-sapphire-bg"></div>
-  <div class="wave-bg wave-ruby-bg"></div>
-</div>
-
-<!-- 3D TRADEAUX LOGO -->
-<div class="gem-logo-corner">
-  <div class="gem-text">
-    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+  <div class="bg-waves">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
   </div>
-  <div class="light-source"></div>
-  <div class="sparkle sparkle-1"></div>
-  <div class="sparkle sparkle-2"></div>
-  <div class="sparkle sparkle-3"></div>
-  <div class="sparkle sparkle-4"></div>
-  <div class="sparkle sparkle-5"></div>
-  <div class="sparkle sparkle-6"></div>
-  <div class="sparkle sparkle-7"></div>
-  <div class="sparkle sparkle-8"></div>
-  <div class="sparkle sparkle-9"></div>
-  <div class="sparkle sparkle-10"></div>
-  <div class="depth-shadow"></div>
-</div>
 
-<div class="glass-header">
-  <div class="nav-links"><a href="#">LIVE</a><a href="#">CO-OPS</a><a href="#">LEADERBOARD</a></div>
-</div>
-
-<div class="seller-info-bar">
-  <div class="seller-avatar">
-    <div class="avatar-placeholder">
-      <div class="crop-image-placeholder">🥥</div>
-      <div class="image-label">Product Image</div>
+  <!-- 3D TRADEAUX LOGO -->
+  <div class="gem-logo-corner">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
     </div>
-    <div class="seller-name">
-      <h3 id="sellerNameDisplay">MATALE COCONUT CO-OP</h3>
-      <p id="sellerMetaDisplay">⭐ 4.9 ★ (247 sales) • Member since 2022</p>
-      <p class="fob-line" id="sellerFobDisplay">📍 FOB: COLOMBO, SRI LANKA</p>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div>
+    <div class="sparkle sparkle-2"></div>
+    <div class="sparkle sparkle-3"></div>
+    <div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div>
+    <div class="sparkle sparkle-6"></div>
+    <div class="sparkle sparkle-7"></div>
+    <div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div>
+    <div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
+  </div>
+
+  <div class="glass-header">
+    <div class="nav-links"><a href="#">LIVE</a><a href="#">CO-OPS</a><a href="#">LEADERBOARD</a></div>
+  </div>
+
+  <div class="seller-info-bar">
+    <div class="seller-avatar">
+      <div class="avatar-placeholder">
+        <div class="crop-image-placeholder">🥥</div>
+        <div class="image-label">Product Image</div>
+      </div>
+      <div class="seller-name">
+        <h3 id="sellerNameDisplay">MATALE COCONUT CO-OP</h3>
+        <p id="sellerMetaDisplay">⭐ 4.9 ★ (247 sales) • Member since 2022</p>
+        <p class="fob-line" id="sellerFobDisplay">📍 FOB: COLOMBO, SRI LANKA</p>
+      </div>
+    </div>
+    <div class="inventory-stats">
+      <div class="remaining-qty" id="remainingQuantity">500</div>
+      <div class="total-qty" id="totalQtyDisplay">MT remaining of 500 MT total</div>
     </div>
   </div>
-  <div class="inventory-stats">
-    <div class="remaining-qty" id="remainingQuantity">500</div>
-    <div class="total-qty" id="totalQtyDisplay">MT remaining of 500 MT total</div>
-  </div>
-</div>
 
-<div class="auction-cockpit">
-  <div class="timer-panel"><div class="timer-digits" id="timerMain">03:00</div></div>
-  <div class="stats-group"><div class="stat"><div class="stat-label">ACTIVE BIDS</div><div class="stat-value" id="statActive">0</div></div><div class="stat"><div class="stat-label">HIGHEST BID</div><div class="stat-value" id="statHighest">$0.00</div></div><div class="stat"><div class="stat-label">💰 FEES COLLECTED</div><div class="stat-value" id="statFees">$0</div></div></div>
-</div>
-<div class="controls"><button class="btn btn-primary" id="startBtn">▶ START AUCTION</button></div>
-<div class="cards-grid" id="cardsGrid"></div>
-
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-card"><button class="modal-close" id="closeModalBtn" aria-label="Close modal">✕</button>
-    <div class="modal-header"><div class="modal-emoji" id="modalEmoji">🏢</div><div class="modal-title-xl" id="modalName">Buyer Company</div></div>
-    <div style="text-align:center; margin-bottom:12px;"><span style="font-size:2rem; font-weight:800; color:#FFD966;" id="modalPrice">$0.00</span><span style="font-size:0.8rem;" id="modalQty">0 MT</span></div>
-    <div class="contact-block">
-      <div class="contact-row">👤 <strong>Contact:</strong> <span id="modalContact"></span></div>
-      <div class="contact-row">📧 <span id="modalEmail">buyer@example.com</span></div>
-      <div class="contact-row">📱 <span id="modalPhone">+1 (555) 123-4567</span></div>
-      <div class="contact-row">💬 WhatsApp: <span id="modalWhatsapp">+1 (555) 123-4567</span></div>
+  <div class="auction-cockpit">
+    <div class="timer-panel"><div class="timer-digits" id="timerMain">03:00</div></div>
+    <div class="stats-group">
+      <div class="stat"><div class="stat-label">ACTIVE BIDS</div><div class="stat-value" id="statActive">0</div></div>
+      <div class="stat"><div class="stat-label">HIGHEST BID</div><div class="stat-value" id="statHighest">$0.00</div></div>
+      <div class="stat"><div class="stat-label">💰 FEES</div><div class="stat-value" id="statFees">$0</div></div>
+      <div class="stat"><div class="stat-label">🎯 IDEAL</div><div class="stat-value" id="statIdeal">$0.00</div></div>
     </div>
-    <button class="accept-modal-btn" id="acceptFromModalBtn">✓ ACCEPT THIS OFFER</button>
   </div>
-</div>
+  <div class="controls"><button class="btn btn-primary" id="startBtn">▶ START AUCTION</button></div>
+  <div class="cards-grid" id="cardsGrid"></div>
 
-<div class="toast-msg" id="toastMsg" role="status" aria-live="polite"></div>
-<footer>⚡ Highest bid wins • Click any card for buyer contact • Accept offer captures $25 fee</footer>
+  <!-- DUHE Modal -->
+  <div class="modal-overlay" id="duheModal">
+    <div class="modal-card" style="max-width: 620px;">
+      <button class="modal-close" id="closeDuheModal" aria-label="Close modal">✕</button>
+      <div class="modal-header">
+        <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
+        <div class="modal-title-xl">DUHE KNAPSACK PROPOSAL</div>
+      </div>
+      <div id="duheStatus" style="text-align:center; margin-bottom: 16px; font-size: 0.9rem;"></div>
+      <div id="duheComparison" style="background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2);"></div>
+      <div style="margin: 20px 0; max-height: 260px; overflow-y: auto;" id="duheWinnersList">
+        <h3 style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 12px;">WINNING BUYERS</h3>
+      </div>
+      <div style="background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2);" id="duheFinancials"></div>
+      <div id="duheNearSolve" style="display:none; background: rgba(255,217,102,0.1); border: 1px solid #FFD966; padding: 14px; border-radius: 20px; margin: 16px 0;"></div>
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button id="acceptDuheBtn" style="flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem;">✅ ACCEPT DUHE</button>
+        <button id="rejectDuheBtn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem;">❌ REJECT</button>
+      </div>
+    </div>
+  </div>
 
-<script>
-// ========== SUPABASE CONFIG ==========
-const SUPABASE_URL = "https://pfutaovwbygefummienf.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <!-- Bid Detail Modal -->
+  <div class="modal-overlay" id="bidModal">
+    <div class="modal-card"><button class="modal-close" id="closeBidModal" aria-label="Close modal">✕</button>
+      <div class="modal-header"><div class="modal-emoji" id="modalEmoji">🏢</div><div class="modal-title-xl" id="modalName">Buyer Company</div></div>
+      <div style="text-align:center; margin-bottom:12px;"><span style="font-size:2rem; font-weight:800; color:#FFD966;" id="modalPrice">$0.00</span><span style="font-size:0.8rem;" id="modalQty">0 MT</span></div>
+      <div class="contact-block">
+        <div class="contact-row">👤 <strong>Contact:</strong> <span id="modalContact"></span></div>
+        <div class="contact-row">📧 <span id="modalEmail">buyer@example.com</span></div>
+        <div class="contact-row">📱 <span id="modalPhone">+1 (555) 123-4567</span></div>
+        <div class="contact-row">💬 WhatsApp: <span id="modalWhatsapp">+1 (555) 123-4567</span></div>
+      </div>
+      <button class="accept-modal-btn" id="acceptFromModalBtn">✓ ACCEPT THIS OFFER</button>
+    </div>
+  </div>
 
-// ========== STATE ==========
-let currentUser = null;
-let currentSeller = null;
-let currentBrief = null;
-let activeBids = [];
-let auctionActive = false;
-let timerSeconds = 180;
-let timerInterval = null;
-let feesCollected = 0;
-let remainingQty = 0;
-let totalQty = 0;
-let currentModalBid = null;
-let bidsChannel = null;
-let duheSolution = null;
-let currentAuctionId = null;
-let authSubscription = null;
+  <!-- Toast -->
+  <div class="toast-msg" id="toastMsg" role="status" aria-live="polite"></div>
+  <footer>⚡ Knapsack optimizes bids • Seller ideal price guides the solver • $25 fee per accepted bid</footer>
 
-// ========== AUTH GUARD ==========
-async function initAuth() {
-  // Check for existing session
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error) {
-    console.error("Auth session error:", error);
-    redirectToSignin();
-    return;
-  }
-  if (!session) {
-    redirectToSignin();
-    return;
-  }
-  currentUser = session.user;
-  console.log("✅ Authenticated:", currentUser.email);
-  await onAuthReady();
+  <script>
+    // ========== SUPABASE CONFIG ==========
+    const SUPABASE_URL = "https://pfutaovwbygefummienf.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Listen for auth changes
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    console.log("Auth event:", event);
-    if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-      redirectToSignin();
-    } else if (session) {
-      currentUser = session.user;
-    }
-  });
-  authSubscription = subscription;
-}
+    // ========== STATE ==========
+    let currentUser = null;
+    let currentSeller = null;
+    let currentBrief = null;
+    let activeBids = [];
+    let auctionActive = false;
+    let timerSeconds = 180;
+    let timerInterval = null;
+    let feesCollected = 0;
+    let remainingQty = 0;
+    let totalQty = 0;
+    let currentModalBid = null;
+    let bidsChannel = null;
+    let duheSolution = null;
+    let currentAuctionId = null;
+    let authSubscription = null;
+    let idealPrice = 4.25;
+    let acceptInProgress = false;
+    let processingBids = new Set();
+    let startAuctionInProgress = false;
+    let auctionEndTimeout = null;
+    let toastTimeoutId = null;
+    let isAuctionEndInProgress = false;
+    let isDuheDelayActive = false;
 
-function redirectToSignin() {
-  window.location.href = 'signin.html';
-}
+    const MAX_AUCTION_END_RETRIES = 3;
 
-async function signOut() {
-  await supabase.auth.signOut();
-  if (authSubscription) authSubscription.unsubscribe();
-  redirectToSignin();
-}
+    // Global star rating cache persists across renders
+    const starRatingCache = new Map();
 
-// ========== INIT AFTER AUTH ==========
-async function onAuthReady() {
-  await loadSellerProfile();
-  await loadBriefAndBids();
-  await subscribeToSupabaseBids();
-}
-
-// ========== LOAD SELLER PROFILE ==========
-async function loadSellerProfile() {
-  try {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (error || !profile) {
-      console.warn("Profile not found, trying sellers table...");
-      // Fallback to sellers table
-      const { data: seller, error: sellerErr } = await supabase
-        .from('sellers')
-        .select('*')
-        .limit(1)
-        .single();
-      if (sellerErr || !seller) {
-        showToast('Seller profile not found', true);
-        return;
+    // ========== HELPER: Safe ID validation ==========
+    function validateId(id, name) {
+      if (!id || typeof id !== 'string' || id.trim() === '') {
+        throw new Error(`Invalid ${name}: ${id}`);
       }
-      currentSeller = seller;
-    } else {
-      currentSeller = profile;
+      return id.trim();
     }
 
-    document.getElementById('sellerNameDisplay').innerText = 
-      (currentSeller.coop_name || currentSeller.business_name || currentSeller.full_name || currentSeller.name || 'Unknown Co-op').toUpperCase();
-    document.getElementById('sellerMetaDisplay').innerHTML = 
-      `⭐ ${currentSeller.rating || '4.5'} ★ (${currentSeller.sales_count || currentSeller.sales || 0} sales) • Member since ${currentSeller.member_since || '2023'}`;
-    document.getElementById('sellerFobDisplay').innerText = 
-      `📍 FOB: ${currentSeller.fob_port || currentSeller.location || 'Colombo, Sri Lanka'}`;
-  } catch (err) {
-    console.error("Error loading seller profile:", err);
-    showToast('Error loading profile', true);
-  }
-}
-
-// ========== LOAD BRIEF & BIDS ==========
-async function loadBriefAndBids() {
-  try {
-    // Get the most recent active brief for this seller
-    const { data: briefs, error } = await supabase
-      .from('seller_briefs')
-      .select('*')
-      .eq('seller_id', currentUser.id)
-      .in('status', ['active', 'auctioning'])
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (error) throw error;
-
-    if (!briefs || briefs.length === 0) {
-      showToast('No active brief found. Create one in the dashboard.', true);
-      document.getElementById('cardsGrid').innerHTML = 
-        '<div style="color:#9ca3af;text-align:center;padding:40px;">No active seller brief. Go to dashboard to create one.</div>';
-      return;
+    // ========== HELPER: Safe DB update with validated ID ==========
+    async function safeUpdateBrief(briefId, updates) {
+      const id = validateId(briefId, 'briefId');
+      const { data, error } = await supabase
+        .from('seller_briefs')
+        .update(updates)
+        .eq('id', id)
+        .select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(`Brief update affected 0 rows. ID=${id} may have been deleted.`);
+      }
+      return data[0];
     }
 
-    currentBrief = briefs[0];
-    totalQty = currentBrief.quantity_mt || 500;
-    remainingQty = currentBrief.remaining_mt || totalQty;
-    feesCollected = currentBrief.fees_collected || 0;
+    async function safeUpdateBid(bidId, updates) {
+      const id = validateId(bidId, 'bidId');
+      const { data, error } = await supabase
+        .from('bids')
+        .update(updates)
+        .eq('id', id)
+        .select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(`Bid update affected 0 rows. ID=${id} may have been deleted.`);
+      }
+      return data[0];
+    }
 
-    // Restore auction state if it was running
-    if (currentBrief.status === 'auctioning' && currentBrief.started_at) {
-      const startedAt = new Date(currentBrief.started_at);
-      const elapsed = Math.floor((Date.now() - startedAt.getTime()) / 1000);
-      timerSeconds = Math.max(0, 180 - elapsed);
-      if (timerSeconds > 0) {
-        auctionActive = true;
-        startTimerLoop();
-        document.getElementById('startBtn').innerText = '⏳ AUCTION RUNNING';
-        document.getElementById('startBtn').disabled = true;
-      } else {
-        onAuctionEnd();
+    async function safeUpdateAuction(auctionId, updates) {
+      const id = validateId(auctionId, 'auctionId');
+      const { data, error } = await supabase
+        .from('auctions')
+        .update(updates)
+        .eq('id', id)
+        .select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(`Auction update affected 0 rows. ID=${id} may have been deleted.`);
+      }
+      return data[0];
+    }
+
+    // ========== XSS PREVENTION ==========
+    function createSafeElement(tag, className, textContent) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (textContent !== undefined && textContent !== null) {
+        el.textContent = textContent;
+      }
+      return el;
+    }
+
+    // ========== AUTH GUARD ==========
+    async function initAuth() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) { redirectToSignin(); return; }
+        currentUser = session.user;
+        console.log("✅ Authenticated:", currentUser.email);
+        await onAuthReady();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') redirectToSignin();
+          else if (session) currentUser = session.user;
+        });
+        authSubscription = subscription;
+      } catch (err) {
+        console.error('Auth init error:', err);
+        showToast('Failed to initialize authentication. Please refresh.', true);
       }
     }
 
-    document.getElementById('remainingQuantity').innerText = remainingQty;
-    document.getElementById('totalQtyDisplay').innerText = `MT remaining of ${totalQty} MT total`;
+    function redirectToSignin() { window.location.href = 'signin.html'; }
 
-    // Load existing bids for this brief
-    await loadBidsForBrief(currentBrief.id);
-  } catch (err) {
-    console.error("Error loading brief:", err);
-    showToast('Error loading brief', true);
-  }
-}
+    // ========== INIT AFTER AUTH ==========
+    async function onAuthReady() {
+      try {
+        await loadSellerProfile();
+        await loadBriefAndBids();
+        await subscribeToSupabaseBids();
+      } catch (err) {
+        console.error('Error loading data:', err);
+        showToast('Error loading dashboard data. Please refresh.', true);
+      }
+    }
 
-// ========== LOAD BIDS FOR BRIEF ==========
-async function loadBidsForBrief(briefId) {
-  try {
-    const { data: bids, error } = await supabase
-      .from('bids')
-      .select('*')
-      .eq('brief_id', briefId)
-      .eq('status', 'pending')
-      .order('amount', { ascending: false });
+    // ========== LOAD SELLER PROFILE ==========
+    async function loadSellerProfile() {
+      try {
+        const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (profile) {
+          currentSeller = profile;
+        } else {
+          const { data: seller, error: sellerErr } = await supabase
+            .from('sellers')
+            .select('*')
+            .limit(1)
+            .maybeSingle();
+          if (sellerErr) throw sellerErr;
+          if (!seller) {
+            showToast('Seller profile not found. Please set up your seller profile.', true);
+            return;
+          }
+          currentSeller = seller;
+        }
 
-    if (error) throw error;
+        const nameEl = document.getElementById('sellerNameDisplay');
+        if (nameEl) {
+          nameEl.textContent = (currentSeller.coop_name || currentSeller.business_name || currentSeller.full_name ||
+            currentSeller.name || 'Unknown Co-op').toUpperCase();
+        }
+        const metaEl = document.getElementById('sellerMetaDisplay');
+        if (metaEl) {
+          metaEl.textContent =
+            `⭐ ${currentSeller.rating || '4.5'} ★ (${currentSeller.sales_count || currentSeller.sales || 0} sales) • Member since ${currentSeller.member_since || '2023'}`;
+        }
+        const fobEl = document.getElementById('sellerFobDisplay');
+        if (fobEl) {
+          fobEl.textContent = `📍 FOB: ${currentSeller.fob_port || currentSeller.location || 'Colombo, Sri Lanka'}`;
+        }
+      } catch (err) {
+        console.error("Error loading seller profile:", err);
+        showToast('Error loading profile', true);
+      }
+    }
 
-    activeBids = (bids || []).map(bid => ({
-      id: bid.id,
-      buyerName: bid.buyer_name || 'Unknown Buyer',
-      contactPerson: bid.buyer_contact || 'Unknown',
-      email: bid.buyer_email || 'buyer@example.com',
-      phone: bid.buyer_phone || '+1 (555) 123-4567',
-      whatsapp: bid.buyer_whatsapp || bid.buyer_phone,
-      price: bid.amount || 0,
-      quantity: bid.quantity_mt || 20,
-      totalValue: (bid.amount || 0) * (bid.quantity_mt || 20),
-      accepted: bid.status === 'accepted',
-      change: ((bid.amount || 0) - (bid.previous_amount || 0)) / (bid.previous_amount || 1) * 100,
-      heat: Math.min(100, (bid.bid_count || 1) * 15 + 30),
-      fromSupabase: true
-    }));
+    // ========== LOAD BRIEF & BIDS ==========
+    async function loadBriefAndBids() {
+      try {
+        const { data: briefs, error } = await supabase
+          .from('seller_briefs')
+          .select('*')
+          .eq('seller_id', currentUser.id)
+          .in('status', ['active', 'auctioning', 'errored'])
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (error) throw error;
 
-    renderCardsWithJostle();
-    updateStats();
-  } catch (err) {
-    console.error("Error loading bids:", err);
-  }
-}
+        if (!briefs || briefs.length === 0) {
+          showToast('No active brief found. Create one in the dashboard.', true);
+          const container = document.getElementById('cardsGrid');
+          container.innerHTML = '';
+          const emptyState = document.createElement('div');
+          emptyState.style.cssText = 'color:#9ca3af;text-align:center;padding:40px;';
+          emptyState.textContent = 'No active seller brief. Go to dashboard to create one.';
+          container.appendChild(emptyState);
+          return;
+        }
 
-// ========== SUBSCRIBE TO REALTIME BIDS ==========
-async function subscribeToSupabaseBids() {
-  if (bidsChannel) {
-    await supabase.removeChannel(bidsChannel);
-  }
+        const brief = briefs[0];
+        if (!brief.id) {
+          showToast('Brief data is malformed. Please contact support.', true);
+          return;
+        }
 
-  // Find the auction for this seller's current brief
-  if (!currentBrief) return;
+        // ✅ Validate brief ID
+        try {
+          validateId(brief.id, 'brief.id');
+        } catch (err) {
+          showToast('Invalid brief ID. Please refresh.', true);
+          return;
+        }
 
-  const { data: auctions, error } = await supabase
-    .from('auctions')
-    .select('id')
-    .eq('seller_id', currentUser.id)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(1);
+        if (brief.status === 'errored') {
+          currentBrief = brief;
+          showToast('⚠️ Brief is in errored state. Please reset it in the dashboard.', true);
+          const container = document.getElementById('cardsGrid');
+          container.innerHTML = '';
+          const errorState = document.createElement('div');
+          errorState.style.cssText = 'color:#FF5E5E;text-align:center;padding:40px;';
+          errorState.textContent =
+            `Brief is in errored state: ${brief.error_message || 'Unknown error'}. Please reset from dashboard.`;
+          container.appendChild(errorState);
+          return;
+        }
 
-  if (error) {
-    console.error('Error fetching auction:', error);
-    return;
-  }
+        currentBrief = brief;
+        totalQty = currentBrief.quantity_mt ?? 500;
+        remainingQty = currentBrief.remaining_mt ?? totalQty;
+        feesCollected = currentBrief.fees_collected ?? 0;
+        idealPrice = currentBrief.ideal_price ?? 4.25;
 
-  if (!auctions || auctions.length === 0) {
-    console.log('No active auction found');
-    return;
-  }
+        document.getElementById('remainingQuantity').textContent = remainingQty;
+        document.getElementById('totalQtyDisplay').textContent = `MT remaining of ${totalQty} MT total`;
+        document.getElementById('statIdeal').textContent = `$${idealPrice.toFixed(2)}`;
 
-  currentAuctionId = auctions[0].id;
-  console.log('Subscribing to bids for auction:', currentAuctionId);
+        if (currentBrief.status === 'auctioning' && currentBrief.started_at) {
+          const startedAt = new Date(currentBrief.started_at);
 
-  bidsChannel = supabase
-    .channel('bids-channel')
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'bids',
-      filter: `auction_id=eq.${currentAuctionId}`
-    }, (payload) => {
-      console.log('New bid from Supabase:', payload.new);
-      const newBid = {
-        id: payload.new.id,
-        buyerName: payload.new.buyer_name || 'Buyer Bot',
-        contactPerson: payload.new.buyer_name || 'Bot',
-        email: payload.new.buyer_contact_email || 'bot@tradeaux.com',
-        phone: payload.new.buyer_contact_phone || '+1 (555) 000-0000',
-        whatsapp: payload.new.buyer_contact_phone || '+1 (555) 000-0000',
-        price: payload.new.price_per_kg || payload.new.amount || 0,
-        quantity: payload.new.quantity_kg || payload.new.quantity_mt || 20,
-        totalValue: (payload.new.price_per_kg || payload.new.amount || 0) * (payload.new.quantity_kg || payload.new.quantity_mt || 20),
-        accepted: false,
-        change: 0,
-        heat: 50 + Math.random() * 40,
-        fromSupabase: true
-      };
+          if (isNaN(startedAt.getTime())) {
+            console.error('Invalid started_at date:', currentBrief.started_at);
+            timerSeconds = 0;
+            try {
+              const updatedBrief = await safeUpdateBrief(currentBrief.id, {
+                status: 'active',
+                started_at: null
+              });
+              currentBrief = updatedBrief;
+            } catch (err) {
+              console.error('Error handling invalid started_at:', err);
+              showToast('Failed to reset invalid auction state. Please refresh.', true);
+              return;
+            }
+          } else {
+            const elapsed = Math.floor((Date.now() - startedAt.getTime()) / 1000);
+            timerSeconds = Math.max(0, 180 - elapsed);
+            if (timerSeconds > 0) {
+              auctionActive = true;
+              startTimerLoop();
+              document.getElementById('startBtn').textContent = '⏳ AUCTION RUNNING';
+              document.getElementById('startBtn').disabled = true;
+            } else {
+              await onAuctionEnd();
+            }
+          }
+        }
+        await loadBidsForBrief(currentBrief.id);
+      } catch (err) {
+        console.error("Error loading brief:", err);
+        showToast('Error loading brief', true);
+      }
+    }
 
-      if (!activeBids.some(b => b.id === newBid.id)) {
-        activeBids.push(newBid);
-        activeBids.sort((a, b) => b.price - a.price);
+    // ========== LOAD BIDS FOR BRIEF ==========
+    async function loadBidsForBrief(briefId) {
+      try {
+        const id = validateId(briefId, 'briefId');
+        const { data: bids, error } = await supabase
+          .from('bids')
+          .select('*')
+          .eq('brief_id', id)
+          .eq('status', 'pending')
+          .order('amount', { ascending: false });
+        if (error) throw error;
+        activeBids = (bids || []).map(bid => ({
+          id: bid.id,
+          buyerName: bid.buyer_name || 'Unknown Buyer',
+          contactPerson: bid.buyer_contact || 'Unknown',
+          email: bid.buyer_email || 'buyer@example.com',
+          phone: bid.buyer_phone || '+1 (555) 123-4567',
+          whatsapp: bid.buyer_whatsapp || bid.buyer_phone,
+          quantity: bid.quantity_mt ?? (bid.quantity_kg ? bid.quantity_kg / 1000 : 20),
+          price: bid.amount ?? bid.price_per_kg ?? 0,
+          totalValue: (bid.amount ?? bid.price_per_kg ?? 0) * (bid.quantity_mt ?? (bid.quantity_kg ? bid.quantity_kg / 1000 :
+            20)),
+          accepted: bid.status === 'accepted',
+          change: bid.previous_amount ? ((bid.amount ?? 0) - bid.previous_amount) / bid.previous_amount * 100 : 0,
+          heat: Math.min(100, (bid.bid_count ?? 1) * 15 + 30),
+          buyer_id: bid.buyer_id,
+          fromSupabase: true,
+          status: bid.status || 'pending'
+        }));
         renderCardsWithJostle();
         updateStats();
-        showToast(`🤖 New bid from ${newBid.buyerName}: $${newBid.price}/kg for ${newBid.quantity} MT`, false);
-      }
-    })
-    .subscribe((status) => {
-      console.log('Realtime subscription status:', status);
-    });
-}
-
-// ========== RENDER ==========
-function renderCardsWithJostle() {
-  const container = document.getElementById('cardsGrid');
-  const oldChildren = Array.from(container.children);
-  const posMap = new Map();
-  oldChildren.forEach(el => { let id = el.getAttribute('data-id'); if(id) { let rect = el.getBoundingClientRect(); posMap.set(id, { left: rect.left, top: rect.top }); } });
-  container.innerHTML = '';
-  activeBids.forEach((card, idx) => {
-    const div = document.createElement('div');
-    div.className = `market-card ${card.accepted ? 'accepted' : ''}`;
-    div.setAttribute('data-id', card.id);
-    const rankVal = idx + 1;
-    const rankHtml = rankVal <= 3 ? `<div class="rank-flag ${rankVal===1?'rank-1':rankVal===2?'rank-2':'rank-3'}">#${rankVal}</div>` : `<div class="rank-flag" style="background:#1e293b;">#${rankVal}</div>`;
-    const changePct = card.change || 0;
-    const changeClass = changePct >= 0 ? 'up' : 'down';
-    const heatPercent = Math.min(100, Math.max(8, card.heat));
-
-    let actionButton;
-    if (auctionActive) {
-      actionButton = `<button class="accept-btn" disabled style="opacity:0.3;cursor:not-allowed;">⏳ DUHE PENDING</button>`;
-    } else if (card.accepted) {
-      actionButton = `<button class="accept-btn" disabled style="opacity:0.5;">✓ ACCEPTED</button>`;
-    } else {
-      actionButton = `<button class="accept-btn" data-action="accept" data-bid-id="${card.id}">✓ ACCEPT OFFER</button>`;
+      } catch (err) { console.error("Error loading bids:", err); }
     }
 
-    div.innerHTML = `
-      ${rankHtml}
-      <div class="verified-badge">✓ ${card.fromSupabase ? 'Bot Bid' : 'Buyer Verified'}</div>
-      <div class="product-visual"><div class="product-emoji">🏢</div></div>
-      <div class="card-title">${card.buyerName}</div>
-      <div class="contact-name">📞 ${card.contactPerson}</div>
-      <div class="price-row"><span class="current-price">$${card.price.toFixed(2)}</span><span class="change-badge ${changeClass}">${changePct>=0?'+':''}${changePct.toFixed(1)}%</span></div>
-      <div class="bid-quantity">📦 ${card.quantity} MT · Total: $${card.totalValue.toLocaleString()}</div>
-      <div class="heat-bar-container"><div class="heat-fill" style="width: ${heatPercent}%;"></div></div>
-      <div class="card-meta"><span>⭐ ${(4 + Math.random()).toFixed(1)} ★</span><span>🔥 ${Math.round(card.heat)}°</span></div>
-      ${actionButton}
-    `;
-    container.appendChild(div);
-  });
-  requestAnimationFrame(() => {
-    const newCards = Array.from(container.children);
-    newCards.forEach(el => { let id = el.getAttribute('data-id'); let old = posMap.get(id); if(old && !el.classList.contains('accepted')) { let rect = el.getBoundingClientRect(); let dx = old.left - rect.left, dy = old.top - rect.top; if(Math.abs(dx)>2||Math.abs(dy)>2) { el.style.transform = `translate(${dx}px, ${dy}px)`; el.style.transition = 'none'; el.offsetHeight; el.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1)'; el.style.transform = ''; } } });
-  });
-  updateStats();
-}
+    // ========== SUBSCRIBE TO REALTIME BIDS ==========
+    async function subscribeToSupabaseBids() {
+      if (bidsChannel) { await supabase.removeChannel(bidsChannel);
+        bidsChannel = null; }
+      if (!currentBrief || !currentBrief.id) return;
+      const { data: auctions, error } = await supabase
+        .from('auctions')
+        .select('id')
+        .eq('seller_id', currentUser.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (error || !auctions || auctions.length === 0) { console.log('No active auction found'); return; }
+      const auctionId = validateId(auctions[0].id, 'auctionId');
+      currentAuctionId = auctionId;
+      bidsChannel = supabase
+        .channel('bids-channel')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'bids',
+          filter: `auction_id=eq.${currentAuctionId}`
+        }, (payload) => {
+          const newBid = payload.new;
+          if (activeBids.some(b => b.id === newBid.id)) return;
 
-function updateStats() {
-  const activeCount = activeBids.filter(c => !c.accepted).length;
-  const highestBid = activeBids.filter(c => !c.accepted).sort((a,b) => b.price - a.price)[0]?.price || 0;
-  document.getElementById('statActive').innerText = activeCount;
-  document.getElementById('statHighest').innerText = `$${highestBid.toFixed(2)}`;
-  document.getElementById('statFees').innerText = `$${feesCollected}`;
-  document.getElementById('remainingQuantity').innerText = remainingQty;
-}
+          const price = newBid.price_per_kg ?? newBid.amount ?? 0;
+          const quantityMt = newBid.quantity_mt ?? (newBid.quantity_kg ? newBid.quantity_kg / 1000 : 20);
 
-// ========== DUHE SOLVER ==========
-function runDUHESolver(bids, inventory) {
-  const pendingBids = bids.filter(b => !b.accepted);
-  const sortedBids = [...pendingBids].sort((a, b) => b.price - a.price);
-  let selectedBids = [];
-  let remaining = inventory;
-  for (const bid of sortedBids) {
-    if (bid.quantity <= remaining) {
-      selectedBids.push(bid);
-      remaining -= bid.quantity;
+          const bidObj = {
+            id: newBid.id,
+            buyerName: newBid.buyer_name || 'Buyer Bot',
+            contactPerson: newBid.buyer_name || 'Bot',
+            email: newBid.buyer_contact_email || 'bot@tradeaux.com',
+            phone: newBid.buyer_contact_phone || '+1 (555) 000-0000',
+            whatsapp: newBid.buyer_contact_phone || '+1 (555) 000-0000',
+            price: price,
+            quantity: quantityMt,
+            totalValue: price * quantityMt,
+            accepted: false,
+            change: 0,
+            heat: 50 + Math.random() * 40,
+            buyer_id: newBid.buyer_id,
+            fromSupabase: true,
+            status: 'pending'
+          };
+          activeBids.push(bidObj);
+          activeBids.sort((a, b) => b.price - a.price);
+          renderCardsWithJostle();
+          updateStats();
+          showToast(`🤖 New bid from ${bidObj.buyerName}: $${bidObj.price.toFixed(2)}/MT for ${bidObj.quantity} MT`, false);
+        })
+        .subscribe((status) => { console.log('Realtime subscription status:', status); });
     }
-    if (remaining <= 0) break;
-  }
-  const solved = (remaining === 0);
-  const fillPercent = ((inventory - remaining) / inventory) * 100;
-  const nearSolve = (remaining > 0 && remaining <= inventory * 0.05);
-  return {
-    solved,
-    nearSolve,
-    winners: selectedBids,
-    remaining,
-    fillPercent,
-    totalValue: selectedBids.reduce((sum, b) => sum + (b.price * b.quantity), 0),
-    totalFees: selectedBids.length * 25,
-    totalDiscount: selectedBids.length * 50,
-    netToCoop: selectedBids.reduce((sum, b) => sum + (b.price * b.quantity), 0) - (selectedBids.length * 50)
-  };
-}
 
-// ========== DUHE PROPOSAL MODAL ==========
-function showDUHEProposalModal(solution) {
-  duheSolution = solution;
-  const existing = document.getElementById('duheModal');
-  if (existing) existing.remove();
+    // ========== RENDER CARDS ==========
+    function renderCardsWithJostle() {
+      const container = document.getElementById('cardsGrid');
+      if (!container) return;
 
-  const modalHtml = `
-    <div class="modal-overlay active" id="duheModal">
-      <div class="modal-card" style="max-width: 600px;">
-        <button class="modal-close" id="closeDuheModal" aria-label="Close modal">✕</button>
-        <div class="modal-header">
-          <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
-          <div class="modal-title-xl">DUHE PROPOSAL</div>
-        </div>
-        <p style="text-align:center; margin-bottom: 16px; font-size: 0.9rem;">
-          ${solution.solved 
-            ? '<span style="color:#7CFC00;">✅ Full inventory cleared!</span>' 
-            : `<span style="color:#FFD966;">⚠️ ${solution.fillPercent.toFixed(1)}% cleared (${solution.remaining} MT remaining)</span>`
-          }
-        </p>
-        <div style="margin: 20px 0; max-height: 280px; overflow-y: auto;">
-          <h3 style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 12px;">WINNING BUYERS (${solution.winners.length})</h3>
-          ${solution.winners.map((w, i) => `
-            <div style="border-bottom: 1px solid rgba(124,252,0,0.15); padding: 10px 0;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <b style="color:#F0F3FA;">${i+1}. ${w.buyerName}</b>
-                <span style="color:#FFD966; font-weight:700;">$${(w.price * w.quantity).toLocaleString()}</span>
-              </div>
-              <div style="font-size: 0.75rem; color: #94A3B8; margin-top: 4px;">
-                ${w.quantity} MT @ $${w.price.toFixed(2)}/MT
-              </div>
-              <div style="font-size: 0.7rem; color: #7CFC00; margin-top: 2px;">
-                📞 ${w.contactPerson} | ${w.email}
-              </div>
-            </div>
-          `).join('')}
-          ${solution.winners.length === 0 ? '<div style="color:#FF5E5E; text-align:center; padding:20px;">No winning bids found.</div>' : ''}
-        </div>
-        <div style="background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2);">
-          <div style="display:flex; justify-content:space-between; margin: 6px 0; font-size: 0.85rem;">
-            <span style="color:#94A3B8;">Total Value:</span>
-            <span style="color:#FFD966; font-weight:700;">$${solution.totalValue.toLocaleString()}</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin: 6px 0; font-size: 0.85rem;">
-            <span style="color:#94A3B8;">Your Fees Collected:</span>
-            <span style="color:#7CFC00; font-weight:700;">+$${solution.totalFees}</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin: 6px 0; font-size: 0.85rem;">
-            <span style="color:#94A3B8;">Buyer Discounts Given:</span>
-            <span style="color:#FF5E5E; font-weight:700;">-$${solution.totalDiscount}</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin: 8px 0 4px; font-size: 1rem; padding-top: 8px; border-top: 1px solid rgba(124,252,0,0.2);">
-            <span style="color:#F0F3FA; font-weight:700;">Net to Co-op:</span>
-            <span style="color:#7CFC00; font-weight:800;">$${solution.netToCoop.toLocaleString()}</span>
-          </div>
-        </div>
-        ${solution.nearSolve ? `
-          <div style="background: rgba(255,217,102,0.1); border: 1px solid #FFD966; padding: 14px; border-radius: 20px; margin: 16px 0;">
-            <div style="color:#FFD966; font-weight:700; margin-bottom: 8px;">⚡ NEAR-SOLVE OPPORTUNITY</div>
-            <p style="font-size: 0.8rem; color: #BFC9E0; line-height: 1.5;">
-              DUHE needs <b>${solution.remaining} MT</b> more to clear full inventory. 
-              If you can find it, buyers will take it at $${solution.winners[0]?.price?.toFixed(2) || '0.00'}/MT.
-              <br><br>
-              <b>Extra revenue potential:</b> <span style="color:#7CFC00;">$${(solution.remaining * (solution.winners[0]?.price || 0)).toLocaleString()}</span>
-            </p>
-            <button id="nearSolveBtn" style="margin-top: 12px; background: linear-gradient(105deg, #FFD966, #F5A623); color: #0A0C15; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 700; font-size: 0.8rem; width: 100%;">
-              🔍 I'll find ${solution.remaining} MT more
-            </button>
-          </div>
-        ` : ''}
-        <div style="display: flex; gap: 12px; margin-top: 24px;">
-          <button id="acceptDuheBtn" style="flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem;">
-            ✅ ACCEPT DUHE SOLUTION
-          </button>
-          <button id="rejectDuheBtn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem;">
-            ❌ REJECT & RELIST
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  document.getElementById('acceptDuheBtn').onclick = async () => { await acceptDUHESolution(solution); };
-  document.getElementById('rejectDuheBtn').onclick = async () => {
-    document.getElementById('duheModal').remove();
-    showToast("❌ DUHE solution rejected. You can relist the inventory.", true);
-    await supabase.from('seller_briefs').update({ 
-      status: 'active', 
-      updated_at: new Date().toISOString() 
-    }).eq('id', currentBrief.id);
-    document.getElementById('startBtn').innerText = '▶ START AUCTION';
-    document.getElementById('startBtn').disabled = false;
-  };
-  document.getElementById('closeDuheModal').onclick = () => { document.getElementById('duheModal').remove(); };
-  if (document.getElementById('nearSolveBtn')) {
-    document.getElementById('nearSolveBtn').onclick = () => {
-      document.getElementById('duheModal').remove();
-      showCoopNegotiation(solution.remaining, solution.winners[0]?.price || 0);
-    };
-  }
-}
-
-async function acceptDUHESolution(solution) {
-  const btn = document.getElementById('acceptDuheBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
-  try {
-    let acceptedCount = 0;
-    for (const winner of solution.winners) {
-      try {
-        const result = await acceptBidTransaction(winner.id, currentBrief.id);
-        if (result.success) {
-          acceptedCount++;
-          remainingQty = result.remaining_mt;
-          feesCollected = result.fees_collected;
+      const oldChildren = Array.from(container.children);
+      const posMap = new Map();
+      oldChildren.forEach(el => {
+        let id = el.getAttribute('data-id');
+        if (id && !el.classList.contains('accepted')) {
+          let rect = el.getBoundingClientRect();
+          posMap.set(id, { left: rect.left, top: rect.top });
         }
-      } catch (err) { console.error(`Failed to accept bid ${winner.id}:`, err); }
+      });
+
+      container.innerHTML = '';
+      const sortedBids = [...activeBids].sort((a, b) => b.price - a.price);
+      const pendingBids = sortedBids.filter(b => !b.accepted);
+      const highestBid = pendingBids.length > 0 ? pendingBids[0].price : 0;
+
+      sortedBids.forEach((card, idx) => {
+        const div = document.createElement('div');
+        div.className = `market-card ${card.accepted ? 'accepted' : ''}`;
+        div.setAttribute('data-id', card.id);
+
+        // === RANK FLAG ===
+        const rankVal = idx + 1;
+        const rankClass = rankVal === 1 ? 'rank-1' : rankVal === 2 ? 'rank-2' : rankVal === 3 ? 'rank-3' : 'rank-other';
+        const rankDiv = createSafeElement('div', `rank-flag ${rankClass}`, `#${rankVal}`);
+        div.appendChild(rankDiv);
+
+        // === VERIFIED BADGE ===
+        const verifiedDiv = createSafeElement('div', 'verified-badge', card.fromSupabase ? '🤖 Bot' : '✓ Verified');
+        div.appendChild(verifiedDiv);
+
+        // === PRODUCT VISUAL ===
+        const productVisual = createSafeElement('div', 'product-visual');
+        const emojiDiv = createSafeElement('div', 'product-emoji', '🏢');
+        productVisual.appendChild(emojiDiv);
+        div.appendChild(productVisual);
+
+        // === CARD TITLE ===
+        const titleEl = createSafeElement('div', 'card-title', card.buyerName);
+        div.appendChild(titleEl);
+
+        // === CONTACT NAME ===
+        const contactEl = createSafeElement('div', 'contact-name', `📞 ${card.contactPerson}`);
+        div.appendChild(contactEl);
+
+        // === PRICE ROW ===
+        const priceRow = document.createElement('div');
+        priceRow.className = 'price-row';
+        const priceSpan = createSafeElement('span', 'current-price', `$${card.price.toFixed(2)}`);
+        const changePct = card.change || 0;
+        const changeClass = changePct >= 0 ? 'up' : 'down';
+        const changeSpan = createSafeElement('span', `change-badge ${changeClass}`, `${changePct >= 0 ? '+' : ''}${changePct.toFixed(1)}%`);
+        priceRow.appendChild(priceSpan);
+        priceRow.appendChild(changeSpan);
+        div.appendChild(priceRow);
+
+        // === QUANTITY ===
+        const qtyEl = createSafeElement('div', 'bid-quantity', `📦 ${card.quantity} MT · Total: $${card.totalValue.toLocaleString()}`);
+        div.appendChild(qtyEl);
+
+        // === HEAT BAR ===
+        const heatPercent = Math.min(100, Math.max(8, card.heat));
+        const heatBar = document.createElement('div');
+        heatBar.className = 'heat-bar-container';
+        const heatFill = document.createElement('div');
+        heatFill.className = 'heat-fill';
+        heatFill.style.width = `${heatPercent}%`;
+        heatBar.appendChild(heatFill);
+        div.appendChild(heatBar);
+
+        // === CARD META ===
+        const metaEl = document.createElement('div');
+        metaEl.className = 'card-meta';
+        let starRating = starRatingCache.get(card.buyerName);
+        if (!starRating) {
+          let hash = 0;
+          for (let i = 0; i < card.buyerName.length; i++) {
+            hash = card.buyerName.charCodeAt(i) + ((hash << 5) - hash);
+          }
+          starRating = (3.5 + (Math.abs(hash) % 15) / 10).toFixed(1);
+          starRatingCache.set(card.buyerName, starRating);
+        }
+        const starSpan = createSafeElement('span', '', `⭐ ${starRating} ★`);
+        const heatSpan = createSafeElement('span', '', `🔥 ${Math.round(card.heat)}°`);
+        metaEl.appendChild(starSpan);
+        metaEl.appendChild(heatSpan);
+        div.appendChild(metaEl);
+
+        // === ACTION BUTTON ===
+        const canAccept = !auctionActive && !isDuheDelayActive && !card.accepted && card.quantity <= remainingQty && card
+          .price > 0;
+        const btn = document.createElement('button');
+        btn.className = 'accept-btn';
+
+        if (auctionActive || isDuheDelayActive) {
+          btn.disabled = true;
+          btn.textContent = isDuheDelayActive ? '⏳ DUHE PROCESSING...' : '⏳ DUHE PENDING';
+          btn.style.opacity = '0.3';
+        } else if (card.accepted) {
+          btn.disabled = true;
+          btn.textContent = '✓ ACCEPTED';
+          btn.style.opacity = '0.5';
+        } else if (!canAccept) {
+          btn.disabled = true;
+          btn.textContent = card.quantity > remainingQty ? '⚠️ QTY EXCEEDS' : '✕ UNAVAILABLE';
+          btn.style.opacity = '0.3';
+        } else {
+          btn.textContent = '✓ ACCEPT OFFER';
+          btn.setAttribute('data-action', 'accept');
+          btn.setAttribute('data-bid-id', card.id);
+        }
+        div.appendChild(btn);
+
+        container.appendChild(div);
+      });
+
+      if (posMap.size > 0) {
+        requestAnimationFrame(() => {
+          const newCards = Array.from(container.children);
+          newCards.forEach(el => {
+            let id = el.getAttribute('data-id');
+            let old = posMap.get(id);
+            if (old && !el.classList.contains('accepted')) {
+              let rect = el.getBoundingClientRect();
+              let dx = old.left - rect.left,
+                dy = old.top - rect.top;
+              if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+                el.style.transform = `translate(${dx}px, ${dy}px)`;
+                el.style.transition = 'none';
+                el.offsetHeight;
+                el.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1)';
+                el.style.transform = '';
+                setTimeout(() => {
+                  el.style.transition = '';
+                }, 500);
+              }
+            }
+          });
+        });
+      }
+
+      updateStats(highestBid);
     }
-    document.getElementById('duheModal').remove();
-    if (acceptedCount > 0) {
-      showToast(`✅ DUHE solution accepted! ${acceptedCount} buyers notified.`);
-      if (solution.solved || remainingQty <= 0) {
-        showToast("🎉 Full inventory cleared! Auction complete.");
-        document.getElementById('startBtn').innerText = 'AUCTION COMPLETE';
-        document.getElementById('startBtn').disabled = true;
+
+    function updateStats(highestBid) {
+      const activeCount = activeBids.filter(c => !c.accepted).length;
+      const highest = (highestBid !== undefined && highestBid !== null) ? highestBid :
+        activeBids.filter(c => !c.accepted).reduce((max, b) => Math.max(max, b.price), 0);
+      document.getElementById('statActive').textContent = activeCount;
+      document.getElementById('statHighest').textContent = `$${highest.toFixed(2)}`;
+      document.getElementById('statFees').textContent = `$${feesCollected}`;
+      document.getElementById('remainingQuantity').textContent = remainingQty;
+      document.getElementById('statIdeal').textContent = `$${idealPrice.toFixed(2)}`;
+    }
+
+    // ========== KNAPSACK SOLVER ==========
+    function runKnapsackSolver(bids, inventory, idealPrice, strategy = 'seller_ideal') {
+      const pendingBids = bids.filter(b => !b.accepted);
+      if (pendingBids.length === 0) {
+        return { solved: false, nearSolve: false, winners: [], remaining: inventory, fillPercent: 0, optimizedPrice: 0,
+          deviation: 0, totalValue: 0, totalFees: 0, totalDiscount: 0, netToCoop: 0 };
+      }
+      const capacity = Math.floor(inventory);
+      const items = pendingBids.map(bid => {
+        const priceDiff = Math.abs(bid.price - idealPrice) / (idealPrice || 1);
+        const priceScore = Math.max(0, 1 - Math.min(priceDiff, 0.8));
+        const fillScore = Math.min(1, bid.quantity / inventory);
+        const value = bid.price * bid.quantity * (0.6 + 0.4 * priceScore);
+        return { ...bid, value, weight: Math.floor(bid.quantity), priceScore, fillScore };
+      });
+      const n = items.length;
+      const dp = Array(n + 1).fill(null).map(() => Array(capacity + 1).fill(0));
+      for (let i = 1; i <= n; i++) {
+        for (let w = 1; w <= capacity; w++) {
+          if (items[i - 1].weight <= w) {
+            dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - items[i - 1].weight] + items[i - 1].value);
+          } else {
+            dp[i][w] = dp[i - 1][w];
+          }
+        }
+      }
+      let w = capacity;
+      const selected = [];
+      for (let i = n; i > 0 && w > 0; i--) {
+        if (dp[i][w] !== dp[i - 1][w]) {
+          selected.push(items[i - 1]);
+          w -= items[i - 1].weight;
+        }
+      }
+      const totalQuantity = selected.reduce((sum, item) => sum + item.weight, 0);
+      const fillRate = (totalQuantity / capacity) * 100;
+      const optimizedPrice = totalQuantity > 0 ? selected.reduce((sum, item) => sum + (item.price * item.weight), 0) /
+        totalQuantity : 0;
+      const deviation = idealPrice > 0 ? ((optimizedPrice - idealPrice) / idealPrice) * 100 : 0;
+      return {
+        solved: fillRate >= 95,
+        nearSolve: fillRate >= 60 && fillRate < 95,
+        winners: selected,
+        remaining: capacity - totalQuantity,
+        fillPercent: fillRate,
+        optimizedPrice,
+        deviation,
+        totalValue: selected.reduce((sum, item) => sum + (item.price * item.weight), 0),
+        totalFees: selected.length * 25,
+        totalDiscount: selected.length * 50,
+        netToCoop: selected.reduce((sum, item) => sum + (item.price * item.weight), 0) - (selected.length * 50)
+      };
+    }
+
+    function runDUHESolver(bids, inventory) {
+      return runKnapsackSolver(bids, inventory, idealPrice, 'seller_ideal');
+    }
+
+    // ========== DUHE PROPOSAL MODAL ==========
+    function showDUHEProposalModal(solution) {
+      if (!currentBrief) {
+        showToast('No brief loaded', true);
+        return;
+      }
+
+      if (!solution || typeof solution !== 'object') {
+        showToast('Invalid solution data', true);
+        return;
+      }
+
+      isDuheDelayActive = false;
+
+      duheSolution = solution;
+      const modal = document.getElementById('duheModal');
+      const status = document.getElementById('duheStatus');
+      const comparison = document.getElementById('duheComparison');
+      const winnersList = document.getElementById('duheWinnersList');
+      const financials = document.getElementById('duheFinancials');
+      const nearSolve = document.getElementById('duheNearSolve');
+
+      // Status
+      const statusText = solution.solved ?
+        '✅ Full inventory cleared! 🎉' :
+        `⚠️ ${solution.fillPercent.toFixed(1)}% cleared (${solution.remaining} MT remaining)`;
+      status.textContent = statusText;
+      status.style.color = solution.solved ? '#7CFC00' : '#FFD966';
+
+      // Comparison
+      comparison.innerHTML = '';
+      const comparisons = [
+        ['Your Ideal Price:', `$${idealPrice.toFixed(2)}/MT`, '#FFD966'],
+        ['Optimized Price:', `$${solution.optimizedPrice.toFixed(2)}/MT`, '#7CFC00'],
+        ['Deviation:', `${solution.deviation > 0 ? '+' : ''}${solution.deviation.toFixed(1)}%`, Math.abs(solution.deviation) <
+          5 ? '#7CFC00' : '#FFD966'
+        ]
+      ];
+
+      comparisons.forEach(([label, value, color]) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; justify-content:space-between; margin: 6px 0; font-size: 0.85rem;';
+        const labelSpan = createSafeElement('span', '', label);
+        labelSpan.style.color = '#94A3B8';
+        const valueSpan = createSafeElement('span', '', value);
+        valueSpan.style.cssText = `color:${color}; font-weight:700;`;
+        row.appendChild(labelSpan);
+        row.appendChild(valueSpan);
+        comparison.appendChild(row);
+      });
+
+      // Winners List
+      const winnersHeader = document.createElement('h3');
+      winnersHeader.style.cssText = 'font-size: 0.85rem; color: #94A3B8; margin-bottom: 12px;';
+      winnersHeader.textContent = `WINNING BUYERS (${solution.winners.length})`;
+      winnersList.innerHTML = '';
+      winnersList.appendChild(winnersHeader);
+
+      if (solution.winners.length === 0) {
+        const emptyMsg = createSafeElement('div', '', 'No winning bids found.');
+        emptyMsg.style.cssText = 'color:#FF5E5E; text-align:center; padding:20px;';
+        winnersList.appendChild(emptyMsg);
       } else {
-        showToast(`⚠️ ${remainingQty} MT still remaining. Consider relisting.`);
-        document.getElementById('startBtn').innerText = '▶ START NEW AUCTION';
-        document.getElementById('startBtn').disabled = false;
+        solution.winners.forEach((w, i) => {
+          const div = document.createElement('div');
+          div.style.cssText = 'border-bottom: 1px solid rgba(124,252,0,0.15); padding: 10px 0;';
+
+          const nameDiv = document.createElement('div');
+          nameDiv.style.cssText = 'display:flex; justify-content:space-between; align-items:center;';
+          const nameStrong = createSafeElement('b', '', `${i+1}. ${w.buyerName}`);
+          const priceSpan = createSafeElement('span', '', `$${(w.price * w.quantity).toLocaleString()}`);
+          priceSpan.style.cssText = 'color:#FFD966; font-weight:700;';
+          nameDiv.appendChild(nameStrong);
+          nameDiv.appendChild(priceSpan);
+
+          const detailsDiv = createSafeElement('div', '', `${w.quantity} MT @ $${w.price.toFixed(2)}/MT`);
+          detailsDiv.style.cssText = 'font-size: 0.75rem; color: #94A3B8; margin-top: 4px;';
+
+          const contactDiv = createSafeElement('div', '', `📞 ${w.contactPerson} | ${w.email}`);
+          contactDiv.style.cssText = 'font-size: 0.7rem; color: #7CFC00; margin-top: 2px;';
+
+          div.appendChild(nameDiv);
+          div.appendChild(detailsDiv);
+          div.appendChild(contactDiv);
+          winnersList.appendChild(div);
+        });
       }
-      renderCardsWithJostle();
-      updateStats();
-    } else {
-      showToast("No bids could be accepted. Please try again.", true);
+
+      // Financials
+      financials.innerHTML = '';
+      const financialData = [
+        ['Total Value:', `$${solution.totalValue.toLocaleString()}`, '#FFD966'],
+        ['Your Fees Collected:', `+$${solution.totalFees}`, '#7CFC00'],
+        ['Buyer Discounts Given:', `-$${solution.totalDiscount}`, '#FF5E5E'],
+        ['Net to Co-op:', `$${solution.netToCoop.toLocaleString()}`, '#7CFC00']
+      ];
+
+      financialData.forEach(([label, value, color], index) => {
+        const row = document.createElement('div');
+        const isLast = index === financialData.length - 1;
+        row.style.cssText =
+          `display:flex; justify-content:space-between; margin: ${isLast ? '8px 0 4px' : '6px 0'}; font-size: ${isLast ? '1rem' : '0.85rem'}; ${isLast ? 'padding-top: 8px; border-top: 1px solid rgba(124,252,0,0.2);' : ''}`;
+        const labelSpan = createSafeElement('span', '', label);
+        labelSpan.style.color = isLast ? '#F0F3FA' : '#94A3B8';
+        if (isLast) labelSpan.style.fontWeight = '700';
+        const valueSpan = createSafeElement('span', '', value);
+        valueSpan.style.cssText = `color:${color}; font-weight:${isLast ? '800' : '700'};`;
+        row.appendChild(labelSpan);
+        row.appendChild(valueSpan);
+        financials.appendChild(row);
+      });
+
+      // Near Solve
+      if (solution.nearSolve && !solution.solved) {
+        nearSolve.style.display = 'block';
+        nearSolve.innerHTML = '';
+        const header = createSafeElement('div', '', '⚡ NEAR-SOLVE OPPORTUNITY');
+        header.style.cssText = 'color:#FFD966; font-weight:700; margin-bottom: 8px;';
+
+        const desc = document.createElement('p');
+        desc.style.cssText = 'font-size: 0.8rem; color: #BFC9E0; line-height: 1.5;';
+
+        const text1 = document.createTextNode('DUHE needs ');
+        const mtBold = document.createElement('b');
+        mtBold.textContent = `${solution.remaining} MT`;
+        mtBold.style.color = '#FFD966';
+        const text2 = document.createTextNode(' more to clear full inventory. Buyers will take it at ');
+        const priceBold = document.createElement('b');
+        priceBold.textContent = `$${solution.winners[0]?.price?.toFixed(2) || '0.00'}/MT`;
+        priceBold.style.color = '#7CFC00';
+        const text3 = document.createTextNode('.');
+
+        desc.appendChild(text1);
+        desc.appendChild(mtBold);
+        desc.appendChild(text2);
+        desc.appendChild(priceBold);
+        desc.appendChild(text3);
+
+        const br1 = document.createElement('br');
+        const br2 = document.createElement('br');
+        const text4 = document.createTextNode('Extra revenue potential: ');
+        const revenueBold = document.createElement('b');
+        revenueBold.textContent = `$${(solution.remaining * (solution.winners[0]?.price || 0)).toLocaleString()}`;
+        revenueBold.style.color = '#7CFC00';
+
+        desc.appendChild(br1);
+        desc.appendChild(br2);
+        desc.appendChild(text4);
+        desc.appendChild(revenueBold);
+
+        const btn = document.createElement('button');
+        btn.id = 'nearSolveBtn';
+        btn.style.cssText =
+          'margin-top: 12px; background: linear-gradient(105deg, #FFD966, #F5A623); color: #0A0C15; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 700; font-size: 0.8rem; width: 100%;';
+        btn.textContent = `🔍 I'll find ${solution.remaining} MT more`;
+        btn.onclick = () => {
+          document.getElementById('duheModal').classList.remove('active');
+          showCoopNegotiation(solution.remaining, solution.winners[0]?.price || 0);
+        };
+
+        nearSolve.appendChild(header);
+        nearSolve.appendChild(desc);
+        nearSolve.appendChild(btn);
+      } else {
+        nearSolve.style.display = 'none';
+      }
+
+      document.getElementById('acceptDuheBtn').onclick = async () => { await acceptDUHESolution(solution); };
+      document.getElementById('rejectDuheBtn').onclick = async () => {
+        document.getElementById('duheModal').classList.remove('active');
+        try {
+          await safeUpdateBrief(currentBrief.id, {
+            status: 'active',
+            updated_at: new Date().toISOString()
+          });
+          showToast("❌ DUHE solution rejected. You can relist the inventory.", true);
+          document.getElementById('startBtn').textContent = '▶ START AUCTION';
+          document.getElementById('startBtn').disabled = false;
+        } catch (err) {
+          console.error('Failed to update brief status:', err);
+          showToast('Error rejecting solution. Please try again.', true);
+        }
+      };
+      document.getElementById('closeDuheModal').onclick = () => { document.getElementById('duheModal').classList.remove(
+          'active'); };
+      modal.classList.add('active');
     }
-  } catch (err) {
-    showToast('Error: ' + err.message, true);
-    if (btn) { btn.disabled = false; btn.textContent = '✅ ACCEPT DUHE SOLUTION'; }
-  }
-}
 
-function showCoopNegotiation(extraNeeded, pricePerMT) {
-  const existing = document.getElementById('negotiateModal');
-  if (existing) existing.remove();
-  const modalHtml = `
-    <div class="modal-overlay active" id="negotiateModal">
-      <div class="modal-card" style="max-width: 480px;">
-        <button class="modal-close" id="closeNegotiateModal" aria-label="Close modal">✕</button>
-        <div class="modal-header">
-          <div style="font-size: 48px; margin-bottom: 8px;">📦</div>
-          <div class="modal-title-xl">Find More Supply</div>
-        </div>
-        <p style="text-align:center; margin-bottom: 20px; font-size: 0.85rem; color: #BFC9E0; line-height: 1.6;">
-          DUHE needs <b style="color:#FFD966;">${extraNeeded} MT</b> more to clear full inventory.
-          <br>Buyers will take it at <b style="color:#7CFC00;">$${pricePerMT.toFixed(2)}/MT</b>.
-        </p>
-        <div style="background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2); text-align: center;">
-          <div style="font-size: 0.8rem; color: #94A3B8; margin-bottom: 4px;">Extra Revenue Potential</div>
-          <div style="font-size: 1.8rem; font-weight: 800; color: #FFD966;">$${(extraNeeded * pricePerMT).toLocaleString()}</div>
-        </div>
-        <div style="display: flex; gap: 12px; margin-top: 24px;">
-          <button id="foundSupplyBtn" style="flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem;">
-            ✅ I FOUND ${extraNeeded} MT
-          </button>
-          <button id="noSupplyBtn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem;">
-            ❌ Complete as-is
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  document.getElementById('foundSupplyBtn').onclick = async () => {
-    totalQty += extraNeeded;
-    remainingQty += extraNeeded;
-    await supabase.from('seller_briefs').update({
-      quantity_mt: totalQty,
-      remaining_mt: remainingQty,
-      updated_at: new Date().toISOString()
-    }).eq('id', currentBrief.id);
-    document.getElementById('negotiateModal').remove();
-    showToast(`📦 Inventory expanded by ${extraNeeded} MT. Re-running DUHE...`);
-    const newSolution = runDUHESolver(activeBids, remainingQty);
-    showDUHEProposalModal(newSolution);
-  };
-  document.getElementById('noSupplyBtn').onclick = () => {
-    document.getElementById('negotiateModal').remove();
-    showToast("Sale will complete with partial fill.", true);
-    if (duheSolution) showDUHEProposalModal(duheSolution);
-  };
-  document.getElementById('closeNegotiateModal').onclick = () => {
-    document.getElementById('negotiateModal').remove();
-    if (duheSolution) showDUHEProposalModal(duheSolution);
-  };
-}
+    // ========== ACCEPT DUHE SOLUTION ==========
+    async function acceptDUHESolution(solution) {
+      if (!currentBrief) {
+        showToast('No brief loaded', true);
+        return;
+      }
+      if (acceptInProgress) return;
 
-async function onAuctionEnd() {
-  auctionActive = false;
-  stopAllIntervals();
-  await supabase.from('seller_briefs').update({
-    status: 'ended',
-    ended_at: new Date().toISOString()
-  }).eq('id', currentBrief.id);
-  document.getElementById('startBtn').innerText = '⏳ DUHE SOLVING...';
-  document.getElementById('startBtn').disabled = true;
-  showToast("⏰ TIME'S UP! Running DUHE solver...");
-  const solution = runDUHESolver(activeBids, remainingQty);
-  setTimeout(() => {
-    if (!solution || solution.winners.length === 0) {
-      showToast("DUHE could not find a solution. No bids accepted.", true);
-      document.getElementById('startBtn').innerText = 'NO SOLUTION FOUND';
-      return;
+      acceptInProgress = true;
+      const btn = document.getElementById('acceptDuheBtn');
+      if (btn) { btn.disabled = true;
+        btn.textContent = 'Processing...'; }
+
+      try {
+        let acceptedCount = 0;
+        let feeErrors = 0;
+        let rpcErrors = 0;
+        let bidUpdateErrors = 0;
+        let releaseErrors = 0;
+        for (const winner of solution.winners) {
+          try {
+            const result = await acceptBidTransaction(winner.id, currentBrief.id);
+            if (result.success) {
+              acceptedCount++;
+              remainingQty = result.remaining_mt;
+              feesCollected = result.fees_collected;
+              const bid = activeBids.find(b => b.id === winner.id);
+              if (bid) bid.accepted = true;
+              if (!result.fee_recorded) {
+                feeErrors++;
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to accept bid ${winner.id}:`, err);
+          }
+        }
+
+        if (acceptedCount > 0) {
+          const notificationResult = await sendKnapsackNotifications(solution);
+          rpcErrors = notificationResult?.rpcErrors || 0;
+          releaseErrors = notificationResult?.releaseErrors || 0;
+          bidUpdateErrors = notificationResult?.bidUpdateErrors || 0;
+        }
+
+        document.getElementById('duheModal').classList.remove('active');
+
+        if (acceptedCount > 0) {
+          let msg = `✅ DUHE solution accepted! ${acceptedCount} buyers notified.`;
+          const totalErrors = feeErrors + rpcErrors + bidUpdateErrors + releaseErrors;
+          if (totalErrors > 0) {
+            const parts = [];
+            if (feeErrors > 0) parts.push(`${feeErrors} fee records`);
+            if (rpcErrors > 0) parts.push(`${rpcErrors} fee deductions`);
+            if (bidUpdateErrors > 0) parts.push(`${bidUpdateErrors} bid updates`);
+            if (releaseErrors > 0) parts.push(`${releaseErrors} hold releases`);
+            msg += ` ⚠️ ${totalErrors} operations failed (${parts.join(', ')}). Please contact support.`;
+          }
+          showToast(msg, totalErrors > 0);
+
+          if (solution.solved || remainingQty <= 0) {
+            showToast("🎉 Full inventory cleared! Auction complete.", false);
+            document.getElementById('startBtn').textContent = 'AUCTION COMPLETE';
+            document.getElementById('startBtn').disabled = true;
+            try {
+              await safeUpdateBrief(currentBrief.id, {
+                status: 'completed',
+                completed_at: new Date().toISOString()
+              });
+            } catch (err) {
+              console.error('Failed to mark brief as completed:', err);
+              showToast('Warning: Database update failed, but auction completed locally.', true);
+            }
+          } else {
+            showToast(`⚠️ ${remainingQty} MT still remaining. Consider relisting.`, true);
+            document.getElementById('startBtn').textContent = '▶ START NEW AUCTION';
+            document.getElementById('startBtn').disabled = false;
+          }
+          renderCardsWithJostle();
+          updateStats();
+        } else {
+          showToast("No bids could be accepted. Please try again.", true);
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, true);
+      } finally {
+        acceptInProgress = false;
+        if (btn) { btn.disabled = false;
+          btn.textContent = '✅ ACCEPT DUHE'; }
+      }
     }
-    showDUHEProposalModal(solution);
-    document.getElementById('startBtn').innerText = 'DUHE PROPOSAL READY';
-  }, 1500);
-}
 
-function stopAllIntervals() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-}
+    // ========== COOP NEGOTIATION ==========
+    function showCoopNegotiation(extraNeeded, pricePerMT) {
+      if (!currentBrief) {
+        showToast('No brief loaded', true);
+        return;
+      }
 
-function startTimerLoop() {
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    if (!auctionActive) return;
-    if (timerSeconds <= 1) {
-      stopAllIntervals();
-      onAuctionEnd();
-    } else {
-      timerSeconds--;
-      let mins = Math.floor(timerSeconds / 60), secs = timerSeconds % 60;
-      let el = document.getElementById('timerMain');
-      el.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      if (timerSeconds <= 10) el.classList.add('warning');
-      else el.classList.remove('warning');
+      const safePrice = isNaN(pricePerMT) ? 0 : pricePerMT;
+
+      const existing = document.getElementById('negotiateModal');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay active';
+      overlay.id = 'negotiateModal';
+      overlay.style.zIndex = '1001';
+
+      const modalCard = document.createElement('div');
+      modalCard.className = 'modal-card';
+      modalCard.style.maxWidth = '480px';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'modal-close';
+      closeBtn.id = 'closeNegotiateModal';
+      closeBtn.setAttribute('aria-label', 'Close modal');
+      closeBtn.textContent = '✕';
+      modalCard.appendChild(closeBtn);
+
+      const header = document.createElement('div');
+      header.className = 'modal-header';
+      const emoji = createSafeElement('div', '', '📦');
+      emoji.style.cssText = 'font-size: 48px; margin-bottom: 8px;';
+      const title = createSafeElement('div', 'modal-title-xl', 'Find More Supply');
+      header.appendChild(emoji);
+      header.appendChild(title);
+      modalCard.appendChild(header);
+
+      const desc = document.createElement('p');
+      desc.style.cssText = 'text-align:center; margin-bottom: 20px; font-size: 0.85rem; color: #BFC9E0; line-height: 1.6;';
+
+      const text1 = document.createTextNode('DUHE needs ');
+      const mtBold = document.createElement('b');
+      mtBold.textContent = `${extraNeeded} MT`;
+      mtBold.style.color = '#FFD966';
+      const text2 = document.createTextNode(' more to clear full inventory. Buyers will take it at ');
+      const priceBold = document.createElement('b');
+      priceBold.textContent = `$${safePrice.toFixed(2)}/MT`;
+      priceBold.style.color = '#7CFC00';
+      const text3 = document.createTextNode('.');
+
+      desc.appendChild(text1);
+      desc.appendChild(mtBold);
+      desc.appendChild(text2);
+      desc.appendChild(priceBold);
+      desc.appendChild(text3);
+      modalCard.appendChild(desc);
+
+      const revenueBox = document.createElement('div');
+      revenueBox.style.cssText =
+        'background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2); text-align: center;';
+      const revenueLabel = createSafeElement('div', '', 'Extra Revenue Potential');
+      revenueLabel.style.cssText = 'font-size: 0.8rem; color: #94A3B8; margin-bottom: 4px;';
+      const revenueValue = createSafeElement('div', '', `$${(extraNeeded * safePrice).toLocaleString()}`);
+      revenueValue.style.cssText = 'font-size: 1.8rem; font-weight: 800; color: #FFD966;';
+      revenueBox.appendChild(revenueLabel);
+      revenueBox.appendChild(revenueValue);
+      modalCard.appendChild(revenueBox);
+
+      const btnContainer = document.createElement('div');
+      btnContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 24px;';
+
+      const foundBtn = document.createElement('button');
+      foundBtn.id = 'foundSupplyBtn';
+      foundBtn.style.cssText =
+        'flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem;';
+      foundBtn.textContent = `✅ I FOUND ${extraNeeded} MT`;
+      btnContainer.appendChild(foundBtn);
+
+      const noBtn = document.createElement('button');
+      noBtn.id = 'noSupplyBtn';
+      noBtn.style.cssText =
+        'flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem;';
+      noBtn.textContent = '❌ Complete as-is';
+      btnContainer.appendChild(noBtn);
+
+      modalCard.appendChild(btnContainer);
+      overlay.appendChild(modalCard);
+      document.body.appendChild(overlay);
+
+      foundBtn.onclick = async () => {
+        foundBtn.disabled = true;
+        foundBtn.textContent = 'Updating...';
+        try {
+          const newTotalQty = totalQty + extraNeeded;
+          const newRemainingQty = remainingQty + extraNeeded;
+          await safeUpdateBrief(currentBrief.id, {
+            quantity_mt: newTotalQty,
+            remaining_mt: newRemainingQty,
+            updated_at: new Date().toISOString()
+          });
+
+          totalQty = newTotalQty;
+          remainingQty = newRemainingQty;
+
+          overlay.remove();
+          showToast(`📦 Inventory expanded by ${extraNeeded} MT. Re-running DUHE...`);
+          const newSolution = runDUHESolver(activeBids, remainingQty);
+          showDUHEProposalModal(newSolution);
+        } catch (err) {
+          console.error('Failed to update inventory:', err);
+          showToast('Error expanding inventory. Please try again.', true);
+          foundBtn.disabled = false;
+          foundBtn.textContent = `✅ I FOUND ${extraNeeded} MT`;
+        }
+      };
+
+      noBtn.onclick = () => {
+        overlay.remove();
+        showToast("Sale will complete with partial fill.", true);
+        if (duheSolution) showDUHEProposalModal(duheSolution);
+      };
+
+      closeBtn.onclick = () => {
+        overlay.remove();
+        if (duheSolution) showDUHEProposalModal(duheSolution);
+      };
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.remove();
+          if (duheSolution) showDUHEProposalModal(duheSolution);
+        }
+      });
     }
-  }, 1000);
-}
 
-async function startAuction() {
-  if (auctionActive) { showToast("Auction already running!"); return; }
-  if (!currentBrief) { showToast("No brief loaded", true); return; }
+    // ========== SEND KNAPSACK NOTIFICATIONS ==========
+    async function sendKnapsackNotifications(solution) {
+      let rpcErrors = 0;
+      let bidUpdateErrors = 0;
+      let releaseErrors = 0;
+      try {
+        const feePromises = solution.winners.map(async (bid) => {
+          if (bid.buyer_id) {
+            try {
+              await supabase.rpc('deduct_buyer_fee', { buyer_id: bid.buyer_id, amount: 25 });
+            } catch (e) {
+              console.warn('Fee deduction failed for', bid.buyer_id, e);
+              rpcErrors++;
+            }
+          }
+          try {
+            await safeUpdateBid(bid.id, {
+              status: 'won',
+              fee_deducted: true,
+              accepted_at: new Date().toISOString()
+            });
+          } catch (e) {
+            console.warn('Bid update to won failed for', bid.id, e);
+            bidUpdateErrors++;
+          }
+        });
 
-  // Create auction in Supabase
-  const { data: auction, error: auctionErr } = await supabase.from('auctions').insert({
-    seller_id: currentUser.id,
-    brief_id: currentBrief.id,
-    product: currentBrief.product || 'Coconut',
-    total_qty: totalQty,
-    remaining_qty: remainingQty,
-    status: 'active',
-    duration_seconds: 180,
-    remaining_seconds: 180,
-    fees_collected: 0,
-    created_at: new Date().toISOString()
-  }).select().single();
+        await Promise.allSettled(feePromises);
 
-  if (auctionErr) {
-    console.error("Failed to create auction:", auctionErr);
-    showToast("Failed to start auction", true);
-    return;
-  }
+        const losingBids = activeBids.filter(b =>
+          !solution.winners.some(w => w.id === b.id) && !b.accepted && b.status !== 'won'
+        );
+        const releasePromises = losingBids.map(async (bid) => {
+          if (bid.buyer_id) {
+            try {
+              await supabase.rpc('release_bid_hold', { buyer_id: bid.buyer_id, amount: 25 });
+            } catch (e) {
+              console.warn('Hold release failed for', bid.buyer_id, e);
+              releaseErrors++;
+            }
+          }
+          try {
+            await safeUpdateBid(bid.id, {
+              status: 'lost',
+              hold_released: true
+            });
+          } catch (e) {
+            console.warn('Bid update to lost failed for', bid.id, e);
+            bidUpdateErrors++;
+          }
+        });
 
-  currentAuctionId = auction.id;
-  auctionActive = true;
-  timerSeconds = 180;
-  document.getElementById('timerMain').innerText = "03:00";
-  document.getElementById('timerMain').classList.remove('warning');
-  document.getElementById('startBtn').innerText = '⏳ AUCTION RUNNING';
-  document.getElementById('startBtn').disabled = true;
+        await Promise.allSettled(releasePromises);
 
-  await supabase.from('seller_briefs').update({
-    status: 'auctioning',
-    started_at: new Date().toISOString()
-  }).eq('id', currentBrief.id);
+        try {
+          await supabase.functions.invoke('send-auction-results', {
+            body: {
+              auction_id: currentAuctionId,
+              brief_id: currentBrief?.id,
+              winners: solution.winners.map(w => ({
+                buyer_name: w.buyerName,
+                email: w.email,
+                quantity: w.quantity,
+                price: w.price,
+                total: w.price * w.quantity
+              })),
+              seller_id: currentUser?.id,
+              seller_name: currentSeller?.coop_name || currentSeller?.name || 'Seller',
+              total_value: solution.totalValue,
+              optimized_price: solution.optimizedPrice,
+              fill_rate: solution.fillPercent,
+              ideal_price: idealPrice
+            }
+          });
+        } catch (err) {
+          console.warn('Email function not available:', err.message);
+        }
 
-  startTimerLoop();
-  renderCardsWithJostle();
-  showToast("🎬 Seller auction STARTED — highest bid wins! Bot bids will appear automatically.");
+        await updateSellerContracts(solution);
 
-  // Subscribe to realtime bids for this auction
-  await subscribeToSupabaseBids();
-}
+      } catch (err) {
+        console.error('Error sending notifications:', err);
+      }
+      return { rpcErrors, bidUpdateErrors, releaseErrors };
+    }
 
-async function acceptOffer(bidId) {
-  const bid = activeBids.find(c => c.id === bidId);
-  if (!bid || bid.accepted) return;
-  if (auctionActive) {
-    showToast("Cannot accept during auction. Wait for DUHE.", true);
-    return;
-  }
-  if (bid.quantity > remainingQty) {
-    showToast(`Cannot accept ${bid.quantity} MT — only ${remainingQty} MT remaining`, true);
-    return;
-  }
-  const btn = document.querySelector(`[data-bid-id="${bidId}"]`);
-  if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
-  try {
-    const result = await acceptBidTransaction(bid.id, currentBrief.id);
-    if (result.success) {
-      bid.accepted = true;
-      remainingQty = result.remaining_mt;
-      feesCollected = result.fees_collected;
-      showToast(`✓ Accepted ${bid.buyerName}: ${bid.quantity} MT @ $${bid.price}/MT — $25 fee captured`);
-      renderCardsWithJostle();
-      if (remainingQty <= 0) {
-        showToast("🎉 INVENTORY SOLD OUT! Auction complete.");
-        document.getElementById('startBtn').innerText = 'AUCTION COMPLETE';
+    async function updateSellerContracts(solution) {
+      if (!currentBrief) {
+        console.warn('Cannot update contracts: no brief loaded');
+        return;
+      }
+
+      let contracts = [];
+      try {
+        const stored = localStorage.getItem('tradeaux_contracts');
+        contracts = stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        console.warn('Failed to parse contracts from localStorage, starting fresh:', e);
+        contracts = [];
+      }
+
+      solution.winners.forEach(w => {
+        contracts.push({
+          id: 'contract_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          product: currentBrief?.product || 'Coconut',
+          variety: currentBrief?.variety || 'Standard',
+          quantity: w.quantity,
+          price: w.price,
+          total: w.price * w.quantity,
+          buyer: w.buyerName,
+          buyerId: w.buyer_id,
+          seller: currentSeller?.coop_name || 'TradeAux Seller',
+          status: 'pending',
+          date: new Date().toISOString(),
+          auctionId: currentAuctionId
+        });
+      });
+
+      try {
+        localStorage.setItem('tradeaux_contracts', JSON.stringify(contracts));
+      } catch (e) {
+        console.warn('Failed to save contracts to localStorage:', e);
+      }
+
+      // ✅ Append to existing DB contracts instead of overwriting
+      try {
+        const { data: existingBrief } = await supabase
+          .from('seller_briefs')
+          .select('contracts')
+          .eq('id', currentBrief.id)
+          .single();
+        const existingContracts = existingBrief?.contracts || [];
+        const newContracts = [...existingContracts, ...contracts.filter(c => c.auctionId === currentAuctionId)];
+        await safeUpdateBrief(currentBrief.id, {
+          contracts: newContracts,
+          updated_at: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('Failed to update contracts in DB:', e);
+      }
+    }
+
+    // ========== TIMER ==========
+    function startTimerLoop() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!auctionActive) return;
+        if (timerSeconds <= 1) {
+          stopAllIntervals();
+          onAuctionEnd();
+        } else {
+          timerSeconds--;
+          let mins = Math.floor(timerSeconds / 60),
+            secs = timerSeconds % 60;
+          let el = document.getElementById('timerMain');
+          el.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+          if (timerSeconds <= 10) el.classList.add('warning');
+          else el.classList.remove('warning');
+        }
+      }, 1000);
+    }
+
+    function stopAllIntervals() {
+      if (timerInterval) { clearInterval(timerInterval);
+        timerInterval = null; }
+    }
+
+    // ========== AUCTION END ==========
+    async function onAuctionEnd() {
+      if (isAuctionEndInProgress) {
+        console.warn('Auction end already in progress');
+        return;
+      }
+
+      if (auctionEndTimeout) {
+        clearTimeout(auctionEndTimeout);
+        auctionEndTimeout = null;
+      }
+
+      if (!currentBrief) {
+        showToast('No brief loaded', true);
+        return;
+      }
+
+      // ✅ Validate brief ID before any DB operations
+      let briefId;
+      try {
+        briefId = validateId(currentBrief.id, 'currentBrief.id');
+      } catch (err) {
+        showToast('Invalid brief ID. Please refresh.', true);
+        return;
+      }
+
+      isAuctionEndInProgress = true;
+      try {
+        auctionActive = false;
+        stopAllIntervals();
+
+        let briefUpdated = false;
+        for (let attempt = 1; attempt <= MAX_AUCTION_END_RETRIES; attempt++) {
+          try {
+            await safeUpdateBrief(briefId, {
+              status: 'ended',
+              started_at: null,
+              ended_at: new Date().toISOString()
+            });
+            briefUpdated = true;
+            break;
+          } catch (err) {
+            console.error(`Brief update attempt ${attempt} failed:`, err);
+            if (attempt < MAX_AUCTION_END_RETRIES) {
+              const delay = 1000 * Math.pow(2, attempt - 1);
+              console.log(`Retrying in ${delay}ms...`);
+              await new Promise(r => setTimeout(r, delay));
+            }
+          }
+        }
+
+        if (!briefUpdated) {
+          console.error('Failed to update brief status after all retries');
+          showToast('Warning: Could not end auction. Please refresh and try again.', true);
+          try {
+            await safeUpdateBrief(briefId, {
+              status: 'errored',
+              error_message: 'Auction end failed after retries'
+            });
+          } catch (e) {
+            console.error('Failed to set dead letter status:', e);
+          }
+          isAuctionEndInProgress = false;
+          return;
+        }
+
+        document.getElementById('startBtn').textContent = '⏳ DUHE SOLVING...';
         document.getElementById('startBtn').disabled = true;
+        showToast("⏰ TIME'S UP! Running DUHE solver...");
+
+        isDuheDelayActive = true;
+
+        const solution = runDUHESolver(activeBids, remainingQty);
+
+        auctionEndTimeout = setTimeout(() => {
+          try {
+            isDuheDelayActive = false;
+
+            if (!solution || solution.winners.length === 0) {
+              showToast("DUHE could not find a solution. No bids accepted.", true);
+              document.getElementById('startBtn').textContent = 'NO SOLUTION FOUND';
+              auctionEndTimeout = null;
+              return;
+            }
+            showDUHEProposalModal(solution);
+            document.getElementById('startBtn').textContent = 'DUHE PROPOSAL READY';
+            auctionEndTimeout = null;
+          } catch (err) {
+            console.error('Error in auction end timeout:', err);
+            showToast('Error processing auction end. Please refresh.', true);
+            isDuheDelayActive = false;
+            auctionEndTimeout = null;
+          }
+        }, 1500);
+      } finally {
+        isAuctionEndInProgress = false;
       }
-    } else {
-      showToast(result.error || 'Accept failed', true);
-      if (btn) { btn.disabled = false; btn.textContent = '✓ ACCEPT OFFER'; }
     }
-  } catch (err) {
-    showToast('Error: ' + err.message, true);
-    if (btn) { btn.disabled = false; btn.textContent = '✓ ACCEPT OFFER'; }
-  }
-}
 
-function openModal(card, rank) {
-  document.getElementById('modalEmoji').innerHTML = "🏢";
-  document.getElementById('modalName').innerHTML = card.buyerName;
-  document.getElementById('modalPrice').innerHTML = `$${card.price.toFixed(2)}`;
-  document.getElementById('modalQty').innerHTML = `${card.quantity} MT · Total: $${card.totalValue.toLocaleString()}`;
-  document.getElementById('modalContact').innerHTML = card.contactPerson;
-  document.getElementById('modalEmail').innerHTML = card.email;
-  document.getElementById('modalPhone').innerHTML = card.phone;
-  document.getElementById('modalWhatsapp').innerHTML = card.whatsapp;
-  const modal = document.getElementById('modalOverlay');
-  modal.classList.add('active');
-  currentModalBid = card;
-}
+    // ========== START AUCTION ==========
+    async function startAuction() {
+      if (startAuctionInProgress) return;
+      if (!currentUser) { redirectToSignin(); return; }
+      if (!currentBrief) { showToast("No brief loaded", true); return; }
+      if (auctionActive) { showToast("Auction already running!"); return; }
 
-function acceptFromModal() { if (currentModalBid) acceptOffer(currentModalBid.id); document.getElementById('modalOverlay').classList.remove('active'); }
-function closeModalFn() { document.getElementById('modalOverlay').classList.remove('active'); }
-function showToast(msg, isError = false) {
-  let t = document.getElementById('toastMsg');
-  t.innerText = msg;
-  t.style.borderLeftColor = isError ? '#FF4D4D' : '#7CFC00';
-  t.classList.add('visible');
-  setTimeout(() => t.classList.remove('visible'), 4000);
-}
+      // ✅ Validate brief ID before capturing state
+      let briefId;
+      try {
+        briefId = validateId(currentBrief.id, 'currentBrief.id');
+      } catch (err) {
+        showToast('Invalid brief ID. Please refresh.', true);
+        return;
+      }
 
-// ========== ACCEPT BID TRANSACTION (Supabase RPC or direct update) ==========
-async function acceptBidTransaction(bidId, briefId) {
-  const uid = currentUser?.id;
-  if (!uid) throw new Error("Not authenticated");
+      // Store original brief state for rollback (after validation)
+      const originalBriefStatus = currentBrief.status;
 
-  // Get bid and brief
-  const { data: bid, error: bidErr } = await supabase
-    .from('bids')
-    .select('*')
-    .eq('id', bidId)
-    .single();
-  if (bidErr || !bid) throw new Error("Bid not found");
+      startAuctionInProgress = true;
+      const btn = document.getElementById('startBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ STARTING...';
 
-  const { data: brief, error: briefErr } = await supabase
-    .from('seller_briefs')
-    .select('*')
-    .eq('id', briefId)
-    .single();
-  if (briefErr || !brief) throw new Error("Brief not found");
-  if (brief.seller_id !== uid) throw new Error("Brief does not belong to you");
-  if (bid.status !== "pending") throw new Error("Bid is no longer pending");
+      try {
+        const { data: auction, error: auctionErr } = await supabase.from('auctions').insert({
+          seller_id: currentUser.id,
+          brief_id: briefId,
+          product: currentBrief.product || 'Coconut',
+          total_qty: totalQty,
+          remaining_qty: remainingQty,
+          status: 'active',
+          duration_seconds: 180,
+          remaining_seconds: 180,
+          fees_collected: 0,
+          created_at: new Date().toISOString()
+        }).select().single();
 
-  const qty = bid.quantity_mt || 20;
-  const remaining = brief.remaining_mt || 0;
-  if (qty > remaining) throw new Error(`Only ${remaining} MT remaining`);
+        // ✅ Check both error and data
+        if (auctionErr || !auction) {
+          showToast("Failed to start auction", true);
+          btn.disabled = false;
+          btn.textContent = '▶ START AUCTION';
+          startAuctionInProgress = false;
+          return;
+        }
 
-  const nextRemaining = remaining - qty;
-  const nextFees = (brief.fees_collected || 0) + 25;
+        let newAuctionId;
+        try {
+          newAuctionId = validateId(auction.id, 'auction.id');
+        } catch (err) {
+          showToast('Invalid auction ID from DB', true);
+          btn.disabled = false;
+          btn.textContent = '▶ START AUCTION';
+          startAuctionInProgress = false;
+          return;
+        }
 
-  // Update bid
-  await supabase.from('bids').update({
-    status: "accepted",
-    accepted_at: new Date().toISOString()
-  }).eq('id', bidId);
+        try {
+          await safeUpdateBrief(briefId, {
+            status: 'auctioning',
+            started_at: new Date().toISOString()
+          });
+        } catch (briefErr) {
+          console.error('Failed to update brief status:', briefErr);
+          try {
+            await safeUpdateAuction(newAuctionId, {
+              status: 'failed',
+              error_message: 'Brief update failed'
+            });
+          } catch (cleanupErr) {
+            console.error('Failed to clean up orphaned auction:', cleanupErr);
+          }
+          showToast('Failed to start auction: brief update failed. Please try again.', true);
+          btn.disabled = false;
+          btn.textContent = '▶ START AUCTION';
+          startAuctionInProgress = false;
+          return;
+        }
 
-  // Update brief
-  const briefUpdate = {
-    remaining_mt: nextRemaining,
-    fees_collected: nextFees,
-    updated_at: new Date().toISOString()
-  };
-  if (nextRemaining <= 0) {
-    briefUpdate.status = "completed";
-    briefUpdate.ended_at = new Date().toISOString();
-  }
-  await supabase.from('seller_briefs').update(briefUpdate).eq('id', briefId);
+        // ✅ Success - update local state
+        currentAuctionId = newAuctionId;
+        auctionActive = true;
+        timerSeconds = 180;
+        document.getElementById('timerMain').textContent = "03:00";
+        document.getElementById('timerMain').classList.remove('warning');
+        btn.textContent = '⏳ AUCTION RUNNING';
+        btn.disabled = true;
 
-  // Record fee
-  await supabase.from('fees').insert({
-    auction_id: currentAuctionId,
-    bid_id: bidId,
-    amount: 25,
-    type: 'acceptance_fee',
-    created_at: new Date().toISOString()
-  });
+        try {
+          startTimerLoop();
+          renderCardsWithJostle();
+          showToast("🎬 Seller auction STARTED — highest bid wins! Bot bids will appear automatically.");
+          await subscribeToSupabaseBids();
+        } catch (err) {
+          // ✅ Rollback on unexpected error
+          console.error('Unexpected error during auction startup:', err);
+          const rollbackStatus = originalBriefStatus === 'auctioning' ? 'active' : originalBriefStatus;
+          try {
+            await safeUpdateBrief(briefId, {
+              status: rollbackStatus,
+              started_at: null
+            });
+          } catch (rollbackErr) {
+            console.error('Failed to rollback brief status:', rollbackErr);
+          }
+          try {
+            await safeUpdateAuction(currentAuctionId, {
+              status: 'failed',
+              error_message: err.message || 'Unknown error'
+            });
+          } catch (cleanupErr) {
+            console.error('Failed to clean up auction:', cleanupErr);
+          }
+          // ✅ Reset currentAuctionId to prevent stale reference
+          currentAuctionId = null;
+          auctionActive = false;
+          btn.disabled = false;
+          btn.textContent = '▶ START AUCTION';
+          showToast('Auction startup failed: ' + err.message, true);
+        }
+      } catch (err) {
+        console.error('Unexpected error in startAuction:', err);
+        showToast('Error: ' + err.message, true);
+        // ✅ Rollback brief on outer catch too
+        if (currentBrief) {
+          const rollbackStatus = originalBriefStatus === 'auctioning' ? 'active' : originalBriefStatus;
+          try {
+            await safeUpdateBrief(briefId, {
+              status: rollbackStatus,
+              started_at: null
+            });
+          } catch (rollbackErr) {
+            console.error('Failed to rollback brief on error:', rollbackErr);
+          }
+        }
+        if (currentAuctionId) {
+          try {
+            await safeUpdateAuction(currentAuctionId, {
+              status: 'failed',
+              error_message: err.message || 'Unknown error'
+            });
+          } catch (cleanupErr) {
+            console.error('Failed to clean up auction on error:', cleanupErr);
+          }
+          // ✅ Reset currentAuctionId
+          currentAuctionId = null;
+        }
+        auctionActive = false;
+        btn.disabled = false;
+        btn.textContent = '▶ START AUCTION';
+      } finally {
+        startAuctionInProgress = false;
+      }
+    }
 
-  return { success: true, remaining_mt: nextRemaining, fees_collected: nextFees, soldOut: nextRemaining <= 0 };
-}
+    // ========== ACCEPT BID TRANSACTION ==========
+    // ⚠️ WARNING: This function is intentionally non-atomic for simplicity.
+    // For production, consider using a Supabase RPC transaction to prevent
+    // race conditions where two tabs/sessions could accept the same bid.
+    // The processingBids Set prevents same-session races only.
+    async function acceptBidTransaction(bidId, briefId) {
+      const uid = currentUser?.id;
+      if (!uid) throw new Error("Not authenticated");
 
-// ========== EVENT LISTENERS ==========
-document.getElementById('cardsGrid').addEventListener('click', e => {
-  const card = e.target.closest('.market-card');
-  if (!card) return;
-  const bidId = card.getAttribute('data-id');
-  const bid = activeBids.find(b => b.id === bidId);
-  if (!bid) return;
-  if (e.target.matches('[data-action="accept"]')) {
-    e.stopPropagation();
-    acceptOffer(bidId);
-  } else {
-    const rank = Array.from(card.parentNode.children).indexOf(card) + 1;
-    openModal(bid, rank);
-  }
-});
-document.getElementById('startBtn').addEventListener('click', startAuction);
-document.getElementById('closeModalBtn').addEventListener('click', closeModalFn);
-document.getElementById('acceptFromModalBtn').addEventListener('click', acceptFromModal);
-document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === document.getElementById('modalOverlay')) closeModalFn(); });
-document.addEventListener('keydown', e => { 
-  if (e.key === 'Escape') { 
-    closeModalFn(); 
-    const duheModal = document.getElementById('duheModal'); 
-    if (duheModal) duheModal.remove(); 
-    const negModal = document.getElementById('negotiateModal'); 
-    if (negModal) negModal.remove(); 
-  } 
-});
+      const validatedBidId = validateId(bidId, 'bidId');
+      const validatedBriefId = validateId(briefId, 'briefId');
 
-// ========== INIT ==========
-initAuth();
-</script>
+      const { data: bid, error: bidErr } = await supabase
+        .from('bids')
+        .select('*')
+        .eq('id', validatedBidId)
+        .single();
+      if (bidErr || !bid) throw new Error("Bid not found");
+
+      const qty = bid.quantity_mt ?? (bid.quantity_kg ? bid.quantity_kg / 1000 : 0);
+      if (qty <= 0) throw new Error("Bid quantity must be greater than 0");
+
+      const price = bid.amount ?? bid.price_per_kg ?? 0;
+      if (price <= 0) throw new Error("Bid price must be greater than 0");
+
+      const { data: brief, error: briefErr } = await supabase
+        .from('seller_briefs')
+        .select('*')
+        .eq('id', validatedBriefId)
+        .single();
+      if (briefErr || !brief) throw new Error("Brief not found");
+      if (brief.seller_id !== uid) throw new Error("Brief does not belong to you");
+      if (bid.status !== "pending") throw new Error("Bid is no longer pending");
+
+      const remaining = brief.remaining_mt ?? 0;
+      if (qty > remaining) throw new Error(`Only ${remaining} MT remaining`);
+
+      const nextRemaining = remaining - qty;
+      const nextFees = (brief.fees_collected ?? 0) + 25;
+
+      // ⚠️ These updates are separate network calls, not atomic.
+      // For production, wrap in a Supabase RPC transaction to prevent race conditions
+      // where two tabs/sessions could accept the same bid.
+      // The processingBids Set only prevents same-session races.
+      await safeUpdateBid(validatedBidId, {
+        status: "accepted",
+        accepted_at: new Date().toISOString()
+      });
+
+      const briefUpdate = {
+        remaining_mt: nextRemaining,
+        fees_collected: nextFees,
+        updated_at: new Date().toISOString()
+      };
+      if (nextRemaining <= 0) {
+        briefUpdate.status = "completed";
+        briefUpdate.ended_at = new Date().toISOString();
+      }
+      const updatedBrief = await safeUpdateBrief(validatedBriefId, briefUpdate);
+
+      let auctionId = currentAuctionId;
+      if (!auctionId) {
+        const { data: auction } = await supabase
+          .from('auctions')
+          .select('id')
+          .eq('seller_id', uid)
+          .eq('status', 'active')
+          .maybeSingle();
+        if (auction) {
+          auctionId = validateId(auction.id, 'auction.id');
+          currentAuctionId = auctionId;
+        }
+      }
+
+      let feeRecorded = false;
+      if (auctionId) {
+        try {
+          await supabase.from('fees').insert({
+            auction_id: auctionId,
+            bid_id: validatedBidId,
+            amount: 25,
+            type: 'acceptance_fee',
+            created_at: new Date().toISOString()
+          });
+          feeRecorded = true;
+        } catch (feeErr) {
+          console.error('Failed to record fee:', feeErr);
+        }
+      }
+
+      // ✅ Return actual DB values, not calculated ones
+      return {
+        success: true,
+        remaining_mt: updatedBrief.remaining_mt,
+        fees_collected: updatedBrief.fees_collected,
+        soldOut: (updatedBrief.remaining_mt ?? 0) <= 0,
+        fee_recorded: feeRecorded
+      };
+    }
+
+    // ========== TOAST ==========
+    function showToast(msg, isError = false) {
+      let t = document.getElementById('toastMsg');
+      if (!t) return;
+      t.textContent = msg;
+      t.className = 'toast-msg' + (isError ? ' error' : '');
+      t.classList.add('visible');
+      if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+        toastTimeoutId = null;
+      }
+      toastTimeoutId = setTimeout(() => {
+        if (t) {
+          t.classList.remove('visible');
+        }
+        toastTimeoutId = null;
+      }, 4500);
+    }
+
+    // Cleanup
+    window.addEventListener('beforeunload', function() {
+      if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+        toastTimeoutId = null;
+      }
+      if (auctionEndTimeout) {
+        clearTimeout(auctionEndTimeout);
+        auctionEndTimeout = null;
+      }
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      if (bidsChannel) {
+        // Fire and forget - browser will handle cleanup
+        supabase.removeChannel(bidsChannel).catch(e => console.warn('Failed to remove channel:', e));
+        bidsChannel = null;
+      }
+      if (authSubscription) {
+        try {
+          authSubscription.unsubscribe();
+        } catch (e) {
+          console.warn('Failed to unsubscribe auth:', e);
+        }
+        authSubscription = null;
+      }
+    });
+
+    // ========== BID MODAL ==========
+    function openBidModal(card) {
+      document.getElementById('modalEmoji').textContent = '🏢';
+      document.getElementById('modalName').textContent = card.buyerName;
+      document.getElementById('modalPrice').textContent = `$${card.price.toFixed(2)}`;
+      document.getElementById('modalQty').textContent = `${card.quantity} MT · Total: $${card.totalValue.toLocaleString()}`;
+      document.getElementById('modalContact').textContent = card.contactPerson;
+      document.getElementById('modalEmail').textContent = card.email;
+      document.getElementById('modalPhone').textContent = card.phone;
+      document.getElementById('modalWhatsapp').textContent = card.whatsapp;
+
+      // ✅ Disable modal accept button if auction active or DUHE delay active
+      const modalBtn = document.getElementById('acceptFromModalBtn');
+      if (modalBtn) {
+        if (auctionActive || isDuheDelayActive || card.accepted || card.quantity > remainingQty) {
+          modalBtn.disabled = true;
+          modalBtn.textContent = auctionActive || isDuheDelayActive ? '⏳ AUCTION IN PROGRESS' : card.accepted ? '✓ ALREADY ACCEPTED' : '⚠️ QTY EXCEEDS';
+          modalBtn.style.opacity = '0.4';
+        } else {
+          modalBtn.disabled = false;
+          modalBtn.textContent = '✓ ACCEPT THIS OFFER';
+          modalBtn.style.opacity = '1';
+        }
+      }
+
+      document.getElementById('bidModal').classList.add('active');
+      currentModalBid = card;
+    }
+
+    function closeBidModal() { document.getElementById('bidModal').classList.remove('active'); }
+
+    // ========== ACCEPT FROM MODAL ==========
+    async function acceptFromModal() {
+      if (!currentModalBid) return;
+
+      let bidId;
+      try {
+        bidId = validateId(currentModalBid.id, 'currentModalBid.id');
+      } catch (err) {
+        showToast('Invalid bid selected', true);
+        return;
+      }
+
+      if (processingBids.has(bidId)) {
+        showToast('Already processing this bid', true);
+        return;
+      }
+
+      const btn = document.getElementById('acceptFromModalBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+      }
+
+      try {
+        await acceptOffer(bidId);
+        const bid = activeBids.find(b => b.id === bidId);
+        if (bid && bid.accepted) {
+          closeBidModal();
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, true);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '✓ ACCEPT THIS OFFER';
+        }
+      }
+    }
+
+    // ========== ACCEPT OFFER ==========
+    async function acceptOffer(bidId) {
+      const brief = currentBrief;
+      if (!brief) {
+        showToast('No brief loaded. Please refresh.', true);
+        return;
+      }
+
+      let validatedBidId;
+      try {
+        validatedBidId = validateId(bidId, 'bidId');
+      } catch (err) {
+        showToast('Invalid bid ID', true);
+        return;
+      }
+
+      if (processingBids.has(validatedBidId)) return;
+      processingBids.add(validatedBidId);
+
+      const bid = activeBids.find(c => c.id === validatedBidId);
+      if (!bid || bid.accepted) {
+        processingBids.delete(validatedBidId);
+        return;
+      }
+
+      if (auctionActive || isDuheDelayActive) {
+        showToast("Cannot accept during auction or DUHE processing.", true);
+        processingBids.delete(validatedBidId);
+        return;
+      }
+
+      if (bid.quantity > remainingQty) {
+        showToast(`Cannot accept ${bid.quantity} MT — only ${remainingQty} MT remaining`, true);
+        processingBids.delete(validatedBidId);
+        return;
+      }
+
+      const btn = document.querySelector(`[data-bid-id="${validatedBidId}"]`);
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+      }
+
+      try {
+        const result = await acceptBidTransaction(validatedBidId, brief.id);
+        bid.accepted = true;
+        remainingQty = result.remaining_mt;
+        feesCollected = result.fees_collected;
+        let msg = `✓ Accepted ${bid.buyerName}: ${bid.quantity} MT @ $${bid.price}/MT — $25 fee captured`;
+        if (!result.fee_recorded) {
+          msg += ' ⚠️ Fee not recorded. Contact support.';
+        }
+        showToast(msg, !result.fee_recorded);
+        renderCardsWithJostle();
+        if (remainingQty <= 0) {
+          showToast("🎉 INVENTORY SOLD OUT! Auction complete.");
+          document.getElementById('startBtn').textContent = 'AUCTION COMPLETE';
+          document.getElementById('startBtn').disabled = true;
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, true);
+        const newBtn = document.querySelector(`[data-bid-id="${validatedBidId}"]`);
+        if (newBtn) {
+          newBtn.disabled = false;
+          newBtn.textContent = '✓ ACCEPT OFFER';
+        }
+        throw err;
+      } finally {
+        processingBids.delete(validatedBidId);
+      }
+    }
+
+    // ========== EVENT LISTENERS ==========
+    document.getElementById('cardsGrid').addEventListener('click', e => {
+      const card = e.target.closest('.market-card');
+      if (!card) return;
+      const bidId = card.getAttribute('data-id');
+      const bid = activeBids.find(b => b.id === bidId);
+      if (!bid) return;
+
+      // ✅ Use closest for robustness
+      const acceptBtn = e.target.closest('[data-action="accept"]');
+      if (acceptBtn) {
+        e.stopPropagation();
+        if (acceptBtn.disabled) return;
+        acceptBtn.disabled = true;
+        acceptBtn.textContent = 'Processing...';
+        acceptOffer(bidId).finally(() => {
+          const newBtn = document.querySelector(`[data-bid-id="${bidId}"]`);
+          if (newBtn && !bid.accepted) {
+            newBtn.disabled = false;
+            newBtn.textContent = '✓ ACCEPT OFFER';
+          }
+        });
+      } else {
+        openBidModal(bid);
+      }
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startAuction);
+    document.getElementById('closeBidModal').addEventListener('click', closeBidModal);
+    document.getElementById('acceptFromModalBtn').addEventListener('click', acceptFromModal);
+    document.getElementById('bidModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('bidModal')) closeBidModal();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeBidModal();
+        const duheModal = document.getElementById('duheModal');
+        if (duheModal) duheModal.classList.remove('active');
+        const negModal = document.getElementById('negotiateModal');
+        if (negModal) negModal.remove();
+      }
+    });
+
+    // ========== INIT ==========
+    initAuth();
+    console.log('🚀 TradeAux Seller Auction Arena with Knapsack Solver loaded!');
+    console.log(
+      '✅ All fixes applied: safeUpdate helpers with row-count validation, currentAuctionId reset, eq(id) vulnerability eliminated, atomicity warnings, DUHE modal guards, contract append mode, detailed error tracking'
+      );
+  </script>
 </body>
 </html>
