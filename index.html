@@ -4,20 +4,12 @@
 <meta charset="UTF-8">
 <title>TradeAux — Global Surplus Exchange</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* ===== COMPLETE STYLES (same as before) ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  background: #020617;
-  min-height: 100vh;
-  font-family: 'Orbitron', sans-serif;
-  overflow-x: hidden;
-}
+body { background: #020617; min-height: 100vh; font-family: 'Orbitron', sans-serif; overflow-x: hidden; padding-bottom: 80px; }
 
 .bg-waves {
   position: fixed;
@@ -50,12 +42,12 @@ body {
 .container {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 20px 24px 80px 140px;
+  padding: 20px 24px 40px 140px;
   position: relative;
   z-index: 2;
 }
 
-/* ===== TRADEAUX 3D LOGO ===== */
+/* ===== 3D LOGO ===== */
 .gem-logo-corner {
   position: fixed;
   top: 20px;
@@ -106,34 +98,13 @@ body {
   50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
 }
 
-.gem-letter[data-letter="T"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="R"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="A"] {
-  background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="D"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="E"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="U"] {
-  background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.gem-letter[data-letter="X"] {
-  background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
+.gem-letter[data-letter="T"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="R"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="A"] { background: linear-gradient(145deg, #5a1a1a 0%, #8a2a2a 15%, #ba3a3a 30%, #ea4a4a 45%, #ba3a3a 60%, #8a2a2a 75%, #5a1a1a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="D"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="E"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="U"] { background: linear-gradient(145deg, #1a3a6a 0%, #2a5a9a 15%, #3a7aca 30%, #4a9aff 45%, #3a7aca 60%, #2a5a9a 75%, #1a3a6a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gem-letter[data-letter="X"] { background: linear-gradient(145deg, #1a5a2a 0%, #2a8a3a 15%, #3aba4a 30%, #4aea5a 45%, #3aba4a 60%, #2a8a3a 75%, #1a5a2a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 .gem-letter .edge-top {
   position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
@@ -271,7 +242,6 @@ body {
   line-height: 1.5;
 }
 
-/* ===== MARKET CARDS ===== */
 .market-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -330,17 +300,6 @@ body {
   height: 180px;
   z-index: 1;
   overflow: hidden;
-}
-
-.market-image-area img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.market-card:hover .market-image-area img {
-  transform: scale(1.05);
 }
 
 .market-image-placeholder {
@@ -502,12 +461,417 @@ footer a:hover { color: #4a9e5a; }
   .trust { grid-template-columns: repeat(2, 1fr); }
   .gem-logo-corner { transform: scale(0.25); }
   .hero h1 { font-size: 1.8rem; }
-  .container { padding: 16px 16px 80px 16px; }
+  .container { padding: 16px 16px 40px 16px; }
 }
 @media (max-width: 600px) {
   .trust { grid-template-columns: 1fr; }
 }
+
+/* ===== TAR STATUS BAR ===== */
+#tar-status-bar {
+  position: fixed;
+  bottom: 45px;
+  right: 20px;
+  z-index: 9998;
+  background: rgba(2, 6, 23, 0.95);
+  border: 1px solid rgba(124, 252, 0, 0.3);
+  border-radius: 12px;
+  padding: 10px 16px;
+  backdrop-filter: blur(12px);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+#tar-status-bar:hover {
+  border-color: #7CFC00;
+  box-shadow: 0 10px 40px rgba(124, 252, 0, 0.15);
+}
+
+.tar-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7CFC00;
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.tar-status-dot.inactive {
+  background: #ff6b6b;
+  animation: none;
+}
+
+.tar-status-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  color: #7CFC00;
+  letter-spacing: 0.5px;
+}
+
+.tar-metrics {
+  display: flex;
+  gap: 10px;
+  font-size: 9px;
+  color: #9ca3af;
+}
+
+.tar-metrics .metric {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tar-metrics .metric-value {
+  color: #e5e7eb;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+}
+
+.tar-expand-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+  transition: color 0.3s;
+}
+
+.tar-expand-btn:hover {
+  color: #7CFC00;
+}
+
+#tar-panel {
+  position: fixed;
+  bottom: 95px;
+  right: 20px;
+  width: 320px;
+  max-height: 400px;
+  background: rgba(2, 6, 23, 0.98);
+  border: 1px solid rgba(124, 252, 0, 0.2);
+  border-radius: 16px;
+  padding: 16px 20px;
+  backdrop-filter: blur(12px);
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+  display: none;
+  z-index: 9997;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  overflow-y: auto;
+}
+
+#tar-panel.open {
+  display: block;
+}
+
+#tar-panel h4 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  color: #7CFC00;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#tar-panel .close-panel {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#tar-panel .close-panel:hover {
+  color: #ff6b6b;
+}
+
+#tar-panel .panel-content {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+#tar-panel .panel-item {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
+}
+
+#tar-panel .panel-item:last-child {
+  border-bottom: none;
+}
+
+#tar-panel .panel-item .label {
+  color: #9ca3af;
+}
+
+#tar-panel .panel-item .value {
+  color: #e5e7eb;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+}
+
+/* ===== TAR CHAT WIDGET ===== */
+#tar-chat-widget {
+  position: fixed;
+  bottom: 105px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.tar-chat-toggle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7CFC00, #00ced1);
+  border: none;
+  color: #020617;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(124, 252, 0, 0.3);
+  transition: all 0.3s ease;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tar-chat-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 15px 40px rgba(124, 252, 0, 0.5);
+}
+
+.tar-chat-panel {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  width: 380px;
+  height: 500px;
+  background: rgba(2, 6, 23, 0.98);
+  border: 1px solid rgba(124, 252, 0, 0.3);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.tar-chat-panel.hidden {
+  display: none;
+}
+
+.tar-chat-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(124, 252, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: #7CFC00;
+}
+
+.tar-chat-header button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.tar-chat-header button:hover {
+  color: #ff6b6b;
+}
+
+.tar-chat-messages {
+  flex: 1;
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tar-chat-message {
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 85%;
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+  animation: messageSlide 0.3s ease;
+}
+
+@keyframes messageSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tar-chat-message.bot {
+  background: rgba(124, 252, 0, 0.08);
+  border: 1px solid rgba(124, 252, 0, 0.1);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.tar-chat-message.user {
+  background: rgba(0, 206, 209, 0.15);
+  border: 1px solid rgba(0, 206, 209, 0.1);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.tar-chat-message .highlight { color: #7CFC00; }
+.tar-chat-message .info { color: #00ced1; }
+.tar-chat-message .warning { color: #FFD966; }
+.tar-chat-message .danger { color: #ff6b6b; }
+.tar-chat-message .commentary { color: #FFD966; font-style: italic; }
+
+.tar-chat-input {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  gap: 8px;
+}
+
+.tar-chat-input input {
+  flex: 1;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #e5e7eb;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+}
+
+.tar-chat-input input:focus {
+  border-color: #7CFC00;
+}
+
+.tar-chat-input button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #7CFC00, #00ced1);
+  border: none;
+  border-radius: 8px;
+  color: #020617;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tar-chat-input button:hover {
+  transform: scale(1.02);
+}
+
+/* ===== TAR TICKER BAR ===== */
+#tar-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45px;
+  background: rgba(2, 6, 23, 0.98);
+  border-top: 2px solid rgba(124, 252, 0, 0.3);
+  z-index: 9996;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -5px 30px rgba(0,0,0,0.5);
+}
+
+.ticker-container {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-content {
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  animation: tickerScroll 45s linear infinite;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.ticker-item .ticker-icon { font-size: 14px; }
+.ticker-item .ticker-highlight { color: #7CFC00; font-weight: 600; }
+.ticker-item .ticker-info { color: #00ced1; }
+.ticker-item .ticker-warning { color: #FFD966; }
+.ticker-item .ticker-danger { color: #ff6b6b; }
+.ticker-item .ticker-commentary { color: #FFD966; font-style: italic; }
+
+.ticker-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  height: 100%;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  color: #9ca3af;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.ticker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7CFC00;
+  animation: tickerPulse 1.5s infinite;
+}
+
+.ticker-dot.inactive { background: #ff6b6b; animation: none; }
+.ticker-dot.demo { background: #FFD966; animation: tickerPulse 2s infinite; }
+
+@keyframes tickerPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+
+.ticker-label { letter-spacing: 1px; }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -558,19 +922,11 @@ footer a:hover { color: #4a9e5a; }
   </header>
 
   <div class="hero">
-    <h1>International trade shouldn’t waste opportunities.</h1>
-    <p>Profitable products go unsold. 
-Containers leave half empty.
-Buyers never see better options.
-Sellers never see the right demand.
-Not because trade is broken.
-Because it’s disconnected...</p>
+    <h1>International trade shouldn't waste opportunities.</h1>
+    <p>Profitable products go unsold. Containers leave half empty. Buyers never see better options. Sellers never see the right demand. Not because trade is broken. Because it's disconnected...</p>
   </div>
 
-  <!-- ===== MARKET CARDS ===== -->
   <div class="market-cards">
-
-    <!-- COCONUTS — ACTIVE -->
     <div class="market-card card-active">
       <div class="card-wave"></div>
       <div class="market-image-area">
@@ -579,19 +935,12 @@ Because it’s disconnected...</p>
       <div class="market-info">
         <div class="market-title">COCONUTS</div>
         <div class="market-products">
-          <ul>
-            <li>Dessicated</li>
-            <li>Coconut Water</li>
-            <li>Coconut Milk</li>
-            <li>Coconut Cream</li>
-            <li>Coconut Flour</li>
-          </ul>
+          <ul><li>Dessicated</li><li>Coconut Water</li><li>Coconut Milk</li><li>Coconut Cream</li><li>Coconut Flour</li></ul>
         </div>
         <div class="status-badge status-active">🟢 MARKET ACTIVE</div>
       </div>
     </div>
 
-    <!-- PEANUTS — COMING SOON -->
     <div class="market-card card-soon">
       <div class="card-wave"></div>
       <div class="market-image-area">
@@ -599,16 +948,11 @@ Because it’s disconnected...</p>
       </div>
       <div class="market-info">
         <div class="market-title">PEANUTS</div>
-        <div class="market-products">
-          <ul>
-            <li>Coming Soon</li>
-          </ul>
-        </div>
+        <div class="market-products"><ul><li>Coming Soon</li></ul></div>
         <div class="status-badge status-soon">🟡 COMING SOON</div>
       </div>
     </div>
 
-    <!-- CASHEWS — COMING SOON -->
     <div class="market-card card-soon-2">
       <div class="card-wave"></div>
       <div class="market-image-area">
@@ -616,31 +960,19 @@ Because it’s disconnected...</p>
       </div>
       <div class="market-info">
         <div class="market-title">CASHEWS</div>
-        <div class="market-products">
-          <ul>
-            <li>Coming Soon</li>
-          </ul>
-        </div>
+        <div class="market-products"><ul><li>Coming Soon</li></ul></div>
         <div class="status-badge status-soon-2">🔴 COMING SOON</div>
       </div>
     </div>
-
   </div>
 
   <div class="how-it-works">
     <h2>The TradeAux Method</h2>
     <div class="steps">
-      <div class="step"><div class="step-number">1</div><h3>Buying Through TradeAux</h3><p>Create demand. 
-Compete for business using your own digital trading assets. Choose the best auctions.
-Learn how buyers use RFQs, auctions, freight procurement, and transparent bidding to purchase with confidence.</p></div>
-      <div class="step"><div class="step-number">2</div><h3>Selling Through TradeAux</h3><p>Invite competition.Build reputation. Grow your market. Move your inventory in 3 minutes.</p></div>
-      <div class="step"><div class="step-number">3</div><h3>Creating Opportunity</h3><p>Every shipment contains more opportunity than first appears.
-Discover how Opportunity Surfaces, Trade Bots, and Container Captain connect buyers, suppliers, products, and freight into opportunities that would otherwise remain unseen.</p></div>
-      <div class="step"><div class="step-number">4</div><h3>What Is a Kontor?</h3><p>A kontor is a connected trading hub where buyers, sellers, logistics activity and financial factoring are concentrated.
-
-TradeAux builds markets by focusing activity into kontors—so demand, supply, and freight can interact in one structured environment instead of being scattered.
-
-Each kontor grows as real trade activity increases..</p></div>
+      <div class="step"><div class="step-number">1</div><h3>Buying Through TradeAux</h3><p>Create demand. Compete for business using your own digital trading assets. Choose the best auctions. Learn how buyers use RFQs, auctions, freight procurement, and transparent bidding to purchase with confidence.</p></div>
+      <div class="step"><div class="step-number">2</div><h3>Selling Through TradeAux</h3><p>Invite competition. Build reputation. Grow your market. Move your inventory in 3 minutes.</p></div>
+      <div class="step"><div class="step-number">3</div><h3>Creating Opportunity</h3><p>Every shipment contains more opportunity than first appears. Discover how Opportunity Surfaces, Trade Bots, and Container Captain connect buyers, suppliers, products, and freight into opportunities that would otherwise remain unseen.</p></div>
+      <div class="step"><div class="step-number">4</div><h3>What Is a Kontor?</h3><p>A kontor is a connected trading hub where buyers, sellers, logistics activity and financial factoring are concentrated. TradeAux builds markets by focusing activity into kontors—so demand, supply, and freight can interact in one structured environment instead of being scattered. Each kontor grows as real trade activity increases.</p></div>
     </div>
   </div>
 
@@ -657,59 +989,772 @@ Each kontor grows as real trade activity increases..</p></div>
   </footer>
 </div>
 
+<!-- ===== TAR TICKER BAR ===== -->
+<div id="tar-ticker">
+  <div class="ticker-container">
+    <div class="ticker-content" id="tickerContent">
+      <span class="ticker-item"><span class="ticker-icon">🎯</span><span class="ticker-highlight">TradeAux Live Feed - Loading...</span></span>
+    </div>
+  </div>
+  <div class="ticker-status">
+    <span class="ticker-dot" id="tickerDot"></span>
+    <span class="ticker-label" id="tickerLabel">STARTING</span>
+  </div>
+</div>
+
+<!-- ===== TAR STATUS BAR ===== -->
+<div id="tar-status-bar">
+  <div class="tar-status-dot" id="tarDot"></div>
+  <span class="tar-status-label" id="tarLabel">TAR LOADING</span>
+  <div class="tar-metrics">
+    <span class="metric">📊 <span class="metric-value" id="tarActive">0</span></span>
+    <span class="metric">📦 <span class="metric-value" id="tarVolume">0</span></span>
+    <span class="metric">💰 <span class="metric-value" id="tarPrice">$0</span></span>
+  </div>
+  <button class="tar-expand-btn" id="tarExpandBtn">📈</button>
+</div>
+
+<!-- ===== TAR PANEL ===== -->
+<div id="tar-panel">
+  <h4>
+    🤖 TAR SYSTEM
+    <button class="close-panel" id="tarClosePanel">✕</button>
+  </h4>
+  <div class="panel-content">
+    <div class="panel-item"><span class="label">Status</span><span class="value" id="panelStatus">Loading...</span></div>
+    <div class="panel-item"><span class="label">Active Auctions</span><span class="value" id="panelActive">0</span></div>
+    <div class="panel-item"><span class="label">Total Volume</span><span class="value" id="panelVolume">0 MT</span></div>
+    <div class="panel-item"><span class="label">Avg Price</span><span class="value" id="panelPrice">$0.00</span></div>
+    <div class="panel-item"><span class="label">Completed Today</span><span class="value" id="panelCompleted">0</span></div>
+  </div>
+</div>
+
+<!-- ===== TAR CHAT WIDGET ===== -->
+<div id="tar-chat-widget">
+  <button id="tar-chat-toggle" class="tar-chat-toggle">💬</button>
+  <div id="tar-chat-panel" class="tar-chat-panel hidden">
+    <div class="tar-chat-header">
+      <span>🤖 TAR Assistant</span>
+      <button id="tar-chat-close">✕</button>
+    </div>
+    <div id="tar-chat-messages" class="tar-chat-messages">
+      <div class="tar-chat-message bot">
+        💡 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>
+        I know everything about TradeAux and I watch every auction live.<br><br>
+        <span class="info">Ask me anything about:</span><br>
+        • How TradeAux works<br>
+        • What a Kontor is<br>
+        • Auction strategies<br>
+        • Current auction status<br>
+        • Why you won or lost<br>
+        • Container optimization<br>
+        • Fees and holds<br>
+        • The flywheel<br>
+        • Or just say hello! 👋
+      </div>
+    </div>
+    <div class="tar-chat-input">
+      <input type="text" id="tar-chat-input" placeholder="Ask TAR anything..." />
+      <button id="tar-chat-send">Send</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// SUPABASE CONFIGURATION
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-document.addEventListener('DOMContentLoaded', async function() {
-  const loginBtn = document.getElementById('login-btn');
-  const signupBtn = document.getElementById('signup-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const userInfo = document.getElementById('user-info');
-  const userEmail = document.getElementById('user-email');
+// ============================================================
+// TAR ENGINE
+// ============================================================
+class TAR {
+  constructor() {
+    if (window.__TAR_INSTANCE) return window.__TAR_INSTANCE;
+    this.initialized = false;
+    this.auctions = [];
+    this.marketData = { activeAuctions: 0, totalVolume: 0, averagePrice: 0, completedAuctions: 0 };
+    this.listeners = [];
+    this.supabase = null;
+    window.__TAR_INSTANCE = this;
+  }
 
-  // Check session on load with error handling
+  init(supabaseClient) {
+    if (this.initialized) return this;
+    this.supabase = supabaseClient;
+    console.log('🚀 TAR initializing...');
+    this.loadDemoData();
+    this.initialized = true;
+    this.broadcast('ready', this.getState());
+    console.log('✅ TAR Ready');
+    return this;
+  }
+
+  loadDemoData() {
+    this.auctions = [
+      { id: 'AUC-001', commodity: 'Coffee', quantity: 60, status: 'open', bids: [{ bidder: 'Bot A', quantity: 10, price: 4.85 }], current_high: 4.85, timeRemaining: 45 },
+      { id: 'AUC-002', commodity: 'Cocoa', quantity: 45, status: 'open', bids: [{ bidder: 'Bot B', quantity: 12, price: 4.45 }], current_high: 4.45, timeRemaining: 120 }
+    ];
+    this.marketData = { activeAuctions: 2, totalVolume: 105, averagePrice: 4.65, completedAuctions: 5 };
+  }
+
+  getState() {
+    return { initialized: this.initialized, ...this.marketData, auctions: this.auctions };
+  }
+
+  subscribe(callback) { this.listeners.push(callback); return () => { this.listeners = this.listeners.filter(l => l !== callback); }; }
+  broadcast(event, data) { this.listeners.forEach(cb => { try { cb(event, data); } catch(e) {} }); }
+}
+
+const tar = new TAR();
+tar.init(supabaseClient);
+
+// ============================================================
+// TAR UI
+// ============================================================
+function updateTARUI() {
+  const state = tar.getState();
+  const dot = document.getElementById('tarDot');
+  const label = document.getElementById('tarLabel');
+
+  if (state.initialized) {
+    dot.className = 'tar-status-dot';
+    label.textContent = 'TAR ACTIVE';
+    label.style.color = '#7CFC00';
+  } else {
+    dot.className = 'tar-status-dot inactive';
+    label.textContent = 'TAR LOADING';
+    label.style.color = '#9ca3af';
+  }
+
+  document.getElementById('tarActive').textContent = state.activeAuctions || 0;
+  document.getElementById('tarVolume').textContent = state.totalVolume || 0;
+  document.getElementById('tarPrice').textContent = `$${(state.averagePrice || 0).toFixed(2)}`;
+  document.getElementById('panelStatus').textContent = state.initialized ? '🟢 Active' : '🟡 Loading';
+  document.getElementById('panelActive').textContent = state.activeAuctions || 0;
+  document.getElementById('panelVolume').textContent = `${state.totalVolume || 0} MT`;
+  document.getElementById('panelPrice').textContent = `$${(state.averagePrice || 0).toFixed(2)}`;
+  document.getElementById('panelCompleted').textContent = state.completedAuctions || 0;
+}
+
+tar.subscribe(updateTARUI);
+setTimeout(updateTARUI, 500);
+
+// ============================================================
+// UI CONTROLS
+// ============================================================
+const expandBtn = document.getElementById('tarExpandBtn');
+const panel = document.getElementById('tar-panel');
+const closePanel = document.getElementById('tarClosePanel');
+const statusBar = document.getElementById('tar-status-bar');
+
+expandBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  panel.classList.toggle('open');
+  expandBtn.textContent = panel.classList.contains('open') ? '📉' : '📈';
+});
+
+closePanel.addEventListener('click', () => {
+  panel.classList.remove('open');
+  expandBtn.textContent = '📈';
+});
+
+statusBar.addEventListener('click', (e) => {
+  if (e.target.closest('.tar-expand-btn')) return;
+  panel.classList.toggle('open');
+  expandBtn.textContent = panel.classList.contains('open') ? '📉' : '📈';
+});
+
+// ============================================================
+// AUTH
+// ============================================================
+document.addEventListener('DOMContentLoaded', async function() {
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) showLoggedIn(session.user);
-  } catch (err) {
-    console.error('Session check failed:', err);
-  }
+    if (session) {
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('signup-btn').style.display = 'none';
+      document.getElementById('user-info').classList.add('show');
+      document.getElementById('user-email').textContent = session.user.email;
+    }
+  } catch(err) { console.error('Auth error:', err); }
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) showLoggedIn(session.user);
-    else if (event === 'SIGNED_OUT') showLoggedOut();
+  document.getElementById('logout-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
   });
 
-  function showLoggedIn(user) {
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (signupBtn) signupBtn.style.display = 'none';
-    userInfo.classList.add('show');
-    userEmail.textContent = user.email;
+  // Listen for auth state changes (e.g. sign out in another tab)
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      window.location.href = 'index.html';
+    }
+  });
+});
+
+// ============================================================
+// TAR TICKER ENGINE
+// ============================================================
+class TARTicker {
+  constructor() {
+    this.container = document.getElementById('tickerContent');
+    this.dot = document.getElementById('tickerDot');
+    this.label = document.getElementById('tickerLabel');
+    this.realDataCount = 0;
+    this.demoInterval = null;
+    this.setupTicker();
   }
 
-  function showLoggedOut() {
-    if (loginBtn) loginBtn.style.display = 'block';
-    if (signupBtn) signupBtn.style.display = 'block';
-    userInfo.classList.remove('show');
+  setupTicker() {
+    this.addItem('🎯', 'TradeAux Live Feed - Demo Mode', 'highlight', 'system');
+    this.addItem('📊', 'Real auctions will appear here when they start!', 'info', 'system');
+    this.addItem('🔄', 'Bots are active and monitoring all auctions', 'warning', 'system');
+    this.startDemoMode();
+    if (window.TAR) {
+      window.TAR.subscribe((event, data) => {
+        this.handleTAREvent(event, data);
+      });
+    }
   }
 
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        await supabaseClient.auth.signOut();
-        window.location.href = 'signin.html?logout=1';
-      } catch (error) {
-        console.error('Sign out error:', error);
-        window.location.href = 'signin.html?logout=1';
+  startDemoMode() {
+    this.demoInterval = setInterval(() => {
+      this.generateDemoUpdate();
+    }, 5000 + Math.random() * 3000);
+  }
+
+  generateDemoUpdate() {
+    if (this.realDataCount < 10 || Math.random() < 0.3) {
+      const updates = [
+        { icon: '📈', text: 'Bot ' + ['A','B','C','D','E'][Math.floor(Math.random()*5)] + ' bid $' + (4.20 + Math.random() * 0.8).toFixed(2) + ' on DEMO Coffee (10 MT)', type: 'info', source: 'demo' },
+        { icon: '📊', text: 'DEMO Cocoa price now $' + (4.30 + Math.random() * 0.3).toFixed(2), type: 'warning', source: 'demo' },
+        { icon: '📦', text: 'DEMO Container ' + (60 + Math.floor(Math.random() * 35)) + '% full', type: 'info', source: 'demo' },
+        { icon: '✅', text: 'DEMO Coffee auction closed! Winners: 3 bidders', type: 'highlight', source: 'demo' },
+        { icon: '🔔', text: 'DEMO Pallet Auction: ' + ['Cocoa','Sugar','Coconut Oil'][Math.floor(Math.random()*3)] + ' ' + (40 + Math.floor(Math.random()*20)) + ' MT', type: 'highlight', source: 'demo' },
+      ];
+      const update = updates[Math.floor(Math.random() * updates.length)];
+      this.addItem(update.icon, update.text, update.type, update.source);
+    }
+  }
+
+  handleTAREvent(event, data) {
+    switch(event) {
+      case 'auction_created':
+        this.addItem('🆕', `${data.commodity} ${data.quantity} MT @ $${data.start_price || 4.50} - Auction Started!`, 'highlight', 'real');
+        break;
+      case 'bid_placed':
+        this.addItem('📈', `${data.bidder} bid $${data.price} on ${data.commodity} (${data.quantity} MT)`, 'info', 'real');
+        break;
+      case 'auction_closed':
+        this.addItem('✅', `${data.commodity} ${data.quantity} MT SOLD!`, 'highlight', 'real');
+        break;
+      case 'high_bid':
+        this.addItem('📊', `${data.commodity} now $${data.bid.price} ↑ $${(data.bid.price - (data.previous || data.bid.price - 0.05)).toFixed(2)}`, 'warning', 'real');
+        break;
+      case 'container_update':
+        this.addItem('📦', `Container ${data.percentage}% full (${data.filled} MT of ${data.total} MT)`, 'info', 'real');
+        break;
+    }
+  }
+
+  addItem(icon, text, type = 'info', source = 'system') {
+    const item = document.createElement('span');
+    item.className = 'ticker-item';
+    const colorClass = type === 'highlight' ? 'ticker-highlight' :
+                       type === 'warning' ? 'ticker-warning' :
+                       type === 'danger' ? 'ticker-danger' : 'ticker-info';
+
+    const sourceBadge = source === 'real' ? '🔴' : source === 'demo' ? '🟡' : '';
+    const sourceLabel = source === 'real' ? 'LIVE' : source === 'demo' ? 'DEMO' : '';
+
+    item.innerHTML = `<span class="ticker-icon">${icon}</span>
+                      <span class="${colorClass}">${text}</span>
+                      ${sourceBadge ? `<span style="font-size:8px;color:#9ca3af;margin-left:4px;">${sourceLabel}</span>` : ''}`;
+
+    this.container.appendChild(item);
+
+    while (this.container.children.length > 30) {
+      this.container.removeChild(this.container.children[0]);
+    }
+
+    if (source === 'real') {
+      this.realDataCount++;
+      if (this.realDataCount >= 5 && this.demoInterval) {
+        clearInterval(this.demoInterval);
+        this.demoInterval = null;
+        this.addItem('🚀', 'Transitioning to LIVE mode - Real auctions detected!', 'highlight', 'system');
+        setTimeout(() => {
+          this.label.textContent = 'LIVE';
+          this.dot.className = 'ticker-dot';
+          this.addItem('🔴', 'LIVE MODE ACTIVE - Real auction data streaming', 'highlight', 'system');
+        }, 3000);
+      }
+    }
+  }
+}
+
+// ============================================================
+// TAR LIVE AUCTION COMMENTATOR
+// ============================================================
+class TARAuctionCommentator {
+  constructor() {
+    this.activeAuctions = {};
+    this.setupCommentator();
+  }
+
+  setupCommentator() {
+    if (window.TAR) {
+      window.TAR.subscribe((event, data) => {
+        this.handleEvent(event, data);
+      });
+    }
+    setInterval(() => {
+      this.checkActiveAuctions();
+    }, 10000);
+  }
+
+  handleEvent(event, data) {
+    switch(event) {
+      case 'auction_created':
+        this.commentOnAuctionStart(data);
+        break;
+      case 'bid_placed':
+        this.commentOnBid(data);
+        break;
+      case 'high_bid':
+        this.commentOnPriceMovement(data);
+        break;
+      case 'auction_closed':
+        this.commentOnAuctionEnd(data);
+        break;
+    }
+  }
+
+  commentOnAuctionStart(auction) {
+    const startPrice = auction.start_price || 4.50;
+    const expectedLow = (startPrice * 1.05).toFixed(2);
+    const expectedHigh = (startPrice * 1.12).toFixed(2);
+
+    let comment = `🔴 ${auction.commodity} ${auction.quantity} MT @ $${startPrice} - Auction Started!\n`;
+    comment += `🤖 TAR: "${auction.commodity} auction just opened. `;
+    comment += `${auction.quantity} MT available at $${startPrice}.\n`;
+    comment += `Expected final price: $${expectedLow}-$${expectedHigh}.\n`;
+    comment += `Based on historical patterns, expect strong competition within 30 seconds."\n\n`;
+    this.addComment(comment);
+  }
+
+  commentOnBid(bid) {
+    const price = bid.price || 4.50;
+    const quantity = bid.quantity || 10;
+    const bidder = bid.bidder || 'Bot';
+    const commodity = bid.commodity || 'product';
+
+    let comment = `📈 ${bidder} bid $${price} on ${commodity} (${quantity} MT)\n`;
+    comment += `🤖 TAR: "${bidder} just placed a bid at $${price}.\n`;
+
+    if (quantity >= 13) {
+      comment += `💡 KEY OBSERVATION: ${quantity} MT is a strategic quantity.\n`;
+      comment += `They're leveraging volume advantage - can afford to bid lower.\n`;
+    } else if (quantity <= 10) {
+      comment += `💡 NOTE: ${quantity} MT is in the competitive zone.\n`;
+      comment += `Larger bidders may undercut on price while offering more volume.\n`;
+    }
+
+    if (price > 4.80) {
+      comment += `Aggressive move - they really want this.\n`;
+    } else if (price < 4.60) {
+      comment += `They're playing the volume game - watch for counter-bids.\n`;
+    }
+
+    comment += `\nExpect response within 15 seconds."\n\n`;
+    this.addComment(comment);
+  }
+
+  commentOnPriceMovement(data) {
+    const currentPrice = data.bid?.price || 4.50;
+    const commodity = data.commodity || 'product';
+
+    let comment = `📊 ${commodity} now $${currentPrice}\n`;
+    comment += `🤖 TAR: "Price just moved to $${currentPrice}.\n`;
+
+    if (currentPrice > 4.80) {
+      comment += `💡 Strong demand here. Expect more buyers to enter.\n`;
+    } else if (currentPrice < 4.60) {
+      comment += `💡 Market is finding support at this level.\n`;
+    } else {
+      comment += `💡 Stable trading. Watch for the final rush.\n`;
+    }
+
+    comment += `\n${currentPrice > 4.75 ? 'Resistance' : 'Support'} at $${(currentPrice + (currentPrice > 4.75 ? 0.05 : -0.05)).toFixed(2)}.\n\n`;
+    this.addComment(comment);
+  }
+
+  commentOnAuctionEnd(auction) {
+    const winners = auction.winners || [];
+    const totalQuantity = auction.quantity || 60;
+    const commodity = auction.commodity || 'product';
+
+    let comment = `✅ ${commodity} ${totalQuantity} MT - AUCTION CLOSED!\n`;
+    comment += `🤖 TAR: "Auction complete!\n`;
+
+    if (winners.length > 0) {
+      comment += `🏆 Winners:\n`;
+      winners.forEach((w, i) => {
+        comment += `   ${i+1}. ${w.bidder} - ${w.quantity} MT @ $${w.price}\n`;
+      });
+    }
+
+    if (winners.length >= 2) {
+      const quantities = winners.map(w => w.quantity);
+      const total = quantities.reduce((a, b) => a + b, 0);
+      comment += `\n🧩 PUZZLE ANALYSIS: ${quantities.join(' + ')} = ${total} MT.\n`;
+      const remaining = totalQuantity - total;
+      if (remaining > 0) {
+        comment += `   ${remaining} MT remaining. `;
+        comment += `The solver ${remaining < 5 ? 'almost' : 'could'} have used a filler.\n`;
+      } else {
+        comment += `   ✅ PERFECT FIT! The container is full.\n`;
+      }
+    }
+
+    if (winners.length > 0) {
+      const winner = winners[0];
+      if (winner.quantity >= 13) {
+        comment += `\n💡 VOLUME ADVANTAGE: The winner (${winner.quantity} MT at $${winner.price}) `;
+        comment += `used volume strategy - lower price but more quantity.\n`;
+      }
+    }
+
+    comment += `\n🤖 Ready for the next auction!"\n\n`;
+    this.addComment(comment);
+  }
+
+  checkActiveAuctions() {
+    const state = window.TAR ? window.TAR.getState() : null;
+    if (!state || !state.auctions) return;
+
+    state.auctions.forEach(auction => {
+      if (auction.status === 'open' && auction.timeRemaining < 30 && !this.activeAuctions[auction.id]) {
+        this.activeAuctions[auction.id] = true;
+        const comment = `⚡ FINAL COUNTDOWN - ${auction.commodity} ${auction.quantity} MT\n`;
+        const comment2 = `🤖 TAR: "Less than 30 seconds remaining! `;
+        const comment3 = `Current high: ${auction.current_high || 4.50}\n`;
+        const comment4 = `💡 Watch for a surge in the final 10 seconds!"\n\n`;
+        this.addComment(comment + comment2 + comment3 + comment4);
       }
     });
   }
+
+  addComment(comment) {
+    if (window.TARChat) {
+      window.TARChat.addMessage('bot', comment.replace(/\n/g, '<br>'));
+    }
+    if (window.TARTicker) {
+      const lines = comment.split('\n');
+      const firstLine = lines[0] || comment;
+      window.TARTicker.addItem('💬', firstLine.substring(0, 80), 'commentary', 'system');
+    }
+  }
+}
+
+// ============================================================
+// TAR CHAT ENGINE - COMPLETE KNOWLEDGE
+// ============================================================
+class TARChat {
+  constructor() {
+    this.messages = [];
+    this.isOpen = false;
+    this.setupUI();
+
+    // ===== COMPLETE KNOWLEDGE BASE =====
+    this.knowledge = {
+
+      // ===== CORE IDEA =====
+      coreIdea: `🎯 TradeAux is an AI-native operating system for international trade.
+
+It connects: Production → Discovery → Purchase → Container → Shipment → Finance → Reinvestment
+
+The objective is to move from "transactions connected by logistics" to "trade ecosystems optimized by intelligence."`,
+
+      // ===== THE PROBLEM =====
+      problem: `📋 TradeAux solves three core problems:
+
+1. CONTAINER INEFFICIENCY: A container is a fixed-cost asset. Whether 65% or 95% full, costs remain similar. TradeAux optimizes the whole container, not individual purchases.
+
+2. FRAGMENTED SUPPLY: Many regions have excellent exports but struggle with discovery, buyer access, and scale. The problem is coordination, not supply.
+
+3. FRAGMENTED DEMAND: Buyers struggle to find suppliers, evaluate products, and optimize inventory. TradeAux provides an intelligence layer between supply and demand.`,
+
+      // ===== KONTOR =====
+      kontor: `🏛️ A TradeAux Kontor is a port-centered trade ecosystem combining production, processing, logistics, commercial intelligence, and finance.
+
+TRADITIONAL (e.g., Davao): Internal production depth - seafood, agricultural exports, processed foods, snacks, dried products.
+
+MAGNETIC (e.g., Koper): Gateway for multiple economies - Slovenia, Croatia, Austria, Hungary, Northern Italy, surrounding regions.
+
+💡 A port alone is not a Kontor. A Kontor is a NETWORK.`,
+
+      // ===== MARKETPLACE =====
+      marketplace: `🛒 TradeAux is not simply a marketplace.
+
+Traditional: Seller → Buyer
+TradeAux: Production → Discovery → Purchase → Container → Shipment → Finance → Reinvestment
+
+BUYERS: Trading entities managing inventory, margins, suppliers, logistics, working capital. Buyers can become sellers.
+
+SELLERS: Production nodes. TradeAux helps find buyers, test products, increase exports. Sellers pay NOTHING for auctions.
+
+LOGISTICS: TradeAux improves logistics decisions by optimizing the shipment before movement begins.
+
+FINANCE: Verified trade activity connects to liquidity.`,
+
+      // ===== AI AGENTS =====
+      ai: `🧠 TradeAux uses specialized AI agents:
+
+1. BUYER AI: Digital procurement partner. Evaluates price, margin, supplier quality, container impact, buyer strategy. The buyer provides objectives, AI finds opportunities.
+
+2. SELLER AI: Helps producers choose auction types, understand demand, optimize inventory, build relationships.
+
+3. CONTAINER CAPTAIN: Optimizes the physical shipment. Considers weight, volume, pallets, product compatibility, destination, margins.
+
+4. FREIGHT AI: Optimizes transportation choices. Considers cost, timing, reliability, total economic impact.
+
+5. FINANCE AI: Manages the transition from completed trade activity to available capital.`,
+
+      // ===== AUCTIONS =====
+      auctions: `📊 TradeAux has five auction types:
+
+1. 🔬 DISCOVERY (50 kg): Find new products and suppliers. Reduces discovery cost. Designed to create future commercial relationships.
+
+2. 📦 PALLET (~250 kg): Primary commercial trading. The pallet connects warehouse, truck, and container.
+
+3. 🚛 BULK: Large commercial purchases. Used for established suppliers, large quantities, contracts.
+
+4. 🚢 FREIGHT: Creates competition among logistics providers. Cheapest freight isn't always best - objective is best total trade outcome.
+
+5. 💰 RECEIVABLE: Converts verified trade receivables into liquidity. Seller chooses whether to use this service.`,
+
+      // ===== FEES =====
+      fees: `💰 BUYER:
+• $25 hold BLOCKED from account per auction
+• If WIN: TradeAux keeps the $25
+• If LOSE: $25 is UNBLOCKED immediately
+• Must keep account funded to participate
+
+SELLER:
+• Pays NOTHING for the auction
+• Free to list products
+• Free to participate
+• Only pays when selling receivables (optional service)
+
+💡 Best practice: Keep at least $100-200 in your account.`,
+
+      // ===== FLYWHEEL =====
+      flywheel: `🔄 The TradeAux Flywheel:
+
+Product Discovery → Commercial Orders → Containers → Shipments → Receivables → Liquidity → More Trade
+
+Each stage creates value for the next stage. It's a continuous trade cycle.`,
+
+      // ===== INSIGHT =====
+      insight: `💡 The Fundamental Insight:
+
+TradeAux is NOT an auction company, freight company, factoring company, or marketplace.
+
+TradeAux IS a coordinated intelligence layer connecting all of them.
+
+The innovation is the combination: AI decision-making + container optimization + regional trade ecosystems + liquidity management.`,
+
+      // ===== TRUST =====
+      trust: `🔒 Trust & Safety:
+• Neutral marketplace
+• Buyers, sellers, and carriers trade directly
+• FOB port required on every listing
+• Transparency is our product
+• Disputes resolved via reputation system
+• Governed by Canadian law
+• Verified trade assets
+• Buyer funds reserved before bidding
+• No financing of promises - only verified execution`
+    };
+  }
+
+  setupUI() {
+    this.toggle = document.getElementById('tar-chat-toggle');
+    this.panel = document.getElementById('tar-chat-panel');
+    this.close = document.getElementById('tar-chat-close');
+    this.input = document.getElementById('tar-chat-input');
+    this.send = document.getElementById('tar-chat-send');
+    this.messagesContainer = document.getElementById('tar-chat-messages');
+
+    this.toggle.addEventListener('click', () => this.togglePanel());
+    this.close.addEventListener('click', () => this.togglePanel());
+    this.send.addEventListener('click', () => this.handleSend());
+    this.input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.handleSend();
+    });
+  }
+
+  togglePanel() {
+    this.isOpen = !this.isOpen;
+    this.panel.classList.toggle('hidden');
+    this.toggle.textContent = this.isOpen ? '✕' : '💬';
+    if (this.isOpen) {
+      this.input.focus();
+    }
+  }
+
+  handleSend() {
+    const text = this.input.value.trim();
+    if (!text) return;
+
+    this.addMessage('user', text);
+    this.input.value = '';
+    this.input.focus();
+
+    setTimeout(() => {
+      const response = this.processQuestion(text);
+      this.addMessage('bot', response);
+    }, 300 + Math.random() * 400);
+  }
+
+  addMessage(type, text) {
+    const div = document.createElement('div');
+    div.className = `tar-chat-message ${type}`;
+    div.innerHTML = text;
+    this.messagesContainer.appendChild(div);
+    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+  }
+
+  processQuestion(question) {
+    const lower = question.toLowerCase();
+    const state = window.TAR ? window.TAR.getState() : null;
+
+    // ===== LIVE AUCTION QUESTIONS =====
+    if (lower.includes('what\'s happening') || lower.includes('current') || lower.includes('status') || lower.includes('what\'s going on')) {
+      if (state && state.auctions && state.auctions.length > 0) {
+        const open = state.auctions.filter(a => a.status === 'open');
+        if (open.length > 0) {
+          let response = `📊 <span class="highlight">Live Auction Status:</span><br><br>`;
+          open.forEach(a => {
+            const timeLeft = a.timeRemaining || 120;
+            response += `☕ <span class="info">${a.commodity}</span> ${a.quantity} MT `;
+            response += `⏰ ${Math.floor(timeLeft/60)}:${String(Math.floor(timeLeft%60)).padStart(2,'0')} remaining<br>`;
+            response += `💰 Current high: <span class="highlight">$${a.current_high || a.start_price || 4.50}</span><br>`;
+            response += `👥 ${a.bids ? a.bids.length : 0} bids placed<br><br>`;
+          });
+          return response + `💡 <span class="warning">Anything specific you want to know?</span>`;
+        }
+      }
+      return `📊 <span class="highlight">No active auctions right now.</span><br><br>💡 Check back soon - new auctions start regularly!`;
+    }
+
+    if (lower.includes('why did i lose') || lower.includes('lose') || lower.includes('lost')) {
+      return `🤔 <span class="highlight">Why you might have lost:</span><br><br>
+1. 📦 <span class="info">Quantity strategy</span> - The winner likely used 13 MT+ to get volume advantage<br>
+2. 💰 <span class="info">Puzzle fit</span> - Your quantity didn't fit the container as well<br>
+3. ⏰ <span class="info">Timing</span> - You might have bid too early or too late<br>
+4. 🧩 <span class="info">Competition</span> - Multiple 10 MT bidders competed against each other<br><br>
+💡 <span class="warning">Try a different quantity next time - 12 MT often wins over 10 MT!</span>`;
+    }
+
+    if (lower.includes('strategy') || lower.includes('should i bid')) {
+      return `🎯 <span class="highlight">Current Strategy Recommendations:</span><br><br>
+1. 📦 <span class="info">Use 12-13 MT</span> - More volume = better puzzle fit<br>
+2. 💰 <span class="info">Don't set a floor</span> - Let bots compete the price up<br>
+3. ⏰ <span class="info">Watch the final 30 seconds</span> - That's where the action is<br>
+4. 🧩 <span class="info">Think about the container</span> - Your product is part of a puzzle<br>
+5. 📊 <span class="info">Check other auctions</span> - Avoid competing with similar products<br><br>
+💡 <span class="highlight">The 13 MT bidder often wins with lower price!</span>`;
+    }
+
+    // ===== GENERAL KNOWLEDGE =====
+    if (lower.includes('what is tradeaux') || lower.includes('what does tradeaux do')) {
+      return this.knowledge.coreIdea;
+    }
+
+    if (lower.includes('problem') || lower.includes('inefficiency') || lower.includes('fragmented')) {
+      return this.knowledge.problem;
+    }
+
+    if (lower.includes('kontor') || lower.includes('what is a kontor') || lower.includes('davao') || lower.includes('koper')) {
+      return this.knowledge.kontor;
+    }
+
+    if (lower.includes('marketplace') || lower.includes('participants') || (lower.includes('buyer') && !lower.includes('auction')) || (lower.includes('seller') && !lower.includes('auction'))) {
+      return this.knowledge.marketplace;
+    }
+
+    if (lower.includes('ai') || lower.includes('buyer ai') || lower.includes('seller ai') || lower.includes('container captain') || lower.includes('freight ai') || lower.includes('finance ai')) {
+      return this.knowledge.ai;
+    }
+
+    if (lower.includes('auction types') || lower.includes('what auctions') || lower.includes('discovery') || lower.includes('pallet') || lower.includes('bulk')) {
+      return this.knowledge.auctions;
+    }
+
+    if (lower.includes('fee') || lower.includes('cost') || lower.includes('hold') || lower.includes('pay') || lower.includes('fund')) {
+      return this.knowledge.fees;
+    }
+
+    if (lower.includes('flywheel') || lower.includes('cycle') || lower.includes('ecosystem')) {
+      return this.knowledge.flywheel;
+    }
+
+    if (lower.includes('insight') || lower.includes('fundamental')) {
+      return this.knowledge.insight;
+    }
+
+    if (lower.includes('trust') || lower.includes('safe') || lower.includes('secure')) {
+      return this.knowledge.trust;
+    }
+
+    // ===== DEFAULT =====
+    return `🤖 <span class="highlight">I'm TAR - Your TradeAux Assistant!</span><br><br>
+
+I can answer questions about:
+
+📋 <span class="info">What TradeAux is and how it works</span>
+🏛️ <span class="info">Kontors</span> (Traditional & Magnetic)
+🧠 <span class="info">AI Agents</span> (Buyer AI, Seller AI, Container Captain)
+📊 <span class="info">Auction Types</span> (Discovery, Pallet, Bulk, Freight, Receivable)
+💰 <span class="info">Fees & Holds</span>
+🔄 <span class="info">The Flywheel</span>
+💡 <span class="info">The Fundamental Insight</span>
+
+📈 <span class="info">I also watch auctions live!</span>
+• "What's happening in the auctions?"<br>
+• "Why did I lose?"<br>
+• "What's the best strategy now?"<br>
+
+<br><span class="warning">💡 Ask me anything about TradeAux!</span>`;
+  }
+}
+
+// ============================================================
+// INITIALIZE EVERYTHING
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  const chat = new TARChat();
+  window.TARChat = chat;
+
+  const ticker = new TARTicker();
+  window.TARTicker = ticker;
+
+  const commentator = new TARAuctionCommentator();
+  window.TARCommentator = commentator;
+
+  console.log('🚀 TAR System Fully Loaded!');
+  console.log('   ✅ TAR Engine Ready');
+  console.log('   ✅ TAR Chat Ready');
+  console.log('   ✅ TAR Ticker Ready');
+  console.log('   ✅ TAR Commentator Ready');
 });
 </script>
 </body>

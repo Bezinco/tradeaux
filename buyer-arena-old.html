@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeAux — Arena | Live Trading Floor</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #020617;
+  font-family: 'Inter', sans-serif;
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+/* Background Waves */
+.bg-waves {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: waveBgDrift 24s ease-in-out infinite;
+}
+
+.wave-1 { background: radial-gradient(circle at 30% 40%, rgba(0, 206, 209, 0.3), transparent 70%); top: -40%; left: -20%; }
+.wave-2 { background: radial-gradient(circle at 50% 50%, rgba(124, 252, 0, 0.2), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+.wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255, 59, 59, 0.15), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+
+@keyframes waveBgDrift {
+  0% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(40px,-30px) scale(1.05); }
+  100% { transform: translate(-30px,20px) scale(1); }
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0 30px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #0066ff, #00cc44, #d92b2b, #0066ff, #00cc44, #d92b2b, #0066ff, #00cc44);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 2px;
+}
+
+.nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav a {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 2px solid rgba(0, 206, 209, 0.5);
+  border-radius: 8px;
+  background: rgba(15, 32, 64, 0.7);
+  backdrop-filter: blur(4px);
+  color: #e5e7eb;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.nav a:hover {
+  border-color: #00ced1;
+  transform: translateY(-2px);
+}
+
+/* Wallet Section */
+.wallet-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0, 206, 209, 0.1);
+  padding: 8px 20px;
+  border-radius: 40px;
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  margin-right: 12px;
+}
+
+.wallet-balance {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.wallet-label {
+  font-size: 11px;
+  color: #9ca3af;
+  letter-spacing: 1px;
+}
+
+.wallet-amount {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #00ced1;
+}
+
+.wallet-currency {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.deposit-btn {
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  border: none;
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.deposit-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(0, 206, 209, 0.5);
+}
+
+.deposit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wallet-status {
+  font-size: 11px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7CFC00;
+  box-shadow: 0 0 5px #7CFC00;
+}
+
+/* Top Trader Banner */
+.top-trader {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 12px 24px;
+  border-radius: 40px;
+  display: inline-block;
+  width: auto;
+  margin: 20px auto;
+  border: 1px solid rgba(124, 252, 0, 0.3);
+  backdrop-filter: blur(4px);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+}
+
+.banner-container {
+  text-align: center;
+}
+
+/* Live Ticker */
+.ticker-section {
+  margin: 20px 0 30px;
+  text-align: center;
+}
+
+.ticker-header {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  color: #9ca3af;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.live-ticker {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ticker-item {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 206, 209, 0.2);
+  border-radius: 40px;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 206, 209, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(0, 206, 209, 0.4); }
+}
+
+.ticker-commodity {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+}
+
+.ticker-price {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  color: #00ced1;
+}
+
+.ticker-change.up { color: #7CFC00; }
+.ticker-change.down { color: #ff3b3b; }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.hero h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00ced1, #7CFC00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 16px;
+}
+
+.hero p {
+  color: #9ca3af;
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+
+.button-group {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.file-brief-btn {
+  background: linear-gradient(135deg, #ff3b3b, #ff6b6b);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+}
+
+.file-brief-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(255, 59, 59, 0.4);
+}
+
+.deploy-bot-btn {
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #000;
+}
+
+.deploy-bot-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(0, 206, 209, 0.4);
+}
+
+/* Arena Cards Grid */
+.arena-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 40px 0;
+}
+
+@media (max-width: 1000px) {
+  .arena-cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .arena-cards { grid-template-columns: 1fr; }
+}
+
+.arena-card {
+  background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95));
+  border: 2px solid rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.arena-card:hover {
+  transform: translateY(-6px);
+  border-color: #00ced1;
+  box-shadow: 0 20px 35px -12px rgba(0, 206, 209, 0.3);
+}
+
+/* Info Card - Gold Theme */
+.info-card {
+  background: linear-gradient(145deg, rgba(255, 215, 0, 0.1), rgba(218, 165, 32, 0.05));
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  border-radius: 20px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+  background-size: 200% 100%;
+  animation: goldShine 3s linear infinite;
+}
+
+@keyframes goldShine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.info-header {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFD700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-content {
+  font-size: 12px;
+  color: #e5e7eb;
+  line-height: 1.6;
+}
+
+.info-type {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  border-left: 3px solid #FFD700;
+}
+
+.info-type-label {
+  font-weight: 600;
+  color: #FFD700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.info-type-desc {
+  color: #9ca3af;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.info-tip {
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  font-size: 11px;
+  color: #FFD700;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.info-stat {
+  text-align: center;
+}
+
+.info-stat-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFD700;
+}
+
+.info-stat-label {
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* Card Badge */
+.card-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-active { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+.badge-idle { background: rgba(255,255,255,0.2); color: #9ca3af; }
+.badge-hot { background: linear-gradient(135deg, #ff3b3b, #ff6b6b); color: #fff; }
+
+/* Card Content */
+.card-emoji {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.card-commodity {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.card-price {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #00ced1;
+  margin: 12px 0;
+}
+
+.price-change {
+  font-size: 12px;
+  margin-left: 8px;
+}
+.price-change.up { color: #7CFC00; }
+.price-change.down { color: #ff3b3b; }
+
+.heat-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.heat-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ced1, #7CFC00);
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+
+.card-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.card-stats span:last-child {
+  color: #00ced1;
+  font-weight: 700;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #0a1228, #020617);
+  border: 2px solid #00ced1;
+  border-radius: 24px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 28px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.modal-close:hover { color: #00ced1; }
+
+.modal-header {
+  border-bottom: 1px solid rgba(0, 206, 209, 0.3);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  color: #00ced1;
+}
+
+.modal-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .modal-two-column { grid-template-columns: 1fr; }
+}
+
+.modal-section {
+  margin-bottom: 20px;
+}
+
+.modal-section h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: #7CFC00;
+  margin-bottom: 12px;
+}
+
+.share-list, .activity-list {
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.share-item, .activity-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 13px;
+}
+
+.share-name { font-weight: 600; }
+.share-amount { color: #00ced1; }
+
+.activity-action { color: #7CFC00; }
+.activity-time { font-size: 11px; color: #9ca3af; }
+
+.chart-container {
+  height: 150px;
+  margin-top: 16px;
+}
+
+/* Modal Fields for Add Bot */
+.modal-field {
+  margin-bottom: 20px;
+}
+
+.modal-field label {
+  display: block;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.modal-field input, .modal-field select, .modal-field textarea {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0, 206, 209, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+
+.modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
+  outline: none;
+  border-color: #00ced1;
+}
+
+.modal-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.slider-row input {
+  flex: 1;
+}
+
+.slider-value {
+  font-family: 'Orbitron', sans-serif;
+  color: #00ced1;
+  min-width: 60px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #e5e7eb;
+}
+
+.create-btn {
+  background: linear-gradient(135deg, #00ced1, #00ff7f);
+  border: none;
+  color: #000;
+}
+
+.submit-brief-btn {
+  background: linear-gradient(135deg, #ff3b3b, #ff6b6b);
+  border: none;
+  color: #fff;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 40px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(15,32,64,0.98);
+  border: 1px solid #00ced1;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  transition: 0.3s;
+  opacity: 0;
+  z-index: 2000;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+  border-color: #ff3b3b;
+  color: #ff3b3b;
+}
+
+/* Add Bot Card */
+.add-bot-card {
+  background: rgba(15, 32, 64, 0.4);
+  border: 2px dashed rgba(0, 206, 209, 0.3);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.add-bot-card:hover {
+  border-color: #00ced1;
+  background: rgba(0, 206, 209, 0.05);
+  transform: translateY(-4px);
+}
+
+.add-bot-icon {
+  font-size: 48px;
+  color: #00ced1;
+  margin-bottom: 16px;
+}
+
+.add-bot-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.add-bot-sub {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.3);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 206, 209, 0.2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.checkbox-item:hover {
+  border-color: #00ced1;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.checkbox-item.selected {
+  background: rgba(0, 206, 209, 0.2);
+  border-color: #00ced1;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-waves">
+  <div class="wave-bg wave-1"></div>
+  <div class="wave-bg wave-2"></div>
+  <div class="wave-bg wave-3"></div>
+</div>
+
+<div class="container">
+  <header class="header">
+    <div class="logo">⚡ TRADEAUX</div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="wallet-section">
+        <div class="wallet-balance">
+          <span class="wallet-label">WALLET</span>
+          <span class="wallet-amount" id="walletAmount">$0.00</span>
+          <span class="wallet-currency">USD</span>
+        </div>
+        <button class="deposit-btn" id="depositBtn">+ Deposit</button>
+        <div class="wallet-status">
+          <span class="status-dot"></span>
+          <span id="bidCount">0 bids available</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="market-intel.html">Market Intel</a>
+        <a href="#" id="authBtn">Sign In</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="banner-container">
+    <div class="top-trader" id="topTraderBanner">🏆 TOP TRADER: Nutcracker (+$18,432) | 2nd: Green Machine (+$12,847) | 3rd: Coco Loco (+$8,234)</div>
+  </div>
+
+  <!-- Live Price Ticker -->
+  <div class="ticker-section">
+    <div class="ticker-header">🔴 LIVE MARKET TICKER</div>
+    <div class="live-ticker" id="liveTicker">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <section class="hero">
+    <h1>✦ THE ARENA ✦</h1>
+    <p>Make your trading bots for the futures and spot lot markets. Live trading floor. Watch your Bots jostle for position. Click any card to see performance and adjust strategy.</p>
+    <div class="button-group">
+      <button class="file-brief-btn" id="fileBriefBtn">📋 FILE NEW BRIEF</button>
+      <button class="deploy-bot-btn" id="heroDeployBotBtn">🤖 DEPLOY NEW BOT</button>
+    </div>
+  </section>
+
+  <div class="arena-cards" id="arenaCards">
+    <!-- Bot cards populated by JavaScript -->
+  </div>
+
+  <footer class="footer">
+    <p>TRADEAUX © 2026 • Global Commodity Exchange • All fees in USD</p>
+  </footer>
+</div>
+
+<!-- Bot Details Modal -->
+<div id="botModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeModal">&times;</span>
+    <div class="modal-header">
+      <h2 id="modalTitle">Bot Name</h2>
+    </div>
+    <div class="modal-two-column">
+      <div class="modal-left">
+        <div class="modal-section">
+          <h3>📊 PERFORMANCE</h3>
+          <div class="share-list" id="performanceList">
+            <div class="share-item"><span>Trades</span><span id="modalTrades">0</span></div>
+            <div class="share-item"><span>PnL</span><span id="modalPnL">$0</span></div>
+            <div class="share-item"><span>Win Rate</span><span id="modalWinRate">0%</span></div>
+            <div class="share-item"><span>Best Trade</span><span id="modalBestTrade">$0</span></div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h3>⚙ CONFIGURATION</h3>
+          <div class="share-list" id="configList">
+            <div class="share-item"><span>Max Price</span><span id="modalMaxPrice">$0.00/unit</span></div>
+            <div class="share-item"><span>Daily Budget</span><span id="modalBudget">$0</span></div>
+            <div class="share-item"><span>Strategy</span><span id="modalStrategy">Balanced</span></div>
+            <div class="share-item"><span>Markets</span><span id="modalMarkets">Spot + Futures</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-right">
+        <div class="modal-section">
+          <h3>📈 TRADING ACTIVITY</h3>
+          <div class="activity-list" id="activityList">
+            <div class="activity-item">No recent activity</div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h3>📉 PERFORMANCE CHART</h3>
+          <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- File Brief Modal -->
+<div id="fileBriefModal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <span class="modal-close" id="closeBriefModal">&times;</span>
+    <div class="modal-header">
+      <h2>📋 FILE NEW BRIEF</h2>
+    </div>
+    <div class="modal-field">
+      <label>Commodity</label>
+      <select id="briefCommodity">
+        <option value="Peanuts">Peanuts</option>
+        <option value="Almonds">Almonds</option>
+        <option value="Coconuts">Coconuts</option>
+        <option value="Avocados">Avocados</option>
+        <option value="Coffee">Coffee</option>
+        <option value="Cashews">Cashews</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Quantity (MT)</label>
+      <input type="number" id="briefQuantity" min="1" step="1" value="100">
+    </div>
+    <div class="modal-field">
+      <label>Grade</label>
+      <select id="briefGrade">
+        <option value="Type 1">Type 1</option>
+        <option value="Type 2">Type 2</option>
+        <option value="Type 3">Type 3</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Origin (Multi-select)</label>
+      <div class="checkbox-group" id="originCheckboxes">
+        <label class="checkbox-item"><input type="checkbox" value="Argentina"> Argentina</label>
+        <label class="checkbox-item"><input type="checkbox" value="Brazil"> Brazil</label>
+        <label class="checkbox-item"><input type="checkbox" value="India"> India</label>
+        <label class="checkbox-item"><input type="checkbox" value="USA"> USA</label>
+        <label class="checkbox-item"><input type="checkbox" value="Vietnam"> Vietnam</label>
+        <label class="checkbox-item"><input type="checkbox" value="Nigeria"> Nigeria</label>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Destination</label>
+      <input type="text" id="briefDestination" placeholder="e.g., Rotterdam, NL" maxlength="100">
+    </div>
+    <div class="modal-field">
+      <label>Target Price (USD/MT) — Optional</label>
+      <input type="number" id="briefTargetPrice" min="0" step="0.01" placeholder="Leave blank for market rate">
+    </div>
+    <div class="modal-field">
+      <label>Notes</label>
+      <textarea id="briefNotes" placeholder="Special requirements, delivery window, etc." maxlength="500"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelBriefBtn">Cancel</button>
+      <button class="submit-brief-btn" id="submitBriefBtn">Submit Brief →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deploy Bot Modal -->
+<div id="addBotModal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <span class="modal-close" id="closeAddModal">&times;</span>
+    <div class="modal-header">
+      <h2>🤖 DEPLOY NEW BOT</h2>
+    </div>
+    <div class="modal-field">
+      <label>Bot Name *</label>
+      <input type="text" id="botName" placeholder="e.g., Nutcracker" maxlength="50">
+    </div>
+    <div class="modal-field">
+      <label>Commodity</label>
+      <select id="botCommodity">
+        <option value="Peanuts">Peanuts</option>
+        <option value="Almonds">Almonds</option>
+        <option value="Coconuts">Coconuts</option>
+        <option value="Avocados">Avocados</option>
+        <option value="Coffee">Coffee</option>
+        <option value="Cashews">Cashews</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Max Price (USD/unit)</label>
+      <div class="slider-row">
+        <input type="range" id="maxPrice" min="0.10" max="10.00" step="0.01" value="0.52">
+        <span class="slider-value" id="maxPriceDisplay">$0.52</span>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Strategy</label>
+      <select id="botStrategy">
+        <option value="Sniper">Sniper</option>
+        <option value="Aggressive">Aggressive</option>
+        <option value="Balanced">Balanced</option>
+        <option value="Conservative">Conservative</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Initial Budget (USD)</label>
+      <input type="number" id="botBudget" min="100" step="100" value="1000">
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelAddBtn">Cancel</button>
+      <button class="create-btn" id="createBotBtn">Deploy Bot →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deposit Modal -->
+<div id="depositModal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <span class="modal-close" id="closeDepositModal">&times;</span>
+    <div class="modal-header">
+      <h2>💰 Deposit Funds</h2>
+    </div>
+    <div class="modal-field">
+      <label>Amount (USD)</label>
+      <input type="number" id="depositAmount" min="100" step="100" value="500">
+      <small style="color: #9ca3af; display: block; margin-top: 8px;">Minimum deposit: $100 USD</small>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelDepositBtn">Cancel</button>
+      <button class="create-btn" id="confirmDepositBtn">Continue to Wise →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Bot updated</div>
+
+<script>
+// ==========================================
+// CONFIGURATION: Toggle Test Mode
+// ==========================================
+const TEST_MODE = true;
+const BID_COST = 8;
+
+// ==========================================
+// TEST MODE: Mock Supabase & Data Persistence
+// ==========================================
+if (TEST_MODE) {
+  console.log('🧪 ARENA TEST MODE ACTIVE');
+  
+  const FAKE_USER_ID = '22222222-2222-2222-2222-222222222222';
+  
+  window.mockSupabase = {
+    auth: {
+      getSession: () => Promise.resolve({
+        data: { session: { user: { id: FAKE_USER_ID, email: 'arena@tradeaux.com' } } },
+        error: null
+      })
+    }
+  };
+}
+
+// ==========================================
+// Data & State
+// ==========================================
+const commodityPrices = {
+  Peanuts: { price: 1.24, change: 2.1, emoji: '🥜', basePrice: 1.24 },
+  Almonds: { price: 6.48, change: 0.3, emoji: '🌰', basePrice: 6.48 },
+  Coconuts: { price: 0.44, change: -0.5, emoji: '🌴', basePrice: 0.44 },
+  Avocados: { price: 2.52, change: 1.8, emoji: '🥑', basePrice: 2.52 },
+  Coffee: { price: 4.85, change: 0.9, emoji: '☕', basePrice: 4.85 },
+  Cashews: { price: 3.22, change: 1.2, emoji: '🥥', basePrice: 3.22 }
+};
+
+const defaultBots = [
+  { id: '1', name: "Nutcracker", commodity: "Peanuts", emoji: "🥜", price: 1.24, change: 2.1, heat: 78, trades: 1247, pnl: 18432, winRate: 78, strategy: "Sniper", markets: "Spot + Futures", maxPrice: 1.30, budget: 5000, status: "active", badge: "badge-active" },
+  { id: '2', name: "Green Machine", commodity: "Avocados", emoji: "🥑", price: 2.52, change: 1.8, heat: 65, trades: 892, pnl: 12847, winRate: 72, strategy: "Aggressive", markets: "Spot only", maxPrice: 2.60, budget: 3000, status: "active", badge: "badge-active" },
+  { id: '3', name: "Coco Loco", commodity: "Coconuts", emoji: "🌴", price: 0.44, change: -0.5, heat: 42, trades: 456, pnl: 8234, winRate: 68, strategy: "Conservative", markets: "Futures only", maxPrice: 0.46, budget: 2000, status: "idle", badge: "badge-idle" },
+  { id: '4', name: "Almond Joy", commodity: "Almonds", emoji: '🌰', price: 6.48, change: 0.3, heat: 55, trades: 234, pnl: 5678, winRate: 65, strategy: "Balanced", markets: "Spot + Futures", maxPrice: 6.60, budget: 2500, status: "active", badge: "badge-active" },
+  { id: '5', name: "Cash Cow", commodity: "Cashews", emoji: '🥥', price: 3.22, change: 1.2, heat: 60, trades: 189, pnl: 4231, winRate: 70, strategy: "Aggressive", markets: "Spot only", maxPrice: 3.35, budget: 1500, status: "active", badge: "badge-active" },
+  { id: '6', name: "Caffeine", commodity: "Coffee", emoji: '☕', price: 4.85, change: 0.9, heat: 48, trades: 312, pnl: 3987, winRate: 66, strategy: "Sniper", markets: "Futures only", maxPrice: 5.00, budget: 1800, status: "idle", badge: "badge-idle" }
+];
+
+let bots = [];
+let walletBalance = 0;
+let currentUser = null;
+let performanceChart = null;
+let priceInterval = null;
+
+// ==========================================
+// Helpers
+// ==========================================
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'toast' + (isError ? ' error' : '');
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+function sanitizeInput(str) {
+  if (!str) return '';
+  return str.replace(/[<>]/g, '').trim();
+}
+
+function updateWalletDisplay() {
+  document.getElementById('walletAmount').textContent = `$${walletBalance.toFixed(2)}`;
+  const bidCount = Math.floor(walletBalance / BID_COST);
+  document.getElementById('bidCount').textContent = `${bidCount} bid${bidCount !== 1 ? 's' : ''} available`;
+  if (TEST_MODE) {
+    localStorage.setItem('arena_wallet', walletBalance.toString());
+  }
+}
+
+function saveBots() {
+  if (TEST_MODE) {
+    localStorage.setItem('arena_bots', JSON.stringify(bots));
+  }
+  updateTopTraderBanner();
+}
+
+function updateTopTraderBanner() {
+  if (!bots || !Array.isArray(bots) || bots.length === 0) return;
+  
+  const sorted = [...bots].sort((a, b) => (b.pnl || 0) - (a.pnl || 0)).slice(0, 3);
+  const names = sorted.map((b, i) => {
+    const rank = i === 0 ? '🏆' : i === 1 ? '🥈' : '🥉';
+    return `${rank} ${b.name} (+$${(b.pnl || 0).toLocaleString()})`;
+  }).join(' | ');
+  document.getElementById('topTraderBanner').textContent = names;
+}
+
+// ==========================================
+// Live Ticker
+// ==========================================
+function renderTicker() {
+  const container = document.getElementById('liveTicker');
+  const items = Object.entries(commodityPrices).map(([name, data]) => {
+    const changeClass = data.change >= 0 ? 'up' : 'down';
+    return `
+      <div class="ticker-item">
+        <span class="ticker-commodity">${data.emoji} ${name}</span>
+        <span class="ticker-price">$${data.price.toFixed(2)}</span>
+        <span class="ticker-change ${changeClass}">${data.change >= 0 ? '▲' : '▼'} ${Math.abs(data.change).toFixed(1)}%</span>
+      </div>
+    `;
+  }).join('');
+  container.innerHTML = items;
+}
+
+function startPriceSimulation() {
+  if (priceInterval) clearInterval(priceInterval);
+  
+  priceInterval = setInterval(() => {
+    Object.keys(commodityPrices).forEach(key => {
+      const data = commodityPrices[key];
+      if (!data.basePrice) data.basePrice = data.price;
+      
+      const volatility = (Math.random() - 0.5) * 2.5;
+      data.price = Math.max(
+        0.01,
+        parseFloat((data.basePrice * (1 + volatility / 100)).toFixed(2))
+      );
+      data.change = ((data.price - data.basePrice) / data.basePrice) * 100;
+    });
+    renderTicker();
+    renderCards(false);
+  }, 5000);
+}
+
+// ==========================================
+// Cards Rendering
+// ==========================================
+function renderInfoCard() {
+  const safeBots = Array.isArray(bots) ? bots : [];
+  const activeCount = safeBots.filter(b => b.status === 'active').length;
+  const totalPnL = safeBots.reduce((sum, b) => sum + (b.pnl || 0), 0);
+  
+  return `
+    <div class="info-card">
+      <div class="info-header">📖 TRADING GUIDE</div>
+      <div class="info-content">
+        <div class="info-type">
+          <div class="info-type-label">Type 1: Buyer Brief</div>
+          <div class="info-type-desc">Sellers bid competitively (seller bots auto-bid against your brief)</div>
+        </div>
+        <div class="info-type">
+          <div class="info-type-label">Type 2: Futures</div>
+          <div class="info-type-desc">Negotiate forward pricing (buyer bots snipe undervalued contracts)</div>
+        </div>
+        <div class="info-type">
+          <div class="info-type-label">Type 3: Inventory</div>
+          <div class="info-type-desc">Bid up on available lots (buyer bots compete in real-time auctions)</div>
+        </div>
+        <div class="info-tip">
+          <span>💡</span>
+          <span>Deploy bots to trade 24/7 while you sleep</span>
+        </div>
+        <div class="info-stats">
+          <div class="info-stat">
+            <div class="info-stat-value" id="infoActiveCount">${activeCount}</div>
+            <div class="info-stat-label">Active Bots</div>
+          </div>
+          <div class="info-stat">
+            <div class="info-stat-value" id="infoTotalPnL" style="color: ${totalPnL >= 0 ? '#FFD700' : '#ff3b3b'}">${totalPnL >= 0 ? '+' : ''}$${totalPnL.toLocaleString()}</div>
+            <div class="info-stat-label">Total PnL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCards(rebuild = true) {
+  const container = document.getElementById('arenaCards');
+  if (!container) return;
+  
+  if (rebuild === false) {
+    // STRICT UPDATE ONLY: prices and info stats, NO innerHTML touch
+    const safeBots = Array.isArray(bots) ? bots : [];
+    
+    // Update info card stats only
+    const activeCount = safeBots.filter(b => b.status === 'active').length;
+    const totalPnL = safeBots.reduce((sum, b) => sum + (b.pnl || 0), 0);
+    
+    const activeEl = document.getElementById('infoActiveCount');
+    const pnlEl = document.getElementById('infoTotalPnL');
+    if (activeEl) activeEl.textContent = activeCount;
+    if (pnlEl) {
+      pnlEl.textContent = `${totalPnL >= 0 ? '+' : ''}$${totalPnL.toLocaleString()}`;
+      pnlEl.style.color = totalPnL >= 0 ? '#FFD700' : '#ff3b3b';
+    }
+    
+    // Update bot card prices only
+    safeBots.forEach(bot => {
+      const priceData = commodityPrices[bot.commodity];
+      if (!priceData) return;
+      
+      const priceEl = document.getElementById(`price-${bot.id}`);
+      const changeEl = document.getElementById(`change-${bot.id}`);
+      
+      if (priceEl && changeEl) {
+        const changeClass = priceData.change >= 0 ? 'up' : 'down';
+        const changeSign = priceData.change >= 0 ? '+' : '';
+        priceEl.innerHTML = `$${priceData.price.toFixed(2)}/unit <span class="price-change ${changeClass}" id="change-${bot.id}">${changeSign}${priceData.change.toFixed(1)}%</span>`;
+      }
+    });
+    return;
+  }
+  
+  // FULL REBUILD
+  container.innerHTML = '';
+  container.innerHTML = renderInfoCard();
+  
+  const safeBots = Array.isArray(bots) ? bots : [];
+  
+  if (safeBots.length === 0) {
+    const addCard = document.createElement('div');
+    addCard.className = 'add-bot-card';
+    addCard.id = 'addBotCard';
+    addCard.innerHTML = `
+      <div class="add-bot-icon">+</div>
+      <div class="add-bot-text">Deploy First Bot</div>
+      <div class="add-bot-sub">Enter the trading arena</div>
+    `;
+    container.appendChild(addCard);
+    return;
+  }
+  
+  safeBots.forEach(bot => {
+    const priceData = commodityPrices[bot.commodity];
+    const currentPrice = priceData ? priceData.price : bot.price;
+    const priceChange = priceData ? priceData.change : bot.change;
+    const changeClass = priceChange >= 0 ? 'up' : 'down';
+    const changeSign = priceChange >= 0 ? '+' : '';
+    
+    const div = document.createElement('div');
+    div.className = 'arena-card';
+    div.setAttribute('data-bot-id', bot.id);
+    div.innerHTML = `
+      <div class="card-badge ${bot.badge}">${bot.status === 'active' ? '● ACTIVE' : '○ IDLE'}</div>
+      <div class="card-emoji">${bot.emoji}</div>
+      <div class="card-title">${sanitizeInput(bot.name)}</div>
+      <div class="card-commodity">${bot.commodity}</div>
+      <div class="card-price" id="price-${bot.id}">
+        $${currentPrice.toFixed(2)}/unit
+        <span class="price-change ${changeClass}" id="change-${bot.id}">${changeSign}${priceChange.toFixed(1)}%</span>
+      </div>
+      <div class="heat-bar">
+        <div class="heat-fill" style="width: ${bot.heat}%"></div>
+      </div>
+      <div class="card-stats">
+        <span>Trades: ${bot.trades}</span>
+        <span>PnL: $${bot.pnl.toLocaleString()}</span>
+        <span>Win: ${bot.winRate}%</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  
+  // Add card
+  const addCard = document.createElement('div');
+  addCard.className = 'add-bot-card';
+  addCard.id = 'addBotCard';
+  addCard.innerHTML = `
+    <div class="add-bot-icon">+</div>
+    <div class="add-bot-text">Add New Bot</div>
+    <div class="add-bot-sub">Expand your fleet</div>
+  `;
+  container.appendChild(addCard);
+}
+
+// ==========================================
+// Modals
+// ==========================================
+function openModal(bot) {
+  if (!bot) return;
+  
+  document.getElementById('modalTitle').innerHTML = `${bot.emoji} ${sanitizeInput(bot.name)}`;
+  document.getElementById('modalTrades').textContent = bot.trades.toLocaleString();
+  document.getElementById('modalPnL').innerHTML = bot.pnl >= 0 ? `+$${bot.pnl.toLocaleString()}` : `-$${Math.abs(bot.pnl).toLocaleString()}`;
+  document.getElementById('modalWinRate').textContent = `${bot.winRate}%`;
+  document.getElementById('modalBestTrade').textContent = `+$${Math.floor(bot.pnl / bot.trades * 1.5).toLocaleString()}`;
+  document.getElementById('modalMaxPrice').textContent = `$${bot.maxPrice.toFixed(2)}/unit`;
+  document.getElementById('modalBudget').textContent = `$${bot.budget.toLocaleString()}/day`;
+  document.getElementById('modalStrategy').textContent = bot.strategy;
+  document.getElementById('modalMarkets').textContent = bot.markets;
+  
+  const activities = [
+    { action: bot.status === 'active' ? 'Won auction' : 'Paused trading', time: '2 mins ago' },
+    { action: 'Bid placed', time: '15 mins ago' },
+    { action: `Strategy: ${bot.strategy}`, time: '1 hour ago' },
+    { action: 'Daily budget reset', time: '2 hours ago' },
+    { action: 'Market analysis complete', time: '3 hours ago' }
+  ];
+  
+  document.getElementById('activityList').innerHTML = activities.map(a => `
+    <div class="activity-item">
+      <span class="activity-action">${a.action}</span>
+      <span class="activity-time">${a.time}</span>
+    </div>
+  `).join('');
+  
+  const ctx = document.getElementById('performanceChart').getContext('2d');
+  if (performanceChart) performanceChart.destroy();
+  
+  const dataPoints = [];
+  let equity = bot.pnl * 0.3;
+  for (let i = 0; i < 12; i++) {
+    equity += (Math.random() - 0.3) * (bot.pnl / 10);
+    dataPoints.push(Math.max(0, equity));
+  }
+  dataPoints.push(bot.pnl);
+  
+  performanceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', 'Now'],
+      datasets: [{
+        label: 'PnL ($)',
+        data: dataPoints,
+        borderColor: '#00ced1',
+        backgroundColor: 'rgba(0, 206, 209, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#00ced1'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#9ca3af', font: { size: 10 } }, grid: { display: false } },
+        y: { ticks: { color: '#9ca3af', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      },
+      animation: { duration: 1000 }
+    }
+  });
+  
+  document.getElementById('botModal').style.display = 'flex';
+}
+
+function openAddBotModal() {
+  document.getElementById('addBotModal').style.display = 'flex';
+  document.getElementById('botName').focus();
+}
+
+function openFileBriefModal() {
+  document.getElementById('fileBriefModal').style.display = 'flex';
+  document.getElementById('briefQuantity').value = '100';
+  document.getElementById('briefDestination').value = '';
+  document.getElementById('briefTargetPrice').value = '';
+  document.getElementById('briefNotes').value = '';
+  document.querySelectorAll('#originCheckboxes input').forEach(cb => {
+    cb.checked = false;
+    cb.parentElement.classList.remove('selected');
+  });
+}
+
+async function createBot() {
+  const nameInput = document.getElementById('botName');
+  const name = sanitizeInput(nameInput.value);
+  
+  if (!name || name.length < 2) {
+    showToast('Enter bot name (min 2 chars)', true);
+    nameInput.focus();
+    return;
+  }
+  
+  const btn = document.getElementById('createBotBtn');
+  btn.disabled = true;
+  btn.textContent = 'Deploying...';
+  
+  try {
+    const commodity = document.getElementById('botCommodity').value;
+    const maxPrice = parseFloat(document.getElementById('maxPrice').value);
+    const strategy = document.getElementById('botStrategy').value;
+    const budget = parseInt(document.getElementById('botBudget').value);
+    
+    if (budget > walletBalance) {
+      showToast('Insufficient funds for budget', true);
+      btn.disabled = false;
+      btn.textContent = 'Deploy Bot →';
+      return;
+    }
+    
+    const newBot = {
+      id: crypto.randomUUID(),
+      name: name,
+      commodity: commodity,
+      emoji: commodityPrices[commodity].emoji,
+      price: commodityPrices[commodity].price,
+      change: commodityPrices[commodity].change,
+      heat: Math.floor(Math.random() * 40) + 40,
+      trades: 0,
+      pnl: 0,
+      winRate: 0,
+      strategy: strategy,
+      markets: strategy === 'Conservative' ? 'Futures only' : 'Spot + Futures',
+      maxPrice: maxPrice,
+      budget: budget,
+      status: 'active',
+      badge: 'badge-active'
+    };
+    
+    if (!Array.isArray(bots)) bots = [];
+    bots.push(newBot);
+    saveBots();
+    renderCards(true);
+    
+    showToast(`${name} deployed successfully!`);
+    
+    document.getElementById('addBotModal').style.display = 'none';
+    nameInput.value = '';
+    btn.disabled = false;
+    btn.textContent = 'Deploy Bot →';
+    
+  } catch (err) {
+    console.error('Error creating bot:', err);
+    showToast('Deployment failed', true);
+    btn.disabled = false;
+    btn.textContent = 'Deploy Bot →';
+  }
+}
+
+// ==========================================
+// File Brief Function
+// ==========================================
+async function submitBrief() {
+  const commodity = document.getElementById('briefCommodity').value;
+  const quantity = parseInt(document.getElementById('briefQuantity').value);
+  const grade = document.getElementById('briefGrade').value;
+  const destination = sanitizeInput(document.getElementById('briefDestination').value);
+  const targetPrice = document.getElementById('briefTargetPrice').value;
+  const notes = sanitizeInput(document.getElementById('briefNotes').value);
+  
+  const origins = Array.from(document.querySelectorAll('#originCheckboxes input:checked')).map(cb => cb.value);
+  
+  if (origins.length === 0) {
+    showToast('Select at least one origin', true);
+    return;
+  }
+  
+  if (!destination) {
+    showToast('Enter destination', true);
+    return;
+  }
+  
+  const btn = document.getElementById('submitBriefBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  
+  await new Promise(r => setTimeout(r, 800));
+  
+  const briefData = {
+    id: crypto.randomUUID(),
+    commodity,
+    quantity,
+    grade,
+    origins,
+    destination,
+    targetPrice: targetPrice ? parseFloat(targetPrice) : null,
+    notes,
+    status: 'open',
+    createdAt: new Date().toISOString()
+  };
+  
+  let briefs = JSON.parse(localStorage.getItem('tradeaux_briefs') || '[]');
+  briefs.push(briefData);
+  localStorage.setItem('tradeaux_briefs', JSON.stringify(briefs));
+  
+  showToast(`Brief filed: ${quantity}MT ${commodity} to ${destination}`);
+  document.getElementById('fileBriefModal').style.display = 'none';
+  btn.disabled = false;
+  btn.textContent = 'Submit Brief →';
+  
+  console.log('Brief filed:', briefData);
+}
+
+// ==========================================
+// Wallet Functions
+// ==========================================
+async function depositFunds() {
+  const amount = parseFloat(document.getElementById('depositAmount').value);
+  
+  if (isNaN(amount) || amount < 100) {
+    showToast('Minimum deposit is $100', true);
+    return;
+  }
+  
+  const btn = document.getElementById('confirmDepositBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  
+  await new Promise(r => setTimeout(r, 1000));
+  
+  walletBalance += amount;
+  updateWalletDisplay();
+  showToast(`$${amount} deposited!`);
+  
+  document.getElementById('depositModal').style.display = 'none';
+  btn.disabled = false;
+  btn.textContent = 'Continue to Wise →';
+}
+
+// ==========================================
+// Initialization
+// ==========================================
+function init() {
+  // STRICT: Local Storage Robust Fallback
+  const persistedBots = localStorage.getItem('arena_bots');
+  const persistedWallet = localStorage.getItem('arena_wallet');
+  
+  bots = persistedBots ? JSON.parse(persistedBots) : defaultBots;
+  walletBalance = persistedWallet ? parseFloat(persistedWallet) : 5000;
+  
+  if (!Array.isArray(bots)) bots = defaultBots;
+  if (isNaN(walletBalance)) walletBalance = 5000;
+  
+  updateWalletDisplay();
+  renderTicker();
+  renderCards(true);
+  
+  // STRICT: Interval Safety - called only once
+  if (!priceInterval) {
+    startPriceSimulation();
+  }
+  
+  updateTopTraderBanner();
+  
+  // STRICT: Single Event Delegation - attached once here only
+  const container = document.getElementById('arenaCards');
+  if (container) {
+    container.addEventListener('click', (e) => {
+      const card = e.target.closest('.arena-card');
+      if (!card || card.id === 'addBotCard') return;
+      
+      const botId = card.getAttribute('data-bot-id');
+      if (!botId) return;
+      
+      const bot = bots.find(b => b.id === botId);
+      if (bot) openModal(bot);
+    });
+  }
+  
+  // Modal bindings
+  document.getElementById('closeModal').addEventListener('click', () => {
+    document.getElementById('botModal').style.display = 'none';
+  });
+  
+  document.getElementById('botModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('botModal')) {
+      document.getElementById('botModal').style.display = 'none';
+    }
+  });
+  
+  document.getElementById('closeAddModal').addEventListener('click', () => {
+    document.getElementById('addBotModal').style.display = 'none';
+  });
+  
+  document.getElementById('cancelAddBtn').addEventListener('click', () => {
+    document.getElementById('addBotModal').style.display = 'none';
+  });
+  
+  document.getElementById('createBotBtn').addEventListener('click', createBot);
+  
+  document.getElementById('heroDeployBotBtn').addEventListener('click', openAddBotModal);
+  document.getElementById('fileBriefBtn').addEventListener('click', openFileBriefModal);
+  
+  document.getElementById('closeBriefModal').addEventListener('click', () => {
+    document.getElementById('fileBriefModal').style.display = 'none';
+  });
+  
+  document.getElementById('cancelBriefBtn').addEventListener('click', () => {
+    document.getElementById('fileBriefModal').style.display = 'none';
+  });
+  
+  document.getElementById('submitBriefBtn').addEventListener('click', submitBrief);
+  
+  document.querySelectorAll('#originCheckboxes input').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      e.target.parentElement.classList.toggle('selected', e.target.checked);
+    });
+  });
+  
+  document.getElementById('depositBtn').addEventListener('click', () => {
+    document.getElementById('depositModal').style.display = 'flex';
+  });
+  
+  document.getElementById('closeDepositModal').addEventListener('click', () => {
+    document.getElementById('depositModal').style.display = 'none';
+  });
+  
+  document.getElementById('cancelDepositBtn').addEventListener('click', () => {
+    document.getElementById('depositModal').style.display = 'none';
+  });
+  
+  document.getElementById('confirmDepositBtn').addEventListener('click', depositFunds);
+  
+  document.getElementById('maxPrice').addEventListener('input', (e) => {
+    document.getElementById('maxPriceDisplay').textContent = `$${parseFloat(e.target.value).toFixed(2)}`;
+  });
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    }
+  });
+  
+  if (typeof supabaseClient !== 'undefined') {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+      const authBtn = document.getElementById('authBtn');
+      if (session) {
+        currentUser = session.user;
+        authBtn.textContent = 'Dashboard';
+        authBtn.href = 'buyer.html';
+      } else if (TEST_MODE) {
+        currentUser = { id: '22222222-2222-2222-2222-222222222222' };
+      }
+    });
+  }
+}
+
+// STRICT: Ensure init runs once
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
