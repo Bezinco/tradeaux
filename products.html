@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Products</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
+
+    /* ===== 3D GEM LOGO ===== */
+    .gem-logo-corner {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+
+    .gem-letter:nth-child(1)::before,
+    .gem-letter:nth-child(4)::before,
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before,
+    .gem-letter:nth-child(5)::before,
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before,
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+    /* Navigation */
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 10px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .nav a:hover, .nav button:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.active { border-color: #7CFC00; background: rgba(124,252,0,0.12); color: #7CFC00; }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
+
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 24px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(0,206,209,0.15); margin-bottom: 24px; }
+    .page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: #00ced1; }
+    .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Products Grid */
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 20px; }
+    .product-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.2); border-radius: 20px; padding: 24px; transition: all 0.3s; position: relative; overflow: hidden; }
+    .product-card:hover { transform: translateY(-4px); border-color: #00ced1; box-shadow: 0 12px 40px rgba(0,206,209,0.08); }
+    .product-card .product-images { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; }
+    .product-card .product-images img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(0,206,209,0.15); flex-shrink: 0; }
+    .product-card .product-images .no-image { width: 60px; height: 60px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #4a5568; flex-shrink: 0; }
+    .product-card .product-name { font-size: 18px; font-weight: 700; color: #e5e7eb; margin-bottom: 4px; }
+    .product-card .product-sku { font-size: 11px; color: #6b7280; font-family: 'Orbitron', sans-serif; letter-spacing: 0.5px; }
+    .product-card .product-packaging { font-size: 13px; color: #9ca3af; margin: 8px 0; }
+    .product-card .product-packaging strong { color: #e5e7eb; }
+    .product-card .product-stock { font-size: 13px; color: #9ca3af; }
+    .product-card .product-stock .in-stock { color: #7CFC00; }
+    .product-card .product-stock .low-stock { color: #FFD966; }
+    .product-card .product-stock .out-of-stock { color: #ff3b3b; }
+    .product-card .cert-badge { display: inline-block; font-size: 10px; padding: 2px 10px; border-radius: 12px; background: rgba(124,252,0,0.1); color: #7CFC00; border: 1px solid rgba(124,252,0,0.2); margin-right: 4px; margin-top: 8px; }
+    .product-card .product-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .product-card .product-actions button { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #e5e7eb; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
+    .product-card .product-actions button:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+    .product-card .product-actions .btn-edit { border-color: rgba(0,206,209,0.3); color: #00ced1; }
+    .product-card .product-actions .btn-edit:hover { background: rgba(0,206,209,0.1); }
+    .product-card .product-actions .btn-delete { border-color: rgba(255,59,59,0.3); color: #ff3b3b; }
+    .product-card .product-actions .btn-delete:hover { background: rgba(255,59,59,0.1); }
+
+    .empty-state { text-align: center; padding: 80px 20px; color: #9ca3af; }
+    .empty-state .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    .empty-state h3 { font-size: 24px; color: #e5e7eb; margin-bottom: 8px; }
+    .empty-state p { max-width: 400px; margin: 0 auto 20px; }
+
+    /* Modal - Updated for packaging */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 4px 8px; border-radius: 4px; transition: color 0.2s; }
+    .modal-close:hover { color: #00ced1; }
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field.full-width { grid-column: 1 / -1; }
+    .modal-field label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
+    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 0 3px rgba(0,206,209,0.2); }
+    .modal-field .hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
+    .modal-field .image-preview-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .modal-field .image-preview-grid .preview-item { position: relative; width: 80px; height: 80px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); overflow: hidden; }
+    .modal-field .image-preview-grid .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .modal-field .image-preview-grid .preview-item .remove-img { position: absolute; top: 2px; right: 2px; background: rgba(255,59,59,0.9); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; transition: all 0.3s; }
+    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .cancel-btn:hover { background: rgba(255,255,255,0.2); }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 20000; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+    .hidden-input { position: absolute; opacity: 0; width: 0.1px; height: 0.1px; pointer-events: none; z-index: -1; }
+
+    @media (max-width: 700px) { .products-grid { grid-template-columns: 1fr; } .page-title { font-size: 22px; } .header { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .modal-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
+  </div>
+
+  <!-- 3D Logo -->
+  <div class="gem-logo-corner" aria-hidden="true" role="presentation">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
+  </div>
+
+  <input type="file" id="productImageInput" class="hidden-input" accept=".jpg,.png,.jpeg,.webp,.gif" multiple>
+
+  <main class="container" role="main">
+    <!-- Navigation -->
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="wallet-section">
+          <div class="wallet-balance">
+            <span class="wallet-label">💰 BALANCE</span>
+            <span class="wallet-amount" id="walletAmount">$0.00</span>
+            <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
+          </div>
+          <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
+          <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px;" type="button">☁️ Sync</button>
+          <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        </div>
+        <a href="dashboard-seller.html" id="navDashboard">📊 Dashboard</a>
+        <a href="products.html" class="active" id="navProducts">📦 Products</a>
+        <a href="tia.html" id="navTia">🤖 TIA Maria</a>
+        <a href="auctions.html" id="navAuctions">📅 Auctions</a>
+        <a href="orders.html" id="navOrders">📋 Orders</a>
+        <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
+      </nav>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">📦 <span>Products</span></div>
+      <button class="btn-neon" id="addProductBtn" type="button" style="padding:12px 32px; font-size:14px;">➕ Add Product</button>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="productsContainer">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📦</div>
+        <h3>No Products Yet</h3>
+        <p>Start by adding your first product. Click the "Add Product" button above.</p>
+      </div>
+      <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <footer class="footer">
+      <p>TRADEAUX © 2026 • Global Commodity Exchange • TIA Maria v1.0</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Product Modal -->
+  <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+    <div class="modal-content">
+      <button class="modal-close" id="closeProductModal" type="button" aria-label="Close product modal">&times;</button>
+      <div class="modal-header"><h2 id="productModalTitle">➕ Add Product</h2></div>
+      
+      <div class="modal-grid">
+        <!-- Product Name -->
+        <div class="modal-field full-width">
+          <label for="editProductName">Product Name *</label>
+          <input type="text" id="editProductName" placeholder="e.g. Organic Coconut Oil" required>
+        </div>
+
+        <!-- SKU -->
+        <div class="modal-field">
+          <label for="editProductSKU">SKU / Lot Number</label>
+          <input type="text" id="editProductSKU" placeholder="e.g. CO-2026-001">
+        </div>
+
+        <!-- Origin -->
+        <div class="modal-field">
+          <label for="editProductOrigin">Country of Origin</label>
+          <input type="text" id="editProductOrigin" placeholder="e.g. Philippines">
+        </div>
+
+        <!-- Packaging: Bag Weight -->
+        <div class="modal-field">
+          <label for="editBagWeight">Bag Weight (grams) *</label>
+          <input type="number" id="editBagWeight" placeholder="e.g. 500" step="1" required>
+          <div class="hint">Weight of one bag/pouch in grams</div>
+        </div>
+
+        <!-- Packaging: Bags per Box -->
+        <div class="modal-field">
+          <label for="editBagsPerBox">Bags per Box *</label>
+          <input type="number" id="editBagsPerBox" placeholder="e.g. 24" step="1" required>
+          <div class="hint">How many bags fit in one master carton/box</div>
+        </div>
+
+        <!-- Packaging Type -->
+        <div class="modal-field">
+          <label for="editPackagingType">Packaging Type</label>
+          <select id="editPackagingType">
+            <option value="Pouch">Pouch</option>
+            <option value="Stand-up Pouch">Stand-up Pouch</option>
+            <option value="Bag">Bag</option>
+            <option value="Box">Box</option>
+            <option value="Tin">Tin</option>
+            <option value="Bottle">Bottle</option>
+            <option value="Jar">Jar</option>
+            <option value="Vacuum Pack">Vacuum Pack</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <!-- Box Weight (calculated) -->
+        <div class="modal-field">
+          <label>Box Weight (calculated)</label>
+          <input type="text" id="editBoxWeight" placeholder="Auto-calculated" readonly style="background: rgba(0,0,0,0.3); cursor: not-allowed;">
+          <div class="hint">Bag weight × Bags per box</div>
+        </div>
+
+        <!-- Total Boxes in Stock -->
+        <div class="modal-field">
+          <label for="editTotalBoxes">Total Boxes in Stock</label>
+          <input type="number" id="editTotalBoxes" placeholder="e.g. 100" step="1">
+          <div class="hint">Number of master cartons/boxes available</div>
+        </div>
+
+        <!-- Price per Box -->
+        <div class="modal-field">
+          <label for="editPricePerBox">Price per Box ($) *</label>
+          <input type="number" id="editPricePerBox" placeholder="e.g. 120.00" step="0.01" required>
+          <div class="hint">Selling price for one master carton/box</div>
+        </div>
+
+        <!-- Certifications -->
+        <div class="modal-field full-width">
+          <label for="editProductCertifications">Certifications</label>
+          <input type="text" id="editProductCertifications" placeholder="Organic, Fair Trade, Non-GMO, Rainforest Alliance">
+          <div class="hint">Separate certifications with commas. These will appear as badges.</div>
+        </div>
+
+        <!-- Description -->
+        <div class="modal-field full-width">
+          <label for="editProductDescription">Description</label>
+          <textarea id="editProductDescription" rows="3" placeholder="Product details, quality notes, harvest date..."></textarea>
+        </div>
+
+        <!-- Images -->
+        <div class="modal-field full-width">
+          <label>Product Images</label>
+          <input type="file" id="editProductImages" accept=".jpg,.png,.jpeg,.webp,.gif" multiple>
+          <div class="hint">Upload multiple product images (click to select multiple files)</div>
+          <div class="image-preview-grid" id="imagePreviewGrid"></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelProductBtn" type="button">Cancel</button>
+        <button class="create-btn" id="saveProductBtn" type="button">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    const STORAGE_KEY = 'tradeaux_seller_state';
+    const $ = id => document.getElementById(id);
+    const money = n => (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function showToast(msg, type='info') {
+      const t = $('toast'); if (!t) return;
+      t.textContent = msg.length > 60 ? msg.substring(0,57)+'...' : msg;
+      t.className = 'toast visible ' + type;
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.className = 'toast'; }, 5000);
+    }
+
+    function loadData() { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; } }
+    function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; } catch(e) { showToast('⚠️ Storage error: ' + e.message, 'error'); return false; } }
+
+    let APP = {
+      wallet: { balance: 0 },
+      company: { name: 'YOUR COMPANY' },
+      products: [],
+      orders: [],
+      receivables: [],
+      briefs: [],
+      archivedAuctions: [],
+      tar: { conversionFee: 25, totalConversions: 0 }
+    };
+
+    function loadAppData() {
+      const saved = loadData();
+      if (saved) {
+        if (saved.wallet) APP.wallet = saved.wallet;
+        if (saved.company) APP.company = saved.company;
+        if (saved.products && Array.isArray(saved.products)) APP.products = saved.products;
+        if (saved.orders && Array.isArray(saved.orders)) APP.orders = saved.orders;
+        if (saved.receivables && Array.isArray(saved.receivables)) APP.receivables = saved.receivables;
+        if (saved.briefs && Array.isArray(saved.briefs)) APP.briefs = saved.briefs;
+        if (saved.archivedAuctions && Array.isArray(saved.archivedAuctions)) APP.archivedAuctions = saved.archivedAuctions;
+        if (saved.tar) Object.assign(APP.tar, saved.tar);
+      }
+      if (!Array.isArray(APP.products)) APP.products = [];
+      if (!Array.isArray(APP.orders)) APP.orders = [];
+      if (!Array.isArray(APP.receivables)) APP.receivables = [];
+      if (!Array.isArray(APP.briefs)) APP.briefs = [];
+      if (!Array.isArray(APP.archivedAuctions)) APP.archivedAuctions = [];
+    }
+    loadAppData();
+
+    // ============================================================
+    // IMAGE HANDLING
+    // ============================================================
+    let tempImages = [];
+
+    function handleImageUpload(files) {
+      const grid = $('imagePreviewGrid');
+      if (!grid) return;
+      
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          tempImages.push(e.target.result);
+          renderImagePreviews();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderImagePreviews() {
+      const grid = $('imagePreviewGrid');
+      if (!grid) return;
+      grid.innerHTML = tempImages.map((img, idx) => `
+        <div class="preview-item">
+          <img src="${img}" alt="Product image ${idx+1}">
+          <button class="remove-img" data-index="${idx}">×</button>
+        </div>
+      `).join('');
+      
+      grid.querySelectorAll('.remove-img').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const idx = parseInt(this.dataset.index);
+          tempImages.splice(idx, 1);
+          renderImagePreviews();
+        });
+      });
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderAll() { renderProducts(); renderWallet(); }
+
+    function renderProducts() {
+      const grid = $('productsGrid');
+      const empty = $('emptyState');
+      if (!grid) return;
+
+      if (APP.products.length === 0) {
+        grid.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      grid.innerHTML = APP.products.map((p, idx) => {
+        const totalBags = p.totalBoxes * p.bagsPerBox;
+        const stockClass = p.totalBoxes > 10 ? 'in-stock' : p.totalBoxes > 0 ? 'low-stock' : 'out-of-stock';
+        const stockText = p.totalBoxes > 10 ? 'In Stock' : p.totalBoxes > 0 ? 'Low Stock' : 'Out of Stock';
+        const certs = p.certifications ? p.certifications.split(',').map(c => c.trim()).filter(c => c) : [];
+        const certHtml = certs.map(c => `<span class="cert-badge">${escapeHtml(c)}</span>`).join('');
+        
+        const imagesHtml = p.images && p.images.length > 0 
+          ? p.images.slice(0, 4).map(img => `<img src="${img}" alt="${p.name}">`).join('')
+          : `<div class="no-image">📦</div>`;
+
+        return `
+          <div class="product-card" data-index="${idx}">
+            <div class="product-images">${imagesHtml}</div>
+            <div class="product-name">${escapeHtml(p.name)}</div>
+            <div class="product-sku">${escapeHtml(p.sku || 'No SKU')}</div>
+            <div class="product-packaging">
+              <strong>${p.bagWeight}g</strong> per bag · 
+              <strong>${p.bagsPerBox}</strong> bags/box · 
+              <strong>${p.totalBoxes || 0}</strong> boxes
+            </div>
+            <div class="product-packaging">
+              📦 ${money(p.pricePerBox)}/box · 
+              ${totalBags.toLocaleString()} total bags
+            </div>
+            <div class="product-stock"><span class="${stockClass}">${stockText}</span></div>
+            ${certHtml}
+            <div class="product-actions">
+              <button class="btn-edit" data-index="${idx}">✏️ Edit</button>
+              <button class="btn-delete" data-index="${idx}">🗑️ Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => editProduct(parseInt(btn.dataset.index)));
+      });
+      grid.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteProduct(parseInt(btn.dataset.index)));
+      });
+    }
+
+    function renderWallet() {
+      if($('walletAmount')) $('walletAmount').textContent = money(APP.wallet.balance);
+      if($('conversionCapacity')) { const fee=APP.tar.conversionFee||25; const bal=Math.max(0,APP.wallet.balance||0); $('conversionCapacity').textContent = Math.floor(bal/fee)+' conversions'; }
+    }
+
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // ============================================================
+    // PRODUCT CRUD
+    // ============================================================
+    let editingIndex = -1;
+
+    function openModal() { $('productModal').classList.add('show'); }
+    function closeModal() { 
+      $('productModal').classList.remove('show'); 
+      editingIndex = -1; 
+      tempImages = [];
+      renderImagePreviews();
+      $('productModalTitle').textContent = '➕ Add Product'; 
+    }
+
+    function addProduct() {
+      editingIndex = -1;
+      tempImages = [];
+      renderImagePreviews();
+      $('productModalTitle').textContent = '➕ Add Product';
+      ['editProductName','editProductSKU','editProductOrigin','editBagWeight','editBagsPerBox','editTotalBoxes','editPricePerBox','editProductCertifications','editProductDescription'].forEach(id => $(id).value = '');
+      $('editPackagingType').value = 'Pouch';
+      $('editBoxWeight').value = '';
+      $('editProductImages').value = '';
+      openModal();
+    }
+
+    function editProduct(index) {
+      const p = APP.products[index];
+      if (!p) return;
+      editingIndex = index;
+      tempImages = p.images ? [...p.images] : [];
+      renderImagePreviews();
+      $('productModalTitle').textContent = '✏️ Edit Product';
+      $('editProductName').value = p.name || '';
+      $('editProductSKU').value = p.sku || '';
+      $('editProductOrigin').value = p.origin || '';
+      $('editBagWeight').value = p.bagWeight || '';
+      $('editBagsPerBox').value = p.bagsPerBox || '';
+      $('editPackagingType').value = p.packagingType || 'Pouch';
+      $('editTotalBoxes').value = p.totalBoxes || '';
+      $('editPricePerBox').value = p.pricePerBox || '';
+      $('editProductCertifications').value = p.certifications || '';
+      $('editProductDescription').value = p.description || '';
+      calculateBoxWeight();
+      $('editProductImages').value = '';
+      openModal();
+    }
+
+    function deleteProduct(index) {
+      if (!confirm(`Delete "${APP.products[index].name}"?`)) return;
+      APP.products.splice(index, 1);
+      saveData(APP);
+      renderAll();
+      showToast('🗑️ Product deleted', 'warning');
+    }
+
+    function calculateBoxWeight() {
+      const bagWeight = parseFloat($('editBagWeight').value) || 0;
+      const bagsPerBox = parseFloat($('editBagsPerBox').value) || 0;
+      const boxWeight = bagWeight * bagsPerBox;
+      $('editBoxWeight').value = boxWeight > 0 ? `${boxWeight}g (${(boxWeight/1000).toFixed(2)}kg)` : 'Enter bag weight and bags per box';
+    }
+
+    function saveProduct() {
+      const name = $('editProductName').value.trim();
+      const sku = $('editProductSKU').value.trim();
+      const origin = $('editProductOrigin').value.trim();
+      const bagWeight = parseFloat($('editBagWeight').value);
+      const bagsPerBox = parseFloat($('editBagsPerBox').value);
+      const packagingType = $('editPackagingType').value;
+      const totalBoxes = parseInt($('editTotalBoxes').value) || 0;
+      const pricePerBox = parseFloat($('editPricePerBox').value);
+      const certifications = $('editProductCertifications').value.trim();
+      const description = $('editProductDescription').value.trim();
+
+      if (!name) { showToast('Product name is required', 'error'); return; }
+      if (!bagWeight || bagWeight <= 0) { showToast('Please enter a valid bag weight', 'error'); return; }
+      if (!bagsPerBox || bagsPerBox <= 0) { showToast('Please enter bags per box', 'error'); return; }
+      if (!pricePerBox || pricePerBox <= 0) { showToast('Please enter a valid price per box', 'error'); return; }
+
+      const product = { 
+        name, 
+        sku, 
+        origin,
+        bagWeight, 
+        bagsPerBox, 
+        packagingType,
+        totalBoxes, 
+        pricePerBox,
+        certifications,
+        description,
+        images: tempImages.length > 0 ? tempImages : []
+      };
+
+      if (editingIndex >= 0 && editingIndex < APP.products.length) {
+        APP.products[editingIndex] = product;
+        showToast('✅ Product updated!', 'success');
+      } else {
+        APP.products.push(product);
+        showToast('✅ Product added!', 'success');
+      }
+      saveData(APP);
+      renderAll();
+      closeModal();
+    }
+
+    // ============================================================
+    // EVENTS
+    // ============================================================
+    function setupEvents() {
+      // Add product
+      if($('addProductBtn')) $('addProductBtn').addEventListener('click', addProduct);
+
+      // Calculate box weight on change
+      if($('editBagWeight')) $('editBagWeight').addEventListener('input', calculateBoxWeight);
+      if($('editBagsPerBox')) $('editBagsPerBox').addEventListener('input', calculateBoxWeight);
+
+      // Image upload
+      if($('editProductImages')) {
+        $('editProductImages').addEventListener('change', function(e) {
+          if (this.files && this.files.length > 0) {
+            handleImageUpload(this.files);
+          }
+          this.value = '';
+        });
+      }
+
+      // Modal controls
+      if($('closeProductModal')) $('closeProductModal').addEventListener('click', closeModal);
+      if($('cancelProductBtn')) $('cancelProductBtn').addEventListener('click', closeModal);
+      if($('saveProductBtn')) $('saveProductBtn').addEventListener('click', saveProduct);
+
+      // Close modal on backdrop click
+      document.addEventListener('click', e => {
+        if (e.target.classList.contains('modal') && e.target.classList.contains('show')) {
+          e.target.classList.remove('show');
+        }
+      });
+
+      // Close modal on Escape
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+        }
+      });
+
+      // Deposit
+      if($('depositBtn')) $('depositBtn').addEventListener('click', () => {
+        const amt = prompt('Enter deposit amount ($):', '1000');
+        if (amt === null) return;
+        const v = parseFloat(amt);
+        if (isNaN(v) || v <= 0) { showToast('Invalid amount.', 'error'); return; }
+        APP.wallet.balance = (APP.wallet.balance || 0) + v;
+        saveData(APP);
+        renderAll();
+        showToast('Deposited ' + money(v), 'success');
+      });
+
+      // Sync
+      if($('syncCloudBtn')) $('syncCloudBtn').addEventListener('click', () => {
+        showToast('☁️ Syncing...', 'info');
+        loadAppData();
+        renderAll();
+        setTimeout(() => showToast('✅ Sync complete!', 'success'), 800);
+      });
+
+      // Save
+      if($('forceSaveBtn')) $('forceSaveBtn').addEventListener('click', () => {
+        saveData(APP);
+        showToast('💾 Data saved locally!', 'success');
+      });
+
+      // Sign out
+      if($('authBtn')) $('authBtn').addEventListener('click', () => {
+        if (confirm('Sign out?')) {
+          showToast('👋 Signed out', 'info');
+          window.location.href = 'signin.html';
+        }
+      });
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAppData();
+      renderAll();
+      setupEvents();
+      showToast('📦 Welcome to Products!', 'info');
+    });
+  </script>
+</body>
+</html>
