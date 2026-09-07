@@ -1,1296 +1,2356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>TradeAux • Auctions</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root {
-    --neon-green: #7CFC00;
-    --gold: #FFD966;
-    --cyan: #00ced1;
-    --muted: #9ca3af;
-    --red: #FF5E5E;
-  }
-  body {
-    background: #020617;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #F0F3FA;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  .bg-waves {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .wave-bg {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    filter: blur(100px);
-    opacity: 0.15;
-    animation: waveBgDrift 24s ease-in-out infinite;
-    border-radius: 50%;
-  }
-  .wave-1 { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
-  .wave-2 { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.3), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
-  .wave-3 { background: radial-gradient(circle at 70% 60%, rgba(255,217,102,0.3), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
-  @keyframes waveBgDrift {
-    0% { transform: translate(0px, 0px) scale(1); opacity: 0.1; }
-    50% { transform: translate(40px, -30px) scale(1.05); opacity: 0.2; }
-    100% { transform: translate(-30px, 20px) scale(1); opacity: 0.1; }
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://pfutaovwbygefummienf.supabase.co wss://pfutaovwbygefummienf.supabase.co;">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>TradeAux • Seller Auction | DUHE + Bot Bids</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+  </script>
+  <style>
+    /* ===== COMPLETE STYLES ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --neon-green: #7CFC00; --gold: #FFD966; --card-bg: linear-gradient(145deg, #0B1122, #030712); }
+    body { min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; color: #F0F3FA; background: #020617; position: relative; overflow-x: hidden; }
 
-  /* ===== 3D LOGO - TRADEAUX ===== */
-  .gem-logo-corner {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 150;
-    filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
-    transform-style: preserve-3d;
-    perspective: 1000px;
-    transform: scale(0.35);
-    transform-origin: top left;
-    pointer-events: none;
-  }
-  .gem-text {
-    font-size: 160px;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    position: relative;
-    display: flex;
-    text-transform: uppercase;
-    line-height: 0.9;
-    font-family: 'Orbitron', sans-serif;
-    transform-style: preserve-3d;
-    gap: 2px;
-  }
-  .gem-letter {
-    display: inline-block;
-    position: relative;
-    transform-style: preserve-3d;
-    animation: letterFloat 6s ease-in-out infinite;
-    filter: brightness(1.2);
-    color: transparent;
-  }
-  .gem-letter:nth-child(1) { animation-delay: 0s; }
-  .gem-letter:nth-child(2) { animation-delay: 0.2s; }
-  .gem-letter:nth-child(3) { animation-delay: 0.4s; }
-  .gem-letter:nth-child(4) { animation-delay: 0.6s; }
-  .gem-letter:nth-child(5) { animation-delay: 0.8s; }
-  .gem-letter:nth-child(6) { animation-delay: 1.0s; }
-  .gem-letter:nth-child(7) { animation-delay: 1.2s; }
-  .gem-letter:nth-child(8) { animation-delay: 1.4s; }
-  @keyframes letterFloat {
-    0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); }
-    50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); }
-  }
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
 
-  /* Letter T - Blue */
-  .gem-letter:nth-child(1)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
-  /* Letter R - Green */
-  .gem-letter:nth-child(2)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
-  /* Letter A - Red */
-  .gem-letter:nth-child(3)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
-  /* Letter D - Blue */
-  .gem-letter:nth-child(4)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
-  /* Letter E - Green */
-  .gem-letter:nth-child(5)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
-  /* Letter A - Red */
-  .gem-letter:nth-child(6)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
-  /* Letter U - Blue */
-  .gem-letter:nth-child(7)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
-  /* Letter X - Green */
-  .gem-letter:nth-child(8)::before {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
-    transform: translateZ(2px);
-  }
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
 
-  .gem-letter .edge-top {
-    position: absolute; top: -2px; left: 0; width: 100%; height: 20%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
-    mix-blend-mode: overlay; pointer-events: none; z-index: 5;
-  }
-  .gem-letter .edge-right {
-    position: absolute; top: 0; right: -2px; width: 10%; height: 100%;
-    background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%);
-    mix-blend-mode: overlay; pointer-events: none; z-index: 5;
-  }
-  .gem-letter .edge-bottom {
-    position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%;
-    background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%);
-    mix-blend-mode: multiply; pointer-events: none; z-index: 5;
-  }
-  .gem-letter .edge-left {
-    position: absolute; top: 0; left: -2px; width: 10%; height: 100%;
-    background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%);
-    mix-blend-mode: multiply; pointer-events: none; z-index: 5;
-  }
+    /* ===== 3D LOGO ===== */
+    .gem-logo-corner { position: fixed; top: 20px; left: 20px; z-index: 150; filter: drop-shadow(0 30px 50px rgba(0,206,209,0.4)); transform-style: preserve-3d; perspective: 1000px; transform: scale(0.35); transform-origin: top left; pointer-events: none; }
+    .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
+    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); color: transparent; }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+    .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a, #002a6e, #0040a0, #0055cc, #0066ff, #0055cc, #002a6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0,102,255,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
+    .gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a, #006622, #009933, #00b33c, #00cc44, #00b33c, #006622); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0,204,68,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
+    .gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000, #4a0000, #7a0b0b, #a61a1a, #d92b2b, #a61a1a, #4a0000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217,43,43,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
 
-  .light-source {
-    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%);
-    animation: rotateLight 15s linear infinite;
-    pointer-events: none; z-index: 10; mix-blend-mode: overlay;
-  }
-  @keyframes rotateLight {
-    0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
-    50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
-    100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
-  }
+    /* ===== NAVIGATION ===== */
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 10px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .nav a:hover, .nav button:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.active { border-color: #7CFC00; background: rgba(124,252,0,0.12); color: #7CFC00; }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
 
-  .sparkle {
-    position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%;
-    box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1;
-    animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none;
-  }
-  @keyframes sparkleFlash {
-    0% { opacity: 0; transform: scale(0.5); }
-    10% { opacity: 1; transform: scale(1.2); }
-    20% { opacity: 0.6; transform: scale(0.9); }
-    30% { opacity: 1; transform: scale(1.1); }
-    40% { opacity: 0; transform: scale(0.5); }
-    100% { opacity: 0; transform: scale(0.5); }
-  }
-  .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
-  .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
-  .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
-  .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
-  .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
-  .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
-  .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
-  .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
-  .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
-  .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
-  .depth-shadow {
-    position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px;
-    background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%);
-    filter: blur(20px); z-index: -1;
-  }
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 24px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
 
-  .container { 
-    max-width: 1400px; 
-    margin: 0 auto; 
-    padding: 80px 24px 60px; 
-    position: relative; 
-    z-index: 2; 
-  }
-  
-  /* Header */
-  .header { display: flex; justify-content: flex-end; align-items: center; padding: 10px 0 30px; flex-wrap: wrap; gap: 16px; }
-  .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .nav a { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 600; color: #BFC9E0; text-decoration: none; padding: 6px 16px; border-radius: 40px; border: 1px solid rgba(124,252,0,0.3); background: rgba(0,0,0,0.3); transition: all 0.3s; cursor: pointer; }
-  .nav a:hover { border-color: var(--neon-green); color: var(--neon-green); }
-  .nav a.active { background: rgba(124,252,0,0.15); border-color: var(--neon-green); color: var(--neon-green); }
-  .nav .sign-out { border-color: rgba(255,94,94,0.3); color: #FF5E5E; }
-  .nav .sign-out:hover { border-color: #FF5E5E; color: #FF5E5E; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(0,206,209,0.15); margin-bottom: 24px; }
+    .page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: #00ced1; }
+    .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-  /* Stats Bar */
-  .stats-bar { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 16px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border: 1px solid rgba(124,252,0,0.1); }
-  .stat-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-  .stat-number { font-weight: 700; font-size: 1.1rem; color: var(--neon-green); }
-  .stat-label { color: var(--muted); }
-  .stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  .stat-dot.green { background: var(--neon-green); }
-  .stat-dot.yellow { background: var(--gold); }
-  .stat-dot.red { background: #FF5E5E; }
+    /* ===== SELLER INFO BAR ===== */
+    .seller-info-bar { max-width: 1100px; margin: 0 auto 10px; padding: 16px 24px; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); border-radius: 60px; border: 1px solid rgba(255,217,102,0.4); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; z-index: 10; position: relative; }
+    .seller-avatar { display: flex; align-items: center; gap: 16px; }
+    .avatar-placeholder { width: 70px; height: 70px; background: linear-gradient(135deg, #1a2a3a, #0a1222); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(124,252,0,0.3); }
+    .crop-image-placeholder { font-size: 32px; }
+    .image-label { font-size: 8px; color: #9ca6bb; margin-top: 4px; }
+    .seller-name h3 { font-size: 1.2rem; letter-spacing: 1px; }
+    .seller-name p { font-size: 0.7rem; color: #9ca6bb; margin: 2px 0; }
+    .fob-line { font-size: 0.7rem; color: #7CFC00; margin-top: 4px; font-weight: 500; }
+    .inventory-stats { text-align: right; }
+    .remaining-qty { font-size: 1.8rem; font-weight: 800; color: var(--neon-green); }
+    .total-qty { font-size: 0.7rem; color: #9ca6bb; }
 
-  /* Controls */
-  .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; align-items: center; padding: 16px 20px; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid rgba(124,252,0,0.1); }
-  .controls-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .controls-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
-  .control-select { background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.2); border-radius: 8px; padding: 8px 12px; color: white; font-family: inherit; font-size: 0.8rem; cursor: pointer; min-width: 120px; }
-  .control-select:focus { outline: none; border-color: var(--neon-green); }
-  .search-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(124,252,0,0.2); border-radius: 8px; padding: 8px 14px; color: white; font-family: inherit; font-size: 0.8rem; min-width: 200px; }
-  .search-input:focus { outline: none; border-color: var(--neon-green); }
-  .search-input::placeholder { color: var(--muted); }
+    /* ===== AUCTION COCKPIT ===== */
+    .auction-cockpit { max-width: 1100px; margin: 16px auto 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding: 0 24px; position: relative; z-index: 10; }
+    .timer-panel { background: rgba(0,0,0,0.65); backdrop-filter: blur(12px); border-radius: 48px; padding: 8px 28px; text-align: center; border: 1px solid rgba(124,252,0,0.5); }
+    .timer-digits { font-family: monospace; font-size: 2.4rem; font-weight: 800; color: var(--neon-green); text-shadow: 0 0 8px rgba(124,252,0,0.5); }
+    .timer-digits.warning { color: #FF4D4D; animation: pulseRed 0.7s infinite; }
+    @keyframes pulseRed { 0% { opacity: 1; text-shadow: 0 0 0px red; } 100% { opacity: 0.9; text-shadow: 0 0 8px #ff4d4d; } }
+    .stats-group { display: flex; gap: 28px; background: rgba(0,0,0,0.5); padding: 8px 28px; border-radius: 60px; backdrop-filter: blur(6px); }
+    .stat { text-align: center; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94A3B8; }
+    .stat-value { font-weight: 800; font-size: 1.3rem; color: var(--neon-green); }
 
-  /* Auction Grid */
-  .auction-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin: 20px 0 30px; }
-  
-  /* Auction Card */
-  .auction-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.85), rgba(2, 6, 23, 0.98)); border-radius: 20px; border: 1px solid rgba(124,252,0,0.2); padding: 20px; transition: all 0.3s ease; position: relative; overflow: hidden; cursor: pointer; }
-  .auction-card:hover { transform: translateY(-4px); border-color: var(--neon-green); box-shadow: 0 8px 30px rgba(124,252,0,0.1); }
-  .auction-card .card-wave { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(124,252,0,0.03) 0px, rgba(124,252,0,0.03) 40px, rgba(124,252,0,0.06) 40px, rgba(124,252,0,0.06) 80px); background-size: 200% 200%; animation: waveFlow 6s linear infinite; pointer-events: none; border-radius: 20px; }
-  @keyframes waveFlow { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
-  
-  .auction-card .card-content { position: relative; z-index: 1; }
-  .auction-card .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .auction-card .card-product { font-size: 1.1rem; font-weight: 700; }
-  .auction-card .card-variety { font-size: 0.8rem; color: var(--muted); }
-  .auction-card .card-status { font-size: 0.65rem; font-weight: 600; padding: 3px 12px; border-radius: 20px; }
-  .auction-card .card-status.live { background: rgba(124,252,0,0.15); color: var(--neon-green); border: 1px solid rgba(124,252,0,0.3); }
-  .auction-card .card-status.ending { background: rgba(255,217,102,0.15); color: var(--gold); border: 1px solid rgba(255,217,102,0.3); animation: pulseYellow 1s infinite; }
-  @keyframes pulseYellow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-  .auction-card .card-status.completed { background: rgba(255,94,94,0.15); color: #FF5E5E; border: 1px solid rgba(255,94,94,0.3); }
-  .auction-card .card-status.coming { background: rgba(255,217,102,0.1); color: var(--gold); border: 1px solid rgba(255,217,102,0.2); }
-  
-  .auction-card .card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-  .auction-card .detail-item { display: flex; flex-direction: column; }
-  .auction-card .detail-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
-  .auction-card .detail-value { font-size: 0.9rem; font-weight: 600; }
-  .auction-card .detail-value.price { color: var(--gold); }
-  
-  .auction-card .card-seller { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(124,252,0,0.1); }
-  .auction-card .seller-name { font-size: 0.8rem; font-weight: 500; }
-  .auction-card .seller-rating { font-size: 0.7rem; color: var(--gold); }
-  .auction-card .seller-sales { font-size: 0.65rem; color: var(--muted); }
-  
-  .auction-card .card-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-  .auction-card .view-btn { background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 8px 20px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.7rem; color: #010101; cursor: pointer; transition: transform 0.2s; width: 100%; }
-  .auction-card .view-btn:hover { transform: scale(1.02); }
-  .auction-card .view-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  
-  /* Bot Activation Button */
-  .auction-card .bot-btn { background: linear-gradient(105deg, #FFD966, #F5A623); border: none; padding: 8px 20px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.65rem; color: #0A0C15; cursor: pointer; transition: transform 0.2s; width: 100%; }
-  .auction-card .bot-btn:hover { transform: scale(1.02); }
-  .auction-card .bot-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .auction-card .bot-btn.active { background: linear-gradient(105deg, #7CFC00, #10b981); color: #010101; }
-  
-  .auction-card .bot-status { font-size: 0.6rem; color: var(--muted); text-align: center; margin-top: 4px; }
+    .controls { display: flex; gap: 16px; margin: 16px 24px 24px; justify-content: center; z-index: 10; position: relative; }
+    .btn { border: none; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.85rem; padding: 10px 32px; border-radius: 48px; cursor: pointer; transition: 0.2s; background: rgba(20,30,50,0.9); color: white; backdrop-filter: blur(4px); }
+    .btn-primary { background: linear-gradient(105deg, #10b981, #2dd4bf); color: #010101; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,252,0,0.4); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  /* Auction in Progress Overlay */
-  .auction-in-progress { background: rgba(255,217,102,0.05); border: 2px solid var(--gold); border-radius: 16px; padding: 16px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .auction-in-progress .indicator { display: flex; align-items: center; gap: 8px; }
-  .auction-in-progress .pulse-dot { width: 12px; height: 12px; background: var(--gold); border-radius: 50%; animation: pulseDot 1.5s infinite; }
-  @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
-  .auction-in-progress .message { font-size: 0.85rem; color: var(--gold); }
-  .auction-in-progress .auction-name { font-weight: 700; color: white; }
+    /* ===== CARDS GRID ===== */
+    .cards-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 175px)); gap: 22px; justify-content: center; max-width: 980px; margin: 28px auto; padding: 0 20px; position: relative; z-index: 8; }
+    @media (max-width: 920px) { .cards-grid { grid-template-columns: repeat(4, minmax(0, 175px)); max-width: 740px; } }
+    @media (max-width: 720px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 190px)); gap: 20px; } }
+    @media (max-width: 460px) { .cards-grid { grid-template-columns: 1fr; } }
 
-  /* Pagination */
-  .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 30px; flex-wrap: wrap; }
-  .page-btn { background: rgba(0,0,0,0.4); border: 1px solid rgba(124,252,0,0.2); border-radius: 8px; padding: 8px 14px; color: white; cursor: pointer; font-family: inherit; font-size: 0.8rem; transition: all 0.2s; min-width: 36px; text-align: center; }
-  .page-btn:hover:not(:disabled) { background: rgba(124,252,0,0.1); border-color: var(--neon-green); }
-  .page-btn.active { background: rgba(124,252,0,0.15); border-color: var(--neon-green); color: var(--neon-green); }
-  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .page-info { color: var(--muted); font-size: 0.8rem; padding: 0 8px; }
+    .market-card { background: var(--card-bg); border-radius: 24px; border: 1px solid rgba(124,252,0,0.35); padding: 14px 10px; cursor: pointer; transition: all 0.25s cubic-bezier(0.2,0.9,0.4,1.1); position: relative; backdrop-filter: blur(4px); box-shadow: 0 12px 20px -12px black; }
+    .market-card:hover { border-color: var(--neon-green); transform: translateY(-5px); box-shadow: 0 25px 30px -14px rgba(124,252,0,0.25); }
+    .market-card.accepted { opacity: 0.4; filter: grayscale(0.3); pointer-events: none; }
+    .market-card .accept-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Modal */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.88);
-    backdrop-filter: blur(14px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    visibility: hidden;
-    opacity: 0;
-    transition: 0.2s;
-  }
-  .modal-overlay.active {
-    visibility: visible;
-    opacity: 1;
-  }
-  .modal-card {
-    background: #0B1122;
-    max-width: 520px;
-    width: 92%;
-    border-radius: 32px;
-    border: 1px solid var(--neon-green);
-    padding: 32px 28px;
-    position: relative;
-    box-shadow: 0 40px 70px black;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .modal-close {
-    position: absolute;
-    right: 20px;
-    top: 16px;
-    background: none;
-    border: none;
-    font-size: 28px;
-    color: #ccc;
-    cursor: pointer;
-  }
-  .modal-close:hover { color: white; }
-  .modal-title { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; margin-bottom: 8px; }
-  .modal-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
-  .form-group input, .form-group select {
-    width: 100%;
-    padding: 10px 14px;
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(124,252,0,0.2);
-    border-radius: 10px;
-    color: white;
-    font-size: 0.95rem;
-    font-family: inherit;
-  }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--neon-green); }
-  .fee-box {
-    background: rgba(255,217,102,0.08);
-    border: 1px solid rgba(255,217,102,0.2);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin: 16px 0;
-    text-align: center;
-  }
-  .fee-box .amount { font-size: 1.8rem; font-weight: 800; color: var(--gold); }
-  .fee-box .note { font-size: 0.75rem; color: var(--muted); }
-  .modal-btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 40px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.2s;
-    margin-top: 8px;
-  }
-  .modal-btn.primary { background: linear-gradient(105deg, #FFD966, #F5A623); color: #0A0C15; }
-  .modal-btn.primary:hover { transform: scale(1.02); }
-  .modal-btn.primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  .modal-btn.secondary { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.1); }
+    .rank-flag { position: absolute; top: -8px; left: 12px; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 40px; z-index: 3; backdrop-filter: blur(4px); }
+    .rank-1 { background: linear-gradient(135deg, #FFD966, #F5A623); color: #0A0C15; box-shadow: 0 0 8px gold; }
+    .rank-2 { background: linear-gradient(135deg, #C0C7D9, #A0AABA); color: #111; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #B5632C); color: white; }
+    .rank-other { background: #1e293b; color: #94A3B8; }
 
-  /* Toast */
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: #0f1a2e; padding: 12px 28px; border-radius: 60px; border-left: 4px solid var(--neon-green); transition: 0.3s; opacity: 0; z-index: 2000; max-width: 90%; font-size: 0.85rem; word-wrap: break-word; text-align: center; }
-  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
-  .toast.error { border-left-color: #FF5E5E; }
+    .verified-badge { position: absolute; top: -6px; right: 10px; background: rgba(0,0,0,0.85); border-radius: 30px; padding: 3px 10px; font-size: 0.6rem; font-weight: 700; color: var(--neon-green); border: 1px solid #7CFC00; backdrop-filter: blur(4px); z-index: 3; }
+    .product-visual { text-align: center; margin-bottom: 10px; background: rgba(0,0,0,0.25); border-radius: 40px; padding: 8px 6px; }
+    .product-emoji { font-size: 2.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+    .card-title { font-weight: 800; font-size: 0.9rem; text-align: center; word-break: break-word; }
+    .contact-name { font-size: 0.6rem; text-align: center; color: #7CFC00; margin-top: 4px; font-weight: 500; word-break: break-word; }
+    .price-row { display: flex; justify-content: center; gap: 8px; align-items: baseline; margin: 6px 0 5px; }
+    .current-price { font-weight: 800; font-size: 1.2rem; color: #FFE484; }
+    .change-badge { font-size: 0.65rem; font-weight: 600; }
+    .up { color: #7CFC00; }
+    .down { color: #FF5E5E; }
+    .bid-quantity { font-size: 0.65rem; color: #a0aec0; text-align: center; margin-top: 4px; }
+    .heat-bar-container { margin: 8px 0 6px; background: #1e293b; border-radius: 12px; height: 4px; overflow: hidden; }
+    .heat-fill { height: 100%; background: linear-gradient(90deg, #7CFC00, #FFD966); border-radius: 12px; }
+    .card-meta { display: flex; justify-content: space-between; font-size: 0.6rem; margin-top: 8px; color: #a0aec0; }
 
-  /* Empty State */
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); grid-column: 1 / -1; }
-  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
-  .empty-state .empty-title { font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 8px; }
-  .empty-state .empty-desc { font-size: 0.9rem; }
+    .accept-btn { width: 100%; margin-top: 10px; padding: 6px; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; border-radius: 40px; font-weight: 700; font-size: 0.7rem; cursor: pointer; transition: 0.2s; color: #010101; }
+    .accept-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 12px rgba(124,252,0,0.5); }
+    .accept-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .accept-btn.hidden { display: none; }
 
-  /* Loading State */
-  .loading { text-align: center; padding: 60px 20px; color: var(--muted); grid-column: 1 / -1; }
-  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid rgba(124,252,0,0.1); border-top-color: var(--neon-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    /* ===== MODALS ===== */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.2s; }
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-card { background: #0B1122; max-width: 500px; width: 92%; border-radius: 40px; border: 1px solid #7CFC00; padding: 28px 24px; position: relative; box-shadow: 0 40px 70px black; max-height: 90vh; overflow-y: auto; }
+    .modal-close { position: absolute; right: 22px; top: 18px; background: none; border: none; font-size: 28px; color: #ccc; cursor: pointer; }
+    .modal-header { text-align: center; margin-bottom: 20px; }
+    .modal-emoji { font-size: 56px; margin-bottom: 4px; }
+    .modal-title-xl { font-size: 26px; font-weight: 800; word-break: break-word; }
+    .contact-block { background: #03050C; border-radius: 24px; padding: 14px 18px; margin: 16px 0; font-size: 0.8rem; }
+    .contact-row { display: flex; gap: 10px; margin: 8px 0; align-items: center; flex-wrap: wrap; word-break: break-word; }
+    .accept-modal-btn { width: 100%; padding: 12px; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; border-radius: 40px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 16px; color: #010101; }
+    .accept-modal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  @media (max-width: 768px) {
-    .container { padding: 80px 16px 40px; }
-    .header { flex-direction: column; align-items: flex-start; }
-    .controls { flex-direction: column; align-items: stretch; }
-    .controls-group { flex-wrap: wrap; }
-    .search-input { min-width: 100%; }
-    .auction-grid { grid-template-columns: 1fr; }
-    .stats-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
-    .auction-card .card-details { grid-template-columns: 1fr 1fr; }
-    .gem-logo-corner { transform: scale(0.25); }
-    .pagination { gap: 4px; }
-    .page-btn { padding: 6px 10px; font-size: 0.7rem; min-width: 30px; }
-    .modal-card { padding: 24px 16px; }
-  }
+    .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(70px); background: #0a1424cc; backdrop-filter: blur(12px); padding: 12px 24px; border-radius: 60px; font-size: 0.8rem; border-left: 4px solid #7CFC00; transition: 0.2s; opacity: 0; z-index: 200; max-width: 90%; white-space: normal; word-wrap: break-word; text-align: center; line-height: 1.4; }
+    .toast-msg.visible { opacity: 1; transform: translateX(-50%) translateY(0px); }
+    .toast-msg.error { border-left-color: #FF4D4D; }
 
-  @media (max-width: 480px) {
-    .auction-card .card-details { grid-template-columns: 1fr; }
-    .stats-bar { font-size: 0.75rem; }
-  }
-</style>
+    footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(124,252,0,0.15); margin-top: 20px; font-size: 12px; color: #5c6b8a; position: relative; z-index: 5; }
+
+    @media (max-width: 800px) { .gem-logo-corner { transform: scale(0.25); } .container { padding-top: 140px; } .header { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .seller-info-bar { flex-direction: column; text-align: center; } .inventory-stats { text-align: center; } }
+  </style>
 </head>
 <body>
 
-<div class="bg-waves">
-  <div class="wave-bg wave-1"></div>
-  <div class="wave-bg wave-2"></div>
-  <div class="wave-bg wave-3"></div>
-</div>
-
-<!-- 3D TRADEAUX LOGO -->
-<div class="gem-logo-corner">
-  <div class="gem-text">
-    <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-    <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
-  </div>
-  <div class="light-source"></div>
-  <div class="sparkle sparkle-1"></div>
-  <div class="sparkle sparkle-2"></div>
-  <div class="sparkle sparkle-3"></div>
-  <div class="sparkle sparkle-4"></div>
-  <div class="sparkle sparkle-5"></div>
-  <div class="sparkle sparkle-6"></div>
-  <div class="sparkle sparkle-7"></div>
-  <div class="sparkle sparkle-8"></div>
-  <div class="sparkle sparkle-9"></div>
-  <div class="sparkle sparkle-10"></div>
-  <div class="depth-shadow"></div>
-</div>
-
-<div class="container">
-  <header class="header">
-    <div class="nav">
-      <a href="#" class="active" onclick="return false;">Live Auctions</a>
-      <a href="#" onclick="showToast('My Bids — coming soon'); return false;">My Bids</a>
-      <a href="#" onclick="showToast('Co-ops — coming soon'); return false;">Co-ops</a>
-      <a href="#" onclick="showToast('Leaderboard — coming soon'); return false;">Leaderboard</a>
-      <a href="#" class="sign-out" onclick="signOut(); return false;">🚪 Sign Out</a>
-    </div>
-  </header>
-
-  <!-- Stats Bar -->
-  <div class="stats-bar" id="statsBar">
-    <div class="stat-item">
-      <span class="stat-dot green"></span>
-      <span>Live: <span class="stat-number" id="activeCount">0</span></span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-dot yellow"></span>
-      <span>Coming: <span class="stat-number" id="comingCount">0</span></span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-dot red"></span>
-      <span>Completed: <span class="stat-number" id="completedCount">0</span></span>
-    </div>
-    <div class="stat-item">
-      <span>🤖 <span class="stat-number" id="botCount">0</span> active bots</span>
-    </div>
+  <div class="bg-waves">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
   </div>
 
-  <!-- Controls -->
-  <div class="controls">
-    <div class="controls-group">
-      <span class="controls-label">Sort:</span>
-      <select class="control-select" id="sortSelect">
-        <option value="date">Date (Newest)</option>
-        <option value="commodity">Commodity A-Z</option>
-        <option value="company">Company A-Z</option>
-      </select>
+  <!-- 3D TRADEAUX LOGO -->
+  <div class="gem-logo-corner">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
     </div>
-    <div class="controls-group">
-      <span class="controls-label">Commodity:</span>
-      <select class="control-select" id="commodityFilter">
-        <option value="all">All Commodities</option>
-      </select>
-    </div>
-    <div class="controls-group">
-      <span class="controls-label">Status:</span>
-      <select class="control-select" id="statusFilter">
-        <option value="all">All Status</option>
-        <option value="live">🟢 Live</option>
-        <option value="coming">🟡 Coming Soon</option>
-        <option value="completed">🔴 Completed</option>
-      </select>
-    </div>
-    <div class="controls-group" style="flex:1; justify-content:flex-end;">
-      <input class="search-input" id="searchInput" type="text" placeholder="🔍 Search auctions..." />
-    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
   </div>
 
-  <!-- Auction In Progress Notice -->
-  <div class="auction-in-progress" id="auctionInProgress" style="display:none;">
-    <div class="indicator">
-      <span class="pulse-dot"></span>
-      <span class="message">⏳ Auction in progress:</span>
-    </div>
-    <span class="auction-name" id="inProgressAuctionName">Loading...</span>
-    <span style="color:var(--muted); font-size:0.8rem;" id="inProgressTime">Time remaining: 02:45</span>
-    <span style="color:var(--red); font-size:0.75rem; margin-left:auto;">⛔ Registration Closed</span>
-  </div>
-
-  <!-- Auction Grid -->
-  <div class="auction-grid" id="auctionGrid">
-    <!-- Loading state -->
-    <div class="loading">
-      <div class="spinner"></div>
-      <div>Loading auctions...</div>
-    </div>
-  </div>
-
-  <!-- Pagination -->
-  <div class="pagination" id="pagination">
-    <button class="page-btn" id="prevPage" disabled>←</button>
-    <span class="page-info" id="pageInfo">Page 1 of 1</span>
-    <button class="page-btn" id="nextPage" disabled>→</button>
-  </div>
-</div>
-
-<!-- ==== BOT ACTIVATION MODAL ==== -->
-<div class="modal-overlay" id="botModal">
-  <div class="modal-card">
-    <button class="modal-close" id="closeBotModal">✕</button>
-    <div class="modal-title">🤖 Activate Your Bot</div>
-    <div class="modal-sub">Set your bot's strategy for <strong id="modalAuctionName">Premium Coconut</strong></div>
-    
-    <div class="fee-box">
-      <div class="amount">$25</div>
-      <div class="note">Set aside. Refundable if you don't win.</div>
-    </div>
-
-    <div class="form-group">
-      <label>Max Price per MT ($)</label>
-      <input type="number" id="botMaxPrice" value="4.50" step="0.01" min="0.01">
-    </div>
-
-    <div class="form-group">
-      <label>Target Quantity (MT)</label>
-      <input type="number" id="botTargetQty" value="100" step="5" min="1">
-    </div>
-
-    <div class="form-group">
-      <label>Bidding Strategy</label>
-      <select id="botStrategy">
-        <option value="aggressive">🚀 Aggressive — Bid early and often</option>
-        <option value="balanced" selected>⚖️ Balanced — Wait for good price</option>
-        <option value="conservative">🛡️ Conservative — Bid at the last moment</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Auto-bid increment ($/MT)</label>
-      <input type="number" id="botIncrement" value="0.05" step="0.01" min="0.01">
-    </div>
-
-    <button class="modal-btn primary" id="activateBotBtn" onclick="activateBot()">
-      🤖 Activate Bot ($25)
-    </button>
-    <button class="modal-btn secondary" onclick="closeBotModal()">Cancel</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ========== SUPABASE CONFIG ==========
-const SUPABASE_URL = "https://pfutaovwbygefummienf.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I";
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ========== STATE ==========
-let currentPage = 1;
-const ITEMS_PER_PAGE = 9;
-let totalItems = 0;
-let allAuctions = [];
-let filteredAuctions = [];
-let realtimeChannel = null;
-let timerInterval = null;
-let selectedAuctionId = null;
-let currentUser = null;
-let registeredBots = new Set();
-
-// ========== SIGN OUT ==========
-async function signOut() {
-  try {
-    // Clear Supabase session
-    await supabaseClient.auth.signOut();
-    
-    // Clean up intervals and channels
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-    if (realtimeChannel) {
-      await supabaseClient.removeChannel(realtimeChannel);
-      realtimeChannel = null;
-    }
-    
-    // Redirect to home
-    window.location.href = 'index.html';
-  } catch (err) {
-    console.error('Sign out error:', err);
-    // Even if there's an error, still redirect
-    window.location.href = 'index.html';
-  }
-}
-
-// ========== ESCAPE HTML (XSS Prevention) ==========
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// ========== CHECK AUTH & LOAD USER ==========
-async function initUser() {
-  try {
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    if (error || !session) {
-      console.log('Not authenticated, guests can view auctions');
-      return;
-    }
-    currentUser = session.user;
-    console.log('✅ User:', currentUser.email);
-    // Load user's registered bots
-    await loadUserBots();
-  } catch (err) {
-    console.error('Auth error:', err);
-  }
-}
-
-// ========== LOAD USER'S BOTS ==========
-async function loadUserBots() {
-  if (!currentUser) return;
-  try {
-    const { data, error } = await supabaseClient
-      .from('auction_bots')
-      .select('auction_id')
-      .eq('user_id', currentUser.id);
-    if (error) throw error;
-    data.forEach(bot => registeredBots.add(bot.auction_id));
-  } catch (err) {
-    console.error('Error loading bots:', err);
-  }
-}
-
-// ========== LOAD AUCTIONS ==========
-async function loadAuctions() {
-  try {
-    const { data, error } = await supabaseClient
-      .from('auctions')
-      .select(`
-        *,
-        sellers!auctions_seller_id_fkey (
-          id,
-          coop_name,
-          business_name,
-          name,
-          rating,
-          sales_count,
-          fob_port
-        ),
-        seller_briefs!auctions_brief_id_fkey (
-          product,
-          variety,
-          quantity_mt,
-          remaining_mt,
-          ideal_price,
-          fob_port,
-          origin
-        )
-      `)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    const auctionIds = (data || []).map(a => a.id).filter(Boolean);
-    
-    let bidsMap = {};
-    let botCountMap = {};
-    if (auctionIds.length > 0) {
-      // Get bid counts
-      const { data: bids, error: bidsErr } = await supabaseClient
-        .from('bids')
-        .select('auction_id, amount')
-        .in('auction_id', auctionIds)
-        .eq('status', 'pending');
-
-      if (!bidsErr && bids) {
-        bidsMap = bids.reduce((acc, bid) => {
-          if (!acc[bid.auction_id]) acc[bid.auction_id] = [];
-          acc[bid.auction_id].push(bid.amount || 0);
-          return acc;
-        }, {});
-      }
-
-      // Get bot counts
-      const { data: bots, error: botsErr } = await supabaseClient
-        .from('auction_bots')
-        .select('auction_id')
-        .in('auction_id', auctionIds);
-
-      if (!botsErr && bots) {
-        botCountMap = bots.reduce((acc, bot) => {
-          acc[bot.auction_id] = (acc[bot.auction_id] || 0) + 1;
-          return acc;
-        }, {});
-      }
-    }
-
-    allAuctions = (data || []).map(item => {
-      const auctionBids = bidsMap[item.id] || [];
-      const isLive = item.status === 'active' && item.started_at;
-      const isCompleted = item.status === 'completed' || item.status === 'ended';
-      const isComing = item.status === 'active' && !item.started_at;
-      
-      return {
-        id: item.id,
-        seller_id: item.seller_id,
-        brief_id: item.brief_id,
-        seller_name: item.sellers?.coop_name || item.sellers?.business_name || item.sellers?.name || 'Unknown Co-op',
-        seller_rating: item.sellers?.rating || '4.5',
-        seller_sales: item.sellers?.sales_count || 0,
-        product: item.seller_briefs?.product || 'Product',
-        variety: item.seller_briefs?.variety || 'Standard',
-        total_qty: item.seller_briefs?.quantity_mt || 0,
-        remaining_qty: item.seller_briefs?.remaining_mt || 0,
-        ideal_price: item.seller_briefs?.ideal_price || 0,
-        fob_port: item.seller_briefs?.fob_port || item.sellers?.fob_port || 'Location',
-        origin: item.seller_briefs?.origin || '',
-        status: item.status || 'active',
-        created_at: item.created_at,
-        started_at: item.started_at,
-        duration_seconds: item.duration_seconds || 180,
-        fees_collected: item.fees_collected || 0,
-        bids_count: auctionBids.length,
-        highest_bid: auctionBids.length > 0 ? Math.max(...auctionBids) : 0,
-        bot_count: botCountMap[item.id] || 0,
-        is_live: isLive,
-        is_completed: isCompleted,
-        is_coming: isComing
-      };
-    });
-
-    populateFilters();
-    applyFiltersAndSort();
-    updateStats();
-
-  } catch (err) {
-    console.error('Error loading auctions:', err);
-    showToast('Error loading auctions', true);
-  }
-}
-
-// ========== POPULATE FILTERS ==========
-function populateFilters() {
-  const commodities = [...new Set(allAuctions.map(a => a.product).filter(Boolean))].sort();
-  const commoditySelect = document.getElementById('commodityFilter');
-  const currentValue = commoditySelect.value;
-  commoditySelect.innerHTML = '<option value="all">All Commodities</option>';
-  commodities.forEach(c => {
-    const option = document.createElement('option');
-    option.value = c;
-    option.textContent = c;
-    commoditySelect.appendChild(option);
-  });
-  if (currentValue && commodities.includes(currentValue)) {
-    commoditySelect.value = currentValue;
-  }
-}
-
-// ========== APPLY FILTERS & SORT ==========
-function applyFiltersAndSort() {
-  const commodityFilter = document.getElementById('commodityFilter').value;
-  const statusFilter = document.getElementById('statusFilter').value;
-  const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-  const sortBy = document.getElementById('sortSelect').value;
-
-  let filtered = [...allAuctions];
-
-  if (commodityFilter !== 'all') {
-    filtered = filtered.filter(a => a.product === commodityFilter);
-  }
-
-  if (statusFilter === 'live') {
-    filtered = filtered.filter(a => a.is_live);
-  } else if (statusFilter === 'coming') {
-    filtered = filtered.filter(a => a.is_coming);
-  } else if (statusFilter === 'completed') {
-    filtered = filtered.filter(a => a.is_completed);
-  }
-
-  if (searchQuery) {
-    filtered = filtered.filter(a => 
-      (a.product || '').toLowerCase().includes(searchQuery) ||
-      (a.variety || '').toLowerCase().includes(searchQuery) ||
-      (a.seller_name || '').toLowerCase().includes(searchQuery) ||
-      (a.fob_port || '').toLowerCase().includes(searchQuery)
-    );
-  }
-
-  filtered.sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return new Date(b.created_at) - new Date(a.created_at);
-      case 'commodity':
-        return (a.product || '').localeCompare(b.product || '');
-      case 'company':
-        return (a.seller_name || '').localeCompare(b.seller_name || '');
-      default:
-        return 0;
-    }
-  });
-
-  filteredAuctions = filtered;
-  totalItems = filtered.length;
-  renderPagination();
-  renderPage(filtered);
-  checkAuctionInProgress(filtered);
-}
-
-// ========== CHECK AUCTION IN PROGRESS ==========
-function checkAuctionInProgress(auctions) {
-  const inProgress = auctions.find(a => a.is_live);
-  const container = document.getElementById('auctionInProgress');
-  
-  if (inProgress) {
-    container.style.display = 'flex';
-    document.getElementById('inProgressAuctionName').textContent = `${inProgress.product} - ${inProgress.variety}`;
-    
-    if (inProgress.started_at) {
-      const started = new Date(inProgress.started_at);
-      const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
-      const remaining = Math.max(0, (inProgress.duration_seconds || 180) - elapsed);
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
-      document.getElementById('inProgressTime').textContent = `Time remaining: ${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-  } else {
-    container.style.display = 'none';
-  }
-}
-
-// ========== RENDER PAGE ==========
-function renderPage(auctions) {
-  const start = (currentPage - 1) * ITEMS_PER_PAGE;
-  const end = Math.min(start + ITEMS_PER_PAGE, auctions.length);
-  const pageItems = auctions.slice(start, end);
-
-  const grid = document.getElementById('auctionGrid');
-
-  if (pageItems.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <div class="empty-title">No auctions found</div>
-        <div class="empty-desc">Try adjusting your filters or check back later</div>
-      </div>
-    `;
-    return;
-  }
-
-  grid.innerHTML = pageItems.map(auction => {
-    const isLive = auction.is_live;
-    const isComing = auction.is_coming;
-    const isCompleted = auction.is_completed;
-    
-    let statusClass = 'live';
-    let statusText = '🟢 LIVE';
-    let statusLabel = 'Live — Bots Bidding Now';
-    if (isCompleted) {
-      statusClass = 'completed';
-      statusText = '🔴 COMPLETED';
-      statusLabel = 'Completed — Auction Ended';
-    } else if (isComing) {
-      statusClass = 'coming';
-      statusText = '🟡 COMING SOON';
-      statusLabel = 'Coming Soon — Register Your Bot';
-    }
-
-    let timeRemaining = '—';
-    if (auction.started_at && isLive) {
-      const started = new Date(auction.started_at);
-      const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
-      const remaining = Math.max(0, (auction.duration_seconds || 180) - elapsed);
-      if (remaining > 0) {
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        timeRemaining = `${mins}:${secs.toString().padStart(2, '0')}`;
-      } else {
-        timeRemaining = 'Ended';
-      }
-    }
-
-    const safeProduct = escapeHtml(auction.product);
-    const safeVariety = escapeHtml(auction.variety);
-    const safeSeller = escapeHtml(auction.seller_name);
-    const safeFob = escapeHtml(auction.fob_port);
-
-    const isRegistered = currentUser && registeredBots.has(auction.id);
-    const canRegister = !isRegistered && isComing && currentUser;
-
-    return `
-      <div class="auction-card" data-id="${auction.id}">
-        <div class="card-wave"></div>
-        <div class="card-content">
-          <div class="card-header">
-            <div>
-              <div class="card-product">${safeProduct}</div>
-              <div class="card-variety">${safeVariety}</div>
-            </div>
-            <span class="card-status ${statusClass}">${statusText}</span>
+  <main class="container" role="main">
+    <!-- Navigation -->
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="wallet-section">
+          <div class="wallet-balance">
+            <span class="wallet-label">💰 BALANCE</span>
+            <span class="wallet-amount" id="walletAmount">$0.00</span>
+            <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
           </div>
-          <div class="card-details">
-            <div class="detail-item">
-              <span class="detail-label">📦 Remaining</span>
-              <span class="detail-value">${auction.remaining_qty || 0} / ${auction.total_qty || 0} MT</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">💎 Ideal Price</span>
-              <span class="detail-value price">$${(auction.ideal_price || 0).toFixed(2)}/MT</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">🏷️ Bids</span>
-              <span class="detail-value">${auction.bids_count || 0}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">⏱️ Time Left</span>
-              <span class="detail-value">${isCompleted ? '—' : timeRemaining}</span>
-            </div>
-            <div class="detail-item" style="grid-column: 1 / -1;">
-              <span class="detail-label">📍 FOB</span>
-              <span class="detail-value" style="font-size:0.8rem;">${safeFob}</span>
-            </div>
-          </div>
-          <div class="card-seller">
-            <span>🏢 <span class="seller-name">${safeSeller}</span></span>
-            <span class="seller-rating">⭐ ${auction.seller_rating}</span>
-            <span class="seller-sales">(${auction.seller_sales || 0} sales)</span>
-            <span style="margin-left:auto; font-size:0.65rem; color:var(--muted);">🤖 ${auction.bot_count} bots</span>
-          </div>
-          <div class="card-actions">
-            ${isLive ? `
-              <button class="view-btn" disabled>
-                ⛔ Auction in Progress
-              </button>
-              <div class="bot-status">Registration closed — bots are battling</div>
-            ` : isCompleted ? `
-              <button class="view-btn" disabled>
-                🔴 Completed
-              </button>
-            ` : isComing ? `
-              ${isRegistered ? `
-                <button class="bot-btn active" disabled>
-                  ✅ Bot Activated ($25 held)
-                </button>
-                <div class="bot-status">You're registered for this auction</div>
-              ` : canRegister ? `
-                <button class="bot-btn" onclick="openBotModal('${auction.id}', '${safeProduct} - ${safeVariety}')">
-                  🤖 Activate Bot ($25)
-                </button>
-                <div class="bot-status">$25 set aside • Refundable</div>
-              ` : `
-                <button class="view-btn" onclick="viewAuction('${auction.id}')">
-                  VIEW AUCTION →
-                </button>
-              `}
-            ` : `
-              <button class="view-btn" onclick="viewAuction('${auction.id}')">
-                VIEW AUCTION →
-              </button>
-            `}
-          </div>
+          <button class="deposit-btn" id="depositBtn" type="button">+ Demo Deposit</button>
+          <button class="btn-neon" id="refreshBidsBtn" style="padding:4px 12px; font-size:10px;" type="button">🔄 Refresh Bids</button>
+          <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        </div>
+        <a href="dashboard-seller.html" id="navDashboard">📊 Dashboard</a>
+        <a href="products.html" id="navProducts">📦 Products</a>
+        <a href="tia.html" id="navTia">🤖 TIA Maria</a>
+        <a href="auctions.html" class="active" id="navAuctions">📅 Auctions</a>
+        <a href="orders.html" id="navOrders">📋 Orders</a>
+        <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
+      </nav>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">📅 <span>Auctions</span></div>
+      <div style="font-size:13px; color:#9ca3af;">DUHE multi-bid optimization — settles all winners atomically</div>
+    </div>
+
+    <!-- Seller Info Bar -->
+    <div class="seller-info-bar">
+      <div class="seller-avatar">
+        <div class="avatar-placeholder">
+          <div class="crop-image-placeholder" id="productEmoji">🥥</div>
+          <div class="image-label" id="productLabel">Product</div>
+        </div>
+        <div class="seller-name">
+          <h3 id="sellerNameDisplay">Loading...</h3>
+          <p id="sellerMetaDisplay">Loading profile...</p>
+          <p class="fob-line" id="sellerFobDisplay">📍 Loading...</p>
         </div>
       </div>
-    `;
-  }).join('');
-}
+      <div class="inventory-stats">
+        <div class="remaining-qty" id="remainingQuantity">0</div>
+        <div class="total-qty" id="totalQtyDisplay">MT remaining</div>
+      </div>
+    </div>
 
-// ========== RENDER PAGINATION ==========
-function renderPagination() {
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
-  document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
-  document.getElementById('prevPage').disabled = currentPage <= 1;
-  document.getElementById('nextPage').disabled = currentPage >= totalPages;
-}
+    <!-- Auction Cockpit -->
+    <div class="auction-cockpit">
+      <div class="timer-panel">
+        <div class="timer-digits" id="timerMain">03:00</div>
+      </div>
+      <div class="stats-group">
+        <div class="stat"><div class="stat-label">ACTIVE BIDS</div><div class="stat-value" id="statActive">0</div></div>
+        <div class="stat"><div class="stat-label">HIGHEST BID</div><div class="stat-value" id="statHighest">$0.00</div></div>
+        <div class="stat"><div class="stat-label">💰 FEES</div><div class="stat-value" id="statFees">$0</div></div>
+        <div class="stat"><div class="stat-label">🎯 IDEAL</div><div class="stat-value" id="statIdeal">$0.00</div></div>
+      </div>
+    </div>
 
-// ========== UPDATE STATS ==========
-function updateStats() {
-  const live = allAuctions.filter(a => a.is_live).length;
-  const coming = allAuctions.filter(a => a.is_coming).length;
-  const completed = allAuctions.filter(a => a.is_completed).length;
-  const totalBots = allAuctions.reduce((sum, a) => sum + (a.bot_count || 0), 0);
-  
-  document.getElementById('activeCount').textContent = live;
-  document.getElementById('comingCount').textContent = coming;
-  document.getElementById('completedCount').textContent = completed;
-  document.getElementById('botCount').textContent = totalBots;
-}
+    <div class="controls">
+      <button class="btn btn-primary" id="startBtn">▶ START AUCTION</button>
+      <button class="btn" id="resetBtn" style="background:rgba(255,59,59,0.2); border:1px solid rgba(255,59,59,0.3); color:#ff3b3b;">⟳ Reset</button>
+    </div>
 
-// ========== VIEW AUCTION ==========
-function viewAuction(auctionId) {
-  const auction = allAuctions.find(a => a.id === auctionId);
-  if (!auction) {
-    showToast('Auction not found', true);
-    return;
-  }
-  
-  // For seller auction page
-  window.location.href = `seller-auction.html?id=${auctionId}`;
-}
+    <!-- Cards Grid -->
+    <div class="cards-grid" id="cardsGrid">
+      <div style="color:#9ca3af; text-align:center; padding:40px; grid-column:1/-1;">Loading bids...</div>
+    </div>
 
-// ========== BOT MODAL ==========
-function openBotModal(auctionId, auctionName) {
-  selectedAuctionId = auctionId;
-  document.getElementById('modalAuctionName').textContent = auctionName || 'this auction';
-  document.getElementById('botModal').classList.add('active');
-}
+    <!-- DUHE Modal -->
+    <div class="modal-overlay" id="duheModal" role="dialog" aria-modal="true" aria-labelledby="duheModalTitle">
+      <div class="modal-card" style="max-width: 620px;">
+        <button class="modal-close" id="closeDuheModal" aria-label="Close modal" type="button">✕</button>
+        <div class="modal-header">
+          <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
+          <div class="modal-title-xl" id="duheModalTitle">DUHE KNAPSACK PROPOSAL</div>
+        </div>
+        <div id="duheStatus" style="text-align:center; margin-bottom: 16px; font-size: 0.9rem;"></div>
+        <div id="duheComparison" style="background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2);"></div>
+        <div style="margin: 20px 0; max-height: 260px; overflow-y: auto;" id="duheWinnersList">
+          <h3 style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 12px;">WINNING BUYERS</h3>
+        </div>
+        <div style="background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2);" id="duheFinancials"></div>
+        <div id="duheNearSolve" style="display:none; background: rgba(255,217,102,0.1); border: 1px solid #FFD966; padding: 14px; border-radius: 20px; margin: 16px 0;"></div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button id="acceptDuheBtn" type="button" style="flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem;">✅ ACCEPT DUHE</button>
+          <button id="rejectDuheBtn" type="button" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem;">❌ REJECT</button>
+        </div>
+      </div>
+    </div>
 
-function closeBotModal() {
-  document.getElementById('botModal').classList.remove('active');
-  selectedAuctionId = null;
-}
+    <!-- Bid Detail Modal -->
+    <div class="modal-overlay" id="bidModal" role="dialog" aria-modal="true" aria-labelledby="bidModalTitle">
+      <div class="modal-card">
+        <button class="modal-close" id="closeBidModal" aria-label="Close modal" type="button">✕</button>
+        <div class="modal-header">
+          <div class="modal-emoji" id="modalEmoji">🏢</div>
+          <div class="modal-title-xl" id="bidModalTitle">Buyer Company</div>
+        </div>
+        <div style="text-align:center; margin-bottom:12px;">
+          <span style="font-size:2rem; font-weight:800; color:#FFD966;" id="modalPrice">$0.00</span>
+          <span style="font-size:0.8rem;" id="modalQty">0 MT</span>
+        </div>
+        <div class="contact-block">
+          <div class="contact-row">👤 <strong>Contact:</strong> <span id="modalContact"></span></div>
+          <div class="contact-row">📧 <span id="modalEmail">Not provided</span></div>
+          <div class="contact-row">📱 <span id="modalPhone">Not provided</span></div>
+          <div class="contact-row">💬 WhatsApp: <span id="modalWhatsapp">Not provided</span></div>
+        </div>
+        <button class="accept-modal-btn" id="acceptFromModalBtn" type="button">✓ ACCEPT THIS OFFER</button>
+      </div>
+    </div>
 
-// ========== ACTIVATE BOT ==========
-async function activateBot() {
-  if (!currentUser) {
-    showToast('Please sign in to activate a bot', true);
-    window.location.href = 'signin.html';
-    return;
-  }
+    <!-- Toast -->
+    <div class="toast-msg" id="toastMsg" role="status" aria-live="polite"></div>
 
-  if (!selectedAuctionId) {
-    showToast('No auction selected', true);
-    return;
-  }
+    <footer>
+      <p>⚡ DUHE optimizes multi-bid combinations • Seller ideal price guides the solver • $25 fee per accepted bid • TRADEAUX © 2026</p>
+    </footer>
+  </main>
 
-  const maxPrice = parseFloat(document.getElementById('botMaxPrice').value);
-  const targetQty = parseFloat(document.getElementById('botTargetQty').value);
-  const strategy = document.getElementById('botStrategy').value;
-  const increment = parseFloat(document.getElementById('botIncrement').value);
+  <script>
+    // ============================================================
+    // CONFIGURATION
+    // ============================================================
+    const STORAGE_KEY = 'tradeaux_seller_state';
+    const SUPABASE_URL = "https://pfutaovwbygefummienf.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  if (!maxPrice || maxPrice <= 0) {
-    showToast('Please enter a valid max price', true);
-    return;
-  }
-  if (!targetQty || targetQty <= 0) {
-    showToast('Please enter a valid target quantity', true);
-    return;
-  }
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    const $ = id => document.getElementById(id);
 
-  const btn = document.getElementById('activateBotBtn');
-  btn.disabled = true;
-  btn.textContent = 'Processing...';
-
-  try {
-    // Insert bot registration
-    const { data, error } = await supabaseClient
-      .from('auction_bots')
-      .insert({
-        auction_id: selectedAuctionId,
-        user_id: currentUser.id,
-        max_price: maxPrice,
-        target_qty: targetQty,
-        strategy: strategy,
-        increment: increment,
-        status: 'active',
-        fee_held: true,
-        created_at: new Date().toISOString()
-      })
-      .select();
-
-    if (error) throw error;
-
-    registeredBots.add(selectedAuctionId);
-    showToast('✅ Bot activated successfully! $25 held.', false);
-    closeBotModal();
-    loadAuctions();
-
-  } catch (err) {
-    console.error('Bot activation error:', err);
-    showToast('Error activating bot: ' + err.message, true);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🤖 Activate Bot ($25)';
-  }
-}
-
-// ========== SETUP REALTIME ==========
-function setupRealtime() {
-  if (realtimeChannel) {
-    supabaseClient.removeChannel(realtimeChannel).catch(console.warn);
-    realtimeChannel = null;
-  }
-
-  realtimeChannel = supabaseClient
-    .channel('auctions-channel')
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'auctions'
-    }, () => {
-      console.log('🔄 Auction update');
-      loadAuctions();
-    })
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'bids'
-    }, () => {
-      console.log('🔄 New bid');
-      loadAuctions();
-    })
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'auction_bots'
-    }, () => {
-      console.log('🔄 Bot update');
-      loadUserBots();
-      loadAuctions();
-    })
-    .subscribe((status) => {
-      console.log('📡 Realtime status:', status);
+    // FIX #8: money() handles Infinity
+    const money = n => (n === undefined || n === null || !isFinite(n) || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
-}
 
-// ========== TOAST ==========
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '');
-  t.classList.add('visible');
-  clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => t.classList.remove('visible'), 4000);
-}
+    // FIX #9: validateId() handles BIGINT (numbers) and UUID/TEXT (strings)
+    function validateId(id, name) {
+      if (!id) throw new Error(`Invalid ${name}: ${id}`);
+      if (typeof id === 'number') return String(id);
+      if (typeof id === 'string' && id.trim() === '') {
+        throw new Error(`Invalid ${name}: ${id}`);
+      }
+      return id.trim();
+    }
 
-// ========== EVENT LISTENERS ==========
-document.getElementById('sortSelect').addEventListener('change', () => {
-  currentPage = 1;
-  applyFiltersAndSort();
-});
+    // FIX #1: Toast with unique timeout per toast
+    function showToast(msg, isError = false) {
+      const t = $('toastMsg');
+      if (!t) return;
+      t.textContent = msg;
+      t.className = 'toast-msg' + (isError ? ' error' : '');
+      t.classList.add('visible');
+      if (t._timeout) clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.classList.remove('visible'); }, 4500);
+    }
 
-document.getElementById('commodityFilter').addEventListener('change', () => {
-  currentPage = 1;
-  applyFiltersAndSort();
-});
+    // FIX #10: createSafeElement with type="button", no IDs for dynamic elements
+    function createSafeElement(tag, className, textContent) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (textContent !== undefined && textContent !== null) el.textContent = textContent;
+      if (tag === 'button') el.type = 'button';
+      return el;
+    }
 
-document.getElementById('statusFilter').addEventListener('change', () => {
-  currentPage = 1;
-  applyFiltersAndSort();
-});
+    function loadData() { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
 
-document.getElementById('searchInput').addEventListener('input', () => {
-  currentPage = 1;
-  applyFiltersAndSort();
-});
+    function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; } catch (e) {
+        showToast('⚠️ Storage error: ' + e.message, true); return false; } }
 
-document.getElementById('prevPage').addEventListener('click', () => {
-  if (currentPage > 1) {
-    currentPage--;
-    applyFiltersAndSort();
-  }
-});
+    // Consistent price/quantity functions
+    function getBidPriceMT(bid) {
+      if (bid.price_per_mt !== null && bid.price_per_mt !== undefined) return Number(bid.price_per_mt);
+      if (bid.amount !== null && bid.amount !== undefined) return Number(bid.amount);
+      if (bid.price !== null && bid.price !== undefined) return Number(bid.price);
+      throw new Error('Bid price missing');
+    }
 
-document.getElementById('nextPage').addEventListener('click', () => {
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  if (currentPage < totalPages) {
-    currentPage++;
-    applyFiltersAndSort();
-  }
-});
+    function getBidQuantityMT(bid) {
+      if (bid.quantity_mt !== null && bid.quantity_mt !== undefined) {
+        const qty = Number(bid.quantity_mt);
+        if (qty <= 0) throw new Error('Bid quantity must be > 0');
+        return qty;
+      }
+      if (bid.quantity !== null && bid.quantity !== undefined) {
+        const qty = Number(bid.quantity);
+        if (qty <= 0) throw new Error('Bid quantity must be > 0');
+        return qty;
+      }
+      throw new Error('Bid quantity missing');
+    }
 
-document.getElementById('closeBotModal').addEventListener('click', closeBotModal);
-document.getElementById('botModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('botModal')) closeBotModal();
-});
+    // ============================================================
+    // STATE
+    // ============================================================
+    let APP = {
+      wallet: { balance: 0 },
+      company: { name: 'YOUR COMPANY' },
+      products: [],
+      orders: [],
+      receivables: [],
+      briefs: [],
+      archivedAuctions: [],
+      tar: { conversionFee: 25, totalConversions: 0 }
+    };
 
-// ========== CLEANUP ON UNLOAD ==========
-window.addEventListener('beforeunload', function() {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-  if (realtimeChannel) {
-    supabaseClient.removeChannel(realtimeChannel).catch(console.warn);
-    realtimeChannel = null;
-  }
-});
+    let currentUser = null;
+    let currentSeller = null;
+    let currentBrief = null;
+    let activeBids = [];
+    let auctionActive = false;
+    let timerSeconds = 180;
+    let timerInterval = null;
+    let feesCollected = 0;
+    let remainingQty = 0;
+    let totalQty = 0;
+    let currentModalBid = null;
+    let bidsChannel = null;
+    let duheSolution = null;
+    let currentAuctionId = null;
+    let authSubscription = null;
+    let idealPrice = 4.25;
+    let acceptInProgress = false;
 
-// ========== LIVE TIMER UPDATE ==========
-timerInterval = setInterval(() => {
-  document.querySelectorAll('.auction-card').forEach(card => {
-    const id = card.dataset.id;
-    const auction = filteredAuctions.find(a => a.id === id);
-    if (auction && auction.started_at && auction.is_live) {
-      const started = new Date(auction.started_at);
-      const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
-      const remaining = Math.max(0, (auction.duration_seconds || 180) - elapsed);
-      if (remaining > 0) {
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        const timeEl = card.querySelector('.detail-value:last-child');
-        if (timeEl) timeEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    // FIX #8: processingBids Set for double-click protection
+    let processingBids = new Set();
+
+    let startAuctionInProgress = false;
+    let auctionEndTimeout = null;
+    let isAuctionEndInProgress = false;
+    let isDuheDelayActive = false;
+    const MAX_AUCTION_END_RETRIES = 3;
+
+    // StarRatingCache with size cap
+    const starRatingCache = new Map();
+    const MAX_CACHE_SIZE = 200;
+
+    function getCachedRating(key) {
+      if (starRatingCache.size > MAX_CACHE_SIZE) {
+        const firstKey = starRatingCache.keys().next().value;
+        starRatingCache.delete(firstKey);
+      }
+      if (!starRatingCache.has(key)) {
+        let hash = 0;
+        const str = String(key);
+        for (let i = 0; i < str.length; i++) {
+          hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const rating = (3.5 + (Math.abs(hash) % 15) / 10).toFixed(1);
+        starRatingCache.set(key, rating);
+      }
+      return starRatingCache.get(key);
+    }
+
+    function loadAppData() {
+      const saved = loadData();
+      if (saved) {
+        if (saved.wallet) APP.wallet = saved.wallet;
+        if (saved.company) APP.company = saved.company;
+        if (saved.products && Array.isArray(saved.products)) APP.products = saved.products;
+        if (saved.orders && Array.isArray(saved.orders)) APP.orders = saved.orders;
+        if (saved.receivables && Array.isArray(saved.receivables)) APP.receivables = saved.receivables;
+        if (saved.briefs && Array.isArray(saved.briefs)) APP.briefs = saved.briefs;
+        if (saved.archivedAuctions && Array.isArray(saved.archivedAuctions)) APP.archivedAuctions = saved.archivedAuctions;
+        if (saved.tar) Object.assign(APP.tar, saved.tar);
+      }
+      if (!Array.isArray(APP.products)) APP.products = [];
+      if (!Array.isArray(APP.orders)) APP.orders = [];
+      if (!Array.isArray(APP.receivables)) APP.receivables = [];
+      if (!Array.isArray(APP.briefs)) APP.briefs = [];
+      if (!Array.isArray(APP.archivedAuctions)) APP.archivedAuctions = [];
+    }
+    loadAppData();
+
+    // ============================================================
+    // WALLET
+    // ============================================================
+    function renderWallet() {
+      if ($('walletAmount')) $('walletAmount').textContent = money(APP.wallet.balance);
+      if ($('conversionCapacity')) {
+        const fee = APP.tar.conversionFee || 25;
+        const bal = Math.max(0, APP.wallet.balance || 0);
+        $('conversionCapacity').textContent = Math.floor(bal / fee) + ' conversions';
       }
     }
-  });
-  
-  checkAuctionInProgress(filteredAuctions);
-}, 1000);
 
-// ========== INIT ==========
-initUser().then(() => {
-  loadAuctions();
-  setupRealtime();
-});
-console.log('🚀 TradeAux Auctions loaded!');
-</script>
+    // ============================================================
+    // AUTH
+    // ============================================================
+    async function initAuth() {
+      try {
+        // Show loading state
+        const nameEl = $('sellerNameDisplay');
+        if (nameEl) nameEl.textContent = '⏳ Loading...';
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) { redirectToSignin(); return; }
+        currentUser = session.user;
+        console.debug("Authenticated:", currentUser.email);
+        await onAuthReady();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') redirectToSignin();
+          else if (session) currentUser = session.user;
+        });
+        authSubscription = subscription;
+      } catch (err) {
+        console.error('Auth init error:', err);
+        showToast('Failed to initialize authentication. Please refresh.', true);
+      }
+    }
+
+    function redirectToSignin() { window.location.href = 'signin.html'; }
+
+    async function handleSignOut() {
+      if (!confirm('Sign out?')) return;
+      try {
+        if (authSubscription) {
+          try { authSubscription.unsubscribe(); } catch (e) { /* ignore */ }
+          authSubscription = null;
+        }
+        await supabase.auth.signOut();
+        showToast('👋 Signed out', false);
+        window.location.href = 'signin.html';
+      } catch (err) {
+        console.error('Sign out error:', err);
+        showToast('Error signing out. Please try again.', true);
+      }
+    }
+
+    // ============================================================
+    // LOAD DATA
+    // ============================================================
+    async function onAuthReady() {
+      try {
+        await loadSellerProfile();
+        await loadBriefAndBids();
+        await subscribeToSupabaseBids();
+        renderWallet();
+      } catch (err) {
+        console.error('Error loading data:', err);
+        showToast('Error loading dashboard data. Please refresh.', true);
+      }
+    }
+
+    async function loadSellerProfile() {
+      try {
+        // Use .single() - profile is created on signup
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+
+        if (error || !profile) {
+          // Try to create a default profile if missing
+          console.warn('Profile not found, attempting to create one...');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: currentUser.id,
+              name: currentUser.email?.split('@')[0] || 'User',
+              email: currentUser.email,
+              created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+          if (createError || !newProfile) {
+            throw new Error('Profile not found and could not be created');
+          }
+          currentSeller = newProfile;
+        } else {
+          currentSeller = profile;
+        }
+
+        // Load seller data
+        const { data: seller, error: sellerErr } = await supabase
+          .from('sellers')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+        if (sellerErr) throw sellerErr;
+        if (seller) currentSeller = { ...currentSeller, ...seller };
+
+        const nameEl = $('sellerNameDisplay');
+        if (nameEl) nameEl.textContent = (currentSeller.coop_name || currentSeller.business_name || currentSeller
+          .full_name || currentSeller.name || 'Unknown Co-op').toUpperCase();
+        const metaEl = $('sellerMetaDisplay');
+        if (metaEl) metaEl.textContent =
+          `⭐ ${currentSeller.rating || '4.5'} ★ (${currentSeller.sales_count || currentSeller.sales || 0} sales) • Member since ${currentSeller.member_since || '2023'}`;
+        const fobEl = $('sellerFobDisplay');
+        if (fobEl) fobEl.textContent = `📍 FOB: ${currentSeller.fob_port || currentSeller.location || 'Not specified'}`;
+      } catch (err) {
+        console.error("Error loading seller profile:", err);
+        showToast('Error loading profile: ' + err.message, true);
+        const nameEl = $('sellerNameDisplay');
+        if (nameEl) nameEl.textContent = 'PROFILE NOT FOUND';
+      }
+    }
+
+    async function loadBriefAndBids() {
+      try {
+        const { data: briefs, error } = await supabase
+          .from('seller_briefs')
+          .select('*')
+          .eq('seller_id', currentUser.id)
+          .in('status', ['active', 'auctioning', 'errored'])
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (error) throw error;
+
+        if (!briefs || briefs.length === 0) {
+          showToast('No active brief found. Create one in the dashboard.', true);
+          const container = $('cardsGrid');
+          if (container) {
+            container.innerHTML = '';
+            const emptyState = createSafeElement('div', '', 'No active seller brief. Go to dashboard to create one.');
+            emptyState.style.cssText = 'color:#9ca3af;text-align:center;padding:40px;grid-column:1/-1;';
+            container.appendChild(emptyState);
+          }
+          return;
+        }
+
+        const brief = briefs[0];
+        if (!brief.id) { showToast('Brief data is malformed.', true); return; }
+        try { validateId(brief.id, 'brief.id'); } catch (err) { showToast('Invalid brief ID.', true); return; }
+
+        if (brief.status === 'errored') {
+          currentBrief = brief;
+          showToast('⚠️ Brief is in errored state. Please reset it in the dashboard.', true);
+          return;
+        }
+
+        currentBrief = brief;
+        totalQty = currentBrief.quantity_mt ?? 0;
+        remainingQty = currentBrief.remaining_mt ?? totalQty;
+        feesCollected = currentBrief.fees_collected ?? 0;
+        idealPrice = currentBrief.ideal_price ?? 4.25;
+
+        if ($('remainingQuantity')) $('remainingQuantity').textContent = remainingQty;
+        if ($('totalQtyDisplay')) $('totalQtyDisplay').textContent = `MT remaining of ${totalQty} MT total`;
+        if ($('statIdeal')) $('statIdeal').textContent = `$${idealPrice.toFixed(2)}`;
+
+        if ($('productEmoji')) $('productEmoji').textContent = currentBrief.product_emoji || '📦';
+        if ($('productLabel')) $('productLabel').textContent = currentBrief.product || 'Product';
+
+        // Check for active auction
+        const { data: activeAuction, error: auctionCheckErr } = await supabase
+          .from('auctions')
+          .select('id, status, created_at')
+          .eq('brief_id', currentBrief.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (auctionCheckErr) throw auctionCheckErr;
+
+        if (activeAuction && activeAuction.length > 0) {
+          currentAuctionId = activeAuction[0].id;
+
+          // FIX #10: Only set auctionActive if started_at exists and status is auctioning
+          if (currentBrief.status === 'auctioning' && currentBrief.started_at) {
+            auctionActive = true;
+            if ($('startBtn')) {
+              $('startBtn').textContent = '⏳ AUCTION RUNNING';
+              $('startBtn').disabled = true;
+            }
+            const startedAt = new Date(currentBrief.started_at);
+            const elapsed = Math.floor((Date.now() - startedAt.getTime()) / 1000);
+            timerSeconds = Math.max(0, 180 - elapsed);
+            if (timerSeconds > 0) {
+              startTimerLoop();
+            } else {
+              await onAuctionEnd();
+            }
+          } else if (currentBrief.status === 'auctioning' && !currentBrief.started_at) {
+            // FIX #10: Only reset if status is 'auctioning' AND started_at is missing
+            auctionActive = false;
+            await safeUpdateBrief(currentBrief.id, { status: 'active', started_at: null });
+            if ($('startBtn')) {
+              $('startBtn').textContent = '▶ START AUCTION';
+              $('startBtn').disabled = false;
+            }
+            showToast('⚠️ Auction was stuck. Reset to active state.', true);
+          } else {
+            // Status is 'active' - leave it alone
+            auctionActive = false;
+            if ($('startBtn')) {
+              $('startBtn').textContent = '▶ START AUCTION';
+              $('startBtn').disabled = false;
+            }
+          }
+
+          await loadBidsForBrief(currentBrief.id);
+        } else {
+          await loadBidsForBrief(currentBrief.id);
+        }
+      } catch (err) { console.error("Error loading brief:", err);
+        showToast('Error loading brief', true); }
+    }
+
+    // FIX #1: safeUpdate*() without mandatory read-back
+    async function safeUpdateBrief(briefId, updates) {
+      const id = validateId(briefId, 'briefId');
+      const { error } = await supabase.from('seller_briefs').update(updates).eq('id', id);
+      if (error) throw error;
+      return { success: true, id: id };
+    }
+
+    async function safeUpdateBid(bidId, updates) {
+      const id = validateId(bidId, 'bidId');
+      const { error } = await supabase.from('bids').update(updates).eq('id', id);
+      if (error) throw error;
+      return { success: true, id: id };
+    }
+
+    async function safeUpdateAuction(auctionId, updates) {
+      const id = validateId(auctionId, 'auctionId');
+      const { error } = await supabase.from('auctions').update(updates).eq('id', id);
+      if (error) throw error;
+      return { success: true, id: id };
+    }
+
+    // ============================================================
+    // BIDS
+    // ============================================================
+    async function loadBidsForBrief(briefId) {
+      try {
+        const id = validateId(briefId, 'briefId');
+        const { data: auction, error: auctionErr } = await supabase
+          .from('auctions')
+          .select('id')
+          .eq('brief_id', id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (auctionErr) throw auctionErr;
+        if (!auction || auction.length === 0) {
+          const { data: bids, error } = await supabase
+            .from('bids')
+            .select('*')
+            .eq('brief_id', id)
+            .in('status', ['pending', 'accepted'])
+            .order('price', { ascending: false });
+          if (error) throw error;
+          processBidsData(bids);
+          return;
+        }
+
+        const auctionId = auction[0].id;
+        currentAuctionId = auctionId;
+
+        const { data: bids, error } = await supabase
+          .from('bids')
+          .select('*')
+          .eq('auction_id', auctionId)
+          .in('status', ['pending', 'accepted'])
+          .order('price', { ascending: false });
+        if (error) throw error;
+        processBidsData(bids);
+      } catch (err) { console.error("Error loading bids:", err); }
+    }
+
+    function processBidsData(bids) {
+      activeBids = (bids || []).map(bid => {
+        let quantity, price;
+        try {
+          quantity = getBidQuantityMT(bid);
+          price = getBidPriceMT(bid);
+        } catch (err) {
+          console.warn('Skipping malformed bid:', bid.id, err.message);
+          return null;
+        }
+        return {
+          id: bid.id,
+          buyerName: bid.buyer_name || bid.bidder || 'Unknown Buyer',
+          contactPerson: bid.buyer_contact || 'Not provided',
+          email: bid.buyer_email || 'Not provided',
+          phone: bid.buyer_phone || 'Not provided',
+          whatsapp: bid.buyer_whatsapp || 'Not provided',
+          quantity: quantity,
+          price: price,
+          totalValue: price * quantity,
+          accepted: bid.status === 'accepted',
+          change: bid.previous_amount ? ((price - bid.previous_amount) / bid.previous_amount * 100) : 0,
+          heat: Math.min(100, (bid.bid_count ?? 1) * 15 + 30),
+          buyer_id: bid.buyer_id,
+          fromSupabase: true,
+          status: bid.status || 'pending'
+        };
+      }).filter(b => b !== null);
+
+      renderCardsWithJostle();
+      updateStats();
+    }
+
+    // ============================================================
+    // REALTIME SUBSCRIPTION
+    // ============================================================
+    async function subscribeToSupabaseBids() {
+      if (bidsChannel) {
+        try { await supabase.removeChannel(bidsChannel); } catch (e) { /* ignore */ }
+        bidsChannel = null;
+      }
+      if (!currentBrief || !currentBrief.id) return;
+
+      if (!currentAuctionId) {
+        const { data: auctions, error } = await supabase
+          .from('auctions')
+          .select('id')
+          .eq('seller_id', currentUser.id)
+          .eq('brief_id', currentBrief.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error || !auctions || auctions.length === 0) {
+          console.debug('No active auction found for this brief');
+          return;
+        }
+        currentAuctionId = auctions[0].id;
+      }
+
+      bidsChannel = supabase
+        .channel('bids-channel')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'bids',
+          filter: `auction_id=eq.${currentAuctionId}`
+        }, (payload) => {
+          const newBid = payload.new;
+          if (activeBids.some(b => b.id === newBid.id)) return;
+
+          let price, quantity;
+          try {
+            price = getBidPriceMT(newBid);
+            quantity = getBidQuantityMT(newBid);
+          } catch (err) {
+            console.warn('Skipping malformed realtime bid:', newBid.id, err.message);
+            return;
+          }
+
+          const bidObj = {
+            id: newBid.id,
+            buyerName: newBid.buyer_name || newBid.bidder || 'Buyer Bot',
+            contactPerson: newBid.buyer_name || 'Bot',
+            email: newBid.buyer_contact_email || 'Not provided',
+            phone: newBid.buyer_contact_phone || 'Not provided',
+            whatsapp: newBid.buyer_contact_phone || 'Not provided',
+            price: price,
+            quantity: quantity,
+            totalValue: price * quantity,
+            accepted: false,
+            change: 0,
+            heat: 50 + Math.random() * 40,
+            buyer_id: newBid.buyer_id,
+            fromSupabase: true,
+            status: 'pending'
+          };
+          activeBids.push(bidObj);
+          activeBids.sort((a, b) => b.price - a.price);
+          renderCardsWithJostle();
+          updateStats();
+          showToast(`🤖 New bid from ${bidObj.buyerName}: $${bidObj.price.toFixed(2)}/MT for ${bidObj.quantity} MT`);
+        })
+        .subscribe((status) => { console.debug('Realtime subscription status:', status); });
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderCardsWithJostle() {
+      const container = $('cardsGrid');
+      if (!container) return;
+
+      const oldChildren = Array.from(container.children);
+      const posMap = new Map();
+      oldChildren.forEach(el => {
+        let id = el.getAttribute('data-id');
+        if (id && !el.classList.contains('accepted')) {
+          let rect = el.getBoundingClientRect();
+          posMap.set(id, { left: rect.left, top: rect.top });
+        }
+      });
+
+      container.innerHTML = '';
+      const sortedBids = [...activeBids].sort((a, b) => b.price - a.price);
+      const pendingBids = sortedBids.filter(b => !b.accepted);
+      const highestBid = pendingBids.length > 0 ? pendingBids[0].price : 0;
+
+      if (sortedBids.length === 0) {
+        const emptyState = createSafeElement('div', '', 'No bids yet. Start the auction to receive bids.');
+        emptyState.style.cssText = 'color:#9ca3af;text-align:center;padding:40px;grid-column:1/-1;';
+        container.appendChild(emptyState);
+        return;
+      }
+
+      sortedBids.forEach((card, idx) => {
+        const div = document.createElement('div');
+        div.className = `market-card ${card.accepted ? 'accepted' : ''}`;
+        div.setAttribute('data-id', card.id);
+
+        // Rank Flag
+        const rankVal = idx + 1;
+        const rankClass = rankVal === 1 ? 'rank-1' : rankVal === 2 ? 'rank-2' : rankVal === 3 ? 'rank-3' : 'rank-other';
+        const rankDiv = createSafeElement('div', `rank-flag ${rankClass}`, `#${rankVal}`);
+        div.appendChild(rankDiv);
+
+        // Verified Badge
+        const verifiedDiv = createSafeElement('div', 'verified-badge', card.fromSupabase ? '🤖 Bot' : '✓ Verified');
+        div.appendChild(verifiedDiv);
+
+        // Product Visual
+        const productVisual = createSafeElement('div', 'product-visual');
+        const emojiDiv = createSafeElement('div', 'product-emoji', currentBrief?.product_emoji || '🏢');
+        productVisual.appendChild(emojiDiv);
+        div.appendChild(productVisual);
+
+        // Card Title
+        const titleEl = createSafeElement('div', 'card-title', card.buyerName);
+        div.appendChild(titleEl);
+
+        // Contact Name
+        const contactEl = createSafeElement('div', 'contact-name', `📞 ${card.contactPerson}`);
+        div.appendChild(contactEl);
+
+        // Price Row
+        const priceRow = document.createElement('div');
+        priceRow.className = 'price-row';
+        const priceSpan = createSafeElement('span', 'current-price', `$${card.price.toFixed(2)}`);
+        const changePct = card.change || 0;
+        const changeClass = changePct >= 0 ? 'up' : 'down';
+        const changeSpan = createSafeElement('span', `change-badge ${changeClass}`, `${changePct >= 0 ? '+' : ''}${changePct.toFixed(1)}%`);
+        priceRow.appendChild(priceSpan);
+        priceRow.appendChild(changeSpan);
+        div.appendChild(priceRow);
+
+        // Quantity
+        const qtyEl = createSafeElement('div', 'bid-quantity', `📦 ${card.quantity} MT · Total: $${card.totalValue.toLocaleString()}`);
+        div.appendChild(qtyEl);
+
+        // Heat Bar
+        const heatPercent = Math.min(100, Math.max(8, card.heat));
+        const heatBar = document.createElement('div');
+        heatBar.className = 'heat-bar-container';
+        const heatFill = document.createElement('div');
+        heatFill.className = 'heat-fill';
+        heatFill.style.width = `${heatPercent}%`;
+        heatBar.appendChild(heatFill);
+        div.appendChild(heatBar);
+
+        // Card Meta
+        const metaEl = document.createElement('div');
+        metaEl.className = 'card-meta';
+        const cacheKey = card.buyer_id || card.id || card.buyerName;
+        const starRating = getCachedRating(cacheKey);
+        const starSpan = createSafeElement('span', '', `⭐ ${starRating} ★`);
+        const heatSpan = createSafeElement('span', '', `🔥 ${Math.round(card.heat)}°`);
+        metaEl.appendChild(starSpan);
+        metaEl.appendChild(heatSpan);
+        div.appendChild(metaEl);
+
+        // Accept Button
+        const canAccept = !auctionActive && !isDuheDelayActive && !card.accepted && card.quantity <= remainingQty && card
+          .price > 0;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'accept-btn';
+
+        if (auctionActive || isDuheDelayActive) {
+          btn.disabled = true;
+          btn.textContent = auctionActive ? '⏳ AUCTION RUNNING' : '⏳ DUHE PROCESSING...';
+          btn.style.opacity = '0.3';
+        } else if (card.accepted) {
+          btn.disabled = true;
+          btn.textContent = '✓ ACCEPTED';
+          btn.style.opacity = '0.5';
+        } else if (!canAccept) {
+          btn.disabled = true;
+          btn.textContent = card.quantity > remainingQty ? '⚠️ QTY EXCEEDS' : '✕ UNAVAILABLE';
+          btn.style.opacity = '0.3';
+        } else {
+          btn.textContent = '✓ ACCEPT OFFER';
+          btn.setAttribute('data-action', 'accept');
+          btn.setAttribute('data-bid-id', card.id);
+        }
+        div.appendChild(btn);
+
+        // FIX #11: Only attach keyboard accessibility for non-accepted cards
+        if (!card.accepted && !auctionActive) {
+          div.style.cursor = 'pointer';
+          div.setAttribute('tabindex', '0');
+          div.setAttribute('role', 'button');
+          div.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openBidModal(card);
+            }
+          });
+        } else {
+          div.style.cursor = 'default';
+        }
+
+        container.appendChild(div);
+      });
+
+      // FLIP animation (theatre)
+      if (posMap.size > 0) {
+        requestAnimationFrame(() => {
+          const newCards = Array.from(container.children);
+          newCards.forEach(el => {
+            let id = el.getAttribute('data-id');
+            let old = posMap.get(id);
+            if (old && !el.classList.contains('accepted')) {
+              let rect = el.getBoundingClientRect();
+              let dx = old.left - rect.left,
+                dy = old.top - rect.top;
+              if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+                el.style.transform = `translate(${dx}px, ${dy}px)`;
+                el.style.transition = 'none';
+                el.offsetHeight;
+                el.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1)';
+                el.style.transform = '';
+                setTimeout(() => { el.style.transition = ''; }, 500);
+              }
+            }
+          });
+        });
+      }
+
+      updateStats(highestBid);
+    }
+
+    function updateStats(highestBid) {
+      const activeCount = activeBids.filter(c => !c.accepted).length;
+      const highest = (highestBid !== undefined && highestBid !== null) ? highestBid :
+        activeBids.filter(c => !c.accepted).reduce((max, b) => Math.max(max, b.price), 0);
+      if ($('statActive')) $('statActive').textContent = activeCount;
+      if ($('statHighest')) $('statHighest').textContent = `$${highest.toFixed(2)}`;
+      if ($('statFees')) $('statFees').textContent = `$${feesCollected}`;
+      if ($('remainingQuantity')) $('remainingQuantity').textContent = remainingQty;
+      if ($('statIdeal')) $('statIdeal').textContent = `$${idealPrice.toFixed(2)}`;
+    }
+
+    // ============================================================
+    // KNAPSACK SOLVER — FIX #7: 100kg lots for regular, 25kg for samples
+    // ============================================================
+    function runKnapsackSolver(bids, inventoryMT, idealPrice) {
+      const pendingBids = bids.filter(b => !b.accepted);
+      if (pendingBids.length === 0) {
+        return { solved: false, nearSolve: false, winners: [], remaining: inventoryMT, fillPercent: 0, optimizedPrice: 0,
+          deviation: 0, totalValue: 0, totalFees: 0, totalDiscount: 0, netToCoop: 0 };
+      }
+
+      // FIX #7: Use 100kg for regular auctions, 25kg for samples (< 10 MT)
+      const MIN_LOT_SIZE_MT = inventoryMT < 10 ? 0.025 : 0.1;
+      const inventoryUnits = Math.round(inventoryMT / MIN_LOT_SIZE_MT);
+
+      if (inventoryUnits <= 0) {
+        return { solved: false, nearSolve: false, winners: [], remaining: inventoryMT, fillPercent: 0, optimizedPrice: 0,
+          deviation: 0, totalValue: 0, totalFees: 0, totalDiscount: 0, netToCoop: 0 };
+      }
+
+      // Cap at 500 bids for performance
+      const MAX_BIDS = 500;
+      const items = pendingBids
+        .map(bid => {
+          const weightUnits = Math.round(bid.quantity / MIN_LOT_SIZE_MT);
+          if (weightUnits <= 0) return null;
+          const priceDiff = Math.abs(bid.price - idealPrice) / (idealPrice || 1);
+          const priceScore = Math.max(0, 1 - Math.min(priceDiff, 0.8));
+          const value = bid.price * bid.quantity * (0.6 + 0.4 * priceScore);
+          return { ...bid, value, weight: weightUnits, priceScore };
+        })
+        .filter(item => item !== null)
+        .slice(0, MAX_BIDS);
+
+      if (items.length === 0) {
+        return { solved: false, nearSolve: false, winners: [], remaining: inventoryMT, fillPercent: 0, optimizedPrice: 0,
+          deviation: 0, totalValue: 0, totalFees: 0, totalDiscount: 0, netToCoop: 0 };
+      }
+
+      const n = items.length;
+      const dp = Array(n + 1).fill(null).map(() => Array(inventoryUnits + 1).fill(0));
+
+      for (let i = 1; i <= n; i++) {
+        for (let w = 1; w <= inventoryUnits; w++) {
+          if (items[i - 1].weight <= w) {
+            dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - items[i - 1].weight] + items[i - 1].value);
+          } else {
+            dp[i][w] = dp[i - 1][w];
+          }
+        }
+      }
+
+      let w = inventoryUnits;
+      const selected = [];
+      for (let i = n; i > 0 && w > 0; i--) {
+        if (dp[i][w] !== dp[i - 1][w]) {
+          selected.push(items[i - 1]);
+          w -= items[i - 1].weight;
+        }
+      }
+
+      const totalQuantityMT = selected.reduce((sum, item) => sum + item.quantity, 0);
+      const fillRate = (totalQuantityMT / inventoryMT) * 100;
+      const optimizedPrice = totalQuantityMT > 0 ? selected.reduce((sum, item) => sum + (item.price * item.quantity), 0) /
+        totalQuantityMT : 0;
+      const deviation = idealPrice > 0 ? ((optimizedPrice - idealPrice) / idealPrice) * 100 : 0;
+
+      return {
+        solved: fillRate >= 95,
+        nearSolve: fillRate >= 60 && fillRate < 95,
+        winners: selected,
+        remaining: inventoryMT - totalQuantityMT,
+        fillPercent: fillRate,
+        optimizedPrice,
+        deviation,
+        totalValue: selected.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        totalFees: selected.length * 25,
+        totalDiscount: selected.length * 50,
+        netToCoop: selected.reduce((sum, item) => sum + (item.price * item.quantity), 0) - (selected.length * 50)
+      };
+    }
+
+    function runDUHESolver(bids, inventory) {
+      return runKnapsackSolver(bids, inventory, idealPrice);
+    }
+
+    // ============================================================
+    // DUHE MODAL
+    // ============================================================
+    function showDUHEProposalModal(solution) {
+      if (!currentBrief) { showToast('No brief loaded', true); return; }
+      if (!solution || typeof solution !== 'object') { showToast('Invalid solution data', true); return; }
+
+      isDuheDelayActive = false;
+      duheSolution = solution;
+      const modal = $('duheModal');
+      const status = $('duheStatus');
+      const comparison = $('duheComparison');
+      const winnersList = $('duheWinnersList');
+      const financials = $('duheFinancials');
+      const nearSolve = $('duheNearSolve');
+
+      if (status) {
+        const statusText = solution.solved ? '✅ Full inventory cleared! 🎉' :
+          `⚠️ ${solution.fillPercent.toFixed(1)}% cleared (${solution.remaining.toFixed(2)} MT remaining)`;
+        status.textContent = statusText;
+        status.style.color = solution.solved ? '#7CFC00' : '#FFD966';
+      }
+
+      if (comparison) {
+        comparison.innerHTML = '';
+        const comparisons = [
+          ['Your Ideal Price:', `$${idealPrice.toFixed(2)}/MT`, '#FFD966'],
+          ['Optimized Price:', `$${solution.optimizedPrice.toFixed(2)}/MT`, '#7CFC00'],
+          ['Deviation:', `${solution.deviation > 0 ? '+' : ''}${solution.deviation.toFixed(1)}%`, Math.abs(solution
+            .deviation) < 5 ? '#7CFC00' : '#FFD966']
+        ];
+        comparisons.forEach(([label, value, color]) => {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex; justify-content:space-between; margin: 6px 0; font-size: 0.85rem;';
+          const labelSpan = createSafeElement('span', '', label);
+          labelSpan.style.color = '#94A3B8';
+          const valueSpan = createSafeElement('span', '', value);
+          valueSpan.style.cssText = `color:${color}; font-weight:700;`;
+          row.appendChild(labelSpan);
+          row.appendChild(valueSpan);
+          comparison.appendChild(row);
+        });
+      }
+
+      if (winnersList) {
+        winnersList.innerHTML = '';
+        const winnersHeader = createSafeElement('h3', '', `WINNING BUYERS (${solution.winners.length})`);
+        winnersHeader.style.cssText = 'font-size: 0.85rem; color: #94A3B8; margin-bottom: 12px;';
+        winnersList.appendChild(winnersHeader);
+        if (solution.winners.length === 0) {
+          const emptyMsg = createSafeElement('div', '', 'No winning bids found.');
+          emptyMsg.style.cssText = 'color:#FF5E5E; text-align:center; padding:20px;';
+          winnersList.appendChild(emptyMsg);
+        } else {
+          solution.winners.forEach((w, i) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'border-bottom: 1px solid rgba(124,252,0,0.15); padding: 10px 0;';
+            const nameDiv = document.createElement('div');
+            nameDiv.style.cssText = 'display:flex; justify-content:space-between; align-items:center;';
+            const nameStrong = createSafeElement('b', '', `${i+1}. ${w.buyerName}`);
+            const priceSpan = createSafeElement('span', '', `$${(w.price * w.quantity).toLocaleString()}`);
+            priceSpan.style.cssText = 'color:#FFD966; font-weight:700;';
+            nameDiv.appendChild(nameStrong);
+            nameDiv.appendChild(priceSpan);
+            const detailsDiv = createSafeElement('div', '', `${w.quantity.toFixed(2)} MT @ $${w.price.toFixed(2)}/MT`);
+            detailsDiv.style.cssText = 'font-size: 0.75rem; color: #94A3B8; margin-top: 4px;';
+            const contactDiv = createSafeElement('div', '', `📞 ${w.contactPerson} | ${w.email}`);
+            contactDiv.style.cssText = 'font-size: 0.7rem; color: #7CFC00; margin-top: 2px;';
+            div.appendChild(nameDiv);
+            div.appendChild(detailsDiv);
+            div.appendChild(contactDiv);
+            winnersList.appendChild(div);
+          });
+        }
+      }
+
+      if (financials) {
+        financials.innerHTML = '';
+        const financialData = [
+          ['Total Value:', `$${solution.totalValue.toLocaleString()}`, '#FFD966'],
+          ['Your Fees Collected:', `+$${solution.totalFees}`, '#7CFC00'],
+          ['Buyer Discounts Given:', `-$${solution.totalDiscount}`, '#FF5E5E'],
+          ['Net to Co-op:', `$${solution.netToCoop.toLocaleString()}`, '#7CFC00']
+        ];
+        financialData.forEach(([label, value, color], index) => {
+          const row = document.createElement('div');
+          const isLast = index === financialData.length - 1;
+          row.style.cssText =
+            `display:flex; justify-content:space-between; margin: ${isLast ? '8px 0 4px' : '6px 0'}; font-size: ${isLast ? '1rem' : '0.85rem'}; ${isLast ? 'padding-top: 8px; border-top: 1px solid rgba(124,252,0,0.2);' : ''}`;
+          const labelSpan = createSafeElement('span', '', label);
+          labelSpan.style.color = isLast ? '#F0F3FA' : '#94A3B8';
+          if (isLast) labelSpan.style.fontWeight = '700';
+          const valueSpan = createSafeElement('span', '', value);
+          valueSpan.style.cssText = `color:${color}; font-weight:${isLast ? '800' : '700'};`;
+          row.appendChild(labelSpan);
+          row.appendChild(valueSpan);
+          financials.appendChild(row);
+        });
+      }
+
+      if (nearSolve) {
+        if (solution.nearSolve && !solution.solved) {
+          nearSolve.style.display = 'block';
+          nearSolve.innerHTML = '';
+          const header = createSafeElement('div', '', '⚡ NEAR-SOLVE OPPORTUNITY');
+          header.style.cssText = 'color:#FFD966; font-weight:700; margin-bottom: 8px;';
+          const desc = document.createElement('p');
+          desc.style.cssText = 'font-size: 0.8rem; color: #BFC9E0; line-height: 1.5;';
+          const text1 = document.createTextNode('DUHE needs ');
+          const mtBold = document.createElement('b');
+          mtBold.textContent = `${solution.remaining.toFixed(2)} MT`;
+          mtBold.style.color = '#FFD966';
+          const text2 = document.createTextNode(' more to clear full inventory. Buyers will take it at ');
+          const priceBold = document.createElement('b');
+          priceBold.textContent = `$${solution.winners[0]?.price?.toFixed(2) || '0.00'}/MT`;
+          priceBold.style.color = '#7CFC00';
+          const text3 = document.createTextNode('.');
+          desc.appendChild(text1);
+          desc.appendChild(mtBold);
+          desc.appendChild(text2);
+          desc.appendChild(priceBold);
+          desc.appendChild(text3);
+          const br1 = document.createElement('br');
+          const br2 = document.createElement('br');
+          const text4 = document.createTextNode('Extra revenue potential: ');
+          const revenueBold = document.createElement('b');
+          revenueBold.textContent = `$${(solution.remaining * (solution.winners[0]?.price || 0)).toLocaleString()}`;
+          revenueBold.style.color = '#7CFC00';
+          desc.appendChild(br1);
+          desc.appendChild(br2);
+          desc.appendChild(text4);
+          desc.appendChild(revenueBold);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'near-solve-btn'; // FIX #9: Use class instead of ID
+          btn.style.cssText =
+            'margin-top: 12px; background: linear-gradient(105deg, #FFD966, #F5A623); color: #0A0C15; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: 700; font-size: 0.8rem; width: 100%;';
+          btn.textContent = `🔍 I'll find ${solution.remaining.toFixed(2)} MT more`;
+          btn.onclick = () => {
+            $('duheModal').classList.remove('active');
+            showCoopNegotiation(solution.remaining, solution.winners[0]?.price || 0);
+          };
+          nearSolve.appendChild(header);
+          nearSolve.appendChild(desc);
+          nearSolve.appendChild(btn);
+        } else {
+          nearSolve.style.display = 'none';
+        }
+      }
+
+      // Button handlers
+      if ($('acceptDuheBtn')) {
+        $('acceptDuheBtn').onclick = async () => { await acceptDUHESolution(solution); };
+      }
+
+      if ($('rejectDuheBtn')) {
+        $('rejectDuheBtn').onclick = async () => {
+          $('duheModal').classList.remove('active');
+          try {
+            await safeUpdateBrief(currentBrief.id, { status: 'active', updated_at: new Date().toISOString() });
+            showToast("❌ DUHE solution rejected. You can relist the inventory.", true);
+            if ($('startBtn')) { $('startBtn').textContent = '▶ START AUCTION';
+              $('startBtn').disabled = false; }
+          } catch (err) { console.error('Failed to update brief status:', err);
+            showToast('Error rejecting solution. Please try again.', true); }
+        };
+      }
+
+      if ($('closeDuheModal')) {
+        $('closeDuheModal').onclick = () => { $('duheModal').classList.remove('active'); };
+      }
+
+      modal.classList.add('active');
+
+      // Focus trap for accessibility
+      setTimeout(() => {
+        const firstBtn = modal.querySelector('button:not(.modal-close)');
+        if (firstBtn) firstBtn.focus();
+      }, 100);
+    }
+
+    // ============================================================
+    // ATOMIC DUHE SETTLEMENT — Edge Function + Fallback
+    // ============================================================
+    async function acceptDUHESolution(solution) {
+      if (!currentBrief) { showToast('No brief loaded', true); return; }
+      if (acceptInProgress) return;
+      if (!solution.winners || solution.winners.length === 0) { showToast('No winners to settle', true); return; }
+
+      // Validate currentAuctionId
+      if (!currentAuctionId) {
+        showToast('No active auction found. Please refresh.', true);
+        return;
+      }
+
+      acceptInProgress = true;
+      const btn = $('acceptDuheBtn');
+      if (btn) { btn.disabled = true;
+        btn.textContent = 'Settling...'; }
+
+      try {
+        const winnersData = solution.winners.map(w => ({
+          id: w.id,
+          buyer_id: w.buyer_id,
+          quantity: w.quantity,
+          price: w.price,
+          buyerName: w.buyerName,
+          email: w.email,
+          contactPerson: w.contactPerson,
+          phone: w.phone,
+          whatsapp: w.whatsapp
+        }));
+
+        // Try Edge Function
+        let result;
+        let edgeError = null;
+
+        try {
+          const { data, error } = await supabase.functions.invoke('duhe-settle', {
+            body: {
+              brief_id: currentBrief.id,
+              seller_id: currentUser.id,
+              auction_id: currentAuctionId,
+              winners: winnersData,
+              solution_metadata: {
+                optimized_price: solution.optimizedPrice,
+                fill_percent: solution.fillPercent,
+                deviation: solution.deviation,
+                total_fees: solution.totalFees,
+                total_discounts: solution.totalDiscount
+              }
+            }
+          });
+
+          if (error) { edgeError = error;
+            throw new Error(error.message || 'Edge Function error'); }
+          if (!data?.success) { throw new Error(data?.error || 'Settlement failed'); }
+          result = data.data;
+
+        } catch (edgeErr) {
+          console.warn('Edge Function failed, falling back to non-atomic:', edgeErr.message);
+          showToast('⚠️ Using fallback settlement method...', true);
+
+          // FALLBACK: Process winners one by one
+          let acceptedCount = 0;
+          let failedCount = 0;
+
+          for (const winner of solution.winners) {
+            try {
+              const bid = activeBids.find(b => b.id === winner.id);
+              if (!bid || bid.accepted) continue;
+              await acceptSingleBid(winner.id);
+              acceptedCount++;
+            } catch (err) {
+              console.error('Failed to accept bid:', winner.id, err);
+              failedCount++;
+            }
+          }
+
+          if (acceptedCount === 0) { throw new Error('No bids could be accepted'); }
+
+          await loadBriefAndBids();
+          renderCardsWithJostle();
+
+          $('duheModal').classList.remove('active');
+          showToast(`⚠️ Fallback settlement: ${acceptedCount} accepted, ${failedCount} failed`, failedCount > 0);
+          return;
+        }
+
+        // Success path
+        remainingQty = result.remaining_mt;
+        feesCollected = result.fees_collected;
+
+        solution.winners.forEach(w => {
+          const bid = activeBids.find(b => b.id === w.id);
+          if (bid) bid.accepted = true;
+        });
+
+        renderCardsWithJostle();
+        updateStats();
+
+        $('duheModal').classList.remove('active');
+
+        let msg = `✅ DUHE settlement complete! ${result.winners_count} buyers notified.`;
+        showToast(msg, false);
+
+        if (result.remaining_mt <= 0) {
+          showToast("🎉 Full inventory cleared! Auction complete.", false);
+          if ($('startBtn')) { $('startBtn').textContent = 'AUCTION COMPLETE';
+            $('startBtn').disabled = true; }
+        } else {
+          showToast(`⚠️ ${result.remaining_mt.toFixed(2)} MT still remaining. Consider relisting.`, true);
+          if ($('startBtn')) { $('startBtn').textContent = '▶ START NEW AUCTION';
+            $('startBtn').disabled = false; }
+        }
+
+      } catch (err) {
+        console.error('DUHE settlement error:', err);
+        showToast('❌ Settlement failed: ' + err.message, true);
+        await loadBriefAndBids();
+        renderCardsWithJostle();
+      } finally {
+        acceptInProgress = false;
+        if (btn) { btn.disabled = false;
+          btn.textContent = '✅ ACCEPT DUHE'; }
+      }
+    }
+
+    // ============================================================
+    // SINGLE BID ACCEPTANCE — With Fallback & Double-Click Protection
+    // ============================================================
+    async function acceptSingleBid(bidId) {
+      // FIX #8: Double-click protection
+      if (processingBids.has(bidId)) {
+        showToast('Already processing this bid...', true);
+        return { success: false, alreadyProcessing: true };
+      }
+
+      processingBids.add(bidId);
+
+      try {
+        const brief = currentBrief;
+        if (!brief) { throw new Error('No brief loaded'); }
+
+        const bid = activeBids.find(c => c.id === bidId);
+        if (!bid || bid.accepted) { throw new Error('Bid not found or already accepted'); }
+
+        if (auctionActive || isDuheDelayActive) { throw new Error('Cannot accept during auction or DUHE processing'); }
+
+        if (bid.quantity > remainingQty) { throw new Error(`Only ${remainingQty.toFixed(2)} MT remaining`); }
+
+        if (!currentAuctionId) { throw new Error('No active auction found'); }
+
+        // Try Edge Function
+        try {
+          const { data, error } = await supabase.functions.invoke('duhe-settle', {
+            body: {
+              brief_id: brief.id,
+              seller_id: currentUser.id,
+              auction_id: currentAuctionId,
+              winners: [{
+                id: bidId,
+                buyer_id: bid.buyer_id,
+                quantity: bid.quantity,
+                price: bid.price,
+                buyerName: bid.buyerName,
+                email: bid.email,
+                contactPerson: bid.contactPerson,
+                phone: bid.phone,
+                whatsapp: bid.whatsapp
+              }],
+              solution_metadata: { single_bid: true }
+            }
+          });
+
+          if (error || !data?.success) { throw new Error(error?.message || data?.error || 'Bid acceptance failed'); }
+
+          const result = data.data;
+          bid.accepted = true;
+          remainingQty = result.remaining_mt;
+          feesCollected = result.fees_collected;
+          renderCardsWithJostle();
+
+          return { success: true, remaining_mt: result.remaining_mt };
+
+        } catch (edgeErr) {
+          console.warn('Edge Function failed for single bid, using fallback:', edgeErr.message);
+
+          // FALLBACK: Non-atomic acceptance
+          const result = await acceptBidFallback(bidId, brief.id);
+          bid.accepted = true;
+          remainingQty = result.remaining_mt;
+          feesCollected = result.fees_collected;
+          renderCardsWithJostle();
+
+          return result;
+        }
+      } finally {
+        processingBids.delete(bidId);
+      }
+    }
+
+    // ============================================================
+    // FALLBACK: Non-atomic bid acceptance with ownership check + fee/contract
+    // ============================================================
+    async function acceptBidFallback(bidId, briefId) {
+      const uid = currentUser?.id;
+      if (!uid) throw new Error("Not authenticated");
+
+      const { data: bid, error: bidErr } = await supabase
+        .from('bids')
+        .select('*')
+        .eq('id', bidId)
+        .single();
+
+      if (bidErr || !bid) throw new Error("Bid not found");
+
+      const qty = getBidQuantityMT(bid);
+      if (qty <= 0) throw new Error("Bid quantity must be greater than 0");
+
+      const { data: brief, error: briefErr } = await supabase
+        .from('seller_briefs')
+        .select('*')
+        .eq('id', briefId)
+        .single();
+
+      if (briefErr || !brief) throw new Error("Brief not found");
+
+      // FIX #5: Ownership check
+      if (brief.seller_id !== uid) {
+        throw new Error("Brief does not belong to you");
+      }
+
+      const remaining = brief.remaining_mt ?? 0;
+      if (qty > remaining) throw new Error(`Only ${remaining} MT remaining`);
+
+      const nextRemaining = remaining - qty;
+      const nextFees = (brief.fees_collected ?? 0) + 25;
+
+      // Update bid
+      await supabase
+        .from('bids')
+        .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+        .eq('id', bidId);
+
+      // Update brief
+      await supabase
+        .from('seller_briefs')
+        .update({
+          remaining_mt: nextRemaining,
+          fees_collected: nextFees,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', briefId);
+
+      // FIX #6: Record fee
+      if (currentAuctionId) {
+        await supabase
+          .from('fees')
+          .insert({
+            auction_id: currentAuctionId,
+            bid_id: bidId,
+            buyer_id: bid.buyer_id,
+            seller_id: uid,
+            amount: 25,
+            type: 'buyer_acceptance_fee',
+            created_at: new Date().toISOString()
+          })
+          .catch(err => console.warn('Failed to record fee in fallback:', err));
+      }
+
+      // FIX #6: Create contract
+      await supabase
+        .from('contracts')
+        .insert({
+          brief_id: briefId,
+          auction_id: currentAuctionId,
+          bid_id: bidId,
+          buyer_id: bid.buyer_id,
+          seller_id: uid,
+          buyer_name: bid.buyer_name || 'Unknown',
+          buyer_email: bid.buyer_email,
+          buyer_contact: bid.buyer_contact,
+          buyer_phone: bid.buyer_phone,
+          buyer_whatsapp: bid.buyer_whatsapp,
+          product: brief.product || 'Unknown',
+          variety: brief.variety,
+          quantity_mt: qty,
+          price_per_mt: bid.amount || bid.price || 0,
+          total_value: (bid.amount || bid.price || 0) * qty,
+          seller_name: brief.seller_name || 'TradeAux Seller',
+          status: 'pending_acceptance',
+          created_at: new Date().toISOString()
+        })
+        .catch(err => console.warn('Failed to create contract in fallback:', err));
+
+      // Get updated brief data
+      const { data: updatedBrief } = await supabase
+        .from('seller_briefs')
+        .select('*')
+        .eq('id', briefId)
+        .single();
+
+      return {
+        success: true,
+        remaining_mt: updatedBrief.remaining_mt,
+        fees_collected: updatedBrief.fees_collected
+      };
+    }
+
+    // ============================================================
+    // COOP NEGOTIATION
+    // ============================================================
+    function showCoopNegotiation(extraNeeded, pricePerMT) {
+      if (!currentBrief) { showToast('No brief loaded', true); return; }
+
+      const safePrice = isNaN(pricePerMT) ? 0 : pricePerMT;
+      const existing = document.getElementById('negotiateModal');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay active';
+      overlay.id = 'negotiateModal';
+      overlay.style.zIndex = '1001';
+
+      const modalCard = document.createElement('div');
+      modalCard.className = 'modal-card';
+      modalCard.style.maxWidth = '480px';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'modal-close';
+      closeBtn.id = 'closeNegotiateModal';
+      closeBtn.setAttribute('aria-label', 'Close modal');
+      closeBtn.textContent = '✕';
+      modalCard.appendChild(closeBtn);
+
+      const header = document.createElement('div');
+      header.className = 'modal-header';
+      const emoji = createSafeElement('div', '', '📦');
+      emoji.style.cssText = 'font-size: 48px; margin-bottom: 8px;';
+      const title = createSafeElement('div', 'modal-title-xl', 'Find More Supply');
+      header.appendChild(emoji);
+      header.appendChild(title);
+      modalCard.appendChild(header);
+
+      const desc = document.createElement('p');
+      desc.style.cssText = 'text-align:center; margin-bottom: 20px; font-size: 0.85rem; color: #BFC9E0; line-height: 1.6;';
+      const text1 = document.createTextNode('DUHE needs ');
+      const mtBold = document.createElement('b');
+      mtBold.textContent = `${extraNeeded.toFixed(2)} MT`;
+      mtBold.style.color = '#FFD966';
+      const text2 = document.createTextNode(' more to clear full inventory. Buyers will take it at ');
+      const priceBold = document.createElement('b');
+      priceBold.textContent = `$${safePrice.toFixed(2)}/MT`;
+      priceBold.style.color = '#7CFC00';
+      const text3 = document.createTextNode('.');
+      desc.appendChild(text1);
+      desc.appendChild(mtBold);
+      desc.appendChild(text2);
+      desc.appendChild(priceBold);
+      desc.appendChild(text3);
+      modalCard.appendChild(desc);
+
+      const revenueBox = document.createElement('div');
+      revenueBox.style.cssText =
+        'background: linear-gradient(145deg, #0a0f1e, #03050C); padding: 16px; border-radius: 20px; margin: 16px 0; border: 1px solid rgba(124,252,0,0.2); text-align: center;';
+      const revenueLabel = createSafeElement('div', '', 'Extra Revenue Potential');
+      revenueLabel.style.cssText = 'font-size: 0.8rem; color: #94A3B8; margin-bottom: 4px;';
+      const revenueValue = createSafeElement('div', '', `$${(extraNeeded * safePrice).toLocaleString()}`);
+      revenueValue.style.cssText = 'font-size: 1.8rem; font-weight: 800; color: #FFD966;';
+      revenueBox.appendChild(revenueLabel);
+      revenueBox.appendChild(revenueValue);
+      modalCard.appendChild(revenueBox);
+
+      const btnContainer = document.createElement('div');
+      btnContainer.style.cssText = 'display: flex; gap: 12px; margin-top: 24px;';
+
+      const foundBtn = document.createElement('button');
+      foundBtn.type = 'button';
+      foundBtn.id = 'foundSupplyBtn';
+      foundBtn.style.cssText =
+        'flex: 1; background: linear-gradient(105deg, #10b981, #2dd4bf); border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #010101; font-size: 0.9rem;';
+      foundBtn.textContent = `✅ I FOUND ${extraNeeded.toFixed(2)} MT`;
+      btnContainer.appendChild(foundBtn);
+
+      const noBtn = document.createElement('button');
+      noBtn.type = 'button';
+      noBtn.id = 'noSupplyBtn';
+      noBtn.style.cssText =
+        'flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; color: #F0F3FA; font-size: 0.9rem;';
+      noBtn.textContent = '❌ Complete as-is';
+      btnContainer.appendChild(noBtn);
+
+      modalCard.appendChild(btnContainer);
+      overlay.appendChild(modalCard);
+      document.body.appendChild(overlay);
+
+      // Focus trap
+      setTimeout(() => {
+        const firstBtn = modalCard.querySelector('button:not(.modal-close)');
+        if (firstBtn) firstBtn.focus();
+      }, 100);
+
+      foundBtn.onclick = async () => {
+        foundBtn.disabled = true;
+        foundBtn.textContent = 'Updating...';
+        try {
+          const newTotalQty = totalQty + extraNeeded;
+          const newRemainingQty = remainingQty + extraNeeded;
+          await safeUpdateBrief(currentBrief.id, {
+            quantity_mt: newTotalQty,
+            remaining_mt: newRemainingQty,
+            updated_at: new Date().toISOString()
+          });
+          totalQty = newTotalQty;
+          remainingQty = newRemainingQty;
+          overlay.remove();
+          showToast(`📦 Inventory expanded by ${extraNeeded.toFixed(2)} MT. Re-running DUHE...`);
+          const newSolution = runDUHESolver(activeBids, remainingQty);
+          showDUHEProposalModal(newSolution);
+        } catch (err) {
+          console.error('Failed to update inventory:', err);
+          showToast('Error expanding inventory. Please try again.', true);
+          foundBtn.disabled = false;
+          foundBtn.textContent = `✅ I FOUND ${extraNeeded.toFixed(2)} MT`;
+        }
+      };
+
+      noBtn.onclick = () => { overlay.remove();
+        showToast("Sale will complete with partial fill.", true);
+        if (duheSolution) showDUHEProposalModal(duheSolution); };
+      closeBtn.onclick = () => { overlay.remove();
+        if (duheSolution) showDUHEProposalModal(duheSolution); };
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.remove();
+          if (duheSolution) showDUHEProposalModal(duheSolution);
+        }
+      });
+    }
+
+    // ============================================================
+    // TIMER
+    // ============================================================
+    function startTimerLoop() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!auctionActive) return;
+        if (timerSeconds <= 1) {
+          stopAllIntervals();
+          onAuctionEnd();
+        } else {
+          timerSeconds--;
+          let mins = Math.floor(timerSeconds / 60),
+            secs = timerSeconds % 60;
+          let el = $('timerMain');
+          if (el) {
+            el.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            if (timerSeconds <= 10) el.classList.add('warning');
+            else el.classList.remove('warning');
+          }
+        }
+      }, 1000);
+    }
+
+    function stopAllIntervals() {
+      if (timerInterval) { clearInterval(timerInterval);
+        timerInterval = null; }
+    }
+
+    // ============================================================
+    // AUCTION END — Closes auction record with retry logic
+    // ============================================================
+    async function onAuctionEnd() {
+      if (isAuctionEndInProgress) { console.warn('Auction end already in progress'); return; }
+      if (auctionEndTimeout) { clearTimeout(auctionEndTimeout);
+        auctionEndTimeout = null; }
+      if (!currentBrief) { showToast('No brief loaded', true); return; }
+
+      let briefId;
+      try { briefId = validateId(currentBrief.id, 'currentBrief.id'); } catch (err) { showToast('Invalid brief ID.', true); return; }
+
+      // Find auction if missing
+      let auctionId = currentAuctionId;
+      if (!auctionId) {
+        try {
+          const { data: auction } = await supabase
+            .from('auctions')
+            .select('id')
+            .eq('brief_id', briefId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          if (auction) {
+            auctionId = auction.id;
+            currentAuctionId = auctionId;
+            console.debug('Found orphaned auction:', auctionId);
+          }
+        } catch (err) {
+          console.warn('Could not find active auction for brief:', err);
+        }
+      }
+
+      isAuctionEndInProgress = true;
+      try {
+        auctionActive = false;
+        stopAllIntervals();
+
+        // FIX #4: Retry logic for brief update
+        let briefUpdated = false;
+        for (let attempt = 1; attempt <= MAX_AUCTION_END_RETRIES; attempt++) {
+          try {
+            await safeUpdateBrief(briefId, {
+              status: 'ended',
+              started_at: null,
+              ended_at: new Date().toISOString()
+            });
+            briefUpdated = true;
+            break;
+          } catch (err) {
+            console.error(`Brief update attempt ${attempt} failed:`, err);
+            if (attempt < MAX_AUCTION_END_RETRIES) {
+              await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+            } else {
+              throw err;
+            }
+          }
+        }
+
+        if (!briefUpdated) {
+          throw new Error('Brief update failed after all retries');
+        }
+
+        // Close auction if found
+        if (auctionId) {
+          try {
+            await safeUpdateAuction(auctionId, {
+              status: 'ended',
+              ended_at: new Date().toISOString()
+            });
+            console.debug('Auction closed:', auctionId);
+          } catch (auctionErr) {
+            console.error('Failed to close auction:', auctionErr);
+          }
+        }
+
+        if ($('startBtn')) {
+          $('startBtn').textContent = '⏳ DUHE SOLVING...';
+          $('startBtn').disabled = true;
+        }
+        showToast("⏰ TIME'S UP! Running DUHE solver...");
+
+        isDuheDelayActive = true;
+        const solution = runDUHESolver(activeBids, remainingQty);
+
+        auctionEndTimeout = setTimeout(() => {
+          try {
+            isDuheDelayActive = false;
+            isAuctionEndInProgress = false;
+
+            if (!solution || solution.winners.length === 0) {
+              showToast("DUHE could not find a solution. No bids accepted.", true);
+              if ($('startBtn')) $('startBtn').textContent = 'NO SOLUTION FOUND';
+              auctionEndTimeout = null;
+              return;
+            }
+            showDUHEProposalModal(solution);
+            if ($('startBtn')) $('startBtn').textContent = 'DUHE PROPOSAL READY';
+            auctionEndTimeout = null;
+          } catch (err) {
+            console.error('Error in auction end timeout:', err);
+            showToast('Error processing auction end.', true);
+            isDuheDelayActive = false;
+            isAuctionEndInProgress = false;
+            auctionEndTimeout = null;
+          }
+        }, 1500);
+      } catch (err) {
+        console.error('Error in onAuctionEnd:', err);
+        isAuctionEndInProgress = false;
+        isDuheDelayActive = false;
+        showToast('Error ending auction: ' + err.message, true);
+      }
+    }
+
+    // ============================================================
+    // START AUCTION
+    // ============================================================
+    async function startAuction() {
+      if (startAuctionInProgress) return;
+      if (!currentUser) { redirectToSignin(); return; }
+      if (!currentBrief) { showToast("No brief loaded", true); return; }
+      if (auctionActive) { showToast("Auction already running!"); return; }
+
+      let briefId;
+      try { briefId = validateId(currentBrief.id, 'currentBrief.id'); } catch (err) { showToast('Invalid brief ID.', true); return; }
+
+      // Check for existing active auction
+      try {
+        const { data: existingAuctions, error: checkError } = await supabase
+          .from('auctions')
+          .select('id, status')
+          .eq('brief_id', briefId)
+          .eq('status', 'active')
+          .limit(1);
+
+        if (checkError) throw checkError;
+        if (existingAuctions && existingAuctions.length > 0) {
+          showToast('An active auction already exists for this brief.', true);
+          if ($('startBtn')) { $('startBtn').textContent = '⏳ AUCTION RUNNING';
+            $('startBtn').disabled = true; }
+          currentAuctionId = existingAuctions[0].id;
+          auctionActive = true;
+          await loadBidsForBrief(briefId);
+          return;
+        }
+      } catch (err) { console.error('Error checking for existing auction:', err); }
+
+      const originalBriefStatus = currentBrief.status;
+      startAuctionInProgress = true;
+      const btn = $('startBtn');
+      if (btn) { btn.disabled = true;
+        btn.textContent = '⏳ STARTING...'; }
+
+      try {
+        const { data: auction, error: auctionErr } = await supabase.from('auctions').insert({
+          seller_id: currentUser.id,
+          brief_id: briefId,
+          product: currentBrief.product || 'Unknown Product',
+          total_qty: totalQty,
+          remaining_qty: remainingQty,
+          status: 'active',
+          duration_seconds: 180,
+          remaining_seconds: 180,
+          fees_collected: 0,
+          seller_name: currentSeller?.coop_name || currentSeller?.name || 'TradeAux Seller',
+          created_at: new Date().toISOString()
+        }).select().single();
+
+        if (auctionErr || !auction) {
+          if (auctionErr?.code === '23505') {
+            showToast("An auction was just started. Refreshing...", true);
+            await loadBriefAndBids();
+            if ($('startBtn')) { $('startBtn').textContent = '⏳ AUCTION RUNNING';
+              $('startBtn').disabled = true; }
+            startAuctionInProgress = false;
+            return;
+          }
+          showToast("Failed to start auction", true);
+          if (btn) { btn.disabled = false;
+            btn.textContent = '▶ START AUCTION'; }
+          startAuctionInProgress = false;
+          return;
+        }
+
+        let newAuctionId;
+        try { newAuctionId = validateId(auction.id, 'auction.id'); } catch (err) { showToast('Invalid auction ID from DB',
+            true); if (btn) { btn.disabled = false;
+            btn.textContent = '▶ START AUCTION'; } startAuctionInProgress = false; return; }
+
+        try {
+          await safeUpdateBrief(briefId, {
+            status: 'auctioning',
+            started_at: new Date().toISOString(),
+            auction_id: newAuctionId
+          });
+        } catch (briefErr) {
+          console.error('Failed to update brief status:', briefErr);
+          try {
+            await safeUpdateAuction(newAuctionId, { status: 'failed', error_message: 'Brief update failed' });
+          } catch (cleanupErr) { console.error('Failed to clean up orphaned auction:', cleanupErr); }
+          showToast('Failed to start auction: brief update failed.', true);
+          if (btn) { btn.disabled = false;
+            btn.textContent = '▶ START AUCTION'; }
+          startAuctionInProgress = false;
+          return;
+        }
+
+        currentAuctionId = newAuctionId;
+        auctionActive = true;
+        timerSeconds = 180;
+        if ($('timerMain')) { $('timerMain').textContent = "03:00";
+          $('timerMain').classList.remove('warning'); }
+        if (btn) { btn.textContent = '⏳ AUCTION RUNNING';
+          btn.disabled = true; }
+
+        try {
+          startTimerLoop();
+          renderCardsWithJostle();
+          showToast("🎬 Auction started — DUHE will select the optimal combination of bids when the auction ends.", false);
+          await subscribeToSupabaseBids();
+        } catch (err) {
+          console.error('Unexpected error during auction startup:', err);
+          const rollbackStatus = originalBriefStatus === 'auctioning' ? 'active' : originalBriefStatus;
+          try {
+            await safeUpdateBrief(briefId, { status: rollbackStatus, started_at: null });
+          } catch (rollbackErr) { console.error('Failed to rollback brief status:', rollbackErr); }
+          try {
+            await safeUpdateAuction(currentAuctionId, { status: 'failed', error_message: err.message || 'Unknown error' });
+          } catch (cleanupErr) { console.error('Failed to clean up auction:', cleanupErr); }
+          currentAuctionId = null;
+          auctionActive = false;
+          if (btn) { btn.disabled = false;
+            btn.textContent = '▶ START AUCTION'; }
+          showToast('Auction startup failed: ' + err.message, true);
+        }
+      } catch (err) {
+        console.error('Unexpected error in startAuction:', err);
+        showToast('Error: ' + err.message, true);
+        if (currentBrief) {
+          const rollbackStatus = originalBriefStatus === 'auctioning' ? 'active' : originalBriefStatus;
+          try {
+            await safeUpdateBrief(briefId, { status: rollbackStatus, started_at: null });
+          } catch (rollbackErr) { console.error('Failed to rollback brief on error:', rollbackErr); }
+        }
+        if (currentAuctionId) {
+          try {
+            await safeUpdateAuction(currentAuctionId, { status: 'failed', error_message: err.message || 'Unknown error' });
+          } catch (cleanupErr) { console.error('Failed to clean up auction on error:', cleanupErr); }
+          currentAuctionId = null;
+        }
+        auctionActive = false;
+        if (btn) { btn.disabled = false;
+          btn.textContent = '▶ START AUCTION'; }
+      } finally { startAuctionInProgress = false; }
+    }
+
+    // ============================================================
+    // BID MODAL
+    // ============================================================
+    function openBidModal(card) {
+      if ($('modalEmoji')) $('modalEmoji').textContent = '🏢';
+      if ($('modalName')) $('modalName').textContent = card.buyerName;
+      if ($('modalPrice')) $('modalPrice').textContent = `$${card.price.toFixed(2)}`;
+      if ($('modalQty')) $('modalQty').textContent = `${card.quantity.toFixed(2)} MT · Total: $${card.totalValue.toLocaleString()}`;
+      if ($('modalContact')) $('modalContact').textContent = card.contactPerson;
+      if ($('modalEmail')) $('modalEmail').textContent = card.email;
+      if ($('modalPhone')) $('modalPhone').textContent = card.phone;
+      if ($('modalWhatsapp')) $('modalWhatsapp').textContent = card.whatsapp;
+
+      const modalBtn = $('acceptFromModalBtn');
+      if (modalBtn) {
+        if (auctionActive || isDuheDelayActive || card.accepted || card.quantity > remainingQty) {
+          modalBtn.disabled = true;
+          modalBtn.textContent = auctionActive ? '⏳ AUCTION RUNNING' : isDuheDelayActive ? '⏳ DUHE PROCESSING...' : card
+            .accepted ? '✓ ALREADY ACCEPTED' : '⚠️ QTY EXCEEDS';
+          modalBtn.style.opacity = '0.4';
+        } else {
+          modalBtn.disabled = false;
+          modalBtn.textContent = '✓ ACCEPT THIS OFFER';
+          modalBtn.style.opacity = '1';
+        }
+      }
+
+      if ($('bidModal')) $('bidModal').classList.add('active');
+      currentModalBid = card;
+    }
+
+    function closeBidModal() { if ($('bidModal')) $('bidModal').classList.remove('active'); }
+
+    // Re-validate bid state before accepting from modal
+    async function acceptFromModal() {
+      if (!currentModalBid) { showToast('No bid selected', true); return; }
+
+      // Re-validate the bid
+      const bid = activeBids.find(b => b.id === currentModalBid.id);
+      if (!bid || bid.accepted) {
+        showToast('This bid has already been accepted', true);
+        closeBidModal();
+        return;
+      }
+
+      if (auctionActive || isDuheDelayActive) {
+        showToast('Cannot accept during auction or DUHE processing', true);
+        return;
+      }
+
+      const btn = $('acceptFromModalBtn');
+      if (btn) { btn.disabled = true;
+        btn.textContent = 'Processing...'; }
+
+      try {
+        await acceptSingleBid(bid.id);
+        if (bid.accepted) closeBidModal();
+      } catch (err) { showToast('Error: ' + err.message, true); } finally {
+        if (btn) { btn.disabled = false;
+          btn.textContent = '✓ ACCEPT THIS OFFER'; }
+      }
+    }
+
+    // ============================================================
+    // RESET — Closes auction, clears caches, clears timeout
+    // ============================================================
+    async function resetAuction() {
+      if (!currentBrief) { showToast('No brief to reset', true); return; }
+      if (!confirm('Reset auction? This will clear all bids and return inventory.')) return;
+
+      // FIX #3: Clear auctionEndTimeout at the start
+      if (auctionEndTimeout) {
+        clearTimeout(auctionEndTimeout);
+        auctionEndTimeout = null;
+      }
+
+      try {
+        const briefId = validateId(currentBrief.id, 'briefId');
+
+        // Notify buyers of cancellation
+        const cancelledBids = activeBids.filter(b => !b.accepted);
+        if (cancelledBids.length > 0) {
+          try {
+            await supabase.functions.invoke('notify-bid-cancellation', {
+              body: {
+                brief_id: briefId,
+                bids: cancelledBids.map(b => ({ buyer_id: b.buyer_id, buyer_name: b.buyerName, quantity: b.quantity,
+                  price: b.price })),
+                reason: 'Auction reset by seller'
+              }
+            });
+          } catch (fnErr) { console.warn('Notification not available:', fnErr.message); }
+        }
+
+        // Close auction record
+        if (currentAuctionId) {
+          try {
+            await safeUpdateAuction(currentAuctionId, {
+              status: 'cancelled',
+              ended_at: new Date().toISOString(),
+              cancellation_reason: 'Reset by seller'
+            });
+          } catch (err) { console.error('Failed to close auction:', err); }
+        }
+
+        // Unsubscribe from realtime
+        if (bidsChannel) {
+          try { await supabase.removeChannel(bidsChannel); } catch (err) { console.warn('Failed to remove channel:', err); }
+          bidsChannel = null;
+        }
+
+        // Reset brief
+        await safeUpdateBrief(briefId, {
+          status: 'active',
+          started_at: null,
+          ended_at: null,
+          remaining_mt: totalQty,
+          fees_collected: 0,
+          updated_at: new Date().toISOString()
+        });
+
+        // Only cancel pending bids, not accepted ones
+        await supabase
+          .from('bids')
+          .update({
+            status: 'cancelled',
+            cancellation_reason: 'Auction reset by seller',
+            updated_at: new Date().toISOString()
+          })
+          .eq('brief_id', briefId)
+          .in('status', ['pending', 'active']);
+
+        // Clear caches on reset
+        starRatingCache.clear();
+        processingBids.clear();
+
+        // Reset state
+        remainingQty = totalQty;
+        feesCollected = 0;
+        activeBids = [];
+        auctionActive = false;
+        currentAuctionId = null;
+        timerSeconds = 180;
+        isDuheDelayActive = false;
+        isAuctionEndInProgress = false;
+
+        if ($('timerMain')) $('timerMain').textContent = "03:00";
+        if ($('startBtn')) {
+          $('startBtn').textContent = '▶ START AUCTION';
+          $('startBtn').disabled = false;
+        }
+
+        renderCardsWithJostle();
+        updateStats();
+        showToast('🔄 Auction reset successfully.', false);
+      } catch (err) {
+        console.error('Reset failed:', err);
+        showToast('Error resetting auction: ' + err.message, true);
+      }
+    }
+
+    // ============================================================
+    // REFRESH BIDS (formerly syncWithCloud)
+    // ============================================================
+    async function refreshBids() {
+      showToast('🔄 Refreshing bids...', false);
+
+      try {
+        const { data: briefs, error } = await supabase
+          .from('seller_briefs')
+          .select('*')
+          .eq('seller_id', currentUser.id)
+          .in('status', ['active', 'auctioning', 'errored'])
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+
+        if (briefs && briefs.length > 0) {
+          const brief = briefs[0];
+          currentBrief = brief;
+          totalQty = brief.quantity_mt ?? 0;
+          remainingQty = brief.remaining_mt ?? totalQty;
+          feesCollected = brief.fees_collected ?? 0;
+          idealPrice = brief.ideal_price ?? 4.25;
+
+          if ($('remainingQuantity')) $('remainingQuantity').textContent = remainingQty;
+          if ($('totalQtyDisplay')) $('totalQtyDisplay').textContent = `MT remaining of ${totalQty} MT total`;
+          if ($('statIdeal')) $('statIdeal').textContent = `$${idealPrice.toFixed(2)}`;
+
+          await loadBidsForBrief(brief.id);
+
+          showToast('✅ Bids refreshed!', false);
+        } else {
+          showToast('No active brief found.', true);
+        }
+      } catch (err) {
+        console.error('Refresh error:', err);
+        showToast('Refresh failed: ' + err.message, true);
+      }
+    }
+
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const cardsGrid = $('cardsGrid');
+      if (cardsGrid) {
+        cardsGrid.addEventListener('click', e => {
+          const card = e.target.closest('.market-card');
+          if (!card) return;
+
+          // Only handle clicks if not in auction and not accepted
+          if (auctionActive) return;
+
+          const bidId = card.getAttribute('data-id');
+          const bid = activeBids.find(b => b.id === bidId);
+          if (!bid || bid.accepted) return;
+
+          const acceptBtn = e.target.closest('[data-action="accept"]');
+          if (acceptBtn) {
+            e.stopPropagation();
+            if (acceptBtn.disabled) return;
+            acceptBtn.disabled = true;
+            acceptBtn.textContent = 'Processing...';
+            acceptSingleBid(bidId).finally(() => {
+              const newBtn = document.querySelector(`[data-bid-id="${bidId}"]`);
+              if (newBtn && !bid.accepted) { newBtn.disabled = false;
+                newBtn.textContent = '✓ ACCEPT OFFER'; }
+            });
+          } else {
+            openBidModal(bid);
+          }
+        });
+      }
+
+      if ($('startBtn')) $('startBtn').addEventListener('click', startAuction);
+      if ($('resetBtn')) $('resetBtn').addEventListener('click', resetAuction);
+      if ($('closeBidModal')) $('closeBidModal').addEventListener('click', closeBidModal);
+      if ($('acceptFromModalBtn')) $('acceptFromModalBtn').addEventListener('click', acceptFromModal);
+      if ($('bidModal')) {
+        $('bidModal').addEventListener('click', e => { if (e.target === $('bidModal')) closeBidModal(); });
+      }
+
+      if ($('authBtn')) $('authBtn').addEventListener('click', handleSignOut);
+
+      // FIX #12: Renamed to "Refresh Bids"
+      if ($('refreshBidsBtn')) $('refreshBidsBtn').addEventListener('click', refreshBids);
+
+      if ($('depositBtn')) {
+        $('depositBtn').addEventListener('click', () => {
+          const amt = prompt('Enter demo deposit amount ($):', '1000');
+          if (amt === null) return;
+          const v = parseFloat(amt);
+          if (isNaN(v) || v <= 0) { showToast('Invalid amount.', true); return; }
+          APP.wallet.balance = (APP.wallet.balance || 0) + v;
+          saveData(APP);
+          renderWallet();
+          showToast('Deposited ' + money(v) + ' (demo)', false);
+        });
+      }
+
+      if ($('forceSaveBtn')) {
+        $('forceSaveBtn').addEventListener('click', () => {
+          saveData(APP);
+          showToast('💾 Data saved locally!', false);
+        });
+      }
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          closeBidModal();
+          if ($('duheModal')) $('duheModal').classList.remove('active');
+          const negModal = document.getElementById('negotiateModal');
+          if (negModal) negModal.remove();
+        }
+      });
+
+      initAuth();
+      renderWallet();
+
+      console.debug('🚀 TradeAux Seller Auction Arena with DUHE Solver loaded!');
+      console.debug('✅ All fixes applied.');
+    });
+
+    // Cleanup
+    window.addEventListener('pagehide', function() {
+      if (window._toastTimeout) { clearTimeout(window._toastTimeout);
+        window._toastTimeout = null; }
+      if (auctionEndTimeout) { clearTimeout(auctionEndTimeout);
+        auctionEndTimeout = null; }
+      if (timerInterval) { clearInterval(timerInterval);
+        timerInterval = null; }
+      if (bidsChannel) {
+        supabase.removeChannel(bidsChannel).catch(e => console.warn('Failed to remove channel:', e));
+        bidsChannel = null;
+      }
+      if (authSubscription) {
+        try { authSubscription.unsubscribe(); } catch (e) { /* ignore */ }
+        authSubscription = null;
+      }
+    });
+  </script>
 </body>
 </html>
