@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
+
+    /* ===== 3D GEM LOGO ===== */
+    .gem-logo-corner {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+
+    .gem-letter:nth-child(1)::before,
+    .gem-letter:nth-child(4)::before,
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before,
+    .gem-letter:nth-child(5)::before,
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before,
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+    /* Navigation */
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 10px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .nav a:hover, .nav button:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.active { border-color: #7CFC00; background: rgba(124,252,0,0.12); color: #7CFC00; }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
+
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 24px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(0,206,209,0.15); margin-bottom: 24px; }
+    .page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: #00ced1; }
+    .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Filter Bar */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; padding: 12px 16px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(0,206,209,0.1); align-items: center; }
+    .filter-bar .filter-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-right: 8px; }
+    .filter-btn { padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(0,206,209,0.2); background: transparent; color: #9ca3af; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
+    .filter-btn:hover { border-color: #00ced1; color: #e5e7eb; }
+    .filter-btn.active { background: rgba(0,206,209,0.1); border-color: #00ced1; color: #00ced1; }
+    .filter-btn .count { background: rgba(0,206,209,0.1); padding: 1px 8px; border-radius: 12px; font-size: 10px; color: #9ca3af; margin-left: 4px; }
+    .filter-btn.active .count { background: rgba(0,206,209,0.2); color: #00ced1; }
+
+    /* Orders Grid */
+    .orders-grid { display: grid; gap: 20px; }
+    .order-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.15); border-radius: 16px; padding: 24px; transition: all 0.3s; }
+    .order-card:hover { border-color: rgba(0,206,209,0.3); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+
+    .order-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+    .order-id { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #e5e7eb; }
+    .order-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .order-status-badge.pending_acceptance { background: rgba(255,217,102,0.15); color: #FFD966; border: 1px solid rgba(255,217,102,0.2); }
+    .order-status-badge.accepted { background: rgba(0,206,209,0.15); color: #00ced1; border: 1px solid rgba(0,206,209,0.2); }
+    .order-status-badge.shipped { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.2); }
+    .order-status-badge.delivered { background: rgba(0,206,209,0.15); color: #00ced1; border: 1px solid rgba(0,206,209,0.2); }
+    .order-status-badge.completed { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.2); }
+    .order-status-badge.cancelled { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
+
+    .order-body { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin: 12px 0; }
+    .order-body .product-info { display: flex; flex-direction: column; gap: 4px; }
+    .order-body .product-info .product-name { font-size: 16px; font-weight: 700; color: #e5e7eb; }
+    .order-body .product-info .product-detail { font-size: 13px; color: #9ca3af; }
+    .order-body .buyer-info { display: flex; flex-direction: column; gap: 4px; }
+    .order-body .buyer-info .buyer-name { font-size: 14px; font-weight: 600; color: #e5e7eb; }
+    .order-body .buyer-info .buyer-contact { font-size: 12px; color: #9ca3af; }
+    .order-body .order-meta { display: flex; flex-direction: column; gap: 4px; text-align: right; }
+    .order-body .order-meta .total-value { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: #7CFC00; }
+    .order-body .order-meta .order-date { font-size: 12px; color: #9ca3af; }
+
+    .order-footer { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,206,209,0.1); }
+    .order-footer .order-action { padding: 6px 16px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #e5e7eb; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+    .order-footer .order-action:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+    .order-footer .order-action.ship { border-color: rgba(124,252,0,0.3); color: #7CFC00; }
+    .order-footer .order-action.ship:hover { background: rgba(124,252,0,0.08); }
+    .order-footer .order-action.complete { border-color: rgba(0,206,209,0.3); color: #00ced1; }
+    .order-footer .order-action.complete:hover { background: rgba(0,206,209,0.08); }
+    .order-footer .order-action.cancel { border-color: rgba(255,59,59,0.3); color: #ff3b3b; }
+    .order-footer .order-action.cancel:hover { background: rgba(255,59,59,0.08); }
+    .order-footer .order-action.track { border-color: rgba(124,252,0,0.3); color: #FFD966; }
+    .order-footer .order-action.track:hover { background: rgba(124,252,0,0.08); }
+    .order-footer .order-action.contact { border-color: rgba(0,206,209,0.3); color: #00ced1; }
+    .order-footer .order-action.contact:hover { background: rgba(0,206,209,0.08); }
+
+    .order-footer .shipping-info { font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .order-footer .shipping-info .tracking-number { color: #7CFC00; font-family: monospace; font-size: 12px; }
+
+    .empty-state { text-align: center; padding: 80px 20px; color: #9ca3af; }
+    .empty-state .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    .empty-state h3 { font-size: 24px; color: #e5e7eb; margin-bottom: 8px; }
+    .empty-state p { max-width: 400px; margin: 0 auto 20px; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 4px 8px; border-radius: 4px; transition: color 0.2s; }
+    .modal-close:hover { color: #00ced1; }
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
+    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 0 3px rgba(0,206,209,0.2); }
+    .modal-field .hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
+    .modal-field .tracking-sites { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .modal-field .tracking-sites a { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); color: #00ced1; text-decoration: none; font-size: 12px; transition: all 0.3s; }
+    .modal-field .tracking-sites a:hover { background: rgba(0,206,209,0.05); border-color: #00ced1; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; transition: all 0.3s; }
+    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .cancel-btn:hover { background: rgba(255,255,255,0.2); }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+    .create-btn.danger { background: linear-gradient(135deg, #ff3b3b, #cc0000); color: white; }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 20000; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+
+    @media (max-width: 900px) { .order-body { grid-template-columns: 1fr; } .order-body .order-meta { text-align: left; } .order-footer { flex-direction: column; } .order-footer .shipping-info { margin-left: 0; } }
+    @media (max-width: 700px) { .page-title { font-size: 22px; } .header { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .filter-bar { flex-wrap: wrap; } }
+  </style>
+</head>
+<body>
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
+  </div>
+
+  <!-- 3D Logo -->
+  <div class="gem-logo-corner" aria-hidden="true" role="presentation">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
+  </div>
+
+  <main class="container" role="main">
+    <!-- Navigation -->
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="wallet-section">
+          <div class="wallet-balance">
+            <span class="wallet-label">💰 BALANCE</span>
+            <span class="wallet-amount" id="walletAmount">$0.00</span>
+            <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
+          </div>
+          <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
+          <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px;" type="button">☁️ Sync</button>
+          <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        </div>
+        <a href="dashboard-seller.html" id="navDashboard">📊 Dashboard</a>
+        <a href="products.html" id="navProducts">📦 Products</a>
+        <a href="tia.html" id="navTia">🤖 TIA Maria</a>
+        <a href="auctions.html" id="navAuctions">📅 Auctions</a>
+        <a href="orders.html" class="active" id="navOrders">📋 Orders</a>
+        <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
+      </nav>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">📋 <span>Orders</span></div>
+      <div style="font-size:13px; color:#9ca3af;">Manage contracts, shipments, and payments</div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="filter-label">📊 Status:</span>
+      <button class="filter-btn active" data-filter="all">All <span class="count" id="countAll">0</span></button>
+      <button class="filter-btn" data-filter="pending_acceptance">🟡 Pending <span class="count" id="countPending">0</span></button>
+      <button class="filter-btn" data-filter="accepted">🔵 Accepted <span class="count" id="countAccepted">0</span></button>
+      <button class="filter-btn" data-filter="shipped">🚚 Shipped <span class="count" id="countShipped">0</span></button>
+      <button class="filter-btn" data-filter="delivered">📦 Delivered <span class="count" id="countDelivered">0</span></button>
+      <button class="filter-btn" data-filter="completed">✅ Completed <span class="count" id="countCompleted">0</span></button>
+      <button class="filter-btn" data-filter="cancelled">❌ Cancelled <span class="count" id="countCancelled">0</span></button>
+    </div>
+
+    <!-- Orders Grid -->
+    <div id="ordersContainer">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📋</div>
+        <h3>No Orders Yet</h3>
+        <p>Orders will appear here once buyers accept contracts from your auctions.</p>
+      </div>
+      <div class="orders-grid" id="ordersGrid"></div>
+    </div>
+
+    <footer class="footer">
+      <p>TRADEAUX © 2026 • Global Commodity Exchange • TIA Maria v1.0</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Ship Modal -->
+  <div class="modal" id="shipModal" role="dialog" aria-modal="true" aria-labelledby="shipModalTitle">
+    <div class="modal-content">
+      <button class="modal-close" id="closeShipModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="shipModalTitle">🚚 Ship Order</h2></div>
+      <div id="shipOrderInfo" style="margin-bottom:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:10px; border:1px solid rgba(0,206,209,0.15);">
+        <p style="font-size:13px; color:#9ca3af;">Order #<span id="shipOrderId"></span></p>
+        <p style="font-size:16px; font-weight:700; color:#e5e7eb;" id="shipProductName">Product Name</p>
+        <p style="font-size:12px; color:#9ca3af;" id="shipBuyerName">Buyer</p>
+      </div>
+      <div class="modal-field">
+        <label for="shipCarrier">Carrier</label>
+        <input type="text" id="shipCarrier" placeholder="e.g. Maersk Line, MSC, CMA CGM">
+      </div>
+      <div class="modal-field">
+        <label for="shipVessel">Vessel Name</label>
+        <input type="text" id="shipVessel" placeholder="e.g. Emma Maersk">
+      </div>
+      <div class="modal-field">
+        <label for="shipTrackingNumber">Tracking Number / BOL Number</label>
+        <input type="text" id="shipTrackingNumber" placeholder="e.g. MAEU123456789">
+        <div class="hint">Enter the Bill of Lading number for maritime tracking</div>
+      </div>
+      <div class="modal-field">
+        <label for="shipETD">Estimated Departure Date</label>
+        <input type="date" id="shipETD">
+      </div>
+      <div class="modal-field">
+        <label for="shipETA">Estimated Arrival Date</label>
+        <input type="date" id="shipETA">
+      </div>
+      <div class="modal-field">
+        <label>🌊 Maritime Tracking</label>
+        <div class="tracking-sites">
+          <a href="#" target="_blank" id="trackMarineTraffic">🚢 MarineTraffic</a>
+          <a href="#" target="_blank" id="trackVesselFinder">🛳️ VesselFinder</a>
+          <a href="#" target="_blank" id="trackFleetMon">📡 FleetMon</a>
+        </div>
+        <div class="hint">Click any site to track your vessel</div>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelShipBtn" type="button">Cancel</button>
+        <button class="create-btn" id="confirmShipBtn" type="button">✅ Mark as Shipped</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div class="modal" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+    <div class="modal-content">
+      <button class="modal-close" id="closeContactModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="contactModalTitle">📞 Contact Buyer</h2></div>
+      <div id="contactOrderInfo" style="margin-bottom:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:10px; border:1px solid rgba(0,206,209,0.15);">
+        <p style="font-size:13px; color:#9ca3af;">Order #<span id="contactOrderId"></span></p>
+        <p style="font-size:16px; font-weight:700; color:#e5e7eb;" id="contactProductName">Product Name</p>
+      </div>
+      <div class="modal-field">
+        <label>👤 Buyer Name</label>
+        <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border-radius:10px; color:#e5e7eb;" id="contactBuyerName">—</div>
+      </div>
+      <div class="modal-field">
+        <label>📧 Email</label>
+        <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border-radius:10px; color:#e5e7eb;" id="contactBuyerEmail">—</div>
+      </div>
+      <div class="modal-field">
+        <label>📱 Phone</label>
+        <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border-radius:10px; color:#e5e7eb;" id="contactBuyerPhone">—</div>
+      </div>
+      <div class="modal-field">
+        <label>💬 WhatsApp</label>
+        <div style="padding:10px 14px; background:rgba(0,0,0,0.3); border-radius:10px; color:#e5e7eb;" id="contactBuyerWhatsapp">—</div>
+      </div>
+      <div class="modal-field">
+        <label for="contactMessage">Message</label>
+        <textarea id="contactMessage" rows="3" placeholder="Type your message to the buyer..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelContactBtn" type="button">Cancel</button>
+        <button class="create-btn" id="confirmContactBtn" type="button">📧 Send Message</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div class="modal" id="cancelModal" role="dialog" aria-modal="true" aria-labelledby="cancelModalTitle">
+    <div class="modal-content">
+      <button class="modal-close" id="closeCancelModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="cancelModalTitle">❌ Cancel Order</h2></div>
+      <div id="cancelOrderInfo" style="margin-bottom:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:10px; border:1px solid rgba(0,206,209,0.15);">
+        <p style="font-size:13px; color:#9ca3af;">Order #<span id="cancelOrderId"></span></p>
+        <p style="font-size:16px; font-weight:700; color:#e5e7eb;" id="cancelProductName">Product Name</p>
+      </div>
+      <div class="modal-field">
+        <label for="cancelReason">Cancellation Reason</label>
+        <textarea id="cancelReason" rows="3" placeholder="Why is this order being cancelled?"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelCancelBtn" type="button">Keep Order</button>
+        <button class="create-btn danger" id="confirmCancelBtn" type="button">❌ Cancel Order</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    const STORAGE_KEY = 'tradeaux_seller_state';
+    const $ = id => document.getElementById(id);
+    const money = n => (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function showToast(msg, type='info') {
+      const t = $('toast'); if (!t) return;
+      t.textContent = msg.length > 60 ? msg.substring(0,57)+'...' : msg;
+      t.className = 'toast visible ' + type;
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.className = 'toast'; }, 5000);
+    }
+
+    function loadData() { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; } }
+    function saveData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; } catch(e) { showToast('⚠️ Storage error: ' + e.message, 'error'); return false; } }
+
+    let APP = {
+      wallet: { balance: 0 },
+      company: { name: 'YOUR COMPANY' },
+      products: [],
+      orders: [],
+      receivables: [],
+      briefs: [],
+      archivedAuctions: [],
+      tar: { conversionFee: 25, totalConversions: 0 }
+    };
+
+    // ============================================================
+    // SUPABASE CLIENT
+    // ============================================================
+    const SUPABASE_URL = "https://pfutaovwbygefummienf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
+    let currentFilter = 'all';
+    let orders = [];
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+    async function initAuth() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) { redirectToSignin(); return; }
+        currentUser = session.user;
+        console.log("✅ Authenticated:", currentUser.email);
+        await loadAppData();
+        await loadOrders();
+        renderAll();
+        setupEvents();
+        showToast('📋 Welcome to Orders!', 'info');
+      } catch (err) {
+        console.error('Auth init error:', err);
+        showToast('Failed to initialize authentication. Please refresh.', 'error');
+      }
+    }
+
+    function redirectToSignin() { window.location.href = 'signin.html'; }
+
+    function loadAppData() {
+      const saved = loadData();
+      if (saved) {
+        if (saved.wallet) APP.wallet = saved.wallet;
+        if (saved.company) APP.company = saved.company;
+        if (saved.products && Array.isArray(saved.products)) APP.products = saved.products;
+        if (saved.orders && Array.isArray(saved.orders)) APP.orders = saved.orders;
+        if (saved.receivables && Array.isArray(saved.receivables)) APP.receivables = saved.receivables;
+        if (saved.briefs && Array.isArray(saved.briefs)) APP.briefs = saved.briefs;
+        if (saved.archivedAuctions && Array.isArray(saved.archivedAuctions)) APP.archivedAuctions = saved.archivedAuctions;
+        if (saved.tar) Object.assign(APP.tar, saved.tar);
+      }
+      if (!Array.isArray(APP.products)) APP.products = [];
+      if (!Array.isArray(APP.orders)) APP.orders = [];
+      if (!Array.isArray(APP.receivables)) APP.receivables = [];
+      if (!Array.isArray(APP.briefs)) APP.briefs = [];
+      if (!Array.isArray(APP.archivedAuctions)) APP.archivedAuctions = [];
+    }
+
+    // ============================================================
+    // LOAD ORDERS (Contracts)
+    // ============================================================
+    async function loadOrders() {
+      try {
+        const { data, error } = await supabase
+          .from('contracts')
+          .select('*')
+          .eq('seller_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        orders = data || [];
+        renderOrders();
+      } catch (err) {
+        console.error('Error loading orders:', err);
+        showToast('Failed to load orders: ' + err.message, 'error');
+      }
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderAll() { renderWallet(); renderOrders(); }
+
+    function renderWallet() {
+      if($('walletAmount')) $('walletAmount').textContent = money(APP.wallet.balance);
+      if($('conversionCapacity')) { const fee=APP.tar.conversionFee||25; const bal=Math.max(0,APP.wallet.balance||0); $('conversionCapacity').textContent = Math.floor(bal/fee)+' conversions'; }
+    }
+
+    function getStatusBadge(status) {
+      const labels = {
+        'pending_acceptance': '🟡 Pending',
+        'accepted': '🔵 Accepted',
+        'shipped': '🚚 Shipped',
+        'delivered': '📦 Delivered',
+        'completed': '✅ Completed',
+        'cancelled': '❌ Cancelled'
+      };
+      return labels[status] || status || 'Unknown';
+    }
+
+    function getStatusClass(status) {
+      return status || 'pending_acceptance';
+    }
+
+    function renderOrders() {
+      const grid = $('ordersGrid');
+      const empty = $('emptyState');
+      if (!grid) return;
+
+      const filtered = currentFilter === 'all' 
+        ? orders 
+        : orders.filter(o => o.status === currentFilter);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        updateCounts();
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      grid.innerHTML = filtered.map((o, idx) => {
+        const statusLabel = getStatusBadge(o.status);
+        const statusClass = getStatusClass(o.status);
+        const totalValue = o.total_value || o.quantity_mt * o.price_per_mt || 0;
+
+        let shippingInfo = '';
+        if (o.tracking_number) {
+          shippingInfo = `
+            <span class="shipping-info">
+              📦 ${o.carrier || 'Unknown Carrier'} · 
+              <span class="tracking-number">${o.tracking_number}</span>
+            </span>
+          `;
+        }
+
+        let actions = '';
+        if (o.status === 'pending_acceptance') {
+          actions = `
+            <button class="order-action ship" data-action="ship" data-id="${o.id}">🚚 Mark Shipped</button>
+            <button class="order-action contact" data-action="contact" data-id="${o.id}">📞 Contact</button>
+            <button class="order-action cancel" data-action="cancel" data-id="${o.id}">❌ Cancel</button>
+          `;
+        } else if (o.status === 'accepted') {
+          actions = `
+            <button class="order-action ship" data-action="ship" data-id="${o.id}">🚚 Mark Shipped</button>
+            <button class="order-action contact" data-action="contact" data-id="${o.id}">📞 Contact</button>
+            <button class="order-action cancel" data-action="cancel" data-id="${o.id}">❌ Cancel</button>
+          `;
+        } else if (o.status === 'shipped') {
+          actions = `
+            <button class="order-action track" data-action="track" data-id="${o.id}">🌊 Track</button>
+            <button class="order-action complete" data-action="complete" data-id="${o.id}">✅ Complete</button>
+            <button class="order-action contact" data-action="contact" data-id="${o.id}">📞 Contact</button>
+          `;
+        } else if (o.status === 'delivered') {
+          actions = `
+            <button class="order-action complete" data-action="complete" data-id="${o.id}">✅ Complete</button>
+            <button class="order-action contact" data-action="contact" data-id="${o.id}">📞 Contact</button>
+          `;
+        } else if (o.status === 'completed') {
+          actions = `
+            <button class="order-action contact" data-action="contact" data-id="${o.id}">📞 Contact</button>
+          `;
+        } else if (o.status === 'cancelled') {
+          actions = `
+            <button class="order-action contact" data-action="contact" data-id="${o.id}">📞 Contact</button>
+          `;
+        }
+
+        return `
+          <div class="order-card" data-id="${o.id}">
+            <div class="order-header">
+              <span class="order-id">📋 ${o.id ? '#' + o.id.slice(0, 8).toUpperCase() : 'NEW'}</span>
+              <span class="order-status-badge ${statusClass}">${statusLabel}</span>
+            </div>
+            <div class="order-body">
+              <div class="product-info">
+                <div class="product-name">${escapeHtml(o.product || 'Unknown Product')}</div>
+                <div class="product-detail">${o.quantity_mt || 0} MT @ $${(o.price_per_mt || 0).toFixed(2)}/MT · ${o.variety || 'Standard'}</div>
+                <div class="product-detail">📦 ${o.buyer_name || 'Unknown Buyer'}</div>
+              </div>
+              <div class="buyer-info">
+                <div class="buyer-name">${o.buyer_name || 'Unknown Buyer'}</div>
+                <div class="buyer-contact">📧 ${o.buyer_email || 'Not provided'}</div>
+                <div class="buyer-contact">📱 ${o.buyer_phone || 'Not provided'}</div>
+              </div>
+              <div class="order-meta">
+                <div class="total-value">${money(totalValue)}</div>
+                <div class="order-date">📅 ${o.created_at ? new Date(o.created_at).toLocaleDateString() : 'N/A'}</div>
+                ${o.estimated_delivery ? `<div class="order-date">📦 ETA: ${new Date(o.estimated_delivery).toLocaleDateString()}</div>` : ''}
+              </div>
+            </div>
+            <div class="order-footer">
+              ${actions}
+              ${shippingInfo}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Event listeners for order actions
+      grid.querySelectorAll('[data-action="ship"]').forEach(btn => {
+        btn.addEventListener('click', () => openShipModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="contact"]').forEach(btn => {
+        btn.addEventListener('click', () => openContactModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="cancel"]').forEach(btn => {
+        btn.addEventListener('click', () => openCancelModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="track"]').forEach(btn => {
+        btn.addEventListener('click', () => openTrackModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="complete"]').forEach(btn => {
+        btn.addEventListener('click', () => completeOrder(btn.dataset.id));
+      });
+
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const statuses = ['all', 'pending_acceptance', 'accepted', 'shipped', 'delivered', 'completed', 'cancelled'];
+      const counts = {
+        'all': orders.length,
+        'pending_acceptance': orders.filter(o => o.status === 'pending_acceptance').length,
+        'accepted': orders.filter(o => o.status === 'accepted').length,
+        'shipped': orders.filter(o => o.status === 'shipped').length,
+        'delivered': orders.filter(o => o.status === 'delivered').length,
+        'completed': orders.filter(o => o.status === 'completed').length,
+        'cancelled': orders.filter(o => o.status === 'cancelled').length
+      };
+
+      statuses.forEach(s => {
+        const el = $(`count${s.charAt(0).toUpperCase() + s.slice(1)}`);
+        if (el) el.textContent = counts[s] || 0;
+      });
+    }
+
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // ============================================================
+    // ORDER ACTIONS
+    // ============================================================
+    let currentOrderId = null;
+
+    // --- SHIP ---
+    function openShipModal(orderId) {
+      currentOrderId = orderId;
+      const order = orders.find(o => o.id === orderId);
+      if (!order) { showToast('Order not found', 'error'); return; }
+
+      $('shipOrderId').textContent = orderId.slice(0, 8).toUpperCase();
+      $('shipProductName').textContent = order.product || 'Unknown Product';
+      $('shipBuyerName').textContent = `👤 ${order.buyer_name || 'Unknown'} · ${order.quantity_mt || 0} MT`;
+
+      $('shipCarrier').value = order.carrier || '';
+      $('shipVessel').value = order.vessel || '';
+      $('shipTrackingNumber').value = order.tracking_number || '';
+      $('shipETD').value = order.estimated_departure ? order.estimated_departure.split('T')[0] : '';
+      $('shipETA').value = order.estimated_delivery ? order.estimated_delivery.split('T')[0] : '';
+
+      // Set tracking links
+      const trackNum = order.tracking_number || '';
+      $('trackMarineTraffic').href = `https://www.marinetraffic.com/en/ais/details/ships/shipid:${trackNum}`;
+      $('trackVesselFinder').href = `https://www.vesselfinder.com/vessels/${order.vessel || 'vessel'}-${trackNum}`;
+      $('trackFleetMon').href = `https://www.fleetmon.com/vessels/${order.vessel || 'vessel'}_IMO${trackNum}`;
+
+      $('shipModal').classList.add('show');
+    }
+
+    function closeShipModal() { $('shipModal').classList.remove('show'); currentOrderId = null; }
+
+    async function confirmShip() {
+      const orderId = currentOrderId;
+      if (!orderId) { showToast('No order selected', 'error'); return; }
+
+      const carrier = $('shipCarrier').value.trim();
+      const vessel = $('shipVessel').value.trim();
+      const trackingNumber = $('shipTrackingNumber').value.trim();
+      const etd = $('shipETD').value;
+      const eta = $('shipETA').value;
+
+      if (!carrier && !trackingNumber) {
+        showToast('Please enter at least a carrier or tracking number', 'warning');
+        return;
+      }
+
+      try {
+        const updates = {
+          status: 'shipped',
+          carrier: carrier || null,
+          vessel: vessel || null,
+          tracking_number: trackingNumber || null,
+          estimated_departure: etd || null,
+          estimated_delivery: eta || null,
+          shipped_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from('contracts')
+          .update(updates)
+          .eq('id', orderId);
+
+        if (error) throw error;
+
+        // Update local state
+        const order = orders.find(o => o.id === orderId);
+        if (order) Object.assign(order, updates);
+
+        showToast('✅ Order marked as shipped!', 'success');
+        closeShipModal();
+        renderOrders();
+      } catch (err) {
+        console.error('Error shipping order:', err);
+        showToast('Failed to ship order: ' + err.message, 'error');
+      }
+    }
+
+    // --- CONTACT ---
+    function openContactModal(orderId) {
+      currentOrderId = orderId;
+      const order = orders.find(o => o.id === orderId);
+      if (!order) { showToast('Order not found', 'error'); return; }
+
+      $('contactOrderId').textContent = orderId.slice(0, 8).toUpperCase();
+      $('contactProductName').textContent = order.product || 'Unknown Product';
+      $('contactBuyerName').textContent = order.buyer_name || 'Not provided';
+      $('contactBuyerEmail').textContent = order.buyer_email || 'Not provided';
+      $('contactBuyerPhone').textContent = order.buyer_phone || 'Not provided';
+      $('contactBuyerWhatsapp').textContent = order.buyer_whatsapp || 'Not provided';
+      $('contactMessage').value = `Hello ${order.buyer_name || 'Buyer'},\n\nRegarding your order of ${order.product || 'product'}: ${order.quantity_mt || 0} MT.\n\n`;
+
+      $('contactModal').classList.add('show');
+    }
+
+    function closeContactModal() { $('contactModal').classList.remove('show'); currentOrderId = null; }
+
+    async function sendContact() {
+      const orderId = currentOrderId;
+      if (!orderId) { showToast('No order selected', 'error'); return; }
+
+      const message = $('contactMessage').value.trim();
+      if (!message) { showToast('Please enter a message', 'warning'); return; }
+
+      try {
+        // Store message as a note on the contract
+        const { error } = await supabase
+          .from('contracts')
+          .update({
+            notes: message,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId);
+
+        if (error) throw error;
+
+        showToast('📧 Message sent to buyer!', 'success');
+        closeContactModal();
+      } catch (err) {
+        console.error('Error sending message:', err);
+        showToast('Failed to send message: ' + err.message, 'error');
+      }
+    }
+
+    // --- CANCEL ---
+    function openCancelModal(orderId) {
+      currentOrderId = orderId;
+      const order = orders.find(o => o.id === orderId);
+      if (!order) { showToast('Order not found', 'error'); return; }
+
+      $('cancelOrderId').textContent = orderId.slice(0, 8).toUpperCase();
+      $('cancelProductName').textContent = order.product || 'Unknown Product';
+      $('cancelReason').value = '';
+
+      $('cancelModal').classList.add('show');
+    }
+
+    function closeCancelModal() { $('cancelModal').classList.remove('show'); currentOrderId = null; }
+
+    async function confirmCancel() {
+      const orderId = currentOrderId;
+      if (!orderId) { showToast('No order selected', 'error'); return; }
+
+      const reason = $('cancelReason').value.trim() || 'No reason provided';
+
+      if (!confirm('Are you sure you want to cancel this order?')) return;
+
+      try {
+        const { error } = await supabase
+          .from('contracts')
+          .update({
+            status: 'cancelled',
+            cancellation_reason: reason,
+            cancelled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId);
+
+        if (error) throw error;
+
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+          order.status = 'cancelled';
+          order.cancellation_reason = reason;
+          order.cancelled_at = new Date().toISOString();
+        }
+
+        showToast('❌ Order cancelled', 'warning');
+        closeCancelModal();
+        renderOrders();
+      } catch (err) {
+        console.error('Error cancelling order:', err);
+        showToast('Failed to cancel order: ' + err.message, 'error');
+      }
+    }
+
+    // --- TRACK ---
+    function openTrackModal(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) { showToast('Order not found', 'error'); return; }
+
+      if (!order.tracking_number && !order.vessel) {
+        showToast('No tracking information available for this order', 'warning');
+        return;
+      }
+
+      // Open all tracking sites in new tabs
+      const trackNum = order.tracking_number || '';
+      const vessel = order.vessel || 'vessel';
+
+      if (trackNum) {
+        window.open(`https://www.marinetraffic.com/en/ais/details/ships/shipid:${trackNum}`, '_blank');
+        window.open(`https://www.vesselfinder.com/vessels/${vessel}-${trackNum}`, '_blank');
+      } else {
+        window.open(`https://www.fleetmon.com/vessels/${vessel}`, '_blank');
+      }
+
+      showToast('🌊 Opening maritime tracking sites...', 'info');
+    }
+
+    // --- COMPLETE ---
+    async function completeOrder(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) { showToast('Order not found', 'error'); return; }
+
+      if (!confirm(`Mark order for ${order.product} as completed?`)) return;
+
+      try {
+        const { error } = await supabase
+          .from('contracts')
+          .update({
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId);
+
+        if (error) throw error;
+
+        const orderObj = orders.find(o => o.id === orderId);
+        if (orderObj) {
+          orderObj.status = 'completed';
+          orderObj.completed_at = new Date().toISOString();
+        }
+
+        showToast('✅ Order marked as completed!', 'success');
+        renderOrders();
+      } catch (err) {
+        console.error('Error completing order:', err);
+        showToast('Failed to complete order: ' + err.message, 'error');
+      }
+    }
+
+    // ============================================================
+    // FILTERS
+    // ============================================================
+    function setupFilters() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.filter;
+          renderOrders();
+        });
+      });
+    }
+
+    // ============================================================
+    // EVENTS
+    // ============================================================
+    function setupEvents() {
+      // Ship modal
+      if ($('closeShipModal')) $('closeShipModal').addEventListener('click', closeShipModal);
+      if ($('cancelShipBtn')) $('cancelShipBtn').addEventListener('click', closeShipModal);
+      if ($('confirmShipBtn')) $('confirmShipBtn').addEventListener('click', confirmShip);
+
+      // Contact modal
+      if ($('closeContactModal')) $('closeContactModal').addEventListener('click', closeContactModal);
+      if ($('cancelContactBtn')) $('cancelContactBtn').addEventListener('click', closeContactModal);
+      if ($('confirmContactBtn')) $('confirmContactBtn').addEventListener('click', sendContact);
+
+      // Cancel modal
+      if ($('closeCancelModal')) $('closeCancelModal').addEventListener('click', closeCancelModal);
+      if ($('cancelCancelBtn')) $('cancelCancelBtn').addEventListener('click', closeCancelModal);
+      if ($('confirmCancelBtn')) $('confirmCancelBtn').addEventListener('click', confirmCancel);
+
+      // Close modals on backdrop click
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.classList.remove('show');
+          }
+        });
+      });
+
+      // Close modals on Escape
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+        }
+      });
+
+      // Filters
+      setupFilters();
+
+      // Deposit
+      if($('depositBtn')) $('depositBtn').addEventListener('click', () => {
+        const amt = prompt('Enter deposit amount ($):', '1000');
+        if (amt === null) return;
+        const v = parseFloat(amt);
+        if (isNaN(v) || v <= 0) { showToast('Invalid amount.', 'error'); return; }
+        APP.wallet.balance = (APP.wallet.balance || 0) + v;
+        saveData(APP);
+        renderAll();
+        showToast('Deposited ' + money(v), 'success');
+      });
+
+      // Sync
+      if($('syncCloudBtn')) $('syncCloudBtn').addEventListener('click', async () => {
+        showToast('☁️ Syncing...', 'info');
+        await loadOrders();
+        renderAll();
+        showToast('✅ Sync complete!', 'success');
+      });
+
+      // Save
+      if($('forceSaveBtn')) $('forceSaveBtn').addEventListener('click', () => {
+        saveData(APP);
+        showToast('💾 Data saved locally!', 'success');
+      });
+
+      // Sign out
+      if($('authBtn')) {
+        $('authBtn').addEventListener('click', async () => {
+          if (confirm('Sign out?')) {
+            await supabase.auth.signOut();
+            showToast('👋 Signed out', 'info');
+            window.location.href = 'signin.html';
+          }
+        });
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+    });
+  </script>
+</body>
+</html>
