@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Bot Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
+
+    /* ===== 3D GEM LOGO ===== */
+    .gem-logo-corner {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+
+    .gem-letter:nth-child(1)::before,
+    .gem-letter:nth-child(4)::before,
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before,
+    .gem-letter:nth-child(5)::before,
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before,
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+    /* Navigation */
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 10px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .nav a:hover, .nav button:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.active { border-color: #7CFC00; background: rgba(124,252,0,0.12); color: #7CFC00; }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
+
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 24px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(0,206,209,0.15); margin-bottom: 24px; }
+    .page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: #00ced1; }
+    .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Bots Grid */
+    .bots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 20px; }
+    .bot-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.2); border-radius: 20px; padding: 24px; transition: all 0.3s; position: relative; }
+    .bot-card:hover { transform: translateY(-4px); border-color: #00ced1; box-shadow: 0 12px 40px rgba(0,206,209,0.08); }
+    .bot-card .bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .bot-card .bot-emoji { font-size: 32px; }
+    .bot-card .bot-name { font-size: 18px; font-weight: 700; }
+    .bot-card .bot-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+    .bot-card .bot-status.active { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .bot-card .bot-status.paused { background: rgba(255,217,102,0.2); color: #FFD966; }
+    .bot-card .bot-status.scanning { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .bot-card .bot-status.inactive { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+    .bot-card .bot-strategy { font-size: 13px; color: #9ca3af; margin: 8px 0; }
+    .bot-card .bot-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .bot-card .bot-stats .stat { text-align: center; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px; }
+    .bot-card .bot-stats .stat .value { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; }
+    .bot-card .bot-stats .stat .label { font-size: 10px; color: #9ca3af; }
+    .bot-card .bot-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .bot-card .bot-actions button { padding: 6px 16px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #e5e7eb; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
+    .bot-card .bot-actions button:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+    .bot-card .bot-actions .btn-edit { border-color: rgba(0,206,209,0.3); color: #00ced1; }
+    .bot-card .bot-actions .btn-edit:hover { background: rgba(0,206,209,0.1); }
+    .bot-card .bot-actions .btn-delete { border-color: rgba(255,59,59,0.3); color: #ff3b3b; }
+    .bot-card .bot-actions .btn-delete:hover { background: rgba(255,59,59,0.1); }
+    .bot-card .bot-actions .btn-pause { border-color: rgba(255,217,102,0.3); color: #FFD966; }
+    .bot-card .bot-actions .btn-pause:hover { background: rgba(255,217,102,0.08); }
+    .bot-card .bot-actions .btn-resume { border-color: rgba(124,252,0,0.3); color: #7CFC00; }
+    .bot-card .bot-actions .btn-resume:hover { background: rgba(124,252,0,0.08); }
+    .bot-card .bot-prompt { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; margin: 10px 0; font-size: 13px; color: #9ca3af; border-left: 3px solid #00ced1; }
+    .bot-card .bot-prompt .label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .empty-state { text-align: center; padding: 80px 20px; color: #9ca3af; grid-column: 1 / -1; }
+    .empty-state .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    .empty-state h3 { font-size: 24px; color: #e5e7eb; margin-bottom: 8px; }
+    .empty-state p { max-width: 400px; margin: 0 auto 20px; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 4px 8px; border-radius: 4px; transition: color 0.2s; }
+    .modal-close:hover { color: #00ced1; }
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field.full-width { grid-column: 1 / -1; }
+    .modal-field label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
+    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 0 3px rgba(0,206,209,0.2); }
+    .modal-field .hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
+    .modal-field .slider-row { display: flex; align-items: center; gap: 16px; }
+    .modal-field .slider-row input { flex: 1; }
+    .modal-field .slider-value { font-family: 'Orbitron', sans-serif; color: #00ced1; min-width: 60px; text-align: right; }
+
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; transition: all 0.3s; }
+    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .cancel-btn:hover { background: rgba(255,255,255,0.2); }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 20000; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+
+    @media (max-width: 700px) { .bots-grid { grid-template-columns: 1fr; } .page-title { font-size: 22px; } .header { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .modal-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
+  </div>
+
+  <!-- 3D Logo -->
+  <div class="gem-logo-corner" aria-hidden="true" role="presentation">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
+  </div>
+
+  <main class="container" role="main">
+    <!-- Navigation -->
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="wallet-section">
+          <div class="wallet-balance">
+            <span class="wallet-label">💰 BALANCE</span>
+            <span class="wallet-amount" id="walletAmount">$0.00</span>
+            <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
+          </div>
+          <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
+          <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px;" type="button">☁️ Sync</button>
+          <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        </div>
+        <a href="dashboard-buyer.html" id="navDashboard">📊 Dashboard</a>
+        <a href="container-captain.html" id="navContainers">📦 Containers</a>
+        <a href="bot-studio.html" class="active" id="navBots">🤖 Bot Studio</a>
+        <a href="auction-arena.html" id="navArena">🏆 Arena</a>
+        <a href="orders-buyer.html" id="navOrders">📋 Orders</a>
+        <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
+      </nav>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">🤖 <span>Bot Studio</span></div>
+      <button class="btn-neon" id="addBotBtn" type="button" style="padding:12px 32px; font-size:14px;">➕ Create Bot</button>
+    </div>
+
+    <!-- Bots Grid -->
+    <div id="botsContainer">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🤖</div>
+        <h3>No Bots Yet</h3>
+        <p>Create your first trading bot. Click the "Create Bot" button above to get started.</p>
+      </div>
+      <div class="bots-grid" id="botsGrid"></div>
+    </div>
+
+    <footer class="footer">
+      <p>TRADEAUX © 2026 • Global Commodity Exchange • Bot Studio v1.0</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Bot Modal -->
+  <div class="modal" id="botModal" role="dialog" aria-modal="true" aria-labelledby="botModalTitle">
+    <div class="modal-content">
+      <button class="modal-close" id="closeBotModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="botModalTitle">🤖 Create Bot</h2></div>
+      
+      <div class="modal-grid">
+        <div class="modal-field full-width">
+          <label for="editBotName">Bot Name *</label>
+          <input type="text" id="editBotName" placeholder="e.g. Coffee Hunter">
+        </div>
+
+        <div class="modal-field">
+          <label for="editBotEmoji">Emoji</label>
+          <select id="editBotEmoji">
+            <option value="🤖">🤖</option>
+            <option value="🦅">🦅</option>
+            <option value="🐺">🐺</option>
+            <option value="🦁">🦁</option>
+            <option value="🦈">🦈</option>
+            <option value="🦉">🦉</option>
+            <option value="🐉">🐉</option>
+            <option value="🚀">🚀</option>
+            <option value="⚡">⚡</option>
+            <option value="🔥">🔥</option>
+            <option value="💎">💎</option>
+            <option value="🎯">🎯</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="editBotStatus">Status</label>
+          <select id="editBotStatus">
+            <option value="active">🟢 Active</option>
+            <option value="paused">🟡 Paused</option>
+            <option value="scanning">🔵 Scanning</option>
+            <option value="inactive">🔴 Inactive</option>
+          </select>
+        </div>
+
+        <div class="modal-field full-width">
+          <label for="editBotPrompt">Strategy Prompt</label>
+          <textarea id="editBotPrompt" rows="4" placeholder="Describe your bot's strategy in plain English..."></textarea>
+          <div class="hint">Example: "Bid up to $4.25/MT, sniping in the last 30 seconds. Target 500 MT containers."</div>
+        </div>
+
+        <div class="modal-field">
+          <label for="editTargetPrice">Target Price ($/MT)</label>
+          <div class="slider-row">
+            <input type="range" id="editTargetPrice" min="0" max="100" step="0.25" value="4.25">
+            <span class="slider-value" id="targetPriceVal">$4.25</span>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label for="editMaxPrice">Max Price ($/MT)</label>
+          <div class="slider-row">
+            <input type="range" id="editMaxPrice" min="0" max="100" step="0.25" value="4.50">
+            <span class="slider-value" id="maxPriceVal">$4.50</span>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label for="editTargetQuantity">Target Quantity (MT)</label>
+          <div class="slider-row">
+            <input type="range" id="editTargetQuantity" min="0" max="2000" step="10" value="500">
+            <span class="slider-value" id="targetQtyVal">500 MT</span>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label for="editSnipingTiming">Sniping Timing</label>
+          <select id="editSnipingTiming">
+            <option value="immediate">Immediate</option>
+            <option value="mid">Mid-Auction</option>
+            <option value="last_30s" selected>Last 30 Seconds</option>
+            <option value="last_10s">Last 10 Seconds</option>
+            <option value="dynamic">Dynamic (AI)</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="editAggression">Aggressiveness</label>
+          <div class="slider-row">
+            <input type="range" id="editAggression" min="0" max="100" step="1" value="70">
+            <span class="slider-value" id="aggressionVal">70%</span>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label for="editBidIncrement">Bid Increment ($)</label>
+          <div class="slider-row">
+            <input type="range" id="editBidIncrement" min="0" max="10" step="0.05" value="0.10">
+            <span class="slider-value" id="bidIncrementVal">$0.10</span>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label for="editMaxBids">Max Bids per Auction</label>
+          <div class="slider-row">
+            <input type="range" id="editMaxBids" min="1" max="20" step="1" value="3">
+            <span class="slider-value" id="maxBidsVal">3</span>
+          </div>
+        </div>
+
+        <div class="modal-field full-width">
+          <label>Strategy Priority</label>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+              <input type="checkbox" checked value="price" style="width: 16px; height: 16px;"> Price
+            </label>
+            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+              <input type="checkbox" checked value="quantity" style="width: 16px; height: 16px;"> Quantity Fill
+            </label>
+            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+              <input type="checkbox" checked value="location" style="width: 16px; height: 16px;"> Location
+            </label>
+            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+              <input type="checkbox" value="quality" style="width: 16px; height: 16px;"> Quality
+            </label>
+            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+              <input type="checkbox" value="seller_rating" style="width: 16px; height: 16px;"> Seller Rating
+            </label>
+          </div>
+          <div class="hint">Uncheck priorities you don't care about</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelBotBtn" type="button">Cancel</button>
+        <button class="create-btn" id="saveBotBtn" type="button">Save Bot</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    const STORAGE_KEY = 'tradeaux_bot_studio';
+    const $ = id => document.getElementById(id);
+    const money = n => (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function showToast(msg, type='info') {
+      const t = $('toast'); if (!t) return;
+      t.textContent = msg.length > 60 ? msg.substring(0,57)+'...' : msg;
+      t.className = 'toast visible ' + type;
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.className = 'toast'; }, 5000);
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : { bots: [] };
+      } catch(e) { return { bots: [] }; }
+    }
+
+    function saveData(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return true;
+      } catch(e) {
+        showToast('⚠️ Storage error: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    function uuid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let APP = loadData();
+    let editingBotId = null;
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderAll() {
+      renderBots();
+      renderWallet();
+    }
+
+    function renderBots() {
+      const grid = $('botsGrid');
+      const empty = $('emptyState');
+      if (!grid) return;
+
+      const bots = APP.bots || [];
+
+      if (bots.length === 0) {
+        grid.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      grid.innerHTML = bots.map((b, idx) => {
+        const statusClass = b.status || 'active';
+        const statusLabels = {
+          'active': '🟢 Active',
+          'paused': '🟡 Paused',
+          'scanning': '🔵 Scanning',
+          'inactive': '🔴 Inactive'
+        };
+        const statusLabel = statusLabels[statusClass] || '🟢 Active';
+
+        return `
+          <div class="bot-card" data-id="${b.id}">
+            <div class="bot-header">
+              <div>
+                <div class="bot-emoji">${escapeHtml(b.emoji || '🤖')}</div>
+                <div class="bot-name">${escapeHtml(b.name || 'Unnamed Bot')}</div>
+              </div>
+              <span class="bot-status ${statusClass}">${statusLabel}</span>
+            </div>
+
+            <div class="bot-prompt">
+              <div class="label">🤖 Strategy Prompt</div>
+              <div>${escapeHtml(b.prompt || 'No strategy defined')}</div>
+            </div>
+
+            <div class="bot-strategy">
+              🎯 Target: $${(b.targetPrice || 4.25).toFixed(2)}/MT · Max: $${(b.maxPrice || 4.50).toFixed(2)}/MT
+              · ${b.targetQuantity || 500} MT · ${b.snipingTiming || 'last_30s'}
+            </div>
+
+            <div class="bot-stats">
+              <div class="stat">
+                <div class="value">${b.bidsPlaced || 0}</div>
+                <div class="label">Bids</div>
+              </div>
+              <div class="stat">
+                <div class="value">${b.winRate || 0}%</div>
+                <div class="label">Win Rate</div>
+              </div>
+              <div class="stat">
+                <div class="value">${money(b.profit || 0)}</div>
+                <div class="label">Profit</div>
+              </div>
+            </div>
+
+            <div class="bot-actions">
+              <button class="btn-edit" data-action="edit" data-id="${b.id}">✏️ Edit</button>
+              ${statusClass === 'active' ? `<button class="btn-pause" data-action="pause" data-id="${b.id}">⏸️ Pause</button>` : ''}
+              ${statusClass === 'paused' || statusClass === 'inactive' ? `<button class="btn-resume" data-action="resume" data-id="${b.id}">▶️ Resume</button>` : ''}
+              <button class="btn-delete" data-action="delete" data-id="${b.id}">🗑️ Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Event listeners
+      grid.querySelectorAll('[data-action="edit"]').forEach(btn => {
+        btn.addEventListener('click', () => openBotModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="pause"]').forEach(btn => {
+        btn.addEventListener('click', () => setBotStatus(btn.dataset.id, 'paused'));
+      });
+      grid.querySelectorAll('[data-action="resume"]').forEach(btn => {
+        btn.addEventListener('click', () => setBotStatus(btn.dataset.id, 'active'));
+      });
+      grid.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        btn.addEventListener('click', () => deleteBot(btn.dataset.id));
+      });
+    }
+
+    function renderWallet() {
+      // Load wallet from buyer state
+      let saved = localStorage.getItem('tradeaux_buyer_state');
+      let wallet = { balance: 0 };
+      
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data.wallet) wallet = data.wallet;
+        } catch(e) {}
+      }
+      
+      if ($('walletAmount')) $('walletAmount').textContent = money(wallet.balance || 0);
+      if ($('conversionCapacity')) {
+        const fee = 25;
+        const bal = Math.max(0, wallet.balance || 0);
+        $('conversionCapacity').textContent = Math.floor(bal / fee) + ' conversions';
+      }
+    }
+
+    // ============================================================
+    // BOT CRUD
+    // ============================================================
+    function openBotModal(botId) {
+      editingBotId = botId || null;
+      const isEdit = !!botId;
+      $('botModalTitle').textContent = isEdit ? '✏️ Edit Bot' : '🤖 Create Bot';
+
+      // Setup sliders
+      setupSliderListeners();
+
+      if (isEdit) {
+        const b = APP.bots.find(x => x.id === botId);
+        if (b) {
+          $('editBotName').value = b.name || '';
+          $('editBotEmoji').value = b.emoji || '🤖';
+          $('editBotStatus').value = b.status || 'active';
+          $('editBotPrompt').value = b.prompt || '';
+          $('editTargetPrice').value = b.targetPrice || 4.25;
+          $('targetPriceVal').textContent = '$' + (b.targetPrice || 4.25).toFixed(2);
+          $('editMaxPrice').value = b.maxPrice || 4.50;
+          $('maxPriceVal').textContent = '$' + (b.maxPrice || 4.50).toFixed(2);
+          $('editTargetQuantity').value = b.targetQuantity || 500;
+          $('targetQtyVal').textContent = (b.targetQuantity || 500) + ' MT';
+          $('editSnipingTiming').value = b.snipingTiming || 'last_30s';
+          $('editAggression').value = b.aggression || 70;
+          $('aggressionVal').textContent = (b.aggression || 70) + '%';
+          $('editBidIncrement').value = b.bidIncrement || 0.10;
+          $('bidIncrementVal').textContent = '$' + (b.bidIncrement || 0.10).toFixed(2);
+          $('editMaxBids').value = b.maxBids || 3;
+          $('maxBidsVal').textContent = b.maxBids || 3;
+          
+          // Priorities
+          document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
+            cb.checked = b.priorities ? b.priorities.includes(cb.value) : ['price', 'quantity'].includes(cb.value);
+          });
+        }
+      } else {
+        // Reset form
+        $('editBotName').value = '';
+        $('editBotEmoji').value = '🤖';
+        $('editBotStatus').value = 'active';
+        $('editBotPrompt').value = '';
+        $('editTargetPrice').value = 4.25;
+        $('targetPriceVal').textContent = '$4.25';
+        $('editMaxPrice').value = 4.50;
+        $('maxPriceVal').textContent = '$4.50';
+        $('editTargetQuantity').value = 500;
+        $('targetQtyVal').textContent = '500 MT';
+        $('editSnipingTiming').value = 'last_30s';
+        $('editAggression').value = 70;
+        $('aggressionVal').textContent = '70%';
+        $('editBidIncrement').value = 0.10;
+        $('bidIncrementVal').textContent = '$0.10';
+        $('editMaxBids').value = 3;
+        $('maxBidsVal').textContent = '3';
+        
+        document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
+          cb.checked = ['price', 'quantity'].includes(cb.value);
+        });
+      }
+
+      $('botModal').classList.add('show');
+    }
+
+    function closeBotModal() {
+      $('botModal').classList.remove('show');
+      editingBotId = null;
+    }
+
+    function setupSliderListeners() {
+      const sliders = [
+        { id: 'editTargetPrice', valId: 'targetPriceVal', format: (v) => '$' + parseFloat(v).toFixed(2) },
+        { id: 'editMaxPrice', valId: 'maxPriceVal', format: (v) => '$' + parseFloat(v).toFixed(2) },
+        { id: 'editTargetQuantity', valId: 'targetQtyVal', format: (v) => parseFloat(v) + ' MT' },
+        { id: 'editAggression', valId: 'aggressionVal', format: (v) => parseFloat(v) + '%' },
+        { id: 'editBidIncrement', valId: 'bidIncrementVal', format: (v) => '$' + parseFloat(v).toFixed(2) },
+        { id: 'editMaxBids', valId: 'maxBidsVal', format: (v) => v }
+      ];
+
+      sliders.forEach(({ id, valId, format }) => {
+        const el = $(id);
+        const valEl = $(valId);
+        if (el && valEl) {
+          el.oninput = function() {
+            valEl.textContent = format(this.value);
+          };
+        }
+      });
+    }
+
+    function saveBot() {
+      const name = $('editBotName').value.trim();
+      const emoji = $('editBotEmoji').value;
+      const status = $('editBotStatus').value;
+      const prompt = $('editBotPrompt').value.trim();
+      const targetPrice = parseFloat($('editTargetPrice').value);
+      const maxPrice = parseFloat($('editMaxPrice').value);
+      const targetQuantity = parseFloat($('editTargetQuantity').value);
+      const snipingTiming = $('editSnipingTiming').value;
+      const aggression = parseInt($('editAggression').value);
+      const bidIncrement = parseFloat($('editBidIncrement').value);
+      const maxBids = parseInt($('editMaxBids').value);
+      
+      const priorities = Array.from(document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked'))
+        .map(cb => cb.value);
+
+      if (!name) { showToast('Bot name is required', 'error'); return; }
+      if (!prompt) { showToast('Strategy prompt is required', 'error'); return; }
+      if (!targetPrice || targetPrice <= 0) { showToast('Enter a valid target price', 'error'); return; }
+      if (targetPrice > maxPrice) { showToast('Target price cannot exceed max price', 'error'); return; }
+
+      const botData = {
+        name,
+        emoji,
+        status,
+        prompt,
+        targetPrice,
+        maxPrice,
+        targetQuantity,
+        snipingTiming,
+        aggression,
+        bidIncrement,
+        maxBids,
+        priorities,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (editingBotId) {
+        const idx = APP.bots.findIndex(b => b.id === editingBotId);
+        if (idx > -1) {
+          APP.bots[idx] = { ...APP.bots[idx], ...botData };
+          showToast('✅ Bot updated!', 'success');
+        }
+      } else {
+        APP.bots.push({
+          id: uuid(),
+          ...botData,
+          bidsPlaced: 0,
+          winRate: 0,
+          profit: 0,
+          createdAt: new Date().toISOString()
+        });
+        showToast('✅ Bot created!', 'success');
+      }
+
+      saveData(APP);
+      renderBots();
+      closeBotModal();
+    }
+
+    function setBotStatus(id, status) {
+      const bot = APP.bots.find(b => b.id === id);
+      if (!bot) return;
+      bot.status = status;
+      saveData(APP);
+      renderBots();
+      showToast(`Bot ${status === 'active' ? 'resumed' : 'paused'}`, 'success');
+    }
+
+    function deleteBot(id) {
+      if (!confirm('Delete this bot?')) return;
+      APP.bots = APP.bots.filter(b => b.id !== id);
+      saveData(APP);
+      renderBots();
+      showToast('🗑️ Bot deleted', 'warning');
+    }
+
+    // ============================================================
+    // EVENTS
+    // ============================================================
+    function setupEvents() {
+      // Add bot
+      if ($('addBotBtn')) {
+        $('addBotBtn').addEventListener('click', () => openBotModal(null));
+      }
+
+      // Modal controls
+      if ($('closeBotModal')) $('closeBotModal').addEventListener('click', closeBotModal);
+      if ($('cancelBotBtn')) $('cancelBotBtn').addEventListener('click', closeBotModal);
+      if ($('saveBotBtn')) $('saveBotBtn').addEventListener('click', saveBot);
+
+      // Close modals on backdrop click
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.classList.remove('show');
+          }
+        });
+      });
+
+      // Close modals on Escape
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+        }
+      });
+
+      // Sign out
+      if ($('authBtn')) {
+        $('authBtn').addEventListener('click', () => {
+          if (confirm('Sign out?')) {
+            showToast('👋 Signed out', 'info');
+            window.location.href = 'signin.html';
+          }
+        });
+      }
+
+      // Sync
+      if ($('syncCloudBtn')) {
+        $('syncCloudBtn').addEventListener('click', () => {
+          showToast('☁️ Syncing...', 'info');
+          APP = loadData();
+          renderBots();
+          setTimeout(() => showToast('✅ Sync complete!', 'success'), 800);
+        });
+      }
+
+      // Save
+      if ($('forceSaveBtn')) {
+        $('forceSaveBtn').addEventListener('click', () => {
+          saveData(APP);
+          showToast('💾 Data saved locally!', 'success');
+        });
+      }
+
+      // Deposit
+      if ($('depositBtn')) {
+        $('depositBtn').addEventListener('click', () => {
+          const amt = prompt('Enter deposit amount ($):', '1000');
+          if (amt === null) return;
+          const v = parseFloat(amt);
+          if (isNaN(v) || v <= 0) { showToast('Invalid amount.', 'error'); return; }
+          
+          let saved = localStorage.getItem('tradeaux_buyer_state');
+          let data = { wallet: { balance: 0 } };
+          
+          if (saved) {
+            try {
+              data = JSON.parse(saved);
+              if (!data.wallet) data.wallet = { balance: 0 };
+            } catch(e) {}
+          }
+          
+          data.wallet.balance = (data.wallet.balance || 0) + v;
+          localStorage.setItem('tradeaux_buyer_state', JSON.stringify(data));
+          renderWallet();
+          showToast('Deposited ' + money(v), 'success');
+        });
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!APP.bots) APP.bots = [];
+      
+      // Add sample bot if none exist
+      if (APP.bots.length === 0) {
+        APP.bots.push({
+          id: uuid(),
+          name: 'Coffee Hunter',
+          emoji: '🦅',
+          status: 'active',
+          prompt: 'Bid up to $4.25/MT, sniping in the last 30 seconds. Target 500 MT containers.',
+          targetPrice: 4.25,
+          maxPrice: 4.50,
+          targetQuantity: 500,
+          snipingTiming: 'last_30s',
+          aggression: 70,
+          bidIncrement: 0.10,
+          maxBids: 3,
+          priorities: ['price', 'quantity'],
+          bidsPlaced: 12,
+          winRate: 80,
+          profit: 450,
+          createdAt: new Date().toISOString()
+        });
+        APP.bots.push({
+          id: uuid(),
+          name: 'Grain Scout',
+          emoji: '🐺',
+          status: 'paused',
+          prompt: 'Conservative bidding on wheat and corn. Wait for market dips.',
+          targetPrice: 3.50,
+          maxPrice: 3.80,
+          targetQuantity: 1000,
+          snipingTiming: 'mid',
+          aggression: 30,
+          bidIncrement: 0.05,
+          maxBids: 2,
+          priorities: ['price', 'quantity', 'seller_rating'],
+          bidsPlaced: 5,
+          winRate: 45,
+          profit: 120,
+          createdAt: new Date().toISOString()
+        });
+        saveData(APP);
+      }
+
+      renderAll();
+      setupEvents();
+      showToast('🤖 Welcome to Bot Studio!', 'info');
+    });
+  </script>
+</body>
+</html>
