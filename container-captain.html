@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Container Captain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
+
+    /* ===== 3D GEM LOGO ===== */
+    .gem-logo-corner {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transform: scale(0.35);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .gem-text {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+      display: flex;
+      text-transform: uppercase;
+      line-height: 0.9;
+      font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d;
+      gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite;
+      filter: brightness(1.2);
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+
+    .gem-letter:nth-child(1)::before,
+    .gem-letter:nth-child(4)::before,
+    .gem-letter:nth-child(7)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 102, 255, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before,
+    .gem-letter:nth-child(5)::before,
+    .gem-letter:nth-child(8)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(0, 204, 68, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before,
+    .gem-letter:nth-child(6)::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 18px rgba(217, 43, 43, 0.35), 2px 2px 4px rgba(0,0,0,0.3);
+      transform: translateZ(2px);
+    }
+
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+    /* Navigation */
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 10px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .nav a:hover, .nav button:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.active { border-color: #7CFC00; background: rgba(124,252,0,0.12); color: #7CFC00; }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
+
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 24px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(0,206,209,0.15); margin-bottom: 24px; }
+    .page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: #00ced1; }
+    .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Container Grid */
+    .containers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; margin-top: 20px; }
+    .container-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.2); border-radius: 20px; padding: 24px; transition: all 0.3s; }
+    .container-card:hover { transform: translateY(-4px); border-color: #00ced1; box-shadow: 0 12px 40px rgba(0,206,209,0.08); }
+    .container-card .container-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .container-card .container-name { font-size: 18px; font-weight: 700; color: #e5e7eb; }
+    .container-card .container-name .type { font-weight: 400; color: #9ca3af; font-size: 13px; }
+    .container-card .container-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+    .container-card .container-status.active { background: rgba(124,252,0,0.2); color: #7CFC00; }
+    .container-card .container-status.in-transit { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .container-card .container-status.delivered { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .container-card .container-status.overweight { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+
+    .container-progress { margin: 16px 0; }
+    .container-progress .progress-bar { width: 100%; height: 8px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; }
+    .container-progress .progress-fill { height: 100%; background: linear-gradient(90deg, #00ced1, #7CFC00); border-radius: 4px; transition: width 0.6s ease; }
+    .container-progress .progress-fill.overweight { background: linear-gradient(90deg, #ff3b3b, #cc0000); }
+    .container-progress .progress-labels { display: flex; justify-content: space-between; font-size: 12px; color: #9ca3af; margin-top: 4px; }
+
+    .container-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; }
+    .container-details .detail { text-align: center; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; }
+    .container-details .detail .value { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; }
+    .container-details .detail .value.overweight { color: #ff3b3b; }
+    .container-details .detail .label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .container-contents { margin: 12px 0; max-height: 150px; overflow-y: auto; }
+    .container-contents .content-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
+    .container-contents .content-item .product { font-weight: 600; }
+    .container-contents .content-item .qty { color: #9ca3af; }
+
+    .container-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .container-actions button { padding: 6px 16px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #e5e7eb; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
+    .container-actions button:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+    .container-actions .btn-add { border-color: rgba(124,252,0,0.3); color: #7CFC00; }
+    .container-actions .btn-add:hover { background: rgba(124,252,0,0.08); }
+    .container-actions .btn-edit { border-color: rgba(0,206,209,0.3); color: #00ced1; }
+    .container-actions .btn-edit:hover { background: rgba(0,206,209,0.08); }
+    .container-actions .btn-split { border-color: rgba(255,217,102,0.3); color: #FFD966; }
+    .container-actions .btn-split:hover { background: rgba(255,217,102,0.08); }
+    .container-actions .btn-status { border-color: rgba(0,206,209,0.3); color: #00ced1; }
+    .container-actions .btn-status:hover { background: rgba(0,206,209,0.08); }
+    .container-actions .btn-delete { border-color: rgba(255,59,59,0.3); color: #ff3b3b; }
+    .container-actions .btn-delete:hover { background: rgba(255,59,59,0.08); }
+
+    .empty-state { text-align: center; padding: 80px 20px; color: #9ca3af; grid-column: 1 / -1; }
+    .empty-state .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    .empty-state h3 { font-size: 24px; color: #e5e7eb; margin-bottom: 8px; }
+    .empty-state p { max-width: 400px; margin: 0 auto 20px; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 4px 8px; border-radius: 4px; transition: color 0.2s; }
+    .modal-close:hover { color: #00ced1; }
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field.full-width { grid-column: 1 / -1; }
+    .modal-field label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
+    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 0 3px rgba(0,206,209,0.2); }
+    .modal-field .hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
+
+    /* TIA Suggestion Box */
+    .tia-suggestion { background: rgba(0,206,209,0.05); border: 1px solid rgba(0,206,209,0.2); border-radius: 12px; padding: 16px; margin: 12px 0; }
+    .tia-suggestion .tia-header { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #00ced1; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .tia-suggestion .tia-text { font-size: 13px; color: #e5e7eb; line-height: 1.6; }
+    .tia-suggestion .tia-text .highlight { color: #7CFC00; }
+
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; transition: all 0.3s; }
+    .cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .cancel-btn:hover { background: rgba(255,255,255,0.2); }
+    .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+    .create-btn.danger { background: linear-gradient(135deg, #ff3b3b, #cc0000); color: white; }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 20000; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+    .hidden-input { position: absolute; opacity: 0; width: 0.1px; height: 0.1px; pointer-events: none; z-index: -1; }
+
+    @media (max-width: 700px) { .containers-grid { grid-template-columns: 1fr; } .page-title { font-size: 22px; } .header { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .modal-grid { grid-template-columns: 1fr; } .container-details { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
+  </div>
+
+  <!-- 3D Logo -->
+  <div class="gem-logo-corner" aria-hidden="true" role="presentation">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
+  </div>
+
+  <main class="container" role="main">
+    <!-- Navigation -->
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="wallet-section">
+          <div class="wallet-balance">
+            <span class="wallet-label">💰 BALANCE</span>
+            <span class="wallet-amount" id="walletAmount">$0.00</span>
+            <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
+          </div>
+          <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
+          <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px;" type="button">☁️ Sync</button>
+          <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        </div>
+        <a href="dashboard-buyer.html" id="navDashboard">📊 Dashboard</a>
+        <a href="container-captain.html" class="active" id="navContainers">📦 Containers</a>
+        <a href="auction-arena.html" id="navArena">🏆 Arena</a>
+        <a href="orders-buyer.html" id="navOrders">📋 Orders</a>
+        <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
+      </nav>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">📦 <span>Container Captain</span></div>
+      <button class="btn-neon" id="addContainerBtn" type="button" style="padding:12px 32px; font-size:14px;">➕ New Container</button>
+    </div>
+
+    <!-- Containers Grid -->
+    <div id="containersContainer">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📦</div>
+        <h3>No Containers Yet</h3>
+        <p>Start by creating your first container. Click the "New Container" button above.</p>
+      </div>
+      <div class="containers-grid" id="containersGrid"></div>
+    </div>
+
+    <footer class="footer">
+      <p>TRADEAUX © 2026 • Global Commodity Exchange • Container Captain v1.0</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Container Modal -->
+  <div class="modal" id="containerModal" role="dialog" aria-modal="true" aria-labelledby="containerModalTitle">
+    <div class="modal-content">
+      <button class="modal-close" id="closeContainerModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="containerModalTitle">📦 New Container</h2></div>
+      
+      <div class="modal-grid">
+        <div class="modal-field full-width">
+          <label for="editContainerName">Container Name *</label>
+          <input type="text" id="editContainerName" placeholder="e.g. Santos Coffee Run Q3">
+        </div>
+
+        <div class="modal-field">
+          <label for="editContainerType">Container Type *</label>
+          <select id="editContainerType">
+            <option value="20ft Standard">20ft Standard (33.2 m³, 21,800 kg, 10 pallets)</option>
+            <option value="40ft Standard">40ft Standard (67.7 m³, 26,500 kg, 20 pallets)</option>
+            <option value="40ft High Cube" selected>40ft High Cube (76.3 m³, 26,500 kg, 22 pallets)</option>
+            <option value="45ft High Cube">45ft High Cube (86.0 m³, 28,000 kg, 24 pallets)</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="editContainerDestination">Destination *</label>
+          <select id="editContainerDestination">
+            <option value="Winnipeg">Winnipeg, Canada</option>
+            <option value="Vancouver">Vancouver, Canada</option>
+            <option value="Calgary">Calgary, Canada</option>
+            <option value="Edmonton">Edmonton, Canada</option>
+            <option value="Toronto">Toronto, Canada</option>
+            <option value="Montreal">Montreal, Canada</option>
+            <option value="Rotterdam">Rotterdam, Netherlands</option>
+            <option value="Hamburg">Hamburg, Germany</option>
+            <option value="Antwerp">Antwerp, Belgium</option>
+          </select>
+        </div>
+
+        <div class="modal-field full-width">
+          <label for="editContainerOrderId">Linked Order (Optional)</label>
+          <input type="text" id="editContainerOrderId" placeholder="e.g. CON-001">
+          <div class="hint">Link this container to an existing order</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelContainerBtn" type="button">Cancel</button>
+        <button class="create-btn" id="saveContainerBtn" type="button">Create Container</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+    <div class="modal-content">
+      <button class="modal-close" id="closeProductModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="productModalTitle">➕ Add Product</h2></div>
+      
+      <div class="modal-field">
+        <label for="editProductName">Product *</label>
+        <select id="editProductName">
+          <option value="Arabica Coffee">Arabica Coffee (60kg bag)</option>
+          <option value="Robusta Coffee">Robusta Coffee (60kg bag)</option>
+          <option value="Cocoa">Cocoa (50kg bag)</option>
+          <option value="Tea">Tea (25kg box)</option>
+          <option value="Coconut Oil">Coconut Oil (200kg drum)</option>
+          <option value="Palm Oil">Palm Oil (200kg drum)</option>
+          <option value="Sugar">Sugar (50kg bag)</option>
+          <option value="Rice">Rice (50kg bag)</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label for="editProductQuantity">Quantity (units) *</label>
+        <input type="number" id="editProductQuantity" placeholder="e.g. 500" min="1" step="1" required>
+        <div class="hint" id="productMeasurementInfo">Select a product to see measurements</div>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 12px;">
+          <div><span style="color: #9ca3af;">Weight/unit:</span> <span id="productWeightDisplay">—</span></div>
+          <div><span style="color: #9ca3af;">Volume/unit:</span> <span id="productVolumeDisplay">—</span></div>
+          <div><span style="color: #9ca3af;">Units/Pallet:</span> <span id="productPalletDisplay">—</span></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelProductBtn" type="button">Cancel</button>
+        <button class="create-btn" id="saveProductBtn" type="button">Add Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Split Container Modal -->
+  <div class="modal" id="splitModal" role="dialog" aria-modal="true" aria-labelledby="splitModalTitle">
+    <div class="modal-content" style="max-width: 800px;">
+      <button class="modal-close" id="closeSplitModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="splitModalTitle">📦 Split Container</h2></div>
+      
+      <div id="splitSuggestion" style="margin-bottom: 16px;"></div>
+      
+      <div id="splitProducts" style="margin-bottom: 16px;"></div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelSplitBtn" type="button">Cancel</button>
+        <button class="create-btn" id="confirmSplitBtn" type="button">✅ Confirm Split</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    const STORAGE_KEY = 'tradeaux_container_captain';
+    const $ = id => document.getElementById(id);
+    const money = n => (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const CONTAINER_TYPES = {
+      '20ft Standard': { volume: 33.2, weight: 21800, pallets: 10 },
+      '40ft Standard': { volume: 67.7, weight: 26500, pallets: 20 },
+      '40ft High Cube': { volume: 76.3, weight: 26500, pallets: 22 },
+      '45ft High Cube': { volume: 86.0, weight: 28000, pallets: 24 }
+    };
+
+    const PRODUCT_MEASUREMENTS = {
+      'Arabica Coffee': { weight: 60, volume: 0.072, pallet: 20 },
+      'Robusta Coffee': { weight: 60, volume: 0.072, pallet: 20 },
+      'Cocoa': { weight: 50, volume: 0.048, pallet: 20 },
+      'Tea': { weight: 25, volume: 0.024, pallet: 40 },
+      'Coconut Oil': { weight: 200, volume: 0.324, pallet: 10 },
+      'Palm Oil': { weight: 200, volume: 0.324, pallet: 10 },
+      'Sugar': { weight: 50, volume: 0.048, pallet: 20 },
+      'Rice': { weight: 50, volume: 0.048, pallet: 20 }
+    };
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function showToast(msg, type='info') {
+      const t = $('toast'); if (!t) return;
+      t.textContent = msg.length > 60 ? msg.substring(0,57)+'...' : msg;
+      t.className = 'toast visible ' + type;
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.className = 'toast'; }, 5000);
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : { containers: [] };
+      } catch(e) { return { containers: [] }; }
+    }
+
+    function saveData(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return true;
+      } catch(e) {
+        showToast('⚠️ Storage error: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    function uuid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // ============================================================
+    // FIX #1/#2: renderWallet() with proper initialization
+    // ============================================================
+    function renderWallet() {
+      // Initialize wallet if it doesn't exist
+      let saved = localStorage.getItem('tradeaux_buyer_state');
+      let wallet = { balance: 0 };
+      
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data.wallet) wallet = data.wallet;
+        } catch(e) {
+          // Corrupt data, use defaults
+          console.warn('Corrupt wallet data, using defaults');
+        }
+      }
+      
+      if ($('walletAmount')) $('walletAmount').textContent = money(wallet.balance || 0);
+      if ($('conversionCapacity')) {
+        const fee = 25;
+        const bal = Math.max(0, wallet.balance || 0);
+        $('conversionCapacity').textContent = Math.floor(bal / fee) + ' conversions';
+      }
+    }
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let APP = loadData();
+    let editingContainerId = null;
+    let editingProductContainerId = null;
+    let splitContainerId = null;
+
+    // ============================================================
+    // SAFE ACCESSORS FOR MEASUREMENTS (FIX #7)
+    // ============================================================
+    const getWeight = (item) => item.weightPerUnit || 60;
+    const getVolume = (item) => item.volumePerUnit || 0.072;
+    const getPallet = (item) => item.unitsPerPallet || 20;
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderAll() {
+      renderContainers();
+      renderWallet();
+    }
+
+    function renderContainers() {
+      const grid = $('containersGrid');
+      const empty = $('emptyState');
+      if (!grid) return;
+
+      const containers = APP.containers || [];
+
+      if (containers.length === 0) {
+        grid.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      grid.innerHTML = containers.map((c, idx) => {
+        const typeData = CONTAINER_TYPES[c.type] || CONTAINER_TYPES['40ft High Cube'];
+        
+        // FIX #7: Safe calculations with fallback values
+        const totalWeight = c.contents.reduce((sum, item) => sum + (item.quantity * getWeight(item)), 0);
+        const totalVolume = c.contents.reduce((sum, item) => sum + (item.quantity * getVolume(item)), 0);
+        const totalPallets = c.contents.reduce((sum, item) => sum + Math.ceil(item.quantity / getPallet(item)), 0);
+        
+        const weightPct = Math.min(100, (totalWeight / typeData.weight) * 100);
+        const volumePct = Math.min(100, (totalVolume / typeData.volume) * 100);
+        const palletPct = Math.min(100, (totalPallets / typeData.pallets) * 100);
+        const isOverweight = totalWeight > typeData.weight;
+        const isOverstuffed = totalVolume > typeData.volume;
+        const isOverPallets = totalPallets > typeData.pallets;
+        const isOver = isOverweight || isOverstuffed || isOverPallets;
+
+        let statusText = '🟢 Ready';
+        let statusClass = 'active';
+        if (isOver) {
+          statusText = '🔴 Overloaded';
+          statusClass = 'overweight';
+        } else if (c.status === 'in-transit') {
+          statusText = '🚢 In Transit';
+          statusClass = 'in-transit';
+        } else if (c.status === 'delivered') {
+          statusText = '✅ Delivered';
+          statusClass = 'delivered';
+        }
+
+        const contentsHtml = c.contents.length === 0 
+          ? '<div style="color:#666; font-size:12px; padding:8px;">Empty container</div>'
+          : c.contents.map(item => `
+            <div class="content-item">
+              <span class="product">${escapeHtml(item.product)}</span>
+              <span class="qty">${escapeHtml(item.quantity)} units · ${(item.quantity * getWeight(item)).toLocaleString()} kg</span>
+            </div>
+          `).join('');
+
+        return `
+          <div class="container-card" data-id="${c.id}">
+            <div class="container-header">
+              <div>
+                <div class="container-name">${escapeHtml(c.name)} <span class="type">${escapeHtml(c.type)}</span></div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:4px;">
+                  📍 ${escapeHtml(c.destination)} ${c.orderId ? '· 📋 ' + escapeHtml(c.orderId) : ''}
+                </div>
+              </div>
+              <span class="container-status ${statusClass}">${statusText}</span>
+            </div>
+
+            <div class="container-progress">
+              <div class="progress-bar">
+                <div class="progress-fill ${isOver ? 'overweight' : ''}" style="width:${Math.max(weightPct, volumePct, palletPct)}%;"></div>
+              </div>
+              <div class="progress-labels">
+                <span>Weight: ${totalWeight.toLocaleString()} / ${typeData.weight.toLocaleString()} kg ${isOverweight ? '🔴' : '🟢'}</span>
+                <span>Volume: ${totalVolume.toFixed(1)} / ${typeData.volume} m³ ${isOverstuffed ? '🔴' : '🟢'}</span>
+                <span>Pallets: ${totalPallets} / ${typeData.pallets} ${isOverPallets ? '🔴' : '🟢'}</span>
+              </div>
+            </div>
+
+            <div class="container-contents">
+              ${contentsHtml}
+            </div>
+
+            ${isOver ? `
+              <div class="tia-suggestion">
+                <div class="tia-header">🤖 TIA Suggestion</div>
+                <div class="tia-text">
+                  ${isOverweight ? `🔴 Container is <span class="highlight">${(totalWeight - typeData.weight).toLocaleString()} kg overweight</span>. ` : ''}
+                  ${isOverstuffed ? `🔴 Container is <span class="highlight">${(totalVolume - typeData.volume).toFixed(1)} m³ overstuffed</span>. ` : ''}
+                  ${isOverPallets ? `🔴 Container has <span class="highlight">${totalPallets - typeData.pallets} extra pallets</span>. ` : ''}
+                  Consider splitting into two containers.
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- FIX #2: Status buttons with proper flow -->
+            <div class="container-actions">
+              <button class="btn-add" data-action="add-product" data-id="${c.id}">➕ Add Product</button>
+              <button class="btn-edit" data-action="edit" data-id="${c.id}">✏️ Edit</button>
+              ${isOver ? `<button class="btn-split" data-action="split" data-id="${c.id}">📦 Split Container</button>` : ''}
+              ${c.status === 'active' ? `
+                <button class="btn-status" data-action="status" data-id="${c.id}" data-status="in-transit">🚢 Mark In Transit</button>
+                <button class="btn-status" data-action="status" data-id="${c.id}" data-status="delivered">✅ Mark Delivered</button>
+              ` : ''}
+              ${c.status === 'in-transit' ? `
+                <button class="btn-status" data-action="status" data-id="${c.id}" data-status="delivered">✅ Mark Delivered</button>
+              ` : ''}
+              <button class="btn-delete" data-action="delete" data-id="${c.id}">🗑️ Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Event listeners
+      grid.querySelectorAll('[data-action="add-product"]').forEach(btn => {
+        btn.addEventListener('click', () => openProductModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="edit"]').forEach(btn => {
+        btn.addEventListener('click', () => openContainerModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="split"]').forEach(btn => {
+        btn.addEventListener('click', () => openSplitModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="status"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const c = APP.containers.find(x => x.id === btn.dataset.id);
+          if (c) {
+            c.status = btn.dataset.status;
+            saveData(APP);
+            renderContainers();
+            showToast(`Container marked as ${c.status.replace('-', ' ')}`, 'success');
+          }
+        });
+      });
+      grid.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        btn.addEventListener('click', () => deleteContainer(btn.dataset.id));
+      });
+    }
+
+    // ============================================================
+    // CONTAINER CRUD
+    // ============================================================
+    function openContainerModal(containerId) {
+      editingContainerId = containerId || null;
+      const isEdit = !!containerId;
+      $('containerModalTitle').textContent = isEdit ? '✏️ Edit Container' : '📦 New Container';
+
+      if (isEdit) {
+        const c = APP.containers.find(x => x.id === containerId);
+        if (c) {
+          $('editContainerName').value = c.name || '';
+          $('editContainerType').value = c.type || '40ft High Cube';
+          $('editContainerDestination').value = c.destination || 'Winnipeg';
+          $('editContainerOrderId').value = c.orderId || '';
+        }
+      } else {
+        $('editContainerName').value = '';
+        $('editContainerType').value = '40ft High Cube';
+        $('editContainerDestination').value = 'Winnipeg';
+        $('editContainerOrderId').value = '';
+      }
+
+      $('containerModal').classList.add('show');
+    }
+
+    function closeContainerModal() {
+      $('containerModal').classList.remove('show');
+      editingContainerId = null;
+    }
+
+    function saveContainer() {
+      const name = $('editContainerName').value.trim();
+      const type = $('editContainerType').value;
+      const destination = $('editContainerDestination').value;
+      const orderId = $('editContainerOrderId').value.trim();
+
+      if (!name) { showToast('Container name is required', 'error'); return; }
+
+      if (editingContainerId) {
+        const idx = APP.containers.findIndex(c => c.id === editingContainerId);
+        if (idx > -1) {
+          // FIX #1: Use orderId directly so user can clear it
+          APP.containers[idx] = {
+            ...APP.containers[idx],
+            name,
+            type,
+            destination,
+            orderId: orderId
+          };
+          showToast('✅ Container updated!', 'success');
+        }
+      } else {
+        APP.containers.push({
+          id: uuid(),
+          name,
+          type,
+          destination,
+          orderId: orderId || '',
+          status: 'active',
+          contents: [],
+          createdAt: new Date().toISOString()
+        });
+        showToast('✅ Container created!', 'success');
+      }
+
+      saveData(APP);
+      renderContainers();
+      closeContainerModal();
+    }
+
+    function deleteContainer(id) {
+      if (!confirm('Delete this container? All contents will be removed.')) return;
+      APP.containers = APP.containers.filter(c => c.id !== id);
+      saveData(APP);
+      renderContainers();
+      showToast('🗑️ Container deleted', 'warning');
+    }
+
+    // ============================================================
+    // PRODUCT CRUD
+    // ============================================================
+    function openProductModal(containerId) {
+      editingProductContainerId = containerId;
+      const c = APP.containers.find(x => x.id === containerId);
+      if (!c) { showToast('Container not found', 'error'); return; }
+
+      $('productModalTitle').textContent = `➕ Add Product to ${c.name}`;
+      $('editProductName').value = 'Arabica Coffee';
+      $('editProductQuantity').value = '';
+      updateProductInfo('Arabica Coffee');
+      $('productModal').classList.add('show');
+    }
+
+    function closeProductModal() {
+      $('productModal').classList.remove('show');
+      editingProductContainerId = null;
+    }
+
+    function updateProductInfo(productName) {
+      const info = PRODUCT_MEASUREMENTS[productName];
+      if (info) {
+        $('productWeightDisplay').textContent = info.weight + ' kg';
+        $('productVolumeDisplay').textContent = info.volume + ' m³';
+        $('productPalletDisplay').textContent = info.pallet + ' units';
+        $('productMeasurementInfo').textContent = `${info.weight}kg per unit · ${info.volume}m³ per unit · ${info.pallet} units per pallet`;
+      } else {
+        $('productWeightDisplay').textContent = '—';
+        $('productVolumeDisplay').textContent = '—';
+        $('productPalletDisplay').textContent = '—';
+        $('productMeasurementInfo').textContent = 'Select a product to see measurements';
+      }
+    }
+
+    function saveProduct() {
+      const productName = $('editProductName').value;
+      const quantity = parseInt($('editProductQuantity').value);
+      const info = PRODUCT_MEASUREMENTS[productName];
+
+      if (!productName) { showToast('Select a product', 'error'); return; }
+      if (!quantity || quantity <= 0) { showToast('Enter a valid quantity', 'error'); return; }
+      if (!info) { showToast('Product measurements not found', 'error'); return; }
+
+      const c = APP.containers.find(x => x.id === editingProductContainerId);
+      if (!c) { showToast('Container not found', 'error'); return; }
+
+      // Check if product already exists in container
+      const existing = c.contents.find(item => item.product === productName);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        c.contents.push({
+          product: productName,
+          quantity: quantity,
+          weightPerUnit: info.weight,
+          volumePerUnit: info.volume,
+          unitsPerPallet: info.pallet
+        });
+      }
+
+      saveData(APP);
+      renderContainers();
+      closeProductModal();
+      showToast(`✅ Added ${quantity} units of ${productName}`, 'success');
+    }
+
+    // ============================================================
+    // FIX #3/#6: SPLIT CONTAINER — Check ALL constraints
+    // ============================================================
+    function openSplitModal(containerId) {
+      splitContainerId = containerId;
+      const c = APP.containers.find(x => x.id === containerId);
+      if (!c) { showToast('Container not found', 'error'); return; }
+
+      const typeData = CONTAINER_TYPES[c.type] || CONTAINER_TYPES['40ft High Cube'];
+      
+      // FIX #7: Safe calculations with fallback
+      const totalWeight = c.contents.reduce((sum, item) => sum + (item.quantity * getWeight(item)), 0);
+      const totalVolume = c.contents.reduce((sum, item) => sum + (item.quantity * getVolume(item)), 0);
+      const totalPallets = c.contents.reduce((sum, item) => sum + Math.ceil(item.quantity / getPallet(item)), 0);
+
+      const excessWeight = Math.max(0, totalWeight - typeData.weight);
+      const excessVolume = Math.max(0, totalVolume - typeData.volume);
+      const excessPallets = Math.max(0, totalPallets - typeData.pallets);
+
+      let suggestionHtml = `
+        <div class="tia-suggestion">
+          <div class="tia-header">🤖 TIA Split Analysis</div>
+          <div class="tia-text">
+            Container "${escapeHtml(c.name)}" is 
+            ${excessWeight > 0 ? `<span class="highlight">${excessWeight.toLocaleString()} kg overweight</span>` : 'weight OK'}
+            ${excessVolume > 0 ? `, <span class="highlight">${excessVolume.toFixed(1)} m³ overstuffed</span>` : ', volume OK'}
+            ${excessPallets > 0 ? `, and has <span class="highlight">${excessPallets} extra pallets</span>` : ', pallets OK'}.
+          </div>
+        </div>
+      `;
+
+      // FIX #3: Check ALL constraints: weight, volume, pallets
+      let moveSuggestions = [];
+      let remainingWeight = totalWeight;
+      let remainingVolume = totalVolume;
+      let remainingPallets = totalPallets;
+      const targetWeight = typeData.weight * 0.9;
+      const targetVolume = typeData.volume * 0.9;
+      const targetPallets = typeData.pallets * 0.9;
+
+      // Sort by weight (heaviest first) to find best split
+      const sorted = [...c.contents].sort((a, b) => {
+        const aWeight = (a.quantity * getWeight(a));
+        const bWeight = (b.quantity * getWeight(b));
+        return bWeight - aWeight;
+      });
+
+      // FIX #3: Need to fix ALL three constraints
+      for (const item of sorted) {
+        const itemWeight = item.quantity * getWeight(item);
+        const itemVolume = item.quantity * getVolume(item);
+        const itemPallets = Math.ceil(item.quantity / getPallet(item));
+
+        const wouldBeWeight = remainingWeight - itemWeight;
+        const wouldBeVolume = remainingVolume - itemVolume;
+        const wouldBePallets = remainingPallets - itemPallets;
+
+        // Check if removing this item fixes ALL constraints
+        if (wouldBeWeight <= targetWeight && wouldBeVolume <= targetVolume && wouldBePallets <= targetPallets) {
+          moveSuggestions.push(item.product);
+          remainingWeight = wouldBeWeight;
+          remainingVolume = wouldBeVolume;
+          remainingPallets = wouldBePallets;
+        }
+      }
+
+      // If no single item fixes all constraints, try combinations
+      if (moveSuggestions.length === 0 && sorted.length > 0) {
+        // Try moving heaviest items one by one until constraints are met
+        for (const item of sorted) {
+          moveSuggestions.push(item.product);
+          remainingWeight -= item.quantity * getWeight(item);
+          remainingVolume -= item.quantity * getVolume(item);
+          remainingPallets -= Math.ceil(item.quantity / getPallet(item));
+          
+          if (remainingWeight <= targetWeight && remainingVolume <= targetVolume && remainingPallets <= targetPallets) {
+            break;
+          }
+        }
+      }
+
+      if (moveSuggestions.length > 0) {
+        const pctW = Math.min(100, ((remainingWeight / typeData.weight) * 100));
+        const pctV = Math.min(100, ((remainingVolume / typeData.volume) * 100));
+        const pctP = Math.min(100, ((remainingPallets / typeData.pallets) * 100));
+        
+        suggestionHtml += `
+          <div style="margin-top: 12px; background: rgba(124,252,0,0.05); border: 1px solid rgba(124,252,0,0.2); border-radius: 10px; padding: 12px;">
+            <div style="color: #7CFC00; font-weight: 600; font-size: 13px; margin-bottom: 4px;">💡 Recommended Split</div>
+            <div style="font-size: 13px; color: #e5e7eb;">
+              Move ${moveSuggestions.join(', ')} to a new container.
+              Container #1 will have: ${remainingWeight.toFixed(0)} kg (${pctW.toFixed(0)}%), ${remainingVolume.toFixed(1)} m³ (${pctV.toFixed(0)}%), ${remainingPallets} pallets (${pctP.toFixed(0)}%).
+            </div>
+            ${remainingWeight > typeData.weight || remainingVolume > typeData.volume || remainingPallets > typeData.pallets ? `
+              <div style="color: #FFD966; margin-top: 8px;">⚠️ Container #1 will still be overloaded. Consider moving more items.</div>
+            ` : ''}
+          </div>
+        `;
+      } else {
+        suggestionHtml += `
+          <div style="margin-top: 12px; background: rgba(255,59,59,0.05); border: 1px solid rgba(255,59,59,0.2); border-radius: 10px; padding: 12px;">
+            <div style="color: #ff3b3b; font-weight: 600; font-size: 13px;">⚠️ Cannot find a good split</div>
+            <div style="font-size: 13px; color: #e5e7eb;">
+              The container is too overloaded to split effectively.
+              Consider using a larger container type or removing some products.
+            </div>
+          </div>
+        `;
+      }
+
+      $('splitSuggestion').innerHTML = suggestionHtml;
+
+      // Show products with checkboxes
+      let productsHtml = `
+        <div style="font-size: 14px; font-weight: 600; color: #e5e7eb; margin-bottom: 8px;">Select products to move to Container #2:</div>
+        ${c.contents.map(item => `
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
+            <input type="checkbox" class="split-checkbox" data-product="${escapeHtml(item.product)}" ${moveSuggestions.includes(item.product) ? 'checked' : ''}>
+            <span style="font-weight: 600;">${escapeHtml(item.product)}</span>
+            <span style="color: #9ca3af; margin-left: auto;">${escapeHtml(item.quantity)} units · ${(item.quantity * getWeight(item)).toLocaleString()} kg</span>
+          </label>
+        `).join('')}
+      `;
+      $('splitProducts').innerHTML = productsHtml;
+
+      $('splitModal').classList.add('show');
+    }
+
+    function closeSplitModal() {
+      $('splitModal').classList.remove('show');
+      splitContainerId = null;
+    }
+
+    // FIX #5/#6: Validate BOTH containers before split
+    function confirmSplit() {
+      const c = APP.containers.find(x => x.id === splitContainerId);
+      if (!c) { showToast('Container not found', 'error'); return; }
+
+      // Get selected products
+      const checkboxes = document.querySelectorAll('.split-checkbox:checked');
+      if (checkboxes.length === 0) { showToast('Select at least one product to move', 'error'); return; }
+
+      const selectedProducts = Array.from(checkboxes).map(cb => cb.dataset.product);
+
+      // Create new container with moved products
+      const movedItems = c.contents.filter(item => selectedProducts.includes(item.product));
+      const remainingItems = c.contents.filter(item => !selectedProducts.includes(item.product));
+
+      if (movedItems.length === 0) { showToast('No products to move', 'error'); return; }
+
+      const typeData = CONTAINER_TYPES[c.type] || CONTAINER_TYPES['40ft High Cube'];
+
+      // Validate Container #1 (remaining)
+      const remainingWeight = remainingItems.reduce((sum, item) => sum + (item.quantity * getWeight(item)), 0);
+      const remainingVolume = remainingItems.reduce((sum, item) => sum + (item.quantity * getVolume(item)), 0);
+      const remainingPallets = remainingItems.reduce((sum, item) => sum + Math.ceil(item.quantity / getPallet(item)), 0);
+
+      // FIX #5: Validate Container #2 (moved)
+      const movedWeight = movedItems.reduce((sum, item) => sum + (item.quantity * getWeight(item)), 0);
+      const movedVolume = movedItems.reduce((sum, item) => sum + (item.quantity * getVolume(item)), 0);
+      const movedPallets = movedItems.reduce((sum, item) => sum + Math.ceil(item.quantity / getPallet(item)), 0);
+
+      const issues = [];
+
+      if (remainingWeight > typeData.weight) issues.push(`Container #1: ${(remainingWeight - typeData.weight).toLocaleString()} kg overweight`);
+      if (remainingVolume > typeData.volume) issues.push(`Container #1: ${(remainingVolume - typeData.volume).toFixed(1)} m³ overstuffed`);
+      if (remainingPallets > typeData.pallets) issues.push(`Container #1: ${remainingPallets - typeData.pallets} extra pallets`);
+
+      if (movedWeight > typeData.weight) issues.push(`Container #2: ${(movedWeight - typeData.weight).toLocaleString()} kg overweight`);
+      if (movedVolume > typeData.volume) issues.push(`Container #2: ${(movedVolume - typeData.volume).toFixed(1)} m³ overstuffed`);
+      if (movedPallets > typeData.pallets) issues.push(`Container #2: ${movedPallets - typeData.pallets} extra pallets`);
+
+      if (issues.length > 0) {
+        if (!confirm(`⚠️ Split will result in issues:\n\n${issues.join('\n')}\n\nContinue anyway?`)) {
+          return;
+        }
+      }
+
+      // Create new container
+      const newContainer = {
+        id: uuid(),
+        name: c.name + ' (Split)',
+        type: c.type,
+        destination: c.destination,
+        orderId: c.orderId,
+        status: 'active',
+        contents: movedItems.map(item => ({ ...item })),
+        createdAt: new Date().toISOString()
+      };
+
+      c.contents = remainingItems;
+      APP.containers.push(newContainer);
+      saveData(APP);
+      renderContainers();
+      closeSplitModal();
+      showToast('✅ Container split successfully!', 'success');
+    }
+
+    // ============================================================
+    // FIX #1/#2: depositBtn with proper initialization
+    // ============================================================
+    function setupEvents() {
+      // Add container
+      if ($('addContainerBtn')) {
+        $('addContainerBtn').addEventListener('click', () => openContainerModal(null));
+      }
+
+      // Container modal
+      if ($('closeContainerModal')) $('closeContainerModal').addEventListener('click', closeContainerModal);
+      if ($('cancelContainerBtn')) $('cancelContainerBtn').addEventListener('click', closeContainerModal);
+      if ($('saveContainerBtn')) $('saveContainerBtn').addEventListener('click', saveContainer);
+
+      // Product modal
+      if ($('closeProductModal')) $('closeProductModal').addEventListener('click', closeProductModal);
+      if ($('cancelProductBtn')) $('cancelProductBtn').addEventListener('click', closeProductModal);
+      if ($('saveProductBtn')) $('saveProductBtn').addEventListener('click', saveProduct);
+
+      // Product dropdown change
+      if ($('editProductName')) {
+        $('editProductName').addEventListener('change', function() {
+          updateProductInfo(this.value);
+        });
+      }
+
+      // Split modal
+      if ($('closeSplitModal')) $('closeSplitModal').addEventListener('click', closeSplitModal);
+      if ($('cancelSplitBtn')) $('cancelSplitBtn').addEventListener('click', closeSplitModal);
+      if ($('confirmSplitBtn')) $('confirmSplitBtn').addEventListener('click', confirmSplit);
+
+      // Close modals on backdrop click
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.classList.remove('show');
+          }
+        });
+      });
+
+      // Close modals on Escape
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+        }
+      });
+
+      // Sign out
+      if ($('authBtn')) {
+        $('authBtn').addEventListener('click', () => {
+          if (confirm('Sign out?')) {
+            showToast('👋 Signed out', 'info');
+            window.location.href = 'signin.html';
+          }
+        });
+      }
+
+      // Sync
+      if ($('syncCloudBtn')) {
+        $('syncCloudBtn').addEventListener('click', () => {
+          showToast('☁️ Syncing...', 'info');
+          APP = loadData();
+          renderContainers();
+          setTimeout(() => showToast('✅ Sync complete!', 'success'), 800);
+        });
+      }
+
+      // Save
+      if ($('forceSaveBtn')) {
+        $('forceSaveBtn').addEventListener('click', () => {
+          saveData(APP);
+          showToast('💾 Data saved locally!', 'success');
+        });
+      }
+
+      // FIX #1/#2: Deposit button with proper initialization
+      if ($('depositBtn')) {
+        $('depositBtn').addEventListener('click', () => {
+          const amt = prompt('Enter deposit amount ($):', '1000');
+          if (amt === null) return;
+          const v = parseFloat(amt);
+          if (isNaN(v) || v <= 0) { showToast('Invalid amount.', 'error'); return; }
+          
+          // Initialize wallet state if it doesn't exist
+          let saved = localStorage.getItem('tradeaux_buyer_state');
+          let data = { wallet: { balance: 0 } };
+          
+          if (saved) {
+            try {
+              data = JSON.parse(saved);
+              if (!data.wallet) data.wallet = { balance: 0 };
+            } catch(e) {
+              // Corrupt data, start fresh
+              data = { wallet: { balance: 0 } };
+            }
+          }
+          
+          data.wallet.balance = (data.wallet.balance || 0) + v;
+          localStorage.setItem('tradeaux_buyer_state', JSON.stringify(data));
+          renderWallet();
+          showToast('Deposited ' + money(v), 'success');
+        });
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!APP.containers) APP.containers = [];
+      renderAll();
+      setupEvents();
+      showToast('📦 Welcome to Container Captain!', 'info');
+    });
+  </script>
+</body>
+</html>
