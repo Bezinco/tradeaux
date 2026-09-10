@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Buyer Auctions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
+
+    /* ===== 3D LOGO ===== */
+    .gem-logo-corner {
+      position: fixed; top: 20px; left: 20px; z-index: 9999;
+      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
+      transform-style: preserve-3d; perspective: 1000px;
+      transform: scale(0.35); transform-origin: top left; pointer-events: none;
+    }
+    .gem-text {
+      font-size: 160px; font-weight: 900; letter-spacing: -0.02em;
+      position: relative; display: flex; text-transform: uppercase;
+      line-height: 0.9; font-family: 'Orbitron', sans-serif;
+      transform-style: preserve-3d; gap: 2px;
+    }
+    .gem-letter {
+      display: inline-block; position: relative; transform-style: preserve-3d;
+      animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2);
+    }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+
+    .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before {
+      content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0,102,255,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before {
+      content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(0,204,68,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px);
+    }
+    .gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before {
+      content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 18px rgba(217,43,43,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px);
+    }
+
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+    /* Navigation */
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 10px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .nav a:hover, .nav button:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.active { border-color: #7CFC00; background: rgba(124,252,0,0.12); color: #7CFC00; }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
+
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 24px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(0,206,209,0.15); margin-bottom: 24px; }
+    .page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: #00ced1; }
+    .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Status Tabs */
+    .status-tabs { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .status-tab { padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #9ca3af; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; }
+    .status-tab:hover { border-color: #00ced1; color: #e5e7eb; }
+    .status-tab.active { background: rgba(0,206,209,0.1); border-color: #00ced1; color: #00ced1; }
+    .status-tab .count { background: rgba(0,206,209,0.1); padding: 1px 8px; border-radius: 12px; font-size: 10px; margin-left: 6px; color: #9ca3af; }
+    .status-tab.active .count { background: rgba(0,206,209,0.2); color: #00ced1; }
+
+    /* Type Filter */
+    .type-filter { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .type-btn { padding: 6px 16px; border-radius: 16px; border: 1px solid rgba(0,206,209,0.15); background: transparent; color: #9ca3af; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
+    .type-btn:hover { border-color: #00ced1; color: #e5e7eb; }
+    .type-btn.active { background: rgba(0,206,209,0.1); border-color: #00ced1; color: #00ced1; }
+
+    /* Search */
+    .search-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+    .search-bar input { flex: 1; min-width: 180px; padding: 10px 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.2); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; }
+    .search-bar input:focus { outline: none; border-color: #00ced1; }
+    .search-bar input::placeholder { color: #6b7280; }
+    .search-bar select { padding: 10px 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.2); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 130px; }
+    .search-bar select:focus { outline: none; border-color: #00ced1; }
+    .search-bar .results-count { font-size: 13px; color: #9ca3af; margin-left: auto; }
+
+    /* Auctions Grid */
+    .auctions-grid { display: grid; gap: 20px; }
+    .auction-card {
+      background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95));
+      border: 1px solid rgba(0,206,209,0.15); border-radius: 20px; padding: 24px;
+      transition: all 0.3s;
+    }
+    .auction-card:hover { border-color: #00ced1; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+    .auction-card.reserved { border-color: rgba(124,252,0,0.4); background: linear-gradient(145deg, rgba(15,50,30,0.6), rgba(2,6,23,0.95)); }
+
+    .auction-card .top-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .auction-card .auction-number { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #FFD966; letter-spacing: 0.5px; }
+    .auction-card .type-badge { font-size: 10px; padding: 3px 12px; border-radius: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .auction-card .type-badge.sample { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .auction-card .type-badge.regular { background: rgba(124,252,0,0.15); color: #7CFC00; }
+    .auction-card .type-badge.pallet { background: rgba(255,217,102,0.15); color: #FFD966; }
+    .auction-card .status-badge { font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .auction-card .status-badge.live { background: rgba(124,252,0,0.2); color: #7CFC00; animation: livePulse 2s infinite; }
+    .auction-card .status-badge.upcoming { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .auction-card .status-badge.completed { background: rgba(255,255,255,0.1); color: #9ca3af; }
+    @keyframes livePulse { 0%, 100% { box-shadow: 0 0 5px rgba(124,252,0,0.2); } 50% { box-shadow: 0 0 15px rgba(124,252,0,0.5); } }
+
+    .auction-card .product-name { font-size: 22px; font-weight: 700; color: #e5e7eb; margin-bottom: 4px; }
+    .auction-card .product-variety { font-size: 14px; color: #9ca3af; margin-bottom: 8px; }
+
+    .auction-card .seller-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 13px; color: #9ca3af; flex-wrap: wrap; }
+    .auction-card .seller-row .rating { color: #FFD966; }
+    .auction-card .seller-row .verified { color: #7CFC00; font-weight: 600; }
+
+    .auction-card .lot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+    .auction-card .lot-grid .lot-item { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; text-align: center; border: 1px solid rgba(0,206,209,0.1); }
+    .auction-card .lot-grid .lot-item .label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .auction-card .lot-grid .lot-item .value { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; }
+    .auction-card .lot-grid .lot-item .value.price { color: #7CFC00; }
+
+    .auction-card .product-preview { font-size: 13px; color: #9ca3af; margin: 8px 0; line-height: 1.5; }
+
+    .auction-card .actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+    .auction-card .actions .btn-view-product { padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.3); background: rgba(0,206,209,0.05); color: #00ced1; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+    .auction-card .actions .btn-view-product:hover { background: rgba(0,206,209,0.15); border-color: #00ced1; }
+    .auction-card .actions .btn-reserve { padding: 10px 28px; border-radius: 8px; border: none; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; letter-spacing: 0.5px; }
+    .auction-card .actions .btn-reserve:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+    .auction-card .actions .btn-reserve:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .auction-card .actions .btn-reserve.reserved { background: rgba(124,252,0,0.15); color: #7CFC00; border: 1px solid rgba(124,252,0,0.3); }
+    .auction-card .actions .btn-reserve.reserved:hover { background: rgba(124,252,0,0.25); }
+    .auction-card .actions .fee-note { font-size: 12px; color: #6b7280; }
+    .auction-card .actions .fee-note .amount { color: #FFD966; font-weight: 600; }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; grid-column: 1 / -1; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+    /* Product Card Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 4px 8px; border-radius: 4px; transition: color 0.2s; }
+    .modal-close:hover { color: #00ced1; }
+
+    .product-card-modal { display: flex; flex-direction: column; gap: 20px; }
+    .product-card-modal .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 4px; }
+    .product-card-modal .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .product-card-modal .modal-header .sub { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+
+    .product-card-modal .section { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; border: 1px solid rgba(0,206,209,0.1); }
+    .product-card-modal .section .section-title { font-size: 11px; color: #00ced1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600; }
+    .product-card-modal .section .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font-size: 13px; }
+    .product-card-modal .section .grid-2 .label { color: #6b7280; }
+    .product-card-modal .section .grid-2 .value { color: #e5e7eb; }
+
+    .product-card-modal .modal-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .product-card-modal .modal-actions button { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 140px; transition: all 0.3s; }
+    .product-card-modal .modal-actions .btn-close { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .product-card-modal .modal-actions .btn-close:hover { background: rgba(255,255,255,0.2); }
+    .product-card-modal .modal-actions .btn-reserve { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .product-card-modal .modal-actions .btn-reserve:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+    .product-card-modal .modal-actions .btn-reserve:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 20000; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+
+    @media (max-width: 900px) { .auction-card .actions { flex-direction: column; align-items: stretch; } .auction-card .actions button { width: 100%; } }
+    @media (max-width: 700px) { .page-title { font-size: 22px; } .header { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .search-bar { flex-direction: column; align-items: stretch; } .search-bar .results-count { margin-left: 0; } .product-card-modal .section .grid-2 { grid-template-columns: 1fr; } .modal-content { padding: 24px; } }
+  </style>
+</head>
+<body>
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
+  </div>
+
+  <!-- 3D Logo -->
+  <div class="gem-logo-corner" aria-hidden="true" role="presentation">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
+  </div>
+
+  <main class="container" role="main">
+    <!-- Navigation -->
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="wallet-section">
+          <div class="wallet-balance">
+            <span class="wallet-label">💰 BALANCE</span>
+            <span class="wallet-amount" id="walletAmount">$0.00</span>
+            <span class="wallet-sub" id="conversionCapacity">0 conversions</span>
+          </div>
+          <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
+          <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px;" type="button">☁️ Sync</button>
+          <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        </div>
+        <a href="dashboard-buyer.html" id="navDashboard">📊 Dashboard</a>
+        <a href="container-captain.html" id="navContainers">📦 Containers</a>
+        <a href="bot-studio.html" id="navBots">🤖 Bot Studio</a>
+        <a href="auctions-buyer.html" class="active" id="navAuctions">📅 Auctions</a>
+        <a href="orders-buyer.html" id="navOrders">📋 Orders</a>
+        <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
+      </nav>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">📅 <span>Auctions</span></div>
+      <div style="font-size:13px; color:#9ca3af;">Browse, view product cards, and reserve auctions for your bots</div>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="status-tabs" id="statusTabs">
+      <button class="status-tab active" data-filter="all">📊 All <span class="count" id="countAll">0</span></button>
+      <button class="status-tab" data-filter="live">🟢 Live <span class="count" id="countLive">0</span></button>
+      <button class="status-tab" data-filter="upcoming">📅 Upcoming <span class="count" id="countUpcoming">0</span></button>
+      <button class="status-tab" data-filter="completed">✅ Completed <span class="count" id="countCompleted">0</span></button>
+    </div>
+
+    <!-- Type Filter -->
+    <div class="type-filter" id="typeFilter">
+      <button class="type-btn active" data-type="all">🧪 All Types</button>
+      <button class="type-btn" data-type="sample">🧪 Sample</button>
+      <button class="type-btn" data-type="regular">📦 Regular</button>
+      <button class="type-btn" data-type="pallet">📦 Pallet</button>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search by product, location, seller, or auction #..." autocomplete="off">
+      <select id="filterProduct">
+        <option value="all">All Products</option>
+        <option value="Coffee">Coffee</option>
+        <option value="Cocoa">Cocoa</option>
+        <option value="Coconut Oil">Coconut Oil</option>
+        <option value="Banana Chips">Banana Chips</option>
+        <option value="Tea">Tea</option>
+        <option value="Palm Oil">Palm Oil</option>
+        <option value="Sugar">Sugar</option>
+        <option value="Rice">Rice</option>
+      </select>
+      <select id="filterLocation">
+        <option value="all">All Locations</option>
+        <option value="Colombo">Colombo</option>
+        <option value="Santos">Santos</option>
+        <option value="Davao">Davao</option>
+        <option value="Jakarta">Jakarta</option>
+        <option value="Mombasa">Mombasa</option>
+        <option value="Guayaquil">Guayaquil</option>
+      </select>
+      <span class="results-count" id="resultsCount">Showing 0 auctions</span>
+    </div>
+
+    <!-- Auctions Grid -->
+    <div class="auctions-grid" id="auctionsGrid">
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>Loading auctions...</h3>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>TRADEAUX © 2026 • Global Commodity Exchange • Reserve auctions for your bots to bid</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Product Card Modal -->
+  <div class="modal" id="productModal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button class="modal-close" id="closeProductModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="product-card-modal" id="productModalBody">
+        <!-- Content injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    const STORAGE_KEY = 'tradeaux_buyer_state';
+    const AUCTIONS_KEY = 'tradeaux_buyer_auctions_v2';
+    const $ = id => document.getElementById(id);
+    const money = n => (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function showToast(msg, type='info') {
+      const t = $('toast'); if (!t) return;
+      t.textContent = msg.length > 60 ? msg.substring(0,57)+'...' : msg;
+      t.className = 'toast visible ' + type;
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.className = 'toast'; }, 5000);
+    }
+
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let currentStatusFilter = 'all';
+    let currentTypeFilter = 'all';
+    let currentProductModal = null;
+
+    // Load reserved auctions from buyer state
+    function loadBuyerState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : { wallet: { balance: 0 }, reservations: [] };
+      } catch(e) { return { wallet: { balance: 0 }, reservations: [] }; }
+    }
+
+    function saveBuyerState(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return true;
+      } catch(e) {
+        showToast('⚠️ Storage error: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    let BUYER = loadBuyerState();
+    if (!BUYER.reservations) BUYER.reservations = [];
+
+    // ============================================================
+    // DEMO AUCTIONS — With Product Cards & Auction Numbers
+    // ============================================================
+    function getDemoAuctions() {
+      const now = new Date();
+      const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(10, 0, 0, 0);
+      const thursday = new Date(now); thursday.setDate(thursday.getDate() + 3); thursday.setHours(14, 0, 0, 0);
+      const nextMonday = new Date(now); nextMonday.setDate(nextMonday.getDate() + 6); nextMonday.setHours(9, 0, 0, 0);
+
+      return [
+        // SAMPLE AUCTIONS
+        {
+          id: 's1', auction_number: 'AUC-2026-001',
+          commodity: 'Coconut Oil', variety: 'Virgin', quantity_kg: 2000,
+          min_quantity_kg: 25, max_quantity_kg: 250, start_price: 4.25, price_unit: 'kg',
+          auction_type: 'sample', location: 'Colombo', fob_port: 'Colombo Port',
+          seller: 'Matale Coconut Co-op', seller_rating: 4.9, seller_verified: true,
+          status: 'live', opens_at: now.toISOString(),
+          closes_at: new Date(now.getTime() + 86400000 * 2).toISOString(),
+          description: 'Fresh harvest virgin coconut oil. Perfect for international buyers testing new suppliers.',
+          product_card: {
+            grade: 'Premium Virgin', harvest: 'December 2025', processing: 'Cold-pressed',
+            certifications: 'Organic, Fair Trade, Non-GMO',
+            packaging: '25kg food-grade bags', incoterm: 'EXW',
+            image: '🥥', description: 'Cold-pressed virgin coconut oil from Matale region.'
+          }
+        },
+        {
+          id: 's2', auction_number: 'AUC-2026-002',
+          commodity: 'Coffee', variety: 'Arabica', quantity_kg: 1500,
+          min_quantity_kg: 25, max_quantity_kg: 250, start_price: 4.50, price_unit: 'kg',
+          auction_type: 'sample', location: 'Davao', fob_port: 'Davao Port',
+          seller: 'Premium Coffee Co-op', seller_rating: 4.8, seller_verified: true,
+          status: 'upcoming', opens_at: tomorrow.toISOString(),
+          closes_at: new Date(tomorrow.getTime() + 86400000 * 2).toISOString(),
+          description: 'Premium Arabica coffee from Davao region. Direct from farm.',
+          product_card: {
+            grade: 'Arabica Grade 1', harvest: 'January 2026', processing: 'Washed',
+            certifications: 'Rainforest Alliance, UTZ',
+            packaging: '25kg vacuum bags', incoterm: 'EXW',
+            image: '☕', description: 'Single-origin Arabica from Davao highlands.'
+          }
+        },
+        // REGULAR AUCTIONS
+        {
+          id: 'r1', auction_number: 'AUC-2026-003',
+          commodity: 'Coffee', variety: 'Robusta', quantity_kg: 500000,
+          min_quantity_kg: 250, max_quantity_kg: null, start_price: 4.50, price_unit: 'MT',
+          auction_type: 'regular', location: 'Davao', fob_port: 'Davao Port',
+          seller: 'Davao Coffee Co-op', seller_rating: 4.8, seller_verified: true,
+          status: 'live', opens_at: now.toISOString(),
+          closes_at: new Date(now.getTime() + 86400000 * 1).toISOString(),
+          description: 'Large commercial lot of Robusta coffee. Direct from farm to port.',
+          product_card: {
+            grade: 'Robusta Grade 1', harvest: 'January 2026', processing: 'Natural',
+            certifications: 'Rainforest Alliance, UTZ',
+            packaging: '60kg jute bags', incoterm: 'FOB',
+            image: '📦', description: 'Commercial grade Robusta. Bulk quantities.'
+          }
+        },
+        {
+          id: 'r2', auction_number: 'AUC-2026-004',
+          commodity: 'Tea', variety: 'Black CTC', quantity_kg: 100000,
+          min_quantity_kg: 250, max_quantity_kg: null, start_price: 3.20, price_unit: 'MT',
+          auction_type: 'regular', location: 'Mombasa', fob_port: 'Mombasa Port',
+          seller: 'Kenya Tea Co-op', seller_rating: 4.5, seller_verified: true,
+          status: 'upcoming', opens_at: thursday.toISOString(),
+          closes_at: new Date(thursday.getTime() + 86400000 * 3).toISOString(),
+          description: 'Premium Black CTC tea from Kenya. Standard commercial grade.',
+          product_card: {
+            grade: 'Premium CTC', harvest: 'December 2025', processing: 'CTC',
+            certifications: 'Fair Trade, Rainforest Alliance',
+            packaging: '50kg paper sacks', incoterm: 'FOB',
+            image: '🍵', description: 'Kenyan Black CTC tea in commercial quantities.'
+          }
+        },
+        // PALLET AUCTIONS
+        {
+          id: 'p1', auction_number: 'AUC-2026-005',
+          commodity: 'Banana Chips', variety: 'Premium', quantity_kg: 5000,
+          total_pallets: 10, pallet_size_kg: 500, start_price: 550, price_unit: 'pallet',
+          auction_type: 'pallet', location: 'Santos', fob_port: 'Santos Port',
+          seller: 'Santos Foods', seller_rating: 4.2, seller_verified: true,
+          status: 'live', opens_at: now.toISOString(),
+          closes_at: new Date(now.getTime() + 86400000 * 3).toISOString(),
+          description: 'Warehouse clearance! Premium banana chips. Moving out to make space.',
+          product_card: {
+            grade: 'Premium', harvest: 'November 2025', processing: 'Air-dried, lightly salted',
+            certifications: 'Gluten-Free, Non-GMO',
+            packaging: '500kg palletized boxes', incoterm: 'FOB',
+            image: '🍌', description: 'Premium banana chips palletized for export.'
+          }
+        },
+        {
+          id: 'p2', auction_number: 'AUC-2026-006',
+          commodity: 'Cacao', variety: 'Forastero', quantity_kg: 2500,
+          total_pallets: 5, pallet_size_kg: 500, start_price: 600, price_unit: 'pallet',
+          auction_type: 'pallet', location: 'Guayaquil', fob_port: 'Guayaquil Port',
+          seller: 'Premium Cacao Ecuador', seller_rating: 4.9, seller_verified: true,
+          status: 'upcoming', opens_at: nextMonday.toISOString(),
+          closes_at: new Date(nextMonday.getTime() + 86400000 * 4).toISOString(),
+          description: 'Cacao pallets from Ecuador. Direct from farm.',
+          product_card: {
+            grade: 'Forastero', harvest: 'October 2025', processing: 'Fermented, dried',
+            certifications: 'Organic, Fair Trade',
+            packaging: '500kg palletized bags', incoterm: 'FOB',
+            image: '🍫', description: 'Ecuadorian Forastero cacao. Bulk palletized.'
+          }
+        }
+      ];
+    }
+
+    function loadAuctions() {
+      try {
+        const raw = localStorage.getItem(AUCTIONS_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && data.length > 0) return data;
+        }
+      } catch(e) {}
+      const demo = getDemoAuctions();
+      localStorage.setItem(AUCTIONS_KEY, JSON.stringify(demo));
+      return demo;
+    }
+
+    let APP = { auctions: loadAuctions() };
+
+    // ============================================================
+    // RESERVATIONS
+    // ============================================================
+    function isReserved(auctionId) {
+      return BUYER.reservations.some(r => r.auction_id === auctionId);
+    }
+
+    function reserveAuction(auctionId) {
+      const auction = APP.auctions.find(a => a.id === auctionId);
+      if (!auction) { showToast('Auction not found', 'error'); return; }
+
+      if (isReserved(auctionId)) {
+        showToast('Already reserved', 'info');
+        return;
+      }
+
+      const HOLD_AMOUNT = 25;
+
+      // Check wallet balance
+      if ((BUYER.wallet.balance || 0) < HOLD_AMOUNT) {
+        showToast(`⚠️ Insufficient balance. Need $${HOLD_AMOUNT} for hold. Deposit more funds.`, 'error');
+        return;
+      }
+
+      // Deduct $25 hold from wallet
+      BUYER.wallet.balance = (BUYER.wallet.balance || 0) - HOLD_AMOUNT;
+
+      // Add reservation
+      BUYER.reservations.push({
+        auction_id: auctionId,
+        auction_number: auction.auction_number,
+        commodity: auction.commodity,
+        variety: auction.variety,
+        reserved_at: new Date().toISOString(),
+        hold_amount: HOLD_AMOUNT,
+        status: 'reserved',
+        bot_assigned: null
+      });
+
+      if (saveBuyerState(BUYER)) {
+        showToast(`✅ Reserved ${auction.auction_number} · $${HOLD_AMOUNT} held from wallet`, 'success');
+        renderAuctions();
+        renderWallet();
+      } else {
+        // Rollback
+        BUYER.wallet.balance += HOLD_AMOUNT;
+        BUYER.reservations.pop();
+        showToast('Failed to save reservation', 'error');
+      }
+    }
+
+    function cancelReservation(auctionId) {
+      const idx = BUYER.reservations.findIndex(r => r.auction_id === auctionId);
+      if (idx === -1) return;
+
+      if (!confirm(`Cancel reservation? $25 will be refunded to your wallet.`)) return;
+
+      const reservation = BUYER.reservations[idx];
+      BUYER.wallet.balance = (BUYER.wallet.balance || 0) + (reservation.hold_amount || 25);
+      BUYER.reservations.splice(idx, 1);
+
+      if (saveBuyerState(BUYER)) {
+        showToast(`Cancelled reservation. $${reservation.hold_amount || 25} refunded.`, 'success');
+        renderAuctions();
+        renderWallet();
+      }
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderAll() {
+      renderAuctions();
+      renderWallet();
+      updateCounts();
+    }
+
+    function renderWallet() {
+      if ($('walletAmount')) $('walletAmount').textContent = money(BUYER.wallet.balance || 0);
+      if ($('conversionCapacity')) {
+        const reserved = BUYER.reservations.length;
+        $('conversionCapacity').textContent = reserved + ' reserved';
+      }
+    }
+
+    function renderAuctions() {
+      const grid = $('auctionsGrid');
+      if (!grid) return;
+
+      let auctions = APP.auctions || [];
+
+      // Filter by status
+      if (currentStatusFilter !== 'all') {
+        auctions = auctions.filter(a => a.status === currentStatusFilter);
+      }
+
+      // Filter by type
+      if (currentTypeFilter !== 'all') {
+        auctions = auctions.filter(a => a.auction_type === currentTypeFilter);
+      }
+
+      // Search
+      const searchTerm = $('searchInput')?.value?.toLowerCase() || '';
+      if (searchTerm) {
+        auctions = auctions.filter(a =>
+          (a.commodity || '').toLowerCase().includes(searchTerm) ||
+          (a.location || '').toLowerCase().includes(searchTerm) ||
+          (a.seller || '').toLowerCase().includes(searchTerm) ||
+          (a.variety || '').toLowerCase().includes(searchTerm) ||
+          (a.auction_number || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Product filter
+      const productFilter = $('filterProduct')?.value || 'all';
+      if (productFilter !== 'all') {
+        auctions = auctions.filter(a => a.commodity === productFilter);
+      }
+
+      // Location filter
+      const locationFilter = $('filterLocation')?.value || 'all';
+      if (locationFilter !== 'all') {
+        auctions = auctions.filter(a => a.location === locationFilter);
+      }
+
+      if ($('resultsCount')) {
+        $('resultsCount').textContent = `Showing ${auctions.length} auction${auctions.length !== 1 ? 's' : ''}`;
+      }
+
+      if (auctions.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>No auctions found</h3>
+            <p>Try adjusting your search or filters.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = auctions.map(a => {
+        const isReserved = isReserved(a.id);
+        const isSample = a.auction_type === 'sample';
+        const isRegular = a.auction_type === 'regular';
+        const isPallet = a.auction_type === 'pallet';
+
+        const typeLabels = { sample: '🧪 Sample', regular: '📦 Regular', pallet: '📦 Pallet' };
+        const statusLabels = { live: '🟢 LIVE', upcoming: '📅 UPCOMING', completed: '✅ COMPLETED' };
+
+        // Build lot info
+        let totalStr = '';
+        let minStr = '—';
+        let maxStr = '—';
+        let priceStr = '';
+
+        if (isSample) {
+          totalStr = (a.quantity_kg || 0).toLocaleString() + 'kg';
+          minStr = (a.min_quantity_kg || 25) + 'kg';
+          maxStr = (a.max_quantity_kg || 250) + 'kg';
+          priceStr = money(a.start_price) + '/kg';
+        } else if (isRegular) {
+          const mt = (a.quantity_kg || 0) / 1000;
+          totalStr = mt.toLocaleString() + ' MT';
+          minStr = (a.min_quantity_kg || 250) + 'kg';
+          maxStr = 'Full lot';
+          priceStr = money(a.start_price) + '/MT';
+        } else if (isPallet) {
+          totalStr = (a.total_pallets || 0) + ' pallets';
+          minStr = '1 pallet';
+          maxStr = 'All pallets';
+          priceStr = money(a.start_price) + '/pallet';
+        }
+
+        // Time display
+        let timeStr = '';
+        if (a.status === 'live') {
+          timeStr = '⏱️ Live now';
+        } else if (a.status === 'upcoming' && a.opens_at) {
+          const openDate = new Date(a.opens_at);
+          timeStr = '⏰ Opens ' + openDate.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + openDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Action buttons
+        let reserveBtn = '';
+        if (a.status === 'completed') {
+          reserveBtn = `<button class="btn-reserve" disabled>COMPLETED</button>`;
+        } else if (isReserved) {
+          reserveBtn = `<button class="btn-reserve reserved" data-action="cancel" data-id="${a.id}">✅ RESERVED · Click to Cancel</button>`;
+        } else {
+          reserveBtn = `<button class="btn-reserve" data-action="reserve" data-id="${a.id}">📋 RESERVE AUCTION</button>`;
+        }
+
+        return `
+          <div class="auction-card ${isReserved ? 'reserved' : ''}" data-id="${a.id}">
+            <div class="top-row">
+              <span class="auction-number">${escapeHtml(a.auction_number || 'AUC-XXXX-XXX')}</span>
+              <span class="type-badge ${a.auction_type}">${typeLabels[a.auction_type] || '📦'}</span>
+              <span class="status-badge ${a.status}">${statusLabels[a.status] || a.status}</span>
+            </div>
+
+            <div class="product-name">${escapeHtml(a.commodity)} ${a.variety ? '— ' + escapeHtml(a.variety) : ''}</div>
+            <div class="product-variety">${escapeHtml(a.description || '')}</div>
+
+            <div class="seller-row">
+              <span>👤 ${escapeHtml(a.seller)}</span>
+              <span class="rating">⭐ ${(a.seller_rating || 4.5).toFixed(1)}</span>
+              ${a.seller_verified ? '<span class="verified">✅ Verified</span>' : ''}
+              <span>📍 ${escapeHtml(a.location)}</span>
+            </div>
+
+            <div class="lot-grid">
+              <div class="lot-item">
+                <div class="label">Total Lot</div>
+                <div class="value">${escapeHtml(totalStr)}</div>
+              </div>
+              <div class="lot-item">
+                <div class="label">Min Buy</div>
+                <div class="value">${escapeHtml(minStr)}</div>
+              </div>
+              <div class="lot-item">
+                <div class="label">Max Buy</div>
+                <div class="value">${escapeHtml(maxStr)}</div>
+              </div>
+              <div class="lot-item">
+                <div class="label">Starting Price</div>
+                <div class="value price">${escapeHtml(priceStr)}</div>
+              </div>
+            </div>
+
+            <div class="product-preview">
+              ${timeStr}
+              ${a.fob_port ? ' · 📍 FOB: ' + escapeHtml(a.fob_port) : ''}
+            </div>
+
+            <div class="actions">
+              <button class="btn-view-product" data-action="view-product" data-id="${a.id}">📋 View Product Card</button>
+              ${reserveBtn}
+              <span class="fee-note">Hold: <span class="amount">$25</span> per reservation</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Event listeners
+      grid.querySelectorAll('[data-action="view-product"]').forEach(btn => {
+        btn.addEventListener('click', () => openProductModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="reserve"]').forEach(btn => {
+        btn.addEventListener('click', () => reserveAuction(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="cancel"]').forEach(btn => {
+        btn.addEventListener('click', () => cancelReservation(btn.dataset.id));
+      });
+    }
+
+    function updateCounts() {
+      const auctions = APP.auctions || [];
+      const counts = {
+        all: auctions.length,
+        live: auctions.filter(a => a.status === 'live').length,
+        upcoming: auctions.filter(a => a.status === 'upcoming').length,
+        completed: auctions.filter(a => a.status === 'completed').length
+      };
+
+      ['All', 'Live', 'Upcoming', 'Completed'].forEach(name => {
+        const el = $(`count${name}`);
+        if (el) el.textContent = counts[name.toLowerCase()] || 0;
+      });
+    }
+
+    // ============================================================
+    // PRODUCT CARD MODAL
+    // ============================================================
+    function openProductModal(auctionId) {
+      const auction = APP.auctions.find(a => a.id === auctionId);
+      if (!auction) { showToast('Auction not found', 'error'); return; }
+      currentProductModal = auction;
+
+      const pc = auction.product_card || {};
+      const isReserved = isReserved(auction.id);
+
+      let totalStr = '';
+      let priceStr = '';
+      if (auction.auction_type === 'sample') {
+        totalStr = (auction.quantity_kg || 0).toLocaleString() + 'kg';
+        priceStr = money(auction.start_price) + '/kg';
+      } else if (auction.auction_type === 'regular') {
+        totalStr = ((auction.quantity_kg || 0) / 1000).toLocaleString() + ' MT';
+        priceStr = money(auction.start_price) + '/MT';
+      } else {
+        totalStr = (auction.total_pallets || 0) + ' pallets · ' + (auction.quantity_kg || 0).toLocaleString() + 'kg';
+        priceStr = money(auction.start_price) + '/pallet';
+      }
+
+      const body = $('productModalBody');
+      body.innerHTML = `
+        <div class="modal-header">
+          <h2>📦 PRODUCT CARD</h2>
+          <div class="sub">${escapeHtml(auction.auction_number)} · ${escapeHtml(auction.commodity)} ${auction.variety ? '— ' + escapeHtml(auction.variety) : ''}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🏷️ Seller Information</div>
+          <div class="grid-2">
+            <div><span class="label">Seller:</span> <span class="value">${escapeHtml(auction.seller)}</span></div>
+            <div><span class="label">Rating:</span> <span class="value">⭐ ${(auction.seller_rating || 4.5).toFixed(1)} ${auction.seller_verified ? '· ✅ Verified' : ''}</span></div>
+            <div><span class="label">Location:</span> <span class="value">📍 ${escapeHtml(auction.location)}</span></div>
+            <div><span class="label">FOB Port:</span> <span class="value">${escapeHtml(auction.fob_port || '—')}</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🌾 Product Details</div>
+          <div class="grid-2">
+            <div><span class="label">Grade:</span> <span class="value">${escapeHtml(pc.grade || '—')}</span></div>
+            <div><span class="label">Harvest:</span> <span class="value">${escapeHtml(pc.harvest || '—')}</span></div>
+            <div><span class="label">Processing:</span> <span class="value">${escapeHtml(pc.processing || '—')}</span></div>
+            <div><span class="label">Certifications:</span> <span class="value">${escapeHtml(pc.certifications || '—')}</span></div>
+            <div><span class="label">Packaging:</span> <span class="value">${escapeHtml(pc.packaging || '—')}</span></div>
+            <div><span class="label">Incoterm:</span> <span class="value">${escapeHtml(pc.incoterm || 'EXW')}</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📦 Auction Details</div>
+          <div class="grid-2">
+            <div><span class="label">Type:</span> <span class="value">${escapeHtml(auction.auction_type.toUpperCase())}</span></div>
+            <div><span class="label">Total Lot:</span> <span class="value">${escapeHtml(totalStr)}</span></div>
+            <div><span class="label">Starting Price:</span> <span class="value">${escapeHtml(priceStr)}</span></div>
+            <div><span class="label">Status:</span> <span class="value">${escapeHtml(auction.status.toUpperCase())}</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📝 Description</div>
+          <div style="font-size:13px; color:#cbd5e6; line-height:1.6;">${escapeHtml(pc.description || auction.description || '—')}</div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-close" id="modalCloseBtn" type="button">Close</button>
+          ${auction.status !== 'completed' ? (
+            isReserved
+              ? `<button class="btn-reserve" data-action="cancel" data-id="${auction.id}" style="background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.3);">❌ Cancel Reservation</button>`
+              : `<button class="btn-reserve" data-action="reserve" data-id="${auction.id}">📋 Reserve Auction · $25 Hold</button>`
+          ) : ''}
+        </div>
+      `;
+
+      $('productModal').classList.add('show');
+
+      // Wire up buttons
+      const closeBtn = $('modalCloseBtn');
+      if (closeBtn) closeBtn.addEventListener('click', closeProductModal);
+
+      body.querySelectorAll('[data-action="reserve"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          reserveAuction(btn.dataset.id);
+          closeProductModal();
+        });
+      });
+      body.querySelectorAll('[data-action="cancel"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          cancelReservation(btn.dataset.id);
+          closeProductModal();
+        });
+      });
+    }
+
+    function closeProductModal() {
+      $('productModal').classList.remove('show');
+      currentProductModal = null;
+    }
+
+    // ============================================================
+    // EVENTS
+    // ============================================================
+    function setupEvents() {
+      // Status tabs
+      document.querySelectorAll('.status-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentStatusFilter = this.dataset.filter;
+          renderAuctions();
+        });
+      });
+
+      // Type filter
+      document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentTypeFilter = this.dataset.type;
+          renderAuctions();
+        });
+      });
+
+      // Search (debounced)
+      let searchTimeout;
+      if ($('searchInput')) {
+        $('searchInput').addEventListener('input', function() {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => renderAuctions(), 200);
+        });
+      }
+
+      if ($('filterProduct')) $('filterProduct').addEventListener('change', renderAuctions);
+      if ($('filterLocation')) $('filterLocation').addEventListener('change', renderAuctions);
+
+      // Close product modal
+      if ($('closeProductModal')) $('closeProductModal').addEventListener('click', closeProductModal);
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) this.classList.remove('show');
+        });
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+      });
+
+      // Deposit
+      if ($('depositBtn')) {
+        $('depositBtn').addEventListener('click', () => {
+          const amt = prompt('Enter deposit amount ($):', '1000');
+          if (amt === null) return;
+          const v = parseFloat(amt);
+          if (isNaN(v) || v <= 0) { showToast('Invalid amount.', 'error'); return; }
+          BUYER.wallet.balance = (BUYER.wallet.balance || 0) + v;
+          saveBuyerState(BUYER);
+          renderWallet();
+          showToast('Deposited ' + money(v), 'success');
+        });
+      }
+
+      // Sign out
+      if ($('authBtn')) {
+        $('authBtn').addEventListener('click', () => {
+          if (confirm('Sign out?')) {
+            showToast('👋 Signed out', 'info');
+            window.location.href = 'signin.html';
+          }
+        });
+      }
+
+      // Sync
+      if ($('syncCloudBtn')) {
+        $('syncCloudBtn').addEventListener('click', () => {
+          showToast('☁️ Syncing...', 'info');
+          APP.auctions = loadAuctions();
+          BUYER = loadBuyerState();
+          if (!BUYER.reservations) BUYER.reservations = [];
+          renderAll();
+          setTimeout(() => showToast('✅ Sync complete!', 'success'), 800);
+        });
+      }
+
+      // Save
+      if ($('forceSaveBtn')) {
+        $('forceSaveBtn').addEventListener('click', () => {
+          localStorage.setItem(AUCTIONS_KEY, JSON.stringify(APP.auctions));
+          saveBuyerState(BUYER);
+          showToast('💾 Data saved locally!', 'success');
+        });
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      APP.auctions = loadAuctions();
+      BUYER = loadBuyerState();
+      if (!BUYER.reservations) BUYER.reservations = [];
+      renderAll();
+      setupEvents();
+      showToast('📅 Browse & reserve auctions for your bots', 'info');
+    });
+  </script>
+</body>
+</html>
