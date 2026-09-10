@@ -20,38 +20,10 @@
 
     .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
 
-    /* ===== 3D GEM LOGO ===== */
-    .gem-logo-corner {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 9999;
-      filter: drop-shadow(0 30px 50px rgba(0, 206, 209, 0.4));
-      transform-style: preserve-3d;
-      perspective: 1000px;
-      transform: scale(0.35);
-      transform-origin: top left;
-      pointer-events: none;
-    }
-    .gem-text {
-      font-size: 160px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      position: relative;
-      display: flex;
-      text-transform: uppercase;
-      line-height: 0.9;
-      font-family: 'Orbitron', sans-serif;
-      transform-style: preserve-3d;
-      gap: 2px;
-    }
-    .gem-letter {
-      display: inline-block;
-      position: relative;
-      transform-style: preserve-3d;
-      animation: letterFloat 6s ease-in-out infinite;
-      filter: brightness(1.2);
-    }
+    /* ===== 3D LOGO ===== */
+    .gem-logo-corner { position: fixed; top: 20px; left: 20px; z-index: 9999; filter: drop-shadow(0 30px 50px rgba(0,206,209,0.4)); transform-style: preserve-3d; perspective: 1000px; transform: scale(0.35); transform-origin: top left; pointer-events: none; }
+    .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
+    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
     .gem-letter:nth-child(1) { animation-delay: 0s; }
     .gem-letter:nth-child(2) { animation-delay: 0.2s; }
     .gem-letter:nth-child(3) { animation-delay: 0.4s; }
@@ -145,22 +117,30 @@
     .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
     /* Bots Grid */
-    .bots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 20px; }
+    .bots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; margin-top: 20px; }
     .bot-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.2); border-radius: 20px; padding: 24px; transition: all 0.3s; position: relative; }
     .bot-card:hover { transform: translateY(-4px); border-color: #00ced1; box-shadow: 0 12px 40px rgba(0,206,209,0.08); }
     .bot-card .bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .bot-card .bot-emoji { font-size: 32px; }
-    .bot-card .bot-name { font-size: 18px; font-weight: 700; }
+    .bot-card .bot-emoji { font-size: 36px; }
+    .bot-card .bot-name { font-size: 20px; font-weight: 700; }
+    .bot-card .bot-legacy { font-size: 11px; color: #FFD966; font-weight: 500; }
     .bot-card .bot-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
     .bot-card .bot-status.active { background: rgba(124,252,0,0.2); color: #7CFC00; }
     .bot-card .bot-status.paused { background: rgba(255,217,102,0.2); color: #FFD966; }
     .bot-card .bot-status.scanning { background: rgba(0,206,209,0.2); color: #00ced1; }
     .bot-card .bot-status.inactive { background: rgba(255,59,59,0.2); color: #ff3b3b; }
-    .bot-card .bot-strategy { font-size: 13px; color: #9ca3af; margin: 8px 0; }
+
+    .bot-card .bot-prompt { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; margin: 10px 0; font-size: 13px; color: #cbd5e6; border-left: 3px solid #00ced1; max-height: 100px; overflow-y: auto; }
+    .bot-card .bot-prompt .label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+    .bot-card .bot-rules { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+    .bot-card .bot-rules .rule-tag { font-size: 10px; padding: 2px 10px; border-radius: 12px; background: rgba(0,206,209,0.1); color: #00ced1; border: 1px solid rgba(0,206,209,0.15); }
+
     .bot-card .bot-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; }
     .bot-card .bot-stats .stat { text-align: center; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px; }
     .bot-card .bot-stats .stat .value { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; }
     .bot-card .bot-stats .stat .label { font-size: 10px; color: #9ca3af; }
+
     .bot-card .bot-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
     .bot-card .bot-actions button { padding: 6px 16px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #e5e7eb; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
     .bot-card .bot-actions button:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
@@ -172,8 +152,8 @@
     .bot-card .bot-actions .btn-pause:hover { background: rgba(255,217,102,0.08); }
     .bot-card .bot-actions .btn-resume { border-color: rgba(124,252,0,0.3); color: #7CFC00; }
     .bot-card .bot-actions .btn-resume:hover { background: rgba(124,252,0,0.08); }
-    .bot-card .bot-prompt { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; margin: 10px 0; font-size: 13px; color: #9ca3af; border-left: 3px solid #00ced1; }
-    .bot-card .bot-prompt .label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bot-card .bot-actions .btn-test { border-color: rgba(124,252,0,0.3); color: #7CFC00; }
+    .bot-card .bot-actions .btn-test:hover { background: rgba(124,252,0,0.08); }
 
     .empty-state { text-align: center; padding: 80px 20px; color: #9ca3af; grid-column: 1 / -1; }
     .empty-state .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
@@ -183,7 +163,7 @@
     /* Modal */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
     .modal.show { display: flex; }
-    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
     .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 4px 8px; border-radius: 4px; transition: color 0.2s; }
     .modal-close:hover { color: #00ced1; }
     .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
@@ -195,9 +175,12 @@
     .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.25); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; transition: border 0.3s; }
     .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 0 3px rgba(0,206,209,0.2); }
     .modal-field .hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
-    .modal-field .slider-row { display: flex; align-items: center; gap: 16px; }
-    .modal-field .slider-row input { flex: 1; }
-    .modal-field .slider-value { font-family: 'Orbitron', sans-serif; color: #00ced1; min-width: 60px; text-align: right; }
+
+    /* TIA Parsed Rules */
+    .parsed-rules { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin: 12px 0; border: 1px solid rgba(0,206,209,0.15); }
+    .parsed-rules .parsed-header { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #00ced1; font-weight: 600; margin-bottom: 8px; }
+    .parsed-rules .parsed-rule { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #e5e7eb; padding: 4px 0; }
+    .parsed-rules .parsed-rule .check { color: #7CFC00; }
 
     .modal-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
     .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 120px; transition: all 0.3s; }
@@ -261,7 +244,7 @@
         <a href="dashboard-buyer.html" id="navDashboard">📊 Dashboard</a>
         <a href="container-captain.html" id="navContainers">📦 Containers</a>
         <a href="bot-studio.html" class="active" id="navBots">🤖 Bot Studio</a>
-        <a href="auction-arena.html" id="navArena">🏆 Arena</a>
+        <a href="auctions-buyer.html" id="navAuctions">📅 Auctions</a>
         <a href="orders-buyer.html" id="navOrders">📋 Orders</a>
         <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
       </nav>
@@ -297,20 +280,20 @@
       <div class="modal-header"><h2 id="botModalTitle">🤖 Create Bot</h2></div>
       
       <div class="modal-grid">
-        <div class="modal-field full-width">
+        <!-- Bot Name & Emoji -->
+        <div class="modal-field">
           <label for="editBotName">Bot Name *</label>
-          <input type="text" id="editBotName" placeholder="e.g. Coffee Hunter">
+          <input type="text" id="editBotName" placeholder="e.g. Coffee King" value="Coffee King">
         </div>
-
         <div class="modal-field">
           <label for="editBotEmoji">Emoji</label>
           <select id="editBotEmoji">
+            <option value="☕">☕</option>
             <option value="🤖">🤖</option>
             <option value="🦅">🦅</option>
             <option value="🐺">🐺</option>
             <option value="🦁">🦁</option>
             <option value="🦈">🦈</option>
-            <option value="🦉">🦉</option>
             <option value="🐉">🐉</option>
             <option value="🚀">🚀</option>
             <option value="⚡">⚡</option>
@@ -320,6 +303,7 @@
           </select>
         </div>
 
+        <!-- Bot Status -->
         <div class="modal-field">
           <label for="editBotStatus">Status</label>
           <select id="editBotStatus">
@@ -330,97 +314,64 @@
           </select>
         </div>
 
+        <!-- Bot Legacy -->
+        <div class="modal-field">
+          <label for="editBotLegacy">Legacy Name</label>
+          <input type="text" id="editBotLegacy" placeholder="e.g. 100 Years of Coffee Experience" value="100 Years of Coffee Experience">
+        </div>
+
+        <!-- Strategy Prompt — Natural Language -->
         <div class="modal-field full-width">
-          <label for="editBotPrompt">Strategy Prompt</label>
-          <textarea id="editBotPrompt" rows="4" placeholder="Describe your bot's strategy in plain English..."></textarea>
-          <div class="hint">Example: "Bid up to $4.25/MT, sniping in the last 30 seconds. Target 500 MT containers."</div>
+          <label for="editBotPrompt">📝 Strategy Instructions (Natural Language)</label>
+          <textarea id="editBotPrompt" rows="8" placeholder="Describe your trading strategy in plain English...">I buy Arabica coffee from Colombia. Target price is $4.25/MT.
+
+RULES:
+1. HOT MARKET (10+ bidders): Bid early and aggressive. Counter-bid up to $4.50.
+2. COLD MARKET (3-9 bidders): Wait and snipe at $4.25.
+3. DEAD MARKET (1-2 bidders): Bid at minimum $4.00.
+4. If price drops below $4.00, BUY MORE.
+5. Seller rating must be > 4.5.
+6. Adapt to the situation — don't be rigid.</textarea>
+          <div class="hint">💡 Type your strategy like you're talking to a human trader. TIA will parse it into rules.</div>
         </div>
 
-        <div class="modal-field">
-          <label for="editTargetPrice">Target Price ($/MT)</label>
-          <div class="slider-row">
-            <input type="range" id="editTargetPrice" min="0" max="100" step="0.25" value="4.25">
-            <span class="slider-value" id="targetPriceVal">$4.25</span>
-          </div>
-        </div>
-
-        <div class="modal-field">
-          <label for="editMaxPrice">Max Price ($/MT)</label>
-          <div class="slider-row">
-            <input type="range" id="editMaxPrice" min="0" max="100" step="0.25" value="4.50">
-            <span class="slider-value" id="maxPriceVal">$4.50</span>
-          </div>
-        </div>
-
-        <div class="modal-field">
-          <label for="editTargetQuantity">Target Quantity (MT)</label>
-          <div class="slider-row">
-            <input type="range" id="editTargetQuantity" min="0" max="2000" step="10" value="500">
-            <span class="slider-value" id="targetQtyVal">500 MT</span>
-          </div>
-        </div>
-
-        <div class="modal-field">
-          <label for="editSnipingTiming">Sniping Timing</label>
-          <select id="editSnipingTiming">
-            <option value="immediate">Immediate</option>
-            <option value="mid">Mid-Auction</option>
-            <option value="last_30s" selected>Last 30 Seconds</option>
-            <option value="last_10s">Last 10 Seconds</option>
-            <option value="dynamic">Dynamic (AI)</option>
-          </select>
-        </div>
-
-        <div class="modal-field">
-          <label for="editAggression">Aggressiveness</label>
-          <div class="slider-row">
-            <input type="range" id="editAggression" min="0" max="100" step="1" value="70">
-            <span class="slider-value" id="aggressionVal">70%</span>
-          </div>
-        </div>
-
-        <div class="modal-field">
-          <label for="editBidIncrement">Bid Increment ($)</label>
-          <div class="slider-row">
-            <input type="range" id="editBidIncrement" min="0" max="10" step="0.05" value="0.10">
-            <span class="slider-value" id="bidIncrementVal">$0.10</span>
-          </div>
-        </div>
-
-        <div class="modal-field">
-          <label for="editMaxBids">Max Bids per Auction</label>
-          <div class="slider-row">
-            <input type="range" id="editMaxBids" min="1" max="20" step="1" value="3">
-            <span class="slider-value" id="maxBidsVal">3</span>
-          </div>
-        </div>
-
+        <!-- Parsed Rules (TIA Analysis) -->
         <div class="modal-field full-width">
-          <label>Strategy Priority</label>
-          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-              <input type="checkbox" checked value="price" style="width: 16px; height: 16px;"> Price
-            </label>
-            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-              <input type="checkbox" checked value="quantity" style="width: 16px; height: 16px;"> Quantity Fill
-            </label>
-            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-              <input type="checkbox" checked value="location" style="width: 16px; height: 16px;"> Location
-            </label>
-            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-              <input type="checkbox" value="quality" style="width: 16px; height: 16px;"> Quality
-            </label>
-            <label class="checkbox-item" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-              <input type="checkbox" value="seller_rating" style="width: 16px; height: 16px;"> Seller Rating
-            </label>
+          <div class="parsed-rules" id="parsedRules">
+            <div class="parsed-header">🧠 TIA Parsed Your Instructions:</div>
+            <div id="parsedRulesList">
+              <div class="parsed-rule"><span class="check">✅</span> Rule 1: HOT → Bid early, aggressive up to $4.50</div>
+              <div class="parsed-rule"><span class="check">✅</span> Rule 2: COLD → Wait, snipe at $4.25</div>
+              <div class="parsed-rule"><span class="check">✅</span> Rule 3: DEAD → Bid minimum $4.00</div>
+              <div class="parsed-rule"><span class="check">✅</span> Rule 4: Price drop < $4.00 → BUY MORE</div>
+              <div class="parsed-rule"><span class="check">✅</span> Rule 5: Seller rating > 4.5</div>
+              <div class="parsed-rule"><span class="check">✅</span> Rule 6: Adapt to the situation</div>
+            </div>
           </div>
-          <div class="hint">Uncheck priorities you don't care about</div>
         </div>
       </div>
 
       <div class="modal-actions">
         <button class="cancel-btn" id="cancelBotBtn" type="button">Cancel</button>
-        <button class="create-btn" id="saveBotBtn" type="button">Save Bot</button>
+        <button class="create-btn" id="saveBotBtn" type="button">💾 Save Bot</button>
+        <button class="create-btn" id="testBotBtn" type="button" style="background: linear-gradient(135deg, #FFD966, #f5a623); color: #000;">🧪 Test Bot</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Bot Modal -->
+  <div class="modal" id="testModal" role="dialog" aria-modal="true" aria-labelledby="testModalTitle">
+    <div class="modal-content" style="max-width: 700px;">
+      <button class="modal-close" id="closeTestModal" type="button" aria-label="Close modal">&times;</button>
+      <div class="modal-header"><h2 id="testModalTitle">🧪 Test Your Bot</h2></div>
+      
+      <div id="testResults">
+        <div style="text-align:center; padding:20px; color:#9ca3af;">Select an auction to test your bot's strategy</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelTestBtn" type="button">Close</button>
+        <button class="create-btn" id="runTestBtn" type="button" style="background: linear-gradient(135deg, #FFD966, #f5a623); color: #000;">🔄 Test Another</button>
       </div>
     </div>
   </div>
@@ -472,6 +423,73 @@
     // ============================================================
     let APP = loadData();
     let editingBotId = null;
+    let currentTestBot = null;
+
+    // ============================================================
+    // TIA PARSER — Extract Rules from Natural Language
+    // ============================================================
+    function parseInstructions(text) {
+      const rules = [];
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      
+      // Look for numbered rules or bullet points
+      let rulePatterns = [
+        /(\d+)[\.\)]\s*(.+)/,
+        /[•\-]\s*(.+)/,
+        /RULE\s*(\d+)[:]\s*(.+)/i
+      ];
+
+      for (const line of lines) {
+        let matched = false;
+        for (const pattern of rulePatterns) {
+          const match = line.match(pattern);
+          if (match) {
+            const ruleText = match[2] || match[1] || line;
+            if (ruleText.length > 10) {
+              rules.push(ruleText.trim());
+              matched = true;
+              break;
+            }
+          }
+        }
+        if (!matched && line.length > 15 && !line.match(/^(I|WE|MY|OUR|THE|THIS|THAT)/i)) {
+          rules.push(line);
+        }
+      }
+
+      // If no rules found, try to split by sentences
+      if (rules.length === 0) {
+        const sentences = text.split(/[.!?]\s+/).filter(s => s.length > 20);
+        for (const sentence of sentences) {
+          if (sentence.length > 20 && sentence.length < 200) {
+            rules.push(sentence.trim());
+          }
+        }
+      }
+
+      // If still no rules, use the whole text
+      if (rules.length === 0 && text.length > 20) {
+        rules.push(text.substring(0, 200) + (text.length > 200 ? '...' : ''));
+      }
+
+      return rules;
+    }
+
+    function updateParsedRules() {
+      const prompt = $('editBotPrompt')?.value || '';
+      const rules = parseInstructions(prompt);
+      const list = $('parsedRulesList');
+      if (!list) return;
+
+      if (rules.length === 0) {
+        list.innerHTML = `<div style="color:#6b7280; font-size:13px; padding:8px 0;">No rules detected. Write your strategy in plain English.</div>`;
+        return;
+      }
+
+      list.innerHTML = rules.map((rule, i) => `
+        <div class="parsed-rule"><span class="check">✅</span> Rule ${i+1}: ${escapeHtml(rule)}</div>
+      `).join('');
+    }
 
     // ============================================================
     // RENDER
@@ -504,6 +522,9 @@
           'inactive': '🔴 Inactive'
         };
         const statusLabel = statusLabels[statusClass] || '🟢 Active';
+        const rules = b.rules || [];
+        const rulesHtml = rules.slice(0, 3).map(r => `<span class="rule-tag">${escapeHtml(r.length > 40 ? r.substring(0, 40)+'...' : r)}</span>`).join('');
+        const legacy = b.legacy || b.name || '';
 
         return `
           <div class="bot-card" data-id="${b.id}">
@@ -511,19 +532,17 @@
               <div>
                 <div class="bot-emoji">${escapeHtml(b.emoji || '🤖')}</div>
                 <div class="bot-name">${escapeHtml(b.name || 'Unnamed Bot')}</div>
+                <div class="bot-legacy">${escapeHtml(legacy)}</div>
               </div>
               <span class="bot-status ${statusClass}">${statusLabel}</span>
             </div>
 
             <div class="bot-prompt">
-              <div class="label">🤖 Strategy Prompt</div>
-              <div>${escapeHtml(b.prompt || 'No strategy defined')}</div>
+              <div class="label">📝 Strategy</div>
+              <div>${escapeHtml(b.prompt ? b.prompt.substring(0, 120) + (b.prompt.length > 120 ? '...' : '') : 'No strategy defined')}</div>
             </div>
 
-            <div class="bot-strategy">
-              🎯 Target: $${(b.targetPrice || 4.25).toFixed(2)}/MT · Max: $${(b.maxPrice || 4.50).toFixed(2)}/MT
-              · ${b.targetQuantity || 500} MT · ${b.snipingTiming || 'last_30s'}
-            </div>
+            <div class="bot-rules">${rulesHtml}</div>
 
             <div class="bot-stats">
               <div class="stat">
@@ -542,6 +561,7 @@
 
             <div class="bot-actions">
               <button class="btn-edit" data-action="edit" data-id="${b.id}">✏️ Edit</button>
+              <button class="btn-test" data-action="test" data-id="${b.id}">🧪 Test</button>
               ${statusClass === 'active' ? `<button class="btn-pause" data-action="pause" data-id="${b.id}">⏸️ Pause</button>` : ''}
               ${statusClass === 'paused' || statusClass === 'inactive' ? `<button class="btn-resume" data-action="resume" data-id="${b.id}">▶️ Resume</button>` : ''}
               <button class="btn-delete" data-action="delete" data-id="${b.id}">🗑️ Delete</button>
@@ -550,9 +570,11 @@
         `;
       }).join('');
 
-      // Event listeners
       grid.querySelectorAll('[data-action="edit"]').forEach(btn => {
         btn.addEventListener('click', () => openBotModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="test"]').forEach(btn => {
+        btn.addEventListener('click', () => openTestModal(btn.dataset.id));
       });
       grid.querySelectorAll('[data-action="pause"]').forEach(btn => {
         btn.addEventListener('click', () => setBotStatus(btn.dataset.id, 'paused'));
@@ -566,17 +588,14 @@
     }
 
     function renderWallet() {
-      // Load wallet from buyer state
       let saved = localStorage.getItem('tradeaux_buyer_state');
       let wallet = { balance: 0 };
-      
       if (saved) {
         try {
           const data = JSON.parse(saved);
           if (data.wallet) wallet = data.wallet;
         } catch(e) {}
       }
-      
       if ($('walletAmount')) $('walletAmount').textContent = money(wallet.balance || 0);
       if ($('conversionCapacity')) {
         const fee = 25;
@@ -593,58 +612,32 @@
       const isEdit = !!botId;
       $('botModalTitle').textContent = isEdit ? '✏️ Edit Bot' : '🤖 Create Bot';
 
-      // Setup sliders
-      setupSliderListeners();
-
       if (isEdit) {
         const b = APP.bots.find(x => x.id === botId);
         if (b) {
           $('editBotName').value = b.name || '';
-          $('editBotEmoji').value = b.emoji || '🤖';
+          $('editBotEmoji').value = b.emoji || '☕';
           $('editBotStatus').value = b.status || 'active';
+          $('editBotLegacy').value = b.legacy || '';
           $('editBotPrompt').value = b.prompt || '';
-          $('editTargetPrice').value = b.targetPrice || 4.25;
-          $('targetPriceVal').textContent = '$' + (b.targetPrice || 4.25).toFixed(2);
-          $('editMaxPrice').value = b.maxPrice || 4.50;
-          $('maxPriceVal').textContent = '$' + (b.maxPrice || 4.50).toFixed(2);
-          $('editTargetQuantity').value = b.targetQuantity || 500;
-          $('targetQtyVal').textContent = (b.targetQuantity || 500) + ' MT';
-          $('editSnipingTiming').value = b.snipingTiming || 'last_30s';
-          $('editAggression').value = b.aggression || 70;
-          $('aggressionVal').textContent = (b.aggression || 70) + '%';
-          $('editBidIncrement').value = b.bidIncrement || 0.10;
-          $('bidIncrementVal').textContent = '$' + (b.bidIncrement || 0.10).toFixed(2);
-          $('editMaxBids').value = b.maxBids || 3;
-          $('maxBidsVal').textContent = b.maxBids || 3;
-          
-          // Priorities
-          document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
-            cb.checked = b.priorities ? b.priorities.includes(cb.value) : ['price', 'quantity'].includes(cb.value);
-          });
+          updateParsedRules();
         }
       } else {
-        // Reset form
-        $('editBotName').value = '';
-        $('editBotEmoji').value = '🤖';
+        // Default: Coffee King template
+        $('editBotName').value = 'Coffee King';
+        $('editBotEmoji').value = '☕';
         $('editBotStatus').value = 'active';
-        $('editBotPrompt').value = '';
-        $('editTargetPrice').value = 4.25;
-        $('targetPriceVal').textContent = '$4.25';
-        $('editMaxPrice').value = 4.50;
-        $('maxPriceVal').textContent = '$4.50';
-        $('editTargetQuantity').value = 500;
-        $('targetQtyVal').textContent = '500 MT';
-        $('editSnipingTiming').value = 'last_30s';
-        $('editAggression').value = 70;
-        $('aggressionVal').textContent = '70%';
-        $('editBidIncrement').value = 0.10;
-        $('bidIncrementVal').textContent = '$0.10';
-        $('editMaxBids').value = 3;
-        $('maxBidsVal').textContent = '3';
-        
-        document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
-          cb.checked = ['price', 'quantity'].includes(cb.value);
-        });
+        $('editBotLegacy').value = '100 Years of Coffee Experience';
+        $('editBotPrompt').value = `I buy Arabica coffee from Colombia. Target price is $4.25/MT.
+
+RULES:
+1. HOT MARKET (10+ bidders): Bid early and aggressive. Counter-bid up to $4.50.
+2. COLD MARKET (3-9 bidders): Wait and snipe at $4.25.
+3. DEAD MARKET (1-2 bidders): Bid at minimum $4.00.
+4. If price drops below $4.00, BUY MORE.
+5. Seller rating must be > 4.5.
+6. Adapt to the situation — don't be rigid.`;
+        updateParsedRules();
       }
 
       $('botModal').classList.add('show');
@@ -655,61 +648,24 @@
       editingBotId = null;
     }
 
-    function setupSliderListeners() {
-      const sliders = [
-        { id: 'editTargetPrice', valId: 'targetPriceVal', format: (v) => '$' + parseFloat(v).toFixed(2) },
-        { id: 'editMaxPrice', valId: 'maxPriceVal', format: (v) => '$' + parseFloat(v).toFixed(2) },
-        { id: 'editTargetQuantity', valId: 'targetQtyVal', format: (v) => parseFloat(v) + ' MT' },
-        { id: 'editAggression', valId: 'aggressionVal', format: (v) => parseFloat(v) + '%' },
-        { id: 'editBidIncrement', valId: 'bidIncrementVal', format: (v) => '$' + parseFloat(v).toFixed(2) },
-        { id: 'editMaxBids', valId: 'maxBidsVal', format: (v) => v }
-      ];
-
-      sliders.forEach(({ id, valId, format }) => {
-        const el = $(id);
-        const valEl = $(valId);
-        if (el && valEl) {
-          el.oninput = function() {
-            valEl.textContent = format(this.value);
-          };
-        }
-      });
-    }
-
     function saveBot() {
       const name = $('editBotName').value.trim();
       const emoji = $('editBotEmoji').value;
       const status = $('editBotStatus').value;
+      const legacy = $('editBotLegacy').value.trim();
       const prompt = $('editBotPrompt').value.trim();
-      const targetPrice = parseFloat($('editTargetPrice').value);
-      const maxPrice = parseFloat($('editMaxPrice').value);
-      const targetQuantity = parseFloat($('editTargetQuantity').value);
-      const snipingTiming = $('editSnipingTiming').value;
-      const aggression = parseInt($('editAggression').value);
-      const bidIncrement = parseFloat($('editBidIncrement').value);
-      const maxBids = parseInt($('editMaxBids').value);
-      
-      const priorities = Array.from(document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked'))
-        .map(cb => cb.value);
+      const rules = parseInstructions(prompt);
 
       if (!name) { showToast('Bot name is required', 'error'); return; }
-      if (!prompt) { showToast('Strategy prompt is required', 'error'); return; }
-      if (!targetPrice || targetPrice <= 0) { showToast('Enter a valid target price', 'error'); return; }
-      if (targetPrice > maxPrice) { showToast('Target price cannot exceed max price', 'error'); return; }
+      if (!prompt) { showToast('Strategy instructions are required', 'error'); return; }
 
       const botData = {
         name,
         emoji,
         status,
+        legacy,
         prompt,
-        targetPrice,
-        maxPrice,
-        targetQuantity,
-        snipingTiming,
-        aggression,
-        bidIncrement,
-        maxBids,
-        priorities,
+        rules,
         updatedAt: new Date().toISOString()
       };
 
@@ -754,6 +710,57 @@
     }
 
     // ============================================================
+    // TEST BOT
+    // ============================================================
+    function openTestModal(botId) {
+      const bot = APP.bots.find(b => b.id === botId);
+      if (!bot) { showToast('Bot not found', 'error'); return; }
+      currentTestBot = bot;
+
+      // Simulate test results
+      const rules = bot.rules || [];
+      const results = $('testResults');
+      if (results) {
+        let html = `
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 16px; font-weight: 700; color: #7CFC00;">🧪 Testing: ${escapeHtml(bot.name)}</div>
+            <div style="font-size: 13px; color: #9ca3af;">${escapeHtml(bot.legacy || bot.name)}</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 16px; margin-bottom: 12px; border-left: 3px solid #7CFC00;">
+            <div style="font-size: 13px; color: #e5e7eb;">📊 Test Auction: Coffee (100 MT, $4.25/MT, 8 bidders)</div>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">Market: COLD (3-9 bidders) → Strategy: Wait and snipe at $4.25</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px; font-size: 13px; color: #cbd5e6; max-height: 200px; overflow-y: auto;">
+            <div>⏱️ 0:00 Auction starts at $4.25/MT</div>
+            <div>⏱️ 1:00 Others bid $4.30 → Bot waits (sniping)</div>
+            <div>⏱️ 2:30 Price at $4.45 → Bot waits</div>
+            <div style="color: #00ced1;">⏱️ 2:50 Bot analyzes: 8 bidders → COLD market → Snipe at $4.25</div>
+            <div style="color: #7CFC00;">⏱️ 2:55 Bot bids $4.25! (last 10 seconds)</div>
+            <div style="color: #7CFC00; font-weight: 700;">🏆 Bot WINS at $4.25!</div>
+          </div>
+          <div style="margin-top: 12px; padding: 12px; background: rgba(124,252,0,0.05); border-radius: 10px; border: 1px solid rgba(124,252,0,0.2);">
+            <div style="font-size: 13px; color: #7CFC00;">✅ Bot would win this auction.</div>
+            <div style="font-size: 12px; color: #9ca3af;">${rules.length} rules applied. Strategy: Sniping at target price.</div>
+          </div>
+        `;
+        results.innerHTML = html;
+      }
+
+      $('testModal').classList.add('show');
+    }
+
+    function closeTestModal() {
+      $('testModal').classList.remove('show');
+      currentTestBot = null;
+    }
+
+    function runTestAgain() {
+      if (currentTestBot) {
+        openTestModal(currentTestBot.id);
+      }
+    }
+
+    // ============================================================
     // EVENTS
     // ============================================================
     function setupEvents() {
@@ -766,6 +773,33 @@
       if ($('closeBotModal')) $('closeBotModal').addEventListener('click', closeBotModal);
       if ($('cancelBotBtn')) $('cancelBotBtn').addEventListener('click', closeBotModal);
       if ($('saveBotBtn')) $('saveBotBtn').addEventListener('click', saveBot);
+
+      // Test modal
+      if ($('closeTestModal')) $('closeTestModal').addEventListener('click', closeTestModal);
+      if ($('cancelTestBtn')) $('cancelTestBtn').addEventListener('click', closeTestModal);
+      if ($('runTestBtn')) $('runTestBtn').addEventListener('click', runTestAgain);
+
+      // Parse instructions on input
+      if ($('editBotPrompt')) {
+        $('editBotPrompt').addEventListener('input', updateParsedRules);
+        $('editBotPrompt').addEventListener('change', updateParsedRules);
+      }
+
+      // Test bot from modal
+      if ($('testBotBtn')) {
+        $('testBotBtn').addEventListener('click', () => {
+          const name = $('editBotName').value.trim();
+          if (!name) { showToast('Please name your bot first', 'error'); return; }
+          const prompt = $('editBotPrompt').value.trim();
+          if (!prompt) { showToast('Please enter strategy instructions', 'error'); return; }
+          // Save first then test
+          saveBot();
+          setTimeout(() => {
+            const bot = APP.bots.find(b => b.name === name);
+            if (bot) openTestModal(bot.id);
+          }, 300);
+        });
+      }
 
       // Close modals on backdrop click
       document.querySelectorAll('.modal').forEach(modal => {
@@ -818,17 +852,14 @@
           if (amt === null) return;
           const v = parseFloat(amt);
           if (isNaN(v) || v <= 0) { showToast('Invalid amount.', 'error'); return; }
-          
           let saved = localStorage.getItem('tradeaux_buyer_state');
           let data = { wallet: { balance: 0 } };
-          
           if (saved) {
             try {
               data = JSON.parse(saved);
               if (!data.wallet) data.wallet = { balance: 0 };
             } catch(e) {}
           }
-          
           data.wallet.balance = (data.wallet.balance || 0) + v;
           localStorage.setItem('tradeaux_buyer_state', JSON.stringify(data));
           renderWallet();
@@ -842,45 +873,61 @@
     // ============================================================
     document.addEventListener('DOMContentLoaded', () => {
       if (!APP.bots) APP.bots = [];
-      
+
       // Add sample bot if none exist
       if (APP.bots.length === 0) {
         APP.bots.push({
           id: uuid(),
-          name: 'Coffee Hunter',
-          emoji: '🦅',
+          name: 'Coffee King',
+          emoji: '☕',
           status: 'active',
-          prompt: 'Bid up to $4.25/MT, sniping in the last 30 seconds. Target 500 MT containers.',
-          targetPrice: 4.25,
-          maxPrice: 4.50,
-          targetQuantity: 500,
-          snipingTiming: 'last_30s',
-          aggression: 70,
-          bidIncrement: 0.10,
-          maxBids: 3,
-          priorities: ['price', 'quantity'],
-          bidsPlaced: 12,
-          winRate: 80,
-          profit: 450,
+          legacy: '100 Years of Coffee Experience',
+          prompt: `I buy Arabica coffee from Colombia. Target price is $4.25/MT.
+
+RULES:
+1. HOT MARKET (10+ bidders): Bid early and aggressive. Counter-bid up to $4.50.
+2. COLD MARKET (3-9 bidders): Wait and snipe at $4.25.
+3. DEAD MARKET (1-2 bidders): Bid at minimum $4.00.
+4. If price drops below $4.00, BUY MORE.
+5. Seller rating must be > 4.5.
+6. Adapt to the situation — don't be rigid.`,
+          rules: [
+            'HOT → Bid early, aggressive up to $4.50',
+            'COLD → Wait, snipe at $4.25',
+            'DEAD → Bid minimum $4.00',
+            'Price drop < $4.00 → BUY MORE',
+            'Seller rating > 4.5',
+            'Adapt to the situation'
+          ],
+          bidsPlaced: 47,
+          winRate: 83,
+          profit: 12500,
           createdAt: new Date().toISOString()
         });
         APP.bots.push({
           id: uuid(),
-          name: 'Grain Scout',
-          emoji: '🐺',
+          name: 'Sugar Baron',
+          emoji: '🍬',
           status: 'paused',
-          prompt: 'Conservative bidding on wheat and corn. Wait for market dips.',
-          targetPrice: 3.50,
-          maxPrice: 3.80,
-          targetQuantity: 1000,
-          snipingTiming: 'mid',
-          aggression: 30,
-          bidIncrement: 0.05,
-          maxBids: 2,
-          priorities: ['price', 'quantity', 'seller_rating'],
-          bidsPlaced: 5,
-          winRate: 45,
-          profit: 120,
+          legacy: '20 Years of Sugar Trading',
+          prompt: `I buy sugar from Brazil. Target price is $0.18/lb.
+
+RULES:
+1. Always buy in bulk (500+ MT)
+2. Seller must have 4.5+ rating
+3. Only buy from Santos port
+4. Bid aggressively up to $0.20/lb
+5. If price goes above $0.20, wait for next auction`,
+          rules: [
+            'Buy in bulk (500+ MT)',
+            'Seller rating > 4.5',
+            'Santos port only',
+            'Aggressive up to $0.20/lb',
+            'Wait if price > $0.20'
+          ],
+          bidsPlaced: 18,
+          winRate: 72,
+          profit: 4500,
           createdAt: new Date().toISOString()
         });
         saveData(APP);
