@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Buyer Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; }
+
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 200px 24px 60px; position: relative; z-index: 2; }
+
+    /* ===== 3D LOGO ===== */
+    .gem-logo-corner { position: fixed; top: 20px; left: 20px; z-index: 9999; filter: drop-shadow(0 30px 50px rgba(0,206,209,0.4)); transform-style: preserve-3d; perspective: 1000px; transform: scale(0.35); transform-origin: top left; pointer-events: none; }
+    .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
+    .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
+    .gem-letter:nth-child(1) { animation-delay: 0s; }
+    .gem-letter:nth-child(2) { animation-delay: 0.2s; }
+    .gem-letter:nth-child(3) { animation-delay: 0.4s; }
+    .gem-letter:nth-child(4) { animation-delay: 0.6s; }
+    .gem-letter:nth-child(5) { animation-delay: 0.8s; }
+    .gem-letter:nth-child(6) { animation-delay: 1.0s; }
+    .gem-letter:nth-child(7) { animation-delay: 1.2s; }
+    .gem-letter:nth-child(8) { animation-delay: 1.4s; }
+    @keyframes letterFloat { 0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(2deg); } 50% { transform: translateY(-8px) rotateX(5deg) rotateY(5deg); } }
+    .gem-letter:nth-child(1)::before, .gem-letter:nth-child(4)::before, .gem-letter:nth-child(7)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #001a4a 0%, #002a6e 15%, #0040a0 30%, #0055cc 45%, #0066ff 60%, #0055cc 75%, #002a6e 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0,102,255,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
+    .gem-letter:nth-child(2)::before, .gem-letter:nth-child(5)::before, .gem-letter:nth-child(8)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #004d1a 0%, #006622 15%, #009933 30%, #00b33c 45%, #00cc44 60%, #00b33c 75%, #006622 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(0,204,68,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
+    .gem-letter:nth-child(3)::before, .gem-letter:nth-child(6)::before { content: attr(data-letter); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(145deg, #2a0000 0%, #4a0000 15%, #7a0b0b 30%, #a61a1a 45%, #d92b2b 60%, #a61a1a 75%, #4a0000 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 18px rgba(217,43,43,0.35), 2px 2px 4px rgba(0,0,0,0.3); transform: translateZ(2px); }
+    .gem-letter .edge-top { position: absolute; top: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-right { position: absolute; top: 0; right: -2px; width: 10%; height: 100%; background: linear-gradient(270deg, rgba(255,255,255,0.5) 0%, transparent 100%); mix-blend-mode: overlay; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-bottom { position: absolute; bottom: -2px; left: 0; width: 100%; height: 20%; background: linear-gradient(0deg, rgba(50,0,0,0.4) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .gem-letter .edge-left { position: absolute; top: 0; left: -2px; width: 10%; height: 100%; background: linear-gradient(90deg, rgba(50,0,0,0.3) 0%, transparent 100%); mix-blend-mode: multiply; pointer-events: none; z-index: 5; }
+    .light-source { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, rgba(0,206,209,0.1) 30%, transparent 70%); animation: rotateLight 15s linear infinite; pointer-events: none; z-index: 10; mix-blend-mode: overlay; }
+    @keyframes rotateLight { 0% { transform: rotate(0deg) scale(1); opacity: 0.3; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; } 100% { transform: rotate(360deg) scale(1); opacity: 0.3; } }
+    .sparkle { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; box-shadow: 0 0 15px 3px white, 0 0 25px 6px #00ced1; animation: sparkleFlash 4s ease-in-out infinite; opacity: 0; z-index: 20; pointer-events: none; }
+    @keyframes sparkleFlash { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1.2); } 20% { opacity: 0.6; transform: scale(0.9); } 30% { opacity: 1; transform: scale(1.1); } 40% { opacity: 0; transform: scale(0.5); } 100% { opacity: 0; transform: scale(0.5); } }
+    .sparkle-1 { top: 15%; left: 12%; animation-delay: 0s; }
+    .sparkle-2 { top: 25%; left: 28%; animation-delay: 0.7s; }
+    .sparkle-3 { top: 70%; left: 22%; animation-delay: 1.4s; }
+    .sparkle-4 { top: 35%; left: 48%; animation-delay: 2.1s; }
+    .sparkle-5 { top: 80%; left: 42%; animation-delay: 2.8s; }
+    .sparkle-6 { top: 20%; left: 68%; animation-delay: 3.5s; }
+    .sparkle-7 { top: 55%; left: 78%; animation-delay: 4.2s; }
+    .sparkle-8 { top: 75%; left: 88%; animation-delay: 4.9s; }
+    .sparkle-9 { top: 45%; left: 15%; animation-delay: 5.6s; }
+    .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
+    .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
+
+    /* Navigation */
+    .header { display: flex; justify-content: flex-end; align-items: center; padding: 0 0 10px; flex-wrap: wrap; gap: 16px; }
+    .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .nav a:hover, .nav button:hover { border-color: #00ced1; transform: translateY(-2px); }
+    .nav a.active { border-color: #7CFC00; background: rgba(124,252,0,0.12); color: #7CFC00; }
+    .nav a.sign-out { color: #ff3b3b; border-color: rgba(255,59,59,0.3); }
+    .nav a.sign-out:hover { border-color: #ff3b3b; background: rgba(255,59,59,0.1); }
+
+    .wallet-section { display: flex; align-items: center; gap: 16px; background: rgba(0,206,209,0.1); padding: 8px 20px; border-radius: 40px; border: 1px solid rgba(0,206,209,0.3); flex-wrap: wrap; }
+    .wallet-balance { display: flex; align-items: baseline; gap: 6px; }
+    .wallet-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; }
+    .wallet-amount { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 700; color: #00ced1; }
+    .wallet-sub { font-size: 11px; color: #7CFC00; }
+    .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+    .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
+    .btn-neon { background: #0a1228; border: 1px solid rgba(124,252,0,0.3); border-radius: 10px; padding: 10px 24px; color: #7CFC00; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-neon:hover { background: rgba(124,252,0,0.08); border-color: #7CFC00; box-shadow: 0 0 20px rgba(124,252,0,0.15); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(0,206,209,0.15); margin-bottom: 24px; }
+    .page-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: #00ced1; }
+    .page-title span { background: linear-gradient(135deg, #7CFC00, #00ced1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Status Tabs */
+    .status-tabs { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .status-tab { padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #9ca3af; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; }
+    .status-tab:hover { border-color: #00ced1; color: #e5e7eb; }
+    .status-tab.active { background: rgba(0,206,209,0.1); border-color: #00ced1; color: #00ced1; }
+    .status-tab .count { background: rgba(0,206,209,0.1); padding: 1px 8px; border-radius: 12px; font-size: 10px; margin-left: 6px; color: #9ca3af; }
+    .status-tab.active .count { background: rgba(0,206,209,0.2); color: #00ced1; }
+
+    /* Search */
+    .search-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+    .search-bar input { flex: 1; min-width: 200px; padding: 10px 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,206,209,0.2); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 14px; }
+    .search-bar input:focus { outline: none; border-color: #00ced1; }
+    .search-bar input::placeholder { color: #6b7280; }
+    .search-bar .results-count { font-size: 13px; color: #9ca3af; margin-left: auto; }
+
+    /* Orders Grid */
+    .orders-grid { display: grid; gap: 20px; }
+    .order-card {
+      background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95));
+      border: 1px solid rgba(0,206,209,0.15); border-radius: 20px; padding: 24px;
+      transition: all 0.3s;
+    }
+    .order-card:hover { border-color: #00ced1; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+
+    .order-card .top-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .order-card .order-number { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #FFD966; letter-spacing: 0.5px; }
+    .order-card .type-badge { font-size: 10px; padding: 3px 12px; border-radius: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .order-card .type-badge.sample { background: rgba(0,206,209,0.2); color: #00ced1; }
+    .order-card .type-badge.regular { background: rgba(124,252,0,0.15); color: #7CFC00; }
+    .order-card .type-badge.pallet { background: rgba(255,217,102,0.15); color: #FFD966; }
+    .order-card .status-badge { font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .order-card .status-badge.pending_acceptance { background: rgba(255,217,102,0.15); color: #FFD966; }
+    .order-card .status-badge.accepted { background: rgba(0,206,209,0.15); color: #00ced1; }
+    .order-card .status-badge.shipped { background: rgba(124,252,0,0.15); color: #7CFC00; }
+    .order-card .status-badge.delivered { background: rgba(0,206,209,0.15); color: #00ced1; }
+    .order-card .status-badge.completed { background: rgba(124,252,0,0.15); color: #7CFC00; }
+    .order-card .status-badge.cancelled { background: rgba(255,59,59,0.15); color: #ff3b3b; }
+
+    .order-card .product-name { font-size: 22px; font-weight: 700; color: #e5e7eb; margin-bottom: 4px; }
+    .order-card .product-variety { font-size: 14px; color: #9ca3af; margin-bottom: 12px; }
+
+    .order-card .seller-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: #9ca3af; flex-wrap: wrap; }
+    .order-card .seller-row .rating { color: #FFD966; }
+
+    .order-card .order-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0; }
+    .order-card .order-details-grid .detail-item { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; text-align: center; border: 1px solid rgba(0,206,209,0.1); }
+    .order-card .order-details-grid .detail-item .label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .order-card .order-details-grid .detail-item .value { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 700; color: #00ced1; }
+    .order-card .order-details-grid .detail-item .value.price { color: #7CFC00; }
+    .order-card .order-details-grid .detail-item .value.warning { color: #FFD966; }
+
+    .order-card .shipment-status { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 14px 16px; margin: 12px 0; border-left: 3px solid #00ced1; }
+    .order-card .shipment-status .shipment-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 4px 0; flex-wrap: wrap; gap: 8px; }
+    .order-card .shipment-status .shipment-row .label { color: #6b7280; }
+    .order-card .shipment-status .shipment-row .value { color: #e5e7eb; font-family: 'Orbitron', sans-serif; font-size: 12px; }
+
+    .order-card .actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+    .order-card .actions button { padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); background: rgba(0,0,0,0.3); color: #e5e7eb; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; }
+    .order-card .actions button:hover { border-color: #00ced1; background: rgba(0,206,209,0.05); }
+    .order-card .actions .btn-track { border-color: rgba(124,252,0,0.3); color: #7CFC00; }
+    .order-card .actions .btn-track:hover { background: rgba(124,252,0,0.08); }
+    .order-card .actions .btn-track:disabled { opacity: 0.4; cursor: not-allowed; }
+    .order-card .actions .btn-view { border-color: rgba(0,206,209,0.3); color: #00ced1; }
+    .order-card .actions .btn-view:hover { background: rgba(0,206,209,0.08); }
+    .order-card .actions .btn-contact { border-color: rgba(255,217,102,0.3); color: #FFD966; }
+    .order-card .actions .btn-contact:hover { background: rgba(255,217,102,0.08); }
+    .order-card .actions .btn-complete { border-color: rgba(124,252,0,0.3); color: #7CFC00; }
+    .order-card .actions .btn-complete:hover { background: rgba(124,252,0,0.08); }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; grid-column: 1 / -1; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty-state h3 { font-size: 22px; color: #e5e7eb; margin-bottom: 8px; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 4px 8px; border-radius: 4px; transition: color 0.2s; }
+    .modal-close:hover { color: #00ced1; }
+
+    .modal-header { border-bottom: 1px solid rgba(0,206,209,0.3); padding-bottom: 16px; margin-bottom: 20px; }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; color: #00ced1; }
+    .modal-header .sub { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+
+    .modal-section { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(0,206,209,0.1); }
+    .modal-section .section-title { font-size: 11px; color: #00ced1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600; }
+    .modal-section .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font-size: 13px; }
+    .modal-section .grid-2 .label { color: #6b7280; }
+    .modal-section .grid-2 .value { color: #e5e7eb; }
+    .modal-section .grid-2 .value.mono { font-family: 'Orbitron', sans-serif; color: #00ced1; font-size: 13px; }
+
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .modal-actions button { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-size: 14px; min-width: 140px; transition: all 0.3s; }
+    .modal-actions .btn-close { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e5e7eb; }
+    .modal-actions .btn-close:hover { background: rgba(255,255,255,0.2); }
+    .modal-actions .btn-track { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
+    .modal-actions .btn-track:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
+
+    /* Tracking Sites */
+    .tracking-sites { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .tracking-sites a { padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(0,206,209,0.2); color: #00ced1; text-decoration: none; font-size: 12px; transition: all 0.3s; }
+    .tracking-sites a:hover { background: rgba(0,206,209,0.1); border-color: #00ced1; }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 20000; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.warning { border-color: #FFD966; color: #FFD966; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
+
+    @media (max-width: 900px) { .order-card .actions { flex-direction: column; align-items: stretch; } .order-card .actions button { width: 100%; } }
+    @media (max-width: 700px) { .page-title { font-size: 22px; } .header { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .gem-logo-corner { transform: scale(0.22); } .container { padding-top: 140px; } .search-bar { flex-direction: column; align-items: stretch; } .search-bar .results-count { margin-left: 0; } .modal-content { padding: 24px; } .modal-section .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
+  </div>
+
+  <!-- 3D Logo -->
+  <div class="gem-logo-corner" aria-hidden="true" role="presentation">
+    <div class="gem-text">
+      <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="R">R<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="D">D<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="E">E<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="A">A<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="U">U<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+      <span class="gem-letter" data-letter="X">X<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
+    </div>
+    <div class="light-source"></div>
+    <div class="sparkle sparkle-1"></div><div class="sparkle sparkle-2"></div><div class="sparkle sparkle-3"></div><div class="sparkle sparkle-4"></div>
+    <div class="sparkle sparkle-5"></div><div class="sparkle sparkle-6"></div><div class="sparkle sparkle-7"></div><div class="sparkle sparkle-8"></div>
+    <div class="sparkle sparkle-9"></div><div class="sparkle sparkle-10"></div>
+    <div class="depth-shadow"></div>
+  </div>
+
+  <main class="container" role="main">
+    <!-- Navigation -->
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="wallet-section">
+          <div class="wallet-balance">
+            <span class="wallet-label">💰 BALANCE</span>
+            <span class="wallet-amount" id="walletAmount">$0.00</span>
+            <span class="wallet-sub" id="conversionCapacity">0 reserved</span>
+          </div>
+          <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
+          <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px;" type="button">☁️ Sync</button>
+          <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
+        </div>
+        <a href="dashboard-buyer.html" id="navDashboard">📊 Dashboard</a>
+        <a href="container-captain.html" id="navContainers">📦 Containers</a>
+        <a href="bot-studio.html" id="navBots">🤖 Bot Studio</a>
+        <a href="auctions-buyer.html" id="navAuctions">📅 Auctions</a>
+        <a href="orders-buyer.html" class="active" id="navOrders">📋 Orders</a>
+        <button id="authBtn" class="sign-out" type="button">🚪 Sign Out</button>
+      </nav>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">📋 <span>Orders</span></div>
+      <div style="font-size:13px; color:#9ca3af;">Track your won contracts and shipments</div>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="status-tabs" id="statusTabs">
+      <button class="status-tab active" data-filter="all">📊 All <span class="count" id="countAll">0</span></button>
+      <button class="status-tab" data-filter="pending_acceptance">🟡 Pending <span class="count" id="countPending">0</span></button>
+      <button class="status-tab" data-filter="accepted">🔵 Accepted <span class="count" id="countAccepted">0</span></button>
+      <button class="status-tab" data-filter="shipped">🚚 Shipped <span class="count" id="countShipped">0</span></button>
+      <button class="status-tab" data-filter="delivered">📦 Delivered <span class="count" id="countDelivered">0</span></button>
+      <button class="status-tab" data-filter="completed">✅ Completed <span class="count" id="countCompleted">0</span></button>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search by product, seller, order #, tracking #..." autocomplete="off">
+      <span class="results-count" id="resultsCount">Showing 0 orders</span>
+    </div>
+
+    <!-- Orders Grid -->
+    <div class="orders-grid" id="ordersGrid">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>Loading orders...</h3>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>TRADEAUX © 2026 • Global Commodity Exchange • Track your shipments and contracts</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Order Detail Modal -->
+  <div class="modal" id="orderModal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button class="modal-close" id="closeOrderModal" type="button" aria-label="Close modal">&times;</button>
+      <div id="orderModalBody">
+        <!-- Content injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    const STORAGE_KEY = 'tradeaux_buyer_state';
+    const ORDERS_KEY = 'tradeaux_buyer_orders';
+    const $ = id => document.getElementById(id);
+    const money = n => (n === undefined || n === null || isNaN(n)) ? '$0.00' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function showToast(msg, type='info') {
+      const t = $('toast'); if (!t) return;
+      t.textContent = msg.length > 60 ? msg.substring(0,57)+'...' : msg;
+      t.className = 'toast visible ' + type;
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.className = 'toast'; }, 5000);
+    }
+
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let currentStatusFilter = 'all';
+    let currentOrderId = null;
+
+    function loadBuyerState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : { wallet: { balance: 0 }, reservations: [] };
+      } catch(e) { return { wallet: { balance: 0 }, reservations: [] }; }
+    }
+
+    let BUYER = loadBuyerState();
+
+    // ============================================================
+    // DEMO ORDERS
+    // ============================================================
+    function getDemoOrders() {
+      const now = new Date();
+      const daysAgo = (n) => new Date(now.getTime() - 86400000 * n).toISOString();
+      const daysFromNow = (n) => new Date(now.getTime() + 86400000 * n).toISOString();
+
+      return [
+        {
+          id: 'ord-1',
+          order_number: 'CON-2026-001',
+          auction_number: 'AUC-2026-003',
+          commodity: 'Coffee',
+          variety: 'Robusta',
+          quantity_kg: 50000,
+          price_per_unit: 4.50,
+          price_unit: 'MT',
+          total_value: 225000,
+          auction_type: 'regular',
+          seller: 'Davao Coffee Co-op',
+          seller_rating: 4.8,
+          seller_verified: true,
+          location: 'Davao',
+          fob_port: 'Davao Port',
+          status: 'shipped',
+          payment_status: 'paid',
+          created_at: daysAgo(5),
+          accepted_at: daysAgo(4),
+          shipped_at: daysAgo(2),
+          delivered_at: null,
+          completed_at: null,
+          tracking_number: 'MAEU9876543',
+          carrier: 'Maersk Line',
+          vessel: 'Emma Maersk',
+          origin_port: 'Davao',
+          destination_port: 'Vancouver',
+          etd: daysAgo(2).split('T')[0],
+          eta: daysFromNow(12).split('T')[0],
+          bol_status: 'uploaded',
+          container_id: 'cont-1',
+          notes: 'Standard commercial lot. Refrigerated container.'
+        },
+        {
+          id: 'ord-2',
+          order_number: 'CON-2026-002',
+          auction_number: 'AUC-2026-005',
+          commodity: 'Banana Chips',
+          variety: 'Premium',
+          quantity_kg: 2500,
+          price_per_unit: 550,
+          price_unit: 'pallet',
+          total_value: 2750,
+          auction_type: 'pallet',
+          seller: 'Santos Foods',
+          seller_rating: 4.2,
+          seller_verified: true,
+          location: 'Santos',
+          fob_port: 'Santos Port',
+          status: 'accepted',
+          payment_status: 'paid',
+          created_at: daysAgo(3),
+          accepted_at: daysAgo(2),
+          shipped_at: null,
+          delivered_at: null,
+          completed_at: null,
+          tracking_number: '',
+          carrier: '',
+          vessel: '',
+          origin_port: 'Santos',
+          destination_port: 'Rotterdam',
+          etd: '',
+          eta: '',
+          bol_status: 'pending',
+          container_id: 'cont-2',
+          notes: 'Warehouse clearance pallets. Awaiting shipping details.'
+        },
+        {
+          id: 'ord-3',
+          order_number: 'CON-2026-003',
+          auction_number: 'AUC-2026-001',
+          commodity: 'Coconut Oil',
+          variety: 'Virgin',
+          quantity_kg: 500,
+          price_per_unit: 4.25,
+          price_unit: 'kg',
+          total_value: 2125,
+          auction_type: 'sample',
+          seller: 'Matale Coconut Co-op',
+          seller_rating: 4.9,
+          seller_verified: true,
+          location: 'Colombo',
+          fob_port: 'Colombo Port',
+          status: 'delivered',
+          payment_status: 'paid',
+          created_at: daysAgo(15),
+          accepted_at: daysAgo(14),
+          shipped_at: daysAgo(10),
+          delivered_at: daysAgo(3),
+          completed_at: null,
+          tracking_number: 'DHL123456789',
+          carrier: 'DHL Express',
+          vessel: 'Air Freight',
+          origin_port: 'Colombo',
+          destination_port: 'Vancouver',
+          etd: daysAgo(10).split('T')[0],
+          eta: daysAgo(3).split('T')[0],
+          bol_status: 'uploaded',
+          container_id: '',
+          notes: 'Sample shipment. Quality testing batch.'
+        },
+        {
+          id: 'ord-4',
+          order_number: 'CON-2026-004',
+          auction_number: 'AUC-2026-004',
+          commodity: 'Tea',
+          variety: 'Black CTC',
+          quantity_kg: 100000,
+          price_per_unit: 3.20,
+          price_unit: 'MT',
+          total_value: 320000,
+          auction_type: 'regular',
+          seller: 'Kenya Tea Co-op',
+          seller_rating: 4.5,
+          seller_verified: true,
+          location: 'Mombasa',
+          fob_port: 'Mombasa Port',
+          status: 'pending_acceptance',
+          payment_status: 'pending',
+          created_at: daysAgo(1),
+          accepted_at: null,
+          shipped_at: null,
+          delivered_at: null,
+          completed_at: null,
+          tracking_number: '',
+          carrier: '',
+          vessel: '',
+          origin_port: 'Mombasa',
+          destination_port: 'Hamburg',
+          etd: '',
+          eta: '',
+          bol_status: 'pending',
+          container_id: 'cont-3',
+          notes: 'Awaiting contract acceptance.'
+        }
+      ];
+    }
+
+    function loadOrders() {
+      try {
+        const raw = localStorage.getItem(ORDERS_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && data.length > 0) return data;
+        }
+      } catch(e) {}
+      const demo = getDemoOrders();
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(demo));
+      return demo;
+    }
+
+    let APP = { orders: loadOrders() };
+
+    function saveOrders() {
+      try {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(APP.orders));
+      } catch(e) {}
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderAll() {
+      renderOrders();
+      renderWallet();
+      updateCounts();
+    }
+
+    function renderWallet() {
+      if ($('walletAmount')) $('walletAmount').textContent = money(BUYER.wallet.balance || 0);
+      if ($('conversionCapacity')) {
+        const reserved = (BUYER.reservations || []).length;
+        $('conversionCapacity').textContent = reserved + ' reserved';
+      }
+    }
+
+    function renderOrders() {
+      const grid = $('ordersGrid');
+      if (!grid) return;
+
+      let orders = APP.orders || [];
+
+      // Filter by status
+      if (currentStatusFilter !== 'all') {
+        orders = orders.filter(o => o.status === currentStatusFilter);
+      }
+
+      // Search
+      const searchTerm = $('searchInput')?.value?.toLowerCase() || '';
+      if (searchTerm) {
+        orders = orders.filter(o =>
+          (o.commodity || '').toLowerCase().includes(searchTerm) ||
+          (o.variety || '').toLowerCase().includes(searchTerm) ||
+          (o.seller || '').toLowerCase().includes(searchTerm) ||
+          (o.order_number || '').toLowerCase().includes(searchTerm) ||
+          (o.tracking_number || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      if ($('resultsCount')) {
+        $('resultsCount').textContent = `Showing ${orders.length} order${orders.length !== 1 ? 's' : ''}`;
+      }
+
+      if (orders.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No orders found</h3>
+            <p>Orders will appear here once you win auctions.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = orders.map(o => {
+        const statusLabels = {
+          pending_acceptance: '🟡 Pending Acceptance',
+          accepted: '🔵 Accepted',
+          shipped: '🚚 Shipped',
+          delivered: '📦 Delivered',
+          completed: '✅ Completed',
+          cancelled: '❌ Cancelled'
+        };
+
+        // Quantity display
+        let qtyStr = '';
+        if (o.price_unit === 'MT') {
+          qtyStr = ((o.quantity_kg || 0) / 1000).toLocaleString() + ' MT';
+        } else if (o.price_unit === 'pallet') {
+          qtyStr = (o.quantity_kg / (o.price_per_unit || 550) * 550 / 500).toFixed(0) + ' pallets';
+        } else {
+          qtyStr = (o.quantity_kg || 0).toLocaleString() + 'kg';
+        }
+
+        // Shipment status section
+        let shipmentHtml = '';
+        if (o.status === 'shipped' || o.status === 'delivered' || o.tracking_number) {
+          shipmentHtml = `
+            <div class="shipment-status">
+              <div class="shipment-row"><span class="label">🚢 Tracking:</span><span class="value">${escapeHtml(o.tracking_number || 'Pending')}</span></div>
+              <div class="shipment-row"><span class="label">📦 Carrier:</span><span class="value">${escapeHtml(o.carrier || 'Pending')}</span></div>
+              <div class="shipment-row"><span class="label">🚢 Vessel:</span><span class="value">${escapeHtml(o.vessel || 'Pending')}</span></div>
+              <div class="shipment-row"><span class="label">📅 ETD:</span><span class="value">${escapeHtml(o.etd || 'Pending')}</span></div>
+              <div class="shipment-row"><span class="label">📅 ETA:</span><span class="value">${escapeHtml(o.eta || 'Pending')}</span></div>
+              <div class="shipment-row"><span class="label">📄 BOL:</span><span class="value">${o.bol_status === 'uploaded' ? '✅ Uploaded' : '⏳ Pending'}</span></div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="order-card" data-id="${o.id}">
+            <div class="top-row">
+              <span class="order-number">${escapeHtml(o.order_number)}</span>
+              <span class="type-badge ${o.auction_type}">${o.auction_type.toUpperCase()}</span>
+              <span class="status-badge ${o.status}">${statusLabels[o.status] || o.status}</span>
+            </div>
+
+            <div class="product-name">${escapeHtml(o.commodity)} ${o.variety ? '— ' + escapeHtml(o.variety) : ''}</div>
+            <div class="product-variety">Auction: ${escapeHtml(o.auction_number || '—')}</div>
+
+            <div class="seller-row">
+              <span>👤 ${escapeHtml(o.seller)}</span>
+              <span class="rating">⭐ ${(o.seller_rating || 4.5).toFixed(1)}</span>
+              ${o.seller_verified ? '<span style="color:#7CFC00;">✅ Verified</span>' : ''}
+              <span>📍 ${escapeHtml(o.location)}</span>
+            </div>
+
+            <div class="order-details-grid">
+              <div class="detail-item">
+                <div class="label">Quantity</div>
+                <div class="value">${escapeHtml(qtyStr)}</div>
+              </div>
+              <div class="detail-item">
+                <div class="label">Unit Price</div>
+                <div class="value price">${money(o.price_per_unit)}/${escapeHtml(o.price_unit)}</div>
+              </div>
+              <div class="detail-item">
+                <div class="label">Total Value</div>
+                <div class="value price">${money(o.total_value)}</div>
+              </div>
+              <div class="detail-item">
+                <div class="label">Payment</div>
+                <div class="value ${o.payment_status === 'paid' ? '' : 'warning'}">${o.payment_status === 'paid' ? '✅ Paid' : '⏳ Pending'}</div>
+              </div>
+            </div>
+
+            ${shipmentHtml}
+
+            <div class="actions">
+              <button class="btn-view" data-action="view" data-id="${o.id}">📊 View Details</button>
+              ${o.tracking_number ? `<button class="btn-track" data-action="track" data-id="${o.id}">🌊 Track Shipment</button>` : ''}
+              <button class="btn-contact" data-action="contact" data-id="${o.id}">📞 Contact Seller</button>
+              ${o.status === 'delivered' ? `<button class="btn-complete" data-action="complete" data-id="${o.id}">✅ Mark Complete</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Event listeners
+      grid.querySelectorAll('[data-action="view"]').forEach(btn => {
+        btn.addEventListener('click', () => openOrderModal(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="track"]').forEach(btn => {
+        btn.addEventListener('click', () => trackShipment(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="contact"]').forEach(btn => {
+        btn.addEventListener('click', () => contactSeller(btn.dataset.id));
+      });
+      grid.querySelectorAll('[data-action="complete"]').forEach(btn => {
+        btn.addEventListener('click', () => markComplete(btn.dataset.id));
+      });
+    }
+
+    function updateCounts() {
+      const orders = APP.orders || [];
+      const counts = {
+        all: orders.length,
+        pending_acceptance: orders.filter(o => o.status === 'pending_acceptance').length,
+        accepted: orders.filter(o => o.status === 'accepted').length,
+        shipped: orders.filter(o => o.status === 'shipped').length,
+        delivered: orders.filter(o => o.status === 'delivered').length,
+        completed: orders.filter(o => o.status === 'completed').length
+      };
+
+      ['All', 'Pending', 'Accepted', 'Shipped', 'Delivered', 'Completed'].forEach(name => {
+        const key = name.toLowerCase() === 'pending' ? 'pending_acceptance' : name.toLowerCase();
+        const el = $(`count${name}`);
+        if (el) el.textContent = counts[key] || 0;
+      });
+    }
+
+    // ============================================================
+    // ACTIONS
+    // ============================================================
+    function openOrderModal(orderId) {
+      const o = APP.orders.find(x => x.id === orderId);
+      if (!o) return;
+      currentOrderId = orderId;
+
+      let qtyStr = '';
+      if (o.price_unit === 'MT') {
+        qtyStr = ((o.quantity_kg || 0) / 1000).toLocaleString() + ' MT';
+      } else if (o.price_unit === 'pallet') {
+        qtyStr = (o.quantity_kg / 500) + ' pallets';
+      } else {
+        qtyStr = (o.quantity_kg || 0).toLocaleString() + 'kg';
+      }
+
+      const statusLabels = {
+        pending_acceptance: '🟡 Pending Acceptance',
+        accepted: '🔵 Accepted',
+        shipped: '🚚 Shipped',
+        delivered: '📦 Delivered',
+        completed: '✅ Completed',
+        cancelled: '❌ Cancelled'
+      };
+
+      const body = $('orderModalBody');
+      body.innerHTML = `
+        <div class="modal-header">
+          <h2>📋 ${escapeHtml(o.order_number)}</h2>
+          <div class="sub">${escapeHtml(o.commodity)} ${o.variety ? '— ' + escapeHtml(o.variety) : ''} · ${statusLabels[o.status] || o.status}</div>
+        </div>
+
+        <div class="modal-section">
+          <div class="section-title">📦 Order Details</div>
+          <div class="grid-2">
+            <div><span class="label">Auction #:</span> <span class="value mono">${escapeHtml(o.auction_number || '—')}</span></div>
+            <div><span class="label">Type:</span> <span class="value">${escapeHtml(o.auction_type.toUpperCase())}</span></div>
+            <div><span class="label">Quantity:</span> <span class="value">${escapeHtml(qtyStr)}</span></div>
+            <div><span class="label">Unit Price:</span> <span class="value">${money(o.price_per_unit)}/${escapeHtml(o.price_unit)}</span></div>
+            <div><span class="label">Total Value:</span> <span class="value mono">${money(o.total_value)}</span></div>
+            <div><span class="label">Payment:</span> <span class="value">${o.payment_status === 'paid' ? '✅ Paid' : '⏳ Pending'}</span></div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <div class="section-title">🏷️ Seller Information</div>
+          <div class="grid-2">
+            <div><span class="label">Seller:</span> <span class="value">${escapeHtml(o.seller)}</span></div>
+            <div><span class="label">Rating:</span> <span class="value">⭐ ${(o.seller_rating || 4.5).toFixed(1)} ${o.seller_verified ? '· ✅ Verified' : ''}</span></div>
+            <div><span class="label">Location:</span> <span class="value">📍 ${escapeHtml(o.location)}</span></div>
+            <div><span class="label">FOB Port:</span> <span class="value">${escapeHtml(o.fob_port || '—')}</span></div>
+          </div>
+        </div>
+
+        ${o.tracking_number ? `
+          <div class="modal-section">
+            <div class="section-title">🚢 Shipment Information</div>
+            <div class="grid-2">
+              <div><span class="label">Tracking #:</span> <span class="value mono">${escapeHtml(o.tracking_number)}</span></div>
+              <div><span class="label">Carrier:</span> <span class="value">${escapeHtml(o.carrier || '—')}</span></div>
+              <div><span class="label">Vessel:</span> <span class="value">${escapeHtml(o.vessel || '—')}</span></div>
+              <div><span class="label">Origin:</span> <span class="value">${escapeHtml(o.origin_port || '—')}</span></div>
+              <div><span class="label">Destination:</span> <span class="value">${escapeHtml(o.destination_port || '—')}</span></div>
+              <div><span class="label">ETD:</span> <span class="value">${escapeHtml(o.etd || '—')}</span></div>
+              <div><span class="label">ETA:</span> <span class="value">${escapeHtml(o.eta || '—')}</span></div>
+              <div><span class="label">BOL:</span> <span class="value">${o.bol_status === 'uploaded' ? '✅ Uploaded' : '⏳ Pending'}</span></div>
+            </div>
+            <div class="tracking-sites">
+              <a href="https://www.marinetraffic.com/en/ais/details/ships/shipid:${encodeURIComponent(o.tracking_number)}" target="_blank" rel="noopener">🚢 MarineTraffic</a>
+              <a href="https://www.vesselfinder.com/vessels?name=${encodeURIComponent(o.vessel || o.tracking_number)}" target="_blank" rel="noopener">🛳️ VesselFinder</a>
+              <a href="https://www.fleetmon.com/vessels?q=${encodeURIComponent(o.vessel || o.tracking_number)}" target="_blank" rel="noopener">📡 FleetMon</a>
+            </div>
+          </div>
+        ` : ''}
+
+        ${o.notes ? `
+          <div class="modal-section">
+            <div class="section-title">📝 Notes</div>
+            <div style="font-size:13px; color:#cbd5e6; line-height:1.6;">${escapeHtml(o.notes)}</div>
+          </div>
+        ` : ''}
+
+        <div class="modal-actions">
+          <button class="btn-close" id="modalCloseOrderBtn" type="button">Close</button>
+          ${o.tracking_number ? `<button class="btn-track" id="modalTrackBtn" type="button">🌊 Track Shipment</button>` : ''}
+        </div>
+      `;
+
+      $('orderModal').classList.add('show');
+
+      const closeBtn = $('modalCloseOrderBtn');
+      if (closeBtn) closeBtn.addEventListener('click', closeOrderModal);
+      const trackBtn = $('modalTrackBtn');
+      if (trackBtn) trackBtn.addEventListener('click', () => trackShipment(orderId));
+    }
+
+    function closeOrderModal() {
+      $('orderModal').classList.remove('show');
+      currentOrderId = null;
+    }
+
+    function trackShipment(orderId) {
+      const o = APP.orders.find(x => x.id === orderId);
+      if (!o || !o.tracking_number) {
+        showToast('No tracking information available', 'warning');
+        return;
+      }
+      window.open(`https://www.marinetraffic.com/en/ais/details/ships/shipid:${encodeURIComponent(o.tracking_number)}`, '_blank', 'noopener');
+      showToast('🌊 Opening maritime tracking...', 'info');
+    }
+
+    function contactSeller(orderId) {
+      const o = APP.orders.find(x => x.id === orderId);
+      if (!o) return;
+      showToast(`📞 Contacting ${o.seller}...`, 'info');
+    }
+
+    function markComplete(orderId) {
+      const o = APP.orders.find(x => x.id === orderId);
+      if (!o) return;
+      if (!confirm(`Mark order ${o.order_number} as completed?`)) return;
+      o.status = 'completed';
+      o.completed_at = new Date().toISOString();
+      saveOrders();
+      renderOrders();
+      updateCounts();
+      showToast('✅ Order marked as completed!', 'success');
+    }
+
+    // ============================================================
+    // EVENTS
+    // ============================================================
+    function setupEvents() {
+      document.querySelectorAll('.status-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentStatusFilter = this.dataset.filter;
+          renderOrders();
+        });
+      });
+
+      let searchTimeout;
+      if ($('searchInput')) {
+        $('searchInput').addEventListener('input', function() {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => renderOrders(), 200);
+        });
+      }
+
+      if ($('closeOrderModal')) $('closeOrderModal').addEventListener('click', closeOrderModal);
+
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) this.classList.remove('show');
+        });
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+      });
+
+      if ($('depositBtn')) {
+        $('depositBtn').addEventListener('click', () => {
+          const amt = prompt('Enter deposit amount ($):', '1000');
+          if (amt === null) return;
+          const v = parseFloat(amt);
+          if (isNaN(v) || v <= 0) { showToast('Invalid amount.', 'error'); return; }
+          BUYER.wallet.balance = (BUYER.wallet.balance || 0) + v;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(BUYER));
+          renderWallet();
+          showToast('Deposited ' + money(v), 'success');
+        });
+      }
+
+      if ($('authBtn')) {
+        $('authBtn').addEventListener('click', () => {
+          if (confirm('Sign out?')) {
+            showToast('👋 Signed out', 'info');
+            window.location.href = 'signin.html';
+          }
+        });
+      }
+
+      if ($('syncCloudBtn')) {
+        $('syncCloudBtn').addEventListener('click', () => {
+          showToast('☁️ Syncing...', 'info');
+          APP.orders = loadOrders();
+          BUYER = loadBuyerState();
+          renderAll();
+          setTimeout(() => showToast('✅ Sync complete!', 'success'), 800);
+        });
+      }
+
+      if ($('forceSaveBtn')) {
+        $('forceSaveBtn').addEventListener('click', () => {
+          saveOrders();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(BUYER));
+          showToast('💾 Data saved locally!', 'success');
+        });
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      APP.orders = loadOrders();
+      BUYER = loadBuyerState();
+      renderAll();
+      setupEvents();
+      showToast('📋 Track your orders and shipments', 'info');
+    });
+  </script>
+</body>
+</html>
