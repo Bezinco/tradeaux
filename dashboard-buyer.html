@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>TradeAux • Buyer Dashboard | Bot-Powered Trading</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -24,7 +25,6 @@
 
     .container { max-width: 1400px; margin: 0 auto; padding: 100px 24px 60px; position: relative; z-index: 2; }
 
-    /* ===== 3D LOGO ===== */
     .gem-logo-corner { position: fixed; top: 20px; left: 20px; z-index: 9999; filter: drop-shadow(0 30px 50px rgba(0,206,209,0.4)); transform-style: preserve-3d; perspective: 1000px; transform: scale(0.35); transform-origin: top left; pointer-events: none; }
     .gem-text { font-size: 160px; font-weight: 900; letter-spacing: -0.02em; position: relative; display: flex; text-transform: uppercase; line-height: 0.9; font-family: 'Orbitron', sans-serif; transform-style: preserve-3d; gap: 2px; }
     .gem-letter { display: inline-block; position: relative; transform-style: preserve-3d; animation: letterFloat 6s ease-in-out infinite; filter: brightness(1.2); }
@@ -60,7 +60,6 @@
     .sparkle-10 { top: 65%; left: 58%; animation-delay: 6.3s; }
     .depth-shadow { position: absolute; bottom: -30px; left: 0; width: 100%; height: 60px; background: radial-gradient(ellipse at center, rgba(0,206,209,0.3) 0%, transparent 80%); filter: blur(20px); z-index: -1; }
 
-    /* Navigation */
     .header { display: flex; justify-content: flex-end; align-items: center; padding: 20px 0 30px; flex-wrap: wrap; gap: 16px; }
     .nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .nav a, .nav button { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; background: rgba(15,32,64,0.7); backdrop-filter: blur(4px); color: #e5e7eb; text-decoration: none; transition: all 0.3s; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
@@ -77,11 +76,9 @@
     .deposit-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; padding: 8px 20px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
     .deposit-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.5); }
 
-    /* Banner */
     .top-trader { text-align: center; background: rgba(0, 0, 0, 0.5); padding: 12px 24px; border-radius: 40px; display: inline-block; width: auto; margin: 0 auto; border: 1px solid rgba(124, 252, 0, 0.3); backdrop-filter: blur(4px); font-family: 'Orbitron', sans-serif; font-size: 14px; }
     .banner-container { text-align: center; padding-top: 20px; }
 
-    /* Ticker */
     .ticker-section { margin: 20px 0 30px; text-align: center; }
     .ticker-header { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #9ca3af; letter-spacing: 2px; margin-bottom: 12px; }
     .live-ticker { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
@@ -92,19 +89,16 @@
     .ticker-change.up { color: #7CFC00; }
     .ticker-change.down { color: #ff3b3b; }
 
-    /* Stats */
     .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-bottom: 40px; }
     .stat-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; text-align: center; }
     .stat-value { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 800; color: #00ced1; }
     .stat-label { font-size: 11px; color: #9ca3af; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
 
-    /* Section Headers */
     .section-header { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 16px; flex-wrap: wrap; gap: 8px; }
     .section-title { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: #00ced1; border-left: 4px solid #7CFC00; padding-left: 16px; }
     .section-link { font-size: 13px; color: #00ced1; text-decoration: none; transition: all 0.2s; }
     .section-link:hover { color: #7CFC00; }
 
-    /* Upcoming Auctions Widget */
     .upcoming-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
     .upcoming-card { background: linear-gradient(145deg, rgba(15,32,64,0.8), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.15); border-radius: 16px; padding: 20px; transition: all 0.3s; cursor: pointer; }
     .upcoming-card:hover { border-color: #00ced1; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
@@ -118,7 +112,6 @@
     .upcoming-card .meta { font-size: 12px; color: #9ca3af; margin-bottom: 4px; }
     .upcoming-card .opens-in { font-size: 13px; color: #FFD966; font-weight: 600; margin-top: 8px; }
 
-    /* Container Widget */
     .container-widget { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; margin-bottom: 30px; }
     .container-widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .container-widget-header .title { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; }
@@ -142,7 +135,6 @@
     .widget-actions .btn-primary { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; border: none; }
     .widget-actions .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.3); }
 
-    /* Bots Widget */
     .bots-widget { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; margin-bottom: 30px; }
     .bots-widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .bots-widget-header .title { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; }
@@ -160,7 +152,6 @@
     .bot-mini-card .bot-status.scanning { background: rgba(0,206,209,0.15); color: #00ced1; }
     .bot-mini-card .bot-status.inactive { background: rgba(255,59,59,0.15); color: #ff3b3b; }
 
-    /* Dashboard Grid */
     .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin: 20px 0; }
     .dashboard-card { background: linear-gradient(145deg, rgba(15, 32, 64, 0.8), rgba(2, 6, 23, 0.95)); border: 1px solid rgba(0, 206, 209, 0.3); border-radius: 20px; padding: 20px; }
     .card-header { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; color: #00ced1; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,206,209,0.2); padding-bottom: 10px; }
@@ -174,7 +165,6 @@
     .status-badge.pending { background: rgba(255,217,102,0.2); color: #FFD966; }
     .empty-message { color: #9ca3af; text-align: center; padding: 20px; font-size: 13px; }
 
-    /* Modal */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; }
     .modal.show { display: flex; }
     .modal-content { background: linear-gradient(145deg, #0a1228, #020617); border: 2px solid #00ced1; border-radius: 24px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 28px; position: relative; }
@@ -193,7 +183,6 @@
     .create-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; color: #000; }
     .create-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.3); }
 
-    /* Toast */
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 14px; transition: 0.3s; opacity: 0; z-index: 2000; max-width: 90%; text-align: center; pointer-events: none; }
     .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
@@ -201,10 +190,8 @@
     .toast.warning { border-color: #FFD966; color: #FFD966; }
     .toast.info { border-color: #00ced1; color: #00ced1; }
 
-    /* Footer */
     .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; font-size: 12px; color: #9ca3af; }
 
-    /* Responsive */
     @media (max-width: 1000px) {
       .stats-grid { grid-template-columns: repeat(3, 1fr); }
       .dashboard-grid { grid-template-columns: 1fr; }
@@ -231,7 +218,6 @@
   <div class="wave-bg wave-ruby-bg"></div>
 </div>
 
-<!-- 3D TRADEAUX LOGO -->
 <div class="gem-logo-corner">
   <div class="gem-text">
     <span class="gem-letter" data-letter="T">T<span class="edge-top"></span><span class="edge-right"></span><span class="edge-bottom"></span><span class="edge-left"></span></span>
@@ -258,7 +244,6 @@
 </div>
 
 <div class="container">
-  <!-- HEADER -->
   <header class="header">
     <nav class="nav">
       <div class="wallet-section">
@@ -274,26 +259,23 @@
       <a href="bot-studio.html">🤖 Bot Studio</a>
       <a href="auctions-buyer.html">📅 Auctions</a>
       <a href="orders-buyer.html">📋 Orders</a>
-      <a href="#" id="authBtn">🔄 Reset Demo</a>
+      <a href="#" id="authBtn">🚪 Sign Out</a>
     </nav>
   </header>
 
-  <!-- BANNER -->
   <div class="banner-container">
-    <div class="top-trader" id="topTraderBanner">🏆 Top Trader: Fazenda Aurora • 28 contracts • $1.2M volume</div>
+    <div class="top-trader" id="topTraderBanner">🏆 Top Trader: Loading...</div>
   </div>
 
-  <!-- TICKER -->
   <div class="ticker-section">
     <div class="ticker-header">🔴 LIVE MARKET TICKER — YOUR BOT COMMODITIES</div>
     <div class="live-ticker" id="liveTicker"></div>
   </div>
 
-  <!-- STATS -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-value" id="totalDeposits">$0</div>
-      <div class="stat-label">Total Deposits</div>
+      <div class="stat-label">Wallet Balance</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" id="totalReservations">0</div>
@@ -313,7 +295,6 @@
     </div>
   </div>
 
-  <!-- UPCOMING AUCTIONS WIDGET -->
   <div class="section-header">
     <div class="section-title">📅 Upcoming Auctions</div>
     <a href="auctions-buyer.html" class="section-link">View All →</a>
@@ -322,7 +303,6 @@
     <div class="empty-message">Loading upcoming auctions...</div>
   </div>
 
-  <!-- BOT FLEET WIDGET -->
   <div class="bots-widget" style="margin-top: 30px;">
     <div class="bots-widget-header">
       <span class="title">🤖 Your Bot Fleet</span>
@@ -337,7 +317,6 @@
     </div>
   </div>
 
-  <!-- CONTAINER CAPTAIN WIDGET -->
   <div class="container-widget">
     <div class="container-widget-header">
       <span class="title">📦 Container Captain</span>
@@ -352,7 +331,6 @@
     </div>
   </div>
 
-  <!-- DASHBOARD GRID -->
   <div class="dashboard-grid">
     <div class="dashboard-card">
       <div class="card-header">📋 RESERVED AUCTIONS <span class="badge-count" id="reservedCount">0</span></div>
@@ -369,348 +347,267 @@
   </footer>
 </div>
 
-<!-- Deposit Modal -->
 <div class="modal" id="depositModal">
   <div class="modal-content" style="max-width:400px;">
-    <span class="modal-close" onclick="closeModal('depositModal')">&times;</span>
+    <button class="modal-close" id="closeDepositModal">&times;</button>
     <div class="modal-header"><h2>💰 Deposit Funds</h2></div>
     <div class="modal-field"><label>Amount ($)</label><input type="number" id="depositAmount" placeholder="5000" min="100"></div>
     <div class="modal-field"><label>Payment Method</label><select id="depositMethod"><option>Wire Transfer</option><option>USDC (ERC-20)</option><option>USDT (TRC-20)</option></select></div>
     <div class="modal-actions">
-      <button class="cancel-btn" onclick="closeModal('depositModal')">Cancel</button>
-      <button class="create-btn" onclick="processDeposit()">Confirm Deposit</button>
+      <button class="cancel-btn" id="cancelDepositBtn">Cancel</button>
+      <button class="create-btn" id="confirmDepositBtn">Confirm Deposit</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== HELPERS ===== */
-function $(id) { return document.getElementById(id); }
-function money(n) { 
-  if (n === null || n === undefined || isNaN(n)) return '$0.00';
-  return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); 
-}
-function showToast(msg, type='info') {
-  const t = $('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.className = 'toast visible ' + type;
-  clearTimeout(window._toastTimeout);
-  window._toastTimeout = setTimeout(() => { if (t) t.className = 'toast'; }, 4000);
-}
-function openModal(id) { const modal = $(id); if (modal) modal.style.display = 'flex'; }
-function closeModal(id) { const modal = $(id); if (modal) modal.style.display = 'none'; }
-function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+(function() {
+  'use strict';
+  var SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+  var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ===== STATE ===== */
-const STORAGE_KEY = 'tradeaux_buyer_state';
-const AUCTIONS_KEY = 'tradeaux_buyer_auctions_v2';
-const ORDERS_KEY = 'tradeaux_buyer_orders';
-const BOTS_KEY = 'tradeaux_bot_studio';
-const CONTAINERS_KEY = 'tradeaux_container_captain';
-
-let BUYER = loadBuyerState();
-
-function loadBuyerState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { wallet: { balance: 0 }, reservations: [] };
-  } catch(e) { return { wallet: { balance: 0 }, reservations: [] }; }
-}
-
-function loadAuctions() {
-  try {
-    const raw = localStorage.getItem(AUCTIONS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
-
-function loadOrders() {
-  try {
-    const raw = localStorage.getItem(ORDERS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
-
-function loadBots() {
-  try {
-    const raw = localStorage.getItem(BOTS_KEY);
-    const data = raw ? JSON.parse(raw) : { bots: [] };
-    return data.bots || [];
-  } catch(e) { return []; }
-}
-
-function loadContainers() {
-  try {
-    const raw = localStorage.getItem(CONTAINERS_KEY);
-    const data = raw ? JSON.parse(raw) : { containers: [] };
-    return data.containers || [];
-  } catch(e) { return []; }
-}
-
-/* ===== RENDER ===== */
-function renderAll() {
-  renderWallet();
-  renderStats();
-  renderUpcomingAuctions();
-  renderBots();
-  renderContainers();
-  renderReservations();
-  renderWonAuctions();
-  renderTicker();
-}
-
-function renderWallet() {
-  if ($('walletAmount')) $('walletAmount').textContent = money(BUYER.wallet?.balance || 0);
-  if ($('reservationCount')) {
-    const count = (BUYER.reservations || []).length;
-    $('reservationCount').textContent = count + ' reserved';
+  function $(id) { return document.getElementById(id); }
+  function money(n) {
+    if (n === null || n === undefined || isNaN(n)) return '$0.00';
+    return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
-}
-
-function renderStats() {
-  const reservations = (BUYER.reservations || []).length;
-  const bots = loadBots();
-  const containers = loadContainers();
-  const orders = loadOrders();
-
-  if ($('totalDeposits')) $('totalDeposits').textContent = money(BUYER.wallet?.balance || 0);
-  if ($('totalReservations')) $('totalReservations').textContent = reservations;
-  if ($('totalBots')) $('totalBots').textContent = bots.length;
-  if ($('totalContainers')) $('totalContainers').textContent = containers.length;
-  if ($('totalOrders')) $('totalOrders').textContent = orders.length;
-}
-
-function renderUpcomingAuctions() {
-  const grid = $('upcomingGrid');
-  if (!grid) return;
-
-  const auctions = loadAuctions();
-  const upcoming = auctions.filter(a => a.status === 'upcoming').slice(0, 3);
-
-  if (upcoming.length === 0) {
-    grid.innerHTML = `<div class="empty-message">No upcoming auctions yet. <a href="auctions-buyer.html" style="color:#00ced1;">Browse all →</a></div>`;
-    return;
+  function showToast(msg, type) {
+    type = type || 'info';
+    var t = $('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'toast visible ' + type;
+    clearTimeout(window._toastTimeout);
+    window._toastTimeout = setTimeout(function() { t.className = 'toast'; }, 4000);
   }
+  function openModal(id) { var m = $(id); if (m) m.classList.add('show'); }
+  function closeModal(id) { var m = $(id); if (m) m.classList.remove('show'); }
+  function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-  grid.innerHTML = upcoming.map(a => {
-    const typeLabels = { sample: '🧪 Sample', regular: '📦 Regular', pallet: '📦 Pallet' };
-    
-    let openStr = 'Soon';
-    if (a.opens_at) {
-      const openDate = new Date(a.opens_at);
-      openStr = '📅 ' + openDate.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + openDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  var currentUser = null;
+  var userProfile = null;
+  var userWallet = null;
+  var auctions = [];
+  var reservations = [];
+  var assignments = [];
+  var bots = [];
+
+  async function initUser() {
+    var sessionRes = await supabase.auth.getSession();
+    var session = sessionRes.data ? sessionRes.data.session : null;
+    if (!session) {
+      showToast('Please sign in', 'error');
+      setTimeout(function() { window.location.href = 'index.html'; }, 1500);
+      return false;
     }
+    currentUser = session.user;
 
-    return `
-      <div class="upcoming-card" onclick="window.location.href='auctions-buyer.html'">
-        <div class="top-row">
-          <span class="auction-number">${escapeHtml(a.auction_number || '—')}</span>
-          <span class="type-badge ${a.auction_type}">${typeLabels[a.auction_type] || '📦'}</span>
-        </div>
-        <div class="product">${escapeHtml(a.commodity || 'Unknown')} ${a.variety ? '— ' + escapeHtml(a.variety) : ''}</div>
-        <div class="meta">👤 ${escapeHtml(a.seller || '—')} · ⭐ ${(a.seller_rating || 4.5).toFixed(1)}</div>
-        <div class="meta">📍 ${escapeHtml(a.location || '—')}</div>
-        <div class="opens-in">${escapeHtml(openStr)}</div>
-      </div>
-    `;
-  }).join('');
-}
+    var profRes = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+    userProfile = profRes.data || {};
 
-function renderBots() {
-  const list = $('botMiniList');
-  const badge = $('botCount');
-  if (!list) return;
-
-  const bots = loadBots();
-  if (badge) badge.textContent = bots.length + ' bots';
-
-  if (bots.length === 0) {
-    list.innerHTML = `<div class="empty-message">No bots yet. <a href="bot-studio.html" style="color:#00ced1;">Create one →</a></div>`;
-    return;
+    var walletRes = await supabase.from('wallets').select('*').eq('user_id', currentUser.id).maybeSingle();
+    var wallet = walletRes.data;
+    if (!wallet) {
+      var newRes = await supabase.from('wallets').insert({ user_id: currentUser.id, balance: 0, held_balance: 0, currency: 'USD' }).select().single();
+      wallet = newRes.data;
+    }
+    userWallet = wallet || { balance: 0, held_balance: 0 };
+    return true;
   }
 
-  list.innerHTML = bots.slice(0, 3).map(b => `
-    <div class="bot-mini-card" onclick="window.location.href='bot-studio.html'">
-      <div class="bot-info">
-        <div class="bot-emoji">${escapeHtml(b.emoji || '🤖')}</div>
-        <div>
-          <div class="bot-name">${escapeHtml(b.name || 'Unnamed Bot')}</div>
-          <div class="bot-legacy">${escapeHtml(b.legacy || '')}</div>
-        </div>
-      </div>
-      <span class="bot-status ${escapeHtml(b.status || 'active')}">${escapeHtml((b.status || 'active').toUpperCase())}</span>
-    </div>
-  `).join('');
-}
-
-function renderContainers() {
-  const grid = $('containerWidgetGrid');
-  const badge = $('containerBadge');
-  if (!grid) return;
-
-  const containers = loadContainers();
-  if (badge) badge.textContent = containers.length + ' containers';
-
-  if (containers.length === 0) {
-    grid.innerHTML = `<div class="empty-message">No containers yet. <a href="container-captain.html" style="color:#00ced1;">Create one →</a></div>`;
-    return;
+  async function loadData() {
+    var results = await Promise.all([
+      supabase.from('auctions').select('*').in('status', ['open', 'active', 'upcoming']).order('created_at', { ascending: false }),
+      supabase.from('buyer_holds').select('*').eq('user_id', currentUser.id).eq('status', 'held'),
+      supabase.from('auction_bot_assignments').select('*').eq('buyer_id', currentUser.id).in('status', ['assigned', 'active']),
+      supabase.from('buyer_bots').select('*').eq('buyer_id', currentUser.id)
+    ]);
+    auctions = results[0].data || [];
+    reservations = results[1].data || [];
+    assignments = results[2].data || [];
+    bots = results[3].data || [];
   }
 
-  grid.innerHTML = containers.slice(0, 3).map(c => {
-    const typeData = { weight: 26500, volume: 76.3, pallets: 22 };
-    const getWeight = (item) => item.weightPerUnit || 60;
-    const getVolume = (item) => item.volumePerUnit || 0.072;
-    const getPallet = (item) => item.unitsPerPallet || 20;
-
-    const contents = c.contents || [];
-    const totalWeight = contents.reduce((sum, item) => sum + (item.quantity * getWeight(item)), 0);
-    const totalVolume = contents.reduce((sum, item) => sum + (item.quantity * getVolume(item)), 0);
-    const totalPallets = contents.reduce((sum, item) => sum + Math.ceil(item.quantity / getPallet(item)), 0);
-    const pct = Math.min(100, Math.max(
-      (totalWeight / typeData.weight) * 100,
-      (totalVolume / typeData.volume) * 100,
-      (totalPallets / typeData.pallets) * 100
-    ));
-    const isOver = totalWeight > typeData.weight || totalVolume > typeData.volume || totalPallets > typeData.pallets;
-    const statusClass = isOver ? 'overweight' : c.status || 'active';
-
-    return `
-      <div class="container-mini-card" onclick="window.location.href='container-captain.html'">
-        <div class="name"><span class="status-dot ${statusClass}"></span>${escapeHtml(c.name || 'Unnamed')}</div>
-        <div class="details">${escapeHtml(c.destination || '—')} · ${contents.length} products</div>
-        <div class="mini-progress"><div class="fill ${isOver ? 'overweight' : ''}" style="width:${Math.min(100, pct)}%;"></div></div>
-        <div class="details" style="margin-top:4px;">${Math.round(pct)}% filled</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderReservations() {
-  const list = $('reservedList');
-  const count = $('reservedCount');
-  if (!list) return;
-
-  const reservations = BUYER.reservations || [];
-  if (count) count.textContent = reservations.length;
-
-  if (reservations.length === 0) {
-    list.innerHTML = `<div class="empty-message">No reservations yet. <a href="auctions-buyer.html" style="color:#00ced1;">Browse auctions →</a></div>`;
-    return;
+  function renderAll() {
+    renderWallet();
+    renderStats();
+    renderUpcomingAuctions();
+    renderBots();
+    renderContainers();
+    renderReservations();
+    renderWonAuctions();
+    renderTicker();
+    renderTopTrader();
   }
 
-  list.innerHTML = reservations.slice(0, 5).map(r => `
-    <div class="clickable-item" onclick="window.location.href='auctions-buyer.html'">
-      <div class="item-title"><span>${escapeHtml(r.auction_number || '—')}</span><span style="color:#7CFC00;">$${r.hold_amount || 25} hold</span></div>
-      <div class="item-details"><span>${escapeHtml(r.commodity || '')} ${r.variety ? '— ' + escapeHtml(r.variety) : ''}</span><span class="status-badge">RESERVED</span></div>
-    </div>
-  `).join('');
-}
-
-function renderWonAuctions() {
-  const list = $('wonList');
-  const count = $('wonCount');
-  if (!list) return;
-
-  const orders = loadOrders();
-  const completed = orders.filter(o => o.status === 'delivered' || o.status === 'completed');
-  if (count) count.textContent = completed.length;
-
-  if (completed.length === 0) {
-    list.innerHTML = `<div class="empty-message">No won auctions yet</div>`;
-    return;
+  function renderWallet() {
+    if ($('walletAmount')) $('walletAmount').textContent = money(userWallet ? userWallet.balance : 0);
+    if ($('reservationCount')) {
+      var count = reservations.length;
+      $('reservationCount').textContent = count + ' reserved';
+    }
   }
 
-  list.innerHTML = completed.slice(0, 5).map(o => `
-    <div class="clickable-item" onclick="window.location.href='orders-buyer.html'">
-      <div class="item-title"><span>${escapeHtml(o.commodity)} ${o.variety ? '— ' + escapeHtml(o.variety) : ''}</span><span style="color:#7CFC00;">WON</span></div>
-      <div class="item-details"><span>${escapeHtml(o.order_number || '')}</span><span>${money(o.total_value || 0)}</span></div>
-    </div>
-  `).join('');
-}
+  function renderStats() {
+    if ($('totalDeposits')) $('totalDeposits').textContent = money(userWallet ? userWallet.balance : 0);
+    if ($('totalReservations')) $('totalReservations').textContent = reservations.length;
+    if ($('totalBots')) $('totalBots').textContent = bots.length;
+    if ($('totalContainers')) $('totalContainers').textContent = 0;
+    if ($('totalOrders')) $('totalOrders').textContent = 0;
+  }
 
-function renderTicker() {
-  const ticker = $('liveTicker');
-  if (!ticker) return;
-  const prices = [
-    {c:'Coffee', p:4.35, ch:-0.12},{c:'Cocoa', p:3200, ch:1.45},{c:'Wheat', p:245, ch:-0.80},
-    {c:'Sugar', p:0.18, ch:0.05},{c:'Corn', p:195, ch:-0.30},{c:'Soybeans', p:420, ch:0.90}
-  ];
-  ticker.innerHTML = prices.map(t => {
-    const up = t.ch >= 0;
-    const priceStr = typeof t.p === 'number' && t.p < 1 ? '$'+t.p.toFixed(2) : '$'+t.p.toLocaleString();
-    return `<div class="ticker-item">
-      <span class="ticker-commodity">${escapeHtml(t.c)}</span>
-      <span class="ticker-price">${escapeHtml(priceStr)}</span>
-      <span class="ticker-change ${up?'up':'down'}">${up?'+':''}${escapeHtml(t.ch)}%</span>
-    </div>`;
-  }).join('');
-}
+  function renderUpcomingAuctions() {
+    var grid = $('upcomingGrid');
+    if (!grid) return;
+    var list = auctions.slice(0, 3);
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-message">No upcoming auctions yet. <a href="auctions-buyer.html" style="color:#00ced1;">Browse all →</a></div>';
+      return;
+    }
+    var typeLabels = { sample: '🧪 Sample', regular: '📦 Regular', pallet: '📦 Pallet' };
+    grid.innerHTML = list.map(function(a) {
+      var openStr = a.status === 'upcoming' ? '📅 Upcoming' : '🟢 Live now';
+      return '<div class="upcoming-card" onclick="window.location.href=\'auctions-buyer.html\'">' +
+        '<div class="top-row">' +
+          '<span class="auction-number">' + escapeHtml(a.id) + '</span>' +
+          '<span class="type-badge ' + (a.auction_type || 'regular') + '">' + (typeLabels[a.auction_type] || '📦') + '</span>' +
+        '</div>' +
+        '<div class="product">' + escapeHtml(a.commodity || 'Unknown') + (a.variety ? ' — ' + escapeHtml(a.variety) : '') + '</div>' +
+        '<div class="meta">👤 ' + escapeHtml(a.seller || '—') + '</div>' +
+        '<div class="meta">📍 ' + escapeHtml(a.fob_port || '—') + '</div>' +
+        '<div class="opens-in">' + escapeHtml(openStr) + '</div>' +
+      '</div>';
+    }).join('');
+  }
 
-/* ===== ACTIONS ===== */
-function processDeposit() {
-  const amt = parseFloat($('depositAmount')?.value);
-  if (!amt || amt < 100) { showToast('Minimum deposit $100', 'error'); return; }
-  BUYER.wallet.balance = (BUYER.wallet.balance || 0) + amt;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(BUYER));
-  renderAll();
-  closeModal('depositModal');
-  showToast('Deposit processed: ' + money(amt), 'success');
-}
+  function renderBots() {
+    var list = $('botMiniList');
+    var badge = $('botCount');
+    if (!list) return;
+    if (badge) badge.textContent = bots.length + ' bots';
+    if (bots.length === 0) {
+      list.innerHTML = '<div class="empty-message">No bots yet. <a href="bot-studio.html" style="color:#00ced1;">Create one →</a></div>';
+      return;
+    }
+    list.innerHTML = bots.slice(0, 3).map(function(b) {
+      var status = (b.status || 'idle').toLowerCase();
+      var statusClass = (status === 'active' || status === 'assigned') ? 'active' : 'inactive';
+      return '<div class="bot-mini-card" onclick="window.location.href=\'bot-studio.html\'">' +
+        '<div class="bot-info">' +
+          '<div class="bot-emoji">🤖</div>' +
+          '<div>' +
+            '<div class="bot-name">' + escapeHtml(b.name || 'Unnamed Bot') + '</div>' +
+            '<div class="bot-legacy">' + escapeHtml(b.commodity || '') + ' · ' + escapeHtml(b.designation || '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<span class="bot-status ' + statusClass + '">' + escapeHtml(status.toUpperCase()) + '</span>' +
+      '</div>';
+    }).join('');
+  }
 
-/* ===== EVENTS ===== */
-function setupEvents() {
-  if ($('depositBtn')) $('depositBtn').addEventListener('click', () => openModal('depositModal'));
-  
-  if ($('authBtn')) {
-    $('authBtn').addEventListener('click', () => {
-      if (confirm('Reset all demo data? This will erase your current session.')) {
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(AUCTIONS_KEY);
-        localStorage.removeItem(ORDERS_KEY);
-        localStorage.removeItem(BOTS_KEY);
-        localStorage.removeItem(CONTAINERS_KEY);
-        location.reload();
+  function renderContainers() {
+    var grid = $('containerWidgetGrid');
+    var badge = $('containerBadge');
+    if (!grid) return;
+    if (badge) badge.textContent = '0 containers';
+    grid.innerHTML = '<div class="empty-message">No containers yet. <a href="container-captain.html" style="color:#00ced1;">Create one →</a></div>';
+  }
+
+  function renderReservations() {
+    var list = $('reservedList');
+    var count = $('reservedCount');
+    if (!list) return;
+    if (count) count.textContent = reservations.length;
+    if (reservations.length === 0) {
+      list.innerHTML = '<div class="empty-message">No reservations yet. <a href="auctions-buyer.html" style="color:#00ced1;">Browse auctions →</a></div>';
+      return;
+    }
+    list.innerHTML = reservations.slice(0, 5).map(function(r) {
+      var a = auctions.find(function(x) { return x.id === r.auction_id; });
+      return '<div class="clickable-item" onclick="window.location.href=\'auctions-buyer.html\'">' +
+        '<div class="item-title"><span>' + escapeHtml(r.auction_id) + '</span><span style="color:#7CFC00;">$' + (r.amount || 25) + ' hold</span></div>' +
+        '<div class="item-details"><span>' + escapeHtml(a ? (a.commodity || '') : '') + '</span><span class="status-badge">RESERVED</span></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderWonAuctions() {
+    var list = $('wonList');
+    var count = $('wonCount');
+    if (!list) return;
+    if (count) count.textContent = 0;
+    list.innerHTML = '<div class="empty-message">No won auctions yet</div>';
+  }
+
+  function renderTopTrader() {
+    var el = $('topTraderBanner');
+    if (!el) return;
+    el.textContent = '🏆 Welcome, ' + (userProfile && (userProfile.full_name || userProfile.company_name) ? (userProfile.full_name || userProfile.company_name) : 'Trader');
+  }
+
+  function renderTicker() {
+    var ticker = $('liveTicker');
+    if (!ticker) return;
+    var prices = [
+      {c:'Coffee', p:4.35, ch:-0.12},
+      {c:'Cocoa', p:3200, ch:1.45},
+      {c:'Wheat', p:245, ch:-0.80},
+      {c:'Sugar', p:0.18, ch:0.05},
+      {c:'Corn', p:195, ch:-0.30},
+      {c:'Soybeans', p:420, ch:0.90}
+    ];
+    ticker.innerHTML = prices.map(function(t) {
+      var up = t.ch >= 0;
+      var priceStr = (typeof t.p === 'number' && t.p < 1) ? '$' + t.p.toFixed(2) : '$' + t.p.toLocaleString();
+      return '<div class="ticker-item">' +
+        '<span class="ticker-commodity">' + escapeHtml(t.c) + '</span>' +
+        '<span class="ticker-price">' + escapeHtml(priceStr) + '</span>' +
+        '<span class="ticker-change ' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + escapeHtml(t.ch) + '%</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function setupEvents() {
+    if ($('depositBtn')) $('depositBtn').addEventListener('click', function() { openModal('depositModal'); });
+    if ($('closeDepositModal')) $('closeDepositModal').addEventListener('click', function() { closeModal('depositModal'); });
+    if ($('cancelDepositBtn')) $('cancelDepositBtn').addEventListener('click', function() { closeModal('depositModal'); });
+    if ($('confirmDepositBtn')) {
+      $('confirmDepositBtn').addEventListener('click', function() {
+        showToast('Deposit processing coming soon', 'info');
+        closeModal('depositModal');
+      });
+    }
+    if ($('authBtn')) {
+      $('authBtn').addEventListener('click', async function(e) {
+        e.preventDefault();
+        if (confirm('Sign out?')) {
+          await supabase.auth.signOut();
+          window.location.href = 'index.html';
+        }
+      });
+    }
+    document.querySelectorAll('.modal').forEach(function(m) {
+      m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('show'); });
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal').forEach(function(m) { m.classList.remove('show'); });
       }
     });
   }
-  
-  document.querySelectorAll('.modal').forEach(m => {
-    m.addEventListener('click', (e) => { if (e.target === m) m.style.display = 'none'; });
+
+  document.addEventListener('DOMContentLoaded', async function() {
+    var ok = await initUser();
+    if (!ok) return;
+    await loadData();
+    renderAll();
+    setupEvents();
+    console.log('TradeAux Buyer Dashboard loaded');
   });
-  
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-    }
-  });
-}
-
-/* ===== INIT ===== */
-function initApp() {
-  BUYER = loadBuyerState();
-  if (!BUYER.reservations) BUYER.reservations = [];
-
-  // Set demo wallet to $125,000 if fresh
-  if ((BUYER.wallet.balance || 0) === 0 && !localStorage.getItem('tradeaux_demo_seeded')) {
-    BUYER.wallet.balance = 125000;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(BUYER));
-    localStorage.setItem('tradeaux_demo_seeded', 'true');
-  }
-
-  renderAll();
-  setupEvents();
-  console.log('🚀 TradeAux Buyer Dashboard loaded');
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
+})();
 </script>
 </body>
 </html>
