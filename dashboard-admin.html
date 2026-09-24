@@ -641,7 +641,7 @@ async function verifySession() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
     showToast('Session expired. Please sign in again.', true);
-    setTimeout(() => window.location.href = 'signin.html', 1500);
+    setTimeout(() => window.location.href = 'index.html', 1500);
     return false;
   }
   return true;
@@ -811,7 +811,7 @@ async function checkAuth() {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      window.location.href = 'signin.html';
+      window.location.href = 'index.html';
       return false;
     }
     AppState.currentUser = session.user;
@@ -822,18 +822,18 @@ async function checkAuth() {
     } catch (profileErr) {
       console.error('Profile fetch error:', profileErr);
       showToast('Failed to load admin profile', true);
-      setTimeout(() => window.location.href = 'signin.html', 2000);
+      setTimeout(() => window.location.href = 'index.html', 2000);
       return false;
     }
     if (profile?.role !== 'admin') {
       showToast('Admin only', true);
-      setTimeout(() => window.location.href = 'signin.html', 1500);
+      setTimeout(() => window.location.href = 'index.html', 1500);
       return false;
     }
     return true;
   } catch (err) {
     showToast('Auth error: ' + err.message, true);
-    setTimeout(() => window.location.href = 'signin.html', 2000);
+    setTimeout(() => window.location.href = 'index.html', 2000);
     return false;
   }
 }
@@ -855,7 +855,7 @@ async function signOut() {
     }
   });
   AppState._openModalCount = 0;
-  window.location.href = 'signin.html';
+  window.location.href = 'index.html';
 }
 
 // ============================================================
