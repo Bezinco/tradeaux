@@ -59,6 +59,10 @@ input {
   margin-bottom: 16px;
   font-size: 14px;
 }
+input:focus {
+  outline: none;
+  border-color: #00ced1;
+}
 button {
   width: 100%;
   padding: 14px;
@@ -71,6 +75,15 @@ button {
   margin-top: 8px;
   font-size: 14px;
   color: #000;
+  transition: all 0.2s;
+}
+button:hover {
+  transform: scale(1.01);
+  box-shadow: 0 0 20px rgba(0,206,209,0.4);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .error {
   color: #ff6b6b;
@@ -79,6 +92,7 @@ button {
   border-radius: 8px;
   margin-bottom: 16px;
   display: none;
+  font-size: 13px;
 }
 .success {
   color: #7CFC00;
@@ -87,16 +101,24 @@ button {
   border-radius: 8px;
   margin-bottom: 16px;
   display: none;
+  font-size: 13px;
 }
 .toggle {
   text-align: center;
   margin-top: 20px;
   color: #9ca3af;
+  font-size: 13px;
 }
 .toggle a {
   color: #00ced1;
   cursor: pointer;
   text-decoration: underline;
+}
+.hint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: -10px;
+  margin-bottom: 14px;
 }
 </style>
 </head>
@@ -107,18 +129,22 @@ button {
   <div class="auth-card">
     <div class="error" id="errorMsg"></div>
     <div class="success" id="successMsg"></div>
-    
+
+    <!-- SIGN IN VIEW -->
     <div id="signinView">
-      <input type="email" id="email" placeholder="Email">
-      <input type="password" id="password" placeholder="Password">
+      <input type="email" id="email" placeholder="Email" autocomplete="email">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
       <button id="signinBtn">Sign In</button>
       <div class="toggle">No account? <a id="showSignup">Create one</a></div>
     </div>
 
+    <!-- SIGN UP VIEW -->
     <div id="signupView" style="display:none">
-      <input type="email" id="signupEmail" placeholder="Email">
-      <input type="password" id="signupPassword" placeholder="Password (min 6 chars)">
-      <input type="text" id="signupName" placeholder="Company / Organization Name">
+      <input type="email" id="signupEmail" placeholder="Email" autocomplete="email">
+      <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <input type="text" id="signupName" placeholder="Your Full Name">
+      <input type="text" id="signupCompany" placeholder="Company / Organization Name">
+      <div class="hint">You'll pick your home Kontor after signup.</div>
       <button id="signupBtn">Create Account</button>
       <div class="toggle">Already have an account? <a id="showSignin">Sign in</a></div>
     </div>
@@ -132,11 +158,15 @@ button {
 const SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-// Create Supabase client correctly from the global supabase object
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+if (!window.supabase) {
+  document.body.innerHTML = '<div style="text-align:center;padding:40px;color:#ff3b3b;font-family:Inter,sans-serif;">❌ Failed to load required libraries. Please check your internet connection and refresh.</div>';
+  throw new Error('Supabase not loaded');
+}
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =====================================================
-// CHECK FOR LOGOUT FLAG
+// LOGOUT FLAG
 // =====================================================
 const urlParams = new URLSearchParams(window.location.search);
 const isLogout = urlParams.get('logout') === '1';
@@ -144,12 +174,16 @@ const isLogout = urlParams.get('logout') === '1';
 // =====================================================
 // UI HELPERS
 // =====================================================
+let errorTimeout = null;
+let successTimeout = null;
+
 function showError(msg) {
   const el = document.getElementById('errorMsg');
   el.textContent = msg;
   el.style.display = 'block';
   document.getElementById('successMsg').style.display = 'none';
-  setTimeout(() => el.style.display = 'none', 5000);
+  clearTimeout(errorTimeout);
+  errorTimeout = setTimeout(() => { el.style.display = 'none'; }, 6000);
 }
 
 function showSuccess(msg) {
@@ -157,51 +191,62 @@ function showSuccess(msg) {
   el.textContent = msg;
   el.style.display = 'block';
   document.getElementById('errorMsg').style.display = 'none';
-  setTimeout(() => el.style.display = 'none', 5000);
+  clearTimeout(successTimeout);
+  successTimeout = setTimeout(() => { el.style.display = 'none'; }, 6000);
 }
 
 // =====================================================
-// PAGE LOAD - CHECK SESSION
+// ROLE-BASED REDIRECT
+// =====================================================
+// role is TEXT[] like ['admin'] or ['buyer','seller']
+function getRedirectForRole(roleArray) {
+  const roles = Array.isArray(roleArray) ? roleArray : ['buyer'];
+
+  if (roles.includes('admin'))   return 'dashboard-admin.html';
+  if (roles.includes('seller'))  return 'dashboard-seller.html';
+  if (roles.includes('carrier')) return 'dashboard-transport.html';
+  if (roles.includes('insurer')) return 'dashboard-insurer.html';
+  if (roles.includes('banker'))  return 'dashboard-banker.html';
+  return 'dashboard-buyer.html';
+}
+
+// =====================================================
+// PAGE LOAD
 // =====================================================
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('🚀 Signin page loaded');
-  
-  // If this is a logout redirect, stay on signin page
+
+  // Handle logout redirect
   if (isLogout) {
-    console.log('🔓 Logged out successfully');
+    console.log('🔓 Logged out');
     showSuccess('You have been signed out.');
-    // Force clear any lingering session
-    try {
-      await supabaseClient.auth.signOut();
-    } catch(e) { /* ignore */ }
+    try { await supabaseClient.auth.signOut(); } catch(e) { /* ignore */ }
     return;
   }
 
-  // Check if user is already logged in
+  // Check existing session
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-      // User is already logged in - redirect to their dashboard
-      const { data: profile } = await supabaseClient
+      const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
         .single();
-      
-      const role = profile?.role || 'buyer';
-      console.log('🔐 Already logged in as:', role);
-      
-      if (role === 'admin') window.location.href = 'dashboard-admin.html';
-      else if (role === 'seller') window.location.href = 'dashboard-seller.html';
-      else if (role === 'carrier') window.location.href = 'dashboard-transport.html';
-      else if (role === 'insurer') window.location.href = 'dashboard-insurer.html';
-      else if (role === 'banker') window.location.href = 'dashboard-banker.html';
-      else window.location.href = 'dashboard-buyer.html';
+
+      if (profileError) {
+        console.warn('Profile fetch failed, defaulting to buyer:', profileError.message);
+      }
+
+      const roleArray = profile?.role || ['buyer'];
+      console.log('🔐 Already signed in as:', roleArray);
+
+      window.location.href = getRedirectForRole(roleArray);
       return;
     }
   } catch(e) { /* ignore */ }
 
-  console.log('📝 User not logged in, showing signin form');
+  console.log('📝 No active session — showing signin form');
 
   // =====================================================
   // TOGGLE SIGNIN / SIGNUP
@@ -222,6 +267,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // SIGN IN
   // =====================================================
   document.getElementById('signinBtn').onclick = async () => {
+    const btn = document.getElementById('signinBtn');
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
 
@@ -229,6 +275,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       showError('Please enter email and password');
       return;
     }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
 
     try {
       const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -240,24 +289,27 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       const user = data.user;
 
-      // Get user role from profiles table
+      // Fetch role from profiles
       const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single();
 
-      const role = profile?.role || 'buyer';
+      if (profileError) {
+        console.warn('Profile fetch failed:', profileError.message);
+      }
 
-      // Redirect based on role
-      if (role === 'admin') window.location.href = 'dashboard-admin.html';
-      else if (role === 'seller') window.location.href = 'dashboard-seller.html';
-      else if (role === 'carrier') window.location.href = 'dashboard-transport.html';
-      else if (role === 'insurer') window.location.href = 'dashboard-insurer.html';
-      else if (role === 'banker') window.location.href = 'dashboard-banker.html';
-      else window.location.href = 'dashboard-buyer.html';
+      const roleArray = profile?.role || ['buyer'];
+      console.log('✅ Signed in:', email, '→', roleArray);
+
+      window.location.href = getRedirectForRole(roleArray);
+
     } catch (error) {
-      showError(error.message);
+      console.error('Signin error:', error);
+      showError(error.message || 'Sign in failed');
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
     }
   };
 
@@ -265,34 +317,44 @@ document.addEventListener('DOMContentLoaded', async function() {
   // SIGN UP
   // =====================================================
   document.getElementById('signupBtn').onclick = async () => {
+    const btn = document.getElementById('signupBtn');
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     const name = document.getElementById('signupName').value.trim();
+    const company = document.getElementById('signupCompany').value.trim();
 
     if (!email || !password) {
       showError('Please enter email and password');
       return;
     }
-
     if (password.length < 6) {
       showError('Password must be at least 6 characters');
       return;
     }
-
     if (!name) {
+      showError('Please enter your full name');
+      return;
+    }
+    if (!company) {
       showError('Please enter your Company / Organization name');
       return;
     }
 
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
     try {
-      // Create user in Supabase Auth
+      // Step 1: Create auth user
+      // The database trigger `on_auth_user_created` will automatically create:
+      //   - profiles row with role = ['buyer']
+      //   - wallets row with balance = 0, currency = CAD
       const { data, error } = await supabaseClient.auth.signUp({
         email: email,
         password: password,
         options: {
           data: {
             full_name: name,
-            role: 'buyer'
+            company_name: company
           }
         }
       });
@@ -301,36 +363,90 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       const user = data.user;
 
-      // Create profile in Supabase
-      await supabaseClient
-        .from('profiles')
-        .insert({
-          id: user.id,
-          email: email,
-          full_name: name,
-          company_name: name,
-          role: 'buyer',
-          wallet_balance: 0,
-          created_at: new Date().toISOString()
-        });
+      if (!user) {
+        throw new Error('Account creation returned no user');
+      }
 
-      // Auto sign in
+      // Step 2: Give the trigger a moment to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Step 3: Update full name on the profile (trigger set a default)
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .update({
+          full_name: name
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.warn('Profile update warning:', updateError.message);
+      }
+
+      // Step 4: Try to create a company record
+      const { data: sessionData } = await supabaseClient.auth.getSession();
+      if (sessionData?.session) {
+        const { error: companyError } = await supabaseClient
+          .from('companies')
+          .insert({
+            user_id: user.id,
+            name: company,
+            business_type: 'importer'   // default; user picks real one later
+          });
+
+        if (companyError) {
+          console.warn('Company creation warning:', companyError.message);
+        }
+      }
+
+      // Step 5: Auto sign in
       const { error: signInError } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
       });
 
-      if (signInError) throw signInError;
-
-      window.location.href = 'dashboard-buyer.html';
-    } catch (error) {
-      if (error.message && error.message.includes('email not confirmed')) {
-        showSuccess('Account created! Please check your email to confirm.');
-      } else {
-        showError(error.message);
+      if (signInError) {
+        if (signInError.message && signInError.message.toLowerCase().includes('email not confirmed')) {
+          showSuccess('✅ Account created! Please check your email to confirm, then sign in.');
+          btn.disabled = false;
+          btn.textContent = 'Create Account';
+          return;
+        }
+        throw signInError;
       }
+
+      // Step 6: Redirect to buyer dashboard
+      console.log('✅ Account created and signed in:', email);
+      window.location.href = 'dashboard-buyer.html';
+
+    } catch (error) {
+      console.error('Signup error:', error);
+
+      const msg = (error.message || '').toLowerCase();
+
+      if (msg.includes('email not confirmed')) {
+        showSuccess('✅ Account created! Please check your email to confirm, then sign in.');
+      } else if (msg.includes('already registered') || msg.includes('already exists')) {
+        showError('This email is already registered. Try signing in instead.');
+      } else if (msg.includes('password')) {
+        showError('Password is too weak or invalid.');
+      } else {
+        showError(error.message || 'Sign up failed');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
     }
   };
+
+  // =====================================================
+  // ENTER KEY SUPPORT
+  // =====================================================
+  document.getElementById('password').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('signinBtn').click();
+  });
+  document.getElementById('signupPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('signupBtn').click();
+  });
 });
 </script>
 </body>
