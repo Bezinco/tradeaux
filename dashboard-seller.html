@@ -239,6 +239,8 @@
     .product-card .product-actions .post-auction-btn { background: linear-gradient(135deg, #00ced1, #00ff7f); color: #000; }
     .product-card .product-actions .post-auction-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,206,209,0.3); }
     .product-card .product-actions .post-auction-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .product-card .product-actions .cancel-auction-btn { background: rgba(255,217,102,0.15); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
+    .product-card .product-actions .cancel-auction-btn:hover { background: rgba(255,217,102,0.25); }
     .product-card .product-actions .edit-btn { background: rgba(255,217,102,0.2); color: #FFD966; border: 1px solid rgba(255,217,102,0.3); }
     .product-card .product-actions .edit-btn:hover { background: rgba(255,217,102,0.3); }
     .product-card .product-actions .delete-btn { background: rgba(255,59,59,0.15); color: #ff3b3b; border: 1px solid rgba(255,59,59,0.2); }
@@ -369,6 +371,7 @@
     .receivable-detail-modal button:focus-visible { outline: 3px solid #7CFC00; outline-offset: 2px; }
 
     .diagnostic-panel { position: fixed; bottom: 10px; right: 10px; z-index: 9998; background: rgba(2,6,23,0.95); border: 1px solid rgba(0,206,209,0.3); border-radius: 12px; padding: 12px 16px; max-width: 320px; max-height: 300px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 10px; color: #7CFC00; display: none; pointer-events: auto; }
+    .diagnostic-panel.show { display: block; }
     .diagnostic-panel .diag-title { color: #00ced1; font-weight: 700; font-size: 11px; margin-bottom: 6px; }
     .diagnostic-panel .diag-line { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .diagnostic-panel .diag-line .label { color: #9ca3af; }
@@ -428,6 +431,7 @@
 <input type="file" id="taxFileInput" class="hidden-input" accept=".pdf,.jpg,.png,.gif,.webp">
 <input type="file" id="headerLogoLeftInput" class="hidden-input" accept=".jpg,.png,.jpeg,.webp,.gif">
 <input type="file" id="headerLogoRightInput" class="hidden-input" accept=".jpg,.png,.jpeg,.webp,.gif">
+<input type="file" id="importFileInput" class="hidden-input" accept=".json,application/json">
 
 <main class="container" role="main" id="mainContent">
 
@@ -456,14 +460,13 @@
         </div>
         <button class="deposit-btn" id="depositBtn" type="button">+ Deposit</button>
         <button class="btn-neon" style="padding:4px 12px; font-size:10px;" id="tourBtn" type="button">🎯 Tour</button>
-        <button class="btn-neon" id="syncCloudBtn" style="padding:4px 12px; font-size:10px;" type="button">☁️ Sync</button>
         <button class="btn-neon" id="forceSaveBtn" style="padding:4px 12px; font-size:10px; border-color:#7CFC00; color:#7CFC00;" type="button">💾 Save</button>
         <button class="btn-neon" id="exportBtn" style="padding:4px 12px; font-size:10px; border-color:#FFD966; color:#FFD966;" type="button">📤 Export</button>
         <button class="btn-neon" id="importBtn" style="padding:4px 12px; font-size:10px; border-color:#FFD966; color:#FFD966;" type="button">📥 Import</button>
       </div>
       <a href="javascript:void(0)" id="marketplaceNav" role="button">Marketplace</a>
       <a href="javascript:void(0)" id="analyticsNav" role="button">Analytics</a>
-      <a href="index.html" class="sign-out" id="authBtn" role="button">🚪 Sign Out</a>
+      <a href="javascript:void(0)" class="sign-out" id="authBtn" role="button">🚪 Sign Out</a>
     </nav>
   </header>
 
@@ -895,7 +898,10 @@ function saveData(data) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     return true;
-  } catch(e) { return false; }
+  } catch(e) {
+    showToast('Storage full — could not save. Try removing photos or images.', 'error');
+    return false;
+  }
 }
 
 var APP = {
@@ -944,6 +950,16 @@ function loadAppData() {
   }
 }
 loadAppData();
+
+/* Reset "today" counters if the date changed */
+function refreshDailyCounters() {
+  var today = new Date().toISOString().slice(0, 10);
+  if (APP.tar.todayConversionsDate !== today) {
+    APP.tar.todayConversions = 0;
+    APP.tar.todayConversionsDate = today;
+    saveData(APP);
+  }
+}
 
 function setupHeaderLogos() {
   var leftLogo = $('headerLogoLeft');
@@ -1205,7 +1221,7 @@ function loadProductIntoModal(product) {
   if($('productIdealPrice')) { $('productIdealPrice').value = product.idealPrice || 4.25; if($('productIdealPriceVal')) $('productIdealPriceVal').textContent = '$' + (product.idealPrice || 4.25).toFixed(2) + ' / MT'; }
 }
 
-function saveProduct() {
+function saveProduct(afterSave) {
   var data = gatherProductData();
   if(!data) return;
 
@@ -1229,7 +1245,7 @@ function saveProduct() {
       sorted.forEach(function(i) { if(i < existing.length) existing.splice(i, 1); });
       APP._imageRemoveQueue = [];
       data.images = [].concat(existing, newImages).slice(0, 10);
-      saveProductData(data);
+      saveProductData(data, afterSave);
     });
     return;
   }
@@ -1243,10 +1259,10 @@ function saveProduct() {
   sorted.forEach(function(i) { if(i < existing.length) existing.splice(i, 1); });
   APP._imageRemoveQueue = [];
   data.images = existing;
-  saveProductData(data);
+  saveProductData(data, afterSave);
 }
 
-function saveProductData(data) {
+function saveProductData(data, afterSave) {
   var id = APP.currentEditId;
   if(id) {
     var idx = APP.products.findIndex(function(p) { return p.id === id; });
@@ -1255,18 +1271,63 @@ function saveProductData(data) {
     id = uuid();
     APP.products.push(Object.assign({ id: id }, data, { createdAt: Date.now() }));
   }
+  if(!saveData(APP)) { showToast('Storage full — product NOT saved', 'error'); return; }
+  if(typeof afterSave === 'function') afterSave(id);
   APP.currentEditId = null;
   APP._editImages = [];
   APP._imageRemoveQueue = [];
-  saveData(APP);
   renderAll();
   closeModal('productModal');
   showToast('Product saved!', 'success');
 }
 
+function postAuction(productId) {
+  var p = APP.products.find(function(x) { return x.id === productId; });
+  if(!p) return;
+  if(p.hasAuction) { showToast('Auction already active for this product', 'warning'); return; }
+  var when = p.scheduledStart ? new Date(p.scheduledStart) : new Date(Date.now() + 24 * 3600 * 1000);
+  if(isNaN(when.getTime())) when = new Date(Date.now() + 24 * 3600 * 1000);
+  var brief = {
+    id: uuid(),
+    product: p.name,
+    productId: p.id,
+    quantity: p.quantity,
+    auctionType: p.auctionType || 'standard',
+    idealPrice: p.idealPrice || 0,
+    auctionTime: when.toISOString(),
+    status: 'scheduled',
+    createdAt: Date.now(),
+    archived: false
+  };
+  APP.briefs.push(brief);
+  p.hasAuction = true;
+  if(!saveData(APP)) {
+    APP.briefs.pop();
+    p.hasAuction = false;
+    showToast('Storage full — auction NOT posted', 'error');
+    return;
+  }
+  renderAll();
+  showToast('Auction scheduled for ' + when.toLocaleDateString() + '!', 'success');
+}
+
+function cancelAuction(productId) {
+  var p = APP.products.find(function(x) { return x.id === productId; });
+  if(!p || !p.hasAuction) return;
+  if(!confirm('Cancel the active auction for "' + p.name + '"?')) return;
+  APP.briefs = (APP.briefs || []).filter(function(b) {
+    return !(b.productId === productId && (b.status === 'scheduled' || b.status === 'live'));
+  });
+  p.hasAuction = false;
+  saveData(APP);
+  renderAll();
+  showToast('Auction cancelled', 'info');
+}
+
 function deleteProduct(id) {
   if(!confirm('Delete this product?')) return;
   APP.products = APP.products.filter(function(p) { return p.id !== id; });
+  APP.briefs = (APP.briefs || []).filter(function(b) { return b.productId !== id; });
   saveData(APP);
   renderAll();
   showToast('Product deleted', 'info');
@@ -1285,6 +1346,7 @@ function openProductModal(productId) {
   if($('productOriginInput')) $('productOriginInput').value = '';
   if($('productPackageType')) $('productPackageType').value = '';
   if($('productPackageSize')) $('productPackageSize').value = '';
+  if($('productScheduledStart')) $('productScheduledStart').value = '';
   selectAuctionType('standard');
   if($('palletCount')) $('palletCount').value = '';
   if($('palletWeight')) $('palletWeight').value = '';
@@ -1423,7 +1485,7 @@ function renderCompany() {
     var el = $(id);
     if(el) {
       var v = vals[i];
-      el.textContent = (v === undefined || v === null || v === '' || v === 'undefined' || v === 'null') ? 'Not set' : escapeHtml(String(v));
+      el.textContent = (v === undefined || v === null || v === '') ? 'Not set' : String(v);
     }
   });
 
@@ -1447,7 +1509,7 @@ function renderCompany() {
   if(photos) {
     photos.innerHTML = '';
     var p = APP.company.photos || [];
-    p.forEach(function(src) {
+    p.forEach(function(src, idx) {
       if (src && src.startsWith('data:')) {
         var div = document.createElement('div');
         div.className = 'photo-item';
@@ -1455,6 +1517,23 @@ function renderCompany() {
         img.src = src;
         img.alt = 'Company photo';
         div.appendChild(img);
+        var rm = document.createElement('button');
+        rm.className = 'photo-remove';
+        rm.type = 'button';
+        rm.textContent = '×';
+        rm.setAttribute('aria-label', 'Remove photo');
+        rm.dataset.index = idx;
+        rm.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var i = parseInt(this.dataset.index);
+          if(!confirm('Remove this photo?')) return;
+          APP.company.photos.splice(i, 1);
+          saveData(APP);
+          renderCompany();
+          showToast('Photo removed', 'info');
+        });
+        div.appendChild(rm);
         photos.appendChild(div);
       }
     });
@@ -1499,8 +1578,6 @@ function renderProducts() {
     var auctionType = p.auctionType || 'standard';
     card.className = 'product-card ' + auctionType;
     var hasAuction = p.hasAuction || false;
-    var postBtnDisabled = hasAuction ? 'disabled style="opacity:0.4;"' : '';
-    var postBtnText = hasAuction ? 'Active' : 'Post Auction';
 
     var imgHtml = '';
     if (p.images && p.images.length > 0 && p.images[0] && p.images[0].startsWith('data:')) {
@@ -1509,13 +1586,17 @@ function renderProducts() {
       imgHtml = '<div class="no-image">📷 No image</div>';
     }
 
-    card.innerHTML = '<div class="cartouche">' + (auctionType.toUpperCase()) + '</div>' +
+    var auctionBtns = hasAuction
+      ? '<button class="cancel-auction-btn" type="button" data-product-id="' + p.id + '">⏹ Cancel Auction</button>'
+      : '<button class="post-auction-btn" type="button" data-product-id="' + p.id + '">📅 Post Auction</button>';
+
+    card.innerHTML = '<div class="cartouche">' + escapeHtml(auctionType.toUpperCase()) + '</div>' +
       '<div class="product-image">' + imgHtml + '</div>' +
       '<div class="product-name">' + escapeHtml(p.name) + '</div>' +
       '<div class="product-variety">' + escapeHtml(p.description || '') + '</div>' +
       '<div style="font-size:11px;color:#9ca3af;margin:4px 0;">📦 ' + escapeHtml(p.quantity || 0) + ' MT • ' + escapeHtml(p.grade || 'Standard') + '</div>' +
-      (hasAuction ? '<div style="color:#7CFC00;font-size:10px;">Auction active</div>' : '') +
-      '<div class="product-actions"><button class="post-auction-btn" type="button" ' + postBtnDisabled + ' data-product-id="' + p.id + '">' + postBtnText + '</button><button class="edit-btn" type="button" data-product-id="' + p.id + '">✏️ Edit</button><button class="delete-btn" type="button" data-product-id="' + p.id + '">🗑</button></div>';
+      (hasAuction ? '<div style="color:#7CFC00;font-size:10px;">✅ Auction active</div>' : '') +
+      '<div class="product-actions">' + auctionBtns + '<button class="edit-btn" type="button" data-product-id="' + p.id + '">✏️ Edit</button><button class="delete-btn" type="button" data-product-id="' + p.id + '">🗑</button></div>';
 
     grid.appendChild(card);
   });
@@ -1648,6 +1729,38 @@ function renderTARAdvisory() {
   text.innerHTML = msg;
 }
 
+function renderDiagnostic() {
+  var content = $('diagContent');
+  if(!content) return;
+  function line(label, value, cls) {
+    return '<div class="diag-line"><span class="label">' + escapeHtml(label) + ':</span> <span class="value ' + (cls || '') + '">' + escapeHtml(String(value)) + '</span></div>';
+  }
+  var storageBytes = 0;
+  try { storageBytes = (localStorage.getItem(STORAGE_KEY) || '').length; } catch(e) {}
+  var storageKB = (storageBytes / 1024).toFixed(1);
+  var storagePct = ((storageBytes / (5 * 1024 * 1024)) * 100).toFixed(1);
+  var photosCount = (APP.company.photos || []).length;
+  var productImgCount = 0;
+  (APP.products || []).forEach(function(p) { productImgCount += (p.images || []).length; });
+  var docCount = Object.keys(APP.company.documents || {}).length;
+
+  var html = '';
+  html += line('Storage Used', storageKB + ' KB (' + storagePct + '%)', storagePct > 80 ? 'error' : storagePct > 50 ? 'warning' : '');
+  html += line('Products', (APP.products || []).length);
+  html += line('Orders', (APP.orders || []).length);
+  html += line('Active Auctions', (APP.briefs || []).filter(function(b) { return !b.archived; }).length);
+  html += line('Archived Auctions', (APP.archivedAuctions || []).length);
+  html += line('Receivables', (APP.receivables || []).length);
+  html += line('Company Photos', photosCount);
+  html += line('Product Images', productImgCount);
+  html += line('Legal Documents', docCount);
+  html += line('Certificates', Object.keys(APP.certToggles || {}).length);
+  html += line('Wallet Balance', money(APP.wallet.balance));
+  html += line('Total Conversions', APP.tar.totalConversions || 0);
+  html += line('Today Conversions', APP.tar.todayConversions || 0);
+  content.innerHTML = html;
+}
+
 function renderAll() {
   renderCompany();
   renderStats();
@@ -1659,6 +1772,7 @@ function renderAll() {
   renderArchive();
   renderAuctionSchedule();
   renderTARAdvisory();
+  renderDiagnostic();
 }
 
 function setupFileUploads() {
@@ -1737,9 +1851,63 @@ function setupFileUploads() {
   if(incorpBtn && incorpInput) { incorpBtn.onclick = function(e) { e.preventDefault(); incorpInput.click(); }; incorpInput.onchange = function(e) { handleDocUpload(e, 'incorporation', 'incorpDocStatus'); }; }
   if(licBtn && licInput) { licBtn.onclick = function(e) { e.preventDefault(); licInput.click(); }; licInput.onchange = function(e) { handleDocUpload(e, 'license', 'licenseDocStatus'); }; }
   if(taxBtn && taxInput) { taxBtn.onclick = function(e) { e.preventDefault(); taxInput.click(); }; taxInput.onchange = function(e) { handleDocUpload(e, 'tax', 'taxDocStatus'); }; }
+
+  var importInput = $('importFileInput');
+  if(importInput) {
+    importInput.onchange = function(e) {
+      var file = e.target.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          var parsed = JSON.parse(ev.target.result);
+          if(!parsed || typeof parsed !== 'object') throw new Error('Invalid file format');
+          if(!confirm('This will replace all current data with the imported file. Continue?')) { return; }
+          if(parsed.wallet) APP.wallet = parsed.wallet;
+          if(parsed.company) APP.company = parsed.company;
+          if(parsed.products) APP.products = parsed.products;
+          if(parsed.orders) APP.orders = parsed.orders;
+          if(parsed.receivables) APP.receivables = parsed.receivables;
+          if(parsed.conversions) APP.conversions = parsed.conversions;
+          if(parsed.certToggles) APP.certToggles = parsed.certToggles;
+          if(parsed.briefs) APP.briefs = parsed.briefs;
+          if(parsed.archivedAuctions) APP.archivedAuctions = parsed.archivedAuctions;
+          if(parsed.tar) APP.tar = parsed.tar;
+          if(!saveData(APP)) { showToast('Import failed — storage full', 'error'); return; }
+          renderAll();
+          showToast('Data imported successfully!', 'success');
+        } catch(err) {
+          showToast('Import failed: ' + err.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+      this.value = '';
+    };
+  }
+}
+
+function exportData() {
+  try {
+    var dataStr = JSON.stringify(APP, null, 2);
+    var blob = new Blob([dataStr], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var d = new Date().toISOString().slice(0, 10);
+    var name = (APP.company.name || 'tradeaux').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    a.href = url;
+    a.download = name + '-export-' + d + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    showToast('Exported ' + (dataStr.length / 1024).toFixed(1) + ' KB', 'success');
+  } catch(e) {
+    showToast('Export failed: ' + e.message, 'error');
+  }
 }
 
 function init() {
+  refreshDailyCounters();
   setupHeaderLogos();
   setupCompanyName();
   setupFileUploads();
@@ -1748,7 +1916,9 @@ function init() {
   var addBtn = $('addProductBtn');
   if(addBtn) addBtn.addEventListener('click', function() { openProductModal(); });
   var saveBtn = $('saveProductBtn');
-  if(saveBtn) saveBtn.addEventListener('click', saveProduct);
+  if(saveBtn) saveBtn.addEventListener('click', function() { saveProduct(); });
+  var savePostBtn = $('saveAndPostBtn');
+  if(savePostBtn) savePostBtn.addEventListener('click', function() { saveProduct(function(newId) { postAuction(newId); }); });
   var cancelBtn = $('cancelProductBtn');
   if(cancelBtn) cancelBtn.addEventListener('click', function() { closeModal('productModal'); });
   var closeBtn = $('closeProductModal');
@@ -1762,6 +1932,8 @@ function init() {
       var id = btn.dataset.productId;
       if(btn.classList.contains('edit-btn')) { openProductModal(id); }
       else if(btn.classList.contains('delete-btn')) { deleteProduct(id); }
+      else if(btn.classList.contains('post-auction-btn')) { postAuction(id); }
+      else if(btn.classList.contains('cancel-auction-btn')) { cancelAuction(id); }
     });
   }
 
@@ -1872,9 +2044,18 @@ function init() {
   }
 
   var forceBtn = $('forceSaveBtn');
-  if(forceBtn) forceBtn.addEventListener('click', function() { saveData(APP); showToast('Data saved!', 'success'); });
-  var syncBtn = $('syncCloudBtn');
-  if(syncBtn) syncBtn.addEventListener('click', function() { saveData(APP); showToast('Synced!', 'success'); });
+  if(forceBtn) forceBtn.addEventListener('click', function() {
+    if(saveData(APP)) showToast('Data saved to this device!', 'success');
+  });
+
+  var exportBtn = $('exportBtn');
+  if(exportBtn) exportBtn.addEventListener('click', exportData);
+
+  var importBtn = $('importBtn');
+  if(importBtn) importBtn.addEventListener('click', function() {
+    var input = $('importFileInput');
+    if(input) input.click();
+  });
 
   var archiveHeader = $('archiveHeader');
   var archiveCollapse = $('archiveCollapse');
@@ -1882,6 +2063,9 @@ function init() {
     archiveHeader.addEventListener('click', function() {
       archiveCollapse.classList.toggle('open');
       archiveHeader.classList.toggle('open');
+    });
+    archiveHeader.addEventListener('keydown', function(e) {
+      if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
     });
   }
 
@@ -1909,14 +2093,14 @@ function init() {
   var autoBtn = $('tarAutoConvertBtn');
   if(autoBtn) {
     autoBtn.addEventListener('click', function() {
-      var ready = APP.receivables.filter(function(r) { return r.status === 'ready' && !r.converted && r.amount >= 1.00; });
-      if(ready.length === 0) { showToast('No ready receivables to convert', 'warning'); return; }
+      var ready = APP.receivables.filter(function(r) { return r.status === 'ready' && !r.converted && r.amount > 25; });
+      if(ready.length === 0) { showToast('No ready receivables to convert (min $25 after fee)', 'warning'); return; }
       var count = 0;
       ready.forEach(function(r) {
         if(!r.converted) {
           var fee = 25;
           var payout = r.amount - fee;
-          if(payout < 0 && APP.wallet.balance < Math.abs(payout)) return;
+          if(payout <= 0) return;
           r.converted = true;
           r.convertedAt = new Date().toISOString();
           APP.wallet.balance = Number(APP.wallet.balance) + payout;
@@ -2019,6 +2203,22 @@ function init() {
     packSize.addEventListener('change', updatePackaging);
     updatePackaging();
   }
+
+  var diagToggle = $('diagToggle');
+  var diagPanel = $('diagnosticPanel');
+  if(diagToggle && diagPanel) {
+    diagToggle.addEventListener('click', function() {
+      var isShown = diagPanel.classList.toggle('show');
+      if(isShown) renderDiagnostic();
+    });
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if(e.key === 'Escape') { document.querySelectorAll('.modal.show').forEach(function(m) { m.classList.remove('show'); }); }
+  });
+  document.querySelectorAll('.modal').forEach(function(m) {
+    m.addEventListener('click', function(e) { if(e.target === m) m.classList.remove('show'); });
+  });
 
   showToast('Dashboard ready!', 'success');
 }
