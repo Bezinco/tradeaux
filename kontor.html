@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TradeAux • Kontor Sphere • Live</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; overflow: hidden; }
+
+    .bg-waves { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .wave-bg { position: absolute; width: 200%; height: 200%; filter: blur(100px); opacity: 0.2; animation: waveBgDrift 24s ease-in-out infinite; }
+    .wave-emerald-bg { background: radial-gradient(circle at 30% 40%, rgba(124,252,0,0.4), transparent 70%); top: -40%; left: -20%; animation-delay: 0s; }
+    .wave-sapphire-bg { background: radial-gradient(circle at 50% 50%, rgba(0,206,209,0.4), transparent 70%); top: -30%; left: -10%; animation-delay: 8s; }
+    .wave-ruby-bg { background: radial-gradient(circle at 70% 60%, rgba(158,74,74,0.4), transparent 70%); top: -20%; left: 0%; animation-delay: 16s; }
+    @keyframes waveBgDrift { 0% { transform: translate(0,0) scale(1); opacity: 0.15; } 50% { transform: translate(40px,-30px) scale(1.05); opacity: 0.25; } 100% { transform: translate(-30px,20px) scale(1); opacity: 0.15; } }
+
+    .header-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.6), transparent); }
+    .kontor-title { display: flex; align-items: center; gap: 14px; }
+    .kontor-title .flag { font-size: 34px; }
+    .kontor-title .name { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: #00ced1; }
+    .kontor-title .clock { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #7CFC00; margin-top: 2px; }
+    .kontor-title .date { font-size: 10px; color: #9ca3af; }
+
+    .search-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 640px; flex: 1; }
+    .search-input { flex: 1; min-width: 160px; padding: 9px 14px; background: rgba(15,32,64,0.8); border: 1px solid rgba(0,206,209,0.3); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 13px; }
+    .search-input:focus { outline: none; border-color: #00ced1; box-shadow: 0 0 15px rgba(0,206,209,0.2); }
+    .search-select { padding: 9px 12px; background: rgba(15,32,64,0.8); border: 1px solid rgba(0,206,209,0.3); border-radius: 10px; color: #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer; }
+    .search-select:focus { outline: none; border-color: #00ced1; }
+    .search-btn { padding: 9px 18px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #000; cursor: pointer; }
+    .search-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,206,209,0.4); }
+    .clear-btn { padding: 9px 14px; background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.3); border-radius: 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: #ff3b3b; cursor: pointer; }
+    .clear-btn:hover { background: rgba(255,59,59,0.2); }
+
+    .demo-controller { position: fixed; bottom: 20px; left: 20px; z-index: 100; background: rgba(2,6,23,0.92); border: 1px solid rgba(255,217,102,0.3); border-radius: 14px; padding: 12px 16px; backdrop-filter: blur(10px); width: 260px; }
+    .demo-controller h4 { font-family: 'Orbitron', sans-serif; font-size: 10px; color: #FFD966; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .demo-controller .demo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 11px; }
+    .demo-controller .demo-row label { color: #9ca3af; min-width: 60px; }
+    .demo-controller .demo-row select, .demo-controller .demo-row input { flex: 1; padding: 5px 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,217,102,0.2); border-radius: 6px; color: #e5e7eb; font-size: 11px; font-family: 'Inter', sans-serif; }
+    .demo-controller .demo-row input[type=range] { padding: 0; }
+    .demo-controller .demo-toggle { display: flex; gap: 8px; margin-top: 8px; }
+    .demo-controller .demo-toggle button { flex: 1; padding: 6px; background: rgba(255,217,102,0.1); border: 1px solid rgba(255,217,102,0.3); border-radius: 6px; color: #FFD966; font-size: 10px; font-weight: 600; cursor: pointer; }
+    .demo-controller .demo-toggle button.active { background: rgba(124,252,0,0.2); border-color: #7CFC00; color: #7CFC00; }
+
+    .sphere-stage { position: fixed; inset: 0; z-index: 1; perspective: 1800px; overflow: hidden; }
+    .sphere { position: absolute; top: 50%; left: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+
+    .company-card {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      padding: 8px 5px;
+      background: linear-gradient(145deg, rgba(15,32,64,0.92), rgba(2,6,23,0.96));
+      border: 1px solid rgba(0,206,209,0.35);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.4s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+      box-shadow: 0 0 12px rgba(0,206,209,0.12);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transform-origin: center center;
+    }
+    .company-card:hover { border-color: #00ced1; box-shadow: 0 0 25px rgba(0,206,209,0.6); z-index: 10; }
+    .company-card.dimmed { opacity: 0.06 !important; }
+    .company-card.highlighted { border-color: #7CFC00; box-shadow: 0 0 30px rgba(124,252,0,0.8); background: linear-gradient(145deg, rgba(15,50,30,0.95), rgba(2,6,23,0.98)); }
+    .company-card.hot { border-color: #FFD966; box-shadow: 0 0 35px rgba(255,217,102,0.7); }
+    .company-card.cool { opacity: 0.5; }
+    .company-card .card-icon { font-size: 19px; line-height: 1; }
+    .company-card .card-name { font-size: 9px; font-weight: 700; color: #e5e7eb; line-height: 1.1; margin-top: 1px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; padding: 0 2px; }
+    .company-card .card-rating { font-size: 8px; color: #FFD966; margin-top: 1px; }
+    .company-card .card-industry { font-size: 7px; padding: 1px 5px; border-radius: 6px; margin-top: 1px; display: inline-block; background: rgba(0,206,209,0.15); color: #00ced1; border: 1px solid rgba(0,206,209,0.3); }
+
+    .ray-canvas { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+
+    .metrics-panel { position: fixed; bottom: 290px; left: 20px; z-index: 50; width: 240px; background: rgba(2,6,23,0.92); border: 1px solid rgba(0,206,209,0.35); border-radius: 14px; padding: 14px 16px; backdrop-filter: blur(10px); max-height: calc(100vh - 400px); overflow-y: auto; }
+    .metrics-panel h4 { font-family: 'Orbitron', sans-serif; font-size: 10px; color: #00ced1; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .metrics-panel .live-dot { width: 8px; height: 8px; background: #7CFC00; border-radius: 50%; animation: livePulse 1.5s infinite; }
+    @keyframes livePulse { 0%, 100% { opacity: 1; box-shadow: 0 0 5px #7CFC00; } 50% { opacity: 0.4; box-shadow: 0 0 15px #7CFC00; } }
+    .metric-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-row .metric-label { color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-row .metric-value { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; color: #7CFC00; }
+    .metric-row .metric-value.cyan { color: #00ced1; }
+    .metric-row .metric-value.gold { color: #FFD966; }
+    .metric-row .metric-value.red { color: #ff3b3b; }
+    .metric-row .metric-value.neutral { color: #e5e7eb; }
+    .metric-row.big { padding: 9px 0; }
+    .metric-row.big .metric-value { font-size: 16px; }
+    .metric-divider { height: 1px; background: rgba(0,206,209,0.15); margin: 8px 0; }
+    .metric-label-section { font-family: 'Orbitron', sans-serif; font-size: 9px; color: #FFD966; letter-spacing: 1px; text-transform: uppercase; margin: 8px 0 4px; }
+
+    .legend { position: fixed; top: 90px; right: 20px; z-index: 50; background: rgba(2,6,23,0.9); border: 1px solid rgba(0,206,209,0.25); border-radius: 12px; padding: 12px 14px; font-size: 10px; max-width: 220px; backdrop-filter: blur(8px); }
+    .legend h4 { font-family: 'Orbitron', sans-serif; font-size: 9px; color: #00ced1; margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
+    .legend h4.xray { color: #7CFC00; margin-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: #cbd5e6; font-size: 9px; }
+    .legend-item .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-item .dot.green { background: #7CFC00; box-shadow: 0 0 8px #7CFC00; }
+    .legend-item .dot.cyan { background: #00ced1; }
+    .legend-item .dot.dim { background: rgba(255,255,255,0.15); }
+    .legend-item .dot.hot { background: #FFD966; box-shadow: 0 0 8px #FFD966; }
+    .legend-item .dot.teal { background: #00ced1; box-shadow: 0 0 8px #00ced1; }
+    .legend-item .dot.lime { background: #7CFC00; box-shadow: 0 0 8px #7CFC00; }
+    .legend-item .dot.gold { background: #FFD966; box-shadow: 0 0 8px #FFD966; }
+    .legend-item .dot.red { background: #ff3b3b; box-shadow: 0 0 8px #ff3b3b; }
+    .legend-item .dot.purple { background: #a855f7; box-shadow: 0 0 8px #a855f7; }
+    .legend-item .dot.orange { background: #fb923c; box-shadow: 0 0 8px #fb923c; }
+    .legend-item .dot.white { background: #ffffff; box-shadow: 0 0 8px #ffffff; }
+
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(15,32,64,0.98); border: 1px solid #00ced1; padding: 12px 24px; border-radius: 40px; font-family: 'Orbitron', sans-serif; font-size: 13px; transition: 0.3s; opacity: 0; z-index: 20000; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: #ff3b3b; color: #ff3b3b; }
+    .toast.success { border-color: #7CFC00; color: #7CFC00; }
+    .toast.info { border-color: #00ced1; color: #00ced1; }
+
+    .empty-sphere-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3; text-align: center; pointer-events: none; }
+    .empty-sphere-msg .big { font-family: 'Orbitron', sans-serif; font-size: 48px; color: rgba(0,206,209,0.15); margin-bottom: 16px; }
+    .empty-sphere-msg .msg { font-size: 16px; color: rgba(156,163,175,0.5); }
+    .empty-sphere-msg .sub { font-size: 12px; color: rgba(156,163,175,0.3); margin-top: 8px; }
+
+    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(2,6,23,0.85); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: linear-gradient(145deg, rgba(15,32,64,0.98), rgba(2,6,23,0.99)); border: 2px solid rgba(0,206,209,0.4); border-radius: 20px; padding: 28px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal .modal-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,59,59,0.15); border: 1px solid rgba(255,59,59,0.3); color: #ff3b3b; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .modal .modal-close:hover { background: rgba(255,59,59,0.3); }
+    .modal .company-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(0,206,209,0.15); }
+    .modal .company-header .company-icon { font-size: 48px; }
+    .modal .company-header .company-info h2 { font-family: 'Orbitron', sans-serif; font-size: 20px; color: #00ced1; margin-bottom: 4px; }
+    .modal .company-header .company-info .company-loc { font-size: 12px; color: #9ca3af; }
+    .modal .company-header .company-info .company-rating { font-size: 12px; color: #FFD966; margin-top: 4px; }
+    .modal .products-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #7CFC00; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+    .modal .product-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .modal .product-item:last-child { border-bottom: none; }
+    .modal .product-item .product-name { font-size: 13px; color: #e5e7eb; }
+    .modal .product-item .product-price { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #7CFC00; }
+    .modal .product-item .add-btn { padding: 6px 14px; background: rgba(124,252,0,0.15); border: 1px solid rgba(124,252,0,0.3); border-radius: 6px; color: #7CFC00; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .modal .product-item .add-btn:hover { background: rgba(124,252,0,0.25); }
+    .modal .ledger-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #FFD966; letter-spacing: 1px; text-transform: uppercase; margin: 20px 0 12px; }
+    .modal .ledger-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .modal .ledger-row .ledger-label { color: #9ca3af; }
+    .modal .ledger-row .ledger-value { font-family: 'Orbitron', sans-serif; font-weight: 600; }
+    .modal .ledger-row .ledger-value.in { color: #7CFC00; }
+    .modal .ledger-row .ledger-value.out { color: #ff3b3b; }
+    .modal .ledger-row .ledger-value.balance { color: #00ced1; }
+    .modal .checkout-btn { width: 100%; margin-top: 16px; padding: 12px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #000; cursor: pointer; }
+    .modal .checkout-btn:hover { transform: scale(1.01); box-shadow: 0 0 20px rgba(0,206,209,0.4); }
+
+    @media (max-width: 1100px) {
+      .metrics-panel { width: 200px; bottom: 280px; }
+      .legend { display: none; }
+    }
+    @media (max-width: 700px) {
+      .metrics-panel { display: none; }
+      .demo-controller { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-waves" aria-hidden="true">
+    <div class="wave-bg wave-emerald-bg"></div>
+    <div class="wave-bg wave-sapphire-bg"></div>
+    <div class="wave-bg wave-ruby-bg"></div>
+  </div>
+
+  <header class="header-bar">
+    <div class="kontor-title">
+      <span class="flag" id="kontorFlag">🇨🇦</span>
+      <div>
+        <div class="name" id="kontorName">TORONTO KONTOR</div>
+        <div class="clock" id="kontorClock">--:--:--</div>
+        <div class="date" id="kontorDate">---</div>
+      </div>
+    </div>
+    <div class="search-bar">
+      <select class="search-select" id="searchScope">
+        <option value="local">Local Kontor</option>
+        <option value="all">Search All Kontors</option>
+      </select>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search companies, industries...">
+      <select class="search-select" id="industryFilter">
+        <option value="">All Industries</option>
+        <option value="Bakery">Bakery</option>
+        <option value="Spirits">Spirits</option>
+        <option value="Coffee">Coffee</option>
+        <option value="Honey">Honey</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Olive Oil">Olive Oil</option>
+        <option value="Cacao">Cacao</option>
+        <option value="Coconut">Coconut</option>
+        <option value="Preserves">Preserves</option>
+        <option value="Wine">Wine</option>
+      </select>
+      <button class="search-btn" id="searchBtn">🔍 Search</button>
+      <button class="clear-btn" id="clearBtn">✕ Clear</button>
+    </div>
+  </header>
+
+  <div class="sphere-stage" id="sphereStage">
+    <div class="sphere" id="sphere"></div>
+  </div>
+
+  <div class="empty-sphere-msg" id="emptyMsg">
+    <div class="big">🌐</div>
+    <div class="msg">No companies yet</div>
+    <div class="sub">Companies appear here as they join the Kontor</div>
+  </div>
+
+  <canvas class="ray-canvas" id="rayCanvas"></canvas>
+
+  <div class="metrics-panel">
+    <h4><span class="live-dot"></span> Live Market</h4>
+
+    <div class="metric-row big">
+      <span class="metric-label">Market</span>
+      <span class="metric-value cyan" id="hudMarket">PEAK</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">Companies</span>
+      <span class="metric-value neutral" id="hudCompanies">0</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">Events/min</span>
+      <span class="metric-value neutral" id="hudPayments">0</span>
+    </div>
+
+    <div class="metric-divider"></div>
+
+    <div class="metric-label-section">💰 Flow</div>
+    <div class="metric-row">
+      <span class="metric-label">Volume</span>
+      <span class="metric-value" id="hudVolume">0 cr</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Velocity</span>
+      <span class="metric-value" id="hudVelocity">0.0x</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Net Flow</span>
+      <span class="metric-value" id="hudNetFlow">0 cr</span>
+    </div>
+
+    <div class="metric-divider"></div>
+
+    <div class="metric-label-section">⚙️ TradeAux Revenue</div>
+    <div class="metric-row">
+      <span class="metric-label">Transfer fees</span>
+      <span class="metric-value gold" id="adminTransferFees">0 cr</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Auction fees</span>
+      <span class="metric-value gold" id="adminAuctionFees">0 cr</span>
+    </div>
+    <div class="metric-row big">
+      <span class="metric-label">Total /min</span>
+      <span class="metric-value gold" id="adminRevenue">0 cr</span>
+    </div>
+
+    <div class="metric-divider"></div>
+
+    <div class="metric-label-section">🏦 Credits</div>
+    <div class="metric-row">
+      <span class="metric-label">Issued</span>
+      <span class="metric-value neutral" id="adminIssued">0 cr</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Circulation</span>
+      <span class="metric-value cyan" id="adminCirculation">0 cr</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <h4>Node States</h4>
+    <div class="legend-item"><span class="dot hot"></span> Hot (high activity)</div>
+    <div class="legend-item"><span class="dot green"></span> Highlighted match</div>
+    <div class="legend-item"><span class="dot cyan"></span> Normal</div>
+    <div class="legend-item"><span class="dot dim"></span> Dimmed / quiet</div>
+    <h4 class="xray">Economic X-Ray</h4>
+    <div class="legend-item"><span class="dot teal"></span> Credits payment</div>
+    <div class="legend-item"><span class="dot lime"></span> Goods delivered</div>
+    <div class="legend-item"><span class="dot gold"></span> Auction win</div>
+    <div class="legend-item"><span class="dot red"></span> Fee to TradeAux</div>
+    <div class="legend-item"><span class="dot purple"></span> Cross-Kontor comet</div>
+    <div class="legend-item"><span class="dot orange"></span> Insurance activated</div>
+    <div class="legend-item"><span class="dot white"></span> New company joining</div>
+  </div>
+
+  <div class="demo-controller">
+    <h4>🎬 Demo Controller</h4>
+    <div class="demo-row">
+      <label>Kontor</label>
+      <select id="demoKontor">
+        <optgroup label="🇨🇦 Canada">
+          <option value="toronto">🇨🇦 Toronto</option>
+          <option value="montreal">🇨🇦 Montreal</option>
+          <option value="vancouver">🇨🇦 Vancouver</option>
+          <option value="calgary">🇨🇦 Calgary</option>
+          <option value="edmonton">🇨🇦 Edmonton</option>
+          <option value="ottawa">🇨🇦 Ottawa</option>
+          <option value="winnipeg">🇨🇦 Winnipeg</option>
+          <option value="quebeccity">🇨🇦 Quebec City</option>
+          <option value="hamilton">🇨🇦 Hamilton</option>
+          <option value="kitchener">🇨🇦 Kitchener</option>
+          <option value="london">🇨🇦 London</option>
+          <option value="victoria">🇨🇦 Victoria</option>
+          <option value="halifax">🇨🇦 Halifax</option>
+          <option value="saskatoon">🇨🇦 Saskatoon</option>
+          <option value="regina">🇨🇦 Regina</option>
+        </optgroup>
+        <optgroup label="🌏 International">
+          <option value="davao">🇵🇭 Davao</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label>Day</label>
+      <select id="demoDay">
+        <option value="0">Sunday</option>
+        <option value="1">Monday</option>
+        <option value="2">Tuesday</option>
+        <option value="3">Wednesday</option>
+        <option value="4">Thursday</option>
+        <option value="5">Friday</option>
+        <option value="6">Saturday</option>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label>Hour</label>
+      <input type="range" id="demoHour" min="0" max="23" value="14">
+      <span id="demoHourLabel" style="color:#7CFC00; font-family:'Orbitron',sans-serif; font-size:11px; min-width:32px;">14:00</span>
+    </div>
+    <div class="demo-row">
+      <label>Scenario</label>
+      <select id="demoScenario">
+        <option value="normal">Normal Day</option>
+        <option value="auction">Auction Day</option>
+        <option value="crisis">Currency Crisis</option>
+        <option value="newkontor">New Kontor Opening</option>
+        <option value="holiday">Holiday</option>
+      </select>
+    </div>
+    <div class="demo-toggle">
+      <button id="demoLive" class="active">▶ LIVE</button>
+      <button id="demoPause">⏸ PAUSE</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    function showToast(msg, type = 'info') {
+      const t = $('toast'); if (!t) return;
+      t.textContent = msg.length > 70 ? msg.substring(0, 67) + '...' : msg;
+      t.className = 'toast visible ' + type;
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+    // ============================================================
+    // KONTORS — 15 Canadian cities + Davao
+    // ============================================================
+    const KONTORS = {
+      toronto: {
+        flag: '🇨🇦', name: 'Toronto Kontor', tz: 'America/Toronto',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      montreal: {
+        flag: '🇨🇦', name: 'Montreal Kontor', tz: 'America/Toronto',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:6,day:24,name:'Saint-Jean-Baptiste'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:12,day:25,name:'Christmas'}
+        ]
+      },
+      vancouver: {
+        flag: '🇨🇦', name: 'Vancouver Kontor', tz: 'America/Vancouver',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'BC Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      calgary: {
+        flag: '🇨🇦', name: 'Calgary Kontor', tz: 'America/Edmonton',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'Heritage Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      edmonton: {
+        flag: '🇨🇦', name: 'Edmonton Kontor', tz: 'America/Edmonton',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'Heritage Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      ottawa: {
+        flag: '🇨🇦', name: 'Ottawa Kontor', tz: 'America/Toronto',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      winnipeg: {
+        flag: '🇨🇦', name: 'Winnipeg Kontor', tz: 'America/Winnipeg',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'Terry Fox Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      quebeccity: {
+        flag: '🇨🇦', name: 'Quebec City Kontor', tz: 'America/Toronto',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:6,day:24,name:'Saint-Jean-Baptiste'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:12,day:25,name:'Christmas'}
+        ]
+      },
+      hamilton: {
+        flag: '🇨🇦', name: 'Hamilton Kontor', tz: 'America/Toronto',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'Civic Holiday'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      kitchener: {
+        flag: '🇨🇦', name: 'Kitchener Kontor', tz: 'America/Toronto',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      london: {
+        flag: '🇨🇦', name: 'London Kontor', tz: 'America/Toronto',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      victoria: {
+        flag: '🇨🇦', name: 'Victoria Kontor', tz: 'America/Vancouver',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'BC Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      halifax: {
+        flag: '🇨🇦', name: 'Halifax Kontor', tz: 'America/Halifax',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'Natal Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      saskatoon: {
+        flag: '🇨🇦', name: 'Saskatoon Kontor', tz: 'America/Regina',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'Saskatchewan Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      regina: {
+        flag: '🇨🇦', name: 'Regina Kontor', tz: 'America/Regina',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:7,day:1,name:'Canada Day'},
+          {month:8,week:1,weekday:1,name:'Saskatchewan Day'},
+          {month:9,week:1,weekday:1,name:'Labour Day'},
+          {month:10,week:2,weekday:1,name:'Thanksgiving'},
+          {month:11,day:11,name:'Remembrance Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:26,name:'Boxing Day'}
+        ]
+      },
+      davao: {
+        flag: '🇵🇭', name: 'Davao Export Kontor', tz: 'Asia/Manila',
+        holidays: [
+          {month:1,day:1,name:'New Year'},
+          {month:4,day:9,name:'Araw ng Kagitingan'},
+          {month:6,day:12,name:'Independence Day'},
+          {month:11,day:30,name:'Bonifacio Day'},
+          {month:12,day:25,name:'Christmas'},
+          {month:12,day:30,name:'Rizal Day'}
+        ]
+      }
+    };
+
+    const RAY_TYPES = {
+      PAYMENT:     { color: '#00ced1', label: 'Credits payment',     weight: 40, speed: [0.014, 0.024], thickness: 2,   valueRange: [100, 5000] },
+      DELIVERY:    { color: '#7CFC00', label: 'Goods delivered',     weight: 25, speed: [0.018, 0.028], thickness: 2.5, valueRange: [50, 3000] },
+      AUCTION:     { color: '#FFD966', label: 'Auction win',         weight: 10, speed: [0.010, 0.018], thickness: 3,   valueRange: [500, 15000] },
+      FEE:         { color: '#ff3b3b', label: 'Fee to TradeAux',     weight: 8,  speed: [0.025, 0.035], thickness: 1.5, valueRange: [1, 5] },
+      CROSSKONTOR: { color: '#a855f7', label: 'Cross-Kontor flow',   weight: 7,  speed: [0.008, 0.014], thickness: 3.5, valueRange: [1000, 25000] },
+      INSURANCE:   { color: '#fb923c', label: 'Insurance activated', weight: 5,  speed: [0.016, 0.024], thickness: 2.5, valueRange: [200, 5000] },
+      NEWCOMPANY:  { color: '#ffffff', label: 'New company joining', weight: 5,  speed: [0.006, 0.012], thickness: 4,   valueRange: [0, 0] }
+    };
+
+    // ============================================================
+    // COMPANIES — EMPTY. Populated as buyers/sellers sign on.
+    // ============================================================
+    let COMPANIES = [];
+
+    let currentKontor = 'toronto';
+    let cardElements = [];
+    let driftTime = 0;
+    let activityScores = {};
+    let demoState = { live: true, day: null, hour: null, scenario: 'normal' };
+
+    let SYSTEM_TOTAL_CREDITS = 0;
+
+    const METRICS = {
+      events: [],
+      addEvent(fromKontor, toKontor, value, type) {
+        this.events.push({ ts: Date.now(), fromKontor, toKontor, value, type });
+        const cutoff = Date.now() - 5 * 60 * 1000;
+        this.events = this.events.filter(e => e.ts >= cutoff);
+      },
+      getVolume() {
+        const cutoff = Date.now() - 60 * 1000;
+        return this.events.filter(e => e.ts >= cutoff).reduce((sum, e) => sum + e.value, 0);
+      },
+      getVelocity() { return SYSTEM_TOTAL_CREDITS > 0 ? this.getVolume() / SYSTEM_TOTAL_CREDITS : 0; },
+      getNetFlow(kontorId) {
+        const cutoff = Date.now() - 60 * 1000;
+        let net = 0;
+        this.events.filter(e => e.ts >= cutoff).forEach(e => {
+          if (e.toKontor === kontorId) net += e.value;
+          if (e.fromKontor === kontorId) net -= e.value;
+        });
+        return net;
+      },
+      getPaymentCount() {
+        const cutoff = Date.now() - 60 * 1000;
+        return this.events.filter(e => e.ts >= cutoff).length;
+      },
+      getFeesLastMin() {
+        const cutoff = Date.now() - 60 * 1000;
+        return this.events.filter(e => e.ts >= cutoff && e.type === 'FEE').reduce((sum, e) => sum + e.value, 0);
+      },
+      getAuctionFeesLastMin() {
+        const cutoff = Date.now() - 60 * 1000;
+        return this.events.filter(e => e.ts >= cutoff && e.type === 'AUCTION').reduce((sum, e) => sum + e.value, 0);
+      }
+    };
+
+    function isHoliday(kontorId, date) {
+      const k = KONTORS[kontorId];
+      if (!k || !k.holidays) return false;
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const weekday = date.getDay();
+      for (const h of k.holidays) {
+        if (h.month !== month) continue;
+        if (h.day && h.day === day) return h.name;
+        if (h.week && h.weekday !== undefined) {
+          const firstDay = new Date(date.getFullYear(), month - 1, 1).getDay();
+          const nth = Math.floor((day - 1 + firstDay) / 7) + 1;
+          if (nth === h.week && weekday === h.weekday) return h.name;
+        }
+      }
+      return false;
+    }
+
+    function getMarketState() {
+      let now;
+      if (demoState.live) {
+        now = new Date();
+        const k = KONTORS[currentKontor];
+        const localStr = now.toLocaleString('en-US', { timeZone: k.tz });
+        now = new Date(localStr);
+      } else {
+        const base = new Date();
+        const d = demoState.day !== null ? demoState.day : base.getDay();
+        const h = demoState.hour !== null ? demoState.hour : base.getHours();
+        now = new Date(base.getFullYear(), base.getMonth(), base.getDate() - base.getDay() + d, h, 0, 0);
+      }
+      const hour = now.getHours();
+      const day = now.getDay();
+      const holiday = isHoliday(currentKontor, now);
+      let state, multiplier;
+      if (holiday) { state = 'HOLIDAY'; multiplier = 0.05; }
+      else if (day === 0) { state = 'RESTING'; multiplier = 0.1; }
+      else if (hour < 7) { state = 'RESTING'; multiplier = 0.05; }
+      else if (hour < 9) { state = 'WAKING'; multiplier = 0.4; }
+      else if (hour < 12) { state = 'PEAK'; multiplier = 1.0; }
+      else if (hour < 14) { state = 'LUNCH'; multiplier = 0.6; }
+      else if (hour < 18) { state = 'PEAK'; multiplier = 1.0; }
+      else if (hour < 21) { state = 'SLOWING'; multiplier = 0.5; }
+      else { state = 'RESTING'; multiplier = 0.2; }
+      if (demoState.scenario === 'auction') multiplier *= 1.5;
+      if (demoState.scenario === 'crisis') multiplier *= 2.0;
+      if (demoState.scenario === 'newkontor') multiplier *= 0.3;
+      if (demoState.scenario === 'holiday') multiplier = 0.05;
+      return { state, multiplier, holiday, hour, day };
+    }
+
+    function initActivityScores() {
+      COMPANIES.forEach(c => { activityScores[c.id] = 0.3 + Math.random() * 0.4; });
+    }
+
+    function updateActivityScores() {
+      COMPANIES.forEach(c => {
+        const delta = (Math.random() - 0.48) * 0.04;
+        activityScores[c.id] = Math.max(0, Math.min(1, activityScores[c.id] + delta));
+      });
+    }
+
+    function fibonacciSphere(n, radius) {
+      const points = [];
+      const phi = Math.PI * (3 - Math.sqrt(5));
+      for (let i = 0; i < n; i++) {
+        const y = 1 - (i / (n - 1)) * 2;
+        const r = Math.sqrt(1 - y * y);
+        const theta = phi * i;
+        const x = Math.cos(theta) * r;
+        const z = Math.sin(theta) * r;
+        points.push({ x: x * radius, y: y * radius, z: z * radius });
+      }
+      return points;
+    }
+
+    function assignPositions(companies) {
+      const radius = Math.min(window.innerWidth, window.innerHeight) * 0.42;
+      const points = fibonacciSphere(companies.length, radius);
+      const sorted = companies.map((c, i) => ({ company: c, point: points[i], score: activityScores[c.id] || 0.5 }));
+      sorted.sort((a, b) => b.score - a.score);
+      return sorted.map((item, rank) => {
+        const normalizedRank = rank / sorted.length;
+        const zPull = (0.5 - normalizedRank) * 160;
+        return {
+          company: item.company,
+          x: item.point.x,
+          y: item.point.y,
+          z: item.point.z + zPull,
+          score: item.score,
+          rank: rank
+        };
+      });
+    }
+
+    function renderSphere() {
+      const sphere = $('sphere');
+      if (!sphere) return;
+
+      const emptyMsg = $('emptyMsg');
+
+      const kontorCompanies = COMPANIES.filter(c => c.kontor.toLowerCase() === currentKontor);
+      let displayCompanies = kontorCompanies.slice();
+      if (displayCompanies.length < 24 && COMPANIES.length > 0) {
+        const others = COMPANIES.filter(c => c.kontor.toLowerCase() !== currentKontor);
+        displayCompanies = displayCompanies.concat(others.slice(0, 24 - displayCompanies.length));
+      }
+
+      if (emptyMsg) {
+        emptyMsg.style.display = displayCompanies.length === 0 ? 'block' : 'none';
+      }
+
+      if (displayCompanies.length === 0) {
+        sphere.innerHTML = '';
+        cardElements = [];
+        return;
+      }
+
+      const positioned = assignPositions(displayCompanies);
+      sphere.innerHTML = '';
+      cardElements = [];
+
+      positioned.forEach((item) => {
+        const company = item.company;
+        const card = document.createElement('div');
+        card.className = 'company-card';
+        card.dataset.companyId = company.id;
+        card.dataset.industry = company.industry;
+        card.dataset.kontor = company.kontor;
+        card.dataset.name = company.name.toLowerCase();
+        card.dataset.baseX = item.x;
+        card.dataset.baseY = item.y;
+        card.dataset.baseZ = item.z;
+        card.dataset.score = item.score;
+        if (item.score > 0.7) card.classList.add('hot');
+        else if (item.score < 0.25) card.classList.add('cool');
+        card.innerHTML = `
+          <div class="card-icon">${company.icon}</div>
+          <div class="card-name">${escapeHtml(company.name)}</div>
+          <div class="card-rating">⭐ ${company.rating}</div>
+          <div class="card-industry">${escapeHtml(company.industry)}</div>
+        `;
+        card.addEventListener('click', () => openCompany(company.id));
+        card.style.transform = `translate3d(${item.x}px, ${item.y}px, ${item.z}px)`;
+        sphere.appendChild(card);
+        cardElements.push({ el: card, base: { x: item.x, y: item.y, z: item.z }, company, score: item.score });
+      });
+
+      updateSphereRotation();
+    }
+
+    function updateSphereRotation() {
+      const sphere = $('sphere');
+      if (!sphere) return;
+      const t = driftTime;
+      const rotY = Math.sin(t * 0.35) * 12;
+      const rotX = Math.sin(t * 0.22) * 6;
+      sphere.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      cardElements.forEach((item) => {
+        const drift = Math.sin(t * 0.5 + item.base.x * 0.01) * 4;
+        const driftY = Math.cos(t * 0.4 + item.base.y * 0.01) * 4;
+        item.el.style.marginLeft = drift + 'px';
+        item.el.style.marginTop = driftY + 'px';
+        item.el.style.transform = `translate3d(${item.base.x}px, ${item.base.y}px, ${item.base.z}px) rotateY(${-rotY}deg) rotateX(${-rotX}deg)`;
+      });
+    }
+
+    function animate() {
+      driftTime += 0.016;
+      updateSphereRotation();
+      requestAnimationFrame(animate);
+    }
+
+    const canvas = $('rayCanvas');
+    const ctx = canvas.getContext('2d');
+    let rays = [];
+
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
+    function projectToScreen(cardEl) {
+      const rect = cardEl.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    }
+
+    function isCardVisible(el) { return !el.classList.contains('dimmed'); }
+
+    function pickRayType() {
+      const totalWeight = Object.values(RAY_TYPES).reduce((s, t) => s + t.weight, 0);
+      let r = Math.random() * totalWeight;
+      for (const [key, type] of Object.entries(RAY_TYPES)) {
+        r -= type.weight;
+        if (r <= 0) return { key, ...type };
+      }
+      return { key: 'PAYMENT', ...RAY_TYPES.PAYMENT };
+    }
+
+    function pickRayTypeForPair(fromCompany, toCompany) {
+      if (demoState.scenario === 'auction' && Math.random() < 0.4) return { key: 'AUCTION', ...RAY_TYPES.AUCTION };
+      if (demoState.scenario === 'crisis' && Math.random() < 0.4) return { key: 'CROSSKONTOR', ...RAY_TYPES.CROSSKONTOR };
+      if (demoState.scenario === 'newkontor' && Math.random() < 0.3) return { key: 'NEWCOMPANY', ...RAY_TYPES.NEWCOMPANY };
+      if (fromCompany.kontor !== toCompany.kontor && Math.random() < 0.4) return { key: 'CROSSKONTOR', ...RAY_TYPES.CROSSKONTOR };
+      return pickRayType();
+    }
+
+    function valueForType(type) {
+      const [min, max] = type.valueRange;
+      return Math.floor(min + Math.random() * (max - min));
+    }
+
+    function computeExitPoint(origin) {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const dx = origin.x - cx;
+      const dy = origin.y - cy;
+      const margin = 60;
+      let tEdgeX = Infinity, tEdgeY = Infinity;
+      if (dx > 0) tEdgeX = (canvas.width + margin - cx) / dx;
+      else if (dx < 0) tEdgeX = (-margin - cx) / dx;
+      if (dy > 0) tEdgeY = (canvas.height + margin - cy) / dy;
+      else if (dy < 0) tEdgeY = (-margin - cy) / dy;
+      const t = Math.min(tEdgeX, tEdgeY);
+      return { x: cx + dx * t, y: cy + dy * t };
+    }
+
+    function spawnRay() {
+      if (cardElements.length < 2) return;
+      const visibleCards = cardElements.filter(c => isCardVisible(c.el));
+      if (visibleCards.length < 2) return;
+
+      const fromIdx = Math.floor(Math.random() * visibleCards.length);
+      let toIdx = Math.floor(Math.random() * visibleCards.length);
+      while (toIdx === fromIdx) toIdx = Math.floor(Math.random() * visibleCards.length);
+
+      const from = visibleCards[fromIdx];
+      const to = visibleCards[toIdx];
+
+      const fromPos = projectToScreen(from.el);
+      const toPos = projectToScreen(to.el);
+      if (fromPos.x < -50 || fromPos.x > canvas.width + 50 || fromPos.y < -50 || fromPos.y > canvas.height + 50) return;
+
+      const type = pickRayTypeForPair(from.company, to.company);
+      const value = valueForType(type);
+      METRICS.addEvent(from.company.kontor, to.company.kontor, value, type.key);
+
+      if (type.key === 'CROSSKONTOR' && from.company.kontor !== to.company.kontor) {
+        const exitPoint = computeExitPoint(fromPos);
+        rays.push({
+          from: fromPos, to: exitPoint, progress: 0,
+          speed: type.speed[0] + Math.random() * (type.speed[1] - type.speed[0]),
+          color: type.color, thickness: type.thickness, typeKey: 'CROSSKONTOR',
+          value: value, destinationKontor: to.company.kontor,
+          fromEl: from.el, toEl: to.el, isCrossKontor: true
+        });
+      } else {
+        if (toPos.x < -50 || toPos.x > canvas.width + 50 || toPos.y < -50 || toPos.y > canvas.height + 50) return;
+        rays.push({
+          from: fromPos, to: toPos, progress: 0,
+          speed: type.speed[0] + Math.random() * (type.speed[1] - type.speed[0]),
+          color: type.color, thickness: type.thickness, typeKey: type.key,
+          value: value, fromEl: from.el, toEl: to.el, isCrossKontor: false
+        });
+      }
+
+      activityScores[from.company.id] = Math.min(1, (activityScores[from.company.id] || 0.5) + 0.02);
+      activityScores[to.company.id] = Math.min(1, (activityScores[to.company.id] || 0.5) + 0.03);
+    }
+
+    function drawRays() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      rays = rays.filter(ray => {
+        ray.from = projectToScreen(ray.fromEl);
+        if (!ray.isCrossKontor) {
+          ray.to = projectToScreen(ray.toEl);
+        } else {
+          ray.to = computeExitPoint(ray.from);
+        }
+        ray.progress += ray.speed;
+        if (ray.progress >= 1) {
+          if (!ray.isCrossKontor) {
+            ray.toEl.style.transition = 'box-shadow 0.15s';
+            ray.toEl.style.boxShadow = `0 0 45px ${ray.color}`;
+            setTimeout(() => { ray.toEl.style.boxShadow = ''; ray.toEl.style.transition = ''; }, 350);
+          }
+          return false;
+        }
+        const headX = ray.from.x + (ray.to.x - ray.from.x) * ray.progress;
+        const headY = ray.from.y + (ray.to.y - ray.from.y) * ray.progress;
+        const tailLength = (ray.typeKey === 'CROSSKONTOR' || ray.typeKey === 'AUCTION' || ray.typeKey === 'NEWCOMPANY') ? 0.75 : 0.55;
+        const tailProgress = Math.max(0, ray.progress - tailLength);
+        const tailX = ray.from.x + (ray.to.x - ray.from.x) * tailProgress;
+        const tailY = ray.from.y + (ray.to.y - ray.from.y) * tailProgress;
+        const gradient = ctx.createLinearGradient(tailX, tailY, headX, headY);
+        gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        gradient.addColorStop(0.4, ray.color + '60');
+        gradient.addColorStop(1, ray.color);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = ray.thickness;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = ray.color;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(headX, headY);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = ray.color;
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = ray.color;
+        ctx.beginPath();
+        ctx.arc(headX, headY, ray.thickness + 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        if (ray.isCrossKontor && ray.progress > 0.2 && ray.progress < 0.85) {
+          const labelText = '→ ' + ray.destinationKontor.toUpperCase();
+          const valueText = formatNumber(ray.value) + ' cr';
+          const labelX = tailX - 10;
+          const labelY = tailY - 8;
+          const labelOpacity = ray.progress < 0.7 ? 1 : Math.max(0, 1 - (ray.progress - 0.7) / 0.15);
+          ctx.save();
+          ctx.globalAlpha = labelOpacity;
+          ctx.font = 'bold 11px Orbitron, sans-serif';
+          const textWidth = ctx.measureText(labelText).width;
+          ctx.font = 'bold 9px Orbitron, sans-serif';
+          const valueWidth = ctx.measureText(valueText).width;
+          const pillWidth = Math.max(textWidth, valueWidth) + 16;
+          const pillHeight = 32;
+          let pillX = labelX - pillWidth - 6;
+          let pillY = labelY - pillHeight / 2;
+          if (pillX < 10) pillX = labelX + 12;
+          if (pillX + pillWidth > canvas.width - 10) pillX = canvas.width - pillWidth - 10;
+          if (pillY < 10) pillY = 10;
+          if (pillY + pillHeight > canvas.height - 10) pillY = canvas.height - pillHeight - 10;
+          ctx.fillStyle = 'rgba(168,85,247,0.15)';
+          ctx.strokeStyle = '#a855f7';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(pillX, pillY, pillWidth, pillHeight, 8);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#a855f7';
+          ctx.font = 'bold 11px Orbitron, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(labelText, pillX + 8, pillY + 4);
+          ctx.fillStyle = '#e5e7eb';
+          ctx.font = 'bold 9px Orbitron, sans-serif';
+          ctx.fillText(valueText, pillX + 8, pillY + 19);
+          ctx.restore();
+        }
+        return true;
+      });
+    }
+
+    function updateClock() {
+      const kontor = KONTORS[currentKontor];
+      if (!kontor) return;
+      try {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { timeZone: kontor.tz, hour12: false });
+        const dateStr = now.toLocaleDateString('en-US', { timeZone: kontor.tz, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        $('kontorClock').textContent = '🕐 ' + timeStr + ' local';
+        $('kontorDate').textContent = '📅 ' + dateStr;
+      } catch (e) {
+        $('kontorClock').textContent = '🕐 ' + new Date().toLocaleTimeString();
+        $('kontorDate').textContent = '📅 ' + new Date().toLocaleDateString();
+      }
+    }
+
+    function updateKontorDisplay() {
+      const kontor = KONTORS[currentKontor];
+      if (!kontor) return;
+      $('kontorFlag').textContent = kontor.flag;
+      $('kontorName').textContent = kontor.name.toUpperCase();
+      updateClock();
+    }
+
+    function formatNumber(n) {
+      if (Math.abs(n) >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+      if (Math.abs(n) >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+      return Math.round(n).toString();
+    }
+
+    function updateMetricsHUD() {
+      const market = getMarketState();
+      $('hudMarket').textContent = market.state;
+      $('hudMarket').style.color = market.multiplier > 0.5 ? '#7CFC00' : (market.multiplier > 0.1 ? '#FFD966' : '#00ced1');
+
+      const volume = METRICS.getVolume();
+      const velocity = METRICS.getVelocity();
+      const netFlow = METRICS.getNetFlow(currentKontor);
+      const payments = METRICS.getPaymentCount();
+
+      $('hudCompanies').textContent = cardElements.length;
+      $('hudPayments').textContent = payments;
+      $('hudVolume').textContent = formatNumber(volume) + ' cr';
+      $('hudVelocity').textContent = velocity.toFixed(2) + 'x';
+      $('hudVelocity').style.color = velocity > 0.05 ? '#7CFC00' : (velocity > 0.01 ? '#FFD966' : '#9ca3af');
+
+      const netFlowEl = $('hudNetFlow');
+      netFlowEl.textContent = (netFlow >= 0 ? '+' : '') + formatNumber(netFlow) + ' cr';
+      netFlowEl.style.color = netFlow > 0 ? '#7CFC00' : (netFlow < 0 ? '#ff3b3b' : '#9ca3af');
+
+      const fees = METRICS.getFeesLastMin();
+      const auctionFees = METRICS.getAuctionFeesLastMin();
+      const totalRevenue = fees + auctionFees;
+
+      $('adminTransferFees').textContent = formatNumber(fees) + ' cr';
+      $('adminAuctionFees').textContent = formatNumber(auctionFees) + ' cr';
+      $('adminRevenue').textContent = formatNumber(totalRevenue) + ' cr';
+      $('adminIssued').textContent = formatNumber(SYSTEM_TOTAL_CREDITS) + ' cr';
+      $('adminCirculation').textContent = formatNumber(SYSTEM_TOTAL_CREDITS * 0.65) + ' cr';
+    }
+
+    function applySearch() {
+      const query = ($('searchInput').value || '').toLowerCase().trim();
+      const industry = $('industryFilter').value;
+      const scope = $('searchScope').value;
+      const noFilters = !query && !industry && scope === 'local';
+      let matchCount = 0;
+      cardElements.forEach(item => {
+        const c = item.company;
+        if (noFilters) {
+          item.el.classList.remove('highlighted');
+          item.el.classList.remove('dimmed');
+          matchCount++;
+          return;
+        }
+        let matches = true;
+        if (scope === 'local' && c.kontor.toLowerCase() !== currentKontor) matches = false;
+        if (industry && c.industry !== industry) matches = false;
+        if (query) {
+          const haystack = (c.name + ' ' + c.industry + ' ' + c.kontor + ' ' + c.products.map(p => p.name).join(' ')).toLowerCase();
+          if (!haystack.includes(query)) matches = false;
+        }
+        if (matches) {
+          item.el.classList.add('highlighted');
+          item.el.classList.remove('dimmed');
+          matchCount++;
+        } else {
+          item.el.classList.remove('highlighted');
+          item.el.classList.add('dimmed');
+        }
+      });
+      if (!noFilters) showToast(`🔍 ${matchCount} companies match`, matchCount > 0 ? 'success' : 'error');
+    }
+
+    function clearSearch() {
+      $('searchInput').value = '';
+      $('industryFilter').value = '';
+      $('searchScope').value = 'local';
+      cardElements.forEach(item => {
+        item.el.classList.remove('highlighted');
+        item.el.classList.remove('dimmed');
+      });
+      showToast('✨ All filters cleared', 'info');
+    }
+
+    function openCompany(companyId) {
+      const c = COMPANIES.find(x => x.id === companyId);
+      if (!c) return;
+      const balance = c.ledger.in - c.ledger.out;
+      const activity = Math.round((activityScores[c.id] || 0.5) * 100);
+      const productsHtml = c.products.map(p => `
+        <div class="product-item">
+          <span class="product-name">${escapeHtml(p.name)}</span>
+          <span class="product-price">${p.price} cr/${escapeHtml(p.unit)}</span>
+          <button class="add-btn" data-product="${escapeHtml(p.name)}">+ Add</button>
+        </div>
+      `).join('');
+      $('modalContent').innerHTML = `
+        <button class="modal-close" id="modalClose">✕</button>
+        <div class="company-header">
+          <div class="company-icon">${c.icon}</div>
+          <div class="company-info">
+            <h2>${escapeHtml(c.name)}</h2>
+            <div class="company-loc">📍 ${escapeHtml(c.kontor)} Kontor · ${escapeHtml(c.industry)}</div>
+            <div class="company-rating">⭐ ${c.rating} rating · Activity: ${activity}%</div>
+          </div>
+        </div>
+        <div class="products-title">📦 Store of Goods</div>
+        ${productsHtml}
+        <div class="ledger-title">💰 Ledger (Trade Credits)</div>
+        <div class="ledger-row"><span class="ledger-label">Credits In</span><span class="ledger-value in">+${c.ledger.in.toLocaleString()} cr</span></div>
+        <div class="ledger-row"><span class="ledger-label">Credits Out</span><span class="ledger-value out">-${c.ledger.out.toLocaleString()} cr</span></div>
+        <div class="ledger-row"><span class="ledger-label">Balance</span><span class="ledger-value balance">${balance.toLocaleString()} cr</span></div>
+        <button class="checkout-btn" id="checkoutBtn">🛒 Proceed to Checkout</button>
+      `;
+      $('modalOverlay').classList.add('active');
+      $('modalClose').addEventListener('click', () => $('modalOverlay').classList.remove('active'));
+      $('checkoutBtn').addEventListener('click', () => showToast('🛒 Checkout — redeemable in trade credits', 'success'));
+      document.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', () => showToast(`✅ Added ${btn.dataset.product} to cart`, 'success'));
+      });
+    }
+
+    function setupDemoController() {
+      $('demoKontor').addEventListener('change', e => {
+        currentKontor = e.target.value;
+        updateKontorDisplay();
+        renderSphere();
+        updateMetricsHUD();
+        showToast('📍 Switched to ' + KONTORS[currentKontor].name, 'info');
+      });
+      $('demoDay').addEventListener('change', e => {
+        demoState.day = parseInt(e.target.value);
+        demoState.live = false;
+        $('demoLive').classList.remove('active');
+        $('demoPause').classList.add('active');
+        updateMetricsHUD();
+      });
+      $('demoHour').addEventListener('input', e => {
+        const h = parseInt(e.target.value);
+        demoState.hour = h;
+        demoState.live = false;
+        $('demoLive').classList.remove('active');
+        $('demoPause').classList.add('active');
+        $('demoHourLabel').textContent = h.toString().padStart(2, '0') + ':00';
+        updateMetricsHUD();
+      });
+      $('demoScenario').addEventListener('change', e => {
+        demoState.scenario = e.target.value;
+        updateMetricsHUD();
+        showToast('🎬 Scenario: ' + e.target.options[e.target.selectedIndex].text, 'info');
+      });
+      $('demoLive').addEventListener('click', () => {
+        demoState.live = true;
+        demoState.day = null;
+        demoState.hour = null;
+        $('demoLive').classList.add('active');
+        $('demoPause').classList.remove('active');
+        updateMetricsHUD();
+        showToast('▶ Live mode', 'success');
+      });
+      $('demoPause').addEventListener('click', () => {
+        demoState.live = false;
+        $('demoPause').classList.add('active');
+        $('demoLive').classList.remove('active');
+        showToast('⏸ Demo mode', 'info');
+      });
+    }
+
+    // ============================================================
+    // PUBLIC API — for adding companies as they sign on
+    // ============================================================
+    window.TradeAuxKontor = {
+      addCompany(company) {
+        COMPANIES.push({
+          id: company.id || ('c' + Date.now()),
+          name: company.name,
+          icon: company.icon || '🏢',
+          industry: company.industry || 'General',
+          kontor: company.kontor || 'toronto',
+          rating: company.rating || 5.0,
+          products: company.products || [],
+          ledger: company.ledger || { in: 0, out: 0 }
+        });
+        activityScores[company.id] = 0.5;
+        renderSphere();
+        showToast('✅ ' + company.name + ' added to the Kontor', 'success');
+      },
+      removeCompany(companyId) {
+        COMPANIES = COMPANIES.filter(c => c.id !== companyId);
+        delete activityScores[companyId];
+        renderSphere();
+        showToast('🗑️ Company removed', 'info');
+      },
+      addCompanies(list) {
+        list.forEach(c => {
+          COMPANIES.push({
+            id: c.id || ('c' + Date.now() + Math.random()),
+            name: c.name,
+            icon: c.icon || '🏢',
+            industry: c.industry || 'General',
+            kontor: c.kontor || 'toronto',
+            rating: c.rating || 5.0,
+            products: c.products || [],
+            ledger: c.ledger || { in: 0, out: 0 }
+          });
+          activityScores[c.id] = 0.5;
+        });
+        renderSphere();
+        showToast('✅ ' + list.length + ' companies added', 'success');
+      },
+      setCreditsIssued(total) {
+        SYSTEM_TOTAL_CREDITS = total;
+        updateMetricsHUD();
+      },
+      getCompanies() {
+        return COMPANIES;
+      },
+      getKontors() {
+        return KONTORS;
+      }
+    };
+
+    function init() {
+      resizeCanvas();
+      initActivityScores();
+      renderSphere();
+      updateKontorDisplay();
+      updateMetricsHUD();
+      animate();
+      setupDemoController();
+
+      function rayLoop() {
+        const market = getMarketState();
+        const baseInterval = 700;
+        const interval = baseInterval / Math.max(0.1, market.multiplier);
+        if (Math.random() < 0.5) spawnRay();
+        if (Math.random() < 0.3 * market.multiplier) spawnRay();
+        setTimeout(rayLoop, interval + Math.random() * 400);
+      }
+      rayLoop();
+
+      setInterval(() => {
+        updateActivityScores();
+        renderSphere();
+      }, 10000);
+
+      setInterval(updateMetricsHUD, 2000);
+
+      function rayDrawLoop() { drawRays(); requestAnimationFrame(rayDrawLoop); }
+      rayDrawLoop();
+
+      setInterval(updateClock, 1000);
+      $('searchBtn').addEventListener('click', applySearch);
+      $('clearBtn').addEventListener('click', clearSearch);
+      $('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') applySearch(); });
+      $('industryFilter').addEventListener('change', applySearch);
+      $('searchScope').addEventListener('change', applySearch);
+      $('modalOverlay').addEventListener('click', e => { if (e.target.id === 'modalOverlay') $('modalOverlay').classList.remove('active'); });
+
+      window.addEventListener('resize', () => { resizeCanvas(); renderSphere(); });
+
+      showToast('🌐 Kontor ready — waiting for companies to join', 'info');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
