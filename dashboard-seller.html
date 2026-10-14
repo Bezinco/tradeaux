@@ -2177,49 +2177,77 @@ function showLoading(s){var o=$('loadingOverlay'); if(o) o.classList.toggle('hid
 
 async function bootSession() {
   showLoading(true);
+  console.log('=== BOOT START ===');
   try {
     var s = await supabase.auth.getSession();
-    if (!s.data || !s.data.session) { window.location.href = 'index.html'; return; }
+    console.log('1. getSession:', s);
+    if (!s.data || !s.data.session) {
+      console.log('   NO SESSION → redirecting to index.html');
+      window.location.href = 'index.html';
+      return;
+    }
     SESSION.user = s.data.session.user;
+    console.log('   USER:', SESSION.user.id, SESSION.user.email);
 
     var prof = await supabase.from('profiles').select('*').eq('id', SESSION.user.id).maybeSingle();
+    console.log('2. profiles fetch:', prof);
+    if (prof.error) console.error('   PROFILE ERROR:', prof.error);
     SESSION.profile = prof.data || {};
+    console.log('   PROFILE.role:', SESSION.profile.role);
+    console.log('   PROFILE.kontor_id:', SESSION.profile.kontor_id);
+    console.log('   PROFILE.company_id:', SESSION.profile.company_id);
 
     var wal = await supabase.from('wallets').select('*').eq('user_id', SESSION.user.id).maybeSingle();
-    if (wal.data) { APP.wallet.balance = Number(wal.data.balance || 0); }
-
-    // Load company from companies table
-    if (SESSION.profile.company_id) {
-      var comp = await supabase.from('companies').select('*').eq('id', SESSION.profile.company_id).maybeSingle();
-      if (comp.data) hydrateCompanyFromSupabase(comp.data);
+    console.log('3. wallets fetch:', wal);
+    if (wal.error) console.error('   WALLET ERROR:', wal.error);
+    if (wal.data) {
+      APP.wallet.balance = Number(wal.data.balance || 0);
+      console.log('   BALANCE:', APP.wallet.balance);
     } else {
-      var own = await supabase.from('companies').select('*').eq('user_id', SESSION.user.id).maybeSingle();
-      if (own.data) hydrateCompanyFromSupabase(own.data);
+      console.log('   NO WALLET ROW');
     }
 
-    // Admin check
-    try { var adm = await supabase.rpc('is_admin'); SESSION.isAdmin = !!adm.data; } catch(e){ SESSION.isAdmin = false; }
-    if (SESSION.isAdmin) { var astrip = $('adminStrip'); if (astrip) astrip.classList.add('show'); }
+    if (SESSION.profile.company_id) {
+      var comp = await supabase.from('companies').select('*').eq('id', SESSION.profile.company_id).maybeSingle();
+      console.log('4a. companies by id:', comp);
+      if (comp.error) console.error('   COMPANY ERROR:', comp.error);
+      if (comp.data) { console.log('   COMPANY FOUND:', comp.data.name); hydrateCompanyFromSupabase(comp.data); }
+      else console.log('   COMPANY NOT FOUND for id', SESSION.profile.company_id);
+    } else {
+      var own = await supabase.from('companies').select('*').eq('user_id', SESSION.user.id).maybeSingle();
+      console.log('4b. companies by user_id:', own);
+      if (own.error) console.error('   COMPANY ERROR:', own.error);
+      if (own.data) { console.log('   COMPANY FOUND:', own.data.name); hydrateCompanyFromSupabase(own.data); }
+      else console.log('   NO COMPANY ROW for user_id', SESSION.user.id);
+    }
 
-    // Kontor list
+    try {
+      var adm = await supabase.rpc('is_admin');
+      console.log('5. is_admin rpc:', adm);
+      SESSION.isAdmin = !!adm.data;
+    } catch(e) {
+      console.log('   is_admin error:', e);
+      SESSION.isAdmin = false;
+    }
+
     await loadKontors();
+    console.log('6. kontors loaded, count:', SESSION.kontors.length);
 
-    // Credit lines
     await loadCreditLines();
+    console.log('7. creditLines:', SESSION.creditLines.length);
 
-    // Trades (positions)
     await loadPositions();
+    console.log('8. trades:', SESSION.trades.length);
 
-    // My auctions
     await loadMyAuctions();
+    console.log('9. myAuctions:', SESSION.myAuctions.length);
 
-    // Credit movements
     await loadMovements();
+    console.log('10. movements:', SESSION.movements.length);
 
-    // Notifications (recent auctions in selected Kontor)
     await loadNotifications();
+    console.log('11. notifications:', SESSION.notifications.length);
 
-    // Realtime subscription on auctions
     setupRealtime();
 
     renderWallet();
@@ -2228,8 +2256,9 @@ async function bootSession() {
     renderMyAuctions();
     renderNotifications();
     renderDiagnostic();
+    console.log('=== BOOT COMPLETE ===');
   } catch(e) {
-    console.error('boot error', e);
+    console.error('BOOT ERROR:', e);
     showToast('Session load failed: ' + (e.message || e), 'error');
   } finally {
     showLoading(false);
