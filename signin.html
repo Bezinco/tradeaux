@@ -358,6 +358,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
         }
       }
       for (var l = 0; l < sessKeys.length; l++) sessionStorage.removeItem(sessKeys[l]);
+      try { localStorage.removeItem('tradeaux_needs_role'); } catch(e) {}
     } catch(e) {}
     window.location.href = 'signin.html?logout=1';
   }
@@ -532,28 +533,18 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
       }
 
       if (r.data.user && r.data.session) {
-        // Create profile with NO role yet — the role picker will set it.
-        try {
-          await supabaseClient.from('profiles').upsert({
-            id: r.data.user.id,
-            email: ev,
-            full_name: cv,
-            role: [],
-            kontor_id: kv
-          }, { onConflict: 'id' });
-        } catch(profileErr) {
-          console.warn('Profile upsert warning:', profileErr);
-        }
-
-        // If a DB trigger created the profile as ['buyer'], clear the role so the picker shows.
+        // Trigger already created the profile with ['buyer'] and a wallet.
+        // Just make sure kontor_id and full_name are set.
         try {
           await supabaseClient
             .from('profiles')
-            .update({ role: [], kontor_id: kv, full_name: cv })
+            .update({ kontor_id: kv, full_name: cv })
             .eq('id', r.data.user.id);
-        } catch(e) {}
+        } catch(e) { console.warn('Profile update warning:', e); }
 
-        // Route to the role picker — NOT straight to a dashboard.
+        // Force the role picker to show once, regardless of the trigger's default.
+        try { localStorage.setItem('tradeaux_needs_role', '1'); } catch(e) {}
+
         showRolePicker(r.data.user);
       }
     } catch (err) {
@@ -654,6 +645,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
         }
       }
       try { localStorage.setItem('tradeaux_role', selectedRole); } catch(e) {}
+      try { localStorage.removeItem('tradeaux_needs_role'); } catch(e) {}
       redirectToDashboard(selectedRole);
     } catch (err) {
       showError('Could not save role. Please try again.');
@@ -680,6 +672,19 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 
     // Load Kontors dropdown for signup
     loadKontorsForSignup();
+
+    // Just signed up? Force the role picker, whatever the trigger set.
+    if (localStorage.getItem('tradeaux_needs_role') === '1') {
+      try {
+        var s0 = await supabaseClient.auth.getSession();
+        if (s0.data && s0.data.session) {
+          showRolePicker(s0.data.session.user);
+          showLoading(false);
+          isInitialized = true;
+          return;
+        }
+      } catch(e) {}
+    }
 
     // Check for existing session
     try {
