@@ -1,4 +1,35 @@
-<!DOCTYPE html>
+    SESSION.user = s.data.session.user;
+    console.log('   USER:', SESSION.user.id, SESSION.user.email);
+
+    // Wipe stale localStorage if the previous session on this browser was a different user
+    try {
+      var storedOwner = localStorage.getItem('tradeaux_owner_id');
+      if (storedOwner && storedOwner !== SESSION.user.id) {
+        localStorage.removeItem('tradeaux_seller_state');
+        localStorage.removeItem('companyDisplayName');
+        localStorage.removeItem('headerLogoLeftData');
+        localStorage.removeItem('headerLogoRightData');
+        // Reset in-memory APP to defaults
+        APP = {
+          wallet: { balance: 0 },
+          company: { name: '', reg: '', country: '', tax: '', address: '', email: '', phone: '', website: '', verified: 'pending', logo: null, documents: {}, photos: [] },
+          products: [],
+          orders: [],
+          receivables: [],
+          conversions: [],
+          briefs: [],
+          archivedAuctions: [],
+          certToggles: { incorporation: true },
+          selectedAuctionType: 'standard',
+          currentEditId: null,
+          _editImages: [],
+          _imageRemoveQueue: [],
+          tar: { active: true, conversionFee: 25, minReceivable: 100, maxReceivable: 50000, autoConvert: true, batchSize: 50, dailyLimit: 500, todayConversions: 0, todayConversionsDate: '', totalConversions: 0, totalFeesEarned: 0 }
+        };
+        console.log('   CLEARED stale localStorage from previous user:', storedOwner);
+      }
+      localStorage.setItem('tradeaux_owner_id', SESSION.user.id);
+    } catch(e) { console.warn('Owner guard failed:', e); }<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
