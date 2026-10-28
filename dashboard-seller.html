@@ -2256,6 +2256,7 @@ async function bootSession() {
     renderMyAuctions();
     renderNotifications();
     renderDiagnostic();
+   renderAll();
     console.log('=== BOOT COMPLETE ===');
   } catch(e) {
     console.error('BOOT ERROR:', e);
@@ -2551,7 +2552,7 @@ function init() {
   setupHeaderLogos();
   setupCompanyName();
   setupFileUploads();
-  renderAll();
+  
 
   var addBtn = $('addProductBtn');
   if(addBtn) addBtn.addEventListener('click', function() { openProductModal(); });
