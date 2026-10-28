@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; min-height: 100vh; overflow: hidden; }
@@ -175,7 +176,7 @@
     <div class="kontor-title">
       <span class="flag" id="kontorFlag">🇨🇦</span>
       <div>
-        <div class="name" id="kontorName">TORONTO KONTOR</div>
+        <div class="name" id="kontorName">LOADING…</div>
         <div class="clock" id="kontorClock">--:--:--</div>
         <div class="date" id="kontorDate">---</div>
       </div>
@@ -373,6 +374,25 @@
     }
 
     function escapeHtml(s) { if (!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+    // ============================================================
+    // SUPABASE — to read the signed-in user's home Kontor
+    // ============================================================
+    var SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function resolveUserKontor() {
+      try {
+        var s = await supabase.auth.getSession();
+        if (!s.data || !s.data.session) return null;
+        var p = await supabase.from('profiles').select('kontor_id').eq('id', s.data.session.user.id).maybeSingle();
+        return (p.data && p.data.kontor_id) ? p.data.kontor_id : null;
+      } catch (e) {
+        console.warn('resolveUserKontor failed:', e);
+        return null;
+      }
+    }
 
     // ============================================================
     // KONTORS — 15 Canadian cities + Davao
@@ -583,9 +603,6 @@
       NEWCOMPANY:  { color: '#ffffff', label: 'New company joining', weight: 5,  speed: [0.006, 0.012], thickness: 4,   valueRange: [0, 0] }
     };
 
-    // ============================================================
-    // COMPANIES — EMPTY. Populated as buyers/sellers sign on.
-    // ============================================================
     let COMPANIES = [];
 
     let currentKontor = 'toronto';
@@ -1172,9 +1189,6 @@
       });
     }
 
-    // ============================================================
-    // PUBLIC API — for adding companies as they sign on
-    // ============================================================
     window.TradeAuxKontor = {
       addCompany(company) {
         COMPANIES.push({
@@ -1226,7 +1240,22 @@
       }
     };
 
-    function init() {
+    async function init() {
+      // STEP 1 — determine the signed-in user's home Kontor
+      var userKontor = await resolveUserKontor();
+      if (userKontor && KONTORS[userKontor]) {
+        currentKontor = userKontor;
+        var dd = $('demoKontor');
+        if (dd) dd.value = userKontor;
+        console.log('Kontor resolved from profile:', userKontor);
+      } else if (userKontor) {
+        // profile has a kontor_id but it's not in KONTORS (e.g. quebec-city vs quebeccity)
+        console.log('Profile kontor not found in KONTORS map:', userKontor, '→ falling back to Toronto');
+      } else {
+        console.log('No user session or no kontor_id in profile → using Toronto default');
+      }
+
+      // STEP 2 — boot the rest
       resizeCanvas();
       initActivityScores();
       renderSphere();
@@ -1265,7 +1294,7 @@
 
       window.addEventListener('resize', () => { resizeCanvas(); renderSphere(); });
 
-      showToast('🌐 Kontor ready — waiting for companies to join', 'info');
+      showToast('🌐 Kontor ready — showing ' + KONTORS[currentKontor].name, 'info');
     }
 
     document.addEventListener('DOMContentLoaded', init);
