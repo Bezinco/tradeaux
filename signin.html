@@ -206,7 +206,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
       <div class="toggle">Already have an account? <a href="#" id="showSignin">Sign in</a></div>
     </form>
 
-    <!-- STEP 3: ROLE SELECTOR -->
+    <!-- STEP 3: ROLE SELECTOR (first sign-in only) -->
     <div id="step3" class="step-container hidden">
       <div style="text-align:center; margin-bottom:16px;">
         <div style="font-size:13px; color:#9ca3af;">Welcome!</div>
@@ -258,7 +258,6 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   var SUPABASE_URL = 'https://pfutaovwbygefummienf.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdXRhb3Z3YnlnZWZ1bW1pZW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1OTM3OTIsImV4cCI6MjA5MzE2OTc5Mn0.K6KI5Dco1-i6MGMIgXfIUenb3pfE3LtqOMRq2qfar7I';
 
-  // Dashboard routing. Note: banker uses dashboard-bank.html (your actual file).
   var DASHBOARDS = {
     'buyer':   'dashboard-buyer.html',
     'seller':  'dashboard-seller.html',
@@ -482,6 +481,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
         try { localStorage.setItem('tradeaux_role', primaryRole); } catch(e) {}
         redirectToDashboard(primaryRole);
       } else {
+        // No role yet — show picker (first sign-in)
         showRolePicker(r.data.user);
       }
     } catch (err) {
@@ -532,29 +532,29 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
       }
 
       if (r.data.user && r.data.session) {
-        // Insert profile with role as array and kontor_id
+        // Create profile with NO role yet — the role picker will set it.
         try {
           await supabaseClient.from('profiles').upsert({
             id: r.data.user.id,
             email: ev,
             full_name: cv,
-            role: ['buyer'],
+            role: [],
             kontor_id: kv
           }, { onConflict: 'id' });
         } catch(profileErr) {
           console.warn('Profile upsert warning:', profileErr);
         }
-        // The DB trigger (handle_new_user) may already have created the row.
-        // In that case, update the kontor_id.
+
+        // If a DB trigger created the profile as ['buyer'], clear the role so the picker shows.
         try {
           await supabaseClient
             .from('profiles')
-            .update({ kontor_id: kv, full_name: cv })
+            .update({ role: [], kontor_id: kv, full_name: cv })
             .eq('id', r.data.user.id);
         } catch(e) {}
 
-        try { localStorage.setItem('tradeaux_role', 'buyer'); } catch(e) {}
-        redirectToDashboard('buyer');
+        // Route to the role picker — NOT straight to a dashboard.
+        showRolePicker(r.data.user);
       }
     } catch (err) {
       if (err.message && err.message.indexOf('User already registered') !== -1) {
@@ -617,7 +617,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     btn.textContent = 'Saving...';
     try {
       if (currentUser) {
-        // Add role to array (don't replace — allow multiple roles)
+        // Set the chosen role as the primary (first) role, keeping others after it.
         var existing = await supabaseClient
           .from('profiles')
           .select('role')
@@ -625,11 +625,33 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
           .maybeSingle();
         var roles = (existing.data && existing.data.role) || [];
         if (!Array.isArray(roles)) roles = roles ? [roles] : [];
-        if (roles.indexOf(selectedRole) === -1) roles.push(selectedRole);
+        var others = roles.filter(function(r) { return r !== selectedRole; });
+        var newRoles = [selectedRole].concat(others);
         await supabaseClient
           .from('profiles')
-          .update({ role: roles })
+          .update({ role: newRoles })
           .eq('id', currentUser.id);
+
+        // If seller and no company row yet, create one.
+        if (selectedRole === 'seller') {
+          try {
+            var chk = await supabaseClient
+              .from('companies').select('id').eq('user_id', currentUser.id).maybeSingle();
+            if (!chk.data) {
+              var prof = await supabaseClient
+                .from('profiles').select('full_name, kontor_id').eq('id', currentUser.id).maybeSingle();
+              await supabaseClient.from('companies').insert({
+                user_id: currentUser.id,
+                name: (prof.data && prof.data.full_name) || 'My Company',
+                business_type: 'producer',
+                country: 'Philippines',
+                kontor_id: (prof.data && prof.data.kontor_id) || null,
+                email: currentUser.email || null,
+                verified: 'pending'
+              });
+            }
+          } catch(e) { console.warn('Company auto-create warning:', e); }
+        }
       }
       try { localStorage.setItem('tradeaux_role', selectedRole); } catch(e) {}
       redirectToDashboard(selectedRole);
@@ -672,6 +694,12 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
         if (primaryRole) {
           try { localStorage.setItem('tradeaux_role', primaryRole); } catch(e) {}
           redirectToDashboard(primaryRole);
+          return;
+        } else {
+          // Signed in but no role — show picker
+          showRolePicker(s.data.session.user);
+          isInitialized = true;
+          showLoading(false);
           return;
         }
       }
@@ -804,4 +832,5 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 })();
 </script>
-</body
+</body>
+</html>
