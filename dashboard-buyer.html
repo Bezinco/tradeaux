@@ -236,6 +236,31 @@ body {
 @media (max-width: 500px) {
   .stats-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== AUCTION FLOOR TAB ===== */
+.tab-panel { }
+.floor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.floor-card { background: linear-gradient(145deg, rgba(15,32,64,0.85), rgba(2,6,23,0.95)); border: 1px solid rgba(0,206,209,0.35); border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; }
+.floor-card:hover { border-color: #00ced1; transform: translateY(-2px); }
+.floor-card.settled { opacity: 0.55; }
+.floor-card .fc-rank { position: absolute; top: 8px; left: 8px; font-size: 10px; font-weight: 700; color: #FFD966; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 10px; font-family: 'Orbitron', sans-serif; }
+.floor-card .fc-prod { font-weight: 700; font-size: 15px; color: #fff; margin-top: 18px; }
+.floor-card .fc-origin { font-size: 11px; color: #9ca3af; margin: 2px 0 8px; }
+.floor-card .fc-price { font-family: 'Orbitron', sans-serif; font-size: 18px; color: #7CFC00; }
+.floor-card .fc-meta { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; margin-top: 6px; }
+.floor-card .fc-fillbar { height: 5px; background: #1e293b; border-radius: 3px; margin: 8px 0 4px; overflow: hidden; }
+.floor-card .fc-fillbar div { height: 100%; background: linear-gradient(90deg, #7CFC00, #00ced1); }
+.floor-modal { position: fixed; inset: 0; z-index: 10000; background: rgba(2,6,23,0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; }
+.floor-modal.show { display: flex; }
+.floor-modal .fm-box { background: #0B1122; border: 2px solid #00ced1; border-radius: 20px; padding: 24px; max-width: 520px; width: 100%; max-height: 88vh; overflow-y: auto; position: relative; }
+.floor-modal .fm-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 26px; color: #ccc; cursor: pointer; }
+.floor-modal h2 { font-family: 'Orbitron', sans-serif; font-size: 20px; color: #00ced1; margin-bottom: 4px; }
+.floor-modal .fm-sub { font-size: 12px; color: #9ca3af; margin-bottom: 16px; }
+.floor-modal .fm-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+.floor-modal .fm-row span:first-child { color: #9ca3af; }
+.floor-modal .fm-input { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; margin-top: 4px; }
+.floor-modal .fm-btn { width: 100%; margin-top: 16px; padding: 12px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #000; cursor: pointer; }
+.floor-modal .fm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -290,7 +315,8 @@ body {
         </div>
         <button class="deposit-btn" id="depositBtn">+ Deposit</button>
       </div>
-      <a href="dashboard-buyer.html" class="active">📊 Dashboard</a>
+      <a href="#" id="tabDashboard" class="active" onclick="switchTab('dashboard'); return false;">📊 Dashboard</a>
+      <a href="#" id="tabFloor" onclick="switchTab('floor'); return false;">🎯 Auction Floor</a>
       <a href="container-captain.html">📦 Containers</a>
       <a href="bot-studio.html">🤖 Bot Studio</a>
       <a href="kontor.html">🌐 Kontor</a>
@@ -300,6 +326,7 @@ body {
     </nav>
   </header>
 
+  <div id="panelDashboard" class="tab-panel">
   <div class="banner-container">
     <div class="top-trader" id="topTraderBanner">🏆 Welcome to TradeAux</div>
   </div>
@@ -382,6 +409,19 @@ body {
   <footer class="footer">
     <p>TRADEAUX © 2026 • Global Commodity Exchange</p>
   </footer>
+</div>
+
+</div><!-- /panelDashboard -->
+
+  <div id="panelFloor" class="tab-panel" style="display:none;">
+    <div style="background:rgba(0,206,209,0.1);border:1px solid rgba(0,206,209,0.3);border-radius:12px;padding:10px 16px;margin-bottom:16px;font-size:13px;color:#e5e7eb;">
+      🛡️ Your insurance coverage: <strong id="coverageAmount" style="color:#7CFC00;">$0</strong> available
+    </div>
+    <div id="floorGrid" class="floor-grid">
+      <div class="empty-message" style="grid-column:1/-1;">Loading lots…</div>
+    </div>
+  </div><!-- /panelFloor -->
+
 </div>
 
 <div class="modal" id="depositModal">
@@ -864,6 +904,153 @@ body {
       showToast('Failed to load dashboard', 'error');
     } finally {
       showLoading(false);
+    }
+  }
+
+   /* ===== AUCTION FLOOR TAB ===== */
+  function switchTab(name) {
+    var dash = $('panelDashboard');
+    var floor = $('panelFloor');
+    var tabDash = $('tabDashboard');
+    var tabFloor = $('tabFloor');
+    if (!dash || !floor) return;
+    if (name === 'floor') {
+      dash.style.display = 'none';
+      floor.style.display = 'block';
+      if (tabDash) tabDash.classList.remove('active');
+      if (tabFloor) tabFloor.classList.add('active');
+      loadFloor();
+    } else {
+      floor.style.display = 'none';
+      dash.style.display = 'block';
+      if (tabFloor) tabFloor.classList.remove('active');
+      if (tabDash) tabDash.classList.add('active');
+    }
+  }
+  window.switchTab = switchTab;
+
+  async function loadCoverage() {
+    try {
+      var res = await supabase.from('credit_lines')
+        .select('available_amount')
+        .eq('buyer_user_id', currentUser.id)
+        .eq('status', 'active')
+        .order('available_amount', { ascending: false })
+        .limit(1);
+      var avail = (res.data && res.data[0]) ? Number(res.data[0].available_amount || 0) : 0;
+      var el = $('coverageAmount');
+      if (el) el.textContent = money(avail);
+    } catch (e) { console.warn('coverage fetch', e); }
+  }
+
+  async function loadFloor() {
+    loadCoverage();
+    var grid = $('floorGrid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="empty-message" style="grid-column:1/-1;">Loading lots…</div>';
+    try {
+      var res = await supabase.from('auctions')
+        .select('id,product,variety,quantity,unit,reserve_price,status,ends_at,kontor_id,metadata,auction_scope')
+        .in('status', ['live','closed','awarded'])
+        .order('ends_at', { ascending: true })
+        .limit(60);
+      if (res.error) throw res.error;
+      var lots = res.data || [];
+      if (!lots.length) {
+        grid.innerHTML = '<div class="empty-message" style="grid-column:1/-1;">No lots on the floor yet.</div>';
+        return;
+      }
+      grid.innerHTML = '';
+      for (var i = 0; i < lots.length; i++) {
+        var lot = lots[i];
+        var bidsRes = await supabase.from('bids').select('quantity,amount,status').eq('auction_id', lot.id).eq('status','pending');
+        var bids = bidsRes.data || [];
+        var filled = bids.reduce(function(s,b) { return s + Number(b.quantity||0); }, 0);
+        var best = bids.reduce(function(m,b) { return Math.max(m, Number(b.amount||0)); }, 0);
+        var pct = Math.min(100, lot.quantity ? Math.round(filled/lot.quantity*100) : 0);
+        var timeLeft = lot.ends_at ? Math.max(0, Math.floor((new Date(lot.ends_at) - Date.now())/60000)) : 0;
+        var settled = lot.status !== 'live';
+        var card = document.createElement('div');
+        card.className = 'floor-card' + (settled ? ' settled' : '');
+        card.innerHTML =
+          '<div class="fc-rank">' + (lot.auction_scope === 'intl' ? 'INTL' : 'LOCAL') + '</div>' +
+          '<div class="fc-prod">' + escapeHtml(lot.product || 'Lot') + '</div>' +
+          '<div class="fc-origin">📍 ' + escapeHtml(lot.kontor_id || '—') + (lot.variety ? ' · ' + escapeHtml(lot.variety) : '') + '</div>' +
+          '<div class="fc-price">' + (best ? '$' + Number(best).toFixed(2) + '/kg' : '—') + '</div>' +
+          '<div class="fc-fillbar"><div style="width:' + pct + '%"></div></div>' +
+          '<div class="fc-meta"><span>' + (filled/1000).toFixed(1) + ' / ' + (Number(lot.quantity||0)/1000).toFixed(1) + ' MT</span><span>' + (settled ? lot.status.toUpperCase() : timeLeft + 'm left') + '</span></div>';
+        card.onclick = (function(l) { return function() { openFloorLot(l); }; })(lot);
+        grid.appendChild(card);
+      }
+    } catch (e) {
+      grid.innerHTML = '<div class="empty-message" style="grid-column:1/-1;color:#ff3b3b;">Could not load lots: ' + escapeHtml(e.message || e) + '</div>';
+    }
+  }
+  window.loadFloor = loadFloor;
+
+  async function openFloorLot(lot) {
+    var bidsRes = await supabase.from('bids').select('quantity,amount,status').eq('auction_id', lot.id).eq('status','pending');
+    var bids = bidsRes.data || [];
+    var filled = bids.reduce(function(s,b) { return s + Number(b.quantity||0); }, 0);
+    var best = bids.reduce(function(m,b) { return Math.max(m, Number(b.amount||0)); }, 0);
+    var settled = lot.status !== 'live';
+    var winnersHtml = '';
+    if (settled && lot.metadata && lot.metadata.proposal) {
+      var acc = lot.metadata.proposal.accepted || [];
+      winnersHtml = '<div style="margin-top:8px;font-size:12px;color:#7CFC00;">🏆 Winners: ' +
+        acc.map(function(a) { return escapeHtml(String(a.qty_kg)) + ' kg'; }).join(', ') + '</div>';
+    }
+    var modal = document.createElement('div');
+    modal.className = 'floor-modal show';
+    modal.innerHTML =
+      '<div class="fm-box">' +
+        '<button class="fm-close">&times;</button>' +
+        '<h2>' + escapeHtml(lot.product || 'Lot') + '</h2>' +
+        '<div class="fm-sub">📍 ' + escapeHtml(lot.kontor_id || '—') + (lot.variety ? ' · ' + escapeHtml(lot.variety) : '') + '</div>' +
+        '<div class="fm-row"><span>Capacity</span><span>' + (Number(lot.quantity||0)/1000).toFixed(1) + ' MT</span></div>' +
+        '<div class="fm-row"><span>Filled</span><span>' + (filled/1000).toFixed(1) + ' MT (' + Math.min(100,Math.round(filled/(lot.quantity||1)*100)) + '%)</span></div>' +
+        '<div class="fm-row"><span>Best bid</span><span>' + (best ? '$' + Number(best).toFixed(2) + '/kg' : '—') + '</span></div>' +
+        '<div class="fm-row"><span>Status</span><span>' + escapeHtml(lot.status) + '</span></div>' +
+        winnersHtml +
+        (!settled ?
+        '<div style="margin-top:16px;">' +
+          '<label style="font-size:12px;color:#9ca3af;">Quantity (kg, multiple of 250)</label>' +
+          '<input class="fm-input" id="bidQty" type="number" min="250" step="250" placeholder="e.g. 2000">' +
+          '<label style="font-size:12px;color:#9ca3af;margin-top:8px;display:block;">Price per kg ($)</label>' +
+          '<input class="fm-input" id="bidPrice" type="number" min="0.01" step="0.01" placeholder="e.g. 1.25">' +
+          '<button class="fm-btn" id="placeBidBtn">Place Bid</button>' +
+          '<div id="bidMsg" style="font-size:12px;margin-top:8px;"></div>' +
+        '</div>' : '') +
+      '</div>';
+    document.body.appendChild(modal);
+    modal.querySelector('.fm-close').onclick = function() { modal.remove(); };
+    modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+    var btn = modal.querySelector('#placeBidBtn');
+    if (btn) {
+      btn.onclick = async function() {
+        var qty = Number(modal.querySelector('#bidQty').value);
+        var price = Number(modal.querySelector('#bidPrice').value);
+        var msg = modal.querySelector('#bidMsg');
+        if (!qty || qty % 250 !== 0) { msg.style.color = '#ff3b3b'; msg.textContent = 'Quantity must be a multiple of 250 kg'; return; }
+        if (!price || price <= 0) { msg.style.color = '#ff3b3b'; msg.textContent = 'Price must be > 0'; return; }
+        btn.disabled = true; btn.textContent = 'Placing…';
+        try {
+          var r = await supabase.rpc('place_bid', {
+            p_auction_id: lot.id,
+            p_bidder_user_id: currentUser.id,
+            p_amount: price,
+            p_quantity: qty
+          });
+          if (r.error) throw r.error;
+          msg.style.color = '#7CFC00';
+          msg.textContent = '✅ Bid placed.';
+          setTimeout(function() { modal.remove(); loadFloor(); }, 900);
+        } catch (e) {
+          msg.style.color = '#ff3b3b';
+          msg.textContent = '❌ ' + (e.message || e);
+          btn.disabled = false; btn.textContent = 'Place Bid';
+        }
+      };
     }
   }
 
