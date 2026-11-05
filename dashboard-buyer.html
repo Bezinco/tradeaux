@@ -269,6 +269,14 @@ body {
 .fm-reg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .fm-cancel-link { display: block; width: 100%; margin-top: 12px; padding: 10px; background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.3); border-radius: 8px; color: #ff3b3b; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
 .fm-cancel-link:hover { background: rgba(255,59,59,0.2); }
+.fm-bot-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,206,209,0.15); }
+.fm-bot-section h4 { font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00ced1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.fm-bot-section select { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; margin-bottom: 8px; }
+.fm-bot-assign-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #000; cursor: pointer; }
+.fm-bot-assign-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.fm-bot-assigned { background: rgba(124,252,0,0.08); border: 1px solid rgba(124,252,0,0.3); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #7CFC00; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.fm-bot-assigned button { background: rgba(255,59,59,0.15); border: 1px solid rgba(255,59,59,0.3); color: #ff3b3b; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.fm-bot-assigned button:hover { background: rgba(255,59,59,0.25); }
 </style>
 </head>
 <body>
@@ -1011,6 +1019,78 @@ body {
   }
   window.loadFloor = loadFloor;
 
+  async function loadBotAssignment(auctionId, modal) {
+    var body = modal.querySelector('#botSectionBody');
+    if (!body) return;
+    try {
+      var botsRes = await supabase.from('bots')
+        .select('id,name,strategy')
+        .eq('owner_user_id', currentUser.id)
+        .eq('is_active', true);
+      var bots = botsRes.data || [];
+
+      var assignRes = await supabase.from('auction_bot_assignments')
+        .select('id,bot_id,status,bots(name)')
+        .eq('auction_id', auctionId)
+        .eq('user_id', currentUser.id)
+        .eq('status', 'assigned')
+        .limit(1);
+      var assigned = (assignRes.data && assignRes.data[0]) ? assignRes.data[0] : null;
+
+      if (assigned) {
+        var botName = (assigned.bots && assigned.bots.name) ? assigned.bots.name : 'your bot';
+        body.innerHTML = '<div class="fm-bot-assigned"><span>🤖 ' + escapeHtml(botName) + ' is watching this auction</span><button id="removeBotBtn">Remove</button></div>';
+        var rmBtn = body.querySelector('#removeBotBtn');
+        if (rmBtn) {
+          rmBtn.onclick = async function() {
+            rmBtn.disabled = true; rmBtn.textContent = 'Removing…';
+            try {
+              var r = await supabase.rpc('remove_bot_assignment', { p_auction_id: auctionId, p_bot_id: assigned.bot_id });
+              if (r.error) throw r.error;
+              loadBotAssignment(auctionId, modal);
+            } catch (e) {
+              rmBtn.disabled = false; rmBtn.textContent = 'Remove';
+              body.innerHTML += '<div style="color:#ff3b3b;margin-top:6px;">❌ ' + escapeHtml(e.message || e) + '</div>';
+            }
+          };
+        }
+        return;
+      }
+
+      if (!bots.length) {
+        body.innerHTML = '<div>No active bots. <a href="bot-studio.html" style="color:#00ced1;">Create one →</a></div>';
+        return;
+      }
+
+      var options = bots.map(function(b) {
+        return '<option value="' + escapeHtml(b.id) + '">' + escapeHtml(b.name) + '</option>';
+      }).join('');
+      body.innerHTML =
+        '<select id="botPick">' + options + '</select>' +
+        '<button class="fm-bot-assign-btn" id="assignBotBtn">Assign to this auction</button>' +
+        '<div id="botAssignMsg" style="font-size:11px;margin-top:6px;"></div>';
+      var assignBtn = body.querySelector('#assignBotBtn');
+      var pick = body.querySelector('#botPick');
+      if (assignBtn && pick) {
+        assignBtn.onclick = async function() {
+          assignBtn.disabled = true; assignBtn.textContent = 'Assigning…';
+          var msg = body.querySelector('#botAssignMsg');
+          try {
+            var r = await supabase.rpc('assign_bot_to_auction', { p_auction_id: auctionId, p_bot_id: pick.value });
+            if (r.error) throw r.error;
+            msg.style.color = '#7CFC00'; msg.textContent = '✅ Bot assigned.';
+            setTimeout(function(){ loadBotAssignment(auctionId, modal); }, 600);
+          } catch (e) {
+            msg.style.color = '#ff3b3b'; msg.textContent = '❌ ' + (e.message || e);
+            assignBtn.disabled = false; assignBtn.textContent = 'Assign to this auction';
+          }
+        };
+      }
+    } catch (e) {
+      body.innerHTML = '<div style="color:#ff3b3b;">Could not load bots: ' + escapeHtml(e.message || e) + '</div>';
+    }
+  }
+
   async function openFloorLot(lot, regStatus) {
     var bidsRes = await supabase.from('bids').select('quantity,amount,status').eq('auction_id', lot.id).eq('status','pending');
     var bids = bidsRes.data || [];
@@ -1069,6 +1149,14 @@ body {
     document.body.appendChild(modal);
     modal.querySelector('.fm-close').onclick = function() { modal.remove(); };
     modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+    if (regStatus === 'held' && !settled) {
+      var botSection = document.createElement('div');
+      botSection.className = 'fm-bot-section';
+      botSection.innerHTML = '<h4>🤖 Bot assignment</h4><div id="botSectionBody" style="font-size:12px;color:#9ca3af;">Loading bots…</div>';
+      modal.querySelector('.fm-box').appendChild(botSection);
+      loadBotAssignment(lot.id, modal);
+    }
 
     var regBtn = modal.querySelector('#registerBtn');
     if (regBtn) {
