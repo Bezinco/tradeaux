@@ -261,6 +261,14 @@ body {
 .floor-modal .fm-input { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,206,209,0.3); border-radius: 8px; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; margin-top: 4px; }
 .floor-modal .fm-btn { width: 100%; margin-top: 16px; padding: 12px; background: linear-gradient(135deg, #00ced1, #00ff7f); border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #000; cursor: pointer; }
 .floor-modal .fm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.floor-card .fc-reg-badge { position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.floor-card .fc-reg-badge.registered { background: rgba(124,252,0,0.2); color: #7CFC00; }
+.floor-card .fc-reg-badge.unregistered { background: rgba(255,217,102,0.2); color: #FFD966; }
+.floor-card .fc-reg-badge.forfeited, .floor-card .fc-reg-badge.converted, .floor-card .fc-reg-badge.released { background: rgba(156,163,175,0.2); color: #9ca3af; }
+.fm-reg-btn { width: 100%; margin-top: 16px; padding: 12px; background: linear-gradient(135deg, #FFD966, #FFB347); border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #000; cursor: pointer; }
+.fm-reg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.fm-cancel-link { display: block; width: 100%; margin-top: 12px; padding: 10px; background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.3); border-radius: 8px; color: #ff3b3b; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
+.fm-cancel-link:hover { background: rgba(255,59,59,0.2); }
 </style>
 </head>
 <body>
@@ -950,7 +958,7 @@ body {
     grid.innerHTML = '<div class="empty-message" style="grid-column:1/-1;">Loading lots…</div>';
     try {
       var res = await supabase.from('auctions')
-        .select('id,product,variety,quantity,unit,reserve_price,status,ends_at,kontor_id,metadata,auction_scope')
+        .select('id,product,variety,quantity,unit,reserve_price,status,ends_at,kontor_id,metadata,auction_scope,scheduled_start')
         .in('status', ['live','closed','awarded'])
         .order('ends_at', { ascending: true })
         .limit(60);
@@ -960,6 +968,15 @@ body {
         grid.innerHTML = '<div class="empty-message" style="grid-column:1/-1;">No lots on the floor yet.</div>';
         return;
       }
+
+      var ids = lots.map(function(l){ return l.id; });
+      var regRes = await supabase.from('auction_registrations')
+        .select('auction_id,status')
+        .eq('user_id', currentUser.id)
+        .in('auction_id', ids);
+      var regMap = {};
+      (regRes.data || []).forEach(function(r){ regMap[r.auction_id] = r.status; });
+
       grid.innerHTML = '';
       for (var i = 0; i < lots.length; i++) {
         var lot = lots[i];
@@ -970,16 +987,22 @@ body {
         var pct = Math.min(100, lot.quantity ? Math.round(filled/lot.quantity*100) : 0);
         var timeLeft = lot.ends_at ? Math.max(0, Math.floor((new Date(lot.ends_at) - Date.now())/60000)) : 0;
         var settled = lot.status !== 'live';
+        var regStatus = regMap[lot.id] || null;
+        var badgeHtml = '';
+        if (regStatus === 'held') badgeHtml = '<div class="fc-reg-badge registered">REGISTERED</div>';
+        else if (regStatus === null && !settled) badgeHtml = '<div class="fc-reg-badge unregistered">REGISTER $25</div>';
+        else if (regStatus) badgeHtml = '<div class="fc-reg-badge ' + regStatus + '">' + regStatus.toUpperCase() + '</div>';
+
         var card = document.createElement('div');
         card.className = 'floor-card' + (settled ? ' settled' : '');
-        card.innerHTML =
+        card.innerHTML = badgeHtml +
           '<div class="fc-rank">' + (lot.auction_scope === 'intl' ? 'INTL' : 'LOCAL') + '</div>' +
           '<div class="fc-prod">' + escapeHtml(lot.product || 'Lot') + '</div>' +
           '<div class="fc-origin">📍 ' + escapeHtml(lot.kontor_id || '—') + (lot.variety ? ' · ' + escapeHtml(lot.variety) : '') + '</div>' +
           '<div class="fc-price">' + (best ? '$' + Number(best).toFixed(2) + '/kg' : '—') + '</div>' +
           '<div class="fc-fillbar"><div style="width:' + pct + '%"></div></div>' +
           '<div class="fc-meta"><span>' + (filled/1000).toFixed(1) + ' / ' + (Number(lot.quantity||0)/1000).toFixed(1) + ' MT</span><span>' + (settled ? lot.status.toUpperCase() : timeLeft + 'm left') + '</span></div>';
-        card.onclick = (function(l) { return function() { openFloorLot(l); }; })(lot);
+        card.onclick = (function(l, r) { return function() { openFloorLot(l, r); }; })(lot, regStatus);
         grid.appendChild(card);
       }
     } catch (e) {
@@ -988,18 +1011,47 @@ body {
   }
   window.loadFloor = loadFloor;
 
-  async function openFloorLot(lot) {
+  async function openFloorLot(lot, regStatus) {
     var bidsRes = await supabase.from('bids').select('quantity,amount,status').eq('auction_id', lot.id).eq('status','pending');
     var bids = bidsRes.data || [];
     var filled = bids.reduce(function(s,b) { return s + Number(b.quantity||0); }, 0);
     var best = bids.reduce(function(m,b) { return Math.max(m, Number(b.amount||0)); }, 0);
     var settled = lot.status !== 'live';
+    var canCancel = false;
+
     var winnersHtml = '';
     if (settled && lot.metadata && lot.metadata.proposal) {
       var acc = lot.metadata.proposal.accepted || [];
-      winnersHtml = '<div style="margin-top:8px;font-size:12px;color:#7CFC00;">🏆 Winners: ' +
+      winnersHtml = '<div style="margin-top:8px;font-size:12px;color:#7CFC00;">Winners: ' +
         acc.map(function(a) { return escapeHtml(String(a.qty_kg)) + ' kg'; }).join(', ') + '</div>';
     }
+
+    var actionHtml = '';
+    if (settled) {
+      actionHtml = '<div style="margin-top:16px;font-size:12px;color:#9ca3af;text-align:center;">Auction closed</div>';
+    } else if (regStatus === null) {
+      actionHtml = '<button class="fm-reg-btn" id="registerBtn">Register for this auction — $25</button>' +
+                   '<div style="font-size:11px;color:#9ca3af;margin-top:8px;text-align:center;">$25 is held from your wallet until the auction resolves. Refundable if you cancel before lock-in.</div>' +
+                   '<div id="regMsg" style="font-size:12px;margin-top:8px;"></div>';
+    } else if (regStatus === 'held') {
+      if (lot.scheduled_start) {
+        var lockAt = new Date(new Date(lot.scheduled_start).getTime() - 48*3600*1000);
+        canCancel = Date.now() < lockAt.getTime();
+      }
+      actionHtml =
+        '<div style="margin-top:16px;">' +
+          '<label style="font-size:12px;color:#9ca3af;">Quantity (kg, multiple of 250)</label>' +
+          '<input class="fm-input" id="bidQty" type="number" min="250" step="250" placeholder="e.g. 2000">' +
+          '<label style="font-size:12px;color:#9ca3af;margin-top:8px;display:block;">Price per kg ($)</label>' +
+          '<input class="fm-input" id="bidPrice" type="number" min="0.01" step="0.01" placeholder="e.g. 1.25">' +
+          '<button class="fm-btn" id="placeBidBtn">Place Bid</button>' +
+          '<div id="bidMsg" style="font-size:12px;margin-top:8px;"></div>' +
+        '</div>' +
+        (canCancel ? '<button class="fm-cancel-link" id="cancelRegBtn">Cancel registration (refund $25)</button>' : '<div style="font-size:11px;color:#FFD966;margin-top:12px;text-align:center;">Registration locked — within 48h of start</div>');
+    } else {
+      actionHtml = '<div style="margin-top:16px;font-size:12px;color:#9ca3af;text-align:center;">Registration: ' + escapeHtml(regStatus) + '</div>';
+    }
+
     var modal = document.createElement('div');
     modal.className = 'floor-modal show';
     modal.innerHTML =
@@ -1012,19 +1064,45 @@ body {
         '<div class="fm-row"><span>Best bid</span><span>' + (best ? '$' + Number(best).toFixed(2) + '/kg' : '—') + '</span></div>' +
         '<div class="fm-row"><span>Status</span><span>' + escapeHtml(lot.status) + '</span></div>' +
         winnersHtml +
-        (!settled ?
-        '<div style="margin-top:16px;">' +
-          '<label style="font-size:12px;color:#9ca3af;">Quantity (kg, multiple of 250)</label>' +
-          '<input class="fm-input" id="bidQty" type="number" min="250" step="250" placeholder="e.g. 2000">' +
-          '<label style="font-size:12px;color:#9ca3af;margin-top:8px;display:block;">Price per kg ($)</label>' +
-          '<input class="fm-input" id="bidPrice" type="number" min="0.01" step="0.01" placeholder="e.g. 1.25">' +
-          '<button class="fm-btn" id="placeBidBtn">Place Bid</button>' +
-          '<div id="bidMsg" style="font-size:12px;margin-top:8px;"></div>' +
-        '</div>' : '') +
+        actionHtml +
       '</div>';
     document.body.appendChild(modal);
     modal.querySelector('.fm-close').onclick = function() { modal.remove(); };
     modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+    var regBtn = modal.querySelector('#registerBtn');
+    if (regBtn) {
+      regBtn.onclick = async function() {
+        regBtn.disabled = true; regBtn.textContent = 'Registering…';
+        var msg = modal.querySelector('#regMsg');
+        try {
+          var r = await supabase.rpc('register_for_auction', { p_auction_id: lot.id });
+          if (r.error) throw r.error;
+          msg.style.color = '#7CFC00'; msg.textContent = 'Registered. Close and reopen to bid.';
+          setTimeout(function(){ modal.remove(); loadFloor(); }, 900);
+        } catch (e) {
+          msg.style.color = '#ff3b3b'; msg.textContent = '❌ ' + (e.message || e);
+          regBtn.disabled = false; regBtn.textContent = 'Register for this auction — $25';
+        }
+      };
+    }
+
+    var cancelBtn = modal.querySelector('#cancelRegBtn');
+    if (cancelBtn) {
+      cancelBtn.onclick = async function() {
+        if (!confirm('Cancel registration and refund $25?')) return;
+        cancelBtn.disabled = true; cancelBtn.textContent = 'Cancelling…';
+        try {
+          var r = await supabase.rpc('cancel_registration', { p_auction_id: lot.id });
+          if (r.error) throw r.error;
+          modal.remove(); loadFloor();
+        } catch (e) {
+          cancelBtn.disabled = false; cancelBtn.textContent = 'Cancel registration (refund $25)';
+          alert('Cancel failed: ' + (e.message || e));
+        }
+      };
+    }
+
     var btn = modal.querySelector('#placeBidBtn');
     if (btn) {
       btn.onclick = async function() {
@@ -1042,12 +1120,10 @@ body {
             p_quantity: qty
           });
           if (r.error) throw r.error;
-          msg.style.color = '#7CFC00';
-          msg.textContent = '✅ Bid placed.';
+          msg.style.color = '#7CFC00'; msg.textContent = '✅ Bid placed.';
           setTimeout(function() { modal.remove(); loadFloor(); }, 900);
         } catch (e) {
-          msg.style.color = '#ff3b3b';
-          msg.textContent = '❌ ' + (e.message || e);
+          msg.style.color = '#ff3b3b'; msg.textContent = '❌ ' + (e.message || e);
           btn.disabled = false; btn.textContent = 'Place Bid';
         }
       };
