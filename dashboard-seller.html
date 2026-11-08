@@ -2359,6 +2359,58 @@ async function loadMyAuctions() {
     SESSION.myAuctions = res.data || [];
   } catch(e){ SESSION.myAuctions = []; }
 }
+/* ── PIECE 1: load samples from Supabase ────────────────────────── */
+async function loadProducts() {
+  try {
+    var res = await supabase
+      .from('products')
+      .select('*')
+      .eq('user_id', SESSION.user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+    if (res.error) throw res.error;
+    APP.products = (res.data || []).map(function(p) {
+      return {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        grade: p.grade,
+        origin: p.origin,
+        auctionType: p.auction_type || 'standard',
+        quantity: p.quantity,
+        quantityAuctioned: p.quantity_auctioned || 0,
+        packageType: p.package_type,
+        packageSize: p.package_size,
+        moisture: p.moisture,
+        screenSize: p.screen_size,
+        defects: p.defects,
+        foreignMatter: p.foreign_matter,
+        protein: p.protein,
+        aflatoxin: p.aflatoxin,
+        oilContent: p.oil_content,
+        colorGrade: p.color_grade,
+        palletCount: p.pallet_count,
+        palletWeight: p.pallet_weight,
+        palletType: p.pallet_type,
+        palletMinIncrement: p.pallet_min_increment,
+        sampleSize: p.sample_size,
+        sampleCount: p.sample_count,
+        sampleMinIncrement: p.sample_min_increment,
+        images: p.images || [],
+        status: p.status,
+        _supabase_id: p.id,
+        _updated_at: p.updated_at
+      };
+    });
+    console.log('[loadProducts] loaded', APP.products.length, 'samples from Supabase');
+  } catch (e) {
+    console.error('[loadProducts] failed:', e);
+    showToast('Could not load samples: ' + (e.message || e), 'error');
+    APP.products = [];
+  }
+}
+/* ── END PIECE 1 ────────────────────────────────────────────────── */
+
 
 async function loadMovements() {
   try {
