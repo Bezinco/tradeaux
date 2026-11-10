@@ -449,6 +449,7 @@ body { background: #020617; font-family: 'Inter', sans-serif; color: #e5e7eb; mi
 @media (max-width: 1000px) { .insurance-metrics { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .insurance-metrics { grid-template-columns: 1fr; } .notif-dropdown { width: 90vw; right: -50px; } }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -1416,16 +1417,68 @@ function saveProduct(afterSave) {
   saveProductData(data, afterSave);
 }
 
-function saveProductData(data, afterSave) {
+async function saveProductData(data, afterSave) {
   var id = APP.currentEditId;
+  var existing = null;
   if(id) {
     var idx = APP.products.findIndex(function(p) { return p.id === id; });
-    if(idx > -1) APP.products[idx] = Object.assign({}, APP.products[idx], data);
-  } else {
+    if(idx > -1) {
+      existing = APP.products[idx];
+      APP.products[idx] = Object.assign({}, existing, data);
+    }
+  }
+  if(!existing) {
     id = uuid();
     APP.products.push(Object.assign({ id: id }, data, { createdAt: Date.now() }));
   }
   if(!saveData(APP)) { showToast('Storage full — product NOT saved', 'error'); return; }
+
+  // Sync to Supabase so products survive reloads and sign-ins
+  if (SESSION.user) {
+    try {
+      var row = {
+        id: (existing && existing._supabase_id) || id,
+        user_id: SESSION.user.id,
+        name: data.name,
+        description: data.description || null,
+        grade: data.grade || null,
+        origin: data.origin || null,
+        auction_type: data.auctionType || 'standard',
+        quantity: data.quantity,
+        quantity_auctioned: (existing && existing.quantityAuctioned) || 0,
+        ideal_price: data.idealPrice || null,
+        scheduled_start: data.scheduledStart || null,
+        package_type: data.packageType || null,
+        package_size: data.packageSize || null,
+        moisture: data.moisture || null,
+        screen_size: data.screenSize || null,
+        defects: data.defects || null,
+        foreign_matter: data.foreignMatter || null,
+        protein: data.protein || null,
+        aflatoxin: data.aflatoxin || null,
+        oil_content: data.oilContent || null,
+        color_grade: data.colorGrade || null,
+        pallet_count: data.palletCount || null,
+        pallet_weight: data.palletWeight || null,
+        pallet_type: data.palletType || null,
+        pallet_min_increment: data.palletMinIncrement || null,
+        sample_size: data.sampleSize || null,
+        sample_count: data.sampleCount || null,
+        sample_min_increment: data.sampleMinIncrement || null,
+        images: data.images || [],
+        status: 'active'
+      };
+      var res = await supabase.from('products').upsert(row).select().single();
+      if (res.error) throw res.error;
+      var saved = APP.products.find(function(p) { return p.id === id; });
+      if (saved) saved._supabase_id = res.data.id;
+      saveData(APP);
+    } catch(e) {
+      console.error('[saveProduct] Supabase sync failed:', e);
+      showToast('Saved locally — cloud sync failed: ' + (e.message || e), 'warning');
+    }
+  }
+
   if(typeof afterSave === 'function') afterSave(id);
   APP.currentEditId = null;
   APP._editImages = [];
@@ -1538,9 +1591,15 @@ function cancelAuction(productId) {
 
 function deleteProduct(id) {
   if(!confirm('Delete this product?')) return;
+  var target = APP.products.find(function(p) { return p.id === id; });
   APP.products = APP.products.filter(function(p) { return p.id !== id; });
   APP.briefs = (APP.briefs || []).filter(function(b) { return b.productId !== id; });
   saveData(APP);
+  if (SESSION.user && target && target._supabase_id) {
+    supabase.from('products').update({ status: 'deleted' }).eq('id', target._supabase_id).then(function(r){
+      if (r.error) console.error('[deleteProduct] Supabase delete failed:', r.error);
+    });
+  }
   renderAll();
   showToast('Product deleted', 'info');
 }
@@ -1798,7 +1857,7 @@ function renderProducts() {
     var hasAuction = p.hasAuction || false;
 
     var imgHtml = '';
-    if (p.images && p.images.length > 0 && p.images[0] && p.images[0].startsWith('data:')) {
+    if (p.images && p.images.length > 0 && p.images[0]) {
       imgHtml = '<img src="' + escapeHtml(p.images[0]) + '" alt="' + escapeHtml(p.name) + '">';
     } else {
       imgHtml = '<div class="no-image">📷 No image</div>';
@@ -2231,6 +2290,9 @@ async function bootSession() {
     await loadMyAuctions();
     console.log('9. myAuctions:', SESSION.myAuctions.length);
 
+    await loadProducts();
+    console.log('9b. products from Supabase:', APP.products.length);
+
     await loadMovements();
     console.log('10. movements:', SESSION.movements.length);
 
@@ -2389,6 +2451,8 @@ async function loadProducts() {
         aflatoxin: p.aflatoxin,
         oilContent: p.oil_content,
         colorGrade: p.color_grade,
+        idealPrice: p.ideal_price,
+        scheduledStart: p.scheduled_start,
         palletCount: p.pallet_count,
         palletWeight: p.pallet_weight,
         palletType: p.pallet_type,
